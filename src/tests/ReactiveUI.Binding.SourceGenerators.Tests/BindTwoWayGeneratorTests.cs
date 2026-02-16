@@ -1,0 +1,104 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
+
+namespace ReactiveUI.Binding.SourceGenerators.Tests;
+
+/// <summary>
+/// Snapshot tests for BindTwoWay (two-way binding) invocation generation.
+/// </summary>
+public class BindTwoWayGeneratorTests
+{
+    /// <summary>
+    /// Verifies BindTwoWay with same-type string property binding.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleProperty_StringToString()
+    {
+        var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyStringToString");
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies BindTwoWay with int property binding.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleProperty_IntToInt()
+    {
+        var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyIntToInt");
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies BindTwoWay with multiple bindings on the same source/target pair.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MultipleBindings()
+    {
+        var source = SharedSourceReader.ReadScenario("BindTwoWay/MultipleBindings");
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies BindTwoWay on a ReactiveObject-based ViewModel and View.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ReactiveObject_Both()
+    {
+        var source = SharedSourceReader.ReadScenario("BindTwoWay/ReactiveObjectBoth");
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies BindTwoWay combined with BindOneWay in the same compilation.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MixedWithBindOneWay()
+    {
+        var source = SharedSourceReader.ReadScenario("BindTwoWay/MixedWithBindOneWay");
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies BindTwoWay with conversion functions between int and string.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleProperty_WithConverters()
+    {
+        var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyWithConverters");
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies BindTwoWay with a scheduler parameter.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleProperty_WithScheduler()
+    {
+        var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyWithScheduler");
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+}

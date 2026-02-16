@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">net8.0;net10.0;net462</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="ReactiveUI" />
+    <PackageReference Include="System.Reactive" />
+  </ItemGroup>
+
+  <!-- Share view model / view types from the SourceGen benchmark project -->
+  <ItemGroup>
+    <Compile Include="..\ReactiveUI.Binding.Benchmarks\BenchmarkViewModel.cs" Link="BenchmarkViewModel.cs" />
+    <Compile Include="..\ReactiveUI.Binding.Benchmarks\BenchmarkChildViewModel.cs" Link="BenchmarkChildViewModel.cs" />
+    <Compile Include="..\ReactiveUI.Binding.Benchmarks\BenchmarkView.cs" Link="BenchmarkView.cs" />
+  </ItemGroup>
+
+</Project>

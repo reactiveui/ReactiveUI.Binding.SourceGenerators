@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUnit" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Verify.SourceGenerators" />
+    <PackageReference Include="Verify.TUnit" />
+    <PackageReference Include="Basic.Reference.Assemblies.Net100" />
+    <PackageReference Include="Basic.Reference.Assemblies.Net90" />
+    <PackageReference Include="Basic.Reference.Assemblies.Net80" />
+    <PackageReference Include="ReactiveUI" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj" />
+    <ProjectReference Include="..\..\ReactiveUI.Binding.Reactive\ReactiveUI.Binding.Reactive.csproj" />
+    <ProjectReference Include="..\..\ReactiveUI.Binding.SourceGenerators\ReactiveUI.Binding.SourceGenerators.csproj" />
+  </ItemGroup>
+  <PropertyGroup>
+    <SharedScenariosPath>$(MSBuildProjectDirectory)\..\SharedScenarios\</SharedScenariosPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Copy shared scenario files to output (read as text, NOT compiled) -->
+    <None Include="$(SharedScenariosPath)**\*.cs"
+          CopyToOutputDirectory="PreserveNewest"
+          LinkBase="SharedScenarios" />
+  </ItemGroup>
+
+</Project>

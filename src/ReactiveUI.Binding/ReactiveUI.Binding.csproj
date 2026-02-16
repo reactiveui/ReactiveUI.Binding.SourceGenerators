@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(BindingRuntimeTargets)</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PackageDescription>Runtime library for ReactiveUI property observation and binding. Provides ICreatesObservableForProperty, expression chain decomposition, and converter infrastructure.</PackageDescription>
+    <PackageTags>reactiveui;binding;observableforproperty</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Tests" />
+    <InternalsVisibleTo Include="ReactiveUI.Binding.GeneratedCode.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="System.Diagnostics" />
+    <Using Include="System.Diagnostics.CodeAnalysis" />
+    <Using Include="System.Linq.Expressions" />
+    <Using Include="System.Runtime.CompilerServices" />
+    <Using Include="Splat" />
+    <Using Include="ReactiveUI.Binding.Helpers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Splat" />
+    <PackageReference Include="System.Reactive" />
+  </ItemGroup>
+</Project>

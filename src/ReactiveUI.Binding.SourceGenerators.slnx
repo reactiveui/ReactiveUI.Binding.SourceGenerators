@@ -1,0 +1,37 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="../.editorconfig" />
+    <File Path="../.gitignore" />
+    <File Path="../LICENSE" />
+    <File Path="../README.md" />
+    <File Path="../version.json" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+    <File Path="stylecop.json" />
+  </Folder>
+  <Project Path="ReactiveUI.Binding/ReactiveUI.Binding.csproj" />
+  <Project Path="ReactiveUI.Binding.SourceGenerators/ReactiveUI.Binding.SourceGenerators.csproj" />
+  <Project Path="ReactiveUI.Binding.Analyzer/ReactiveUI.Binding.Analyzer.csproj" />
+  <Project Path="ReactiveUI.Binding.Wpf/ReactiveUI.Binding.Wpf.csproj" />
+  <Project Path="ReactiveUI.Binding.WinForms/ReactiveUI.Binding.WinForms.csproj" />
+  <Project Path="ReactiveUI.Binding.Reactive/ReactiveUI.Binding.Reactive.csproj" />
+  <Project Path="ReactiveUI.Binding.Maui/ReactiveUI.Binding.Maui.csproj" />
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/ReactiveUI.Binding.Benchmarks/ReactiveUI.Binding.Benchmarks.csproj" />
+    <Project Path="benchmarks/ReactiveUI.Binding.Benchmarks.ReactiveUI/ReactiveUI.Binding.Benchmarks.ReactiveUI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ReactiveUI.Binding.Tests/ReactiveUI.Binding.Tests.csproj" />
+    <Project Path="tests/ReactiveUI.Binding.SourceGenerators.Tests/ReactiveUI.Binding.SourceGenerators.Tests.csproj" />
+    <Project Path="tests/ReactiveUI.Binding.Analyzer.Tests/ReactiveUI.Binding.Analyzer.Tests.csproj" />
+    <Project Path="tests/ReactiveUI.Binding.GeneratedCode.TestModels/ReactiveUI.Binding.GeneratedCode.TestModels.csproj" />
+    <Project Path="tests/ReactiveUI.Binding.GeneratedCode.Tests/ReactiveUI.Binding.GeneratedCode.Tests.csproj" />
+    <Project Path="tests/ReactiveUI.Binding.AotValidation/ReactiveUI.Binding.AotValidation.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,26 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+using System;
+
+using ReactiveUI;
+using ReactiveUI.Binding;
+
+namespace SharedScenarios.BindTwoWay.ReactiveObjectBoth
+{
+    /// <summary>
+    /// Exercises BindTwoWay with both source and target as ReactiveObject.
+    /// </summary>
+    public static class Scenario
+    {
+        /// <summary>
+        /// Creates a two-way binding between ReactiveObject ViewModel.Name and ReactiveObject View.NameText.
+        /// </summary>
+        /// <param name="vm">The source view model.</param>
+        /// <param name="view">The target view.</param>
+        /// <returns>A disposable representing the binding.</returns>
+        public static IDisposable Execute(MyViewModel vm, MyView view)
+            => vm.BindTwoWay(view, x => x.Name, x => x.NameText);
+    }
+}

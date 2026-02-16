@@ -1,0 +1,106 @@
+<Project>
+  <PropertyGroup>
+    <!-- Enable building Windows-specific targets on non-Windows platforms -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+
+    <!-- Granular Target Framework definitions for cross-platform builds -->
+    <BindingCoreTargets>net8.0;net9.0;net10.0</BindingCoreTargets>
+
+    <!-- Legacy .NET Framework targets (Windows only) -->
+    <BindingLegacyTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">net462;net472;net481</BindingLegacyTargets>
+
+    <!-- Combined core + legacy -->
+    <BindingRuntimeTargets>$(BindingCoreTargets)</BindingRuntimeTargets>
+    <BindingRuntimeTargets Condition=" '$(BindingLegacyTargets)' != '' ">$(BindingRuntimeTargets);$(BindingLegacyTargets)</BindingRuntimeTargets>
+
+    <!-- Windows-specific platform targets (WPF, WinForms) -->
+    <BindingWindowsTargets>net8.0-windows10.0.19041.0;net9.0-windows10.0.19041.0;net10.0-windows10.0.19041.0</BindingWindowsTargets>
+
+    <!-- MAUI targets -->
+    <BindingMauiWindowsTargets>net9.0-windows10.0.19041.0;net10.0-windows10.0.19041.0</BindingMauiWindowsTargets>
+    <BindingAndroidTargets>net9.0-android;net10.0-android</BindingAndroidTargets>
+    <BindingAppleTargets>net9.0-ios;net9.0-macos;net9.0-maccatalyst;net9.0-tvos;net10.0-ios;net10.0-macos;net10.0-maccatalyst;net10.0-tvos</BindingAppleTargets>
+
+    <BindingMauiTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(BindingMauiWindowsTargets)</BindingMauiTargets>
+    <BindingMauiTargets>$(BindingMauiTargets);net9.0;net10.0;$(BindingAndroidTargets)</BindingMauiTargets>
+    <BindingMauiTargets Condition="$([MSBuild]::IsOsPlatform('Windows')) or $([MSBuild]::IsOsPlatform('OSX'))">$(BindingMauiTargets);$(BindingAppleTargets)</BindingMauiTargets>
+
+    <!-- Windows-only targets (Framework + Windows-specific) -->
+    <BindingWindowsOnlyTargets>$(BindingWindowsTargets)</BindingWindowsOnlyTargets>
+    <BindingWindowsOnlyTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(BindingLegacyTargets);$(BindingWindowsTargets)</BindingWindowsOnlyTargets>
+
+    <!-- Test targets -->
+    <BindingTestTargets>net8.0;net9.0;net10.0</BindingTestTargets>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <Platform>AnyCPU</Platform>
+    <IsTestProject>$(MSBuildProjectName.Contains('Tests'))</IsTestProject>
+    <DebugType>embedded</DebugType>
+    <Authors>Glenn Watson</Authors>
+    <Copyright>Copyright (c) $([System.DateTime]::Now.ToString(yyyy)) ReactiveUI Association Inc</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageDescription>Source generator for ReactiveUI property observation and binding. Generates compile-time WhenChanged, WhenChanging, BindOneWay, and BindTwoWay implementations.</PackageDescription>
+    <Owners>glennawatson</Owners>
+    <PackageTags>reactiveui;binding;source-generator;system.reactive</PackageTags>
+    <PackageProjectUrl>https://github.com/reactiveui/ReactiveUI.Binding.SourceGenerators</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/reactiveui/ReactiveUI.Binding.SourceGenerators/releases</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/reactiveui/ReactiveUI.Binding.SourceGenerators</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- Embed source files that are not tracked by the source control manager in the PDB -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- Include PDB in the built .nupkg -->
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <PackageIcon>logo.png</PackageIcon>
+    <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)</SolutionDir>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <IncludePackageReferencesDuringMarkupCompilation>true</IncludePackageReferencesDuringMarkupCompilation>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <TUnitImplicitUsings>false</TUnitImplicitUsings>
+    <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <!-- MTP Native JSON Configuration -->
+  <ItemGroup Condition="'$(IsTestProject)' == 'true'">
+    <None Include="$(MSBuildThisFileDirectory)testconfig.json">
+      <Link>$(AssemblyName).testconfig.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsTestProject)' != 'true'">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\images\logo.png" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)..\LICENSE" Pack="true" PackagePath="LICENSE" />
+    <None Include="$(MSBuildThisFileDirectory)..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="all" />
+    <PackageReference Include="stylecop.analyzers" PrivateAssets="all" />
+    <PackageReference Include="Roslynator.Analyzers" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(BindingRuntimeTargets)</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PackageDescription>System.Reactive adapter for ReactiveUI.Binding. Provides IScheduler-accepting overloads for BindOneWay, BindTwoWay, OneWayBind, and Bind APIs.</PackageDescription>
+    <PackageTags>reactiveui;binding;system.reactive;scheduler</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="System.Diagnostics" />
+    <Using Include="System.Diagnostics.CodeAnalysis" />
+    <Using Include="System.Linq.Expressions" />
+    <Using Include="System.Reactive.Concurrency" />
+    <Using Include="System.Runtime.CompilerServices" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ReactiveUI.Binding\ReactiveUI.Binding.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Reactive" />
+  </ItemGroup>
+</Project>

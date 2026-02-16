@@ -1,0 +1,166 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
+
+namespace ReactiveUI.Binding.SourceGenerators.Tests;
+
+/// <summary>
+/// Snapshot tests for WhenChanging (before-change) invocation generation.
+/// </summary>
+public class WhenChangingGeneratorTests
+{
+    /// <summary>
+    /// Verifies that a WhenChanging invocation on an INPC+INPChanging class generates PropertyChanging observation.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleProperty_INPC()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/SinglePropertyINPC");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenChanging on a ReactiveObject (which implements both INPC and INPChanging).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleProperty_ReactiveObject()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/SinglePropertyReactiveObject");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenChanging with two properties returns a tuple.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MultiProperty_TwoProperties()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyTwoProperties");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenChanging with a deep property chain.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DeepPropertyChain()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/DeepPropertyChain");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenChanging with a selector function.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MultiProperty_WithSelector()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyWithSelector");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that WhenChanging on a type implementing only INotifyPropertyChanging (without INPC)
+    /// generates the correct before-change observation code.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task INPChangingOnly_Property()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+
+            using ReactiveUI.Binding;
+
+            namespace TestApp
+            {
+                public class MyChangingViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+                {
+                    private string _name = string.Empty;
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public event PropertyChangingEventHandler? PropertyChanging;
+                    public string Name
+                    {
+                        get => _name;
+                        set
+                        {
+                            if (_name != value)
+                            {
+                                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Name)));
+                                _name = value;
+                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+                            }
+                        }
+                    }
+                }
+
+                public static class Scenario
+                {
+                    public static IObservable<string> Execute(MyChangingViewModel vm)
+                        => vm.WhenChanging(x => x.Name);
+                }
+            }
+            """;
+
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that WhenChanging on a ReactiveObject (which implements both INPC and INPChanging)
+    /// generates the correct before-change observation code using inline source.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ReactiveObject_Changing_Property()
+    {
+        const string source = """
+            using System;
+
+            using ReactiveUI;
+            using ReactiveUI.Binding;
+
+            namespace TestApp
+            {
+                public class MyReactiveViewModel : ReactiveObject
+                {
+                    private string _name = string.Empty;
+                    public string Name
+                    {
+                        get => _name;
+                        set => this.RaiseAndSetIfChanged(ref _name, value);
+                    }
+                }
+
+                public static class Scenario
+                {
+                    public static IObservable<string> Execute(MyReactiveViewModel vm)
+                        => vm.WhenChanging(x => x.Name);
+                }
+            }
+            """;
+
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+}

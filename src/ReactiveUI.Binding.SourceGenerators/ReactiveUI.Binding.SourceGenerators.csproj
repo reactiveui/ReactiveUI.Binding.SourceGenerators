@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- forces SDK to copy dependencies into build output to make packing easier -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <PackageDescription>Source generator for ReactiveUI property observation and binding. Generates compile-time WhenChanged, WhenChanging, BindOneWay, and BindTwoWay implementations.</PackageDescription>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
+    <NoWarn>$(NoWarn);AD0001</NoWarn>
+    <DebugType>full</DebugType>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.SourceGenerators.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="AnalyzerReleases.Shipped.md" />
+    <None Include="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Reference the analyzer project to force it to build -->
+    <ProjectReference Include="..\ReactiveUI.Binding.Analyzer\ReactiveUI.Binding.Analyzer.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Target Name="PackBuildOutputs" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <!-- Package the generator -->
+      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="analyzers/dotnet/cs" Visible="false" />
+
+      <!-- Package the analyzer -->
+      <TfmSpecificPackageFile Include="..\ReactiveUI.Binding.Analyzer\bin\$(Configuration)\netstandard2.0\ReactiveUI.Binding.Analyzer.dll" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+  </Target>
+</Project>
