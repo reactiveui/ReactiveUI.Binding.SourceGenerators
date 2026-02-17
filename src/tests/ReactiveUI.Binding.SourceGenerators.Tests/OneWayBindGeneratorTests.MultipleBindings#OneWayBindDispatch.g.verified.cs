@@ -41,7 +41,7 @@ namespace ReactiveUI.Binding
             static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel)__o).Name,
             true);
 
-            var sub = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(sourceObs, value =>
+            var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceObs, value =>
             {
                 view.NameText = value;
             });
@@ -85,7 +85,7 @@ namespace ReactiveUI.Binding
             static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel)__o).Age,
             true);
 
-            var sub = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(sourceObs, value =>
+            var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceObs, value =>
             {
                 view.AgeText = value;
             });

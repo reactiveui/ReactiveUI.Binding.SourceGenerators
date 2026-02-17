@@ -35,8 +35,8 @@ namespace ReactiveUI.Binding
                 "Child",
                 static (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel)__o).Child);
 
-        var __obs1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__obs0,
+        var __obs1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obs0,
                 __parent1 => __parent1 != null
                     ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
                         (global::System.ComponentModel.INotifyPropertyChanging)__parent1,

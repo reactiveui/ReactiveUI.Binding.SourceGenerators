@@ -36,8 +36,8 @@ namespace ReactiveUI.Binding
                 static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level1)__o).Model,
                 false);
 
-        var __obs1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__obs0,
+        var __obs1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obs0,
                 __parent1 => __parent1 != null
                     ? (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3?>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3?>(
                         __parent1,
@@ -46,8 +46,8 @@ namespace ReactiveUI.Binding
                         false)
                     : (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3?>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3?>(default(global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3?))));
 
-        var __obs2 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__obs1,
+        var __obs2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obs1,
                 __parent2 => __parent2 != null
                     ? (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model?>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model?>(
                         __parent2,
@@ -56,8 +56,8 @@ namespace ReactiveUI.Binding
                         false)
                     : (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model?>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model?>(default(global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model?))));
 
-        var __obs3 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__obs2,
+        var __obs3 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obs2,
                 __parent3 => __parent3 != null
                     ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                         __parent3,
@@ -65,7 +65,7 @@ namespace ReactiveUI.Binding
                         static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model)__o).Value,
                         false)
                     : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.ReturnObservable<string>(default(string))));
-            return global::ReactiveUI.Binding.Observables.ObservableExtensions.DistinctUntilChanged(__obs3);
+            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__obs3);
         }
 
     }

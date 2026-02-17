@@ -46,7 +46,7 @@ namespace ReactiveUI.Binding
             true);
         var bindObs = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<string>(sourceObs, scheduler);
 
-            return global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(bindObs, value =>
+            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(bindObs, value =>
             {
                 target.NameText = value;
             });

@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Runtime.CompilerServices;
-
 using ReactiveUI.Binding.Builder;
 
 [assembly: NotInParallel]
@@ -11,14 +9,14 @@ using ReactiveUI.Binding.Builder;
 namespace ReactiveUI.Binding.Tests;
 
 /// <summary>
-/// Module initializer for the test assembly.
+/// Assembly-level setup for the test assembly.
 /// </summary>
-public static class ModuleInitializer
+public static class AssemblySetup
 {
     /// <summary>
     /// Initializes the test assembly by configuring the service locator.
     /// </summary>
-    [ModuleInitializer]
+    [Before(Assembly)]
     public static void Initialize()
     {
         RxBindingBuilder.ResetForTesting();

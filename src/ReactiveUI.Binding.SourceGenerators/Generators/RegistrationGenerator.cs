@@ -88,6 +88,7 @@ internal static class RegistrationGenerator
                 /// Auto-generated binder registration. Registers high-affinity
                 /// ICreatesObservableForProperty implementations detected at compile time.
                 /// </summary>
+                [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
                 internal static class __GeneratedBinderRegistration
                 {
                     /// <summary>

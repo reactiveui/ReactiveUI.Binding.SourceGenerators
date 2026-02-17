@@ -264,8 +264,8 @@ internal static class BindCodeGenerator
                 string vmNext = inv.HasScheduler ? "__vmSelected" : "vmBind";
                 string viewNext = inv.HasScheduler ? "__viewSelected" : "viewBind";
                 sb.AppendLine($$"""
-                        var {{vmNext}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{vmVar}}, vmToViewConverter);
-                        var {{viewNext}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{viewVar}}, viewToVmConverter);
+                        var {{vmNext}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{vmVar}}, vmToViewConverter);
+                        var {{viewNext}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{viewVar}}, viewToVmConverter);
                 """);
                 vmVar = vmNext;
                 viewVar = viewNext;
@@ -283,20 +283,20 @@ internal static class BindCodeGenerator
 
             sb.AppendLine($$"""
 
-                        var d1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe({{vmVar}}, value =>
+                        var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe({{vmVar}}, value =>
                         {
                             {{viewPropertyAccess}} = value;
                         });
 
-                        var __viewSkipped = global::ReactiveUI.Binding.Observables.ObservableExtensions.Skip({{viewVar}}, 1);
-                        var d2 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(__viewSkipped, value =>
+                        var __viewSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip({{viewVar}}, 1);
+                        var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__viewSkipped, value =>
                         {
                             {{vmSetAccess}} = value;
                         });
 
-                        var __vmTagged = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{vmVar}}, v => ((object?)v, true));
-                        var __viewTagged = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__viewSkipped, v => ((object?)v, false));
-                        var changed = global::ReactiveUI.Binding.Observables.ObservableExtensions.Merge(__vmTagged, __viewTagged);
+                        var __vmTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{vmVar}}, v => ((object?)v, true));
+                        var __viewTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__viewSkipped, v => ((object?)v, false));
+                        var changed = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(__vmTagged, __viewTagged);
 
                         var disposable = new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
 
@@ -313,20 +313,20 @@ internal static class BindCodeGenerator
         {
             sb.AppendLine($$"""
 
-                        var d1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(vmObs, value =>
+                        var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(vmObs, value =>
                         {
                             {{viewPropertyAccess}} = value;
                         });
 
-                        var __viewSkipped = global::ReactiveUI.Binding.Observables.ObservableExtensions.Skip(viewObs, 1);
-                        var d2 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(__viewSkipped, value =>
+                        var __viewSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(viewObs, 1);
+                        var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__viewSkipped, value =>
                         {
                             {{vmSetAccess}} = value;
                         });
 
-                        var __vmTagged = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(vmObs, v => ((object?)v, true));
-                        var __viewTagged = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__viewSkipped, v => ((object?)v, false));
-                        var changed = global::ReactiveUI.Binding.Observables.ObservableExtensions.Merge(__vmTagged, __viewTagged);
+                        var __vmTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmObs, v => ((object?)v, true));
+                        var __viewTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__viewSkipped, v => ((object?)v, false));
+                        var changed = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(__vmTagged, __viewTagged);
 
                         var disposable = new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
 

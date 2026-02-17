@@ -46,20 +46,20 @@ namespace ReactiveUI.Binding
             static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.MultipleBindings.MyView)__o).NameText,
             true);
 
-            var d1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(vmObs, value =>
+            var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(vmObs, value =>
             {
                 view.NameText = value;
             });
 
-            var __viewSkipped = global::ReactiveUI.Binding.Observables.ObservableExtensions.Skip(viewObs, 1);
-            var d2 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(__viewSkipped, value =>
+            var __viewSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(viewObs, 1);
+            var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__viewSkipped, value =>
             {
                 viewModel.Name = value;
             });
 
-            var __vmTagged = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(vmObs, v => ((object?)v, true));
-            var __viewTagged = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__viewSkipped, v => ((object?)v, false));
-            var changed = global::ReactiveUI.Binding.Observables.ObservableExtensions.Merge(__vmTagged, __viewTagged);
+            var __vmTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmObs, v => ((object?)v, true));
+            var __viewTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__viewSkipped, v => ((object?)v, false));
+            var changed = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(__vmTagged, __viewTagged);
 
             var disposable = new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
 
@@ -107,20 +107,20 @@ namespace ReactiveUI.Binding
             static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.MultipleBindings.MyView)__o).AgeText,
             true);
 
-            var d1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(vmObs, value =>
+            var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(vmObs, value =>
             {
                 view.AgeText = value;
             });
 
-            var __viewSkipped = global::ReactiveUI.Binding.Observables.ObservableExtensions.Skip(viewObs, 1);
-            var d2 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(__viewSkipped, value =>
+            var __viewSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(viewObs, 1);
+            var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__viewSkipped, value =>
             {
                 viewModel.Age = value;
             });
 
-            var __vmTagged = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(vmObs, v => ((object?)v, true));
-            var __viewTagged = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__viewSkipped, v => ((object?)v, false));
-            var changed = global::ReactiveUI.Binding.Observables.ObservableExtensions.Merge(__vmTagged, __viewTagged);
+            var __vmTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmObs, v => ((object?)v, true));
+            var __viewTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__viewSkipped, v => ((object?)v, false));
+            var changed = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(__vmTagged, __viewTagged);
 
             var disposable = new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
 

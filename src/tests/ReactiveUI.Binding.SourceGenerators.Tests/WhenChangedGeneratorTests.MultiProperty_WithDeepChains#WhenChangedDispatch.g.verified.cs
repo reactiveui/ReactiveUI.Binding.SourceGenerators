@@ -40,8 +40,8 @@ namespace ReactiveUI.Binding
                 static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultiPropertyWithDeepChains.MyViewModel)__o).Address,
                 false);
 
-        var __propObs0_s1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__propObs0_s0,
+        var __propObs0_s1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__propObs0_s0,
                 __propObs0_p1 => __propObs0_p1 != null
                     ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                         __propObs0_p1,
@@ -49,7 +49,7 @@ namespace ReactiveUI.Binding
                         static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultiPropertyWithDeepChains.AddressModel)__o).City,
                         false)
                     : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.ReturnObservable<string>(default(string))));
-            var __propObs0 = global::ReactiveUI.Binding.Observables.ObservableExtensions.DistinctUntilChanged(__propObs0_s1);
+            var __propObs0 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__propObs0_s1);
 
 
             var __propObs1 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

@@ -36,8 +36,8 @@ namespace ReactiveUI.Binding
                 static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel)__o).MyCommand,
                 true);
 
-            return global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__obsProperty,
+            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty,
                     __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
         }
 

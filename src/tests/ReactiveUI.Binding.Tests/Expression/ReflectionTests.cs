@@ -146,4 +146,114 @@ public class ReflectionTests
         await Assert.That(result).IsTrue();
         await Assert.That(vm.Name).IsEqualTo("Bob");
     }
+
+    /// <summary>
+    /// Verifies that TryGetAllValuesForPropertyChain returns intermediate ObservedChange objects for a simple property.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TryGetAllValuesForPropertyChain_SimpleProperty_ReturnsObservedChanges()
+    {
+        Expression<Func<TestViewModel, string>> expr = x => x.Name;
+        var body = Reflection.Rewrite(expr.Body);
+        var chain = body.GetExpressionChain();
+
+        var vm = new TestViewModel { Name = "Alice" };
+        var result = Reflection.TryGetAllValuesForPropertyChain(out var changeValues, vm, chain);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(changeValues.Length).IsEqualTo(1);
+        await Assert.That(changeValues[0]).IsNotNull();
+        await Assert.That(changeValues[0].Sender).IsEqualTo(vm);
+        await Assert.That(changeValues[0].Value).IsEqualTo("Alice");
+    }
+
+    /// <summary>
+    /// Verifies that TryGetAllValuesForPropertyChain returns multiple ObservedChange objects for a deep chain.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TryGetAllValuesForPropertyChain_DeepChain_ReturnsMultipleValues()
+    {
+        Expression<Func<TestViewModel, string>> expr = x => x.Address!.City;
+        var body = Reflection.Rewrite(expr.Body);
+        var chain = body.GetExpressionChain();
+
+        var address = new TestAddress { City = "Portland" };
+        var vm = new TestViewModel { Address = address };
+        var result = Reflection.TryGetAllValuesForPropertyChain(out var changeValues, vm, chain);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(changeValues.Length).IsEqualTo(2);
+        await Assert.That(changeValues[0]).IsNotNull();
+        await Assert.That(changeValues[0].Sender).IsEqualTo(vm);
+        await Assert.That(changeValues[0].Value).IsEqualTo(address);
+        await Assert.That(changeValues[1]).IsNotNull();
+        await Assert.That(changeValues[1].Sender).IsEqualTo(address);
+        await Assert.That(changeValues[1].Value).IsEqualTo("Portland");
+    }
+
+    /// <summary>
+    /// Verifies that TrySetValueToPropertyChain sets a value through a deep property chain.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TrySetValueToPropertyChain_DeepChain_SetsValue()
+    {
+        Expression<Func<TestViewModel, string>> expr = x => x.Address!.City;
+        var body = Reflection.Rewrite(expr.Body);
+        var chain = body.GetExpressionChain();
+
+        var address = new TestAddress { City = "Old" };
+        var vm = new TestViewModel { Address = address };
+        var result = Reflection.TrySetValueToPropertyChain(vm, chain, "New");
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(address.City).IsEqualTo("New");
+    }
+
+    /// <summary>
+    /// Verifies that TrySetValueToPropertyChain returns false when a null intermediate is in the chain.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TrySetValueToPropertyChain_NullIntermediate_ReturnsFalse()
+    {
+        Expression<Func<TestViewModel, string>> expr = x => x.Address!.City;
+        var body = Reflection.Rewrite(expr.Body);
+        var chain = body.GetExpressionChain();
+
+        var vm = new TestViewModel(); // Address is null
+        var result = Reflection.TrySetValueToPropertyChain(vm, chain, "New", shouldThrow: false);
+
+        await Assert.That(result).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies that ExpressionToPropertyNames returns a dotted path for a deeper chain using Address.City.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ExpressionToPropertyNames_DeeperChain_ReturnsDottedPath()
+    {
+        Expression<Func<TestViewModel, string>> expr = x => x.Address!.City;
+        var body = Reflection.Rewrite(expr.Body);
+
+        var name = Reflection.ExpressionToPropertyNames(body);
+
+        await Assert.That(name).IsEqualTo("Address.City");
+    }
+
+    /// <summary>
+    /// Verifies that GetValueFetcherForProperty returns null for a member that is neither a field nor a property.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetValueFetcherForProperty_MethodMember_ReturnsNull()
+    {
+        var methodInfo = typeof(TestViewModel).GetMethod("GetHashCode")!;
+        var fetcher = Reflection.GetValueFetcherForProperty(methodInfo);
+
+        await Assert.That(fetcher).IsNull();
+    }
 }

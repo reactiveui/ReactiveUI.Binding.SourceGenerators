@@ -7,9 +7,8 @@ using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 
 using ReactiveUI.Binding.Fallback;
+using ReactiveUI.Binding.Helpers;
 using ReactiveUI.Binding.Observables;
-
-#pragma warning disable CA1062 // Validate arguments of public methods - parameters validated in RuntimeObservationFallback
 
 namespace ReactiveUI.Binding;
 
@@ -56,6 +55,9 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+
         return RuntimeObservationFallback.WhenChanged(objectToMonitor, property1);
     }
 
@@ -105,6 +107,10 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+
         return RuntimeObservationFallback.WhenChanged(objectToMonitor, property1, property2);
     }
 
@@ -162,6 +168,11 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+
         return RuntimeObservationFallback.WhenChanged(objectToMonitor, property1, property2, property3);
     }
 
@@ -227,6 +238,12 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -305,6 +322,13 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -392,6 +416,14 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -488,6 +520,15 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -593,6 +634,16 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -707,6 +758,17 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -830,6 +892,18 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+        ArgumentExceptionHelper.ThrowIfNull(property10);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -962,6 +1036,19 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+        ArgumentExceptionHelper.ThrowIfNull(property10);
+        ArgumentExceptionHelper.ThrowIfNull(property11);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -1103,6 +1190,20 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+        ArgumentExceptionHelper.ThrowIfNull(property10);
+        ArgumentExceptionHelper.ThrowIfNull(property11);
+        ArgumentExceptionHelper.ThrowIfNull(property12);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -1253,6 +1354,21 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+        ArgumentExceptionHelper.ThrowIfNull(property10);
+        ArgumentExceptionHelper.ThrowIfNull(property11);
+        ArgumentExceptionHelper.ThrowIfNull(property12);
+        ArgumentExceptionHelper.ThrowIfNull(property13);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -1412,6 +1528,22 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+        ArgumentExceptionHelper.ThrowIfNull(property10);
+        ArgumentExceptionHelper.ThrowIfNull(property11);
+        ArgumentExceptionHelper.ThrowIfNull(property12);
+        ArgumentExceptionHelper.ThrowIfNull(property13);
+        ArgumentExceptionHelper.ThrowIfNull(property14);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -1580,6 +1712,23 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+        ArgumentExceptionHelper.ThrowIfNull(property10);
+        ArgumentExceptionHelper.ThrowIfNull(property11);
+        ArgumentExceptionHelper.ThrowIfNull(property12);
+        ArgumentExceptionHelper.ThrowIfNull(property13);
+        ArgumentExceptionHelper.ThrowIfNull(property14);
+        ArgumentExceptionHelper.ThrowIfNull(property15);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
@@ -1757,6 +1906,24 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+        ArgumentExceptionHelper.ThrowIfNull(property10);
+        ArgumentExceptionHelper.ThrowIfNull(property11);
+        ArgumentExceptionHelper.ThrowIfNull(property12);
+        ArgumentExceptionHelper.ThrowIfNull(property13);
+        ArgumentExceptionHelper.ThrowIfNull(property14);
+        ArgumentExceptionHelper.ThrowIfNull(property15);
+        ArgumentExceptionHelper.ThrowIfNull(property16);
+
         return CombineLatestObservable.Create(
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property1),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),

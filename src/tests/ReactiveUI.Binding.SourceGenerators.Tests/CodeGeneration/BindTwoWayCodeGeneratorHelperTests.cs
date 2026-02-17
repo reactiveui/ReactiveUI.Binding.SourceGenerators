@@ -300,7 +300,7 @@ public class BindTwoWayCodeGeneratorHelperTests
         BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, suffix: "TEST00000000TEST");
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ObservableExtensions.Select");
+        await Assert.That(result).Contains("RxBindingExtensions.Select");
         await Assert.That(result).Contains("sourceToTargetConv");
         await Assert.That(result).Contains("targetToSourceConv");
     }

@@ -49,13 +49,13 @@ namespace ReactiveUI.Binding
             static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.MultipleBindings.MyView)__o).NameText,
             true);
 
-            var d1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(sourceObs, value =>
+            var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceObs, value =>
             {
                 target.NameText = value;
             });
 
-            var __targetSkipped = global::ReactiveUI.Binding.Observables.ObservableExtensions.Skip(targetObs, 1);
-            var d2 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(__targetSkipped, value =>
+            var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(targetObs, 1);
+            var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
             {
                 source.Name = value;
             });
@@ -103,13 +103,13 @@ namespace ReactiveUI.Binding
             static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.MultipleBindings.MyView)__o).AgeDisplay,
             true);
 
-            var d1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(sourceObs, value =>
+            var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceObs, value =>
             {
                 target.AgeDisplay = value;
             });
 
-            var __targetSkipped = global::ReactiveUI.Binding.Observables.ObservableExtensions.Skip(targetObs, 1);
-            var d2 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(__targetSkipped, value =>
+            var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(targetObs, 1);
+            var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
             {
                 source.Age = value;
             });

@@ -44,9 +44,9 @@ namespace ReactiveUI.Binding
             "Count",
             static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyWithConverter.MyViewModel)__o).Count,
             true);
-        var bindObs = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(sourceObs, conversionFunc);
+        var bindObs = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(sourceObs, conversionFunc);
 
-            return global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(bindObs, value =>
+            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(bindObs, value =>
             {
                 target.CountText = value;
             });

@@ -232,8 +232,8 @@ internal static class WhenAnyObservableCodeGenerator
 
         // Switch pattern: take the observable property value, replace null with Empty, and switch
         sb.Append($$"""
-                        return global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-                            global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__obsProperty,
+                        return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty,
                                 __obs => __obs ?? (global::System.IObservable<{{innerType}}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{{innerType}}>.Instance));
             """);
     }
@@ -269,14 +269,14 @@ internal static class WhenAnyObservableCodeGenerator
             sb.AppendLine()
                 .AppendLine()
                 .AppendLine($$"""
-                            var {{switchedVar}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{rawVar}},
+                            var {{switchedVar}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{rawVar}},
                                     __obs => __obs ?? (global::System.IObservable<{{innerType}}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{{innerType}}>.Instance));
                 """)
                 .AppendLine();
         }
 
-        sb.AppendLine("            return global::ReactiveUI.Binding.Observables.ObservableExtensions.Merge(");
+        sb.AppendLine("            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(");
         for (int i = 0; i < inv.PropertyPaths.Length; i++)
         {
             sb.Append("                __switched").Append(i);
@@ -321,8 +321,8 @@ internal static class WhenAnyObservableCodeGenerator
             sb.AppendLine()
                 .AppendLine()
                 .AppendLine($$"""
-                            var {{switchedVar}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{rawVar}},
+                            var {{switchedVar}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{rawVar}},
                                     __obs => __obs ?? (global::System.IObservable<{{innerType}}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{{innerType}}>.Instance));
                 """)
                 .AppendLine();

@@ -390,9 +390,9 @@ public class ObservationCodeGeneratorHelperTests
         var result = sb.ToString();
         await Assert.That(result).Contains("__obs0");
         await Assert.That(result).Contains("__obs1");
-        await Assert.That(result).Contains("ObservableExtensions.Select(");
-        await Assert.That(result).Contains("ObservableExtensions.Switch(");
-        await Assert.That(result).Contains("ObservableExtensions.DistinctUntilChanged(");
+        await Assert.That(result).Contains("RxBindingExtensions.Select(");
+        await Assert.That(result).Contains("RxBindingExtensions.Switch(");
+        await Assert.That(result).Contains("RxBindingExtensions.DistinctUntilChanged(");
     }
 
     /// <summary>
@@ -445,8 +445,8 @@ public class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("var __propObs0_s0");
         await Assert.That(result).Contains("var __propObs0_s1");
         await Assert.That(result).Contains("var __propObs0");
-        await Assert.That(result).Contains("ObservableExtensions.Switch(");
-        await Assert.That(result).Contains("ObservableExtensions.DistinctUntilChanged(");
+        await Assert.That(result).Contains("RxBindingExtensions.Switch(");
+        await Assert.That(result).Contains("RxBindingExtensions.DistinctUntilChanged(");
     }
 
     /// <summary>

@@ -4,6 +4,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ReactiveUI.Binding.Observables;
 
@@ -13,7 +14,7 @@ namespace ReactiveUI.Binding.Observables;
 /// <c>System.Reactive.Linq</c> extension methods when both namespaces are in scope.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static class ObservableExtensions
+public static class RxBindingExtensions
 {
     /// <summary>
     /// Subscribes to the observable with an action for OnNext.
@@ -95,6 +96,7 @@ public static class ObservableExtensions
         return new MergeObservable<T>(sources);
     }
 
+    [ExcludeFromCodeCoverage]
     private sealed class ActionObserver<T> : IObserver<T>
     {
         private readonly Action<T> _onNext;

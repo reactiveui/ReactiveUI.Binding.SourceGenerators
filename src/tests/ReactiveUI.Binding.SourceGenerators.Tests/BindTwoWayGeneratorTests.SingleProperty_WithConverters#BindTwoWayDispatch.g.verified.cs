@@ -50,16 +50,16 @@ namespace ReactiveUI.Binding
             "CountText",
             static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyView)__o).CountText,
             true);
-        var sourceBind = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(sourceObs, sourceToTargetConv);
-        var targetBind = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(targetObs, targetToSourceConv);
+        var sourceBind = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(sourceObs, sourceToTargetConv);
+        var targetBind = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(targetObs, targetToSourceConv);
 
-            var d1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(sourceBind, value =>
+            var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceBind, value =>
             {
                 target.CountText = value;
             });
 
-            var __targetSkipped = global::ReactiveUI.Binding.Observables.ObservableExtensions.Skip(targetBind, 1);
-            var d2 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(__targetSkipped, value =>
+            var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(targetBind, 1);
+            var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
             {
                 source.Count = value;
             });

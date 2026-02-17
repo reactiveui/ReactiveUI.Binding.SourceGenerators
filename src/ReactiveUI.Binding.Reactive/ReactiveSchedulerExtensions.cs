@@ -13,6 +13,7 @@ namespace ReactiveUI.Binding;
 /// Extension methods for property binding with IScheduler support.
 /// Requires the ReactiveUI.Binding.Reactive package for System.Reactive interop.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class ReactiveSchedulerExtensions
 {
     private const string NoGeneratedBindingMessage =

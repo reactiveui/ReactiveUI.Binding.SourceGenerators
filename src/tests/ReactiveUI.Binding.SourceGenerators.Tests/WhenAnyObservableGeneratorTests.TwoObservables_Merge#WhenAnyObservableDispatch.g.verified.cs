@@ -39,8 +39,8 @@ namespace ReactiveUI.Binding
                 static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel)__o).Command1,
                 true);
 
-            var __switched0 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__obsProperty0,
+            var __switched0 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty0,
                     __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
 
             var __obsProperty1 = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
@@ -49,11 +49,11 @@ namespace ReactiveUI.Binding
                 static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel)__o).Command2,
                 true);
 
-            var __switched1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__obsProperty1,
+            var __switched1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty1,
                     __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
 
-            return global::ReactiveUI.Binding.Observables.ObservableExtensions.Merge(
+            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(
                 __switched0,
                 __switched1);
         }

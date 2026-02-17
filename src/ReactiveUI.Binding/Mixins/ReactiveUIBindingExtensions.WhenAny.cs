@@ -7,10 +7,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 
+using ReactiveUI.Binding.Helpers;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Observables;
-
-#pragma warning disable CA1062 // Validate arguments of public methods - parameters validated in SubscribeToExpressionChain
 
 namespace ReactiveUI.Binding;
 
@@ -66,6 +65,9 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+
         return sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,
@@ -128,6 +130,11 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,
@@ -206,6 +213,12 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,
@@ -298,6 +311,13 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,
@@ -404,6 +424,14 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,
@@ -524,6 +552,15 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,
@@ -658,6 +695,16 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,
@@ -806,6 +853,17 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,
@@ -968,6 +1026,18 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,
@@ -1144,6 +1214,19 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+        ArgumentExceptionHelper.ThrowIfNull(property10);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,
@@ -1334,6 +1417,20 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+        ArgumentExceptionHelper.ThrowIfNull(property10);
+        ArgumentExceptionHelper.ThrowIfNull(property11);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,
@@ -1538,6 +1635,21 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
+        ArgumentExceptionHelper.ThrowIfNull(sender);
+        ArgumentExceptionHelper.ThrowIfNull(property1);
+        ArgumentExceptionHelper.ThrowIfNull(property2);
+        ArgumentExceptionHelper.ThrowIfNull(property3);
+        ArgumentExceptionHelper.ThrowIfNull(property4);
+        ArgumentExceptionHelper.ThrowIfNull(property5);
+        ArgumentExceptionHelper.ThrowIfNull(property6);
+        ArgumentExceptionHelper.ThrowIfNull(property7);
+        ArgumentExceptionHelper.ThrowIfNull(property8);
+        ArgumentExceptionHelper.ThrowIfNull(property9);
+        ArgumentExceptionHelper.ThrowIfNull(property10);
+        ArgumentExceptionHelper.ThrowIfNull(property11);
+        ArgumentExceptionHelper.ThrowIfNull(property12);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
                 beforeChange: false,

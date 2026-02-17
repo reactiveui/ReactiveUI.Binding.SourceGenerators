@@ -52,13 +52,13 @@ namespace ReactiveUI.Binding
         var sourceBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<string>(sourceObs, scheduler);
         var targetBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<string>(targetObs, scheduler);
 
-            var d1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(sourceBind, value =>
+            var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceBind, value =>
             {
                 target.NameText = value;
             });
 
-            var __targetSkipped = global::ReactiveUI.Binding.Observables.ObservableExtensions.Skip(targetBind, 1);
-            var d2 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(__targetSkipped, value =>
+            var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(targetBind, 1);
+            var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
             {
                 source.Name = value;
             });

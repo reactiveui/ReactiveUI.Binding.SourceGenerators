@@ -278,7 +278,7 @@ public class BindOneWayCodeGeneratorHelperTests
         BindOneWayCodeGenerator.GenerateBindOneWayMethod(sb, inv, classInfo, suffix: "TEST00000000TEST");
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ObservableExtensions.Select");
+        await Assert.That(result).Contains("RxBindingExtensions.Select");
         await Assert.That(result).Contains("conversionFunc");
     }
 

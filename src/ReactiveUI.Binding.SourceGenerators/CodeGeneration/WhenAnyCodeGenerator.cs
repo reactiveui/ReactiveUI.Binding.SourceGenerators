@@ -238,7 +238,7 @@ internal static class WhenAnyCodeGenerator
 
         // Wrap in ObservedChange and apply selector
         sb.Append($$"""
-                        return global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__propObs0,
+                        return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__propObs0,
                             value => selector(new global::ReactiveUI.Binding.ObservedChange<{{inv.SourceTypeFullName}}, {{leafType}}>(obj, null, value)));
             """);
     }

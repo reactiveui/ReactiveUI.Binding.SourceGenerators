@@ -105,7 +105,7 @@ internal static class ObservationCodeGenerator
 
                 if (inv.HasSelector)
                 {
-                    sb.Append("            return global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(");
+                    sb.Append("            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(");
                     GenerateShallowPathObservation(sb, path, classInfo, isBeforeChange);
                     sb.AppendLine(", selector);");
                 }
@@ -370,8 +370,8 @@ internal static class ObservationCodeGenerator
             {
                 sb.AppendLine()
                     .AppendLine($$"""
-                            var {{curObsVar}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{prevObsVar}},
+                            var {{curObsVar}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{prevObsVar}},
                                     {{lambdaParam}} => {{lambdaParam}} != null
                                         ? (global::System.IObservable<{{segType}}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{{segType}}>(
                                             (global::System.ComponentModel.INotifyPropertyChanging){{lambdaParam}},
@@ -384,8 +384,8 @@ internal static class ObservationCodeGenerator
             {
                 sb.AppendLine()
                     .AppendLine($$"""
-                            var {{curObsVar}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{prevObsVar}},
+                            var {{curObsVar}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{prevObsVar}},
                                     {{lambdaParam}} => {{lambdaParam}} != null
                                         ? (global::System.IObservable<{{segType}}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{{segType}}>(
                                             {{lambdaParam}},
@@ -407,7 +407,7 @@ internal static class ObservationCodeGenerator
         else
         {
             sb.AppendLine($$"""
-                            var {{varName}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.DistinctUntilChanged({{lastObsVar}});
+                            var {{varName}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged({{lastObsVar}});
                 """);
         }
     }
@@ -689,8 +689,8 @@ internal static class ObservationCodeGenerator
             {
                 sb.AppendLine()
                     .AppendLine($$"""
-                            var {{curVar}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{prevVar}},
+                            var {{curVar}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{prevVar}},
                                     {{lambdaParam}} => {{lambdaParam}} != null
                                         ? (global::System.IObservable<{{segType}}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{{segType}}>(
                                             (global::System.ComponentModel.INotifyPropertyChanging){{lambdaParam}},
@@ -703,8 +703,8 @@ internal static class ObservationCodeGenerator
             {
                 sb.AppendLine()
                     .AppendLine($$"""
-                            var {{curVar}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{prevVar}},
+                            var {{curVar}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{prevVar}},
                                     {{lambdaParam}} => {{lambdaParam}} != null
                                         ? (global::System.IObservable<{{segType}}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{{segType}}>(
                                             {{lambdaParam}},
@@ -726,7 +726,7 @@ internal static class ObservationCodeGenerator
         else
         {
             sb.Append($$"""
-                            return global::ReactiveUI.Binding.Observables.ObservableExtensions.DistinctUntilChanged({{lastObs}});
+                            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged({{lastObs}});
                 """);
         }
     }
@@ -797,8 +797,8 @@ internal static class ObservationCodeGenerator
 
                 sb.AppendLine()
                     .AppendLine($$"""
-                            var {{curVar}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{prevVar}},
+                            var {{curVar}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{prevVar}},
                                     {{lambdaParam}} => {{lambdaParam}} != null
                                         ? (global::System.IObservable<{{segType}}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{{segType}}>(
                                             {{lambdaParam}},
@@ -811,7 +811,7 @@ internal static class ObservationCodeGenerator
 
             string lastSeg = $"__{variableName}_s{propertyPath.Length - 1}";
             sb.AppendLine($$"""
-                            var {{variableName}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.DistinctUntilChanged({{lastSeg}});
+                            var {{variableName}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged({{lastSeg}});
                     """);
         }
     }

@@ -37,7 +37,7 @@ namespace ReactiveUI.Binding
                 static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel)__o).Name,
                 true);
 
-            return global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__propObs0,
+            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__propObs0,
                 value => selector(new global::ReactiveUI.Binding.ObservedChange<global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel, string>(obj, null, value)));
         }
 

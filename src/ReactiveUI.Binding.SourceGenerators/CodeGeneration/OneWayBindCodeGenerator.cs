@@ -247,7 +247,7 @@ internal static class OneWayBindCodeGenerator
             {
                 string nextVar = inv.HasScheduler ? "__selected" : "bindObs";
                 sb.AppendLine($$"""
-                        var {{nextVar}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{currentVar}}, selector);
+                        var {{nextVar}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{currentVar}}, selector);
                 """);
                 currentVar = nextVar;
             }
@@ -262,7 +262,7 @@ internal static class OneWayBindCodeGenerator
 
             sb.AppendLine($$"""
 
-                        var sub = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe({{currentVar}}, value =>
+                        var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe({{currentVar}}, value =>
                         {
                             {{viewPropertyAccess}} = value;
                         });
@@ -280,7 +280,7 @@ internal static class OneWayBindCodeGenerator
         {
             sb.AppendLine($$"""
 
-                        var sub = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(sourceObs, value =>
+                        var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceObs, value =>
                         {
                             {{viewPropertyAccess}} = value;
                         });

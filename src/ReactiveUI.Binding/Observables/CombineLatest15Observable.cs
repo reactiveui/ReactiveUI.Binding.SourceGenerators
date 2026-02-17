@@ -28,6 +28,7 @@ namespace ReactiveUI.Binding.Observables;
 /// <typeparam name="T15">The type of element 15.</typeparam>
 /// <typeparam name="TResult">The result element type.</typeparam>
 [EditorBrowsable(EditorBrowsableState.Never)]
+[ExcludeFromCodeCoverage]
 internal sealed class CombineLatest15Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> : IObservable<TResult>
 {
     private readonly IObservable<T1> _source1;

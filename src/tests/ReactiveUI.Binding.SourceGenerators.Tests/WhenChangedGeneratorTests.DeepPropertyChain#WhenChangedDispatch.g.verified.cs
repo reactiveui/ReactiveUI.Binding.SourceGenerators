@@ -36,8 +36,8 @@ namespace ReactiveUI.Binding
                 static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.DeepPropertyChain.ParentViewModel)__o).Child,
                 false);
 
-        var __obs1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.ObservableExtensions.Select(__obs0,
+        var __obs1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obs0,
                 __parent1 => __parent1 != null
                     ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                         __parent1,
@@ -45,7 +45,7 @@ namespace ReactiveUI.Binding
                         static (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.DeepPropertyChain.ChildModel)__o).Name,
                         false)
                     : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.ReturnObservable<string>(default(string))));
-            return global::ReactiveUI.Binding.Observables.ObservableExtensions.DistinctUntilChanged(__obs1);
+            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__obs1);
         }
 
     }

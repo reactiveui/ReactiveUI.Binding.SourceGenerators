@@ -263,8 +263,8 @@ internal static class BindTwoWayCodeGenerator
                 string srcNext = inv.HasScheduler ? "__srcSelected" : "sourceBind";
                 string tgtNext = inv.HasScheduler ? "__tgtSelected" : "targetBind";
                 sb.AppendLine($$"""
-                        var {{srcNext}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{sourceVar}}, sourceToTargetConv);
-                        var {{tgtNext}} = global::ReactiveUI.Binding.Observables.ObservableExtensions.Select({{targetVar}}, targetToSourceConv);
+                        var {{srcNext}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{sourceVar}}, sourceToTargetConv);
+                        var {{tgtNext}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{targetVar}}, targetToSourceConv);
                 """);
                 sourceVar = srcNext;
                 targetVar = tgtNext;
@@ -282,13 +282,13 @@ internal static class BindTwoWayCodeGenerator
 
             sb.AppendLine($$"""
 
-                        var d1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe({{sourceVar}}, value =>
+                        var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe({{sourceVar}}, value =>
                         {
                             {{targetAccess}} = value;
                         });
 
-                        var __targetSkipped = global::ReactiveUI.Binding.Observables.ObservableExtensions.Skip({{targetVar}}, 1);
-                        var d2 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(__targetSkipped, value =>
+                        var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip({{targetVar}}, 1);
+                        var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
                         {
                             {{sourceSetAccess}} = value;
                         });
@@ -302,13 +302,13 @@ internal static class BindTwoWayCodeGenerator
         {
             sb.AppendLine($$"""
 
-                        var d1 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(sourceObs, value =>
+                        var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceObs, value =>
                         {
                             {{targetAccess}} = value;
                         });
 
-                        var __targetSkipped = global::ReactiveUI.Binding.Observables.ObservableExtensions.Skip(targetObs, 1);
-                        var d2 = global::ReactiveUI.Binding.Observables.ObservableExtensions.Subscribe(__targetSkipped, value =>
+                        var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(targetObs, 1);
+                        var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
                         {
                             {{sourceSetAccess}} = value;
                         });
