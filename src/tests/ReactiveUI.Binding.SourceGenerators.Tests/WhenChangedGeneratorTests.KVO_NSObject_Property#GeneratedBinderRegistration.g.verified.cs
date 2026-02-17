@@ -14,7 +14,6 @@ namespace ReactiveUI.Binding.Generated
         /// <summary>
         /// Registers all generated binders with the Splat service locator.
         /// </summary>
-        [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Initialize()
         {
             // Generated binder registrations will be added here in future phases.

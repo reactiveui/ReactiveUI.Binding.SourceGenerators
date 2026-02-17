@@ -22,27 +22,15 @@ public class BindingGenerator : IIncrementalGenerator
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // Detect C# language version for CallerArgumentExpression support (C# 10+)
-        var supportsCallerArgExpr = context.ParseOptionsProvider.Select(static (opts, _) =>
-            opts is CSharpParseOptions csharpOpts
-            && csharpOpts.LanguageVersion >= LanguageVersion.CSharp10);
-
-        // Conditionally emit CallerArgumentExpression polyfill when C# 10+ but attribute is missing
-        var needsPolyfill = supportsCallerArgExpr
+        // Detect whether the consumer project supports CallerArgumentExpression (C# 10+ AND attribute available).
+        // When supported, invocation generators use expression-text dispatch; otherwise file/line dispatch.
+        var supportsCallerArgExpr = context.ParseOptionsProvider
             .Combine(context.CompilationProvider)
             .Select(static (data, _) =>
-                data.Left && data.Right.GetTypeByMetadataName(
-                    Constants.CallerArgumentExpressionAttributeMetadataName) is null);
-
-        context.RegisterSourceOutput(needsPolyfill, static (ctx, needs) =>
-        {
-            if (needs)
-            {
-                ctx.AddSource(
-                    "CallerArgumentExpressionAttribute.g.cs",
-                    Constants.CallerArgumentExpressionAttributeSource);
-            }
-        });
+                data.Left is CSharpParseOptions csharpOpts
+                && csharpOpts.LanguageVersion >= LanguageVersion.CSharp10
+                && data.Right.GetTypeByMetadataName(
+                    Constants.CallerArgumentExpressionAttributeMetadataName) is not null);
 
         // Pipeline A: Shared type detection
         // One pass: sets flags for IRO, INPC, WpfDP, WinUIDP, KVO, etc.
