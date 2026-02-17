@@ -24,6 +24,8 @@ public class ReactiveUIBindingBenchmark
     private BenchmarkViewModel _source = null!;
     private BenchmarkView _target = null!;
 
+    static ReactiveUIBindingBenchmark() => ModuleInitializer.EnsureInitialized();
+
     /// <summary>
     /// Sets up fresh source and target objects before each benchmark iteration.
     /// </summary>

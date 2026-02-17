@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Runtime.CompilerServices;
-
 using ReactiveUI.Builder;
 
 using Splat;
@@ -11,16 +9,24 @@ using Splat;
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>
-/// Module initializer that configures ReactiveUI before any benchmarks run.
+/// One-shot initializer that configures ReactiveUI before any benchmarks run.
+/// Call <see cref="EnsureInitialized"/> from each benchmark class's static constructor.
 /// </summary>
 internal static class ModuleInitializer
 {
+    private static int _initialized;
+
     /// <summary>
-    /// Initializes ReactiveUI using the builder pattern.
+    /// Ensures ReactiveUI is initialized exactly once, regardless of how many
+    /// benchmark classes call this method.
     /// </summary>
-    [ModuleInitializer]
-    internal static void Initialize()
+    internal static void EnsureInitialized()
     {
+        if (Interlocked.Exchange(ref _initialized, 1) != 0)
+        {
+            return;
+        }
+
         ModeDetector.OverrideModeDetector(new BenchmarkModeDetector());
         RxAppBuilder.CreateReactiveUIBuilder()
             .WithCoreServices()

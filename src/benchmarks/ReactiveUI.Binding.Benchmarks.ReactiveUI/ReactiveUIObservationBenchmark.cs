@@ -25,6 +25,8 @@ public class ReactiveUIObservationBenchmark
 
     private BenchmarkViewModel _vm = null!;
 
+    static ReactiveUIObservationBenchmark() => ModuleInitializer.EnsureInitialized();
+
     /// <summary>
     /// Sets up a fresh view model before each benchmark iteration.
     /// </summary>

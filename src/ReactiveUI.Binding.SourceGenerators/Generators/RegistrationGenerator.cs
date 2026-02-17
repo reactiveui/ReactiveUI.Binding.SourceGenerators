@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Generators;
 
 /// <summary>
 /// Consolidates all per-kind fallback generator results into a single RegisterSourceOutput.
-/// Generates all ICreatesObservableForProperty implementations and one [ModuleInitializer] class.
+/// Generates all ICreatesObservableForProperty implementations and a registration class.
 /// </summary>
 internal static class RegistrationGenerator
 {
@@ -58,7 +58,7 @@ internal static class RegistrationGenerator
     }
 
     /// <summary>
-    /// Generates the consolidated registration output: all per-kind binder classes + [ModuleInitializer].
+    /// Generates the consolidated registration output: all per-kind binder classes.
     /// </summary>
     /// <param name="context">The source production context.</param>
     /// <param name="allTypes">All detected observable type infos across all notification kinds.</param>
@@ -93,7 +93,6 @@ internal static class RegistrationGenerator
                     /// <summary>
                     /// Registers all generated binders with the Splat service locator.
                     /// </summary>
-                    [global::System.Runtime.CompilerServices.ModuleInitializer]
                     internal static void Initialize()
                     {
                         // Generated binder registrations will be added here in future phases.
