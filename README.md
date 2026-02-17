@@ -42,7 +42,7 @@ A C# source generator that replaces ReactiveUI's runtime expression-tree binding
         <img width="100" height="100" src="https://github.com/glennawatson.png?s=150">
         <br>
         <a href="https://github.com/glennawatson">Glenn Watson</a>
-        <p>Brisbane, Australia</p>
+        <p>Melbourne, Australia</p>
       </td>
     </tr>
   </tbody>
