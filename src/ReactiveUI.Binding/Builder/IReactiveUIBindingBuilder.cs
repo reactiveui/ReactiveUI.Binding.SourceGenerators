@@ -45,6 +45,27 @@ public interface IReactiveUIBindingBuilder : IAppBuilder
     IReactiveUIBindingBuilder WithRegistration(Action<IMutableDependencyResolver> configureAction);
 
     /// <summary>
+    /// Registers a typed binding converter.
+    /// </summary>
+    /// <param name="converter">The converter instance to register.</param>
+    /// <returns>The builder instance for chaining.</returns>
+    IReactiveUIBindingBuilder WithConverter(IBindingTypeConverter converter);
+
+    /// <summary>
+    /// Registers a fallback binding converter.
+    /// </summary>
+    /// <param name="converter">The fallback converter instance to register.</param>
+    /// <returns>The builder instance for chaining.</returns>
+    IReactiveUIBindingBuilder WithFallbackConverter(IBindingFallbackConverter converter);
+
+    /// <summary>
+    /// Registers a set-method binding converter.
+    /// </summary>
+    /// <param name="converter">The set-method converter instance to register.</param>
+    /// <returns>The builder instance for chaining.</returns>
+    IReactiveUIBindingBuilder WithSetMethodConverter(ISetMethodBindingConverter converter);
+
+    /// <summary>
     /// Builds the application and returns the configured instance.
     /// </summary>
     /// <returns>The configured application instance.</returns>
