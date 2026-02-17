@@ -98,6 +98,40 @@ The `--treenode-filter` follows the pattern: `/{AssemblyName}/{Namespace}/{Class
   3. Disable `VerifierSettings.AutoVerify()` after accepting
   4. Re-run tests to confirm they pass without AutoVerify
 
+### Code Coverage
+
+Code coverage uses **Microsoft.Testing.Extensions.CodeCoverage** configured in `src/testconfig.json`. Coverage is collected for production assemblies only (test projects and TestModels are excluded).
+
+```powershell
+# Run tests with code coverage (from src/ folder)
+dotnet test --solution ReactiveUI.Binding.SourceGenerators.slnx -c Release -- --coverage --coverage-output-format cobertura
+
+# Generate HTML report using ReportGenerator (install if needed: dotnet tool install -g dotnet-reportgenerator-globaltool)
+# Find all cobertura files and generate report to /tmp/<folder>
+reportgenerator \
+  -reports:"tests/**/TestResults/**/*.cobertura.xml" \
+  -targetdir:/tmp/code_coverage \
+  -reporttypes:"Html;TextSummary"
+
+# View the text summary
+cat /tmp/code_coverage/Summary.txt
+
+# Open HTML report in browser
+xdg-open /tmp/code_coverage/index.html   # Linux
+open /tmp/code_coverage/index.html        # macOS
+```
+
+**Key configuration** (`src/testconfig.json`):
+- `modulePaths.include`: `ReactiveUI\\.Binding\\..*` — covers all production assemblies
+- `modulePaths.exclude`: `.*Tests.*`, `.*TestRunner.*`, `.*TestModels.*` — excludes test/runner/model assemblies
+- `skipAutoProperties: true` — auto-properties excluded from coverage metrics
+
+**Tips:**
+- Always clean `bin/` and `obj/` folders before coverage runs to avoid stale results
+- The `ReactiveUI.Binding.GeneratedCode.TestModels` assembly has `[assembly: ExcludeFromCodeCoverage]` so it won't appear in reports even though its module path matches the include pattern
+- `DiagnosticWarnings.cs` coverage appears as 0% in `ReactiveUI.Binding.SourceGenerators` — this is a linked-file artifact; the code is actually tested via the `ReactiveUI.Binding.Analyzer` assembly
+- Put coverage reports in `/tmp/` to avoid accidentally committing them
+
 ## Architecture Overview
 
 ### What This Project Does
