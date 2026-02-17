@@ -44,6 +44,22 @@ public class BindingGenerator : IIncrementalGenerator
             }
         });
 
+        // Conditionally emit ModuleInitializer polyfill for runtimes that don't include it (e.g. .NET Framework)
+        var needsModuleInitPolyfill = context.CompilationProvider
+            .Select(static (compilation, _) =>
+                compilation.GetTypeByMetadataName(
+                    Constants.ModuleInitializerAttributeMetadataName) is null);
+
+        context.RegisterSourceOutput(needsModuleInitPolyfill, static (ctx, needs) =>
+        {
+            if (needs)
+            {
+                ctx.AddSource(
+                    "ModuleInitializerAttribute.g.cs",
+                    Constants.ModuleInitializerAttributeSource);
+            }
+        });
+
         // Pipeline A: Shared type detection
         // One pass: sets flags for IRO, INPC, WpfDP, WinUIDP, KVO, etc.
         var allClasses = context.SyntaxProvider

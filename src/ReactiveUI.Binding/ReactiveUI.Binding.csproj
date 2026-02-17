@@ -10,6 +10,9 @@
   <ItemGroup>
     <InternalsVisibleTo Include="ReactiveUI.Binding.Tests" />
     <InternalsVisibleTo Include="ReactiveUI.Binding.GeneratedCode.Tests" />
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Wpf" />
+    <InternalsVisibleTo Include="ReactiveUI.Binding.WinForms" />
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Maui" />
   </ItemGroup>
 
   <ItemGroup>

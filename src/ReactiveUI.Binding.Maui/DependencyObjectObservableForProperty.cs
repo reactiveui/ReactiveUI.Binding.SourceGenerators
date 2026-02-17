@@ -9,6 +9,8 @@ using System.Reflection;
 
 using Microsoft.UI.Xaml;
 
+using ReactiveUI.Binding.ObservableForProperty;
+
 namespace ReactiveUI.Binding.Maui;
 
 /// <summary>
