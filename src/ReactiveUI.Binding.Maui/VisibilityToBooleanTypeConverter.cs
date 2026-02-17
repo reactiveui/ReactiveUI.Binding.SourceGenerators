@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for full license information.
 
 #if WINUI_TARGET
-using Microsoft.UI.Xaml;
+using Visibility = Microsoft.UI.Xaml.Visibility;
 #else
-using Microsoft.Maui;
+using Visibility = Microsoft.Maui.Visibility;
 #endif
 
 namespace ReactiveUI.Binding.Maui;
