@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Diagnostics.CodeAnalysis;
+
 using Microsoft.CodeAnalysis;
 
 namespace ReactiveUI.Binding.SourceGenerators;
@@ -11,6 +13,7 @@ namespace ReactiveUI.Binding.SourceGenerators;
 /// The generator itself does NOT report diagnostics — the separate analyzer project does.
 /// This file is linked into the analyzer project via Compile Include.
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class DiagnosticWarnings
 {
     /// <summary>

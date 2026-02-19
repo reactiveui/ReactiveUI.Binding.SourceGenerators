@@ -787,4 +787,304 @@ public class BindingInvocationAnalyzerTests
         var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(0);
     }
+
+    /// <summary>
+    /// Verifies RXUIBIND004 is NOT reported when WhenChanging is called on a type
+    /// that implements IReactiveObject (supports before-change notifications).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND004_IReactiveObject_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class ReactiveViewModel : ReactiveUI.IReactiveObject
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new ReactiveViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        await Assert.That(beforeChangeDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND004 is reported when WhenChanging is called on a WPF DependencyObject type
+    /// (WPF does not support before-change notifications).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND004_WpfDependencyObject_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace System.Windows
+            {
+                public class DependencyObject { }
+            }
+
+            namespace TestApp
+            {
+                public class WpfControl : System.Windows.DependencyObject
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new WpfControl();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND004 is reported when WhenChanging is called on a WinUI DependencyObject type
+    /// (WinUI does not support before-change notifications).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND004_WinUIDependencyObject_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace Microsoft.UI.Xaml
+            {
+                public class DependencyObject { }
+            }
+
+            namespace TestApp
+            {
+                public class WinUIControl : Microsoft.UI.Xaml.DependencyObject
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new WinUIControl();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND004 is reported when WhenChanging is called on a WinForms Component type
+    /// (WinForms does not support before-change notifications).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND004_WinFormsComponent_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace System.ComponentModel
+            {
+                public class Component { }
+            }
+
+            namespace TestApp
+            {
+                public class WinFormsControl : System.ComponentModel.Component
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new WinFormsControl();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND004 is reported when WhenChanging is called on an Android View type
+    /// (Android does not support before-change notifications).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND004_AndroidView_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace Android.Views
+            {
+                public class View { }
+            }
+
+            namespace TestApp
+            {
+                public class AndroidControl : Android.Views.View
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new AndroidControl();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND004 is NOT reported when WhenChanging is called on an Apple NSObject type
+    /// (KVO supports before-change notifications).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND004_KVO_NSObject_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace Foundation
+            {
+                public class NSObject { }
+            }
+
+            namespace TestApp
+            {
+                public class AppleView : Foundation.NSObject
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new AppleView();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        await Assert.That(beforeChangeDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND004 is reported when WhenChanging is called on a type with no
+    /// recognized notification mechanism (unknown type falls through to no before-change support).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND004_UnknownType_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class PlainObject
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new PlainObject();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND004 is reported when WhenChanging is called on a type that inherits
+    /// from a platform type through a deep inheritance chain (e.g., two levels deep from
+    /// WPF DependencyObject). Tests the InheritsFrom base-type walk at line 132.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND004_InheritsFrom_DeepChain_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace System.Windows
+            {
+                public class DependencyObject { }
+            }
+
+            namespace TestApp
+            {
+                public class WpfControlBase : System.Windows.DependencyObject
+                {
+                    public string BaseName { get; set; } = "";
+                }
+
+                public class WpfDerivedControl : WpfControlBase
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new WpfDerivedControl();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
+    }
 }

@@ -4,6 +4,8 @@
 
 using ReactiveUI.Binding.Builder;
 
+using Splat.Builder;
+
 namespace ReactiveUI.Binding.Tests.Builder;
 
 /// <summary>
@@ -76,5 +78,51 @@ public class RxBindingBuilderTests
         // Should throw again
         await Assert.That(RxBindingBuilder.EnsureInitialized)
             .ThrowsExactly<InvalidOperationException>();
+    }
+
+    /// <summary>
+    /// Verifies that calling WithCoreServices twice does not throw and is idempotent.
+    /// Covers the _coreRegistered=true path in ReactiveUIBindingBuilder.WithCoreServices.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WithCoreServices_CalledTwice_IsIdempotent()
+    {
+        RxBindingBuilder.ResetForTesting();
+
+        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+        builder.WithCoreServices();
+        builder.WithCoreServices(); // Second call should be a no-op
+        builder.BuildApp();
+
+        await Assert.That(RxBindingBuilder.EnsureInitialized).ThrowsNothing();
+    }
+
+    /// <summary>
+    /// Verifies that the extension method overload CreateReactiveUIBindingBuilder(resolver) returns a non-null builder.
+    /// Covers lines 41-47 in RxBindingBuilder.cs.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CreateReactiveUIBindingBuilder_WithResolver_ReturnsBuilder()
+    {
+        RxBindingBuilder.ResetForTesting();
+
+        var resolver = new ModernDependencyResolver();
+        var builder = resolver.CreateReactiveUIBindingBuilder();
+
+        await Assert.That(builder).IsNotNull();
+    }
+
+    /// <summary>
+    /// Verifies that the extension method overload throws ArgumentNullException when resolver is null.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CreateReactiveUIBindingBuilder_NullResolver_ThrowsArgumentNullException()
+    {
+        var action = () => ((IMutableDependencyResolver)null!).CreateReactiveUIBindingBuilder();
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
     }
 }

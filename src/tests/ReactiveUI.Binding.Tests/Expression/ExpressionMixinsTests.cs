@@ -158,4 +158,110 @@ public class ExpressionMixinsTests
         var parentMember = (MemberExpression)parent;
         await Assert.That(parentMember.Member.Name).IsEqualTo("Address");
     }
+
+    /// <summary>
+    /// Verifies that GetExpressionChain throws NotSupportedException for a ConstantExpression with a helpful message.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task GetExpressionChain_ConstantExpression_ThrowsWithHelpfulMessage()
+    {
+        var constant = System.Linq.Expressions.Expression.Constant("hello");
+
+        var ex = Assert.Throws<NotSupportedException>(() => constant.GetExpressionChain().ToList());
+        await Assert.That(ex!.Message).Contains("Did you miss the member access prefix");
+    }
+
+    /// <summary>
+    /// Verifies that GetMemberInfo throws NotSupportedException for an unsupported expression type.
+    /// </summary>
+    [Test]
+    public void GetMemberInfo_UnsupportedExpression_ThrowsNotSupportedException()
+    {
+        var constant = System.Linq.Expressions.Expression.Constant(42);
+
+        Assert.Throws<NotSupportedException>(() => constant.GetMemberInfo());
+    }
+
+    /// <summary>
+    /// Verifies that GetParent throws NotSupportedException for an unsupported expression type.
+    /// </summary>
+    [Test]
+    public void GetParent_UnsupportedExpression_ThrowsNotSupportedException()
+    {
+        var constant = System.Linq.Expressions.Expression.Constant(42);
+
+        Assert.Throws<NotSupportedException>(() => constant.GetParent());
+    }
+
+    /// <summary>
+    /// Verifies that GetArgumentsArray returns constant arguments for an index expression.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetArgumentsArray_IndexExpression_ReturnsConstantArguments()
+    {
+        Expression<Func<IndexTestClass, int>> expr = x => x.Items[2];
+        var body = Reflection.Rewrite(expr.Body);
+
+        var args = body.GetArgumentsArray();
+
+        await Assert.That(args).IsNotNull();
+        await Assert.That(args!.Length).IsEqualTo(1);
+        await Assert.That(args[0]).IsEqualTo(2);
+    }
+
+    /// <summary>
+    /// Verifies that GetExpressionChain handles index expressions in chains.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetExpressionChain_WithIndexExpression_ReturnsChainIncludingIndex()
+    {
+        Expression<Func<IndexTestClass, int>> expr = x => x.Items[0];
+        var body = Reflection.Rewrite(expr.Body);
+
+        var chain = body.GetExpressionChain().ToList();
+
+        await Assert.That(chain.Count).IsEqualTo(2);
+    }
+
+    /// <summary>
+    /// Verifies that GetMemberInfo returns indexer info for an IndexExpression.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetMemberInfo_IndexExpression_ReturnsIndexerInfo()
+    {
+        Expression<Func<IndexTestClass, int>> expr = x => x.Items[0];
+        var body = Reflection.Rewrite(expr.Body);
+
+        // body is an IndexExpression for Items[0]
+        var memberInfo = body.GetMemberInfo();
+
+        await Assert.That(memberInfo).IsNotNull();
+        await Assert.That(memberInfo!.Name).IsEqualTo("Item");
+    }
+
+    /// <summary>
+    /// Verifies that GetParent returns the object expression for an IndexExpression.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetParent_IndexExpression_ReturnsObjectExpression()
+    {
+        Expression<Func<IndexTestClass, int>> expr = x => x.Items[0];
+        var body = Reflection.Rewrite(expr.Body);
+
+        var parent = body.GetParent();
+
+        await Assert.That(parent).IsNotNull();
+        await Assert.That(parent!.NodeType).IsEqualTo(ExpressionType.MemberAccess);
+    }
+
+    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
+    private sealed class IndexTestClass
+    {
+        public List<int> Items { get; } = [10, 20, 30];
+    }
 }

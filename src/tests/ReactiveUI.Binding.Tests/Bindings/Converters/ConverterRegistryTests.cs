@@ -255,6 +255,70 @@ public class ConverterRegistryTests
         await Assert.That(selected).IsEqualTo(highAffinity);
     }
 
+    /// <summary>
+    /// Verifies that SetMethodBindingConverterRegistry.TryGetConverter returns null when no converters are registered.
+    /// Covers the null snapshot path at lines 88-92.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task SetMethodRegistry_Empty_TryGetConverter_ReturnsNull()
+    {
+        var registry = new SetMethodBindingConverterRegistry();
+
+        var result = registry.TryGetConverter(typeof(int), typeof(string));
+
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that SetMethodBindingConverterRegistry.GetAllConverters returns empty when no converters are registered.
+    /// Covers the null snapshot path at lines 122-126.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task SetMethodRegistry_Empty_GetAllConverters_ReturnsEmpty()
+    {
+        var registry = new SetMethodBindingConverterRegistry();
+
+        var result = registry.GetAllConverters();
+
+        await Assert.That(result.Count()).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies that SetMethodBindingConverterRegistry.Register throws ArgumentNullException for null converter.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task SetMethodRegistry_Register_Null_ThrowsArgumentNullException()
+    {
+        var registry = new SetMethodBindingConverterRegistry();
+
+        var action = () => registry.Register(null!);
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
+    /// Verifies that SetMethodBindingConverterRegistry.GetAllConverters returns all registered converters.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task SetMethodRegistry_GetAllConverters_ReturnsAllRegistered()
+    {
+        var registry = new SetMethodBindingConverterRegistry();
+        var converter1 = new TestSetMethodConverter(5);
+        var converter2 = new TestSetMethodConverter(3);
+
+        registry.Register(converter1);
+        registry.Register(converter2);
+
+        var all = registry.GetAllConverters().ToList();
+        await Assert.That(all.Count).IsEqualTo(2);
+        await Assert.That(all).Contains(converter1);
+        await Assert.That(all).Contains(converter2);
+    }
+
     private sealed class TestConverter<TFrom, TTo> : BindingTypeConverter<TFrom, TTo>
     {
         private readonly int _affinity;

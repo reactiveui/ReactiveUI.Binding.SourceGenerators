@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using Microsoft.CodeAnalysis.CSharp;
+
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -34,6 +36,34 @@ public class WhenAnyObservableGeneratorTests
         var source = SharedSourceReader.ReadScenario("WhenAnyObservable/TwoObservablesMerge");
         var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
         await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenAnyObservable with two different-type observable properties and a selector (CombineLatest pattern).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TwoObservables_WithSelector()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenAnyObservable/TwoObservablesWithSelector");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that WhenAnyObservable generates CallerFilePath dispatch when targeting pre-C# 10.
+    /// CompilationSucceeds is omitted because the CallerFilePath stub signature is ambiguous
+    /// with the runtime extension method in this test harness (both assemblies are referenced).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleObservable_CallerFilePath()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenAnyObservable/SingleObservable");
+        var result = await TestHelper.TestPassWithResult(
+            source, typeof(WhenAnyObservableGeneratorTests), LanguageVersion.CSharp9);
         await result.HasNoGeneratorDiagnostics();
     }
 }

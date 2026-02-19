@@ -347,7 +347,7 @@ internal static class WhenAnyObservableCodeGenerator
         var sb = new StringBuilder("global::System.Func<");
         for (int i = 0; i < inv.InnerObservableTypeFullNames.Length; i++)
         {
-            sb.Append(inv.InnerObservableTypeFullNames[i]).Append("?, ");
+            sb.Append(inv.InnerObservableTypeFullNames[i]).Append(", ");
         }
 
         sb.Append(inv.ReturnTypeFullName).Append('>');

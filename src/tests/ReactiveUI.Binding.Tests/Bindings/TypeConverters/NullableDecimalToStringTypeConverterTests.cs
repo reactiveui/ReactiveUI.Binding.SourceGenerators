@@ -130,4 +130,20 @@ public class NullableDecimalToStringTypeConverterTests
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("0");
     }
+
+    /// <summary>
+    ///     Verifies TryConvert with a string format hint formats correctly.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
+    {
+        var converter = new NullableDecimalToStringTypeConverter();
+        decimal? value = 42.5m;
+
+        var result = converter.TryConvert(value, "F4", out var output);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(output).IsEqualTo(value.Value.ToString("F4"));
+    }
 }

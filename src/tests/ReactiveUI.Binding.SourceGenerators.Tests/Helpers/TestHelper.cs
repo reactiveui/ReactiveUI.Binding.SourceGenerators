@@ -24,10 +24,15 @@ public static class TestHelper
     /// Includes ReactiveUI for IReactiveObject testing.
     /// </summary>
     /// <param name="source">The source code to compile.</param>
+    /// <param name="languageVersion">Optional C# language version to target. Defaults to the latest version.</param>
     /// <returns>A compilation ready for testing.</returns>
-    public static Compilation CreateCompilation(string source)
+    public static Compilation CreateCompilation(string source, LanguageVersion? languageVersion = null)
     {
-        var syntaxTree = CSharpSyntaxTree.ParseText(source);
+        var parseOptions = languageVersion.HasValue
+            ? new CSharpParseOptions(languageVersion.Value)
+            : new CSharpParseOptions(LanguageVersion.Default);
+
+        var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
         IEnumerable<MetadataReference> references;
 
@@ -39,21 +44,16 @@ public static class TestHelper
         references = Basic.Reference.Assemblies.Net80.References.All;
 #endif
 
-        // Add ReactiveUI assembly reference for IReactiveObject testing
-        var reactiveUIAssembly = typeof(ReactiveUI.IReactiveObject).Assembly;
-        var systemReactiveAssembly = typeof(System.Reactive.Linq.Observable).Assembly;
+        // Add ReactiveUI and transitive assembly references
+        var seedAssemblies = new[]
+        {
+            typeof(ReactiveUI.IReactiveObject).Assembly,
+            typeof(System.Reactive.Linq.Observable).Assembly,
+            typeof(ReactiveUI.Binding.ReactiveUIBindingExtensions).Assembly,
+            typeof(ReactiveUI.Binding.Reactive.ObserveOnObservable<>).Assembly,
+        };
 
-        // Add ReactiveUI.Binding assembly reference for stub extension methods
-        var reactiveUIBindingAssembly = typeof(ReactiveUI.Binding.ReactiveUIBindingExtensions).Assembly;
-        var reactiveUIBindingReactiveAssembly = typeof(ReactiveUI.Binding.Reactive.ObserveOnObservable<>).Assembly;
-        var allReferences = references
-            .Concat(new[]
-            {
-                MetadataReference.CreateFromFile(reactiveUIAssembly.Location),
-                MetadataReference.CreateFromFile(systemReactiveAssembly.Location),
-                MetadataReference.CreateFromFile(reactiveUIBindingAssembly.Location),
-                MetadataReference.CreateFromFile(reactiveUIBindingReactiveAssembly.Location),
-            });
+        var allReferences = references.Concat(GetTransitiveReferences(seedAssemblies));
 
         return CSharpCompilation.Create(
             "TestAssembly",
@@ -68,14 +68,15 @@ public static class TestHelper
     /// </summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
+    /// <param name="languageVersion">Optional C# language version to target. Defaults to the latest version.</param>
     /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>A task representing the asynchronous verification operation.</returns>
-    public static Task TestPass(string source, Type callerType, [CallerFilePath] string file = "", [CallerMemberName] string memberName = "")
+    public static Task TestPass(string source, Type callerType, LanguageVersion? languageVersion = null, [CallerFilePath] string file = "", [CallerMemberName] string memberName = "")
     {
         ArgumentNullException.ThrowIfNull(callerType);
 
-        var result = RunGenerator(source);
+        var result = RunGenerator(source, languageVersion);
 
         // Log any diagnostics for debugging
         var allDiagnostics = result.OutputCompilation.GetDiagnostics()
@@ -101,14 +102,15 @@ public static class TestHelper
     /// </summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
+    /// <param name="languageVersion">Optional C# language version to target. Defaults to the latest version.</param>
     /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>The generator test result for additional assertions.</returns>
-    public static async Task<GeneratorTestResult> TestPassWithResult(string source, Type callerType, [CallerFilePath] string file = "", [CallerMemberName] string memberName = "")
+    public static async Task<GeneratorTestResult> TestPassWithResult(string source, Type callerType, LanguageVersion? languageVersion = null, [CallerFilePath] string file = "", [CallerMemberName] string memberName = "")
     {
         ArgumentNullException.ThrowIfNull(callerType);
 
-        var result = RunGenerator(source);
+        var result = RunGenerator(source, languageVersion);
 
         // Log any diagnostics for debugging
         var allDiagnostics = result.OutputCompilation.GetDiagnostics()
@@ -134,15 +136,23 @@ public static class TestHelper
     /// Runs the source generator on the provided source code and returns the result.
     /// </summary>
     /// <param name="source">The source code to compile and generate.</param>
+    /// <param name="languageVersion">Optional C# language version to target. Defaults to the latest version.</param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
-    public static GeneratorTestResult RunGenerator(string source)
+    public static GeneratorTestResult RunGenerator(string source, LanguageVersion? languageVersion = null)
     {
-        var compilation = CreateCompilation(source);
+        var compilation = CreateCompilation(source, languageVersion);
         var generator = new BindingGenerator();
         var sourceGenerator = generator.AsSourceGenerator();
 
+        var parseOptions = languageVersion.HasValue
+            ? new CSharpParseOptions(languageVersion.Value)
+            : new CSharpParseOptions(LanguageVersion.Default);
+
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
             generators: new[] { sourceGenerator },
+            additionalTexts: null,
+            parseOptions: parseOptions,
+            optionsProvider: null,
             driverOptions: new GeneratorDriverOptions(
                 disabledOutputs: default,
                 trackIncrementalGeneratorSteps: true));
@@ -181,5 +191,45 @@ public static class TestHelper
         var context = new CollectibleAssemblyLoadContext();
         var assembly = context.LoadFromStream(ms);
         return (assembly, context);
+    }
+
+    /// <summary>
+    /// Recursively walks assembly references from the seed assemblies to collect
+    /// all transitive dependencies as metadata references.
+    /// </summary>
+    /// <param name="seedAssemblies">The root assemblies to start from.</param>
+    /// <returns>Metadata references for all reachable assemblies.</returns>
+    private static IEnumerable<MetadataReference> GetTransitiveReferences(params System.Reflection.Assembly[] seedAssemblies)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var queue = new Queue<System.Reflection.Assembly>(seedAssemblies);
+
+        while (queue.Count > 0)
+        {
+            var assembly = queue.Dequeue();
+            if (assembly.IsDynamic || string.IsNullOrEmpty(assembly.Location))
+            {
+                continue;
+            }
+
+            if (!seen.Add(assembly.Location))
+            {
+                continue;
+            }
+
+            yield return MetadataReference.CreateFromFile(assembly.Location);
+
+            foreach (var referencedName in assembly.GetReferencedAssemblies())
+            {
+                try
+                {
+                    queue.Enqueue(System.Reflection.Assembly.Load(referencedName));
+                }
+                catch
+                {
+                    // System assemblies already covered by Basic.Reference.Assemblies
+                }
+            }
+        }
     }
 }

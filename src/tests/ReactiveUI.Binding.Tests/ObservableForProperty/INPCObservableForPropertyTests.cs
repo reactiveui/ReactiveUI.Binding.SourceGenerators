@@ -2,12 +2,16 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
 
 using ReactiveUI.Binding.Expressions;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Tests.TestModels;
+
+using LinqExpression = System.Linq.Expressions.Expression;
 
 namespace ReactiveUI.Binding.Tests.ObservableForProperty;
 
@@ -123,5 +127,241 @@ public class INPCObservableForPropertyTests
         vm.Age = 30;
 
         await Assert.That(emitted).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies that GetNotificationForProperty returns Observable.Never for POCO types.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_PocoType_ReturnsNever()
+    {
+        var sut = new INPCObservableForProperty();
+        var model = new PocoModel { Value = "test" };
+
+        Expression<Func<PocoModel, string>> expr = x => x.Value;
+        var body = Reflection.Rewrite(expr.Body);
+
+        var emitted = false;
+        using var sub = sut.GetNotificationForProperty(model, body, "Value")
+            .Subscribe(_ => emitted = true);
+
+        model.Value = "changed";
+
+        await Assert.That(emitted).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies that null or empty PropertyName in PropertyChanged emits for all listeners.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_NullPropertyName_EmitsNotification()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new NullPropertyNameViewModel();
+
+        Expression<Func<NullPropertyNameViewModel, string>> expr = x => x.Name;
+        var body = Reflection.Rewrite(expr.Body);
+
+        var emitted = false;
+        using var sub = sut.GetNotificationForProperty(vm, body, "Name")
+            .Subscribe(_ => emitted = true);
+
+        vm.RaiseAllPropertiesChanged();
+
+        await Assert.That(emitted).IsTrue();
+    }
+
+    /// <summary>
+    /// Verifies affinity is 0 for before-change on types without INotifyPropertyChanging.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetAffinityForObject_NonChangingType_Returns0ForBeforeChanged()
+    {
+        var sut = new INPCObservableForProperty();
+
+        var affinity = sut.GetAffinityForObject(typeof(NonChangingViewModel), "Name", beforeChanged: true);
+
+        await Assert.That(affinity).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies that GetNotificationForProperty emits for indexer property changes (PropertyChanged path).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_IndexExpression_PropertyChanged_EmitsNotification()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        // Create an IndexExpression for vm["key"] — NodeType == ExpressionType.Index
+        var param = LinqExpression.Parameter(typeof(IndexableViewModel), "x");
+        var indexer = typeof(IndexableViewModel).GetProperty("Item")!;
+        var indexExpr = LinqExpression.MakeIndex(
+            param,
+            indexer,
+            new[] { LinqExpression.Constant("key") });
+
+        var emitted = false;
+        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item")
+            .Subscribe(_ => emitted = true);
+
+        vm["key"] = "value";
+
+        await Assert.That(emitted).IsTrue();
+    }
+
+    /// <summary>
+    /// Verifies that GetNotificationForProperty emits for indexer property changes (PropertyChanging/beforeChanged path).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_IndexExpression_BeforeChanged_EmitsNotification()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        var param = LinqExpression.Parameter(typeof(IndexableViewModel), "x");
+        var indexer = typeof(IndexableViewModel).GetProperty("Item")!;
+        var indexExpr = LinqExpression.MakeIndex(
+            param,
+            indexer,
+            new[] { LinqExpression.Constant("key") });
+
+        var emitted = false;
+        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item", beforeChanged: true)
+            .Subscribe(_ => emitted = true);
+
+        vm["key"] = "value";
+
+        await Assert.That(emitted).IsTrue();
+    }
+
+    /// <summary>
+    /// Verifies that indexer property notification does not emit for unrelated property name changes.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_IndexExpression_DifferentPropertyName_DoesNotEmit()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        var param = LinqExpression.Parameter(typeof(IndexableViewModel), "x");
+        var indexer = typeof(IndexableViewModel).GetProperty("Item")!;
+        var indexExpr = LinqExpression.MakeIndex(
+            param,
+            indexer,
+            new[] { LinqExpression.Constant("key") });
+
+        var emitted = false;
+        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "SomeOtherProperty")
+            .Subscribe(_ => emitted = true);
+
+        vm["key"] = "value";
+
+        await Assert.That(emitted).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies that indexer property notification emits when PropertyChanged fires with null/empty name.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_IndexExpression_NullPropertyName_EmitsNotification()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        var param = LinqExpression.Parameter(typeof(IndexableViewModel), "x");
+        var indexer = typeof(IndexableViewModel).GetProperty("Item")!;
+        var indexExpr = LinqExpression.MakeIndex(
+            param,
+            indexer,
+            new[] { LinqExpression.Constant("key") });
+
+        var emitted = false;
+        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item")
+            .Subscribe(_ => emitted = true);
+
+        vm.RaiseAllPropertiesChanged();
+
+        await Assert.That(emitted).IsTrue();
+    }
+
+    /// <summary>
+    /// A test model that implements INotifyPropertyChanged but NOT INotifyPropertyChanging.
+    /// </summary>
+    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in typeof() expression.")]
+    private sealed class NonChangingViewModel : INotifyPropertyChanged
+    {
+        /// <inheritdoc/>
+#pragma warning disable CS0067 // Event is never used
+        public event PropertyChangedEventHandler? PropertyChanged;
+#pragma warning restore CS0067
+
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// A test model that raises PropertyChanged with null PropertyName.
+    /// </summary>
+    private sealed class NullPropertyNameViewModel : INotifyPropertyChanged
+    {
+        /// <inheritdoc/>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Raises PropertyChanged with null property name (all properties changed).
+        /// </summary>
+        public void RaiseAllPropertiesChanged() =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+    }
+
+    /// <summary>
+    /// A test model with an indexer that implements both INotifyPropertyChanged and INotifyPropertyChanging.
+    /// </summary>
+    private sealed class IndexableViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+    {
+        private readonly Dictionary<string, string> _items = new();
+
+        /// <inheritdoc/>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <inheritdoc/>
+        public event PropertyChangingEventHandler? PropertyChanging;
+
+        /// <summary>
+        /// Gets or sets the value associated with the specified key.
+        /// </summary>
+        /// <param name="key">The key of the value to get or set.</param>
+        /// <returns>The value associated with the specified key.</returns>
+        public string this[string key]
+        {
+            get => _items.TryGetValue(key, out var val) ? val : string.Empty;
+            set
+            {
+                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs("Item[]"));
+                _items[key] = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item[]"));
+            }
+        }
+
+        /// <summary>
+        /// Raises PropertyChanged with null property name (all properties changed).
+        /// </summary>
+        public void RaiseAllPropertiesChanged() =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
     }
 }

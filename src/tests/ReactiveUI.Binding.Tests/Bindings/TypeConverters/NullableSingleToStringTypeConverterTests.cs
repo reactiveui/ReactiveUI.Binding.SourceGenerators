@@ -114,4 +114,20 @@ public class NullableSingleToStringTypeConverterTests
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("42.50");
     }
+
+    /// <summary>
+    ///     Verifies TryConvert with a string format hint formats correctly.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
+    {
+        var converter = new NullableSingleToStringTypeConverter();
+        float? value = 42.5f;
+
+        var result = converter.TryConvert(value, "E2", out var output);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(output).IsEqualTo(value.Value.ToString("E2"));
+    }
 }

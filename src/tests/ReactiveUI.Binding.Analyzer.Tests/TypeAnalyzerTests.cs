@@ -114,4 +114,309 @@ public class TypeAnalyzerTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
+
+    /// <summary>
+    /// Verifies RXUIBIND002 is NOT reported when the source type implements both
+    /// INotifyPropertyChanged and INotifyPropertyChanging.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_INPCWithChanging_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public event PropertyChangingEventHandler? PropertyChanging;
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND002 is NOT reported when the source contains no binding method invocations.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_NonMethodInvocation_NoDiagnostics()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class PlainObject
+                {
+                    public string Name { get; set; } = "";
+                    public void DoWork() { }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND002 is NOT reported when the source type inherits from a base class
+    /// that implements INotifyPropertyChanged.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_InterfaceInheritance_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class BaseViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                }
+
+                public class DerivedViewModel : BaseViewModel
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var derived = new DerivedViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(derived, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND002 is NOT reported when the source type implements IReactiveObject.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_IReactiveObject_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class ReactiveViewModel : ReactiveUI.IReactiveObject
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new ReactiveViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND002 is NOT reported when the source type inherits from WPF DependencyObject.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_WpfDependencyObject_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace System.Windows
+            {
+                public class DependencyObject { }
+            }
+
+            namespace TestApp
+            {
+                public class WpfControl : System.Windows.DependencyObject
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new WpfControl();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND002 is NOT reported when the source type inherits from WinUI DependencyObject.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_WinUIDependencyObject_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace Microsoft.UI.Xaml
+            {
+                public class DependencyObject { }
+            }
+
+            namespace TestApp
+            {
+                public class WinUIControl : Microsoft.UI.Xaml.DependencyObject
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new WinUIControl();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND002 is NOT reported when the source type inherits from Apple NSObject (KVO).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_KVO_NSObject_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace Foundation
+            {
+                public class NSObject { }
+            }
+
+            namespace TestApp
+            {
+                public class AppleView : Foundation.NSObject
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new AppleView();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND002 is NOT reported when the source type inherits from WinForms Component.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_WinFormsComponent_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace System.ComponentModel
+            {
+                public class Component { }
+            }
+
+            namespace TestApp
+            {
+                public class WinFormsControl : System.ComponentModel.Component
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new WinFormsControl();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND002 is NOT reported when the source type inherits from Android View.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_AndroidView_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace Android.Views
+            {
+                public class View { }
+            }
+
+            namespace TestApp
+            {
+                public class AndroidControl : Android.Views.View
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new AndroidControl();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
 }

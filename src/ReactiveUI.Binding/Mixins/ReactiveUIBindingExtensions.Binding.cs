@@ -363,6 +363,37 @@ public static partial class ReactiveUIBindingExtensions
         throw new InvalidOperationException(NoGeneratedBindingMessage);
     }
 
+#if NET8_0_OR_GREATER
+    /// <summary>
+    /// Creates a one-way binding from a view model property to a view property with a specified selector.
+    /// </summary>
+    /// <typeparam name="TViewModel">The type of the view model.</typeparam>
+    /// <typeparam name="TView">The type of the view.</typeparam>
+    /// <typeparam name="TProp">The type of the view model property.</typeparam>
+    /// <typeparam name="TOut">The type of the view property.</typeparam>
+    /// <param name="view">The view to bind to.</param>
+    /// <param name="viewModel">The view model to observe.</param>
+    /// <param name="vmProperty">An expression that selects the view model property to observe.</param>
+    /// <param name="viewProperty">An expression that selects the view property to update.</param>
+    /// <param name="selector">A function that converts the view model property value to the view property type.</param>
+    /// <param name="vmPropertyExpression">The caller argument expression for <paramref name="vmProperty"/>. Auto-populated by the compiler.</param>
+    /// <param name="viewPropertyExpression">The caller argument expression for <paramref name="viewProperty"/>. Auto-populated by the compiler.</param>
+    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
+    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
+    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    public static IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TView, TProp, TOut>(
+        this TView view,
+        TViewModel viewModel,
+        Expression<Func<TViewModel, TProp>> vmProperty,
+        Expression<Func<TView, TOut>> viewProperty,
+        Func<TProp, TOut> selector,
+        [CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+        [CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
+        [CallerFilePath] string callerFilePath = "",
+        [CallerLineNumber] int callerLineNumber = 0)
+        where TViewModel : class
+        where TView : class, IViewFor
+#else
     /// <summary>
     /// Creates a one-way binding from a view model property to a view property with a specified selector.
     /// </summary>
@@ -388,8 +419,44 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TViewModel : class
         where TView : class, IViewFor
-        => throw new InvalidOperationException(NoGeneratedBindingMessage);
+#endif
+    {
+        throw new InvalidOperationException(NoGeneratedBindingMessage);
+    }
 
+#if NET8_0_OR_GREATER
+    /// <summary>
+    /// Creates a two-way binding between a view model property and a view property with conversion functions.
+    /// </summary>
+    /// <typeparam name="TViewModel">The type of the view model.</typeparam>
+    /// <typeparam name="TView">The type of the view.</typeparam>
+    /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
+    /// <typeparam name="TVProp">The type of the view property.</typeparam>
+    /// <param name="view">The view to bind to.</param>
+    /// <param name="viewModel">The view model to observe.</param>
+    /// <param name="vmProperty">An expression that selects the view model property to observe.</param>
+    /// <param name="viewProperty">An expression that selects the view property to update.</param>
+    /// <param name="vmToViewConverter">A function that converts the view model property value to the view property type.</param>
+    /// <param name="viewToVmConverter">A function that converts the view property value back to the view model property type.</param>
+    /// <param name="vmPropertyExpression">The caller argument expression for <paramref name="vmProperty"/>. Auto-populated by the compiler.</param>
+    /// <param name="viewPropertyExpression">The caller argument expression for <paramref name="viewProperty"/>. Auto-populated by the compiler.</param>
+    /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
+    /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
+    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    public static IReactiveBinding<TView, (object? view, bool isViewModel)> Bind<TViewModel, TView, TVMProp, TVProp>(
+        this TView view,
+        TViewModel viewModel,
+        Expression<Func<TViewModel, TVMProp>> vmProperty,
+        Expression<Func<TView, TVProp>> viewProperty,
+        Func<TVMProp, TVProp> vmToViewConverter,
+        Func<TVProp, TVMProp> viewToVmConverter,
+        [CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+        [CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
+        [CallerFilePath] string callerFilePath = "",
+        [CallerLineNumber] int callerLineNumber = 0)
+        where TViewModel : class
+        where TView : class, IViewFor
+#else
     /// <summary>
     /// Creates a two-way binding between a view model property and a view property with conversion functions.
     /// </summary>
@@ -417,5 +484,8 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TViewModel : class
         where TView : class, IViewFor
-        => throw new InvalidOperationException(NoGeneratedBindingMessage);
+#endif
+    {
+        throw new InvalidOperationException(NoGeneratedBindingMessage);
+    }
 }

@@ -14,6 +14,59 @@ namespace ReactiveUI.Binding.Tests.Observables;
 public class PropertyObservableTests
 {
     /// <summary>
+    /// Verifies that Subscribe throws ArgumentNullException when observer is null.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Subscribe_NullObserver_ThrowsArgumentNullException()
+    {
+        var vm = new TestViewModel { Name = "Alice" };
+        var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
+
+        var action = () => observable.Subscribe(null!);
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
+    /// Verifies that constructor throws ArgumentNullException when source is null.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Constructor_NullSource_ThrowsArgumentNullException()
+    {
+        var action = () => new PropertyObservable<string>(null!, "Name", x => "test", false);
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
+    /// Verifies that constructor throws ArgumentNullException when propertyName is null.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Constructor_NullPropertyName_ThrowsArgumentNullException()
+    {
+        var vm = new TestViewModel();
+        var action = () => new PropertyObservable<string>(vm, null!, x => "test", false);
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
+    /// Verifies that constructor throws ArgumentNullException when getter is null.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Constructor_NullGetter_ThrowsArgumentNullException()
+    {
+        var vm = new TestViewModel();
+        var action = () => new PropertyObservable<string>(vm, "Name", null!, false);
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
     /// Verifies that Subscribe emits the current value immediately.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
@@ -139,6 +192,44 @@ public class PropertyObservableTests
         vm.Name = "Bob";
         await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]).IsEqualTo("Alice");
+    }
+
+    /// <summary>
+    /// Verifies that double dispose does not throw.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Dispose_CalledTwice_NoException()
+    {
+        var vm = new TestViewModel { Name = "Alice" };
+        var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
+
+        var subscription = observable.Subscribe(new AnonymousObserver<string>(_ => { }, _ => { }, () => { }));
+        subscription.Dispose();
+        subscription.Dispose();
+
+        await Assert.That(subscription.GetType()).IsNotNull();
+    }
+
+    /// <summary>
+    /// Verifies that a PropertyChanged event fired after dispose does not throw (observer is null path).
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task PropertyChangedAfterDispose_DoesNotThrow()
+    {
+        var vm = new ManualTestViewModel { Name = "Alice" };
+        var results = new List<string>();
+        var observable = new PropertyObservable<string>(vm, "Name", x => ((ManualTestViewModel)x).Name, false);
+
+        var subscription = observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        subscription.Dispose();
+
+        // Fire event after dispose - should be safely ignored
+        vm.RaisePropertyChanged("Name");
+
+        // Only the initial value should have been emitted
+        await Assert.That(results).Count().IsEqualTo(1);
     }
 
     private sealed class ManualTestViewModel : INotifyPropertyChanged

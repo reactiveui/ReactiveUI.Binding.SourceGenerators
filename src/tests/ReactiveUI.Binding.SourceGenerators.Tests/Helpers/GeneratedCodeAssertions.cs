@@ -11,28 +11,19 @@ internal static class GeneratedCodeAssertions
 {
     /// <summary>
     /// Asserts that the output compilation has no errors.
-    /// CS0012 (missing assembly reference) is excluded by default because the test compilation
-    /// does not include all transitive dependencies (e.g. Splat.Logging for ReactiveObject).
     /// </summary>
     /// <param name="result">The generator test result.</param>
-    /// <param name="ignoredDiagnosticIds">Additional diagnostic IDs to ignore beyond CS0012.</param>
     /// <returns>A task representing the asynchronous assertion.</returns>
-    public static async Task CompilationSucceeds(this GeneratorTestResult result, params string[] ignoredDiagnosticIds)
+    public static async Task CompilationSucceeds(this GeneratorTestResult result)
     {
-        var excludedIds = new HashSet<string>(ignoredDiagnosticIds) { "CS0012" };
-
-        var relevantErrors = result.CompilationErrors
-            .Where(d => !excludedIds.Contains(d.Id))
-            .ToList();
-
-        if (relevantErrors.Count > 0)
+        if (result.CompilationErrors.Length > 0)
         {
             var errorMessages = string.Join(
                 Environment.NewLine,
-                relevantErrors.Select(d => $"  {d.Id}: {d.GetMessage()} at {d.Location}"));
+                result.CompilationErrors.Select(d => $"  {d.Id}: {d.GetMessage()} at {d.Location}"));
 
-            await Assert.That(relevantErrors.Count).IsEqualTo(0)
-                .Because($"Compilation should succeed but had {relevantErrors.Count} error(s):{Environment.NewLine}{errorMessages}");
+            await Assert.That(result.CompilationErrors.Length).IsEqualTo(0)
+                .Because($"Compilation should succeed but had {result.CompilationErrors.Length} error(s):{Environment.NewLine}{errorMessages}");
         }
     }
 

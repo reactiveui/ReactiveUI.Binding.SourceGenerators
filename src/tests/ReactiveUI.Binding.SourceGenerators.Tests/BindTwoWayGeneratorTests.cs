@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using Microsoft.CodeAnalysis.CSharp;
+
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -99,6 +101,21 @@ public class BindTwoWayGeneratorTests
         var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyWithScheduler");
         var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
         await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that BindTwoWay generates CallerFilePath dispatch when targeting pre-C# 10.
+    /// CompilationSucceeds is omitted because the CallerFilePath stub signature is ambiguous
+    /// with the runtime extension method in this test harness (both assemblies are referenced).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleProperty_StringToString_CallerFilePath()
+    {
+        var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyStringToString");
+        var result = await TestHelper.TestPassWithResult(
+            source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp9);
         await result.HasNoGeneratorDiagnostics();
     }
 }

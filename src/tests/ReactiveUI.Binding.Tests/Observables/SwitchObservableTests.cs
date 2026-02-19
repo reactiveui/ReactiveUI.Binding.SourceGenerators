@@ -14,6 +14,33 @@ namespace ReactiveUI.Binding.Tests.Observables;
 public class SwitchObservableTests
 {
     /// <summary>
+    /// Verifies that Subscribe throws ArgumentNullException when observer is null.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Subscribe_NullObserver_ThrowsArgumentNullException()
+    {
+        var outerSubject = new Subject<IObservable<int>>();
+        var switchObs = new SwitchObservable<int>(outerSubject);
+
+        var action = () => switchObs.Subscribe(null!);
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
+    /// Verifies that constructor throws ArgumentNullException when source is null.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Constructor_NullSource_ThrowsArgumentNullException()
+    {
+        var action = () => new SwitchObservable<int>(null!);
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
     /// Verifies that an error in the outer observable is propagated to the subscriber.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
@@ -137,6 +164,183 @@ public class SwitchObservableTests
 
         await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that null inner observable is handled gracefully (no subscription).
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task NullInnerObservable_IsIgnored()
+    {
+        var outerSubject = new Subject<IObservable<int>>();
+        var switchObs = new SwitchObservable<int>(outerSubject);
+
+        var results = new List<int>();
+
+        switchObs.Subscribe(new AnonymousObserver<int>(
+            results.Add,
+            _ => { },
+            () => { }));
+
+        outerSubject.OnNext(null!);
+
+        await Assert.That(results).IsEmpty();
+    }
+
+    /// <summary>
+    /// Verifies that double disposal does not throw.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task DoubleDisposal_DoesNotThrow()
+    {
+        var outerSubject = new Subject<IObservable<int>>();
+        var switchObs = new SwitchObservable<int>(outerSubject);
+
+        var results = new List<int>();
+
+        var subscription = switchObs.Subscribe(new AnonymousObserver<int>(
+            results.Add,
+            _ => { },
+            () => { }));
+
+        subscription.Dispose();
+        subscription.Dispose();
+
+        await Assert.That(results).IsEmpty();
+    }
+
+    /// <summary>
+    /// Verifies that outer OnCompleted does not terminate the subscription.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task OuterCompleted_InnerStillEmits()
+    {
+        var outerSubject = new Subject<IObservable<int>>();
+        var innerSubject = new Subject<int>();
+        var switchObs = new SwitchObservable<int>(outerSubject);
+
+        var results = new List<int>();
+
+        switchObs.Subscribe(new AnonymousObserver<int>(
+            results.Add,
+            _ => { },
+            () => { }));
+
+        outerSubject.OnNext(innerSubject);
+        outerSubject.OnCompleted();
+
+        // Inner should still emit after outer completes
+        innerSubject.OnNext(42);
+
+        await Assert.That(results).Count().IsEqualTo(1);
+        await Assert.That(results[0]).IsEqualTo(42);
+    }
+
+    /// <summary>
+    /// Verifies that outer OnNext after dispose is ignored.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task OuterOnNextAfterDispose_IsIgnored()
+    {
+        var outerSubject = new Subject<IObservable<int>>();
+        var switchObs = new SwitchObservable<int>(outerSubject);
+
+        var results = new List<int>();
+
+        var subscription = switchObs.Subscribe(new AnonymousObserver<int>(
+            results.Add,
+            _ => { },
+            () => { }));
+
+        subscription.Dispose();
+
+        // Emit on outer after disposal - should be ignored
+        outerSubject.OnNext(new Subject<int>());
+
+        await Assert.That(results).IsEmpty();
+    }
+
+    /// <summary>
+    /// Verifies that outer error after dispose is ignored.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task OuterErrorAfterDispose_IsIgnored()
+    {
+        var outerSubject = new Subject<IObservable<int>>();
+        var switchObs = new SwitchObservable<int>(outerSubject);
+
+        Exception? receivedError = null;
+
+        var subscription = switchObs.Subscribe(new AnonymousObserver<int>(
+            _ => { },
+            ex => receivedError = ex,
+            () => { }));
+
+        subscription.Dispose();
+
+        // Error on outer after disposal - should be ignored
+        outerSubject.OnError(new InvalidOperationException("should be ignored"));
+
+        await Assert.That(receivedError).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that inner error after parent dispose is ignored.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task InnerErrorAfterDispose_IsIgnored()
+    {
+        var outerSubject = new Subject<IObservable<int>>();
+        var innerSubject = new Subject<int>();
+        var switchObs = new SwitchObservable<int>(outerSubject);
+
+        Exception? receivedError = null;
+
+        var subscription = switchObs.Subscribe(new AnonymousObserver<int>(
+            _ => { },
+            ex => receivedError = ex,
+            () => { }));
+
+        outerSubject.OnNext(innerSubject);
+        subscription.Dispose();
+
+        // Error on inner after parent disposal - should be ignored
+        innerSubject.OnError(new InvalidOperationException("should be ignored"));
+
+        await Assert.That(receivedError).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that inner OnCompleted does not propagate to the subscriber.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task InnerCompleted_DoesNotPropagateToSubscriber()
+    {
+        var outerSubject = new Subject<IObservable<int>>();
+        var innerSubject = new Subject<int>();
+        var switchObs = new SwitchObservable<int>(outerSubject);
+
+        var completed = false;
+        var results = new List<int>();
+
+        switchObs.Subscribe(new AnonymousObserver<int>(
+            results.Add,
+            _ => { },
+            () => completed = true));
+
+        outerSubject.OnNext(innerSubject);
+        innerSubject.OnNext(1);
+        innerSubject.OnCompleted();
+
+        await Assert.That(completed).IsFalse();
+        await Assert.That(results).Count().IsEqualTo(1);
     }
 
     private sealed class AnonymousObserver<T> : IObserver<T>

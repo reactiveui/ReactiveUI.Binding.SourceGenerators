@@ -84,4 +84,20 @@ public class LongToStringTypeConverterTests
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("0000000042");
     }
+
+    /// <summary>
+    ///     Verifies TryConvert with a string format hint formats correctly.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
+    {
+        var converter = new LongToStringTypeConverter();
+        long value = 255;
+
+        var result = converter.TryConvert(value, "X", out var output);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(output).IsEqualTo("FF");
+    }
 }

@@ -402,4 +402,66 @@ public class CodeGeneratorHelpersTests
 
         await Assert.That(result1).IsNotEqualTo(result2);
     }
+
+    /// <summary>
+    /// Verifies ComputePathSuffix returns the full path when only one slash is present
+    /// (secondLastSlash is less than zero). Covers line 119.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ComputePathSuffix_OneSlash_ReturnsFullPath()
+    {
+        var result = CodeGeneratorHelpers.ComputePathSuffix("folder/MyFile.cs");
+
+        await Assert.That(result).IsEqualTo("folder/MyFile.cs");
+    }
+
+    /// <summary>
+    /// Verifies NormalizeLambdaText strips the "static " prefix from lambda text.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NormalizeLambdaText_StaticPrefix_StripsPrefix()
+    {
+        var result = CodeGeneratorHelpers.NormalizeLambdaText("static x => x.Name");
+
+        await Assert.That(result).IsEqualTo("x => x.Name");
+    }
+
+    /// <summary>
+    /// Verifies NormalizeLambdaText returns the input unchanged when no "static " prefix is present.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NormalizeLambdaText_NoPrefix_ReturnsUnchanged()
+    {
+        var result = CodeGeneratorHelpers.NormalizeLambdaText("x => x.Name");
+
+        await Assert.That(result).IsEqualTo("x => x.Name");
+    }
+
+    /// <summary>
+    /// Verifies NormalizeLambdaText does not strip "static" when it is not followed by a space
+    /// or when the string is too short to contain the prefix.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NormalizeLambdaText_ShortString_ReturnsUnchanged()
+    {
+        var result = CodeGeneratorHelpers.NormalizeLambdaText("stat");
+
+        await Assert.That(result).IsEqualTo("stat");
+    }
+
+    /// <summary>
+    /// Verifies EscapeString handles strings with both quotes and backslashes.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EscapeString_MixedSpecialChars_EscapesAll()
+    {
+        var result = CodeGeneratorHelpers.EscapeString("a\\\"b");
+
+        await Assert.That(result).IsEqualTo("a\\\\\\\"b");
+    }
 }
