@@ -1087,4 +1087,580 @@ public class BindingInvocationAnalyzerTests
         var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
     }
+
+    /// <summary>
+    /// Verifies RXUIBIND003 is NOT reported when a block-body lambda is used,
+    /// because the analyzer only walks expression-body lambdas for private member access.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND003_BlockBodyLambda_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    private string Secret { get; set; } = "";
+
+                    public void Test()
+                    {
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(this, x => { return x.Secret; });
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        await Assert.That(privateDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND006 is NOT reported when a block-body lambda is used,
+    /// because the analyzer only walks expression-body lambdas for unsupported path segments.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_BlockBodyLambda_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string _name = "";
+
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => { return x._name; });
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND006 is reported when a property path contains a method call
+    /// in the middle of a chain (e.g., x =&gt; x.GetValue().Name).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_MethodCallInChain_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class Inner : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                }
+
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public Inner GetValue() => new Inner();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.GetValue().Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND006 is reported when a property path contains an indexer
+    /// in the middle of a chain (e.g., x =&gt; x.Items[0].Name).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_IndexerInChain_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class Inner : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                }
+
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public System.Collections.Generic.List<Inner> Items { get; set; } = new();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Items[0].Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND006 is reported for BindOneWay when source property path
+    /// contains a method call.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_BindOneWay_MethodCallInPath_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string GetName() => "";
+                }
+
+                public class MyView : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string NameText { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindOneWay(vm, view, x => x.GetName(), x => x.NameText);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND006 is reported for BindTwoWay when target property path
+    /// contains a field access.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_BindTwoWay_FieldInTargetPath_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                }
+
+                public class MyView : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string _nameText = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindTwoWay(vm, view, x => x.Name, x => x._nameText);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND003 is reported when accessing a private property in a WhenChanging lambda.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND003_WhenChanging_PrivateProperty_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public event PropertyChangingEventHandler? PropertyChanging;
+                    private string Secret { get; set; } = "";
+
+                    public void Test()
+                    {
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(this, x => x.Secret);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        await Assert.That(privateDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND003 is reported when accessing a private property in a BindOneWay source lambda.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND003_BindOneWay_PrivateProperty_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    private string Secret { get; set; } = "";
+
+                    public MyView View { get; set; } = new();
+
+                    public void Test()
+                    {
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindOneWay(this, View, x => x.Secret, x => x.NameText);
+                    }
+                }
+
+                public class MyView : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string NameText { get; set; } = "";
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        await Assert.That(privateDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND006 is reported for a field access in the middle of a property chain.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_FieldInChain_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class Inner : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                }
+
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public Inner _inner = new();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x._inner.Name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND001 is reported for BindTwoWay with non-inline target lambda.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND001_BindTwoWay_NonInlineLambda_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                }
+
+                public class MyView : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string NameText { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        Expression<Func<MyView, string>> targetExpr = x => x.NameText;
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindTwoWay(vm, view, x => x.Name, targetExpr);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        await Assert.That(nonInlineDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND006 is reported for WhenChanging with a method call in the property path.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_WhenChanging_MethodCallInPath_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public event PropertyChangingEventHandler? PropertyChanging;
+                    public string GetName() => "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm, x => x.GetName());
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND003 with block-body lambda does not fire for BindTwoWay.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND003_BindTwoWay_BlockBodyLambda_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    private string Secret { get; set; } = "";
+
+                    public MyView View { get; set; } = new();
+
+                    public void Test()
+                    {
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindTwoWay(this, View, x => { return x.Secret; }, x => x.NameText);
+                    }
+                }
+
+                public class MyView : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string NameText { get; set; } = "";
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        await Assert.That(privateDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND006 is reported for WhenChanging with a field access in the property path.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_WhenChanging_FieldAccess_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public event PropertyChangingEventHandler? PropertyChanging;
+                    public string _name = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm, x => x._name);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND006 is reported for an indexer access in a BindOneWay source lambda.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_BindOneWay_IndexerInPath_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public System.Collections.Generic.List<string> Items { get; set; } = new();
+                }
+
+                public class MyView : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string NameText { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindOneWay(vm, view, x => x.Items[0], x => x.NameText);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that a parenthesized lambda with block body does not report RXUIBIND003
+    /// for private members.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND003_ParenthesizedBlockBodyLambda_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    private string Secret { get; set; } = "";
+
+                    public void Test()
+                    {
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(this, (MyViewModel x) => { return x.Secret; });
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        await Assert.That(privateDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies that a parenthesized lambda with block body does not report RXUIBIND006
+    /// for unsupported path segments.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_ParenthesizedBlockBodyLambda_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string _name = "";
+
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, (MyViewModel x) => { return x._name; });
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
+    }
 }

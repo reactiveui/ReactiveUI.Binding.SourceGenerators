@@ -293,6 +293,106 @@ public class INPCObservableForPropertyTests
     }
 
     /// <summary>
+    /// Verifies that ObservableForProperty by name handles an invalid property name gracefully
+    /// by catching the Expression.Property exception and using the parameter expression.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObservableForProperty_ByName_InvalidProperty_StillCreatesObservable()
+    {
+        var vm = new TestViewModel();
+
+        var emitted = false;
+        using var sub = vm.ObservableForProperty<TestViewModel, string>("NonExistentProperty")
+            .Subscribe(_ => emitted = true);
+
+        await Assert.That(emitted).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies that ObservableForProperty by name with skipInitial=false emits the initial value.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObservableForProperty_ByName_SkipInitialFalse_EmitsInitialValue()
+    {
+        var vm = new TestViewModel { Name = "Initial" };
+
+        string? receivedValue = null;
+        using var sub = vm.ObservableForProperty<TestViewModel, string>("Name", skipInitial: false)
+            .Subscribe(x => receivedValue = x.Value);
+
+        await Assert.That(receivedValue).IsEqualTo("Initial");
+    }
+
+    /// <summary>
+    /// Verifies that ObservableForProperty by name with isDistinct=false allows duplicate values.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObservableForProperty_ByName_IsDistinctFalse_AllowsDuplicates()
+    {
+        var vm = new TestViewModel();
+
+        var values = new List<string>();
+        using var sub = vm.ObservableForProperty<TestViewModel, string>("Name", isDistinct: false)
+            .Subscribe(x => values.Add(x.Value));
+
+        vm.Name = "Alice";
+        vm.Name = string.Empty;
+        vm.Name = "Alice";
+
+        await Assert.That(values.Count).IsEqualTo(3);
+    }
+
+    /// <summary>
+    /// Verifies that ObservableForProperty by name handles a nullable property returning null
+    /// by returning default in GetCurrentValue.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObservableForProperty_ByName_NullPropertyValue_ReturnsDefault()
+    {
+        var vm = new NullablePropertyViewModel();
+
+        string? receivedValue = null;
+        var received = false;
+        using var sub = vm.ObservableForProperty<NullablePropertyViewModel, string?>("NullableName", skipInitial: false)
+            .Subscribe(x =>
+            {
+                receivedValue = x.Value;
+                received = true;
+            });
+
+        await Assert.That(received).IsTrue();
+        await Assert.That(receivedValue).IsNull();
+    }
+
+    /// <summary>
+    /// A test model with a nullable property for testing null GetCurrentValue path.
+    /// </summary>
+    private sealed class NullablePropertyViewModel : INotifyPropertyChanged
+    {
+        private string? _nullableName;
+
+        /// <inheritdoc/>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Gets or sets the nullable name.
+        /// </summary>
+        public string? NullableName
+        {
+            get => _nullableName;
+            set
+            {
+                _nullableName = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NullableName)));
+            }
+        }
+    }
+
+    /// <summary>
     /// A test model that implements INotifyPropertyChanged but NOT INotifyPropertyChanging.
     /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in typeof() expression.")]

@@ -240,6 +240,39 @@ public class ExpressionRewriterTests
         await Assert.That(ex.Message).Contains("Add");
     }
 
+    /// <summary>
+    ///     Verifies that Convert expression wrapping a member access is unwrapped to the inner member access.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task Rewrite_WithConvertWrappingMemberAccess_UnwrapsToMemberAccess()
+    {
+        var parameter = System.Linq.Expressions.Expression.Parameter(typeof(TestClass), "x");
+        var property = System.Linq.Expressions.Expression.Property(parameter, "Property");
+        var convert = System.Linq.Expressions.Expression.Convert(property, typeof(object));
+
+        var result = Reflection.Rewrite(convert);
+
+        await Assert.That(result.NodeType).IsEqualTo(ExpressionType.MemberAccess);
+        var memberExpr = (MemberExpression)result;
+        await Assert.That(memberExpr.Member.Name).IsEqualTo("Property");
+    }
+
+    /// <summary>
+    ///     Verifies that a static method call (non-special-name) throws NotSupportedException.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task Rewrite_WithStaticMethodCall_ThrowsNotSupportedException()
+    {
+        var methodCall = System.Linq.Expressions.Expression.Call(
+            typeof(int).GetMethod("Parse", new[] { typeof(string) })!,
+            System.Linq.Expressions.Expression.Constant("42"));
+
+        var ex = Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(methodCall));
+        await Assert.That(ex).IsNotNull();
+    }
+
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
     private sealed class TestClass
     {

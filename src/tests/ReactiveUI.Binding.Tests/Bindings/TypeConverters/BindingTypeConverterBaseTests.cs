@@ -231,6 +231,38 @@ public class BindingTypeConverterBaseTests
     }
 
     /// <summary>
+    /// Verifies TryConvertTyped succeeds with null result when TTo is a nullable value type and input is null.
+    /// Exercises the null-input path through a production StringToNullableIntegerTypeConverter.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TryConvertTyped_NullableValueTypeTarget_NullInput_ReturnsNullResult()
+    {
+        var converter = new StringToNullableIntegerTypeConverter();
+
+        var result = converter.TryConvertTyped(null, null, out var output);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(output).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies TryConvertTyped succeeds when TTo is a nullable value type and a valid non-null input is provided.
+    /// Exercises the non-null path through a production StringToNullableIntegerTypeConverter.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TryConvertTyped_NullableValueTypeTarget_ValidInput_ConvertsSuccessfully()
+    {
+        var converter = new StringToNullableIntegerTypeConverter();
+
+        var result = converter.TryConvertTyped("42", null, out var output);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(output).IsEqualTo(42);
+    }
+
+    /// <summary>
     /// A converter from int? to string that rejects null input.
     /// Used to exercise the TryConvert failure path for nullable TFrom with null input.
     /// </summary>
