@@ -1,8 +1,16 @@
-[![NuGet Stats](https://img.shields.io/nuget/v/ReactiveUI.Binding.svg)](https://www.nuget.org/packages/ReactiveUI.Binding)
-[![Build](https://github.com/reactivemarbles/ReactiveUI.Binding.SourceGenerators/actions/workflows/ci-build.yml/badge.svg)](https://github.com/reactivemarbles/ReactiveUI.Binding.SourceGenerators/actions/workflows/ci-build.yml)
+[![NuGet Stats](https://img.shields.io/nuget/v/ReactiveUI.Binding.svg)](https://www.nuget.org/packages/ReactiveUI.Binding) [![Build](https://github.com/reactiveui/ReactiveUI.Binding.SourceGenerators/actions/workflows/ci-build.yml/badge.svg)](https://github.com/reactiveui/ReactiveUI.Binding.SourceGenerators/actions/workflows/ci-build.yml) [![Code Coverage](https://codecov.io/gh/reactiveui/ReactiveUI.Binding.SourceGenerators/branch/main/graph/badge.svg)](https://codecov.io/gh/reactiveui/ReactiveUI.Binding.SourceGenerators) [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 <br>
 <a href="https://www.nuget.org/packages/ReactiveUI.Binding">
     <img src="https://img.shields.io/nuget/dt/ReactiveUI.Binding.svg">
+</a>
+<a href="https://reactiveui.net/slack">
+    <img src="https://img.shields.io/badge/chat-slack-blue.svg">
+</a>
+<a href="https://github.com/reactiveui/ReactiveUI.Binding.SourceGenerators/labels/good%20first%20issue">
+    <img src="https://img.shields.io/badge/first--timers--only-friendly-blue.svg">
+</a>
+<a href="https://github.com/reactiveui/ReactiveUI.Binding.SourceGenerators/stargazers">
+    <img src="https://img.shields.io/github/stars/reactiveui/ReactiveUI.Binding.SourceGenerators.svg?style=social">
 </a>
 
 <img src="images/logo.png" width="200">
@@ -361,7 +369,7 @@ ReactiveUI.Binding.SourceGenerators is developed under an OSI-approved open sour
 
 So here's to you, lovely person who wants to join us -- this is how you can support us:
 
-* [Responding to questions on GitHub Discussions](https://github.com/reactivemarbles/ReactiveUI.Binding.SourceGenerators/discussions)
+* [Responding to questions on GitHub Discussions](https://github.com/reactiveui/ReactiveUI.Binding.SourceGenerators/discussions)
 * [Passing on knowledge and teaching the next generation of developers](http://ericsink.com/entries/dont_use_rxui.html)
 * Submitting documentation updates where you see fit or lacking.
 * Making contributions to the code base.
