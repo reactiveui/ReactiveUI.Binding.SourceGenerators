@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using Microsoft.CodeAnalysis.CSharp;
+
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -463,5 +465,303 @@ public class WhenChangedGeneratorTests
         var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that WhenChanged generates CallerFilePath dispatch when targeting pre-C# 10.
+    /// CompilationSucceeds is omitted because the CallerFilePath stub signature is ambiguous
+    /// with the runtime extension method in this test harness (both assemblies are referenced).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleProperty_INPC_CallerFilePath()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanged/SinglePropertyINPC");
+        var result = await TestHelper.TestPassWithResult(
+            source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp9);
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that a method named "WhenChanged" on a non-ReactiveUI extension class is ignored
+    /// by the generator. Exercises the extension class name mismatch guard in MetadataExtractor
+    /// (lines 419-424 of ExtractInvocationInfo).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ExtensionClassNameMismatch_GeneratesNoDispatch()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                }
+
+                public static class CustomExtensions
+                {
+                    public static string WhenChanged<T>(this T obj, Func<T, string> selector)
+                        => selector(obj);
+                }
+
+                public static class Scenario
+                {
+                    public static void Execute(MyViewModel vm)
+                    {
+                        // This calls CustomExtensions.WhenChanged, NOT ReactiveUIBindingExtensions.WhenChanged
+                        var result = vm.WhenChanged(x => x.Name);
+                    }
+                }
+            }
+            """;
+
+        var result = TestHelper.RunGenerator(source);
+
+        // The generator should not produce any WhenChanged dispatch code
+        // because the method belongs to CustomExtensions, not our extension class.
+        await result.HasNoGeneratorDiagnostics();
+        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+    }
+
+    /// <summary>
+    /// Verifies that an identity lambda (x => x) with no member access produces no dispatch code.
+    /// Exercises the segments.Count == 0 guard in MetadataExtractor.ExtractPropertyPathFromLambda (line 578-581).
+    /// The compilation will have errors because the lambda return type is the object itself, not a property type,
+    /// but the generator should not crash and should produce no diagnostics.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IdentityLambda_GeneratesNoDispatch()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using ReactiveUI.Binding;
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                }
+
+                public static class Scenario
+                {
+                    public static void Execute(MyViewModel vm)
+                    {
+                        // Identity lambda — no member access, just x => x
+                        var obs = vm.WhenChanged(x => x);
+                    }
+                }
+            }
+            """;
+
+        var result = TestHelper.RunGenerator(source);
+
+        // The generator should silently skip the identity lambda and produce no dispatch.
+        await result.HasNoGeneratorDiagnostics();
+        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+    }
+
+    /// <summary>
+    /// Verifies that a block-body lambda (statement body) is skipped by the generator.
+    /// Exercises the body == null guard in MetadataExtractor.ExtractPropertyPathFromLambda (line 543-546)
+    /// when the lambda body is a Block instead of an expression.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BlockBodyLambda_GeneratesNoDispatch()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using ReactiveUI.Binding;
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                }
+
+                public static class Scenario
+                {
+                    public static void Execute(MyViewModel vm)
+                    {
+                        // Block body lambda — has a statement body rather than expression body
+                        var obs = vm.WhenChanged(x => { return x.Name; });
+                    }
+                }
+            }
+            """;
+
+        var result = TestHelper.RunGenerator(source);
+
+        // The generator should silently skip block-body lambdas and produce no dispatch.
+        await result.HasNoGeneratorDiagnostics();
+        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+    }
+
+    /// <summary>
+    /// Verifies that a lambda accessing a field (non-property member) is skipped by the generator.
+    /// Exercises the memberSymbolInfo.Symbol is not IPropertySymbol guard in
+    /// MetadataExtractor.ExtractPropertyPathFromLambda (line 558-561).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FieldAccessLambda_GeneratesNoDispatch()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using ReactiveUI.Binding;
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string _name = "";
+                }
+
+                public static class Scenario
+                {
+                    public static void Execute(MyViewModel vm)
+                    {
+                        // Accessing a public field, not a property
+                        var obs = vm.WhenChanged(x => x._name);
+                    }
+                }
+            }
+            """;
+
+        var result = TestHelper.RunGenerator(source);
+
+        // The generator should silently skip field access lambdas and produce no dispatch.
+        await result.HasNoGeneratorDiagnostics();
+        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+    }
+
+    /// <summary>
+    /// Verifies that a lambda accessing a private property is skipped by the generator.
+    /// Exercises the DeclaredAccessibility check in MetadataExtractor.ExtractPropertyPathFromLambda
+    /// (lines 564-568). The compilation may have errors due to accessing a private member,
+    /// but the generator should silently skip the invocation.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task PrivatePropertyLambda_GeneratesNoDispatch()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using ReactiveUI.Binding;
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    private string SecretName { get; set; } = "";
+
+                    public void DoSomething()
+                    {
+                        // Accessing a private property from within the class
+                        var obs = this.WhenChanged(x => x.SecretName);
+                    }
+                }
+            }
+            """;
+
+        var result = TestHelper.RunGenerator(source);
+
+        // The generator should silently skip private property access and produce no dispatch.
+        await result.HasNoGeneratorDiagnostics();
+        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+    }
+
+    /// <summary>
+    /// Verifies that a lambda accessing a protected property is skipped by the generator.
+    /// Exercises the DeclaredAccessibility check (not Public or Internal) in
+    /// MetadataExtractor.ExtractPropertyPathFromLambda (lines 564-568).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ProtectedPropertyLambda_GeneratesNoDispatch()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using ReactiveUI.Binding;
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    protected string GuardedName { get; set; } = "";
+
+                    public void DoSomething()
+                    {
+                        // Accessing a protected property from within the class
+                        var obs = this.WhenChanged(x => x.GuardedName);
+                    }
+                }
+            }
+            """;
+
+        var result = TestHelper.RunGenerator(source);
+
+        // The generator should silently skip protected property access and produce no dispatch.
+        await result.HasNoGeneratorDiagnostics();
+        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+    }
+
+    /// <summary>
+    /// Verifies that a lambda accessing a method (not a property) on the chain is skipped.
+    /// Exercises the memberSymbolInfo.Symbol is not IPropertySymbol guard in
+    /// MetadataExtractor.ExtractPropertyPathFromLambda (line 558-561) for method invocations.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MethodAccessLambda_GeneratesNoDispatch()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using ReactiveUI.Binding;
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                    public string GetName() => Name;
+                }
+
+                public static class Scenario
+                {
+                    public static void Execute(MyViewModel vm)
+                    {
+                        // Calling a method in the lambda, not accessing a property
+                        var obs = vm.WhenChanged(x => x.GetName());
+                    }
+                }
+            }
+            """;
+
+        var result = TestHelper.RunGenerator(source);
+
+        // The generator should silently skip method invocations in the lambda and produce no dispatch.
+        await result.HasNoGeneratorDiagnostics();
+        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
     }
 }

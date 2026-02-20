@@ -47,9 +47,8 @@ public sealed class NullableDecimalToDecimalTypeConverter : IBindingTypeConverte
 
         if (from is decimal value)
         {
-            return TryConvert(value, conversionHint, out var typedResult)
-                ? (result = typedResult) is not null
-                : (result = default) is null && false;
+            result = value;
+            return true;
         }
 
         result = null;

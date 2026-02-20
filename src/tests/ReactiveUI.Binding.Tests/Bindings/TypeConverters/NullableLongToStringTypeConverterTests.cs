@@ -1,0 +1,117 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
+
+/// <summary>
+///     Tests for the <see cref="NullableLongToStringTypeConverter"/> type converter.
+/// </summary>
+public class NullableLongToStringTypeConverterTests
+{
+    /// <summary>
+    ///     Verifies GetAffinityForObjects Returns2.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task GetAffinityForObjects_Returns2()
+    {
+        var converter = new NullableLongToStringTypeConverter();
+        var affinity = converter.GetAffinityForObjects();
+        await Assert.That(affinity).IsEqualTo(2);
+    }
+
+    /// <summary>
+    ///     Verifies TryConvert LongNullableToString Succeeds.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task TryConvert_LongNullableToString_Succeeds()
+    {
+        var converter = new NullableLongToStringTypeConverter();
+        long? value = 123456789012;
+
+        var result = converter.TryConvert(value, null, out var output);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(output).IsEqualTo("123456789012");
+    }
+
+    /// <summary>
+    ///     Verifies TryConvert MaxValue Succeeds.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task TryConvert_MaxValue_Succeeds()
+    {
+        var converter = new NullableLongToStringTypeConverter();
+        long? value = long.MaxValue;
+
+        var result = converter.TryConvert(value, null, out var output);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(output).IsEqualTo(long.MaxValue.ToString());
+    }
+
+    /// <summary>
+    ///     Verifies TryConvert MinValue Succeeds.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task TryConvert_MinValue_Succeeds()
+    {
+        var converter = new NullableLongToStringTypeConverter();
+        long? value = long.MinValue;
+
+        var result = converter.TryConvert(value, null, out var output);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(output).IsEqualTo(long.MinValue.ToString());
+    }
+
+    /// <summary>
+    ///     Verifies TryConvert NullValue ReturnsTrue.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task TryConvert_NullValue_ReturnsTrue()
+    {
+        var converter = new NullableLongToStringTypeConverter();
+
+        var result = converter.TryConvert(null, null, out var output);
+
+        await Assert.That(result).IsTrue();
+    }
+
+    /// <summary>
+    ///     Verifies TryConvert WithConversionHint FormatsCorrectly.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task TryConvert_WithConversionHint_FormatsCorrectly()
+    {
+        var converter = new NullableLongToStringTypeConverter();
+        long? value = 42;
+
+        var result = converter.TryConvert(value, 10, out var output);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(output).IsEqualTo("0000000042");
+    }
+
+    /// <summary>
+    ///     Verifies TryConvert with a string format hint formats correctly.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
+    {
+        var converter = new NullableLongToStringTypeConverter();
+        long? value = 255;
+
+        var result = converter.TryConvert(value, "X", out var output);
+
+        await Assert.That(result).IsTrue();
+        await Assert.That(output).IsEqualTo("FF");
+    }
+}

@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using Microsoft.CodeAnalysis.CSharp;
+
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -161,6 +163,112 @@ public class WhenChangingGeneratorTests
 
         var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
         await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that WhenChanging generates CallerFilePath dispatch when targeting pre-C# 10.
+    /// CompilationSucceeds is omitted because the CallerFilePath stub signature is ambiguous
+    /// with the runtime extension method in this test harness (both assemblies are referenced).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleProperty_INPC_CallerFilePath()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/SinglePropertyINPC");
+        var result = await TestHelper.TestPassWithResult(
+            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp9);
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenChanging with a 4-level deep property chain (Level1 -> Level2 -> Level3 -> Model.Value).
+    /// Exercises the deep chain loop in GenerateDeepChainObservation with multiple intermediate segments
+    /// using PropertyChangingObservable at each level.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FourLevelDeepChain()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/FourLevelDeepChain");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenChanging with three properties returns a tuple.
+    /// Exercises GenerateShallowObservableVariable with isBeforeChange=true for 3 properties
+    /// combined via CombineLatest.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MultiProperty_ThreeProperties()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyThreeProperties");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenChanging with a mix of deep chain and shallow properties in multi-property observation.
+    /// Tests that Address.City uses Select/Switch deep chain pattern with PropertyChangingObservable
+    /// while Name uses shallow PropertyChangingObservable, both combined via CombineLatest with a selector.
+    /// Exercises GenerateDeepChainVariable with isBeforeChange=true.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MultiProperty_WithDeepChains()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyWithDeepChains");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that WhenChanging generates CallerFilePath dispatch for deep property chains
+    /// when targeting pre-C# 10. Exercises the CallerFilePath dispatch code path for deep chains
+    /// with isBeforeChange=true.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DeepPropertyChain_CallerFilePath()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/DeepPropertyChain");
+        var result = await TestHelper.TestPassWithResult(
+            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp9);
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that WhenChanging generates CallerFilePath dispatch for multi-property observations
+    /// when targeting pre-C# 10. Exercises the CallerFilePath dispatch code path for multi-property
+    /// with isBeforeChange=true.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MultiProperty_TwoProperties_CallerFilePath()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyTwoProperties");
+        var result = await TestHelper.TestPassWithResult(
+            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp9);
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that WhenChanging generates CallerFilePath dispatch for four-level deep chains
+    /// when targeting pre-C# 10. Exercises the CallerFilePath dispatch combined with the deep chain
+    /// loop for multiple intermediate segments using PropertyChangingObservable.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FourLevelDeepChain_CallerFilePath()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenChanging/FourLevelDeepChain");
+        var result = await TestHelper.TestPassWithResult(
+            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp9);
         await result.HasNoGeneratorDiagnostics();
     }
 }

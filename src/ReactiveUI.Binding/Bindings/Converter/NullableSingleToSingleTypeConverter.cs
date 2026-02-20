@@ -47,9 +47,8 @@ public sealed class NullableSingleToSingleTypeConverter : IBindingTypeConverter<
 
         if (from is float value)
         {
-            return TryConvert(value, conversionHint, out var typedResult)
-                ? (result = typedResult) is not null
-                : (result = default) is null && false;
+            result = value;
+            return true;
         }
 
         result = null;

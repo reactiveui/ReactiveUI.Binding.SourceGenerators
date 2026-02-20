@@ -1,0 +1,314 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+using System.ComponentModel;
+using ReactiveUI.Binding.Observables;
+using ReactiveUI.Binding.Tests.TestModels;
+
+namespace ReactiveUI.Binding.Tests.Observables;
+
+/// <summary>
+/// Unit tests for <see cref="PropertyObservable{T}"/>.
+/// </summary>
+public class PropertyObservableTests
+{
+    /// <summary>
+    /// Verifies that Subscribe throws ArgumentNullException when observer is null.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Subscribe_NullObserver_ThrowsArgumentNullException()
+    {
+        var vm = new TestViewModel { Name = "Alice" };
+        var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
+
+        var action = () => observable.Subscribe(null!);
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
+    /// Verifies that constructor throws ArgumentNullException when source is null.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Constructor_NullSource_ThrowsArgumentNullException()
+    {
+        var action = () => new PropertyObservable<string>(null!, "Name", x => "test", false);
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
+    /// Verifies that constructor throws ArgumentNullException when propertyName is null.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Constructor_NullPropertyName_ThrowsArgumentNullException()
+    {
+        var vm = new TestViewModel();
+        var action = () => new PropertyObservable<string>(vm, null!, x => "test", false);
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
+    /// Verifies that constructor throws ArgumentNullException when getter is null.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Constructor_NullGetter_ThrowsArgumentNullException()
+    {
+        var vm = new TestViewModel();
+        var action = () => new PropertyObservable<string>(vm, "Name", null!, false);
+
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
+    /// Verifies that Subscribe emits the current value immediately.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Subscribe_EmitsCurrentValueImmediately()
+    {
+        var vm = new TestViewModel { Name = "Alice" };
+        var results = new List<string>();
+        var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
+
+        observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+
+        await Assert.That(results).Count().IsEqualTo(1);
+        await Assert.That(results[0]).IsEqualTo("Alice");
+    }
+
+    /// <summary>
+    /// Verifies that PropertyChanged event triggers a new value emission.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task PropertyChanged_TriggersEmission()
+    {
+        var vm = new TestViewModel { Name = "Alice" };
+        var results = new List<string>();
+        var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
+
+        observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        vm.Name = "Bob";
+
+        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results[1]).IsEqualTo("Bob");
+    }
+
+    /// <summary>
+    /// Verifies that only matching property name triggers emission.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task PropertyChanged_WrongProperty_DoesNotTriggerEmission()
+    {
+        var vm = new TestViewModel { Name = "Alice", Age = 25 };
+        var results = new List<string>();
+        var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
+
+        observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        vm.Age = 26;
+
+        await Assert.That(results).Count().IsEqualTo(1);
+        await Assert.That(results[0]).IsEqualTo("Alice");
+    }
+
+    /// <summary>
+    /// Verifies that null/empty property name matches all properties.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task PropertyChanged_NullOrEmpty_TriggersEmission()
+    {
+        var vm = new ManualTestViewModel { Name = "Alice" };
+        var results = new List<string>();
+        var observable = new PropertyObservable<string>(vm, "Name", x => ((ManualTestViewModel)x).Name, false);
+
+        observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+
+        vm.RaisePropertyChanged(string.Empty);
+        await Assert.That(results).Count().IsEqualTo(2);
+
+        vm.RaisePropertyChanged(null);
+        await Assert.That(results).Count().IsEqualTo(3);
+    }
+
+    /// <summary>
+    /// Verifies that distinctUntilChanged=true suppresses duplicate values.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task DistinctUntilChanged_True_SuppressesDuplicates()
+    {
+        var vm = new ManualTestViewModel { Name = "Alice" };
+        var results = new List<string>();
+        var observable = new PropertyObservable<string>(vm, "Name", x => ((ManualTestViewModel)x).Name, true);
+
+        observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        vm.Name = "Alice"; // Same value
+        vm.RaisePropertyChanged("Name");
+
+        await Assert.That(results).Count().IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that distinctUntilChanged=false allows duplicate values.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task DistinctUntilChanged_False_AllowsDuplicates()
+    {
+        var vm = new ManualTestViewModel { Name = "Alice" };
+        var results = new List<string>();
+        var observable = new PropertyObservable<string>(vm, "Name", x => ((ManualTestViewModel)x).Name, false);
+
+        observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        vm.Name = "Alice"; // Same value
+        vm.RaisePropertyChanged("Name");
+
+        await Assert.That(results).Count().IsEqualTo(2);
+    }
+
+    /// <summary>
+    /// Verifies that disposal removes the event handler.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Dispose_RemovesEventHandler()
+    {
+        var vm = new TestViewModel { Name = "Alice" };
+        var results = new List<string>();
+        var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
+
+        var subscription = observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        subscription.Dispose();
+
+        vm.Name = "Bob";
+        await Assert.That(results).Count().IsEqualTo(1);
+        await Assert.That(results[0]).IsEqualTo("Alice");
+    }
+
+    /// <summary>
+    /// Verifies that double dispose does not throw.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Dispose_CalledTwice_NoException()
+    {
+        var vm = new TestViewModel { Name = "Alice" };
+        var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
+
+        var subscription = observable.Subscribe(new AnonymousObserver<string>(_ => { }, _ => { }, () => { }));
+        subscription.Dispose();
+        subscription.Dispose();
+
+        await Assert.That(subscription.GetType()).IsNotNull();
+    }
+
+    /// <summary>
+    /// Verifies that a PropertyChanged event fired after dispose does not throw (observer is null path).
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task PropertyChangedAfterDispose_DoesNotThrow()
+    {
+        var vm = new ManualTestViewModel { Name = "Alice" };
+        var results = new List<string>();
+        var observable = new PropertyObservable<string>(vm, "Name", x => ((ManualTestViewModel)x).Name, false);
+
+        var subscription = observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        subscription.Dispose();
+
+        // Fire event after dispose - should be safely ignored
+        vm.RaisePropertyChanged("Name");
+
+        // Only the initial value should have been emitted
+        await Assert.That(results).Count().IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that the observer-is-null branch in OnPropertyChanged is safely handled when
+    /// PropertyChanged fires concurrently with disposal on another thread.
+    /// Covers PropertyObservable line 96 (observer is null race-condition guard).
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task PropertyChanged_ConcurrentDispose_ObserverNullGuardDoesNotThrow()
+    {
+        var vm = new ConcurrentTestViewModel();
+        var observable = new PropertyObservable<string>(vm, "Name", x => ((ConcurrentTestViewModel)x).Name, false);
+        var results = new List<string>();
+
+        var subscription = observable.Subscribe(new AnonymousObserver<string>(
+            results.Add,
+            _ => { },
+            () => { }));
+
+        // Start a background task that rapidly disposes while property changes occur
+        var disposed = false;
+        var disposeTask = Task.Run(() =>
+        {
+            Thread.Sleep(1);
+            subscription.Dispose();
+            disposed = true;
+        });
+
+        // Rapidly raise property changed events
+        for (var i = 0; i < 100 && !disposed; i++)
+        {
+            vm.Name = $"Value{i}";
+            vm.RaisePropertyChanged("Name");
+        }
+
+        await disposeTask;
+
+        // The test succeeds if no exception was thrown during concurrent dispose + property change
+        await Assert.That(results).Count().IsGreaterThanOrEqualTo(1);
+    }
+
+    private sealed class ConcurrentTestViewModel : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public string Name { get; set; } = "Alice";
+
+        public void RaisePropertyChanged(string? propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private sealed class ManualTestViewModel : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public string Name { get; set; } = string.Empty;
+
+        public void RaisePropertyChanged(string? propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private sealed class AnonymousObserver<T> : IObserver<T>
+    {
+        private readonly Action<T> _onNext;
+        private readonly Action<Exception> _onError;
+        private readonly Action _onCompleted;
+
+        public AnonymousObserver(Action<T> onNext, Action<Exception> onError, Action onCompleted)
+        {
+            _onNext = onNext;
+            _onError = onError;
+            _onCompleted = onCompleted;
+        }
+
+        public void OnCompleted() => _onCompleted();
+
+        public void OnError(Exception error) => _onError(error);
+
+        public void OnNext(T value) => _onNext(value);
+    }
+}

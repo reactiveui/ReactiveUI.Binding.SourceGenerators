@@ -70,12 +70,6 @@ public abstract class BindingTypeConverter<TFrom, TTo> : IBindingTypeConverter<T
                 return false;
             }
 
-            if (typedResult is null && default(TTo) is not null)
-            {
-                result = null;
-                return false;
-            }
-
             result = typedResult;
             return true;
         }
@@ -87,12 +81,6 @@ public abstract class BindingTypeConverter<TFrom, TTo> : IBindingTypeConverter<T
         }
 
         if (!TryConvert(castFrom, conversionHint, out typedResult))
-        {
-            result = null;
-            return false;
-        }
-
-        if (typedResult is null && default(TTo) is not null)
         {
             result = null;
             return false;

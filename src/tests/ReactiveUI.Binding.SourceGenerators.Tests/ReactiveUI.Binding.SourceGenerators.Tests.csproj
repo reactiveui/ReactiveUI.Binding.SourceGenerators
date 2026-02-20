@@ -34,4 +34,20 @@
           LinkBase="SharedScenarios" />
   </ItemGroup>
 
+  <!-- Verified snapshot files: don't compile, nest under test classes -->
+  <ItemGroup>
+    <Compile Remove="**/*.verified.cs" />
+    <None Include="**/*.verified.cs" />
+    <None Update="BG.*.verified.cs" DependentUpon="BindGeneratorTests.cs" />
+    <None Update="BOG.*.verified.cs" DependentUpon="BindOneWayGeneratorTests.cs" />
+    <None Update="BTG.*.verified.cs" DependentUpon="BindTwoWayGeneratorTests.cs" />
+    <None Update="OBG.*.verified.cs" DependentUpon="OneWayBindGeneratorTests.cs" />
+    <None Update="WAG.*.verified.cs" DependentUpon="WhenAnyGeneratorTests.cs" />
+    <None Update="WAOG.*.verified.cs" DependentUpon="WhenAnyObservableGeneratorTests.cs" />
+    <None Update="WAVG.*.verified.cs" DependentUpon="WhenAnyValueGeneratorTests.cs" />
+    <None Update="WCG.*.verified.cs" DependentUpon="WhenChangedGeneratorTests.cs" />
+    <None Update="WCnG.*.verified.cs" DependentUpon="WhenChangingGeneratorTests.cs" />
+    <None Update="PDS.*.verified.cs" DependentUpon="PlatformDetectionSnapshotTests.cs" />
+  </ItemGroup>
+
 </Project>

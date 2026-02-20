@@ -140,11 +140,7 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     /// <inheritdoc/>
     IReactiveUIBindingBuilder IReactiveUIBindingBuilder.WithCoreServices()
     {
-        if (WithCoreServices() is not IReactiveUIBindingBuilder result)
-        {
-            throw new InvalidOperationException("WithCoreServices did not return an IReactiveUIBindingBuilder");
-        }
-
+        var result = (IReactiveUIBindingBuilder)WithCoreServices();
         return result;
     }
 
@@ -155,7 +151,9 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     /// <exception cref="InvalidOperationException">Thrown if building the app instance fails.</exception>
     public IReactiveUIBindingInstance BuildApp()
     {
-        if (Build() is not IReactiveUIBindingInstance appInstance || appInstance.Current is null)
+        var appInstance = (IReactiveUIBindingInstance)Build();
+
+        if (appInstance.Current is null)
         {
             throw new InvalidOperationException("Failed to create ReactiveUIBindingInstance instance");
         }

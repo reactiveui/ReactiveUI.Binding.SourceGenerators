@@ -49,9 +49,8 @@ public sealed class NullableDoubleToDoubleTypeConverter : IBindingTypeConverter<
         // Handle double by converting through strongly-typed method
         if (from is double value)
         {
-            return TryConvert(value, conversionHint, out var typedResult)
-                ? (result = typedResult) is not null
-                : (result = default) is null && false;
+            result = value;
+            return true;
         }
 
         result = null;

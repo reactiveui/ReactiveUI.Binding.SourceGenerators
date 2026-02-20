@@ -390,9 +390,9 @@ public class ObservationCodeGeneratorHelperTests
         var result = sb.ToString();
         await Assert.That(result).Contains("__obs0");
         await Assert.That(result).Contains("__obs1");
-        await Assert.That(result).Contains("ObservableExtensions.Select(");
-        await Assert.That(result).Contains("ObservableExtensions.Switch(");
-        await Assert.That(result).Contains("ObservableExtensions.DistinctUntilChanged(");
+        await Assert.That(result).Contains("RxBindingExtensions.Select(");
+        await Assert.That(result).Contains("RxBindingExtensions.Switch(");
+        await Assert.That(result).Contains("RxBindingExtensions.DistinctUntilChanged(");
     }
 
     /// <summary>
@@ -445,8 +445,8 @@ public class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("var __propObs0_s0");
         await Assert.That(result).Contains("var __propObs0_s1");
         await Assert.That(result).Contains("var __propObs0");
-        await Assert.That(result).Contains("ObservableExtensions.Switch(");
-        await Assert.That(result).Contains("ObservableExtensions.DistinctUntilChanged(");
+        await Assert.That(result).Contains("RxBindingExtensions.Switch(");
+        await Assert.That(result).Contains("RxBindingExtensions.DistinctUntilChanged(");
     }
 
     /// <summary>
@@ -510,6 +510,351 @@ public class ObservationCodeGeneratorHelperTests
         var result = sb.ToString();
         await Assert.That(result).Contains("throw new global::System.InvalidOperationException");
         await Assert.That(result).Contains("WhenChanging");
+    }
+
+    /// <summary>
+    /// Verifies GenerateDeepChainVariable with isBeforeChange=true generates PropertyChanging code and no DistinctUntilChanged.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateDeepChainVariable_BeforeChange_GeneratesPropertyChangingCode()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(new[]
+        {
+            ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
+        });
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
+
+        ObservationCodeGenerator.GenerateDeepChainVariable(sb, path, classInfo, isBeforeChange: true, "__propObs0");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyChanging");
+        await Assert.That(result).DoesNotContain("DistinctUntilChanged");
+    }
+
+    /// <summary>
+    /// Verifies GenerateMultiPropertyObservation with a mix of shallow and deep chain paths generates both variable styles.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateMultiPropertyObservation_WithDeepChainPath_GeneratesDeepChainVariables()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
+        {
+            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Name", "global::System.String") }),
+            new EquatableArray<PropertyPathSegment>(new[]
+            {
+                ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
+            }),
+        });
+
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            returnTypeFullName: "global::System.String",
+            hasSelector: true,
+            expressionTexts: new EquatableArray<string>(new[] { "x => x.Name", "x => x.Address.City" }));
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+
+        ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, isBeforeChange: false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("__propObs0");
+        await Assert.That(result).Contains("__propObs1");
+        await Assert.That(result).Contains("RxBindingExtensions.Switch(");
+        await Assert.That(result).Contains("CombineLatest");
+    }
+
+    /// <summary>
+    /// Verifies GenerateMultiPropertyObservation with isBeforeChange=true generates PropertyChanging code.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateMultiPropertyObservation_BeforeChange_GeneratesPropertyChangingCode()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
+        {
+            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Name", "global::System.String") }),
+            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32") }),
+        });
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            returnTypeFullName: "global::System.String",
+            hasSelector: true,
+            isBeforeChange: true,
+            expressionTexts: new EquatableArray<string>(new[] { "x => x.Name", "x => x.Age" }));
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
+
+        ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, isBeforeChange: true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyChanging");
+        await Assert.That(result).Contains("CombineLatest");
+    }
+
+    /// <summary>
+    /// Verifies GenerateMultiPropertyObservation before-change with deep chain generates PropertyChanging variable declarations.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateMultiPropertyObservation_BeforeChange_WithDeepChain_GeneratesPropertyChangingVariables()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
+        {
+            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Name", "global::System.String") }),
+            new EquatableArray<PropertyPathSegment>(new[]
+            {
+                ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
+            }),
+        });
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            returnTypeFullName: "global::System.String",
+            hasSelector: true,
+            isBeforeChange: true,
+            expressionTexts: new EquatableArray<string>(new[] { "x => x.Name", "x => x.Address.City" }));
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
+
+        ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, isBeforeChange: true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyChanging");
+        await Assert.That(result).Contains("__propObs1_s0");
+        await Assert.That(result).Contains("CombineLatest");
+    }
+
+    /// <summary>
+    /// Verifies GenerateObservationMethod with a deep chain and selector generates Switch and Select wrapping.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateObservationMethod_DeepChainWithSelector_GeneratesSwitchPattern()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
+        {
+            new EquatableArray<PropertyPathSegment>(new[]
+            {
+                ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
+            }),
+        });
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            returnTypeFullName: "global::System.Int32",
+            hasSelector: true,
+            expressionTexts: new EquatableArray<string>(new[] { "x => x.Address.City" }));
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+
+        ObservationCodeGenerator.GenerateObservationMethod(sb, inv, classInfo, "DEADBEEF", isBeforeChange: false, "WhenChanged");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("RxBindingExtensions.Switch(");
+        await Assert.That(result).Contains("__WhenChanged_DEADBEEF");
+    }
+
+    /// <summary>
+    /// Verifies GenerateObservationMethod with a single property and selector generates Select wrapping.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateObservationMethod_SinglePropertyWithSelector_GeneratesSelectWrap()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo(
+            returnTypeFullName: "global::System.Int32",
+            hasSelector: true);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+
+        ObservationCodeGenerator.GenerateObservationMethod(sb, inv, classInfo, "CAFEBABE", isBeforeChange: false, "WhenChanged");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("RxBindingExtensions.Select(");
+        await Assert.That(result).Contains("selector");
+    }
+
+    /// <summary>
+    /// Verifies EmitInlineObservation with single property INPC generates PropertyObservable.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitInlineObservation_SingleProperty_INPC_GeneratesPropertyObservable()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(
+            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+
+        ObservationCodeGenerator.EmitInlineObservation(sb, "source", path, "global::System.String", classInfo, "sourceObs");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("var sourceObs");
+        await Assert.That(result).Contains("PropertyObservable");
+    }
+
+    /// <summary>
+    /// Verifies EmitInlineObservation with single property and no INPC generates ReturnObservable.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitInlineObservation_SingleProperty_NoINPC_GeneratesReturnObservable()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(
+            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+        var classInfo = ModelFactory.CreateClassBindingInfo();
+
+        ObservationCodeGenerator.EmitInlineObservation(sb, "source", path, "global::System.String", classInfo, "sourceObs");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("var sourceObs");
+        await Assert.That(result).Contains("ReturnObservable");
+    }
+
+    /// <summary>
+    /// Verifies EmitInlineObservation with deep chain generates Select/Switch pattern.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitInlineObservation_DeepChain_GeneratesSelectSwitchPattern()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(new[]
+        {
+            ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
+        });
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+
+        ObservationCodeGenerator.EmitInlineObservation(sb, "source", path, "global::System.String", classInfo, "sourceObs");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("RxBindingExtensions.Switch(");
+        await Assert.That(result).Contains("RxBindingExtensions.DistinctUntilChanged(");
+        await Assert.That(result).Contains("var sourceObs");
+    }
+
+    /// <summary>
+    /// Verifies Generate with empty invocations returns null.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Generate_EmptyInvocations_ReturnsNull()
+    {
+        var result = ObservationCodeGenerator.Generate(
+            ImmutableArray<InvocationInfo>.Empty,
+            ImmutableArray<ClassBindingInfo>.Empty,
+            supportsCallerArgExpr: true,
+            "WhenChanged");
+
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies Generate with default invocations returns null.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Generate_DefaultInvocations_ReturnsNull()
+    {
+        var result = ObservationCodeGenerator.Generate(
+            default,
+            ImmutableArray<ClassBindingInfo>.Empty,
+            supportsCallerArgExpr: true,
+            "WhenChanged");
+
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies Generate with valid invocations returns non-null source containing method prefix.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Generate_WithInvocations_ReturnsNonNullSource()
+    {
+        var inv = ModelFactory.CreateInvocationInfo();
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+
+        var result = ObservationCodeGenerator.Generate(
+            ImmutableArray.Create(inv),
+            ImmutableArray.Create(classInfo),
+            supportsCallerArgExpr: true,
+            "WhenChanged");
+
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result!).Contains("__WhenChanged_");
+    }
+
+    /// <summary>
+    /// Verifies GenerateConcreteOverload with multiple invocations in a group generates else if branching.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateConcreteOverload_MultipleInvocationsInGroup_GeneratesElseIf()
+    {
+        var sb = new StringBuilder();
+        var inv1 = ModelFactory.CreateInvocationInfo(callerLineNumber: 10, expressionTexts: new EquatableArray<string>(new[] { "x => x.Name" }));
+        var inv2 = ModelFactory.CreateInvocationInfo(callerLineNumber: 20, expressionTexts: new EquatableArray<string>(new[] { "x => x.Age" }));
+        var group = new ObservationCodeGenerator.TypeGroup(inv1, new[] { inv1, inv2 });
+
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanged");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("if (");
+        await Assert.That(result).Contains("else if (");
+    }
+
+    /// <summary>
+    /// Verifies GenerateConcreteOverload with selector generates selector parameter.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateConcreteOverload_WithSelector_GeneratesSelectorParameter()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo(hasSelector: true, returnTypeFullName: "global::System.Int32");
+        var group = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanged");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("Func<");
+        await Assert.That(result).Contains("selector");
+    }
+
+    /// <summary>
+    /// Verifies GenerateConcreteOverload with CallerArgExpr and multi-property generates multiple expression checks with AND.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateConcreteOverload_CallerArgExpr_MultiProperty_GeneratesMultipleExpressionChecks()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
+        {
+            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Name", "global::System.String") }),
+            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32") }),
+        });
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            returnTypeFullName: "(global::System.String, global::System.Int32)",
+            hasSelector: false,
+            expressionTexts: new EquatableArray<string>(new[] { "x => x.Name", "x => x.Age" }));
+        var group = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanged");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("property1Expression");
+        await Assert.That(result).Contains("property2Expression");
+        await Assert.That(result).Contains("&&");
     }
 
     /// <summary>
