@@ -47,9 +47,8 @@ public sealed class NullableIntegerToIntegerTypeConverter : IBindingTypeConverte
 
         if (from is int value)
         {
-            return TryConvert(value, conversionHint, out var typedResult)
-                ? (result = typedResult) is not null
-                : (result = default) is null && false;
+            result = value;
+            return true;
         }
 
         result = null;

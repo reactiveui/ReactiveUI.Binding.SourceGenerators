@@ -42,12 +42,12 @@ public class INPCObservableForProperty : ICreatesObservableForProperty
             if (expression.NodeType == ExpressionType.Index)
             {
                 return obs.Where(x => string.IsNullOrEmpty(x)
-                                      || x?.Equals(propertyName + "[]", StringComparison.InvariantCulture) == true)
+                                      || x!.Equals(propertyName + "[]", StringComparison.InvariantCulture))
                           .Select(_ => new ObservedChange<object, object?>(sender, expression, default));
             }
 
             return obs.Where(x => string.IsNullOrEmpty(x)
-                                  || x?.Equals(propertyName, StringComparison.InvariantCulture) == true)
+                                  || x!.Equals(propertyName, StringComparison.InvariantCulture))
                       .Select(_ => new ObservedChange<object, object?>(sender, expression, default));
         }
         else if (sender is INotifyPropertyChanged after)
@@ -64,12 +64,12 @@ public class INPCObservableForProperty : ICreatesObservableForProperty
             if (expression.NodeType == ExpressionType.Index)
             {
                 return obs.Where(x => string.IsNullOrEmpty(x)
-                                      || x?.Equals(propertyName + "[]", StringComparison.InvariantCulture) == true)
+                                      || x!.Equals(propertyName + "[]", StringComparison.InvariantCulture))
                           .Select(_ => new ObservedChange<object, object?>(sender, expression, default));
             }
 
             return obs.Where(x => string.IsNullOrEmpty(x)
-                                  || x?.Equals(propertyName, StringComparison.InvariantCulture) == true)
+                                  || x!.Equals(propertyName, StringComparison.InvariantCulture))
                       .Select(_ => new ObservedChange<object, object?>(sender, expression, default));
         }
         else

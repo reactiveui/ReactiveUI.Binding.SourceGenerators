@@ -261,4 +261,46 @@ public class BindingTypeConverterDispatchTests
         await Assert.That(success).IsFalse();
         await Assert.That(result).IsNull();
     }
+
+    /// <summary>
+    /// Verifies that TryConvert allows null input when the converter's FromType is a nullable value type.
+    /// Covers BindingTypeConverterDispatch.cs line 45 (Nullable.GetUnderlyingType is NOT null branch).
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task TryConvert_NullInputWithNullableFromType_ProceedsToConvert()
+    {
+        // Converter from int? to string; FromType is typeof(int?) which is a nullable value type
+        var converter = new StubBindingTypeConverter(
+            typeof(int?),
+            typeof(string),
+            (from, hint) => (true, from?.ToString() ?? "null"));
+
+        // Pass null as `from` value. Since FromType (int?) is a nullable value type,
+        // Nullable.GetUnderlyingType returns typeof(int), so the null check allows it through.
+        var success = BindingTypeConverterDispatch.TryConvert(converter, null, typeof(string), null, out var result);
+
+        await Assert.That(success).IsTrue();
+        await Assert.That(result).IsEqualTo("null");
+    }
+
+    /// <summary>
+    /// Verifies that TryConvert with a real NullableIntegerToStringTypeConverter handles null input.
+    /// The converter's FromType is int? (nullable), so null should be allowed through the dispatch.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task TryConvert_NullableIntegerToString_NullInput_Succeeds()
+    {
+        var converter = new NullableIntegerToStringTypeConverter();
+
+        var success = BindingTypeConverterDispatch.TryConvert(converter, null, typeof(string), null, out var result);
+
+        await Assert.That(success).IsTrue();
+
+        // NullableIntegerToStringTypeConverter.TryConvert(null, ...) sets result = null, returns true
+        // Then TryConvertTyped sets result = typedResult which is null
+        // Then the dispatch checks if the result is null for non-nullable TTo - string is ref type, so it's OK
+        await Assert.That(result).IsNull();
+    }
 }

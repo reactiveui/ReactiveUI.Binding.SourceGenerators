@@ -75,6 +75,7 @@ public static class TestHelper
     public static Task TestPass(string source, Type callerType, LanguageVersion? languageVersion = null, [CallerFilePath] string file = "", [CallerMemberName] string memberName = "")
     {
         ArgumentNullException.ThrowIfNull(callerType);
+        ArgumentNullException.ThrowIfNull(memberName);
 
         var result = RunGenerator(source, languageVersion);
 
@@ -91,8 +92,8 @@ public static class TestHelper
 
         VerifySettings settings = new();
         settings.DisableRequireUniquePrefix();
-        settings.UseTypeName(callerType.Name);
-        settings.UseMethodName(memberName);
+        settings.UseTypeName(AbbreviateTypeName(callerType.Name));
+        settings.UseMethodName(AbbreviateMethodName(memberName));
         return Verifier.Verify(result.Driver, settings, file);
     }
 
@@ -109,6 +110,7 @@ public static class TestHelper
     public static async Task<GeneratorTestResult> TestPassWithResult(string source, Type callerType, LanguageVersion? languageVersion = null, [CallerFilePath] string file = "", [CallerMemberName] string memberName = "")
     {
         ArgumentNullException.ThrowIfNull(callerType);
+        ArgumentNullException.ThrowIfNull(memberName);
 
         var result = RunGenerator(source, languageVersion);
 
@@ -125,8 +127,8 @@ public static class TestHelper
 
         VerifySettings settings = new();
         settings.DisableRequireUniquePrefix();
-        settings.UseTypeName(callerType.Name);
-        settings.UseMethodName(memberName);
+        settings.UseTypeName(AbbreviateTypeName(callerType.Name));
+        settings.UseMethodName(AbbreviateMethodName(memberName));
         await Verifier.Verify(result.Driver, settings, file);
 
         return result;
@@ -192,6 +194,58 @@ public static class TestHelper
         var assembly = context.LoadFromStream(ms);
         return (assembly, context);
     }
+
+    /// <summary>
+    /// Abbreviates a test class type name to a short prefix for snapshot file names.
+    /// Keeps snapshot file paths under the Windows MAX_PATH limit (260 chars).
+    /// </summary>
+    /// <param name="typeName">The test class type name.</param>
+    /// <returns>An abbreviated prefix string.</returns>
+    internal static string AbbreviateTypeName(string typeName) => typeName switch
+    {
+        "BindGeneratorTests" => "BG",
+        "BindOneWayGeneratorTests" => "BOG",
+        "BindTwoWayGeneratorTests" => "BTG",
+        "OneWayBindGeneratorTests" => "OBG",
+        "WhenAnyGeneratorTests" => "WAG",
+        "WhenAnyObservableGeneratorTests" => "WAOG",
+        "WhenAnyValueGeneratorTests" => "WAVG",
+        "WhenChangedGeneratorTests" => "WCG",
+        "WhenChangingGeneratorTests" => "WCnG",
+        "PlatformDetectionSnapshotTests" => "PDS",
+        _ => typeName,
+    };
+
+    /// <summary>
+    /// Abbreviates a test method name by replacing common patterns with short tokens.
+    /// Keeps snapshot file paths under the Windows MAX_PATH limit (260 chars).
+    /// </summary>
+    /// <param name="methodName">The test method name.</param>
+    /// <returns>An abbreviated method name string.</returns>
+    internal static string AbbreviateMethodName(string methodName) => methodName
+        .Replace("MultipleSameTypeBindings", "MSTB")
+        .Replace("TwoSameTypeBindings", "2STB")
+        .Replace("MultipleInvocations", "MI")
+        .Replace("MultipleBindings", "MB")
+        .Replace("SingleProperty", "SP")
+        .Replace("MultiProperty", "MP")
+        .Replace("CallerFilePath", "CFP")
+        .Replace("StringToString", "S2S")
+        .Replace("IntToInt", "I2I")
+        .Replace("WithConverters", "WC")
+        .Replace("WithConverter", "WC")
+        .Replace("WithSelector", "WS")
+        .Replace("AndScheduler", "Sched")
+        .Replace("FourLevelDeepChain", "4LDC")
+        .Replace("DeepPropertyChain", "DPC")
+        .Replace("WithDeepChains", "WDC")
+        .Replace("DeepChain", "DC")
+        .Replace("TwoObservables", "2O")
+        .Replace("ThreeProperties", "3P")
+        .Replace("TwoProperties", "2P")
+        .Replace("CombineLatest", "CL")
+        .Replace("GeneratesElseIf", "GEI")
+        .Replace("SameTypeSignature", "STS");
 
     /// <summary>
     /// Recursively walks assembly references from the seed assemblies to collect

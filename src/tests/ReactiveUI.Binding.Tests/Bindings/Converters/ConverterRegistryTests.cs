@@ -319,6 +319,36 @@ public class ConverterRegistryTests
         await Assert.That(all).Contains(converter2);
     }
 
+    /// <summary>
+    /// Verifies that GetAllConverters returns empty on a fresh (never-registered) BindingTypeConverterRegistry.
+    /// Covers the if (snap is null) TRUE branch in BindingTypeConverterRegistry.GetAllConverters().
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task TypeConverterRegistry_Fresh_GetAllConverters_ReturnsEmpty()
+    {
+        var registry = new BindingTypeConverterRegistry();
+
+        var result = registry.GetAllConverters();
+
+        await Assert.That(result.Count()).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies that GetAllConverters returns empty on a fresh (never-registered) BindingFallbackConverterRegistry.
+    /// Covers the if (snap is null) TRUE branch in BindingFallbackConverterRegistry.GetAllConverters().
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task FallbackRegistry_Fresh_GetAllConverters_ReturnsEmpty()
+    {
+        var registry = new BindingFallbackConverterRegistry();
+
+        var result = registry.GetAllConverters();
+
+        await Assert.That(result.Count()).IsEqualTo(0);
+    }
+
     private sealed class TestConverter<TFrom, TTo> : BindingTypeConverter<TFrom, TTo>
     {
         private readonly int _affinity;

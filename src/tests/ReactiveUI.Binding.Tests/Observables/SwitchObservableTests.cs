@@ -343,6 +343,36 @@ public class SwitchObservableTests
         await Assert.That(results).Count().IsEqualTo(1);
     }
 
+    /// <summary>
+    /// Verifies that OnNext on the outer observable after dispose is ignored when the outer
+    /// observable does not respect disposal (ManualObservable pattern). This covers
+    /// SwitchObservable line 59 (_disposed != 0 TRUE branch).
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task OnNext_AfterDispose_ViaManualObservable_IsIgnored()
+    {
+        var manualOuter = new ReactiveUI.Binding.Tests.TestModels.ManualObservable<IObservable<int>>();
+        var switchObs = new SwitchObservable<int>(manualOuter);
+
+        var results = new List<int>();
+
+        var subscription = switchObs.Subscribe(new AnonymousObserver<int>(
+            results.Add,
+            _ => { },
+            () => { }));
+
+        // Dispose the subscription
+        subscription.Dispose();
+
+        // Now call OnNext on the outer observer even after dispose
+        // ManualObservable retains the observer reference regardless of disposal
+        manualOuter.Observer?.OnNext(System.Reactive.Linq.Observable.Return(42));
+
+        // The OnNext should have been ignored due to _disposed != 0
+        await Assert.That(results).IsEmpty();
+    }
+
     private sealed class AnonymousObserver<T> : IObserver<T>
     {
         private readonly Action<T> _onNext;

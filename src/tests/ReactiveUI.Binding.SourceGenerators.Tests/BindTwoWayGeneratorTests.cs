@@ -118,4 +118,43 @@ public class BindTwoWayGeneratorTests
             source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp9);
         await result.HasNoGeneratorDiagnostics();
     }
+
+    /// <summary>
+    /// Verifies BindTwoWay with both conversion functions and a scheduler parameter.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleProperty_WithConvertersAndScheduler()
+    {
+        var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyWithConvertersAndScheduler");
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies BindTwoWay with multiple bindings sharing the same type signature to cover the else-if dispatch branch.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MultipleSameTypeBindings()
+    {
+        var source = SharedSourceReader.ReadScenario("BindTwoWay/MultipleSameTypeBindings");
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that BindTwoWay with multiple same-type bindings generates CallerFilePath dispatch when targeting pre-C# 10.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MultipleSameTypeBindings_CallerFilePath()
+    {
+        var source = SharedSourceReader.ReadScenario("BindTwoWay/MultipleSameTypeBindings");
+        var result = await TestHelper.TestPassWithResult(
+            source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp9);
+        await result.HasNoGeneratorDiagnostics();
+    }
 }

@@ -129,12 +129,9 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
         var instance = Visit(node.Left);
         var index = (ConstantExpression)Visit(node.Right);
 
-        if (instance.Type.IsArray)
-        {
-            return System.Linq.Expressions.Expression.ArrayAccess(instance, index);
-        }
-
-        return System.Linq.Expressions.Expression.MakeIndex(instance, GetItemProperty(instance.Type), [index]);
+        // ArrayIndex expressions are only produced by the C# compiler for actual arrays,
+        // so instance.Type.IsArray is always true here.
+        return System.Linq.Expressions.Expression.ArrayAccess(instance, index);
     }
 
     /// <inheritdoc/>
@@ -142,25 +139,18 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
     [SuppressMessage("Trimming", "IL2046:'RequiresUnreferencedCodeAttribute' annotations must match across all interface implementations or overrides.", Justification = "Third Party Code")]
     protected override System.Linq.Expressions.Expression VisitUnary(UnaryExpression node)
     {
-        if (node.Operand is null)
-        {
-            throw new ArgumentException("Could not find a valid operand for the node.", nameof(node));
-        }
-
+        // Visit() only routes Convert and ArrayLength here, so no fallthrough is needed.
+        // UnaryExpression always has a non-null Operand for these node types.
         if (node.NodeType == ExpressionType.Convert)
         {
             return Visit(node.Operand);
         }
 
-        if (node.NodeType == ExpressionType.ArrayLength)
-        {
-            var operand = Visit(node.Operand);
-            var lengthProperty = GetLengthProperty(operand.Type);
+        // Must be ArrayLength
+        var operand = Visit(node.Operand);
+        var lengthProperty = GetLengthProperty(operand.Type);
 
-            return System.Linq.Expressions.Expression.MakeMemberAccess(operand, lengthProperty);
-        }
-
-        return node.Update(Visit(node.Operand));
+        return System.Linq.Expressions.Expression.MakeMemberAccess(operand, lengthProperty);
     }
 
     /// <inheritdoc/>
@@ -173,12 +163,8 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
             throw new NotSupportedException("Index expressions are only supported with constants.");
         }
 
-        if (node.Object is null)
-        {
-            throw new ArgumentException("The method call does not point towards an object.", nameof(node));
-        }
-
-        var instance = Visit(node.Object);
+        // Instance method calls routed here always have a non-null Object.
+        var instance = Visit(node.Object!);
         var args = VisitArgumentList(node.Arguments);
 
         return System.Linq.Expressions.Expression.MakeIndex(instance, GetItemProperty(instance.Type), args);

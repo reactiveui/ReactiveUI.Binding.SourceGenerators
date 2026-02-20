@@ -259,9 +259,71 @@ public class ExpressionMixinsTests
         await Assert.That(parent!.NodeType).IsEqualTo(ExpressionType.MemberAccess);
     }
 
+    /// <summary>
+    /// Verifies that GetExpressionChain correctly handles an IndexExpression whose Object is not a Parameter
+    /// (nested indexer access like x.Items[0]) by producing an updated IndexExpression with a Parameter node.
+    /// Covers ExpressionMixins.cs line 33 (TRUE path for nested Index with non-Parameter Object).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetExpressionChain_NestedIndexExpression_HandlesNonParameterObject()
+    {
+        // x => x.Items[0] produces a chain: [Items (MemberAccess), Item[0] (Index)]
+        // The IndexExpression's Object is MemberAccess (not Parameter), triggering the nested branch
+        Expression<Func<IndexTestClass, int>> expr = x => x.Items[0];
+        var body = Reflection.Rewrite(expr.Body);
+
+        var chain = body.GetExpressionChain().ToList();
+
+        // Should return 2 expressions: MemberAccess for Items, then Index for [0]
+        await Assert.That(chain.Count).IsEqualTo(2);
+
+        // First expression should be MemberAccess (Items property)
+        await Assert.That(chain[0].NodeType).IsEqualTo(ExpressionType.MemberAccess);
+
+        // Second expression should be Index
+        await Assert.That(chain[1].NodeType).IsEqualTo(ExpressionType.Index);
+    }
+
+    /// <summary>
+    /// Verifies that GetExpressionChain correctly handles an IndexExpression where Object IS a Parameter
+    /// (direct indexer on parameter like x[0]) by adding the IndexExpression directly.
+    /// Covers ExpressionMixins.cs line 33 (FALSE/else path for Index with Parameter Object).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetExpressionChain_DirectIndexOnParameter_AddsIndexDirectly()
+    {
+        // Build an IndexExpression directly on the parameter: param["key"]
+        var param = System.Linq.Expressions.Expression.Parameter(typeof(DirectIndexableClass), "x");
+        var indexer = typeof(DirectIndexableClass).GetProperty("Item")!;
+        var indexExpr = System.Linq.Expressions.Expression.MakeIndex(
+            param,
+            indexer,
+            new[] { System.Linq.Expressions.Expression.Constant("key") });
+
+        var chain = indexExpr.GetExpressionChain().ToList();
+
+        // Should return 1 expression: the Index expression itself
+        await Assert.That(chain.Count).IsEqualTo(1);
+        await Assert.That(chain[0].NodeType).IsEqualTo(ExpressionType.Index);
+    }
+
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
     private sealed class IndexTestClass
     {
         public List<int> Items { get; } = [10, 20, 30];
+    }
+
+    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
+    private sealed class DirectIndexableClass
+    {
+        private readonly Dictionary<string, string> _data = new() { ["key"] = "value" };
+
+        public string this[string key]
+        {
+            get => _data.TryGetValue(key, out var val) ? val : string.Empty;
+            set => _data[key] = value;
+        }
     }
 }

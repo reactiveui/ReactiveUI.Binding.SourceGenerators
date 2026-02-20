@@ -53,4 +53,43 @@ public class WhenAnyGeneratorTests
             source, typeof(WhenAnyGeneratorTests), LanguageVersion.CSharp9);
         await result.HasNoGeneratorDiagnostics();
     }
+
+    /// <summary>
+    /// Verifies WhenAny with a deep property chain (x => x.Child.Name) to cover the deep chain branch.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleProperty_DeepChain()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenAny/DeepPropertyChain");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenAny with multiple properties where one uses a deep chain to cover the multi-property deep chain branch.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MultiProperty_DeepChain()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenAny/MultiPropertyDeepChain");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenAny with multiple invocations sharing the same type signature to cover the else-if dispatch branch.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MultipleInvocations_SameTypeSignature()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenAny/MultipleInvocationsSameType");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
 }

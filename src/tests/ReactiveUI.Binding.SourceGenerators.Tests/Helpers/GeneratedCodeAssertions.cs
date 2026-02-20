@@ -54,6 +54,18 @@ internal static class GeneratedCodeAssertions
     }
 
     /// <summary>
+    /// Asserts that no generated source file with the specified hint name exists.
+    /// </summary>
+    /// <param name="result">The generator test result.</param>
+    /// <param name="hintName">The hint name that should NOT be present.</param>
+    /// <returns>A task representing the asynchronous assertion.</returns>
+    public static async Task DoesNotHaveGeneratedSource(this GeneratorTestResult result, string hintName)
+    {
+        await Assert.That(result.GeneratedSources.ContainsKey(hintName)).IsFalse()
+            .Because($"Expected no generated source '{hintName}' but found it among: [{string.Join(", ", result.GeneratedSources.Keys)}]");
+    }
+
+    /// <summary>
     /// Asserts that the generator produced no diagnostics.
     /// </summary>
     /// <param name="result">The generator test result.</param>

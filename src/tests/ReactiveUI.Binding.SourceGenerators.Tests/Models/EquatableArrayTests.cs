@@ -172,6 +172,35 @@ public class EquatableArrayTests
     }
 
     /// <summary>
+    /// Verifies ComputeHashCode handles null elements in the array by using 0 for their hash code.
+    /// Covers EquatableArray.cs line 156 (array[i]?.GetHashCode() ?? 0 with null element).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ComputeHashCode_NullElements_UsesZeroForNullHashCode()
+    {
+        var arr = new PropertyPathSegment?[] { null!, new PropertyPathSegment("Name", "global::System.String", "global::T"), null! };
+
+        // The hash should incorporate 0 for null elements and the actual hash for non-null
+        int hash = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr!);
+
+        // Verify it's deterministic (not crashing on null)
+        int hash2 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr!);
+        await Assert.That(hash).IsEqualTo(hash2);
+
+        // Verify it differs from an array with all non-null elements
+        var nonNullArr = new[]
+        {
+            new PropertyPathSegment("A", "global::System.String", "global::T"),
+            new PropertyPathSegment("Name", "global::System.String", "global::T"),
+            new PropertyPathSegment("B", "global::System.String", "global::T"),
+        };
+
+        int nonNullHash = EquatableArray<PropertyPathSegment>.ComputeHashCode(nonNullArr);
+        await Assert.That(hash).IsNotEqualTo(nonNullHash);
+    }
+
+    /// <summary>
     /// Verifies operator== returns true for equal arrays.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>

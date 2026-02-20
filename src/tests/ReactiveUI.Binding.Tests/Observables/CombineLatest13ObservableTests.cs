@@ -5,6 +5,7 @@
 using System.Reactive.Subjects;
 
 using ReactiveUI.Binding.Observables;
+using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
@@ -538,6 +539,109 @@ public class CombineLatest13ObservableTests
 
         subscription.Dispose();
         source1.OnError(new InvalidOperationException("should be ignored"));
+        source2.OnError(new InvalidOperationException("should be ignored"));
+        source3.OnError(new InvalidOperationException("should be ignored"));
+        source4.OnError(new InvalidOperationException("should be ignored"));
+        source5.OnError(new InvalidOperationException("should be ignored"));
+        source6.OnError(new InvalidOperationException("should be ignored"));
+        source7.OnError(new InvalidOperationException("should be ignored"));
+        source8.OnError(new InvalidOperationException("should be ignored"));
+        source9.OnError(new InvalidOperationException("should be ignored"));
+        source10.OnError(new InvalidOperationException("should be ignored"));
+        source11.OnError(new InvalidOperationException("should be ignored"));
+        source12.OnError(new InvalidOperationException("should be ignored"));
+        source13.OnError(new InvalidOperationException("should be ignored"));
+
+        await Assert.That(receivedError).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that observer OnError and TryEmit null-conditional branches are covered
+    /// when the subscription has been disposed but the observers are still reachable.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task ErrorAfterDispose_AllObservers_CoverNullPath()
+    {
+        var manual1 = new ManualObservable<int>();
+        var manual2 = new ManualObservable<int>();
+        var manual3 = new ManualObservable<int>();
+        var manual4 = new ManualObservable<int>();
+        var manual5 = new ManualObservable<int>();
+        var manual6 = new ManualObservable<int>();
+        var manual7 = new ManualObservable<int>();
+        var manual8 = new ManualObservable<int>();
+        var manual9 = new ManualObservable<int>();
+        var manual10 = new ManualObservable<int>();
+        var manual11 = new ManualObservable<int>();
+        var manual12 = new ManualObservable<int>();
+        var manual13 = new ManualObservable<int>();
+        var combined = CombineLatestObservable.Create(
+            manual1,
+            manual2,
+            manual3,
+            manual4,
+            manual5,
+            manual6,
+            manual7,
+            manual8,
+            manual9,
+            manual10,
+            manual11,
+            manual12,
+            manual13,
+            (a, b, c, d, e, f, g, h, i, j, k, l, m) => a + b + c + d + e + f + g + h + i + j + k + l + m);
+
+        Exception? receivedError = null;
+        var subscription = combined.Subscribe(new AnonymousObserver<int>(
+            _ => { },
+            ex => receivedError = ex,
+            () => { }));
+
+        // Set all has-value flags so TryEmit reaches _observer?.OnNext
+        manual1.Observer!.OnNext(1);
+        manual2.Observer!.OnNext(2);
+        manual3.Observer!.OnNext(3);
+        manual4.Observer!.OnNext(4);
+        manual5.Observer!.OnNext(5);
+        manual6.Observer!.OnNext(6);
+        manual7.Observer!.OnNext(7);
+        manual8.Observer!.OnNext(8);
+        manual9.Observer!.OnNext(9);
+        manual10.Observer!.OnNext(10);
+        manual11.Observer!.OnNext(11);
+        manual12.Observer!.OnNext(12);
+        manual13.Observer!.OnNext(13);
+
+        subscription.Dispose();
+
+        // These reach the observers because ManualObservable retains references
+        manual1.Observer.OnNext(10);
+        manual2.Observer.OnNext(20);
+        manual3.Observer.OnNext(30);
+        manual4.Observer.OnNext(40);
+        manual5.Observer.OnNext(50);
+        manual6.Observer.OnNext(60);
+        manual7.Observer.OnNext(70);
+        manual8.Observer.OnNext(80);
+        manual9.Observer.OnNext(90);
+        manual10.Observer.OnNext(100);
+        manual11.Observer.OnNext(110);
+        manual12.Observer.OnNext(120);
+        manual13.Observer.OnNext(130);
+        manual1.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual2.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual3.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual4.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual5.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual6.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual7.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual8.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual9.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual10.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual11.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual12.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual13.Observer.OnError(new InvalidOperationException("should be ignored"));
 
         await Assert.That(receivedError).IsNull();
     }

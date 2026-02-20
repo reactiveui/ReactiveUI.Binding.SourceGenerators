@@ -66,4 +66,104 @@ public class WhenAnyObservableGeneratorTests
             source, typeof(WhenAnyObservableGeneratorTests), LanguageVersion.CSharp9);
         await result.HasNoGeneratorDiagnostics();
     }
+
+    /// <summary>
+    /// Verifies WhenAnyObservable with a deep property chain in the Switch pattern (x => x.Child.MyCommand).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SingleObservable_DeepChain()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenAnyObservable/DeepObservableSwitch");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenAnyObservable with deep property chains in a Merge pattern.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TwoObservables_DeepChain_Merge()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenAnyObservable/DeepObservableMerge");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenAnyObservable with deep property chains in a CombineLatest pattern with selector.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TwoObservables_DeepChain_CombineLatest()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenAnyObservable/DeepObservableCombineLatest");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies WhenAnyObservable with multiple invocations sharing the same type signature to cover the else-if dispatch branch.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MultipleInvocations_SameTypeSignature()
+    {
+        var source = SharedSourceReader.ReadScenario("WhenAnyObservable/MultipleInvocationsSameType");
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>
+    /// Verifies that a method named "WhenAnyObservable" on a non-ReactiveUI extension class is ignored
+    /// by the generator. Exercises the extension class name mismatch guard in
+    /// MetadataExtractor.ExtractWhenAnyObservableInvocation (lines 183-188).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ExtensionClassNameMismatch_GeneratesNoDispatch()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public IObservable<string>? Items { get; set; }
+                }
+
+                public static class CustomExtensions
+                {
+                    public static IObservable<T> WhenAnyObservable<TSender, T>(
+                        this TSender sender,
+                        Func<TSender, IObservable<T>?> observable)
+                        => null!;
+                }
+
+                public static class Scenario
+                {
+                    public static void Execute(MyViewModel vm)
+                    {
+                        // This calls CustomExtensions.WhenAnyObservable, NOT our extension class
+                        var obs = vm.WhenAnyObservable(x => x.Items);
+                    }
+                }
+            }
+            """;
+
+        var result = TestHelper.RunGenerator(source);
+
+        // The generator should not produce any WhenAnyObservable dispatch code
+        // because the method belongs to CustomExtensions, not our extension class.
+        await result.HasNoGeneratorDiagnostics();
+        await result.DoesNotHaveGeneratedSource("WhenAnyObservableDispatch.g.cs");
+    }
 }

@@ -1,0 +1,62 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+using System;
+using System.ComponentModel;
+
+using ReactiveUI.Binding;
+
+namespace SharedScenarios.WhenAnyObservable.DeepObservableCombineLatest
+{
+    /// <summary>
+    /// Child model with two observable properties of different types.
+    /// </summary>
+    public class ChildModel : INotifyPropertyChanged
+    {
+        /// <summary>
+        /// The backing field for <see cref="Count"/>.
+        /// </summary>
+        private IObservable<int>? _count;
+
+        /// <summary>
+        /// The backing field for <see cref="Message"/>.
+        /// </summary>
+        private IObservable<string>? _message;
+
+        /// <inheritdoc/>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Gets or sets the count observable.
+        /// </summary>
+        public IObservable<int>? Count
+        {
+            get => _count;
+            set
+            {
+                if (_count != value)
+                {
+                    _count = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the message observable.
+        /// </summary>
+        public IObservable<string>? Message
+        {
+            get => _message;
+            set
+            {
+                if (_message != value)
+                {
+                    _message = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Message)));
+                }
+            }
+        }
+    }
+}

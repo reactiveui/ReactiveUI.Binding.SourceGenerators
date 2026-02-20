@@ -5,6 +5,7 @@
 using System.Reactive.Subjects;
 
 using ReactiveUI.Binding.Observables;
+using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
@@ -144,6 +145,41 @@ public class CombineLatest2ObservableTests
 
         subscription.Dispose();
         source1.OnError(new InvalidOperationException("should be ignored"));
+        source2.OnError(new InvalidOperationException("should be ignored"));
+
+        await Assert.That(receivedError).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that observer OnError and TryEmit null-conditional branches are covered
+    /// when the subscription has been disposed but the observers are still reachable.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task ErrorAfterDispose_AllObservers_CoverNullPath()
+    {
+        var manual1 = new ManualObservable<int>();
+        var manual2 = new ManualObservable<int>();
+        var combined = new CombineLatest2Observable<int, int, int>(
+            manual1, manual2, (a, b) => a + b);
+
+        Exception? receivedError = null;
+        var subscription = combined.Subscribe(new AnonymousObserver<int>(
+            _ => { },
+            ex => receivedError = ex,
+            () => { }));
+
+        // Set all has-value flags so TryEmit reaches _observer?.OnNext
+        manual1.Observer!.OnNext(1);
+        manual2.Observer!.OnNext(2);
+
+        subscription.Dispose();
+
+        // These reach the observers because ManualObservable retains references
+        manual1.Observer.OnNext(10);
+        manual2.Observer.OnNext(20);
+        manual1.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual2.Observer.OnError(new InvalidOperationException("should be ignored"));
 
         await Assert.That(receivedError).IsNull();
     }

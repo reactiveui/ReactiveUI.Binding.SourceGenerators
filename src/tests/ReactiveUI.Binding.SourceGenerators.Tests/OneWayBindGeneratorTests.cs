@@ -92,4 +92,19 @@ public class OneWayBindGeneratorTests
             source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp9);
         await result.HasNoGeneratorDiagnostics();
     }
+
+    /// <summary>
+    /// Verifies OneWayBind with two same-type-signature bindings (string-to-string) generates
+    /// "if" for the first invocation and "else if" for the second invocation in the dispatch method.
+    /// Covers OneWayBindCodeGenerator line 147 (i == 0 ? "if" : "else if" with i > 0).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TwoSameTypeBindings_GeneratesElseIf()
+    {
+        var source = SharedSourceReader.ReadScenario("OneWayBind/TwoSameTypeBindings");
+        var result = await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests));
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+    }
 }

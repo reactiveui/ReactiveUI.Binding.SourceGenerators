@@ -369,6 +369,210 @@ public class INPCObservableForPropertyTests
     }
 
     /// <summary>
+    /// Verifies that indexer property notification emits when PropertyChanging fires with null/empty name.
+    /// Covers INPCObservableForProperty line 44 (string.IsNullOrEmpty TRUE branch for Index + BeforeChanged).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_IndexExpression_BeforeChanged_NullPropertyName_EmitsNotification()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        var param = LinqExpression.Parameter(typeof(IndexableViewModel), "x");
+        var indexer = typeof(IndexableViewModel).GetProperty("Item")!;
+        var indexExpr = LinqExpression.MakeIndex(
+            param,
+            indexer,
+            new[] { LinqExpression.Constant("key") });
+
+        var emitted = false;
+        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item", beforeChanged: true)
+            .Subscribe(_ => emitted = true);
+
+        vm.RaiseAllPropertyChanging();
+
+        await Assert.That(emitted).IsTrue();
+    }
+
+    /// <summary>
+    /// Verifies that indexer property notification does not emit for an unrelated property name
+    /// in the BeforeChanged (PropertyChanging) path.
+    /// Covers INPCObservableForProperty line 44 (both conditions FALSE in the Where filter).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_IndexExpression_BeforeChanged_DifferentName_DoesNotEmit()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        var param = LinqExpression.Parameter(typeof(IndexableViewModel), "x");
+        var indexer = typeof(IndexableViewModel).GetProperty("Item")!;
+        var indexExpr = LinqExpression.MakeIndex(
+            param,
+            indexer,
+            new[] { LinqExpression.Constant("key") });
+
+        var emitted = false;
+        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "SomeOtherProperty", beforeChanged: true)
+            .Subscribe(_ => emitted = true);
+
+        vm["key"] = "value";
+
+        await Assert.That(emitted).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies that non-index property notification emits when PropertyChanging fires with null property name.
+    /// Covers INPCObservableForProperty line 49 (string.IsNullOrEmpty TRUE branch for non-Index + BeforeChanged).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_NonIndex_BeforeChanged_NullPropertyName_EmitsNotification()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        Expression<Func<IndexableViewModel, string>> expr = x => x.SomeProp;
+        var body = Reflection.Rewrite(expr.Body);
+
+        var emitted = false;
+        using var sub = sut.GetNotificationForProperty(vm, body, "SomeProp", beforeChanged: true)
+            .Subscribe(_ => emitted = true);
+
+        vm.RaiseAllPropertyChanging();
+
+        await Assert.That(emitted).IsTrue();
+    }
+
+    /// <summary>
+    /// Verifies that non-index property notification does not emit for different property in the
+    /// PropertyChanging path.
+    /// Covers INPCObservableForProperty line 49 (both conditions FALSE in Where filter).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_NonIndex_BeforeChanged_DifferentProperty_DoesNotEmit()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        Expression<Func<IndexableViewModel, string>> expr = x => x.SomeProp;
+        var body = Reflection.Rewrite(expr.Body);
+
+        var emitted = false;
+        using var sub = sut.GetNotificationForProperty(vm, body, "SomeProp", beforeChanged: true)
+            .Subscribe(_ => emitted = true);
+
+        vm["key"] = "value"; // raises PropertyChanging for "Item[]", not "SomeProp"
+
+        await Assert.That(emitted).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies that indexer property notification emits when PropertyChanged fires with null/empty name.
+    /// Covers INPCObservableForProperty line 66 (string.IsNullOrEmpty TRUE branch for Index + PropertyChanged).
+    /// Already exists but this ensures explicit coverage of the null name path within Index branch.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_IndexExpression_PropertyChanged_NullPropertyName_EmitsNotification_Variant()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        var param = LinqExpression.Parameter(typeof(IndexableViewModel), "x");
+        var indexer = typeof(IndexableViewModel).GetProperty("Item")!;
+        var indexExpr = LinqExpression.MakeIndex(
+            param,
+            indexer,
+            new[] { LinqExpression.Constant("key") });
+
+        var count = 0;
+        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item")
+            .Subscribe(_ => count++);
+
+        // Fire with empty string property name - should trigger
+        vm.RaisePropertyChangedWithName(string.Empty);
+
+        await Assert.That(count).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that non-index property notification emits when PropertyChanged fires with null property name.
+    /// Covers INPCObservableForProperty line 71 (string.IsNullOrEmpty TRUE branch for non-Index + PropertyChanged).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_NonIndex_PropertyChanged_NullPropertyName_EmitsNotification()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        Expression<Func<IndexableViewModel, string>> expr = x => x.SomeProp;
+        var body = Reflection.Rewrite(expr.Body);
+
+        var count = 0;
+        using var sub = sut.GetNotificationForProperty(vm, body, "SomeProp")
+            .Subscribe(_ => count++);
+
+        vm.RaiseAllPropertiesChanged();
+
+        await Assert.That(count).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that PropertyChanged with empty string name matches all property listeners.
+    /// The INPC spec says both null and empty string mean "all properties changed".
+    /// Covers INPCObservableForProperty line 71 (string.IsNullOrEmpty TRUE branch for empty string on non-Index + PropertyChanged).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task PropertyChanged_EmptyPropertyName_MatchesAllProperties()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        Expression<Func<IndexableViewModel, string>> expr = x => x.SomeProp;
+        var body = Reflection.Rewrite(expr.Body);
+
+        var count = 0;
+        using var sub = sut.GetNotificationForProperty(vm, body, "SomeProp")
+            .Subscribe(_ => count++);
+
+        // Fire with empty string property name - should trigger (all properties changed)
+        vm.RaisePropertyChangedWithName(string.Empty);
+
+        await Assert.That(count).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that PropertyChanging with empty string name matches all property listeners.
+    /// The INPC spec says both null and empty string mean "all properties changing".
+    /// Covers INPCObservableForProperty line 49 (string.IsNullOrEmpty TRUE branch for empty string on non-Index + BeforeChanged).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task PropertyChanging_EmptyPropertyName_MatchesAllProperties()
+    {
+        var sut = new INPCObservableForProperty();
+        var vm = new IndexableViewModel();
+
+        Expression<Func<IndexableViewModel, string>> expr = x => x.SomeProp;
+        var body = Reflection.Rewrite(expr.Body);
+
+        var count = 0;
+        using var sub = sut.GetNotificationForProperty(vm, body, "SomeProp", beforeChanged: true)
+            .Subscribe(_ => count++);
+
+        // Fire with empty string property name - should trigger (all properties changing)
+        vm.RaisePropertyChangingWithName(string.Empty);
+
+        await Assert.That(count).IsEqualTo(1);
+    }
+
+    /// <summary>
     /// A test model with a nullable property for testing null GetCurrentValue path.
     /// </summary>
     private sealed class NullablePropertyViewModel : INotifyPropertyChanged
@@ -443,6 +647,11 @@ public class INPCObservableForPropertyTests
         public event PropertyChangingEventHandler? PropertyChanging;
 
         /// <summary>
+        /// Gets or sets a non-indexer property for testing non-Index expression paths.
+        /// </summary>
+        public string SomeProp { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the value associated with the specified key.
         /// </summary>
         /// <param name="key">The key of the value to get or set.</param>
@@ -463,5 +672,25 @@ public class INPCObservableForPropertyTests
         /// </summary>
         public void RaiseAllPropertiesChanged() =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+
+        /// <summary>
+        /// Raises PropertyChanged with a specific property name.
+        /// </summary>
+        /// <param name="propertyName">The property name to raise.</param>
+        public void RaisePropertyChangedWithName(string? propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        /// <summary>
+        /// Raises PropertyChanging with null property name (all properties changing).
+        /// </summary>
+        public void RaiseAllPropertyChanging() =>
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(null));
+
+        /// <summary>
+        /// Raises PropertyChanging with a specific property name.
+        /// </summary>
+        /// <param name="propertyName">The property name to raise.</param>
+        public void RaisePropertyChangingWithName(string? propertyName) =>
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
     }
 }

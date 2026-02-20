@@ -380,6 +380,68 @@ public class ObservableForPropertyTests
         await Assert.That(changes.Count).IsEqualTo(0);
     }
 
+    /// <summary>
+    /// Verifies that ObservableForProperty by name returns default when the property cannot be found via reflection.
+    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 82 (prop is null path in GetCurrentValue).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task StringOverload_PropertyNotFoundViaReflection_ReturnsDefault()
+    {
+        EnsureInitialized();
+
+        // Use an object where we observe a property name that exists in the
+        // interface/expression parameter but does not exist on the runtime type.
+        // ObservableForProperty<TSender, TValue>("NonExistentProperty") -
+        // The factory won't fire since no PropertyChanged event for that name gets raised,
+        // but the skipInitial=false path calls GetCurrentValue which will find prop is null.
+        var fixture = new TestFixture();
+
+        string? receivedValue = null;
+        var received = false;
+        using var sub = fixture.ObservableForProperty<TestFixture, string?>(
+            "NonExistentProperty",
+            skipInitial: false)
+            .Subscribe(x =>
+            {
+                receivedValue = x.Value;
+                received = true;
+            });
+
+        await Assert.That(received).IsTrue();
+        await Assert.That(receivedValue).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that the SubscribeToExpressionChain val cast branch is exercised.
+    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 211 (val is not null and val is not TValue).
+    /// When val is null, the condition evaluates differently.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SubscribeToExpressionChain_NullValue_PassesThroughAsDefault()
+    {
+        EnsureInitialized();
+
+        var fixture = new HostTestFixture
+        {
+            Child = null
+        };
+
+        var values = new List<IObservedChange<HostTestFixture, TestFixture?>>();
+
+        using var sub = fixture.ObservableForProperty(
+            x => x.Child,
+            skipInitial: false,
+            isDistinct: false)
+            .Subscribe(values.Add);
+
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
+
+        // The first value should be null since Child is null
+        await Assert.That(values[0].Value).IsNull();
+    }
+
     internal static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();

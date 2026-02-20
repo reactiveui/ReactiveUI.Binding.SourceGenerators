@@ -232,6 +232,56 @@ public class PropertyObservableTests
         await Assert.That(results).Count().IsEqualTo(1);
     }
 
+    /// <summary>
+    /// Verifies that the observer-is-null branch in OnPropertyChanged is safely handled when
+    /// PropertyChanged fires concurrently with disposal on another thread.
+    /// Covers PropertyObservable line 96 (observer is null race-condition guard).
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task PropertyChanged_ConcurrentDispose_ObserverNullGuardDoesNotThrow()
+    {
+        var vm = new ConcurrentTestViewModel();
+        var observable = new PropertyObservable<string>(vm, "Name", x => ((ConcurrentTestViewModel)x).Name, false);
+        var results = new List<string>();
+
+        var subscription = observable.Subscribe(new AnonymousObserver<string>(
+            results.Add,
+            _ => { },
+            () => { }));
+
+        // Start a background task that rapidly disposes while property changes occur
+        var disposed = false;
+        var disposeTask = Task.Run(() =>
+        {
+            Thread.Sleep(1);
+            subscription.Dispose();
+            disposed = true;
+        });
+
+        // Rapidly raise property changed events
+        for (var i = 0; i < 100 && !disposed; i++)
+        {
+            vm.Name = $"Value{i}";
+            vm.RaisePropertyChanged("Name");
+        }
+
+        await disposeTask;
+
+        // The test succeeds if no exception was thrown during concurrent dispose + property change
+        await Assert.That(results).Count().IsGreaterThanOrEqualTo(1);
+    }
+
+    private sealed class ConcurrentTestViewModel : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public string Name { get; set; } = "Alice";
+
+        public void RaisePropertyChanged(string? propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
     private sealed class ManualTestViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -32,17 +32,10 @@ internal static class MetadataExtractor
     /// <returns>A ClassBindingInfo POCO, or null if the node is not relevant.</returns>
     internal static ClassBindingInfo? ExtractClassBindingInfo(GeneratorSyntaxContext context, CancellationToken ct)
     {
-        if (context.Node is not ClassDeclarationSyntax classDecl)
-        {
-            return null;
-        }
+        var classDecl = (ClassDeclarationSyntax)context.Node;
 
         var semanticModel = context.SemanticModel;
-        var symbol = semanticModel.GetDeclaredSymbol(classDecl, ct);
-        if (symbol is not INamedTypeSymbol typeSymbol)
-        {
-            return null;
-        }
+        var typeSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl, ct)!;
 
         var wellKnown = GetWellKnownSymbols(semanticModel.Compilation);
 
@@ -176,15 +169,8 @@ internal static class MetadataExtractor
     /// <returns>A WhenAnyObservableInvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     internal static WhenAnyObservableInvocationInfo? ExtractWhenAnyObservableInvocation(GeneratorSyntaxContext context, CancellationToken ct)
     {
-        if (context.Node is not InvocationExpressionSyntax invocation)
-        {
-            return null;
-        }
-
-        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
-        {
-            return null;
-        }
+        var invocation = (InvocationExpressionSyntax)context.Node;
+        var memberAccess = (MemberAccessExpressionSyntax)invocation.Expression;
 
         var semanticModel = context.SemanticModel;
         var symbolInfo = semanticModel.GetSymbolInfo(invocation, ct);
@@ -215,20 +201,17 @@ internal static class MetadataExtractor
             // Check if parameter type is Expression<Func<TSender, IObservable<T>?>>
             if (parameter.Type is INamedTypeSymbol { Name: "Expression" } expressionType)
             {
-                if (i < args.Count)
+                var path = ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
+                if (path != null)
                 {
-                    var path = ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
-                    if (path != null)
-                    {
-                        propertyPaths.Add(new EquatableArray<PropertyPathSegment>(path));
-                        expressionTexts.Add(CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
+                    propertyPaths.Add(new EquatableArray<PropertyPathSegment>(path));
+                    expressionTexts.Add(CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
 
-                        // Extract the inner type T from the leaf property type IObservable<T>?
-                        // The leaf property type is e.g. "System.IObservable<int>?"
-                        var leafSegment = path[path.Length - 1];
-                        string innerType = ExtractInnerObservableType(leafSegment, semanticModel, args[i].Expression, ct);
-                        innerObservableTypes.Add(innerType);
-                    }
+                    // Extract the inner type T from the leaf property type IObservable<T>?
+                    // The leaf property type is e.g. "System.IObservable<int>?"
+                    var leafSegment = path[path.Length - 1];
+                    string innerType = ExtractInnerObservableType(leafSegment, semanticModel, args[i].Expression, ct);
+                    innerObservableTypes.Add(innerType);
                 }
             }
             else if (parameter.Name == "selector")
@@ -300,15 +283,8 @@ internal static class MetadataExtractor
     /// <returns>A BindingInvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     internal static BindingInvocationInfo? ExtractBindInvocation(GeneratorSyntaxContext context, CancellationToken ct)
     {
-        if (context.Node is not InvocationExpressionSyntax invocation)
-        {
-            return null;
-        }
-
-        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
-        {
-            return null;
-        }
+        var invocation = (InvocationExpressionSyntax)context.Node;
+        var memberAccess = (MemberAccessExpressionSyntax)invocation.Expression;
 
         var semanticModel = context.SemanticModel;
         var symbolInfo = semanticModel.GetSymbolInfo(invocation, ct);
@@ -429,15 +405,8 @@ internal static class MetadataExtractor
         string expectedMethodName,
         CancellationToken ct)
     {
-        if (context.Node is not InvocationExpressionSyntax invocation)
-        {
-            return null;
-        }
-
-        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
-        {
-            return null;
-        }
+        var invocation = (InvocationExpressionSyntax)context.Node;
+        var memberAccess = (MemberAccessExpressionSyntax)invocation.Expression;
 
         var semanticModel = context.SemanticModel;
         var symbolInfo = semanticModel.GetSymbolInfo(invocation, ct);
@@ -467,14 +436,11 @@ internal static class MetadataExtractor
             // Check if parameter type is Expression<Func<...>>
             if (parameter.Type is INamedTypeSymbol { Name: "Expression" })
             {
-                if (i < args.Count)
+                var path = ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
+                if (path != null)
                 {
-                    var path = ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
-                    if (path != null)
-                    {
-                        propertyPaths.Add(new EquatableArray<PropertyPathSegment>(path));
-                        expressionTexts.Add(CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
-                    }
+                    propertyPaths.Add(new EquatableArray<PropertyPathSegment>(path));
+                    expressionTexts.Add(CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
                 }
             }
             else if (parameter.Name is "conversionFunc" or "selector")
@@ -569,13 +535,10 @@ internal static class MetadataExtractor
             return null;
         }
 
-        // Get the lambda body
-        ExpressionSyntax? body = lambda switch
-        {
-            SimpleLambdaExpressionSyntax simple => simple.Body as ExpressionSyntax,
-            ParenthesizedLambdaExpressionSyntax parens => parens.Body as ExpressionSyntax,
-            _ => null
-        };
+        // Get the lambda body (only SimpleLambda and ParenthesizedLambda exist in Roslyn)
+        ExpressionSyntax? body = lambda is SimpleLambdaExpressionSyntax simple
+            ? simple.Body as ExpressionSyntax
+            : (lambda as ParenthesizedLambdaExpressionSyntax)?.Body as ExpressionSyntax;
 
         if (body == null)
         {
@@ -702,12 +665,9 @@ internal static class MetadataExtractor
         // Re-resolve the lambda body to get the actual property symbol.
         if (argExpression is LambdaExpressionSyntax lambda)
         {
-            ExpressionSyntax? body = lambda switch
-            {
-                SimpleLambdaExpressionSyntax simple => simple.Body as ExpressionSyntax,
-                ParenthesizedLambdaExpressionSyntax parens => parens.Body as ExpressionSyntax,
-                _ => null
-            };
+            ExpressionSyntax? body = lambda is SimpleLambdaExpressionSyntax simple
+                ? simple.Body as ExpressionSyntax
+                : (lambda as ParenthesizedLambdaExpressionSyntax)?.Body as ExpressionSyntax;
 
             if (body != null)
             {

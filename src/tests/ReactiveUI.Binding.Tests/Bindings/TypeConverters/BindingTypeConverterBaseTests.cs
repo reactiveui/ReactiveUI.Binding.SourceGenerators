@@ -263,6 +263,118 @@ public class BindingTypeConverterBaseTests
     }
 
     /// <summary>
+    /// Verifies that NullableByteToByteTypeConverter.TryConvertTyped returns false when passed a wrong-type object.
+    /// Exercises the <c>from is byte value</c> false branch and the final <c>result = null; return false;</c> path.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NullableByteToByteTypeConverter_TryConvertTyped_WrongType_ReturnsFalse()
+    {
+        var converter = new NullableByteToByteTypeConverter();
+
+        var success = converter.TryConvertTyped("not a byte", null, out var result);
+
+        await Assert.That(success).IsFalse();
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that NullableDecimalToDecimalTypeConverter.TryConvertTyped returns false when passed a wrong-type object.
+    /// Exercises the <c>from is decimal value</c> false branch and the final <c>result = null; return false;</c> path.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NullableDecimalToDecimalTypeConverter_TryConvertTyped_WrongType_ReturnsFalse()
+    {
+        var converter = new NullableDecimalToDecimalTypeConverter();
+
+        var success = converter.TryConvertTyped("not a decimal", null, out var result);
+
+        await Assert.That(success).IsFalse();
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that NullableDoubleToDoubleTypeConverter.TryConvertTyped returns false when passed a wrong-type object.
+    /// Exercises the <c>from is double value</c> false branch and the final <c>result = null; return false;</c> path.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NullableDoubleToDoubleTypeConverter_TryConvertTyped_WrongType_ReturnsFalse()
+    {
+        var converter = new NullableDoubleToDoubleTypeConverter();
+
+        var success = converter.TryConvertTyped("not a double", null, out var result);
+
+        await Assert.That(success).IsFalse();
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that NullableIntegerToIntegerTypeConverter.TryConvertTyped returns false when passed a wrong-type object.
+    /// Exercises the <c>from is int value</c> false branch and the final <c>result = null; return false;</c> path.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NullableIntegerToIntegerTypeConverter_TryConvertTyped_WrongType_ReturnsFalse()
+    {
+        var converter = new NullableIntegerToIntegerTypeConverter();
+
+        var success = converter.TryConvertTyped("not an int", null, out var result);
+
+        await Assert.That(success).IsFalse();
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that NullableLongToLongTypeConverter.TryConvertTyped returns false when passed a wrong-type object.
+    /// Exercises the <c>from is long value</c> false branch and the final <c>result = null; return false;</c> path.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NullableLongToLongTypeConverter_TryConvertTyped_WrongType_ReturnsFalse()
+    {
+        var converter = new NullableLongToLongTypeConverter();
+
+        var success = converter.TryConvertTyped("not a long", null, out var result);
+
+        await Assert.That(success).IsFalse();
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that NullableShortToShortTypeConverter.TryConvertTyped returns false when passed a wrong-type object.
+    /// Exercises the <c>from is short value</c> false branch and the final <c>result = null; return false;</c> path.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NullableShortToShortTypeConverter_TryConvertTyped_WrongType_ReturnsFalse()
+    {
+        var converter = new NullableShortToShortTypeConverter();
+
+        var success = converter.TryConvertTyped("not a short", null, out var result);
+
+        await Assert.That(success).IsFalse();
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that NullableSingleToSingleTypeConverter.TryConvertTyped returns false when passed a wrong-type object.
+    /// Exercises the <c>from is float value</c> false branch and the final <c>result = null; return false;</c> path.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NullableSingleToSingleTypeConverter_TryConvertTyped_WrongType_ReturnsFalse()
+    {
+        var converter = new NullableSingleToSingleTypeConverter();
+
+        var success = converter.TryConvertTyped("not a float", null, out var result);
+
+        await Assert.That(success).IsFalse();
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>
     /// A converter from int? to string that rejects null input.
     /// Used to exercise the TryConvert failure path for nullable TFrom with null input.
     /// </summary>
