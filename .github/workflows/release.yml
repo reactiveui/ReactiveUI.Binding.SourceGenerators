@@ -10,6 +10,8 @@ permissions:
 jobs:
   nuget-auth:
     runs-on: ubuntu-latest
+    environment:
+      name: release
     permissions:
       id-token: write
     outputs:
