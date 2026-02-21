@@ -8,7 +8,21 @@ permissions:
   id-token: write
 
 jobs:
+  nuget-auth:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    outputs:
+      api-key: ${{ steps.login.outputs.NUGET_API_KEY }}
+    steps:
+      - name: NuGet login (OIDC trusted publishing)
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
   release:
+    needs: nuget-auth
     uses: reactiveui/actions-common/.github/workflows/workflow-common-release.yml@main
     with:
       solutionFile: ReactiveUI.Binding.SourceGenerators.slnx
@@ -18,4 +32,4 @@ jobs:
       ES_PASSWORD: ${{ secrets.ES_PASSWORD }}
       CREDENTIAL_ID: ${{ secrets.CREDENTIAL_ID }}
       ES_TOTP_SECRET: ${{ secrets.ES_TOTP_SECRET }}
-      NUGET_USER: ${{ secrets.NUGET_USER }}
+      NUGET_API_KEY: ${{ needs.nuget-auth.outputs.api-key }}
