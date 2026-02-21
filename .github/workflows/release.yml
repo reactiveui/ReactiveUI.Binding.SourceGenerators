@@ -1,0 +1,20 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: reactiveui/actions-common/.github/workflows/workflow-common-release.yml@main
+    with:
+      solutionFile: ReactiveUI.Binding.SourceGenerators.slnx
+      installWorkloads: true
+    secrets:
+      ES_USERNAME: ${{ secrets.ES_USERNAME }}
+      ES_PASSWORD: ${{ secrets.ES_PASSWORD }}
+      CREDENTIAL_ID: ${{ secrets.CREDENTIAL_ID }}
+      ES_TOTP_SECRET: ${{ secrets.ES_TOTP_SECRET }}
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
