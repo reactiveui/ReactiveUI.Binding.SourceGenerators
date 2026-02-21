@@ -47,3 +47,9 @@ jobs:
           for pkg in *.nupkg; do
             dotnet nuget push "$pkg" --source https://api.nuget.org/v3/index.json --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}"
           done
+
+  create-release:
+    needs: [release, publish-nuget]
+    uses: reactiveui/actions-common/.github/workflows/workflow-common-create-release.yml@main
+    with:
+      version: ${{ needs.release.outputs.semver2 }}
