@@ -49,7 +49,7 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
 
     <!-- Test App Dependencies-->
-    <PackageVersion Include="ReactiveUI" Version="23.1.0-beta.8" />
+    <PackageVersion Include="ReactiveUI" Version="23.1.8" />
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.6.1" />
   </ItemGroup>
 </Project>
