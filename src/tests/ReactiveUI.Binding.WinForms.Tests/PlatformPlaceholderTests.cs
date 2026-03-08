@@ -2,27 +2,20 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Runtime.InteropServices;
-
-using TUnit.Core;
-using TUnit.Core.Enums;
-
 namespace ReactiveUI.Binding.WinForms.Tests;
 
 /// <summary>
-/// Placeholder test for non-Windows platforms where WinForms tests are excluded.
+/// Placeholder test to ensure the test assembly has at least one runnable test.
 /// </summary>
-[ExcludeOn(OS.Windows)]
 public class PlatformPlaceholderTests
 {
     /// <summary>
-    /// Ensures the test assembly has at least one runnable test on non-Windows platforms.
+    /// Verifies the WinForms test assembly is loaded and discoverable by the test runner.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinFormsTests_SkippedOnNonWindows()
+    public async Task WinFormsTestAssembly_IsDiscoverable()
     {
-        var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        await Assert.That(isWindows).IsFalse();
+        await Assert.That(typeof(PlatformPlaceholderTests).Assembly).IsNotNull();
     }
 }
