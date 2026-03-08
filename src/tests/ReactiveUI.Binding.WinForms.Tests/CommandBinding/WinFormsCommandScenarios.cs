@@ -26,7 +26,7 @@ public static class WinFormsCommandScenarios
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
     public static IDisposable ButtonWithExpressionParam(WinFormsCommandViewModel vm, WinFormsCommandView view)
-        => view.BindCommand(vm, x => x.Save, x => x.SaveButton, vm, x => x.CurrentItem);
+        => view.BindCommand(vm, x => x.Save, x => x.SaveButton, x => x.CurrentItem);
 
     /// <summary>
     /// Binds the Save command to a real WinForms Button with an observable parameter.

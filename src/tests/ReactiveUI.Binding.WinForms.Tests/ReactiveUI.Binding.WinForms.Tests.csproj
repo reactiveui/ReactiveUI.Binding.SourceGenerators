@@ -49,7 +49,6 @@
       </PropertyGroup>
       <ItemGroup>
         <Using Include="System.Windows.Forms" />
-        <Using Include="System.Windows.Input" />
         <ProjectReference Include="..\..\ReactiveUI.Binding.WinForms\ReactiveUI.Binding.WinForms.csproj" />
         <Compile Include="CommandBinding\**\*.cs" />
       </ItemGroup>

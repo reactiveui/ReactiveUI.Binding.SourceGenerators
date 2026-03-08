@@ -192,7 +192,7 @@ public class WinFormsCommandBindingTests
         using var binding = WinFormsCommandScenarios.ButtonCustomEvent(vm, view);
 
         // Raise MouseUp event on the button
-        var mouseArgs = new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0);
+        var mouseArgs = new System.Windows.Forms.MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0);
         view.SaveButton.GetType()
             .GetMethod("OnMouseUp", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
             .Invoke(view.SaveButton, [mouseArgs]);

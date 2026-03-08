@@ -12,7 +12,14 @@ namespace ReactiveUI.Binding.WinForms.Tests.CommandBinding;
 /// </summary>
 public class WinFormsCommandViewModel : INotifyPropertyChanged
 {
+    /// <summary>
+    /// The backing field for <see cref="Save"/>.
+    /// </summary>
     private ICommand? _save;
+
+    /// <summary>
+    /// The backing field for <see cref="CurrentItem"/>.
+    /// </summary>
     private string? _currentItem;
 
     /// <inheritdoc/>
