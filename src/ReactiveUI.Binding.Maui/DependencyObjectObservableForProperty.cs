@@ -92,6 +92,12 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         });
     }
 
+    /// <summary>
+    /// Walks the type hierarchy to find a static property with the given name.
+    /// </summary>
+    /// <param name="typeInfo">The type info to search.</param>
+    /// <param name="propertyName">The property name to find.</param>
+    /// <returns>The property info if found; otherwise, null.</returns>
     [RequiresUnreferencedCode("Uses reflection to walk type hierarchy.")]
     internal static PropertyInfo? ActuallyGetProperty(TypeInfo typeInfo, string propertyName)
     {
@@ -110,6 +116,12 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         return null;
     }
 
+    /// <summary>
+    /// Walks the type hierarchy to find a static field with the given name.
+    /// </summary>
+    /// <param name="typeInfo">The type info to search.</param>
+    /// <param name="propertyName">The field name to find.</param>
+    /// <returns>The field info if found; otherwise, null.</returns>
     [RequiresUnreferencedCode("Uses reflection to walk type hierarchy.")]
     internal static FieldInfo? ActuallyGetField(TypeInfo typeInfo, string propertyName)
     {
@@ -128,6 +140,12 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         return null;
     }
 
+    /// <summary>
+    /// Gets a function that returns the DependencyProperty for the given property name.
+    /// </summary>
+    /// <param name="type">The type to search for the DependencyProperty.</param>
+    /// <param name="propertyName">The property name whose DependencyProperty to find.</param>
+    /// <returns>A function returning the DependencyProperty, or null if not found.</returns>
     [RequiresUnreferencedCode("Uses reflection to find DependencyProperty static fields/properties.")]
     internal static Func<DependencyProperty>? GetDependencyPropertyFetcher(Type type, string propertyName)
     {
