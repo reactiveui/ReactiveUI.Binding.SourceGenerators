@@ -18,9 +18,9 @@ public static class ExpressionMixins
     /// </summary>
     /// <param name="expression">The expression.</param>
     /// <returns>An enumerable of expressions.</returns>
-    public static IEnumerable<System.Linq.Expressions.Expression> GetExpressionChain(this System.Linq.Expressions.Expression expression)
+    public static IEnumerable<Expression> GetExpressionChain(this Expression expression)
     {
-        var expressions = new List<System.Linq.Expressions.Expression>();
+        var expressions = new List<Expression>();
         var node = expression;
 
         while (node is not null && node.NodeType != ExpressionType.Parameter)
@@ -33,7 +33,7 @@ public static class ExpressionMixins
                         if (indexExpression.Object is not null && parent is not null && indexExpression.Object.NodeType != ExpressionType.Parameter)
                         {
                             expressions.Add(
-                                            indexExpression.Update(System.Linq.Expressions.Expression.Parameter(parent.Type), indexExpression.Arguments));
+                                            indexExpression.Update(Expression.Parameter(parent.Type), indexExpression.Arguments));
                         }
                         else
                         {
@@ -49,7 +49,7 @@ public static class ExpressionMixins
                         var parent = memberExpression.GetParent();
                         if (parent is not null && memberExpression.Expression is not null && memberExpression.Expression.NodeType != ExpressionType.Parameter)
                         {
-                            expressions.Add(memberExpression.Update(System.Linq.Expressions.Expression.Parameter(parent.Type)));
+                            expressions.Add(memberExpression.Update(Expression.Parameter(parent.Type)));
                         }
                         else
                         {
@@ -85,7 +85,7 @@ public static class ExpressionMixins
     /// </summary>
     /// <param name="expression">The expression.</param>
     /// <returns>The member info from the expression.</returns>
-    public static MemberInfo? GetMemberInfo(this System.Linq.Expressions.Expression expression)
+    public static MemberInfo? GetMemberInfo(this Expression expression)
     {
         ArgumentExceptionHelper.ThrowIfNull(expression);
 
@@ -112,7 +112,7 @@ public static class ExpressionMixins
     /// </summary>
     /// <param name="expression">The expression.</param>
     /// <returns>The parent expression.</returns>
-    public static System.Linq.Expressions.Expression? GetParent(this System.Linq.Expressions.Expression expression)
+    public static Expression? GetParent(this Expression expression)
     {
         ArgumentExceptionHelper.ThrowIfNull(expression);
 
@@ -130,7 +130,7 @@ public static class ExpressionMixins
     /// </summary>
     /// <param name="expression">The expression.</param>
     /// <returns>An array of arguments.</returns>
-    public static object?[]? GetArgumentsArray(this System.Linq.Expressions.Expression expression)
+    public static object?[]? GetArgumentsArray(this Expression expression)
     {
         ArgumentExceptionHelper.ThrowIfNull(expression);
 

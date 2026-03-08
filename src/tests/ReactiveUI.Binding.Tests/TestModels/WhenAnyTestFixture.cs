@@ -12,17 +12,40 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class WhenAnyTestFixture : INotifyPropertyChanged
 {
+    /// <summary>The backing field for <see cref="Value1"/>.</summary>
     private string _value1 = string.Empty;
+
+    /// <summary>The backing field for <see cref="Value2"/>.</summary>
     private string _value2 = string.Empty;
+
+    /// <summary>The backing field for <see cref="Value3"/>.</summary>
     private string _value3 = string.Empty;
+
+    /// <summary>The backing field for <see cref="Value4"/>.</summary>
     private string _value4 = string.Empty;
+
+    /// <summary>The backing field for <see cref="Value5"/>.</summary>
     private string _value5 = string.Empty;
+
+    /// <summary>The backing field for <see cref="Value6"/>.</summary>
     private string _value6 = string.Empty;
+
+    /// <summary>The backing field for <see cref="Value7"/>.</summary>
     private string _value7 = string.Empty;
+
+    /// <summary>The backing field for <see cref="Value8"/>.</summary>
     private string _value8 = string.Empty;
+
+    /// <summary>The backing field for <see cref="Value9"/>.</summary>
     private string _value9 = string.Empty;
+
+    /// <summary>The backing field for <see cref="Value10"/>.</summary>
     private string _value10 = string.Empty;
+
+    /// <summary>The backing field for <see cref="Value11"/>.</summary>
     private string _value11 = string.Empty;
+
+    /// <summary>The backing field for <see cref="Value12"/>.</summary>
     private string _value12 = string.Empty;
 
     /// <inheritdoc/>

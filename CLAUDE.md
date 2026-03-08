@@ -93,10 +93,26 @@ The `--treenode-filter` follows the pattern: `/{AssemblyName}/{Namespace}/{Class
 - Generator tests use **Verify.SourceGenerators** for snapshot testing
 - Snapshots stored as `*.verified.cs` files alongside test classes
 - To accept new/changed snapshots:
-  1. Enable `VerifierSettings.AutoVerify()` in `ModuleInitializer.cs`
+  1. Enable `VerifierSettings.AutoVerify()` in `AssemblySetup.cs`
   2. Run tests to accept all snapshots
   3. Disable `VerifierSettings.AutoVerify()` after accepting
   4. Re-run tests to confirm they pass without AutoVerify
+
+### Generator Test Language Versions (Critical)
+
+Generator tests use a **two-tier language version** strategy to verify generated output compiles under C# 7.3 (the minimum supported version for consumer projects):
+
+- **Default: C# 7.3** — `TestHelper.CreateCompilation()` and `RunGenerator()` default to `LanguageVersion.CSharp7_3`. This ensures generated output contains no C# 8+ syntax (no nullable reference type annotations, no `static` lambdas, no `#nullable enable`).
+- **CallerArgumentExpression tests: explicit C# 10** — Tests that verify `CallerArgumentExpression`-based dispatch (the primary dispatch mechanism for C# 10+ projects) must pass `LanguageVersion.CSharp10` explicitly. These are the majority of snapshot tests.
+- **CallerFilePath fallback tests: explicit C# 7.3** — Tests that verify `CallerFilePath + CallerLineNumber` dispatch (the fallback for pre-C# 10 projects) pass `LanguageVersion.CSharp7_3` explicitly to document intent, even though it matches the default.
+- **Edge case tests** (`RunGenerator` without snapshot verification) — These use the C# 7.3 default. They verify the generator doesn't crash on invalid lambdas and produces no dispatch code. They don't call `CompilationSucceeds()` since their test source may contain C# 8+ features that are only diagnostically invalid under C# 7.3.
+- **Runtime execution tests** — These use `LanguageVersion.CSharp10` because their inline source uses C# 8+ features and they call `CompilationSucceeds()`.
+
+**When adding new generator tests:**
+1. If the test verifies CallerArgumentExpression dispatch → pass `LanguageVersion.CSharp10`
+2. If the test verifies CallerFilePath fallback dispatch → pass `LanguageVersion.CSharp7_3`
+3. If the test verifies the generator skips invalid input → use the default (no parameter)
+4. If the test compiles and loads the generated assembly → pass `LanguageVersion.CSharp10`
 
 ### Code Coverage
 
@@ -296,7 +312,8 @@ There are **two distinct C# language contexts** in this project:
   - Raw string literals (C# 11)
   - File-scoped namespaces (C# 10)
   - `init` setters (C# 9)
-- Generated output CAN use `#nullable enable` and `object?` (pragma-based, works in any C# version)
+- Generated output must NOT use `#nullable enable` or nullable reference type annotations (`T?` where T is a reference type) — these are C# 8+ features
+- `static` lambdas are C# 9 — do not use in generated output
 
 ### Analyzer Separation (Roslyn Best Practice)
 
@@ -339,10 +356,10 @@ The analyzer project links shared files from the generator project:
 
 ### Accepting Snapshot Changes
 
-1. Enable `VerifierSettings.AutoVerify()` in `ModuleInitializer.cs`
+1. Enable `VerifierSettings.AutoVerify()` in `AssemblySetup.cs`
 2. Run tests: `dotnet test --project tests/ReactiveUI.Binding.SourceGenerators.Tests/... -c Release`
-3. Remove `VerifierSettings.AutoVerify()` from `ModuleInitializer.cs`
-4. Re-run tests to confirm they pass
+3. Disable `VerifierSettings.AutoVerify()` in `AssemblySetup.cs`
+4. Re-run tests to confirm they pass without AutoVerify
 
 ## What to Avoid
 

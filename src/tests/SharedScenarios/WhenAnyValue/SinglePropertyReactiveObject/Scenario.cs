@@ -5,7 +5,6 @@
 using System;
 
 using ReactiveUI;
-using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenAnyValue.SinglePropertyReactiveObject
 {

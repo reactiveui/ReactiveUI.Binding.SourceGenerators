@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Reactive.Linq;
-
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.Fallback;
 using ReactiveUI.Binding.Mixins;
@@ -159,6 +157,9 @@ public class RuntimeObservationFallbackTests
         await Assert.That(values[^1].Value1).IsEqualTo("Bob");
     }
 
+    /// <summary>
+    /// Resets and initializes the ReactiveUI binding infrastructure for testing.
+    /// </summary>
     internal static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();

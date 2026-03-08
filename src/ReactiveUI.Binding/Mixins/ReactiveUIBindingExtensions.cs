@@ -2,10 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-
 namespace ReactiveUI.Binding;
 
 /// <summary>
@@ -18,6 +14,10 @@ namespace ReactiveUI.Binding;
 [ExcludeFromCodeCoverage]
 public static partial class ReactiveUIBindingExtensions
 {
+    /// <summary>
+    /// The error message used when no generated binding is found for a call site,
+    /// indicating that the expression must be an inline lambda for compile-time optimization.
+    /// </summary>
     private const string NoGeneratedBindingMessage =
         "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.";
 }

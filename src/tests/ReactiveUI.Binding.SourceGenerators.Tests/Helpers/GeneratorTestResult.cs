@@ -32,12 +32,14 @@ public sealed class GeneratorTestResult
         GeneratorDiagnostics = generatorDiagnostics;
 
         var compilationDiagnostics = outputCompilation.GetDiagnostics();
-        CompilationErrors = compilationDiagnostics
-            .Where(d => d.Severity == DiagnosticSeverity.Error)
-            .ToImmutableArray();
-        CompilationWarnings = compilationDiagnostics
-            .Where(d => d.Severity == DiagnosticSeverity.Warning)
-            .ToImmutableArray();
+        CompilationErrors = [
+            ..compilationDiagnostics
+                .Where(d => d.Severity == DiagnosticSeverity.Error)
+        ];
+        CompilationWarnings = [
+            ..compilationDiagnostics
+                .Where(d => d.Severity == DiagnosticSeverity.Warning)
+        ];
 
         var generatedSources = new Dictionary<string, string>();
         var runResult = driver.GetRunResult();

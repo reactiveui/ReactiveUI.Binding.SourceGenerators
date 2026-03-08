@@ -12,8 +12,19 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class TestViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
+    /// <summary>
+    /// The backer for Name.
+    /// </summary>
     private string _name = string.Empty;
+
+    /// <summary>
+    /// The backer for Age.
+    /// </summary>
     private int _age;
+
+    /// <summary>
+    /// The backer for Address.
+    /// </summary>
     private TestAddress? _address;
 
     /// <inheritdoc/>

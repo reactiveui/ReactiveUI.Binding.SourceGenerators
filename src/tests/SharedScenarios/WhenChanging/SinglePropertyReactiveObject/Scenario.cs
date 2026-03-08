@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
-
-using ReactiveUI;
 using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenChanging.SinglePropertyReactiveObject

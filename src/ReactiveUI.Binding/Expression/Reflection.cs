@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 
@@ -13,6 +12,9 @@ namespace ReactiveUI.Binding.Expressions;
 /// </summary>
 public static class Reflection
 {
+    /// <summary>
+    /// Singleton instance of the <see cref="ExpressionRewriter"/> used for rewriting expression trees.
+    /// </summary>
     private static readonly ExpressionRewriter ExpressionRewriterInstance = new();
 
     /// <summary>
@@ -20,14 +22,14 @@ public static class Reflection
     /// </summary>
     /// <param name="expression">The expression to rewrite.</param>
     /// <returns>The rewritten expression.</returns>
-    public static System.Linq.Expressions.Expression Rewrite(System.Linq.Expressions.Expression? expression) => ExpressionRewriterInstance.Visit(expression);
+    public static Expression Rewrite(Expression? expression) => ExpressionRewriterInstance.Visit(expression);
 
     /// <summary>
     /// Converts an expression that points to a property chain into a dotted path string.
     /// </summary>
     /// <param name="expression">The expression to generate the property names from.</param>
     /// <returns>A string representation for the property chain the expression points to.</returns>
-    public static string ExpressionToPropertyNames(System.Linq.Expressions.Expression? expression)
+    public static string ExpressionToPropertyNames(Expression? expression)
     {
         ArgumentExceptionHelper.ThrowIfNull(expression);
 
@@ -47,8 +49,7 @@ public static class Reflection
             }
 
             if (exp.NodeType == ExpressionType.Index &&
-                exp is IndexExpression indexExpression &&
-                indexExpression.Indexer is not null)
+                exp is IndexExpression { Indexer: not null } indexExpression)
             {
                 sb.Append(indexExpression.Indexer.Name).Append('[');
 
@@ -161,7 +162,7 @@ public static class Reflection
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
     /// <returns>True if the value was successfully retrieved; otherwise false.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
-    public static bool TryGetValueForPropertyChain<TValue>(out TValue changeValue, object? current, IEnumerable<System.Linq.Expressions.Expression> expressionChain)
+    public static bool TryGetValueForPropertyChain<TValue>(out TValue changeValue, object? current, IEnumerable<Expression> expressionChain)
     {
         var expressions = MaterializeExpressions(expressionChain);
         var count = expressions.Length;
@@ -202,7 +203,7 @@ public static class Reflection
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
     /// <returns>True if all values were successfully retrieved; otherwise false.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
-    public static bool TryGetAllValuesForPropertyChain(out IObservedChange<object, object?>[] changeValues, object? current, IEnumerable<System.Linq.Expressions.Expression> expressionChain)
+    public static bool TryGetAllValuesForPropertyChain(out IObservedChange<object, object?>[] changeValues, object? current, IEnumerable<Expression> expressionChain)
     {
         var expressions = MaterializeExpressions(expressionChain);
         var count = expressions.Length;
@@ -255,7 +256,7 @@ public static class Reflection
     /// <param name="shouldThrow">If true, throw when reflection members are missing.</param>
     /// <returns>True if the value was successfully set; otherwise false.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
-    public static bool TrySetValueToPropertyChain<TValue>(object? target, IEnumerable<System.Linq.Expressions.Expression> expressionChain, TValue value, bool shouldThrow = true)
+    public static bool TrySetValueToPropertyChain<TValue>(object? target, IEnumerable<Expression> expressionChain, TValue value, bool shouldThrow = true)
     {
         var expressions = MaterializeExpressions(expressionChain);
         var count = expressions.Length;
@@ -275,7 +276,8 @@ public static class Reflection
 
             if (getter is not null)
             {
-                target = getter(target ?? throw new ArgumentNullException(nameof(target)), expression.GetArgumentsArray());
+                ArgumentExceptionHelper.ThrowIfNull(target);
+                target = getter(target, expression.GetArgumentsArray());
             }
         }
 
@@ -290,37 +292,60 @@ public static class Reflection
             ? GetValueSetterOrThrow(lastExpression.GetMemberInfo())
             : GetValueSetterForProperty(lastExpression.GetMemberInfo());
 
-        if (setter is null)
-        {
-            return false;
-        }
-
-        setter(target, value, lastExpression.GetArgumentsArray());
-        return true;
+        return TryInvokeSetter(setter, target, value, lastExpression.GetArgumentsArray());
     }
 
+    /// <summary>
+    /// Materializes an expression chain into an array for indexed access, reusing the backing array when possible.
+    /// </summary>
+    /// <param name="expressionChain">The expression chain to materialize.</param>
+    /// <returns>An array of expressions representing the chain.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static System.Linq.Expressions.Expression[] MaterializeExpressions(IEnumerable<System.Linq.Expressions.Expression> expressionChain)
+    internal static Expression[] MaterializeExpressions(IEnumerable<Expression> expressionChain)
     {
         ArgumentExceptionHelper.ThrowIfNull(expressionChain);
 
-        if (expressionChain is System.Linq.Expressions.Expression[] arr)
+        if (expressionChain is Expression[] arr)
         {
             return arr;
         }
 
-        if (expressionChain is ICollection<System.Linq.Expressions.Expression> coll)
+        if (expressionChain is ICollection<Expression> coll)
         {
             if (coll.Count == 0)
             {
-                return Array.Empty<System.Linq.Expressions.Expression>();
+                return [];
             }
 
-            var result = new System.Linq.Expressions.Expression[coll.Count];
+            var result = new Expression[coll.Count];
             coll.CopyTo(result, 0);
             return result;
         }
 
         return expressionChain.ToArray();
+    }
+
+    /// <summary>
+    /// Invokes the setter if it is not null. Returns false when the setter is null,
+    /// which occurs when <see cref="GetValueSetterForProperty"/> receives a <see cref="System.Reflection.MemberInfo"/>
+    /// that is neither a <see cref="System.Reflection.FieldInfo"/> nor a <see cref="System.Reflection.PropertyInfo"/>.
+    /// This is a defensive guard for synthetic expression chains; standard lambda-derived chains
+    /// always produce PropertyInfo or FieldInfo members.
+    /// </summary>
+    /// <param name="setter">The setter delegate, or null.</param>
+    /// <param name="target">The target object.</param>
+    /// <param name="value">The value to set.</param>
+    /// <param name="arguments">The indexer arguments, if any.</param>
+    /// <returns>True if the setter was invoked; false if the setter was null.</returns>
+    [ExcludeFromCodeCoverage]
+    private static bool TryInvokeSetter(Action<object?, object?, object?[]?>? setter, object? target, object? value, object?[]? arguments)
+    {
+        if (setter is null)
+        {
+            return false;
+        }
+
+        setter(target, value, arguments);
+        return true;
     }
 }

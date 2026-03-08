@@ -85,12 +85,23 @@ public class ReactiveSchedulerExtensionsTests
                 (IScheduler?)null));
     }
 
+    /// <summary>
+    /// A simple test model implementing <see cref="INotifyPropertyChanged"/>.
+    /// </summary>
     private class TestModel : INotifyPropertyChanged
     {
+        /// <inheritdoc/>
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
         public string? Name { get; set; }
 
+        /// <summary>
+        /// Raises the <see cref="PropertyChanged"/> event for the specified property.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that changed.</param>
         protected virtual void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

@@ -14,6 +14,9 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// </summary>
 internal static class ModuleInitializer
 {
+    /// <summary>
+    /// Guard flag to ensure initialization runs at most once. Uses <see cref="Interlocked.Exchange(ref int, int)"/>.
+    /// </summary>
     private static int _initialized;
 
     /// <summary>
@@ -38,6 +41,7 @@ internal static class ModuleInitializer
     /// </summary>
     private sealed class BenchmarkModeDetector : IModeDetector
     {
+        /// <inheritdoc/>
         public bool? InUnitTestRunner() => true;
     }
 }

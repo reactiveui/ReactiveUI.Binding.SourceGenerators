@@ -12,17 +12,64 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class WhenAnyTestFixture : INotifyPropertyChanged
 {
+    /// <summary>
+    /// The backer for Value1.
+    /// </summary>
     private string _value1 = string.Empty;
+
+    /// <summary>
+    /// The backer for Value2.
+    /// </summary>
     private string _value2 = string.Empty;
+
+    /// <summary>
+    /// The backer for Value3.
+    /// </summary>
     private string _value3 = string.Empty;
+
+    /// <summary>
+    /// The backer for Value4.
+    /// </summary>
     private string _value4 = string.Empty;
+
+    /// <summary>
+    /// The backer for Value5.
+    /// </summary>
     private string _value5 = string.Empty;
+
+    /// <summary>
+    /// The backer for Value6.
+    /// </summary>
     private string _value6 = string.Empty;
+
+    /// <summary>
+    /// The backer for Value7.
+    /// </summary>
     private string _value7 = string.Empty;
+
+    /// <summary>
+    /// The backer for Value8.
+    /// </summary>
     private string _value8 = string.Empty;
+
+    /// <summary>
+    /// The backer for Value9.
+    /// </summary>
     private string _value9 = string.Empty;
+
+    /// <summary>
+    /// The backer for Value10.
+    /// </summary>
     private string _value10 = string.Empty;
+
+    /// <summary>
+    /// The backer for Value11.
+    /// </summary>
     private string _value11 = string.Empty;
+
+    /// <summary>
+    /// The backer for Value12.
+    /// </summary>
     private string _value12 = string.Empty;
 
     /// <inheritdoc/>

@@ -1,0 +1,386 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+using System.Windows.Input;
+
+using ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
+
+namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
+
+/// <summary>
+/// Tests that the source-generator-generated BindCommand code works correctly at runtime.
+/// </summary>
+public class BindCommandTests
+{
+    /// <summary>
+    /// Verifies that clicking the button executes the bound command (command set before binding).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BasicNoParam_CommandSetBeforeBinding_ExecutesOnClick()
+    {
+        var vm = new SharedScenarios.BindCommand.BasicNoParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.BasicNoParam.MyView();
+        var command = new TrackingCommand();
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.BasicNoParam(vm, view);
+
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that clicking the button executes the bound command (command set after binding).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BasicNoParam_CommandSetAfterBinding_ExecutesOnClick()
+    {
+        var vm = new SharedScenarios.BindCommand.BasicNoParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.BasicNoParam.MyView();
+        var command = new TrackingCommand();
+
+        using var binding = BindCommandScenarios.BasicNoParam(vm, view);
+
+        vm.Save = command;
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that when the command is null, clicking the button does not throw.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BasicNoParam_NullCommand_ClickDoesNotThrow()
+    {
+        var vm = new SharedScenarios.BindCommand.BasicNoParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.BasicNoParam.MyView();
+
+        using var binding = BindCommandScenarios.BasicNoParam(vm, view);
+
+        var action = () => view.SaveButton.PerformClick();
+        await Assert.That(action).ThrowsNothing();
+    }
+
+    /// <summary>
+    /// Verifies that when the command changes, the new command is executed on click.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BasicNoParam_CommandChanges_NewCommandExecutes()
+    {
+        var vm = new SharedScenarios.BindCommand.BasicNoParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.BasicNoParam.MyView();
+        var first = new TrackingCommand();
+        var second = new TrackingCommand();
+
+        vm.Save = first;
+        using var binding = BindCommandScenarios.BasicNoParam(vm, view);
+
+        view.SaveButton.PerformClick();
+        await Assert.That(first.ExecuteCount).IsEqualTo(1);
+
+        vm.Save = second;
+        view.SaveButton.PerformClick();
+
+        await Assert.That(second.ExecuteCount).IsEqualTo(1);
+        await Assert.That(first.ExecuteCount).IsEqualTo(1); // no longer wired
+    }
+
+    /// <summary>
+    /// Verifies that disposing the binding stops command execution on click.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BasicNoParam_Dispose_StopsExecution()
+    {
+        var vm = new SharedScenarios.BindCommand.BasicNoParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.BasicNoParam.MyView();
+        var command = new TrackingCommand();
+        vm.Save = command;
+
+        var binding = BindCommandScenarios.BasicNoParam(vm, view);
+        view.SaveButton.PerformClick();
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+
+        binding.Dispose();
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that when CanExecute returns false, the command is not executed.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BasicNoParam_CanExecuteFalse_CommandNotExecuted()
+    {
+        var vm = new SharedScenarios.BindCommand.BasicNoParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.BasicNoParam.MyView();
+        var command = new TrackingCommand { CanExecuteResult = false };
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.BasicNoParam(vm, view);
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies that the expression parameter is passed to the command on click.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ExpressionParam_PassesParameterToCommand()
+    {
+        var vm = new SharedScenarios.BindCommand.ExpressionParam.MyViewModel
+        {
+            CurrentItem = "TestItem",
+        };
+        var view = new SharedScenarios.BindCommand.ExpressionParam.MyView();
+        var command = new TrackingCommand();
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.ExpressionParam(vm, view);
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+        await Assert.That(command.LastParameter).IsEqualTo("TestItem");
+    }
+
+    /// <summary>
+    /// Verifies that the expression parameter is captured at command-bind time (when Save changes),
+    /// not at click time. This reflects the generated binder path used at runtime.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ExpressionParam_ParameterCapturedAtCommandBindTime()
+    {
+        var vm = new SharedScenarios.BindCommand.ExpressionParam.MyViewModel
+        {
+            CurrentItem = "Initial",
+        };
+        var view = new SharedScenarios.BindCommand.ExpressionParam.MyView();
+        var command = new TrackingCommand();
+
+        // Binding created with no command yet
+        using var binding = BindCommandScenarios.ExpressionParam(vm, view);
+
+        // Change CurrentItem and then set command — parameter captured at this moment
+        vm.CurrentItem = "AtCommandSetTime";
+        vm.Save = command;
+
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.LastParameter).IsEqualTo("AtCommandSetTime");
+    }
+
+    /// <summary>
+    /// Verifies that the observable parameter is passed to the command on click.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObservableParam_PassesParameterToCommand()
+    {
+        var vm = new SharedScenarios.BindCommand.ObservableParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.ObservableParam.MyView();
+        var command = new TrackingCommand();
+        var paramSubject = new System.Reactive.Subjects.BehaviorSubject<string>("observable-param");
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.ObservableParam(vm, view, paramSubject);
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+        await Assert.That(command.LastParameter).IsEqualTo("observable-param");
+    }
+
+    /// <summary>
+    /// Verifies that clicking the button 3 times results in 3 executions.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BasicNoParam_MultipleClicks_ExecutesMultipleTimes()
+    {
+        var vm = new SharedScenarios.BindCommand.BasicNoParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.BasicNoParam.MyView();
+        var command = new TrackingCommand();
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.BasicNoParam(vm, view);
+
+        view.SaveButton.PerformClick();
+        view.SaveButton.PerformClick();
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(3);
+    }
+
+    /// <summary>
+    /// Verifies that setting command then null, then clicking does not throw.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BasicNoParam_CommandSetToNull_ClickDoesNotThrow()
+    {
+        var vm = new SharedScenarios.BindCommand.BasicNoParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.BasicNoParam.MyView();
+        var command = new TrackingCommand();
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.BasicNoParam(vm, view);
+
+        vm.Save = null;
+        var action = () => view.SaveButton.PerformClick();
+        await Assert.That(action).ThrowsNothing();
+        await Assert.That(command.ExecuteCount).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies that pushing a new value to the observable parameter is used on click.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObservableParam_ParameterUpdates_UsesLatestValue()
+    {
+        var vm = new SharedScenarios.BindCommand.ObservableParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.ObservableParam.MyView();
+        var command = new TrackingCommand();
+        var paramSubject = new System.Reactive.Subjects.BehaviorSubject<string>("first");
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.ObservableParam(vm, view, paramSubject);
+
+        paramSubject.OnNext("latest");
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.LastParameter).IsEqualTo("latest");
+    }
+
+    /// <summary>
+    /// Verifies that a custom event fires and the command executes.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CustomEvent_ExecutesOnCustomEvent()
+    {
+        var vm = new SharedScenarios.BindCommand.CustomEvent.MyViewModel();
+        var view = new SharedScenarios.BindCommand.CustomEvent.MyView();
+        var command = new TrackingCommand();
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.CustomEvent(vm, view);
+
+        view.SaveButton.PerformMouseUp();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that a deep command path (Child.SaveCommand) executes.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DeepCommandPath_CommandExecutes()
+    {
+        var child = new SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel();
+        var vm = new SharedScenarios.BindCommand.DeepCommandPath.MyViewModel { Child = child };
+        var view = new SharedScenarios.BindCommand.DeepCommandPath.MyView();
+        var command = new TrackingCommand();
+        child.SaveCommand = command;
+
+        using var binding = BindCommandScenarios.DeepCommandPath(vm, view);
+
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that when the child is replaced, the new child's command is wired.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DeepCommandPath_ChildReplaced_NewCommandExecutes()
+    {
+        var oldChild = new SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel();
+        var vm = new SharedScenarios.BindCommand.DeepCommandPath.MyViewModel { Child = oldChild };
+        var view = new SharedScenarios.BindCommand.DeepCommandPath.MyView();
+        var oldCommand = new TrackingCommand();
+        oldChild.SaveCommand = oldCommand;
+
+        using var binding = BindCommandScenarios.DeepCommandPath(vm, view);
+
+        var newChild = new SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel();
+        var newCommand = new TrackingCommand();
+        newChild.SaveCommand = newCommand;
+        vm.Child = newChild;
+
+        view.SaveButton.PerformClick();
+
+        await Assert.That(newCommand.ExecuteCount).IsEqualTo(1);
+        await Assert.That(oldCommand.ExecuteCount).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies that disposing twice does not throw.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BasicNoParam_DoubleDispose_DoesNotThrow()
+    {
+        var vm = new SharedScenarios.BindCommand.BasicNoParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.BasicNoParam.MyView();
+        vm.Save = new TrackingCommand();
+
+        var binding = BindCommandScenarios.BasicNoParam(vm, view);
+        binding.Dispose();
+
+        var action = () => binding.Dispose();
+        await Assert.That(action).ThrowsNothing();
+    }
+
+    /// <summary>
+    /// A simple <see cref="ICommand"/> implementation that tracks invocations for testing.
+    /// </summary>
+    private sealed class TrackingCommand : ICommand
+    {
+        /// <inheritdoc/>
+        public event EventHandler? CanExecuteChanged
+        {
+            add { }
+            remove { }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether <see cref="CanExecute"/> returns <see langword="true"/>.
+        /// </summary>
+        public bool CanExecuteResult { get; set; } = true;
+
+        /// <summary>
+        /// Gets the number of times <see cref="Execute"/> has been called.
+        /// </summary>
+        public int ExecuteCount { get; private set; }
+
+        /// <summary>
+        /// Gets the parameter passed to the most recent <see cref="Execute"/> call.
+        /// </summary>
+        public object? LastParameter { get; private set; }
+
+        /// <inheritdoc/>
+        public bool CanExecute(object? parameter) => CanExecuteResult;
+
+        /// <inheritdoc/>
+        public void Execute(object? parameter)
+        {
+            ExecuteCount++;
+            LastParameter = parameter;
+        }
+    }
+}

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 
@@ -31,7 +30,7 @@ namespace ReactiveUI.Binding.Expressions;
 internal sealed class ExpressionRewriter : ExpressionVisitor
 {
     /// <inheritdoc/>
-    public override System.Linq.Expressions.Expression Visit(System.Linq.Expressions.Expression? node)
+    public override Expression Visit(Expression? node)
     {
         ArgumentExceptionHelper.ThrowIfNull(node);
 
@@ -49,7 +48,12 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
         };
     }
 
-    internal static Exception CreateUnsupportedNodeException(System.Linq.Expressions.Expression node)
+    /// <summary>
+    /// Creates an exception for an unsupported expression node type, with an actionable error message.
+    /// </summary>
+    /// <param name="node">The unsupported expression node.</param>
+    /// <returns>A <see cref="NotSupportedException"/> describing the unsupported node.</returns>
+    internal static Exception CreateUnsupportedNodeException(Expression node)
     {
         var sb = new StringBuilder(96);
         sb.Append("Unsupported expression of type '")
@@ -70,6 +74,12 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
         return new NotSupportedException(sb.ToString());
     }
 
+    /// <summary>
+    /// Gets the indexer property named "Item" from the specified type.
+    /// </summary>
+    /// <param name="type">The type to retrieve the indexer property from.</param>
+    /// <returns>The <see cref="PropertyInfo"/> for the "Item" indexer property.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if no indexer property named "Item" is found.</exception>
     internal static PropertyInfo GetItemProperty(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
         Type type)
@@ -78,6 +88,12 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
         return property ?? throw new InvalidOperationException("Could not find a valid indexer property named 'Item'.");
     }
 
+    /// <summary>
+    /// Gets the "Length" property from the specified type.
+    /// </summary>
+    /// <param name="type">The type to retrieve the Length property from.</param>
+    /// <returns>The <see cref="PropertyInfo"/> for the "Length" property.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if no "Length" property is found.</exception>
     internal static PropertyInfo GetLengthProperty(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
         Type type)
@@ -86,7 +102,12 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
         return property ?? throw new InvalidOperationException("Could not find valid information for the array length operator.");
     }
 
-    internal static bool AllConstant(ReadOnlyCollection<System.Linq.Expressions.Expression> expressions)
+    /// <summary>
+    /// Determines whether all expressions in the collection are <see cref="ConstantExpression"/> instances.
+    /// </summary>
+    /// <param name="expressions">The collection of expressions to check.</param>
+    /// <returns><see langword="true"/> if every expression is a <see cref="ConstantExpression"/>; otherwise <see langword="false"/>.</returns>
+    internal static bool AllConstant(ReadOnlyCollection<Expression> expressions)
     {
         for (var i = 0; i < expressions.Count; i++)
         {
@@ -99,15 +120,20 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
         return true;
     }
 
-    internal System.Linq.Expressions.Expression[] VisitArgumentList(ReadOnlyCollection<System.Linq.Expressions.Expression> arguments)
+    /// <summary>
+    /// Visits each expression in an argument list and returns the visited results as an array.
+    /// </summary>
+    /// <param name="arguments">The argument expressions to visit.</param>
+    /// <returns>An array of visited argument expressions.</returns>
+    internal Expression[] VisitArgumentList(ReadOnlyCollection<Expression> arguments)
     {
         var count = arguments.Count;
         if (count == 0)
         {
-            return Array.Empty<System.Linq.Expressions.Expression>();
+            return [];
         }
 
-        var visited = new System.Linq.Expressions.Expression[count];
+        var visited = new Expression[count];
         for (var i = 0; i < count; i++)
         {
             visited[i] = Visit(arguments[i]);
@@ -119,7 +145,7 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
     [SuppressMessage("Trimming", "IL2046:'RequiresUnreferencedCodeAttribute' annotations must match across all interface implementations or overrides.", Justification = "Third Party Code")]
-    protected override System.Linq.Expressions.Expression VisitBinary(BinaryExpression node)
+    protected override Expression VisitBinary(BinaryExpression node)
     {
         if (node.Right is not ConstantExpression)
         {
@@ -131,13 +157,13 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
 
         // ArrayIndex expressions are only produced by the C# compiler for actual arrays,
         // so instance.Type.IsArray is always true here.
-        return System.Linq.Expressions.Expression.ArrayAccess(instance, index);
+        return Expression.ArrayAccess(instance, index);
     }
 
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
     [SuppressMessage("Trimming", "IL2046:'RequiresUnreferencedCodeAttribute' annotations must match across all interface implementations or overrides.", Justification = "Third Party Code")]
-    protected override System.Linq.Expressions.Expression VisitUnary(UnaryExpression node)
+    protected override Expression VisitUnary(UnaryExpression node)
     {
         // Visit() only routes Convert and ArrayLength here, so no fallthrough is needed.
         // UnaryExpression always has a non-null Operand for these node types.
@@ -150,13 +176,13 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
         var operand = Visit(node.Operand);
         var lengthProperty = GetLengthProperty(operand.Type);
 
-        return System.Linq.Expressions.Expression.MakeMemberAccess(operand, lengthProperty);
+        return Expression.MakeMemberAccess(operand, lengthProperty);
     }
 
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
     [SuppressMessage("Trimming", "IL2046:'RequiresUnreferencedCodeAttribute' annotations must match across all interface implementations or overrides.", Justification = "Third Party Code")]
-    protected override System.Linq.Expressions.Expression VisitMethodCall(MethodCallExpression node)
+    protected override Expression VisitMethodCall(MethodCallExpression node)
     {
         if (!node.Method.IsSpecialName || !AllConstant(node.Arguments))
         {
@@ -167,11 +193,11 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
         var instance = Visit(node.Object!);
         var args = VisitArgumentList(node.Arguments);
 
-        return System.Linq.Expressions.Expression.MakeIndex(instance, GetItemProperty(instance.Type), args);
+        return Expression.MakeIndex(instance, GetItemProperty(instance.Type), args);
     }
 
     /// <inheritdoc/>
-    protected override System.Linq.Expressions.Expression VisitIndex(IndexExpression node)
+    protected override Expression VisitIndex(IndexExpression node)
     {
         if (!AllConstant(node.Arguments))
         {

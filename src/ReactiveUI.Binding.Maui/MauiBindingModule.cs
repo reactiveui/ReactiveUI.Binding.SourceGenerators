@@ -14,10 +14,7 @@ public sealed class MauiBindingModule : IModule
     /// <inheritdoc/>
     public void Configure(IMutableDependencyResolver resolver)
     {
-        if (resolver is null)
-        {
-            throw new ArgumentNullException(nameof(resolver));
-        }
+        ArgumentExceptionHelper.ThrowIfNull(resolver);
 
 #if WINUI_TARGET
         resolver.RegisterLazySingleton<ICreatesObservableForProperty>(() => new DependencyObjectObservableForProperty());

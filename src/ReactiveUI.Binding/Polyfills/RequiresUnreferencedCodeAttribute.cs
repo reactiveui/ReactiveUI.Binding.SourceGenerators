@@ -6,15 +6,14 @@
 // https://github.com/SimonCropp/Polyfill
 #if !NET
 
+using System.Diagnostics;
+
 namespace System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Indicates that the specified method requires dynamic access to code that is not referenced
 /// statically, for example through <see cref="System.Reflection"/>.
 /// </summary>
-/// <remarks>
-/// Link: https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.codeanalysis.requiresunreferencedcodeattribute.
-/// </remarks>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
 [AttributeUsage(
@@ -45,7 +44,5 @@ internal sealed class RequiresUnreferencedCodeAttribute : Attribute
 }
 
 #else
-using System.Runtime.CompilerServices;
-
-[assembly: TypeForwardedTo(typeof(System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute))]
+[assembly: TypeForwardedTo(typeof(RequiresUnreferencedCodeAttribute))]
 #endif

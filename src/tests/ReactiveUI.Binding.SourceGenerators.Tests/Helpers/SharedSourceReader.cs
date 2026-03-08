@@ -83,9 +83,21 @@ internal static partial class SharedSourceReader
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Finds the root directory of the SharedScenarios.
+    /// </summary>
+    /// <returns>The path to the SharedScenarios directory.</returns>
     internal static string FindRoot()
         => Path.Combine(Path.GetDirectoryName(typeof(SharedSourceReader).Assembly.Location)!, "SharedScenarios");
 
+    /// <summary>
+    /// Parses a source file's lines to extract copyright headers, usings, and type blocks.
+    /// </summary>
+    /// <param name="lines">The lines of the file to parse.</param>
+    /// <param name="copyrightLines">The list to which copyright lines will be added.</param>
+    /// <param name="usingDirectives">The set to which using directives will be added.</param>
+    /// <param name="namespaceName">A reference to the shared namespace name.</param>
+    /// <param name="typeBlocks">The list to which extracted type blocks will be added.</param>
     private static void ParseFile(
         string[] lines,
         List<string> copyrightLines,
@@ -103,7 +115,7 @@ internal static partial class SharedSourceReader
                 // First file - start collecting
                 copyrightLines.Add(lines[i]);
             }
-            else if (copyrightLines.Count > 0 && copyrightLines.Count < 3 && lines[i].StartsWith("//", StringComparison.Ordinal))
+            else if (copyrightLines.Count is > 0 and < 3 && lines[i].StartsWith("//", StringComparison.Ordinal))
             {
                 copyrightLines.Add(lines[i]);
             }
@@ -196,6 +208,11 @@ internal static partial class SharedSourceReader
         }
     }
 
+    /// <summary>
+    /// Extracts the prefix from a using directive for grouping.
+    /// </summary>
+    /// <param name="usingDirective">The using directive.</param>
+    /// <returns>The prefix string.</returns>
     private static string ExtractUsingPrefix(string usingDirective)
     {
         // Group usings by top-level namespace (e.g., "System" vs "ReactiveUI")
@@ -203,9 +220,17 @@ internal static partial class SharedSourceReader
         return match.Success ? match.Groups[1].Value : usingDirective;
     }
 
+    /// <summary>
+    /// Generates a regex for matching namespace declarations.
+    /// </summary>
+    /// <returns>The generated regex.</returns>
     [GeneratedRegex(@"^\s*namespace\s+([\w.]+)")]
     private static partial Regex NamespaceRegex();
 
+    /// <summary>
+    /// Generates a regex for matching using directives and extracting the top-level namespace.
+    /// </summary>
+    /// <returns>The generated regex.</returns>
     [GeneratedRegex(@"^using\s+(?:static\s+)?(\w+)")]
     private static partial Regex UsingPrefixRegex();
 
@@ -216,9 +241,21 @@ internal static partial class SharedSourceReader
     private sealed class LinkedHashSet<T> : IEnumerable<T>
         where T : notnull
     {
+        /// <summary>
+        /// The hash set used for O(1) duplicate checks.
+        /// </summary>
         private readonly HashSet<T> _set = [];
+
+        /// <summary>
+        /// The list used for preserving insertion order.
+        /// </summary>
         private readonly List<T> _list = [];
 
+        /// <summary>
+        /// Adds an item to the set if it's not already present.
+        /// </summary>
+        /// <param name="item">The item to add.</param>
+        /// <returns><c>true</c> if the item was added; <c>false</c> if it was already present.</returns>
         public bool Add(T item)
         {
             if (_set.Add(item))
@@ -230,10 +267,16 @@ internal static partial class SharedSourceReader
             return false;
         }
 
-        public List<T> ToList() => new(_list);
+        /// <summary>
+        /// Converts the set to a list.
+        /// </summary>
+        /// <returns>A new list containing the set elements in insertion order.</returns>
+        public List<T> ToList() => [.._list];
 
+        /// <inheritdoc/>
         public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
 
+        /// <inheritdoc/>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

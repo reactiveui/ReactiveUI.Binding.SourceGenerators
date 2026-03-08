@@ -66,6 +66,14 @@ public interface IReactiveUIBindingBuilder : IAppBuilder
     IReactiveUIBindingBuilder WithSetMethodConverter(ISetMethodBindingConverter converter);
 
     /// <summary>
+    /// Registers a custom command binder for binding <see cref="System.Windows.Input.ICommand"/>
+    /// instances to UI controls.
+    /// </summary>
+    /// <param name="binder">The command binder instance to register.</param>
+    /// <returns>The builder instance for chaining.</returns>
+    IReactiveUIBindingBuilder WithCommandBinder(ICreatesCommandBinding binder);
+
+    /// <summary>
     /// Builds the application and returns the configured instance.
     /// </summary>
     /// <returns>The configured application instance.</returns>

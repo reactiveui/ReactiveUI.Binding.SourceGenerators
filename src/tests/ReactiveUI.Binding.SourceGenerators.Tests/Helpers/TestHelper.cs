@@ -9,8 +9,6 @@ using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-using ReactiveUI.Binding.SourceGenerators;
-
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 /// <summary>
@@ -24,13 +22,13 @@ public static class TestHelper
     /// Includes ReactiveUI for IReactiveObject testing.
     /// </summary>
     /// <param name="source">The source code to compile.</param>
-    /// <param name="languageVersion">Optional C# language version to target. Defaults to the latest version.</param>
+    /// <param name="languageVersion">Optional C# language version to target. Defaults to C# 7.3 to verify generated output compatibility.</param>
     /// <returns>A compilation ready for testing.</returns>
     public static Compilation CreateCompilation(string source, LanguageVersion? languageVersion = null)
     {
         var parseOptions = languageVersion.HasValue
             ? new CSharpParseOptions(languageVersion.Value)
-            : new CSharpParseOptions(LanguageVersion.Default);
+            : new CSharpParseOptions(LanguageVersion.CSharp7_3);
 
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
@@ -47,17 +45,17 @@ public static class TestHelper
         // Add ReactiveUI and transitive assembly references
         var seedAssemblies = new[]
         {
-            typeof(ReactiveUI.IReactiveObject).Assembly,
+            typeof(IReactiveObject).Assembly,
             typeof(System.Reactive.Linq.Observable).Assembly,
-            typeof(ReactiveUI.Binding.ReactiveUIBindingExtensions).Assembly,
-            typeof(ReactiveUI.Binding.Reactive.ObserveOnObservable<>).Assembly,
+            typeof(ReactiveUIBindingExtensions).Assembly,
+            typeof(Reactive.ObserveOnObservable<>).Assembly,
         };
 
         var allReferences = references.Concat(GetTransitiveReferences(seedAssemblies));
 
         return CSharpCompilation.Create(
             "TestAssembly",
-            new[] { syntaxTree },
+            [syntaxTree],
             allReferences,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
     }
@@ -68,7 +66,7 @@ public static class TestHelper
     /// </summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
-    /// <param name="languageVersion">Optional C# language version to target. Defaults to the latest version.</param>
+    /// <param name="languageVersion">Optional C# language version to target. Defaults to C# 7.3 to verify generated output compatibility.</param>
     /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>A task representing the asynchronous verification operation.</returns>
@@ -94,7 +92,7 @@ public static class TestHelper
         settings.DisableRequireUniquePrefix();
         settings.UseTypeName(AbbreviateTypeName(callerType.Name));
         settings.UseMethodName(AbbreviateMethodName(memberName));
-        return Verifier.Verify(result.Driver, settings, file);
+        return Verify(result.Driver, settings, file);
     }
 
     /// <summary>
@@ -103,7 +101,7 @@ public static class TestHelper
     /// </summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
-    /// <param name="languageVersion">Optional C# language version to target. Defaults to the latest version.</param>
+    /// <param name="languageVersion">Optional C# language version to target. Defaults to C# 7.3 to verify generated output compatibility.</param>
     /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>The generator test result for additional assertions.</returns>
@@ -129,7 +127,7 @@ public static class TestHelper
         settings.DisableRequireUniquePrefix();
         settings.UseTypeName(AbbreviateTypeName(callerType.Name));
         settings.UseMethodName(AbbreviateMethodName(memberName));
-        await Verifier.Verify(result.Driver, settings, file);
+        await Verify(result.Driver, settings, file);
 
         return result;
     }
@@ -138,7 +136,7 @@ public static class TestHelper
     /// Runs the source generator on the provided source code and returns the result.
     /// </summary>
     /// <param name="source">The source code to compile and generate.</param>
-    /// <param name="languageVersion">Optional C# language version to target. Defaults to the latest version.</param>
+    /// <param name="languageVersion">Optional C# language version to target. Defaults to C# 7.3 to verify generated output compatibility.</param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
     public static GeneratorTestResult RunGenerator(string source, LanguageVersion? languageVersion = null)
     {
@@ -148,10 +146,10 @@ public static class TestHelper
 
         var parseOptions = languageVersion.HasValue
             ? new CSharpParseOptions(languageVersion.Value)
-            : new CSharpParseOptions(LanguageVersion.Default);
+            : new CSharpParseOptions(LanguageVersion.CSharp7_3);
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            generators: new[] { sourceGenerator },
+            generators: [sourceGenerator],
             additionalTexts: null,
             parseOptions: parseOptions,
             optionsProvider: null,
@@ -213,6 +211,8 @@ public static class TestHelper
         "WhenChangedGeneratorTests" => "WCG",
         "WhenChangingGeneratorTests" => "WCnG",
         "PlatformDetectionSnapshotTests" => "PDS",
+        "BindInteractionGeneratorTests" => "BIG",
+        "BindCommandGeneratorTests" => "BCG",
         _ => typeName,
     };
 
@@ -253,10 +253,10 @@ public static class TestHelper
     /// </summary>
     /// <param name="seedAssemblies">The root assemblies to start from.</param>
     /// <returns>Metadata references for all reachable assemblies.</returns>
-    private static IEnumerable<MetadataReference> GetTransitiveReferences(params System.Reflection.Assembly[] seedAssemblies)
+    private static IEnumerable<MetadataReference> GetTransitiveReferences(params Assembly[] seedAssemblies)
     {
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var queue = new Queue<System.Reflection.Assembly>(seedAssemblies);
+        var queue = new Queue<Assembly>(seedAssemblies);
 
         while (queue.Count > 0)
         {

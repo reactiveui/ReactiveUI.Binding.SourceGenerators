@@ -6,7 +6,6 @@ using System.Collections.Immutable;
 using System.Text;
 
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
-using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.CodeGeneration;
@@ -58,7 +57,7 @@ public class WhenChangingCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: "WhenChanging");
-        var group = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanging");
 
@@ -76,7 +75,7 @@ public class WhenChangingCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: "WhenChanging");
-        var group = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false, "WhenChanging");
 
@@ -94,7 +93,7 @@ public class WhenChangingCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: "WhenChanging");
-        var group = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanging");
 
@@ -117,7 +116,7 @@ public class WhenChangingCodeGeneratorHelperTests
             callerLineNumber: 42,
             isBeforeChange: true,
             methodName: "WhenChanging");
-        var group = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false, "WhenChanging");
 

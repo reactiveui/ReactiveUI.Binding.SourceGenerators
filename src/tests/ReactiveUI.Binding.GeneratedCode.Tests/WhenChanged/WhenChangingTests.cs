@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Reactive.Linq;
-
 using ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
@@ -132,7 +130,7 @@ public class WhenChangingTests
         await Assert.That(values[0].property1).IsEqualTo("Y");
         await Assert.That(values[0].property2).IsEqualTo(20);
         await Assert.That(values[0].property3).IsEqualTo(2.71);
-        await Assert.That(values[0].property4).IsEqualTo(true);
+        await Assert.That(values[0].property4).IsTrue();
     }
 
     /// <summary>

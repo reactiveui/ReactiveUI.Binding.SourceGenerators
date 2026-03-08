@@ -33,5 +33,6 @@
     <Project Path="tests/ReactiveUI.Binding.GeneratedCode.TestModels/ReactiveUI.Binding.GeneratedCode.TestModels.csproj" />
     <Project Path="tests/ReactiveUI.Binding.GeneratedCode.Tests/ReactiveUI.Binding.GeneratedCode.Tests.csproj" />
     <Project Path="tests/ReactiveUI.Binding.AotValidation/ReactiveUI.Binding.AotValidation.csproj" />
+    <Project Path="tests/ReactiveUI.Binding.WinForms.Tests/ReactiveUI.Binding.WinForms.Tests.csproj" />
   </Folder>
 </Solution>

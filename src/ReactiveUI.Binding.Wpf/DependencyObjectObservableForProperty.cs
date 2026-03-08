@@ -31,10 +31,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         bool beforeChanged = false,
         bool suppressWarnings = false)
     {
-        if (sender is null)
-        {
-            throw new ArgumentNullException(nameof(sender));
-        }
+        ArgumentExceptionHelper.ThrowIfNull(sender);
 
         var type = sender.GetType();
 
@@ -62,6 +59,15 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         });
     }
 
+    /// <summary>
+    /// Retrieves the <see cref="DependencyProperty"/> associated with the specified property name on the given type, if available.
+    /// </summary>
+    /// <param name="type">The type to search for the dependency property.</param>
+    /// <param name="propertyName">The name of the property for which the dependency property is sought.</param>
+    /// <returns>
+    /// The <see cref="DependencyProperty"/> associated with the specified property name,
+    /// or <c>null</c> if no matching dependency property is found.
+    /// </returns>
     internal static DependencyProperty? GetDependencyProperty(Type type, string propertyName)
     {
         var fi = Array.Find(

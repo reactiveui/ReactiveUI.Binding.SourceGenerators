@@ -327,6 +327,9 @@ public class BuilderMixinsTests
     /// </summary>
     private sealed class TestModule : IModule
     {
+        /// <summary>
+        /// A callback action invoked during the configuration process of the <see cref="TestModule"/>.
+        /// </summary>
         private readonly Action _onConfigure;
 
         /// <summary>

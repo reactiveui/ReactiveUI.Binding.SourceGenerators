@@ -29,7 +29,7 @@ public class IntegerToNullableIntegerTypeConverterTests
     public async Task TryConvert_AlwaysSucceeds()
     {
         var converter = new IntegerToNullableIntegerTypeConverter();
-        int value = 123456;
+        var value = 123456;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -67,7 +67,7 @@ public class IntegerToNullableIntegerTypeConverterTests
     public async Task TryConvertTyped_WithValidValue_ReturnsTrueAndOutput()
     {
         var converter = new IntegerToNullableIntegerTypeConverter();
-        int value = 42;
+        var value = 42;
 
         var success = converter.TryConvertTyped(value, null, out var result);
 
@@ -98,7 +98,7 @@ public class IntegerToNullableIntegerTypeConverterTests
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()
     {
         var converter = new IntegerToNullableIntegerTypeConverter();
-        string value = "invalid";
+        var value = "invalid";
 
         var success = converter.TryConvertTyped(value, null, out var result);
 

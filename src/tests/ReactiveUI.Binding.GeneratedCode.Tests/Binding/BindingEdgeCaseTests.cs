@@ -155,13 +155,13 @@ public class BindingEdgeCaseTests
 
         using var binding = BindTwoWayScenarios.BoolProperty(source, target);
 
-        await Assert.That(target.ViewProp4).IsEqualTo(true);
+        await Assert.That(target.ViewProp4).IsTrue();
 
         source.Prop4 = false;
-        await Assert.That(target.ViewProp4).IsEqualTo(false);
+        await Assert.That(target.ViewProp4).IsFalse();
 
         target.ViewProp4 = true;
-        await Assert.That(source.Prop4).IsEqualTo(true);
+        await Assert.That(source.Prop4).IsTrue();
     }
 
     /// <summary>

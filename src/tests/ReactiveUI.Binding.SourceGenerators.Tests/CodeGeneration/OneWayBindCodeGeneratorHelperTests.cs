@@ -63,7 +63,7 @@ public class OneWayBindCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = OneWayBindCodeGenerator.FormatExtraArgs(group);
 
@@ -84,7 +84,7 @@ public class OneWayBindCodeGeneratorHelperTests
             "global::System.String",
             true,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = OneWayBindCodeGenerator.FormatExtraArgs(group);
 
@@ -105,7 +105,7 @@ public class OneWayBindCodeGeneratorHelperTests
             "global::System.String",
             false,
             true,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = OneWayBindCodeGenerator.FormatExtraArgs(group);
 
@@ -126,7 +126,7 @@ public class OneWayBindCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = OneWayBindCodeGenerator.FormatReturnType(group);
 
@@ -148,7 +148,7 @@ public class OneWayBindCodeGeneratorHelperTests
             "global::System.String",
             true,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = OneWayBindCodeGenerator.FormatReturnType(group);
 
@@ -221,7 +221,7 @@ public class OneWayBindCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            new[] { inv });
+            [inv]);
 
         OneWayBindCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true);
 

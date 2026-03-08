@@ -30,19 +30,22 @@ public static class AnalyzerTestHelper
         var analyzer = new TAnalyzer();
 
         var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
+            [analyzer]);
 
         var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
 
         // Filter to only analyzer diagnostics (exclude compiler errors)
-        return diagnostics
-            .Where(d => analyzer.SupportedDiagnostics.Any(sd => sd.Id == d.Id))
-            .ToImmutableArray();
+        return [
+            ..diagnostics
+                .Where(d => analyzer.SupportedDiagnostics.Any(sd => sd.Id == d.Id))
+        ];
     }
 
     /// <summary>
-    /// Creates a CSharpCompilation from source code with necessary references.
+    /// Creates a CSharpCompilation from the specified source code with required assembly references.
     /// </summary>
+    /// <param name="source">The source code to compile into a CSharpCompilation.</param>
+    /// <returns>A CSharpCompilation object representing the compiled source code.</returns>
     internal static CSharpCompilation CreateCompilation(string source)
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(source);
@@ -61,14 +64,14 @@ public static class AnalyzerTestHelper
         // Add core framework references via typeof to ensure assemblies are loaded
         AddReference(typeof(object).Assembly);
         AddReference(typeof(Enumerable).Assembly);
-        AddReference(typeof(System.Attribute).Assembly);
+        AddReference(typeof(Attribute).Assembly);
         AddReference(typeof(Expression<>).Assembly);
         AddReference(typeof(System.ComponentModel.INotifyPropertyChanged).Assembly);
         AddReference(typeof(System.ComponentModel.INotifyPropertyChanging).Assembly);
         AddReference(typeof(System.ComponentModel.INotifyDataErrorInfo).Assembly);
 
         // Add ReactiveUI reference
-        AddReference(typeof(ReactiveUI.IReactiveObject).Assembly);
+        AddReference(typeof(IReactiveObject).Assembly);
 
         // Add runtime assemblies by name for any that typeof didn't cover
         var assemblyNames = new[]
@@ -91,7 +94,7 @@ public static class AnalyzerTestHelper
 
         return CSharpCompilation.Create(
             "TestAssembly",
-            new[] { syntaxTree },
+            [syntaxTree],
             references,
             new CSharpCompilationOptions(
                 OutputKind.DynamicallyLinkedLibrary,

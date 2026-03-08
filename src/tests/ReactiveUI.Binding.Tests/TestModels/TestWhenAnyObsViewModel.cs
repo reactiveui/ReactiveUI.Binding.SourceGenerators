@@ -12,9 +12,16 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class TestWhenAnyObsViewModel : INotifyPropertyChanged
 {
+    /// <summary>The backing field for <see cref="Command1"/>.</summary>
     private IObservable<int>? _command1;
+
+    /// <summary>The backing field for <see cref="Command2"/>.</summary>
     private IObservable<int>? _command2;
+
+    /// <summary>The backing field for <see cref="Command3"/>.</summary>
     private IObservable<int>? _command3;
+
+    /// <summary>The backing field for <see cref="Changes"/>.</summary>
     private IObservable<int>? _changes;
 
     /// <inheritdoc/>

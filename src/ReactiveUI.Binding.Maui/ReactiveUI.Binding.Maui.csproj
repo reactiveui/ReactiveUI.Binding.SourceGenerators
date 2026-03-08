@@ -1,8 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(BindingMauiTargets)</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
     <UseMaui>true</UseMaui>
     <DefineConstants>$(DefineConstants);IS_MAUI</DefineConstants>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
@@ -32,6 +30,7 @@
     <Using Include="System.Reactive.Linq" />
     <Using Include="System.Runtime.CompilerServices" />
     <Using Include="Splat" />
+    <Using Include="ReactiveUI.Binding.Helpers" />
   </ItemGroup>
 
   <ItemGroup>

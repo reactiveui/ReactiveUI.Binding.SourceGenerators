@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 
 /// <summary>
@@ -17,12 +15,9 @@ public class ConverterMigrationHelperTests
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
-    public async Task ExtractConverters_ShouldThrowArgumentNullException_WhenResolverIsNull()
-    {
-        // Act & Assert
+    public async Task ExtractConverters_ShouldThrowArgumentNullException_WhenResolverIsNull() =>
         await Assert.That(() => ConverterMigrationHelper.ExtractConverters(null!))
             .Throws<ArgumentException>();
-    }
 
     /// <summary>
     ///     Verifies that ExtractConverters returns empty lists when no converters registered.
@@ -319,41 +314,54 @@ public class ConverterMigrationHelperTests
     /// </summary>
     private sealed class TestDependencyResolver : IReadonlyDependencyResolver
     {
+        /// <summary>
+        /// Registered services for resolution.
+        /// </summary>
         private readonly List<object> _services = [];
 
-        public void RegisterService<T>(T? service)
-        {
-            _services.Add(service!);
-        }
+        /// <summary>
+        /// Registers a service instance for later resolution.
+        /// </summary>
+        /// <typeparam name="T">The service type to register.</typeparam>
+        /// <param name="service">The service instance to register.</param>
+        public void RegisterService<T>(T? service) => _services.Add(service!);
 
+        /// <inheritdoc/>
         public object? GetService(Type? serviceType) => _services.FirstOrDefault();
 
+        /// <inheritdoc/>
         public object? GetService(Type? serviceType, string? contract) => _services.FirstOrDefault();
 
+        /// <inheritdoc/>
         public T? GetService<T>() => _services.OfType<T>().FirstOrDefault();
 
+        /// <inheritdoc/>
         public T? GetService<T>(string? contract) => _services.OfType<T>().FirstOrDefault();
 
+        /// <inheritdoc/>
         public IEnumerable<object> GetServices(Type? serviceType) => _services.Where(s => s is not null)!;
 
+        /// <inheritdoc/>
         public IEnumerable<object> GetServices(Type? serviceType, string? contract) => _services.Where(s => s is not null)!;
 
+        /// <inheritdoc/>
         public IEnumerable<T> GetServices<T>() => _services.OfType<T>();
 
+        /// <inheritdoc/>
         public IEnumerable<T> GetServices<T>(string? contract) => _services.OfType<T>();
     }
 
     /// <summary>
     /// Test typed converter for testing purposes.
     /// </summary>
-    private sealed class TestTypedConverter<TFrom, TTo> : BindingTypeConverter<TFrom, TTo>
+    /// <typeparam name="TFrom">The source type for conversion.</typeparam>
+    /// <typeparam name="TTo">The target type for conversion.</typeparam>
+    private sealed class TestTypedConverter<TFrom, TTo>(int affinity) : BindingTypeConverter<TFrom, TTo>
     {
-        private readonly int _affinity;
+        /// <inheritdoc/>
+        public override int GetAffinityForObjects() => affinity;
 
-        public TestTypedConverter(int affinity) => _affinity = affinity;
-
-        public override int GetAffinityForObjects() => _affinity;
-
+        /// <inheritdoc/>
         public override bool TryConvert(TFrom? from, object? conversionHint, [NotNullWhen(true)] out TTo result)
         {
             result = default!;
@@ -364,14 +372,12 @@ public class ConverterMigrationHelperTests
     /// <summary>
     /// Test fallback converter for testing purposes.
     /// </summary>
-    private sealed class TestFallbackConverter : IBindingFallbackConverter
+    private sealed class TestFallbackConverter(int affinity) : IBindingFallbackConverter
     {
-        private readonly int _affinity;
+        /// <inheritdoc/>
+        public int GetAffinityForObjects(Type fromType, Type toType) => affinity;
 
-        public TestFallbackConverter(int affinity) => _affinity = affinity;
-
-        public int GetAffinityForObjects(Type fromType, Type toType) => _affinity;
-
+        /// <inheritdoc/>
         public bool TryConvert(Type fromType, object from, Type toType, object? conversionHint, [NotNullWhen(true)] out object? result)
         {
             result = null;
@@ -382,14 +388,19 @@ public class ConverterMigrationHelperTests
     /// <summary>
     /// Test set method converter for testing purposes.
     /// </summary>
-    private sealed class TestSetMethodConverter : ISetMethodBindingConverter
+    private sealed class TestSetMethodConverter(int affinity) : ISetMethodBindingConverter
     {
-        private readonly int _affinity;
+        /// <summary>
+        /// Represents the affinity value of the <see cref="TestSetMethodConverter"/>.
+        /// This value influences how strongly the converter is preferred for handling specific type conversions
+        /// when multiple converters are available. Higher values indicate higher affinity.
+        /// </summary>
+        private readonly int _affinity = affinity;
 
-        public TestSetMethodConverter(int affinity) => _affinity = affinity;
-
+        /// <inheritdoc/>
         public int GetAffinityForObjects(Type? fromType, Type? toType) => _affinity;
 
+        /// <inheritdoc/>
         public object? PerformSet(object? toTarget, object? newValue, object?[]? arguments) => null;
     }
 }

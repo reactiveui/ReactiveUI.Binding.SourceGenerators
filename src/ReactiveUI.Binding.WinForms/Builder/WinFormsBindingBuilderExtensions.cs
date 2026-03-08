@@ -21,10 +21,7 @@ public static class WinFormsBindingBuilderExtensions
     /// <returns>The builder instance for chaining.</returns>
     public static IReactiveUIBindingBuilder WithWinForms(this IReactiveUIBindingBuilder builder)
     {
-        if (builder is null)
-        {
-            throw new ArgumentNullException(nameof(builder));
-        }
+        ArgumentExceptionHelper.ThrowIfNull(builder);
 
         return builder.WithPlatformModule(new WinFormsBindingModule());
     }

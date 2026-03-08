@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-using System.Linq;
 using System.Text;
 
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
@@ -25,7 +24,7 @@ public class CodeGeneratorHelpersTests
     public async Task BuildPropertyAccessChain_SingleSegment_ReturnsDottedPath()
     {
         var path = new EquatableArray<PropertyPathSegment>(
-            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
 
         var result = CodeGeneratorHelpers.BuildPropertyAccessChain("obj", path);
 
@@ -39,11 +38,10 @@ public class CodeGeneratorHelpersTests
     [Test]
     public async Task BuildPropertyAccessChain_MultiSegment_ReturnsDottedPath()
     {
-        var path = new EquatableArray<PropertyPathSegment>(new[]
-        {
+        var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
-        });
+            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+        ]);
 
         var result = CodeGeneratorHelpers.BuildPropertyAccessChain("obj", path);
 
@@ -57,7 +55,7 @@ public class CodeGeneratorHelpersTests
     [Test]
     public async Task BuildPropertyAccessChain_EmptyPath_ReturnsRoot()
     {
-        var path = new EquatableArray<PropertyPathSegment>(Array.Empty<PropertyPathSegment>());
+        var path = new EquatableArray<PropertyPathSegment>([]);
 
         var result = CodeGeneratorHelpers.BuildPropertyAccessChain("obj", path);
 
@@ -72,7 +70,7 @@ public class CodeGeneratorHelpersTests
     public async Task BuildPropertyPathString_SingleSegment_ReturnsPropertyName()
     {
         var path = new EquatableArray<PropertyPathSegment>(
-            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
 
         var result = CodeGeneratorHelpers.BuildPropertyPathString(path);
 
@@ -86,11 +84,10 @@ public class CodeGeneratorHelpersTests
     [Test]
     public async Task BuildPropertyPathString_MultiSegment_ReturnsDottedPath()
     {
-        var path = new EquatableArray<PropertyPathSegment>(new[]
-        {
+        var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment("Address"),
-            ModelFactory.CreatePropertyPathSegment("City"),
-        });
+            ModelFactory.CreatePropertyPathSegment("City")
+        ]);
 
         var result = CodeGeneratorHelpers.BuildPropertyPathString(path);
 
@@ -104,7 +101,7 @@ public class CodeGeneratorHelpersTests
     [Test]
     public async Task BuildPropertyPathString_EmptyPath_ReturnsEmptyString()
     {
-        var path = new EquatableArray<PropertyPathSegment>(Array.Empty<PropertyPathSegment>());
+        var path = new EquatableArray<PropertyPathSegment>([]);
 
         var result = CodeGeneratorHelpers.BuildPropertyPathString(path);
 
@@ -280,11 +277,10 @@ public class CodeGeneratorHelpersTests
     [Test]
     public async Task BuildPropertyAccessLambda_ReturnsParameterDotPath()
     {
-        var path = new EquatableArray<PropertyPathSegment>(new[]
-        {
+        var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment("Address"),
-            ModelFactory.CreatePropertyPathSegment("City"),
-        });
+            ModelFactory.CreatePropertyPathSegment("City")
+        ]);
 
         var result = CodeGeneratorHelpers.BuildPropertyAccessLambda("x", path);
 
@@ -299,7 +295,7 @@ public class CodeGeneratorHelpersTests
     public async Task BuildPropertySetterChain_ReturnsRootDotPath()
     {
         var path = new EquatableArray<PropertyPathSegment>(
-            new[] { ModelFactory.CreatePropertyPathSegment("Text") });
+            [ModelFactory.CreatePropertyPathSegment("Text")]);
 
         var result = CodeGeneratorHelpers.BuildPropertySetterChain("target", path);
 
@@ -313,8 +309,8 @@ public class CodeGeneratorHelpersTests
     [Test]
     public async Task StableStringHash_SameInput_ReturnsSameHash()
     {
-        int hash1 = CodeGeneratorHelpers.StableStringHash("global::TestApp.MyViewModel");
-        int hash2 = CodeGeneratorHelpers.StableStringHash("global::TestApp.MyViewModel");
+        var hash1 = CodeGeneratorHelpers.StableStringHash("global::TestApp.MyViewModel");
+        var hash2 = CodeGeneratorHelpers.StableStringHash("global::TestApp.MyViewModel");
 
         await Assert.That(hash1).IsEqualTo(hash2);
     }
@@ -326,8 +322,8 @@ public class CodeGeneratorHelpersTests
     [Test]
     public async Task StableStringHash_DifferentInput_ReturnsDifferentHash()
     {
-        int hash1 = CodeGeneratorHelpers.StableStringHash("TypeA");
-        int hash2 = CodeGeneratorHelpers.StableStringHash("TypeB");
+        var hash1 = CodeGeneratorHelpers.StableStringHash("TypeA");
+        var hash2 = CodeGeneratorHelpers.StableStringHash("TypeB");
 
         await Assert.That(hash1).IsNotEqualTo(hash2);
     }
@@ -339,7 +335,7 @@ public class CodeGeneratorHelpersTests
     [Test]
     public async Task StableStringHash_NullInput_ReturnsZero()
     {
-        int result = CodeGeneratorHelpers.StableStringHash(null!);
+        var result = CodeGeneratorHelpers.StableStringHash(null!);
 
         await Assert.That(result).IsEqualTo(0);
     }
@@ -463,5 +459,35 @@ public class CodeGeneratorHelpersTests
         var result = CodeGeneratorHelpers.EscapeString("a\\\"b");
 
         await Assert.That(result).IsEqualTo("a\\\\\\\"b");
+    }
+
+    /// <summary>
+    /// Verifies ConditionKeyword returns "if" for index 0.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ConditionKeyword_IndexZero_ReturnsIf()
+    {
+        await Assert.That(CodeGeneratorHelpers.ConditionKeyword(0)).IsEqualTo("if");
+    }
+
+    /// <summary>
+    /// Verifies ConditionKeyword returns "else if" for index 1.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ConditionKeyword_IndexOne_ReturnsElseIf()
+    {
+        await Assert.That(CodeGeneratorHelpers.ConditionKeyword(1)).IsEqualTo("else if");
+    }
+
+    /// <summary>
+    /// Verifies ConditionKeyword returns "else if" for index greater than 1.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ConditionKeyword_IndexGreaterThanOne_ReturnsElseIf()
+    {
+        await Assert.That(CodeGeneratorHelpers.ConditionKeyword(5)).IsEqualTo("else if");
     }
 }

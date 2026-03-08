@@ -94,11 +94,11 @@ public class BindOneWayTests
 
         using var binding = BindOneWayScenarios.BoolProperty(source, target);
 
-        await Assert.That(target.ViewProp4).IsEqualTo(true);
+        await Assert.That(target.ViewProp4).IsTrue();
 
         source.Prop4 = false;
 
-        await Assert.That(target.ViewProp4).IsEqualTo(false);
+        await Assert.That(target.ViewProp4).IsFalse();
     }
 
     /// <summary>

@@ -5,8 +5,6 @@
 using System;
 using System.ComponentModel;
 
-using ReactiveUI.Binding;
-
 namespace SharedScenarios.WhenAnyObservable.TwoObservablesMerge
 {
     /// <summary>

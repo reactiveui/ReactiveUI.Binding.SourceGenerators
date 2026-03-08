@@ -113,7 +113,7 @@ public class NullableShortToShortTypeConverterTests
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()
     {
         var converter = new NullableShortToShortTypeConverter();
-        string value = "invalid";
+        var value = "invalid";
 
         var success = converter.TryConvertTyped(value, null, out var result);
 

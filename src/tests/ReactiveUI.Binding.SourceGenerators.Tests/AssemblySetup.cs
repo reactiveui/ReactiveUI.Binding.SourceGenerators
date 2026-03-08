@@ -19,5 +19,6 @@ public static class AssemblySetup
     {
         VerifySourceGenerators.Initialize();
         VerifierSettings.UseSplitModeForUniqueDirectory();
+        ////VerifierSettings.AutoVerify();
     }
 }

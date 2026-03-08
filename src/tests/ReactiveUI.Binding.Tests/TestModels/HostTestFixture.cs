@@ -13,8 +13,13 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class HostTestFixture : INotifyPropertyChanged, INotifyPropertyChanging
 {
+    /// <summary>The backing field for <see cref="Child"/>.</summary>
     private TestFixture? _child;
+
+    /// <summary>The backing field for <see cref="SomeOtherParam"/>.</summary>
     private int _someOtherParam;
+
+    /// <summary>The backing field for <see cref="PocoChild"/>.</summary>
     private NonObservableTestFixture? _pocoChild;
 
     /// <inheritdoc/>

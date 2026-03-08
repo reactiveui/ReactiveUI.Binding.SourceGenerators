@@ -5,6 +5,7 @@
 using Microsoft.CodeAnalysis;
 
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Invocations;
@@ -30,7 +31,7 @@ internal static class WhenAnyInvocationGenerator
         var invocations = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: RoslynHelpers.IsWhenAnyInvocation,
-                transform: MetadataExtractor.ExtractWhenAnyInvocation)
+                transform: ObservationExtractor.ExtractWhenAnyInvocation)
             .Where(static x => x is not null)
             .Select(static (x, _) => x!);
 

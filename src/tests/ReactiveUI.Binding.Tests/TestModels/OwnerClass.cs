@@ -12,6 +12,9 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class OwnerClass : INotifyPropertyChanged
 {
+    /// <summary>
+    /// The backer for Name.
+    /// </summary>
     private string _name = string.Empty;
 
     /// <inheritdoc/>

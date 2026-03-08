@@ -5,8 +5,6 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 
-using ReactiveUI;
-
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>
@@ -19,11 +17,25 @@ namespace ReactiveUI.Binding.Benchmarks;
 [MarkdownExporterAttribute.GitHub]
 public class ReactiveUIBindingBenchmark
 {
+    /// <summary>
+    /// The number of property changes to fire during each benchmark iteration.
+    /// </summary>
     private const int PropertyChangeCount = 1000;
 
+    /// <summary>
+    /// The source view model instance used for binding benchmarks.
+    /// </summary>
     private BenchmarkViewModel _source = null!;
+
+    /// <summary>
+    /// The target view instance used for binding benchmarks.
+    /// </summary>
     private BenchmarkView _target = null!;
 
+    /// <summary>
+    /// Initializes static members of the <see cref="ReactiveUIBindingBenchmark"/> class.
+    /// Ensures ReactiveUI is configured before any benchmarks run.
+    /// </summary>
     static ReactiveUIBindingBenchmark() => ModuleInitializer.EnsureInitialized();
 
     /// <summary>

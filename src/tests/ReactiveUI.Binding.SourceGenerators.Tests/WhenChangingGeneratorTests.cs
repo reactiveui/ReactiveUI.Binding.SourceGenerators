@@ -21,7 +21,7 @@ public class WhenChangingGeneratorTests
     public async Task SingleProperty_INPC()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/SinglePropertyINPC");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,7 @@ public class WhenChangingGeneratorTests
     public async Task SingleProperty_ReactiveObject()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/SinglePropertyReactiveObject");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +47,7 @@ public class WhenChangingGeneratorTests
     public async Task MultiProperty_TwoProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyTwoProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +60,7 @@ public class WhenChangingGeneratorTests
     public async Task DeepPropertyChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/DeepPropertyChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -73,7 +73,7 @@ public class WhenChangingGeneratorTests
     public async Task MultiProperty_WithSelector()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyWithSelector");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -122,7 +122,7 @@ public class WhenChangingGeneratorTests
             }
             """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -161,7 +161,7 @@ public class WhenChangingGeneratorTests
             }
             """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -177,7 +177,7 @@ public class WhenChangingGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/SinglePropertyINPC");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -191,7 +191,7 @@ public class WhenChangingGeneratorTests
     public async Task FourLevelDeepChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/FourLevelDeepChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -206,7 +206,7 @@ public class WhenChangingGeneratorTests
     public async Task MultiProperty_ThreeProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyThreeProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -222,7 +222,7 @@ public class WhenChangingGeneratorTests
     public async Task MultiProperty_WithDeepChains()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyWithDeepChains");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -238,7 +238,7 @@ public class WhenChangingGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/DeepPropertyChain");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -253,7 +253,7 @@ public class WhenChangingGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyTwoProperties");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -268,7 +268,7 @@ public class WhenChangingGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/FourLevelDeepChain");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 }

@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace ReactiveUI.Binding.Tests.Bindings;
 
 /// <summary>
@@ -188,8 +186,10 @@ public class BindingTypeConverterTests
     /// </summary>
     private sealed class TestConverter : BindingTypeConverter<string, int>
     {
+        /// <inheritdoc/>
         public override int GetAffinityForObjects() => 1;
 
+        /// <inheritdoc/>
         public override bool TryConvert(string? from, object? conversionHint, [NotNullWhen(true)] out int result)
         {
             if (from is null)
@@ -207,8 +207,10 @@ public class BindingTypeConverterTests
     /// </summary>
     private sealed class ValueTypeConverter : BindingTypeConverter<int, string>
     {
+        /// <inheritdoc/>
         public override int GetAffinityForObjects() => 1;
 
+        /// <inheritdoc/>
         public override bool TryConvert(int from, object? conversionHint, [NotNullWhen(true)] out string? result)
         {
             result = from.ToString();
@@ -221,8 +223,10 @@ public class BindingTypeConverterTests
     /// </summary>
     private sealed class NullableToStringConverter : BindingTypeConverter<int?, string>
     {
+        /// <inheritdoc/>
         public override int GetAffinityForObjects() => 1;
 
+        /// <inheritdoc/>
         public override bool TryConvert(int? from, object? conversionHint, [NotNullWhen(true)] out string? result)
         {
             result = from?.ToString() ?? "null";
@@ -235,8 +239,10 @@ public class BindingTypeConverterTests
     /// </summary>
     private sealed class NullReturningConverter : BindingTypeConverter<string, int>
     {
+        /// <inheritdoc/>
         public override int GetAffinityForObjects() => 1;
 
+        /// <inheritdoc/>
         public override bool TryConvert(string? from, object? conversionHint, [NotNullWhen(true)] out int result)
         {
             result = default;
@@ -249,8 +255,10 @@ public class BindingTypeConverterTests
     /// </summary>
     private sealed class StringToNullableIntConverter : BindingTypeConverter<string, int?>
     {
+        /// <inheritdoc/>
         public override int GetAffinityForObjects() => 1;
 
+        /// <inheritdoc/>
         public override bool TryConvert(string? from, object? conversionHint, out int? result)
         {
             if (from == "null")
@@ -275,8 +283,10 @@ public class BindingTypeConverterTests
     /// </summary>
     private sealed class NullableFailingConverter : BindingTypeConverter<int?, string>
     {
+        /// <inheritdoc/>
         public override int GetAffinityForObjects() => 1;
 
+        /// <inheritdoc/>
         public override bool TryConvert(int? from, object? conversionHint, [NotNullWhen(true)] out string? result)
         {
             if (from is null)

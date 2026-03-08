@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
 using ReactiveUI.Binding.Builder;
@@ -128,6 +127,9 @@ public class WhenAnyObservableTests
         await Assert.That(values[0]).IsEqualTo(99);
     }
 
+    /// <summary>
+    /// Resets and initializes the ReactiveUI binding infrastructure for testing.
+    /// </summary>
     internal static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();

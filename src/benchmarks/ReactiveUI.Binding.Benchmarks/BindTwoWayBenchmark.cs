@@ -7,8 +7,6 @@ using System.Reactive.Concurrency;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 
-using ReactiveUI.Binding;
-
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>
@@ -22,9 +20,19 @@ namespace ReactiveUI.Binding.Benchmarks;
 [MarkdownExporterAttribute.GitHub]
 public class BindTwoWayBenchmark
 {
+    /// <summary>
+    /// Represents the number of property change events to be triggered during the benchmark tests.
+    /// </summary>
     private const int PropertyChangeCount = 1000;
 
+    /// <summary>
+    /// The source and target view models used for binding benchmarks.
+    /// </summary>
     private BenchmarkViewModel _source = null!;
+
+    /// <summary>
+    /// The target view used for binding benchmarks.
+    /// </summary>
     private BenchmarkView _target = null!;
 
     /// <summary>
@@ -87,9 +95,12 @@ public class BindTwoWayBenchmark
     }
 
     /// <summary>
-    /// Triggers source generator dispatch entry for BenchmarkView.DisplayName.
-    /// Required for the reverse observation path in BindTwoWay.
+    /// Observes changes to the <see cref="BenchmarkView.DisplayName"/> property using ReactiveUI's
+    /// expression-tree-based binding APIs. This method is essential for setting up the reverse
+    /// observation path required in bi-directional bindings when benchmarking BindTwoWay.
     /// </summary>
+    /// <param name="view">The instance of <see cref="BenchmarkView"/> whose <see cref="BenchmarkView.DisplayName"/> property changes are observed.</param>
+    /// <returns>An observable sequence of <see cref="string"/> values that represent the changes to the <see cref="BenchmarkView.DisplayName"/> property.</returns>
     internal static IObservable<string> TriggerViewGeneration(BenchmarkView view)
         => view.WhenChanged(x => x.DisplayName);
 }

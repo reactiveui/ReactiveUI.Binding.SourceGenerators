@@ -11,6 +11,9 @@ namespace ReactiveUI.Binding.AotValidation;
 /// </summary>
 public class AotView : INotifyPropertyChanged
 {
+    /// <summary>
+    /// Backing field for the <see cref="DisplayName"/> property, representing the display name of the view.
+    /// </summary>
     private string _displayName = string.Empty;
 
     /// <inheritdoc/>

@@ -11,6 +11,9 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class TestAddress : INotifyPropertyChanged
 {
+    /// <summary>
+    /// The backer for City.
+    /// </summary>
     private string _city = string.Empty;
 
     /// <inheritdoc/>

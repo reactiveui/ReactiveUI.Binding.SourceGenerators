@@ -21,7 +21,7 @@ public class BindTwoWayGeneratorTests
     public async Task SingleProperty_StringToString()
     {
         var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyStringToString");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,7 @@ public class BindTwoWayGeneratorTests
     public async Task SingleProperty_IntToInt()
     {
         var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyIntToInt");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +47,7 @@ public class BindTwoWayGeneratorTests
     public async Task MultipleBindings()
     {
         var source = SharedSourceReader.ReadScenario("BindTwoWay/MultipleBindings");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +60,7 @@ public class BindTwoWayGeneratorTests
     public async Task ReactiveObject_Both()
     {
         var source = SharedSourceReader.ReadScenario("BindTwoWay/ReactiveObjectBoth");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -73,7 +73,7 @@ public class BindTwoWayGeneratorTests
     public async Task MixedWithBindOneWay()
     {
         var source = SharedSourceReader.ReadScenario("BindTwoWay/MixedWithBindOneWay");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -86,7 +86,7 @@ public class BindTwoWayGeneratorTests
     public async Task SingleProperty_WithConverters()
     {
         var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyWithConverters");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -99,7 +99,7 @@ public class BindTwoWayGeneratorTests
     public async Task SingleProperty_WithScheduler()
     {
         var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyWithScheduler");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -115,7 +115,7 @@ public class BindTwoWayGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyStringToString");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -127,7 +127,7 @@ public class BindTwoWayGeneratorTests
     public async Task SingleProperty_WithConvertersAndScheduler()
     {
         var source = SharedSourceReader.ReadScenario("BindTwoWay/SinglePropertyWithConvertersAndScheduler");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -140,7 +140,7 @@ public class BindTwoWayGeneratorTests
     public async Task MultipleSameTypeBindings()
     {
         var source = SharedSourceReader.ReadScenario("BindTwoWay/MultipleSameTypeBindings");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -154,7 +154,7 @@ public class BindTwoWayGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindTwoWay/MultipleSameTypeBindings");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 }

@@ -19,7 +19,7 @@ public static class TestUtilities
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         return string.Join(
             "\n",
-            source.Split(new[] { "\r\n", "\r", "\n" }, System.StringSplitOptions.None)
+            source.Split(["\r\n", "\r", "\n"], StringSplitOptions.None)
                 .Select(line => line.Trim()));
     }
 

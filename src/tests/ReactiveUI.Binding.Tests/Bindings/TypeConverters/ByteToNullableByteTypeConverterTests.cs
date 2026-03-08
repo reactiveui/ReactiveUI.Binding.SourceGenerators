@@ -98,7 +98,7 @@ public class ByteToNullableByteTypeConverterTests
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()
     {
         var converter = new ByteToNullableByteTypeConverter();
-        string value = "invalid";
+        var value = "invalid";
 
         var success = converter.TryConvertTyped(value, null, out var result);
 

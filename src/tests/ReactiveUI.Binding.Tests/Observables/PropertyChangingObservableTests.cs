@@ -199,6 +199,38 @@ public class PropertyChangingObservableTests
     }
 
     /// <summary>
+    /// Verifies that the <c>if (observer is null) { return; }</c> guard in OnPropertyChanging
+    /// is exercised by nulling <c>_observer</c> via reflection without calling Dispose (which
+    /// would unregister the handler). This deterministically covers the race-condition guard path.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task OnPropertyChanging_ObserverNulledViaReflection_DoesNotThrow()
+    {
+        var vm = new ManualTestViewModel { Name = "Alice" };
+        var results = new List<string>();
+        var observable = new PropertyChangingObservable<string>(vm, "Name", x => ((ManualTestViewModel)x).Name);
+
+        var subscription = observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+
+        // Null _observer via reflection WITHOUT calling Dispose so the PropertyChanging
+        // event handler remains registered — when the event fires, OnPropertyChanging runs
+        // with _observer == null, deterministically hitting the null-guard branch.
+        var observerField = subscription.GetType()
+            .GetField("_observer", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        observerField?.SetValue(subscription, null);
+
+        var action = () => vm.RaisePropertyChanging("Name");
+        await Assert.That(action).ThrowsNothing();
+
+        // Only the initial value should have been emitted; no second value after null-observer.
+        await Assert.That(results).Count().IsEqualTo(1);
+
+        // Cleanup: Dispose will see _observer already null and skip unregistration.
+        subscription.Dispose();
+    }
+
+    /// <summary>
     /// Verifies that the observer-is-null branch in OnPropertyChanging is safely handled when
     /// PropertyChanging fires concurrently with disposal on another thread.
     /// Covers PropertyChangingObservable line 86 (observer is null race-condition guard).
@@ -238,43 +270,65 @@ public class PropertyChangingObservableTests
         await Assert.That(results).Count().IsGreaterThanOrEqualTo(1);
     }
 
+    /// <summary>
+    /// A test view model that implements <see cref="INotifyPropertyChanging"/> for concurrent disposal tests.
+    /// </summary>
     private sealed class ConcurrentChangingTestViewModel : INotifyPropertyChanging
     {
+        /// <inheritdoc/>
         public event PropertyChangingEventHandler? PropertyChanging;
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
         public string Name { get; set; } = "Alice";
 
+        /// <summary>
+        /// Raises the <see cref="PropertyChanging"/> event for the specified property.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that is changing.</param>
         public void RaisePropertyChanging(string? propertyName) =>
             PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
     }
 
+    /// <summary>
+    /// A test view model that implements <see cref="INotifyPropertyChanging"/> with manual event raising.
+    /// </summary>
     private sealed class ManualTestViewModel : INotifyPropertyChanging
     {
+        /// <inheritdoc/>
         public event PropertyChangingEventHandler? PropertyChanging;
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
         public string Name { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Raises the <see cref="PropertyChanging"/> event for the specified property.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that is changing.</param>
         public void RaisePropertyChanging(string? propertyName) =>
             PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
     }
 
-    private sealed class AnonymousObserver<T> : IObserver<T>
+    /// <summary>
+    /// A simple observer that delegates to provided actions.
+    /// </summary>
+    /// <typeparam name="T">The type of elements observed.</typeparam>
+    /// <param name="onNext">The action to invoke for each element.</param>
+    /// <param name="onError">The action to invoke on error.</param>
+    /// <param name="onCompleted">The action to invoke on completion.</param>
+    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted)
+        : IObserver<T>
     {
-        private readonly Action<T> _onNext;
-        private readonly Action<Exception> _onError;
-        private readonly Action _onCompleted;
+        /// <inheritdoc/>
+        public void OnCompleted() => onCompleted();
 
-        public AnonymousObserver(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-        {
-            _onNext = onNext;
-            _onError = onError;
-            _onCompleted = onCompleted;
-        }
+        /// <inheritdoc/>
+        public void OnError(Exception error) => onError(error);
 
-        public void OnCompleted() => _onCompleted();
-
-        public void OnError(Exception error) => _onError(error);
-
-        public void OnNext(T value) => _onNext(value);
+        /// <inheritdoc/>
+        public void OnNext(T value) => onNext(value);
     }
 }

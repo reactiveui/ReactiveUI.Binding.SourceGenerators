@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 
 using ReactiveUI.Binding.Expressions;
@@ -21,6 +20,10 @@ namespace ReactiveUI.Binding.ObservableForProperty;
     "Creating Expressions requires unreferenced code because the members being referenced by the Expression may be trimmed.")]
 public static class ReactiveNotifyPropertyChangedMixin
 {
+    /// <summary>
+    /// MRU cache that maps (sender type, property name, before-change flag) to the best
+    /// <see cref="ICreatesObservableForProperty"/> implementation for that combination.
+    /// </summary>
     private static readonly MemoizingMRUCache<(Type senderType, string propertyName, bool beforeChange), ICreatesObservableForProperty?>
         NotifyFactoryCache =
             new(
@@ -59,11 +62,11 @@ public static class ReactiveNotifyPropertyChangedMixin
         ArgumentExceptionHelper.ThrowIfNull(item);
         ArgumentExceptionHelper.ThrowIfNull(propertyName);
 
-        var parameter = System.Linq.Expressions.Expression.Parameter(typeof(TSender), "x");
-        System.Linq.Expressions.Expression expr;
+        var parameter = Expression.Parameter(typeof(TSender), "x");
+        Expression expr;
         try
         {
-            expr = System.Linq.Expressions.Expression.Property(parameter, propertyName);
+            expr = Expression.Property(parameter, propertyName);
         }
         catch
         {
@@ -156,7 +159,7 @@ public static class ReactiveNotifyPropertyChangedMixin
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     public static IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TSender, TValue>(
         this TSender? item,
-        System.Linq.Expressions.Expression<Func<TSender, TValue>> property,
+        Expression<Func<TSender, TValue>> property,
         bool beforeChange = false,
         bool skipInitial = true,
         bool isDistinct = true)
@@ -186,7 +189,7 @@ public static class ReactiveNotifyPropertyChangedMixin
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     public static IObservable<IObservedChange<TSender, TValue>> SubscribeToExpressionChain<TSender, TValue>(
         this TSender? source,
-        System.Linq.Expressions.Expression? expression,
+        Expression? expression,
         bool beforeChange = false,
         bool skipInitial = true,
         bool isDistinct = true)
@@ -222,9 +225,16 @@ public static class ReactiveNotifyPropertyChangedMixin
         return isDistinct ? r.DistinctUntilChanged(x => x.Value) : r;
     }
 
+    /// <summary>
+    /// Creates an observable that tracks nested property changes for a single link in an expression chain.
+    /// </summary>
+    /// <param name="expression">The expression representing the current property in the chain.</param>
+    /// <param name="sourceChange">The observed change from the previous link in the chain.</param>
+    /// <param name="beforeChange">If <see langword="true"/>, subscribes to before-change notifications.</param>
+    /// <returns>An observable of observed changes for the current property link.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     internal static IObservable<IObservedChange<object?, object?>> NestedObservedChanges(
-        System.Linq.Expressions.Expression expression,
+        Expression expression,
         IObservedChange<object?, object?> sourceChange,
         bool beforeChange)
     {
@@ -240,10 +250,18 @@ public static class ReactiveNotifyPropertyChangedMixin
             .Select(static x => new ObservedChange<object?, object?>(x.Sender, x.Expression, x.GetValueOrDefault()));
     }
 
+    /// <summary>
+    /// Gets property change notifications for a single property on an object by resolving the
+    /// best <see cref="ICreatesObservableForProperty"/> implementation from the service locator.
+    /// </summary>
+    /// <param name="sender">The object to observe.</param>
+    /// <param name="expression">The expression identifying the property to observe.</param>
+    /// <param name="beforeChange">If <see langword="true"/>, subscribes to before-change notifications.</param>
+    /// <returns>An observable of observed changes for the property.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     internal static IObservable<IObservedChange<object?, object?>> NotifyForProperty(
         object sender,
-        System.Linq.Expressions.Expression expression,
+        Expression expression,
         bool beforeChange)
     {
         ArgumentExceptionHelper.ThrowIfNull(expression);

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 
 namespace ReactiveUI.Binding.Reactive;
@@ -16,7 +15,14 @@ namespace ReactiveUI.Binding.Reactive;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ObserveOnObservable<T> : IObservable<T>
 {
+    /// <summary>
+    /// The source observable to observe on the specified scheduler.
+    /// </summary>
     private readonly IObservable<T> _source;
+
+    /// <summary>
+    /// The scheduler to forward notifications on.
+    /// </summary>
     private readonly IScheduler _scheduler;
 
     /// <summary>
@@ -26,17 +32,16 @@ public sealed class ObserveOnObservable<T> : IObservable<T>
     /// <param name="scheduler">The scheduler to forward notifications on.</param>
     public ObserveOnObservable(IObservable<T> source, IScheduler scheduler)
     {
-        _source = source ?? throw new ArgumentNullException(nameof(source));
-        _scheduler = scheduler ?? throw new ArgumentNullException(nameof(scheduler));
+        ArgumentExceptionHelper.ThrowIfNull(source);
+        ArgumentExceptionHelper.ThrowIfNull(scheduler);
+        _source = source;
+        _scheduler = scheduler;
     }
 
     /// <inheritdoc/>
     public IDisposable Subscribe(IObserver<T> observer)
     {
-        if (observer is null)
-        {
-            throw new ArgumentNullException(nameof(observer));
-        }
+        ArgumentExceptionHelper.ThrowIfNull(observer);
 
         var composite = new CompositeDisposable();
         var subscription = _source.Subscribe(new ObserveOnObserver(observer, _scheduler, composite));
@@ -44,12 +49,32 @@ public sealed class ObserveOnObservable<T> : IObservable<T>
         return composite;
     }
 
+    /// <summary>
+    /// Observer that forwards notifications to the downstream observer on the specified scheduler.
+    /// </summary>
     private sealed class ObserveOnObserver : IObserver<T>
     {
+        /// <summary>
+        /// The downstream observer.
+        /// </summary>
         private readonly IObserver<T> _observer;
+
+        /// <summary>
+        /// The scheduler to forward notifications on.
+        /// </summary>
         private readonly IScheduler _scheduler;
+
+        /// <summary>
+        /// The composite disposable tracking scheduled work.
+        /// </summary>
         private readonly CompositeDisposable _disposable;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObserveOnObserver"/> class.
+        /// </summary>
+        /// <param name="observer">The downstream observer.</param>
+        /// <param name="scheduler">The scheduler to forward notifications on.</param>
+        /// <param name="disposable">The composite disposable tracking scheduled work.</param>
         public ObserveOnObserver(IObserver<T> observer, IScheduler scheduler, CompositeDisposable disposable)
         {
             _observer = observer;
@@ -57,18 +82,21 @@ public sealed class ObserveOnObservable<T> : IObservable<T>
             _disposable = disposable;
         }
 
+        /// <inheritdoc/>
         public void OnCompleted()
         {
             var d = _scheduler.Schedule(() => _observer.OnCompleted());
             _disposable.Add(d);
         }
 
+        /// <inheritdoc/>
         public void OnError(Exception error)
         {
             var d = _scheduler.Schedule(() => _observer.OnError(error));
             _disposable.Add(d);
         }
 
+        /// <inheritdoc/>
         public void OnNext(T value)
         {
             var d = _scheduler.Schedule(() => _observer.OnNext(value));

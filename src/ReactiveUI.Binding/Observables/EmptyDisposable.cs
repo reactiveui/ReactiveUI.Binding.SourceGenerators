@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
 using System.ComponentModel;
 
 namespace ReactiveUI.Binding.Observables;
@@ -19,6 +18,10 @@ public sealed class EmptyDisposable : IDisposable
     /// </summary>
     public static readonly EmptyDisposable Instance = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EmptyDisposable"/> class.
+    /// Prevents external instantiation. Use <see cref="Instance"/> instead.
+    /// </summary>
     private EmptyDisposable()
     {
     }

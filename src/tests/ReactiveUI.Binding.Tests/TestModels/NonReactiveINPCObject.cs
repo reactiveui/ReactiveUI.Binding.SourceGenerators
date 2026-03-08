@@ -13,6 +13,7 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class NonReactiveINPCObject : INotifyPropertyChanged
 {
+    /// <summary>The backing field for <see cref="InpcProperty"/>.</summary>
     private string _inpcProperty = string.Empty;
 
     /// <inheritdoc/>

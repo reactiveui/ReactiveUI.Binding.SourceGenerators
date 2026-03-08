@@ -2,9 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
 using System.ComponentModel;
-using System.Threading;
 
 namespace ReactiveUI.Binding.Observables;
 
@@ -16,31 +14,56 @@ namespace ReactiveUI.Binding.Observables;
 /// <typeparam name="T3">The type of element 3.</typeparam>
 /// <typeparam name="TResult">The result element type.</typeparam>
 [EditorBrowsable(EditorBrowsableState.Never)]
+[ExcludeFromCodeCoverage]
 internal sealed class CombineLatest3Observable<T1, T2, T3, TResult> : IObservable<TResult>
 {
+    /// <summary>
+    /// The 1st source observable sequence.
+    /// </summary>
     private readonly IObservable<T1> _source1;
+
+    /// <summary>
+    /// The 2nd source observable sequence.
+    /// </summary>
     private readonly IObservable<T2> _source2;
+
+    /// <summary>
+    /// The 3rd source observable sequence.
+    /// </summary>
     private readonly IObservable<T3> _source3;
+
+    /// <summary>
+    /// The function to combine the latest values from all sources into a result.
+    /// </summary>
     private readonly Func<T1, T2, T3, TResult> _resultSelector;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CombineLatest3Observable{T1, T2, T3, TResult}"/> class.
+    /// </summary>
+    /// <param name="source1">The 1st source observable.</param>
+    /// <param name="source2">The 2nd source observable.</param>
+    /// <param name="source3">The 3rd source observable.</param>
+    /// <param name="resultSelector">The function to combine the latest values.</param>
     public CombineLatest3Observable(
         IObservable<T1> source1,
         IObservable<T2> source2,
         IObservable<T3> source3,
         Func<T1, T2, T3, TResult> resultSelector)
     {
-        _source1 = source1 ?? throw new ArgumentNullException(nameof(source1));
-        _source2 = source2 ?? throw new ArgumentNullException(nameof(source2));
-        _source3 = source3 ?? throw new ArgumentNullException(nameof(source3));
-        _resultSelector = resultSelector ?? throw new ArgumentNullException(nameof(resultSelector));
+        ArgumentExceptionHelper.ThrowIfNull(source1);
+        ArgumentExceptionHelper.ThrowIfNull(source2);
+        ArgumentExceptionHelper.ThrowIfNull(source3);
+        ArgumentExceptionHelper.ThrowIfNull(resultSelector);
+        _source1 = source1;
+        _source2 = source2;
+        _source3 = source3;
+        _resultSelector = resultSelector;
     }
 
+    /// <inheritdoc/>
     public IDisposable Subscribe(IObserver<TResult> observer)
     {
-        if (observer is null)
-        {
-            throw new ArgumentNullException(nameof(observer));
-        }
+        ArgumentExceptionHelper.ThrowIfNull(observer);
 
         var sub = new Subscription(observer, _resultSelector);
         sub.Subscribe1(_source1);
@@ -49,53 +72,112 @@ internal sealed class CombineLatest3Observable<T1, T2, T3, TResult> : IObservabl
         return sub;
     }
 
+    /// <summary>
+    /// Manages the active subscriptions to all three source observables and emits combined results.
+    /// </summary>
     private sealed class Subscription : IDisposable
     {
+        /// <summary>
+        /// The function to combine the latest values from all sources into a result.
+        /// </summary>
         private readonly Func<T1, T2, T3, TResult> _resultSelector;
+
+        /// <summary>
+        /// The array of inner source subscriptions.
+        /// </summary>
         private readonly IDisposable?[] _subscriptions = new IDisposable?[3];
+
+        /// <summary>
+        /// The downstream observer receiving combined results. Set to <see langword="null"/> on disposal.
+        /// </summary>
         private IObserver<TResult>? _observer;
+
+        /// <summary>
+        /// The latest value received from source 1.
+        /// </summary>
         private T1 _value1 = default!;
+
+        /// <summary>
+        /// The latest value received from source 2.
+        /// </summary>
         private T2 _value2 = default!;
+
+        /// <summary>
+        /// The latest value received from source 3.
+        /// </summary>
         private T3 _value3 = default!;
+
+        /// <summary>
+        /// Whether source 1 has emitted at least one value.
+        /// </summary>
         private bool _has1;
+
+        /// <summary>
+        /// Whether source 2 has emitted at least one value.
+        /// </summary>
         private bool _has2;
+
+        /// <summary>
+        /// Whether source 3 has emitted at least one value.
+        /// </summary>
         private bool _has3;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Subscription"/> class.
+        /// </summary>
+        /// <param name="observer">The downstream observer.</param>
+        /// <param name="resultSelector">The function to combine the latest values.</param>
         public Subscription(IObserver<TResult> observer, Func<T1, T2, T3, TResult> resultSelector)
         {
             _observer = observer;
             _resultSelector = resultSelector;
         }
 
+        /// <summary>
+        /// Subscribes to the 1st source observable.
+        /// </summary>
+        /// <param name="source">The 1st source observable.</param>
         public void Subscribe1(IObservable<T1> source)
         {
             var sub = source.Subscribe(new Observer1(this));
             Volatile.Write(ref _subscriptions[0], sub);
         }
 
+        /// <summary>
+        /// Subscribes to the 2nd source observable.
+        /// </summary>
+        /// <param name="source">The 2nd source observable.</param>
         public void Subscribe2(IObservable<T2> source)
         {
             var sub = source.Subscribe(new Observer2(this));
             Volatile.Write(ref _subscriptions[1], sub);
         }
 
+        /// <summary>
+        /// Subscribes to the 3rd source observable.
+        /// </summary>
+        /// <param name="source">The 3rd source observable.</param>
         public void Subscribe3(IObservable<T3> source)
         {
             var sub = source.Subscribe(new Observer3(this));
             Volatile.Write(ref _subscriptions[2], sub);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if (Interlocked.Exchange(ref _observer, null) != null)
             {
-                for (int i = 0; i < _subscriptions.Length; i++)
+                for (var i = 0; i < _subscriptions.Length; i++)
                 {
                     Interlocked.Exchange(ref _subscriptions[i], null)?.Dispose();
                 }
             }
         }
 
+        /// <summary>
+        /// Emits the combined result if all sources have produced at least one value.
+        /// </summary>
         private void TryEmit()
         {
             if (_has1 && _has2 && _has3)
@@ -104,61 +186,70 @@ internal sealed class CombineLatest3Observable<T1, T2, T3, TResult> : IObservabl
             }
         }
 
-        private sealed class Observer1 : IObserver<T1>
+        /// <summary>
+        /// Observer for the 1st source observable.
+        /// </summary>
+        /// <param name="parent">The parent subscription.</param>
+        private sealed class Observer1(Subscription parent) : IObserver<T1>
         {
-            private readonly Subscription _parent;
-
-            public Observer1(Subscription parent) => _parent = parent;
-
+            /// <inheritdoc/>
             public void OnNext(T1 value)
             {
-                _parent._value1 = value;
-                _parent._has1 = true;
-                _parent.TryEmit();
+                parent._value1 = value;
+                parent._has1 = true;
+                parent.TryEmit();
             }
 
-            public void OnError(Exception error) => _parent._observer?.OnError(error);
+            /// <inheritdoc/>
+            public void OnError(Exception error) => parent._observer?.OnError(error);
 
+            /// <inheritdoc/>
             public void OnCompleted()
             {
             }
         }
 
-        private sealed class Observer2 : IObserver<T2>
+        /// <summary>
+        /// Observer for the 2nd source observable.
+        /// </summary>
+        /// <param name="parent">The parent subscription.</param>
+        private sealed class Observer2(Subscription parent) : IObserver<T2>
         {
-            private readonly Subscription _parent;
-
-            public Observer2(Subscription parent) => _parent = parent;
-
+            /// <inheritdoc/>
             public void OnNext(T2 value)
             {
-                _parent._value2 = value;
-                _parent._has2 = true;
-                _parent.TryEmit();
+                parent._value2 = value;
+                parent._has2 = true;
+                parent.TryEmit();
             }
 
-            public void OnError(Exception error) => _parent._observer?.OnError(error);
+            /// <inheritdoc/>
+            public void OnError(Exception error) => parent._observer?.OnError(error);
 
+            /// <inheritdoc/>
             public void OnCompleted()
             {
             }
         }
 
-        private sealed class Observer3 : IObserver<T3>
+        /// <summary>
+        /// Observer for the 3rd source observable.
+        /// </summary>
+        /// <param name="parent">The parent subscription.</param>
+        private sealed class Observer3(Subscription parent) : IObserver<T3>
         {
-            private readonly Subscription _parent;
-
-            public Observer3(Subscription parent) => _parent = parent;
-
+            /// <inheritdoc/>
             public void OnNext(T3 value)
             {
-                _parent._value3 = value;
-                _parent._has3 = true;
-                _parent.TryEmit();
+                parent._value3 = value;
+                parent._has3 = true;
+                parent.TryEmit();
             }
 
-            public void OnError(Exception error) => _parent._observer?.OnError(error);
+            /// <inheritdoc/>
+            public void OnError(Exception error) => parent._observer?.OnError(error);
 
+            /// <inheritdoc/>
             public void OnCompleted()
             {
             }

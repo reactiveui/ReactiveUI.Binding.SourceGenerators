@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using ReactiveUI.Binding;
-
 namespace ReactiveUI.Binding.Tests.Bindings;
 
 /// <summary>
@@ -692,6 +690,13 @@ public class BindingTypeConverterTryConvertTypedTests
     public async Task NullableDecimalToDecimal_Failure_Null() =>
         await AssertConverterFailure(new NullableDecimalToDecimalTypeConverter(), null);
 
+    /// <summary>
+    /// Asserts that the converter successfully converts the input to the expected output.
+    /// </summary>
+    /// <param name="converter">The converter to test.</param>
+    /// <param name="input">The input value to convert.</param>
+    /// <param name="expectedOutput">The expected conversion result.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
     private static async Task AssertConverterSuccess(IBindingTypeConverter converter, object? input, object? expectedOutput)
     {
         var success = converter.TryConvertTyped(input, null, out var result);
@@ -699,6 +704,12 @@ public class BindingTypeConverterTryConvertTypedTests
         await Assert.That(result).IsEqualTo(expectedOutput);
     }
 
+    /// <summary>
+    /// Asserts that the converter fails to convert the given input.
+    /// </summary>
+    /// <param name="converter">The converter to test.</param>
+    /// <param name="input">The input value that should fail conversion.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
     private static async Task AssertConverterFailure(IBindingTypeConverter converter, object? input)
     {
         var success = converter.TryConvertTyped(input, null, out _);

@@ -21,10 +21,8 @@ internal static class ModelFactory
     internal static PropertyPathSegment CreatePropertyPathSegment(
         string name = "Name",
         string type = "global::System.String",
-        string declaringType = "global::TestApp.MyViewModel")
-    {
-        return new PropertyPathSegment(name, type, declaringType);
-    }
+        string declaringType = "global::TestApp.MyViewModel") =>
+        new(name, type, declaringType);
 
     /// <summary>
     /// Creates an <see cref="InvocationInfo"/> with sensible defaults for a single-property WhenChanged invocation.
@@ -51,12 +49,11 @@ internal static class ModelFactory
         EquatableArray<string>? expressionTexts = null)
     {
         var paths = propertyPaths ?? new EquatableArray<EquatableArray<PropertyPathSegment>>(
-            new[]
-            {
-                new EquatableArray<PropertyPathSegment>(new[] { CreatePropertyPathSegment() }),
-            });
+        [
+            new EquatableArray<PropertyPathSegment>([CreatePropertyPathSegment()])
+        ]);
 
-        var texts = expressionTexts ?? new EquatableArray<string>(new[] { "x => x.Name" });
+        var texts = expressionTexts ?? new EquatableArray<string>(["x => x.Name"]);
 
         return new InvocationInfo(
             callerFilePath,
@@ -107,9 +104,9 @@ internal static class ModelFactory
         bool hasConverterOverride = false)
     {
         var sourcePath = sourcePropertyPath ?? new EquatableArray<PropertyPathSegment>(
-            new[] { CreatePropertyPathSegment("Name", "global::System.String", sourceTypeFullName) });
+            [CreatePropertyPathSegment("Name", "global::System.String", sourceTypeFullName)]);
         var targetPath = targetPropertyPath ?? new EquatableArray<PropertyPathSegment>(
-            new[] { CreatePropertyPathSegment("Text", "global::System.String", targetTypeFullName) });
+            [CreatePropertyPathSegment("Text", "global::System.String", targetTypeFullName)]);
 
         return new BindingInvocationInfo(
             callerFilePath,
@@ -157,7 +154,7 @@ internal static class ModelFactory
         bool inheritsAndroidView = false,
         EquatableArray<ObservablePropertyInfo>? properties = null)
     {
-        var props = properties ?? new EquatableArray<ObservablePropertyInfo>(Array.Empty<ObservablePropertyInfo>());
+        var props = properties ?? new EquatableArray<ObservablePropertyInfo>([]);
 
         return new ClassBindingInfo(
             fullyQualifiedName,
@@ -174,6 +171,81 @@ internal static class ModelFactory
     }
 
     /// <summary>
+    /// Creates a <see cref="BindCommandInvocationInfo"/> with sensible defaults.
+    /// </summary>
+    /// <param name="callerFilePath">The caller file path.</param>
+    /// <param name="callerLineNumber">The caller line number.</param>
+    /// <param name="viewTypeFullName">The fully qualified view type.</param>
+    /// <param name="viewModelTypeFullName">The fully qualified view model type.</param>
+    /// <param name="commandPropertyPath">The command property path. If null, a single Save property path is created.</param>
+    /// <param name="controlPropertyPath">The control property path. If null, a single SaveButton property path is created.</param>
+    /// <param name="commandTypeFullName">The command type.</param>
+    /// <param name="controlTypeFullName">The control type.</param>
+    /// <param name="hasObservableParameter">Whether the invocation includes an IObservable parameter.</param>
+    /// <param name="hasExpressionParameter">Whether the invocation includes an Expression parameter.</param>
+    /// <param name="parameterTypeFullName">The parameter type, or null.</param>
+    /// <param name="parameterPropertyPath">The parameter property path, or null.</param>
+    /// <param name="resolvedEventName">The resolved event name, or null.</param>
+    /// <param name="resolvedEventArgsTypeFullName">The resolved event args type, or null.</param>
+    /// <param name="commandExpressionText">The command expression text.</param>
+    /// <param name="controlExpressionText">The control expression text.</param>
+    /// <param name="parameterExpressionText">The parameter expression text, or null.</param>
+    /// <param name="hasCommandProperty">Whether the control has a Command property.</param>
+    /// <param name="hasCommandParameterProperty">Whether the control has a CommandParameter property.</param>
+    /// <param name="hasEnabledProperty">Whether the control has an Enabled property.</param>
+    /// <returns>A new BindCommand invocation info.</returns>
+    internal static BindCommandInvocationInfo CreateBindCommandInvocationInfo(
+        string callerFilePath = "/src/Views/MyView.cs",
+        int callerLineNumber = 50,
+        string viewTypeFullName = "global::TestApp.MyView",
+        string viewModelTypeFullName = "global::TestApp.MyViewModel",
+        EquatableArray<PropertyPathSegment>? commandPropertyPath = null,
+        EquatableArray<PropertyPathSegment>? controlPropertyPath = null,
+        string commandTypeFullName = "global::System.Windows.Input.ICommand",
+        string controlTypeFullName = "global::TestApp.MyButton",
+        bool hasObservableParameter = false,
+        bool hasExpressionParameter = false,
+        string? parameterTypeFullName = null,
+        EquatableArray<PropertyPathSegment>? parameterPropertyPath = null,
+        string? resolvedEventName = "Click",
+        string? resolvedEventArgsTypeFullName = "global::System.EventArgs",
+        string commandExpressionText = "x => x.Save",
+        string controlExpressionText = "x => x.SaveButton",
+        string? parameterExpressionText = null,
+        bool hasCommandProperty = false,
+        bool hasCommandParameterProperty = false,
+        bool hasEnabledProperty = false)
+    {
+        var cmdPath = commandPropertyPath ?? new EquatableArray<PropertyPathSegment>(
+            [CreatePropertyPathSegment("Save", commandTypeFullName, viewModelTypeFullName)]);
+        var ctrlPath = controlPropertyPath ?? new EquatableArray<PropertyPathSegment>(
+            [CreatePropertyPathSegment("SaveButton", controlTypeFullName, viewTypeFullName)]);
+
+        return new BindCommandInvocationInfo(
+            callerFilePath,
+            callerLineNumber,
+            viewTypeFullName,
+            viewModelTypeFullName,
+            cmdPath,
+            ctrlPath,
+            commandTypeFullName,
+            controlTypeFullName,
+            hasObservableParameter,
+            hasExpressionParameter,
+            parameterTypeFullName,
+            parameterPropertyPath,
+            resolvedEventName,
+            resolvedEventArgsTypeFullName,
+            "BindCommand",
+            commandExpressionText,
+            controlExpressionText,
+            parameterExpressionText,
+            hasCommandProperty,
+            hasCommandParameterProperty,
+            hasEnabledProperty);
+    }
+
+    /// <summary>
     /// Creates an <see cref="ObservablePropertyInfo"/> with sensible defaults.
     /// </summary>
     /// <param name="propertyName">The property name.</param>
@@ -187,13 +259,11 @@ internal static class ModelFactory
         string propertyTypeFullName = "global::System.String",
         bool hasPublicGetter = true,
         bool isIndexer = false,
-        bool isDependencyProperty = false)
-    {
-        return new ObservablePropertyInfo(
+        bool isDependencyProperty = false) =>
+        new(
             propertyName,
             propertyTypeFullName,
             hasPublicGetter,
             isIndexer,
             isDependencyProperty);
-    }
 }

@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System;
 using System.ComponentModel;
 
 namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
@@ -12,7 +13,10 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class ObservablePropertyViewModel : INotifyPropertyChanged
 {
+    /// <summary>The backing field for <see cref="MyCommand"/>.</summary>
     private IObservable<string>? _myCommand;
+
+    /// <summary>The backing field for <see cref="OtherCommand"/>.</summary>
     private IObservable<string>? _otherCommand;
 
     /// <inheritdoc/>

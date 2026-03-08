@@ -46,8 +46,5 @@ public class ActionDisposableTests
     ///     Verifies that constructor throws ArgumentNullException when action is null.
     /// </summary>
     [Test]
-    public void Constructor_NullAction_ThrowsArgumentNullException()
-    {
-        Assert.Throws<ArgumentNullException>(() => new ActionDisposable(null!));
-    }
+    public void Constructor_NullAction_ThrowsArgumentNullException() => Assert.Throws<ArgumentNullException>(() => new ActionDisposable(null!));
 }

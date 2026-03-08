@@ -5,6 +5,7 @@
 using Microsoft.CodeAnalysis;
 
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Invocations;
@@ -29,7 +30,7 @@ internal static class WhenChangingInvocationGenerator
         var invocations = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: RoslynHelpers.IsWhenChangingInvocation,
-                transform: MetadataExtractor.ExtractWhenChangingInvocation)
+                transform: ObservationExtractor.ExtractWhenChangingInvocation)
             .Where(static x => x is not null)
             .Select(static (x, _) => x!);
 
@@ -41,7 +42,7 @@ internal static class WhenChangingInvocationGenerator
             combined,
             static (ctx, data) =>
             {
-                var source = WhenChangingCodeGenerator.Generate(data.Left.Left, data.Left.Right, data.Right);
+                var source = ObservationCodeGenerator.Generate(data.Left.Left, data.Left.Right, data.Right, "WhenChanging");
                 if (source != null)
                 {
                     ctx.AddSource("WhenChangingDispatch.g.cs", source);

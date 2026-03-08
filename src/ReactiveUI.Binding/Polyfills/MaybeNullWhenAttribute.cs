@@ -6,6 +6,8 @@
 // https://github.com/SimonCropp/Polyfill
 #if !NETCOREAPP3_0_OR_GREATER && !NETSTANDARD2_1_OR_GREATER
 
+using System.Diagnostics;
+
 namespace System.Diagnostics.CodeAnalysis;
 
 /// <summary>
@@ -34,8 +36,5 @@ internal sealed class MaybeNullWhenAttribute : Attribute
 }
 
 #else
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-
 [assembly: TypeForwardedTo(typeof(MaybeNullWhenAttribute))]
 #endif

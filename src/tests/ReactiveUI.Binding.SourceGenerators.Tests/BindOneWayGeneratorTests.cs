@@ -21,7 +21,7 @@ public class BindOneWayGeneratorTests
     public async Task SingleProperty_StringToString()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyStringToString");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,7 @@ public class BindOneWayGeneratorTests
     public async Task SingleProperty_IntToInt()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyIntToInt");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +47,7 @@ public class BindOneWayGeneratorTests
     public async Task MultipleBindings()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/MultipleBindings");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +60,7 @@ public class BindOneWayGeneratorTests
     public async Task ReactiveObject_Source()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/ReactiveObjectSource");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -73,7 +73,7 @@ public class BindOneWayGeneratorTests
     public async Task SingleProperty_WithConverter()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyWithConverter");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -86,7 +86,7 @@ public class BindOneWayGeneratorTests
     public async Task SingleProperty_WithScheduler()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyWithScheduler");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -102,7 +102,7 @@ public class BindOneWayGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyStringToString");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -114,7 +114,7 @@ public class BindOneWayGeneratorTests
     public async Task SingleProperty_WithConverterAndScheduler()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyWithConverterAndScheduler");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -127,7 +127,7 @@ public class BindOneWayGeneratorTests
     public async Task MultipleSameTypeBindings()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/MultipleSameTypeBindings");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -141,14 +141,14 @@ public class BindOneWayGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/MultipleSameTypeBindings");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
     /// <summary>
     /// Verifies that a method named "BindOneWay" on a non-ReactiveUI extension class is ignored
     /// by the generator. Exercises the extension class name mismatch guard in
-    /// MetadataExtractor.ExtractBindInvocation (lines 297-302).
+    /// the extraction helpers.ExtractBindInvocation (lines 297-302).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -204,7 +204,7 @@ public class BindOneWayGeneratorTests
     /// <summary>
     /// Verifies that BindOneWay with an identity lambda (x => x) as the source property
     /// produces no dispatch code. Exercises the segments.Count == 0 guard in
-    /// MetadataExtractor.ExtractPropertyPathFromLambda (line 578-581) for bind invocations.
+    /// the extraction helpers.ExtractPropertyPathFromLambda (line 578-581) for bind invocations.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -250,7 +250,7 @@ public class BindOneWayGeneratorTests
     /// <summary>
     /// Verifies that BindOneWay with a block-body lambda for the source property
     /// produces no dispatch code. Exercises the body == null guard in
-    /// MetadataExtractor.ExtractPropertyPathFromLambda (line 543-546) for bind invocations.
+    /// the extraction helpers.ExtractPropertyPathFromLambda (line 543-546) for bind invocations.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -296,7 +296,7 @@ public class BindOneWayGeneratorTests
     /// <summary>
     /// Verifies that BindOneWay with a field access lambda produces no dispatch code.
     /// Exercises the memberSymbolInfo.Symbol is not IPropertySymbol guard in
-    /// MetadataExtractor.ExtractPropertyPathFromLambda (line 558-561) for bind invocations.
+    /// the extraction helpers.ExtractPropertyPathFromLambda (line 558-561) for bind invocations.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

@@ -18,12 +18,18 @@ namespace ReactiveUI.Binding.Builder;
 /// </example>
 public static class RxBindingBuilder
 {
+    /// <summary>
+    /// Synchronization gate for initialization and reset operations.
+    /// </summary>
 #if NET9_0_OR_GREATER
-    private static readonly System.Threading.Lock _resetLock = new();
+    private static readonly Lock _resetLock = new();
 #else
     private static readonly object _resetLock = new();
 #endif
 
+    /// <summary>
+    /// Tracks whether ReactiveUI.Binding has been initialized (0 = not initialized, 1 = initialized).
+    /// </summary>
     private static int _hasBeenInitialized; // 0 = false, 1 = true
 
     /// <summary>

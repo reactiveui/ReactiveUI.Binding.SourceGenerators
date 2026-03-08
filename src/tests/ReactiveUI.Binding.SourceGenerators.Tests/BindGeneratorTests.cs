@@ -21,7 +21,7 @@ public class BindGeneratorTests
     public async Task SingleProperty_StringToString()
     {
         var source = SharedSourceReader.ReadScenario("Bind/SinglePropertyStringToString");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,7 @@ public class BindGeneratorTests
     public async Task MultipleBindings()
     {
         var source = SharedSourceReader.ReadScenario("Bind/MultipleBindings");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +47,7 @@ public class BindGeneratorTests
     public async Task SingleProperty_WithConverters()
     {
         var source = SharedSourceReader.ReadScenario("Bind/SinglePropertyWithConverters");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +60,7 @@ public class BindGeneratorTests
     public async Task SingleProperty_WithConvertersAndScheduler()
     {
         var source = SharedSourceReader.ReadScenario("Bind/SinglePropertyWithConvertersAndScheduler");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -76,7 +76,7 @@ public class BindGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("Bind/SinglePropertyStringToString");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(BindGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -90,7 +90,7 @@ public class BindGeneratorTests
     public async Task TwoSameTypeBindings_GeneratesElseIf()
     {
         var source = SharedSourceReader.ReadScenario("Bind/TwoSameTypeBindings");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(BindGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }

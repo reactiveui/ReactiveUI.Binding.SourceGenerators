@@ -6,6 +6,8 @@
 // https://github.com/SimonCropp/Polyfill
 #if !NET
 
+using System.Diagnostics;
+
 namespace System.Diagnostics.CodeAnalysis;
 
 using Targets = System.AttributeTargets;
@@ -45,7 +47,5 @@ internal sealed class DynamicallyAccessedMembersAttribute : Attribute
 }
 
 #else
-using System.Runtime.CompilerServices;
-
-[assembly: TypeForwardedTo(typeof(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute))]
+[assembly: TypeForwardedTo(typeof(DynamicallyAccessedMembersAttribute))]
 #endif

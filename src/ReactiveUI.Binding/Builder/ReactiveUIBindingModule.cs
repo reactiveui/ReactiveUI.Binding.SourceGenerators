@@ -16,6 +16,9 @@ namespace ReactiveUI.Binding.Builder;
 /// <list type="bullet">
 /// <item><description>Core <see cref="ICreatesObservableForProperty"/> implementations (INPC, POCO).</description></item>
 /// </list>
+/// Command binding for known patterns (Command property, event+Enabled, basic event) is handled
+/// at compile time by source generator plugins. Only custom <see cref="ICreatesCommandBinding"/>
+/// implementations registered by the user are resolved at runtime.
 /// Platform-specific modules (WPF, WinForms, MAUI) should be registered separately via
 /// <c>WithPlatformModule</c> or <c>UsingModule</c>.
 /// </remarks>

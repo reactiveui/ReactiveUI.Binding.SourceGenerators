@@ -2,9 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
 using System.ComponentModel;
-using System.Threading;
 
 namespace ReactiveUI.Binding.Observables;
 
@@ -17,7 +15,14 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class SelectObservable<TSource, TResult> : IObservable<TResult>
 {
+    /// <summary>
+    /// The upstream source observable.
+    /// </summary>
     private readonly IObservable<TSource> _source;
+
+    /// <summary>
+    /// The projection function applied to each element.
+    /// </summary>
     private readonly Func<TSource, TResult> _selector;
 
     /// <summary>
@@ -27,39 +32,53 @@ public sealed class SelectObservable<TSource, TResult> : IObservable<TResult>
     /// <param name="selector">The projection function.</param>
     public SelectObservable(IObservable<TSource> source, Func<TSource, TResult> selector)
     {
-        _source = source ?? throw new ArgumentNullException(nameof(source));
-        _selector = selector ?? throw new ArgumentNullException(nameof(selector));
+        ArgumentExceptionHelper.ThrowIfNull(source);
+        ArgumentExceptionHelper.ThrowIfNull(selector);
+        _source = source;
+        _selector = selector;
     }
 
     /// <inheritdoc/>
     public IDisposable Subscribe(IObserver<TResult> observer)
     {
-        if (observer is null)
-        {
-            throw new ArgumentNullException(nameof(observer));
-        }
+        ArgumentExceptionHelper.ThrowIfNull(observer);
 
         return _source.Subscribe(new SelectObserver(observer, _selector));
     }
 
+    /// <summary>
+    /// Observer that applies the projection function to each source element.
+    /// </summary>
     private sealed class SelectObserver : IObserver<TSource>
     {
+        /// <summary>
+        /// The downstream observer receiving projected values.
+        /// </summary>
         private readonly IObserver<TResult> _observer;
+
+        /// <summary>
+        /// The projection function applied to each element.
+        /// </summary>
         private readonly Func<TSource, TResult> _selector;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SelectObserver"/> class.
+        /// </summary>
+        /// <param name="observer">The downstream observer.</param>
+        /// <param name="selector">The projection function.</param>
         public SelectObserver(IObserver<TResult> observer, Func<TSource, TResult> selector)
         {
             _observer = observer;
             _selector = selector;
         }
 
-        public void OnNext(TSource value)
-        {
-            _observer.OnNext(_selector(value));
-        }
+        /// <inheritdoc/>
+        public void OnNext(TSource value) => _observer.OnNext(_selector(value));
 
+        /// <inheritdoc/>
         public void OnError(Exception error) => _observer.OnError(error);
 
+        /// <inheritdoc/>
         public void OnCompleted() => _observer.OnCompleted();
     }
 }

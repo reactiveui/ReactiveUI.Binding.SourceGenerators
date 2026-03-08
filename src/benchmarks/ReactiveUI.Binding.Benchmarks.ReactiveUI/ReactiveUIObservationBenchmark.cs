@@ -2,12 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Reactive.Linq;
-
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
-
-using ReactiveUI;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
@@ -21,25 +17,33 @@ namespace ReactiveUI.Binding.Benchmarks;
 [MarkdownExporterAttribute.GitHub]
 public class ReactiveUIObservationBenchmark
 {
+    /// <summary>
+    /// The number of property changes to fire during each benchmark iteration.
+    /// </summary>
     private const int PropertyChangeCount = 1000;
 
+    /// <summary>
+    /// The view model instance used for observation benchmarks.
+    /// </summary>
     private BenchmarkViewModel _vm = null!;
 
+    /// <summary>
+    /// Initializes static members of the <see cref="ReactiveUIObservationBenchmark"/> class.
+    /// Ensures ReactiveUI is configured before any benchmarks run.
+    /// </summary>
     static ReactiveUIObservationBenchmark() => ModuleInitializer.EnsureInitialized();
 
     /// <summary>
     /// Sets up a fresh view model before each benchmark iteration.
     /// </summary>
     [IterationSetup]
-    public void Setup()
-    {
+    public void Setup() =>
         _vm = new BenchmarkViewModel
         {
             Name = "Initial",
             Age = 0,
             Child = new BenchmarkChildViewModel { Value = "ChildInitial" },
         };
-    }
 
     /// <summary>
     /// Expression-tree single property observation: subscribe, fire N changes, dispose.

@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using Microsoft.CodeAnalysis.CSharp;
+
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.RuntimeExecution;
@@ -50,7 +52,7 @@ public class BindOneWayRuntimeTests
             }
             """;
 
-        var result = TestHelper.RunGenerator(source);
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.HasNoGeneratorDiagnostics();
         await result.HasGeneratedSource("BindOneWayDispatch.g.cs");
@@ -91,7 +93,7 @@ public class BindOneWayRuntimeTests
             }
             """;
 
-        var result = TestHelper.RunGenerator(source);
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
@@ -131,7 +133,7 @@ public class BindOneWayRuntimeTests
             }
             """;
 
-        var result = TestHelper.RunGenerator(source);
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
@@ -177,7 +179,7 @@ public class BindOneWayRuntimeTests
             }
             """;
 
-        var result = TestHelper.RunGenerator(source);
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.HasNoGeneratorDiagnostics();
         await result.HasGeneratedSource("BindTwoWayDispatch.g.cs");

@@ -11,6 +11,9 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// </summary>
 public class BenchmarkChildViewModel : INotifyPropertyChanged
 {
+    /// <summary>
+    /// The backing field for the <see cref="Value"/> property.
+    /// </summary>
     private string _value = string.Empty;
 
     /// <inheritdoc/>

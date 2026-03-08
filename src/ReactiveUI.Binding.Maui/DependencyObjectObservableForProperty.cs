@@ -45,10 +45,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         bool beforeChanged = false,
         bool suppressWarnings = false)
     {
-        if (sender is null)
-        {
-            throw new ArgumentNullException(nameof(sender));
-        }
+        ArgumentExceptionHelper.ThrowIfNull(sender);
 
         if (sender is not DependencyObject depSender)
         {

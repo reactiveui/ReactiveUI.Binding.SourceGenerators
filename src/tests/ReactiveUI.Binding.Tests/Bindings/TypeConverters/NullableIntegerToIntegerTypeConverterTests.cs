@@ -113,7 +113,7 @@ public class NullableIntegerToIntegerTypeConverterTests
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()
     {
         var converter = new NullableIntegerToIntegerTypeConverter();
-        string value = "invalid";
+        var value = "invalid";
 
         var success = converter.TryConvertTyped(value, null, out var result);
 

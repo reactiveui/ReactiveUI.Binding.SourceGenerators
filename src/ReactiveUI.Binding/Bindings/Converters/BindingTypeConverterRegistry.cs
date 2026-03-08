@@ -2,10 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Runtime.CompilerServices;
-
-using ReactiveUI.Binding.Helpers;
-
 namespace ReactiveUI.Binding;
 
 /// <summary>
@@ -36,12 +32,18 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public sealed class BindingTypeConverterRegistry
 {
+    /// <summary>
+    /// Synchronization gate for serializing write operations.
+    /// </summary>
 #if NET9_0_OR_GREATER
     private readonly Lock _gate = new();
 #else
     private readonly object _gate = new();
 #endif
 
+    /// <summary>
+    /// The current immutable snapshot of registered typed converters, read via volatile access.
+    /// </summary>
     private Snapshot? _snapshot;
 
     /// <summary>
@@ -170,6 +172,11 @@ public sealed class BindingTypeConverterRegistry
         return result;
     }
 
+    /// <summary>
+    /// Creates a shallow clone of the converter dictionary, preserving list references without deep-copying them.
+    /// </summary>
+    /// <param name="source">The source dictionary to clone.</param>
+    /// <returns>A new dictionary with the same entries as <paramref name="source"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>> CloneRegistryShallow(
         Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>> source)
