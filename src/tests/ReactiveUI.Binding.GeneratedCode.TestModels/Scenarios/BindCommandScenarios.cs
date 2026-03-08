@@ -68,4 +68,92 @@ public static class BindCommandScenarios
         SharedScenarios.BindCommand.DeepCommandPath.MyViewModel vm,
         SharedScenarios.BindCommand.DeepCommandPath.MyView view)
         => SharedScenarios.BindCommand.DeepCommandPath.Scenario.Execute(vm, view);
+
+    /// <summary>
+    /// Binds the Save command via Click+Enabled (no Command property, no parameter).
+    /// Routes through EventEnabledBindingPlugin.
+    /// </summary>
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable EventEnabled(
+        SharedScenarios.BindCommand.EventEnabled.MyViewModel vm,
+        SharedScenarios.BindCommand.EventEnabled.MyView view)
+        => SharedScenarios.BindCommand.EventEnabled.Scenario.Execute(vm, view);
+
+    /// <summary>
+    /// Binds the Save command via Click+Enabled with an expression parameter.
+    /// Routes through EventEnabledBindingPlugin (expression parameter variant).
+    /// </summary>
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable EventEnabledExprParam(
+        SharedScenarios.BindCommand.EventEnabledExprParam.MyViewModel vm,
+        SharedScenarios.BindCommand.EventEnabledExprParam.MyView view)
+        => SharedScenarios.BindCommand.EventEnabledExprParam.Scenario.Execute(vm, view);
+
+    /// <summary>
+    /// Binds the Save command via Click+Enabled with an observable parameter.
+    /// Routes through EventEnabledBindingPlugin (observable parameter variant).
+    /// </summary>
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <param name="parameter">An observable producing command parameters.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable EventEnabledObsParam(
+        SharedScenarios.BindCommand.EventEnabledObsParam.MyViewModel vm,
+        SharedScenarios.BindCommand.EventEnabledObsParam.MyView view,
+        IObservable<string> parameter)
+        => SharedScenarios.BindCommand.EventEnabledObsParam.Scenario.Execute(vm, view, parameter);
+
+    /// <summary>
+    /// Binds the Save command via Command property (no event, no parameter).
+    /// Routes through CommandPropertyBindingPlugin.
+    /// </summary>
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable CommandProperty(
+        SharedScenarios.BindCommand.CommandProperty.MyViewModel vm,
+        SharedScenarios.BindCommand.CommandProperty.MyView view)
+        => SharedScenarios.BindCommand.CommandProperty.Scenario.Execute(vm, view);
+
+    /// <summary>
+    /// Binds the Save command via Command property with an expression parameter.
+    /// Routes through CommandPropertyBindingPlugin (expression parameter variant).
+    /// </summary>
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable CommandPropertyExprParam(
+        SharedScenarios.BindCommand.CommandPropertyExprParam.MyViewModel vm,
+        SharedScenarios.BindCommand.CommandPropertyExprParam.MyView view)
+        => SharedScenarios.BindCommand.CommandPropertyExprParam.Scenario.Execute(vm, view);
+
+    /// <summary>
+    /// Binds the Save command via Command property with an observable parameter.
+    /// Routes through CommandPropertyBindingPlugin (observable parameter variant).
+    /// </summary>
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <param name="parameter">An observable producing command parameters.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable CommandPropertyObsParam(
+        SharedScenarios.BindCommand.CommandPropertyObsParam.MyViewModel vm,
+        SharedScenarios.BindCommand.CommandPropertyObsParam.MyView view,
+        IObservable<string> parameter)
+        => SharedScenarios.BindCommand.CommandPropertyObsParam.Scenario.Execute(vm, view, parameter);
+
+    /// <summary>
+    /// Binds the Save command to a control with no default event.
+    /// Falls back to runtime command binding service.
+    /// </summary>
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable NoEvent(
+        SharedScenarios.BindCommand.NoEvent.MyViewModel vm,
+        SharedScenarios.BindCommand.NoEvent.MyView view)
+        => SharedScenarios.BindCommand.NoEvent.Scenario.Execute(vm, view);
 }

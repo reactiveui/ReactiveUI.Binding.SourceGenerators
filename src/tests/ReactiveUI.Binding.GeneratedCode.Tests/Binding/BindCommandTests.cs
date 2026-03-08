@@ -346,6 +346,293 @@ public class BindCommandTests
         await Assert.That(action).ThrowsNothing();
     }
 
+    // ── EventEnabled (Click + Enabled, no Command property) ─────────────
+
+    /// <summary>
+    /// Verifies that clicking executes the command via event+Enabled binding.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EventEnabled_ClickExecutesCommand()
+    {
+        var vm = new SharedScenarios.BindCommand.EventEnabled.MyViewModel();
+        var view = new SharedScenarios.BindCommand.EventEnabled.MyView();
+        var command = new TrackingCommand();
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.EventEnabled(vm, view);
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that the Enabled property is synchronized with CanExecute.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EventEnabled_EnabledSyncedWithCanExecute()
+    {
+        var vm = new SharedScenarios.BindCommand.EventEnabled.MyViewModel();
+        var view = new SharedScenarios.BindCommand.EventEnabled.MyView();
+        var command = new TrackingCommand { CanExecuteResult = false };
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.EventEnabled(vm, view);
+
+        await Assert.That(view.SaveButton.Enabled).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies that the Enabled property becomes false when the command is null.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EventEnabled_NullCommand_DisablesControl()
+    {
+        var vm = new SharedScenarios.BindCommand.EventEnabled.MyViewModel();
+        var view = new SharedScenarios.BindCommand.EventEnabled.MyView();
+
+        using var binding = BindCommandScenarios.EventEnabled(vm, view);
+
+        await Assert.That(view.SaveButton.Enabled).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies that disposing the binding stops command execution.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EventEnabled_Dispose_StopsExecution()
+    {
+        var vm = new SharedScenarios.BindCommand.EventEnabled.MyViewModel();
+        var view = new SharedScenarios.BindCommand.EventEnabled.MyView();
+        var command = new TrackingCommand();
+        vm.Save = command;
+
+        var binding = BindCommandScenarios.EventEnabled(vm, view);
+        view.SaveButton.PerformClick();
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+
+        binding.Dispose();
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that CanExecute=false prevents execution via event+Enabled binding.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EventEnabled_CanExecuteFalse_DoesNotExecute()
+    {
+        var vm = new SharedScenarios.BindCommand.EventEnabled.MyViewModel();
+        var view = new SharedScenarios.BindCommand.EventEnabled.MyView();
+        var command = new TrackingCommand { CanExecuteResult = false };
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.EventEnabled(vm, view);
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies event+Enabled binding with an expression parameter.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EventEnabledExprParam_PassesParameter()
+    {
+        var vm = new SharedScenarios.BindCommand.EventEnabledExprParam.MyViewModel
+        {
+            CurrentItem = "TestItem",
+        };
+        var view = new SharedScenarios.BindCommand.EventEnabledExprParam.MyView();
+        var command = new TrackingCommand();
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.EventEnabledExprParam(vm, view);
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+        await Assert.That(command.LastParameter).IsEqualTo("TestItem");
+    }
+
+    /// <summary>
+    /// Verifies event+Enabled binding with an observable parameter.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EventEnabledObsParam_PassesParameter()
+    {
+        var vm = new SharedScenarios.BindCommand.EventEnabledObsParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.EventEnabledObsParam.MyView();
+        var command = new TrackingCommand();
+        var paramSubject = new System.Reactive.Subjects.BehaviorSubject<string>("obs-param");
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.EventEnabledObsParam(vm, view, paramSubject);
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.ExecuteCount).IsEqualTo(1);
+        await Assert.That(command.LastParameter).IsEqualTo("obs-param");
+    }
+
+    /// <summary>
+    /// Verifies event+Enabled binding with observable parameter updates reactively.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EventEnabledObsParam_ParameterUpdates()
+    {
+        var vm = new SharedScenarios.BindCommand.EventEnabledObsParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.EventEnabledObsParam.MyView();
+        var command = new TrackingCommand();
+        var paramSubject = new System.Reactive.Subjects.BehaviorSubject<string>("initial");
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.EventEnabledObsParam(vm, view, paramSubject);
+
+        paramSubject.OnNext("updated");
+        view.SaveButton.PerformClick();
+
+        await Assert.That(command.LastParameter).IsEqualTo("updated");
+    }
+
+    // ── CommandProperty (Command + CommandParameter, no event) ──────────
+
+    /// <summary>
+    /// Verifies that binding sets the Command property on the control.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandProperty_SetsCommandOnControl()
+    {
+        var vm = new SharedScenarios.BindCommand.CommandProperty.MyViewModel();
+        var view = new SharedScenarios.BindCommand.CommandProperty.MyView();
+        var command = new TrackingCommand();
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.CommandProperty(vm, view);
+
+        await Assert.That(view.SaveButton.Command).IsEqualTo(command);
+    }
+
+    /// <summary>
+    /// Verifies that setting the command after binding updates the control.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandProperty_CommandSetAfterBinding_UpdatesControl()
+    {
+        var vm = new SharedScenarios.BindCommand.CommandProperty.MyViewModel();
+        var view = new SharedScenarios.BindCommand.CommandProperty.MyView();
+        var command = new TrackingCommand();
+
+        using var binding = BindCommandScenarios.CommandProperty(vm, view);
+
+        vm.Save = command;
+
+        await Assert.That(view.SaveButton.Command).IsEqualTo(command);
+    }
+
+    /// <summary>
+    /// Verifies that changing the command updates the control's Command property.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandProperty_CommandChanges_ControlUpdated()
+    {
+        var vm = new SharedScenarios.BindCommand.CommandProperty.MyViewModel();
+        var view = new SharedScenarios.BindCommand.CommandProperty.MyView();
+        var first = new TrackingCommand();
+        var second = new TrackingCommand();
+        vm.Save = first;
+
+        using var binding = BindCommandScenarios.CommandProperty(vm, view);
+        await Assert.That(view.SaveButton.Command).IsEqualTo(first);
+
+        vm.Save = second;
+        await Assert.That(view.SaveButton.Command).IsEqualTo(second);
+    }
+
+    /// <summary>
+    /// Verifies that null command results in null on the control.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandProperty_NullCommand_SetsControlCommandNull()
+    {
+        var vm = new SharedScenarios.BindCommand.CommandProperty.MyViewModel();
+        var view = new SharedScenarios.BindCommand.CommandProperty.MyView();
+
+        using var binding = BindCommandScenarios.CommandProperty(vm, view);
+
+        await Assert.That(view.SaveButton.Command).IsNull();
+    }
+
+    /// <summary>
+    /// Verifies that expression parameter sets CommandParameter on the control.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyExprParam_SetsCommandParameter()
+    {
+        var vm = new SharedScenarios.BindCommand.CommandPropertyExprParam.MyViewModel
+        {
+            CurrentItem = "TestItem",
+        };
+        var view = new SharedScenarios.BindCommand.CommandPropertyExprParam.MyView();
+        var command = new TrackingCommand();
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.CommandPropertyExprParam(vm, view);
+
+        await Assert.That(view.SaveButton.Command).IsEqualTo(command);
+        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo("TestItem");
+    }
+
+    /// <summary>
+    /// Verifies that observable parameter sets CommandParameter on the control.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyObsParam_SetsCommandParameter()
+    {
+        var vm = new SharedScenarios.BindCommand.CommandPropertyObsParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.CommandPropertyObsParam.MyView();
+        var command = new TrackingCommand();
+        var paramSubject = new System.Reactive.Subjects.BehaviorSubject<string>("obs-param");
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.CommandPropertyObsParam(vm, view, paramSubject);
+
+        await Assert.That(view.SaveButton.Command).IsEqualTo(command);
+        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo("obs-param");
+    }
+
+    /// <summary>
+    /// Verifies that the observable parameter updates CommandParameter reactively.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyObsParam_ParameterUpdates()
+    {
+        var vm = new SharedScenarios.BindCommand.CommandPropertyObsParam.MyViewModel();
+        var view = new SharedScenarios.BindCommand.CommandPropertyObsParam.MyView();
+        var command = new TrackingCommand();
+        var paramSubject = new System.Reactive.Subjects.BehaviorSubject<string>("initial");
+        vm.Save = command;
+
+        using var binding = BindCommandScenarios.CommandPropertyObsParam(vm, view, paramSubject);
+
+        paramSubject.OnNext("updated");
+
+        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo("updated");
+    }
+
     /// <summary>
     /// A simple <see cref="ICommand"/> implementation that tracks invocations for testing.
     /// </summary>
