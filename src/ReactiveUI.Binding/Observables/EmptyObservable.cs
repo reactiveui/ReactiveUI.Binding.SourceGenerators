@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
 using System.ComponentModel;
 
 namespace ReactiveUI.Binding.Observables;
@@ -20,6 +19,10 @@ public sealed class EmptyObservable<T> : IObservable<T>
     /// </summary>
     public static readonly EmptyObservable<T> Instance = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EmptyObservable{T}"/> class.
+    /// Prevents external instantiation. Use <see cref="Instance"/> instead.
+    /// </summary>
     private EmptyObservable()
     {
     }
@@ -27,10 +30,7 @@ public sealed class EmptyObservable<T> : IObservable<T>
     /// <inheritdoc/>
     public IDisposable Subscribe(IObserver<T> observer)
     {
-        if (observer is null)
-        {
-            throw new ArgumentNullException(nameof(observer));
-        }
+        ArgumentExceptionHelper.ThrowIfNull(observer);
 
         observer.OnCompleted();
         return EmptyDisposable.Instance;

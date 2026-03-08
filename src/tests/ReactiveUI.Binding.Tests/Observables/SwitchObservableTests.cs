@@ -352,7 +352,7 @@ public class SwitchObservableTests
     [Test]
     public async Task OnNext_AfterDispose_ViaManualObservable_IsIgnored()
     {
-        var manualOuter = new ReactiveUI.Binding.Tests.TestModels.ManualObservable<IObservable<int>>();
+        var manualOuter = new TestModels.ManualObservable<IObservable<int>>();
         var switchObs = new SwitchObservable<int>(manualOuter);
 
         var results = new List<int>();
@@ -367,29 +367,29 @@ public class SwitchObservableTests
 
         // Now call OnNext on the outer observer even after dispose
         // ManualObservable retains the observer reference regardless of disposal
-        manualOuter.Observer?.OnNext(System.Reactive.Linq.Observable.Return(42));
+        manualOuter.Observer?.OnNext(Observable.Return(42));
 
         // The OnNext should have been ignored due to _disposed != 0
         await Assert.That(results).IsEmpty();
     }
 
-    private sealed class AnonymousObserver<T> : IObserver<T>
+    /// <summary>
+    /// A simple observer that delegates to provided actions.
+    /// </summary>
+    /// <typeparam name="T">The type of elements observed.</typeparam>
+    /// <param name="onNext">The action to invoke for each element.</param>
+    /// <param name="onError">The action to invoke on error.</param>
+    /// <param name="onCompleted">The action to invoke on completion.</param>
+    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted)
+        : IObserver<T>
     {
-        private readonly Action<T> _onNext;
-        private readonly Action<Exception> _onError;
-        private readonly Action _onCompleted;
+        /// <inheritdoc/>
+        public void OnCompleted() => onCompleted();
 
-        public AnonymousObserver(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-        {
-            _onNext = onNext;
-            _onError = onError;
-            _onCompleted = onCompleted;
-        }
+        /// <inheritdoc/>
+        public void OnError(Exception error) => onError(error);
 
-        public void OnCompleted() => _onCompleted();
-
-        public void OnError(Exception error) => _onError(error);
-
-        public void OnNext(T value) => _onNext(value);
+        /// <inheritdoc/>
+        public void OnNext(T value) => onNext(value);
     }
 }

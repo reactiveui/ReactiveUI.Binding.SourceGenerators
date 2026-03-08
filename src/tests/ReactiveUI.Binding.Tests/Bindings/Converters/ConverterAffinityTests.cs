@@ -533,6 +533,12 @@ public class ConverterAffinityTests
     public async Task StringToUriTypeConverter_ShouldHaveAffinity2() =>
         await AssertAffinity(new StringToUriTypeConverter(), 2);
 
+    /// <summary>
+    /// Asserts that the specified converter reports the expected affinity value.
+    /// </summary>
+    /// <param name="converter">The converter to test.</param>
+    /// <param name="expectedAffinity">The expected affinity value.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
     private static async Task AssertAffinity(IBindingTypeConverter converter, int expectedAffinity)
     {
         var actualAffinity = converter.GetAffinityForObjects();

@@ -1,8 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(BindingRuntimeTargets)</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
     <PackageDescription>Runtime library for ReactiveUI property observation and binding. Provides ICreatesObservableForProperty, expression chain decomposition, and converter infrastructure.</PackageDescription>
     <PackageTags>reactiveui;binding;observableforproperty</PackageTags>
   </PropertyGroup>
@@ -13,6 +11,7 @@
     <InternalsVisibleTo Include="ReactiveUI.Binding.Wpf" />
     <InternalsVisibleTo Include="ReactiveUI.Binding.WinForms" />
     <InternalsVisibleTo Include="ReactiveUI.Binding.Maui" />
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Reactive" />
   </ItemGroup>
 
   <ItemGroup>

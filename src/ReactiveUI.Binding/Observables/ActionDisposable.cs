@@ -2,9 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
 using System.ComponentModel;
-using System.Threading;
 
 namespace ReactiveUI.Binding.Observables;
 
@@ -15,6 +13,9 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ActionDisposable : IDisposable
 {
+    /// <summary>
+    /// The action to invoke on disposal. Set to <see langword="null"/> after first invocation.
+    /// </summary>
     private Action? _action;
 
     /// <summary>
@@ -23,12 +24,22 @@ public sealed class ActionDisposable : IDisposable
     /// <param name="action">The action to invoke on disposal.</param>
     public ActionDisposable(Action action)
     {
-        _action = action ?? throw new ArgumentNullException(nameof(action));
+        ArgumentExceptionHelper.ThrowIfNull(action);
+        _action = action;
     }
 
     /// <inheritdoc/>
     public void Dispose()
     {
-        Interlocked.Exchange(ref _action, null)?.Invoke();
+        var action = TryTakeAction();
+        action?.Invoke();
     }
+
+    /// <summary>
+    /// Atomically takes the action, returning it exactly once. Subsequent calls return <see langword="null"/>.
+    /// </summary>
+    /// <returns>The action if this is the first call; otherwise <see langword="null"/>.</returns>
+    [ExcludeFromCodeCoverage]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Action? TryTakeAction() => Interlocked.Exchange(ref _action, null);
 }

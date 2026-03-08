@@ -5,14 +5,14 @@
 using Microsoft.CodeAnalysis;
 
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Invocations;
 
 /// <summary>
 /// Detects WhenAnyValue/WhenAny invocations and generates concrete typed overloads.
-/// Uses <see cref="WhenAnyValueCodeGenerator"/> which delegates to WhenChanged generation
-/// with the "WhenAnyValue" method prefix.
+/// Delegates to <see cref="ObservationCodeGenerator"/> with the "WhenAnyValue" method prefix.
 /// </summary>
 internal static class WhenAnyValueInvocationGenerator
 {
@@ -30,7 +30,7 @@ internal static class WhenAnyValueInvocationGenerator
         var invocations = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: RoslynHelpers.IsWhenAnyValueInvocation,
-                transform: MetadataExtractor.ExtractWhenAnyValueInvocation)
+                transform: ObservationExtractor.ExtractWhenAnyValueInvocation)
             .Where(static x => x is not null)
             .Select(static (x, _) => x!);
 
@@ -42,7 +42,7 @@ internal static class WhenAnyValueInvocationGenerator
             combined,
             static (ctx, data) =>
             {
-                var source = WhenAnyValueCodeGenerator.Generate(data.Left.Left, data.Left.Right, data.Right);
+                var source = ObservationCodeGenerator.Generate(data.Left.Left, data.Left.Right, data.Right, "WhenAnyValue");
                 if (source != null)
                 {
                     ctx.AddSource("WhenAnyValueDispatch.g.cs", source);

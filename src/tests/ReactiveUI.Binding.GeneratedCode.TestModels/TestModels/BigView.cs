@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System;
 using System.ComponentModel;
 
 namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
@@ -12,21 +13,84 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class BigView : INotifyPropertyChanged
 {
+    /// <summary>
+    /// The backer for ViewProp1.
+    /// </summary>
     private string _viewProp1 = string.Empty;
+
+    /// <summary>
+    /// The backer for ViewProp2.
+    /// </summary>
     private int _viewProp2;
+
+    /// <summary>
+    /// The backer for ViewProp3.
+    /// </summary>
     private double _viewProp3;
+
+    /// <summary>
+    /// The backer for ViewProp4.
+    /// </summary>
     private bool _viewProp4;
+
+    /// <summary>
+    /// The backer for ViewProp5.
+    /// </summary>
     private string _viewProp5 = string.Empty;
+
+    /// <summary>
+    /// The backer for ViewProp6.
+    /// </summary>
     private int _viewProp6;
+
+    /// <summary>
+    /// The backer for ViewProp7.
+    /// </summary>
     private double _viewProp7;
+
+    /// <summary>
+    /// The backer for ViewProp8.
+    /// </summary>
     private bool _viewProp8;
+
+    /// <summary>
+    /// The backer for ViewProp9.
+    /// </summary>
     private string _viewProp9 = string.Empty;
+
+    /// <summary>
+    /// The backer for ViewProp10.
+    /// </summary>
     private int _viewProp10;
+
+    /// <summary>
+    /// The backer for ViewProp11.
+    /// </summary>
     private double _viewProp11;
+
+    /// <summary>
+    /// The backer for ViewProp12.
+    /// </summary>
     private bool _viewProp12;
+
+    /// <summary>
+    /// The backer for ViewProp13.
+    /// </summary>
     private string _viewProp13 = string.Empty;
+
+    /// <summary>
+    /// The backer for ViewProp14.
+    /// </summary>
     private int _viewProp14;
+
+    /// <summary>
+    /// The backer for ViewProp15.
+    /// </summary>
     private double _viewProp15;
+
+    /// <summary>
+    /// The backer for ViewProp16.
+    /// </summary>
     private bool _viewProp16;
 
     /// <inheritdoc/>

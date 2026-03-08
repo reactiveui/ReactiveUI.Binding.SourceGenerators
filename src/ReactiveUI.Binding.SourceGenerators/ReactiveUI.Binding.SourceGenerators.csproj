@@ -26,6 +26,12 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- Link polyfills and helpers from runtime library for netstandard2.0 compatibility -->
+  <ItemGroup>
+    <Compile Include="..\ReactiveUI.Binding\Polyfills\**.cs" Link="Polyfills" />
+    <Compile Include="..\ReactiveUI.Binding\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <!-- Reference the analyzer project to force it to build -->
     <ProjectReference Include="..\ReactiveUI.Binding.Analyzer\ReactiveUI.Binding.Analyzer.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" />

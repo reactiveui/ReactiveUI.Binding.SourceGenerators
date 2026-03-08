@@ -31,12 +31,17 @@
 
     <!-- Test targets -->
     <BindingTestTargets>net8.0;net9.0;net10.0</BindingTestTargets>
+
+    <!-- Windows-specific test targets: use Windows TFMs on Windows, core TFMs elsewhere -->
+    <BindingTestWindowsTargets>$(BindingTestTargets)</BindingTestWindowsTargets>
+    <BindingTestWindowsTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(BindingWindowsTargets)</BindingTestWindowsTargets>
   </PropertyGroup>
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
     <Platform>AnyCPU</Platform>
     <IsTestProject>$(MSBuildProjectName.Contains('Tests'))</IsTestProject>
     <DebugType>embedded</DebugType>

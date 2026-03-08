@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using ReactiveUI.Binding.Helpers;
-
 namespace ReactiveUI.Binding;
 
 /// <summary>
@@ -38,6 +36,9 @@ namespace ReactiveUI.Binding;
 /// </example>
 public static class BindingConverters
 {
+    /// <summary>
+    /// The backing field for the current converter service instance.
+    /// </summary>
     private static ConverterService _current = new();
 
     /// <summary>

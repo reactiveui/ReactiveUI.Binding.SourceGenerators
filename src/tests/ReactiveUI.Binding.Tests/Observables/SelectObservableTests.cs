@@ -130,23 +130,23 @@ public class SelectObservableTests
         await Assert.That(results[1]).IsEqualTo(20);
     }
 
-    private sealed class AnonymousObserver<T> : IObserver<T>
+    /// <summary>
+    /// A simple observer that delegates to provided actions.
+    /// </summary>
+    /// <typeparam name="T">The type of elements observed.</typeparam>
+    /// <param name="onNext">The action to invoke for each element.</param>
+    /// <param name="onError">The action to invoke on error.</param>
+    /// <param name="onCompleted">The action to invoke on completion.</param>
+    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted)
+        : IObserver<T>
     {
-        private readonly Action<T> _onNext;
-        private readonly Action<Exception> _onError;
-        private readonly Action _onCompleted;
+        /// <inheritdoc/>
+        public void OnCompleted() => onCompleted();
 
-        public AnonymousObserver(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-        {
-            _onNext = onNext;
-            _onError = onError;
-            _onCompleted = onCompleted;
-        }
+        /// <inheritdoc/>
+        public void OnError(Exception error) => onError(error);
 
-        public void OnCompleted() => _onCompleted();
-
-        public void OnError(Exception error) => _onError(error);
-
-        public void OnNext(T value) => _onNext(value);
+        /// <inheritdoc/>
+        public void OnNext(T value) => onNext(value);
     }
 }

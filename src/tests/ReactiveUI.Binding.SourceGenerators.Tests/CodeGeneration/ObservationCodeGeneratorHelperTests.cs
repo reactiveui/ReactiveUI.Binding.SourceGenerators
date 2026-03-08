@@ -39,17 +39,18 @@ public class ObservationCodeGeneratorHelperTests
     [Test]
     public async Task GetSelectorType_MultiProperty_ReturnsFuncType()
     {
-        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
-        {
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Name", "global::System.String") }),
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32") }),
-        });
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+            ]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+            ])
+        ]);
 
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
             returnTypeFullName: "global::System.String",
             hasSelector: true,
-            expressionTexts: new EquatableArray<string>(new[] { "x => x.Name", "x => x.Age" }));
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
 
         var result = ObservationCodeGenerator.GetSelectorType(inv);
 
@@ -195,7 +196,7 @@ public class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, isBeforeChange: false);
@@ -213,17 +214,18 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateMultiPropertyObservation_MultiplePaths_GeneratesCombineLatest()
     {
         var sb = new StringBuilder();
-        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
-        {
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Name", "global::System.String") }),
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32") }),
-        });
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+            ]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+            ])
+        ]);
 
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
             returnTypeFullName: "global::System.String",
             hasSelector: true,
-            expressionTexts: new EquatableArray<string>(new[] { "x => x.Name", "x => x.Age" }));
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, isBeforeChange: false);
@@ -242,7 +244,7 @@ public class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateInvocationInfo();
-        var group = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanged");
 
@@ -260,7 +262,7 @@ public class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateInvocationInfo();
-        var group = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false, "WhenChanged");
 
@@ -278,7 +280,7 @@ public class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, isBeforeChange: false, "__propObs0");
@@ -297,7 +299,7 @@ public class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
         ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, isBeforeChange: true, "__propObs0");
@@ -317,7 +319,7 @@ public class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
         var classInfo = ModelFactory.CreateClassBindingInfo();
 
         ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, isBeforeChange: false, "__propObs0");
@@ -336,7 +338,7 @@ public class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, isBeforeChange: true);
@@ -355,7 +357,7 @@ public class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
         var classInfo = ModelFactory.CreateClassBindingInfo();
 
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, isBeforeChange: false);
@@ -372,17 +374,15 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateDeepChainObservation_TwoLevelChain_GeneratesSelectSwitch()
     {
         var sb = new StringBuilder();
-        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
-        {
-            new EquatableArray<PropertyPathSegment>(new[]
-            {
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([
                 ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
-            }),
-        });
+                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+            ])
+        ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
-            expressionTexts: new EquatableArray<string>(new[] { "x => x.Address.City" }));
+            expressionTexts: new EquatableArray<string>(["x => x.Address.City"]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateDeepChainObservation(sb, inv, classInfo, isBeforeChange: false);
@@ -403,18 +403,16 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateDeepChainObservation_BeforeChange_NoDistinctUntilChanged()
     {
         var sb = new StringBuilder();
-        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
-        {
-            new EquatableArray<PropertyPathSegment>(new[]
-            {
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([
                 ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
-            }),
-        });
+                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+            ])
+        ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
             isBeforeChange: true,
-            expressionTexts: new EquatableArray<string>(new[] { "x => x.Address.City" }));
+            expressionTexts: new EquatableArray<string>(["x => x.Address.City"]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
         ObservationCodeGenerator.GenerateDeepChainObservation(sb, inv, classInfo, isBeforeChange: true);
@@ -432,11 +430,10 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateDeepChainVariable_TwoLevelChain_GeneratesVariableDeclarations()
     {
         var sb = new StringBuilder();
-        var path = new EquatableArray<PropertyPathSegment>(new[]
-        {
+        var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
-        });
+            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+        ]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateDeepChainVariable(sb, path, classInfo, isBeforeChange: false, "__propObs0");
@@ -520,11 +517,10 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateDeepChainVariable_BeforeChange_GeneratesPropertyChangingCode()
     {
         var sb = new StringBuilder();
-        var path = new EquatableArray<PropertyPathSegment>(new[]
-        {
+        var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
-        });
+            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+        ]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
         ObservationCodeGenerator.GenerateDeepChainVariable(sb, path, classInfo, isBeforeChange: true, "__propObs0");
@@ -542,21 +538,20 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateMultiPropertyObservation_WithDeepChainPath_GeneratesDeepChainVariables()
     {
         var sb = new StringBuilder();
-        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
-        {
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Name", "global::System.String") }),
-            new EquatableArray<PropertyPathSegment>(new[]
-            {
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+            ]),
+            new EquatableArray<PropertyPathSegment>([
                 ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
-            }),
-        });
+                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+            ])
+        ]);
 
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
             returnTypeFullName: "global::System.String",
             hasSelector: true,
-            expressionTexts: new EquatableArray<string>(new[] { "x => x.Name", "x => x.Address.City" }));
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Address.City"]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, isBeforeChange: false);
@@ -576,17 +571,18 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateMultiPropertyObservation_BeforeChange_GeneratesPropertyChangingCode()
     {
         var sb = new StringBuilder();
-        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
-        {
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Name", "global::System.String") }),
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32") }),
-        });
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+            ]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+            ])
+        ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
             returnTypeFullName: "global::System.String",
             hasSelector: true,
             isBeforeChange: true,
-            expressionTexts: new EquatableArray<string>(new[] { "x => x.Name", "x => x.Age" }));
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, isBeforeChange: true);
@@ -604,21 +600,20 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateMultiPropertyObservation_BeforeChange_WithDeepChain_GeneratesPropertyChangingVariables()
     {
         var sb = new StringBuilder();
-        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
-        {
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Name", "global::System.String") }),
-            new EquatableArray<PropertyPathSegment>(new[]
-            {
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+            ]),
+            new EquatableArray<PropertyPathSegment>([
                 ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
-            }),
-        });
+                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+            ])
+        ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
             returnTypeFullName: "global::System.String",
             hasSelector: true,
             isBeforeChange: true,
-            expressionTexts: new EquatableArray<string>(new[] { "x => x.Name", "x => x.Address.City" }));
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Address.City"]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, isBeforeChange: true);
@@ -637,19 +632,17 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateObservationMethod_DeepChainWithSelector_GeneratesSwitchPattern()
     {
         var sb = new StringBuilder();
-        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
-        {
-            new EquatableArray<PropertyPathSegment>(new[]
-            {
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([
                 ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
-            }),
-        });
+                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+            ])
+        ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
             returnTypeFullName: "global::System.Int32",
             hasSelector: true,
-            expressionTexts: new EquatableArray<string>(new[] { "x => x.Address.City" }));
+            expressionTexts: new EquatableArray<string>(["x => x.Address.City"]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateObservationMethod(sb, inv, classInfo, "DEADBEEF", isBeforeChange: false, "WhenChanged");
@@ -688,7 +681,7 @@ public class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.EmitInlineObservation(sb, "source", path, "global::System.String", classInfo, "sourceObs");
@@ -707,7 +700,7 @@ public class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            new[] { ModelFactory.CreatePropertyPathSegment("Name") });
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
         var classInfo = ModelFactory.CreateClassBindingInfo();
 
         ObservationCodeGenerator.EmitInlineObservation(sb, "source", path, "global::System.String", classInfo, "sourceObs");
@@ -725,11 +718,10 @@ public class ObservationCodeGeneratorHelperTests
     public async Task EmitInlineObservation_DeepChain_GeneratesSelectSwitchPattern()
     {
         var sb = new StringBuilder();
-        var path = new EquatableArray<PropertyPathSegment>(new[]
-        {
+        var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address"),
-        });
+            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+        ]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.EmitInlineObservation(sb, "source", path, "global::System.String", classInfo, "sourceObs");
@@ -738,6 +730,381 @@ public class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("RxBindingExtensions.Switch(");
         await Assert.That(result).Contains("RxBindingExtensions.DistinctUntilChanged(");
         await Assert.That(result).Contains("var sourceObs");
+    }
+
+    /// <summary>
+    /// Verifies GenerateShallowPathObservation with null classInfo generates Observable.Return fallback.
+    /// Covers the <c>classInfo?.ImplementsIReactiveObject ?? false</c> null-propagation branch.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateShallowPathObservation_NullClassInfo_GeneratesObservableReturn()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
+
+        ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo: null, isBeforeChange: false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("ReturnObservable");
+    }
+
+    /// <summary>
+    /// Verifies GenerateShallowPathObservation with IReactiveObject after-change generates PropertyObservable.
+    /// Covers the short-circuit OR path where ImplementsIReactiveObject is true.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateShallowPathObservation_ReactiveObjectAfterChange_GeneratesPropertyObservable()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+
+        ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, isBeforeChange: false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyObservable");
+    }
+
+    /// <summary>
+    /// Verifies GenerateShallowPathObservation with IReactiveObject before-change generates PropertyChangingObservable.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateShallowPathObservation_ReactiveObjectBeforeChange_GeneratesPropertyChangingObservable()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+
+        ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, isBeforeChange: true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyChangingObservable");
+    }
+
+    /// <summary>
+    /// Verifies GenerateShallowObservableVariable with null classInfo generates ReturnObservable.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateShallowObservableVariable_NullClassInfo_GeneratesReturnObservable()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
+
+        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo: null, isBeforeChange: false, "__obs0");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("ReturnObservable");
+    }
+
+    /// <summary>
+    /// Verifies GenerateShallowObservableVariable with IReactiveObject after-change generates PropertyObservable.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateShallowObservableVariable_ReactiveObjectAfterChange_GeneratesPropertyObservable()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+
+        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, isBeforeChange: false, "__obs0");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyObservable");
+    }
+
+    /// <summary>
+    /// Verifies GenerateShallowObservableVariable with IReactiveObject before-change generates PropertyChangingObservable.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateShallowObservableVariable_ReactiveObjectBeforeChange_GeneratesPropertyChangingObservable()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+
+        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, isBeforeChange: true, "__obs0");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyChangingObservable");
+    }
+
+    /// <summary>
+    /// Verifies GenerateDeepChainVariable with null classInfo generates after-change code with PropertyObservable.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateDeepChainVariable_NullClassInfo_GeneratesAfterChangeCode()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>([
+            ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+        ]);
+
+        ObservationCodeGenerator.GenerateDeepChainVariable(sb, path, classInfo: null, isBeforeChange: false, "__propObs0");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("var __propObs0_s0");
+        await Assert.That(result).Contains("PropertyObservable");
+    }
+
+    /// <summary>
+    /// Verifies GenerateDeepChainVariable with IReactiveObject after-change.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateDeepChainVariable_ReactiveObjectAfterChange_GeneratesPropertyObservable()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>([
+            ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+        ]);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+
+        ObservationCodeGenerator.GenerateDeepChainVariable(sb, path, classInfo, isBeforeChange: false, "__propObs0");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyObservable");
+        await Assert.That(result).Contains("DistinctUntilChanged");
+    }
+
+    /// <summary>
+    /// Verifies GenerateDeepChainObservation with null classInfo generates after-change code.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateDeepChainObservation_NullClassInfo_GeneratesCode()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([
+                ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+            ])
+        ]);
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            expressionTexts: new EquatableArray<string>(["x => x.Address.City"]));
+
+        ObservationCodeGenerator.GenerateDeepChainObservation(sb, inv, classInfo: null, isBeforeChange: false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyObservable");
+        await Assert.That(result).Contains("Switch");
+    }
+
+    /// <summary>
+    /// Verifies GenerateDeepChainObservation with IReactiveObject after-change.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateDeepChainObservation_ReactiveObjectAfterChange_GeneratesPropertyObservable()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([
+                ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+            ])
+        ]);
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            expressionTexts: new EquatableArray<string>(["x => x.Address.City"]));
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+
+        ObservationCodeGenerator.GenerateDeepChainObservation(sb, inv, classInfo, isBeforeChange: false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyObservable");
+        await Assert.That(result).Contains("DistinctUntilChanged");
+    }
+
+    /// <summary>
+    /// Verifies EmitInlineObservation with null classInfo generates PropertyObservable (uses null-safe path).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitInlineObservation_NullClassInfo_SingleProperty_GeneratesPropertyObservable()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
+
+        ObservationCodeGenerator.EmitInlineObservation(sb, "source", path, "global::System.String", classInfo: null, "sourceObs");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("var sourceObs");
+    }
+
+    /// <summary>
+    /// Verifies EmitInlineObservation with IReactiveObject generates PropertyObservable for single property.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitInlineObservation_ReactiveObject_SingleProperty_GeneratesPropertyObservable()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>(
+            [ModelFactory.CreatePropertyPathSegment("Name")]);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+
+        ObservationCodeGenerator.EmitInlineObservation(sb, "source", path, "global::System.String", classInfo, "sourceObs");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyObservable");
+    }
+
+    /// <summary>
+    /// Verifies EmitInlineObservation with IReactiveObject and deep chain generates Switch pattern.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitInlineObservation_ReactiveObject_DeepChain_GeneratesSwitchPattern()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>([
+            ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+        ]);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+
+        ObservationCodeGenerator.EmitInlineObservation(sb, "source", path, "global::System.String", classInfo, "sourceObs");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("RxBindingExtensions.Switch(");
+        await Assert.That(result).Contains("PropertyObservable");
+    }
+
+    /// <summary>
+    /// Verifies GenerateObservationMethod with null classInfo generates code.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateObservationMethod_NullClassInfo_GeneratesCode()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo();
+
+        ObservationCodeGenerator.GenerateObservationMethod(sb, inv, classInfo: null, "DEADBEEF", isBeforeChange: false, "WhenChanged");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("__WhenChanged_DEADBEEF");
+    }
+
+    /// <summary>
+    /// Verifies GenerateObservationMethod single property without selector generates direct return.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateObservationMethod_SinglePropertyNoSelector_GeneratesDirectReturn()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo(hasSelector: false);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+
+        ObservationCodeGenerator.GenerateObservationMethod(sb, inv, classInfo, "ABC123", isBeforeChange: false, "WhenChanged");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("__WhenChanged_ABC123");
+        await Assert.That(result).Contains("PropertyObservable");
+    }
+
+    /// <summary>
+    /// Verifies GenerateMultiPropertyObservation with IReactiveObject after-change.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateMultiPropertyObservation_ReactiveObjectAfterChange_GeneratesPropertyObservable()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+            ]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+            ])
+        ]);
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            returnTypeFullName: "global::System.String",
+            hasSelector: true,
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+
+        ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, isBeforeChange: false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyObservable");
+        await Assert.That(result).Contains("CombineLatest");
+    }
+
+    /// <summary>
+    /// Verifies GenerateMultiPropertyObservation with null classInfo generates code.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateMultiPropertyObservation_NullClassInfo_GeneratesReturnObservable()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+            ]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+            ])
+        ]);
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            returnTypeFullName: "global::System.String",
+            hasSelector: true,
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
+
+        ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo: null, isBeforeChange: false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("CombineLatest");
+    }
+
+    /// <summary>
+    /// Verifies GenerateMultiPropertyObservation with deep chain and IReactiveObject before-change.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateMultiPropertyObservation_ReactiveObjectBeforeChange_WithDeepChain_GeneratesPropertyChangingVariables()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+            ]),
+            new EquatableArray<PropertyPathSegment>([
+                ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+            ])
+        ]);
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            returnTypeFullName: "global::System.String",
+            hasSelector: true,
+            isBeforeChange: true,
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Address.City"]));
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+
+        ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, isBeforeChange: true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("PropertyChanging");
+        await Assert.That(result).Contains("CombineLatest");
     }
 
     /// <summary>
@@ -783,8 +1150,8 @@ public class ObservationCodeGeneratorHelperTests
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         var result = ObservationCodeGenerator.Generate(
-            ImmutableArray.Create(inv),
-            ImmutableArray.Create(classInfo),
+            [inv],
+            [classInfo],
             supportsCallerArgExpr: true,
             "WhenChanged");
 
@@ -800,9 +1167,13 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateConcreteOverload_MultipleInvocationsInGroup_GeneratesElseIf()
     {
         var sb = new StringBuilder();
-        var inv1 = ModelFactory.CreateInvocationInfo(callerLineNumber: 10, expressionTexts: new EquatableArray<string>(new[] { "x => x.Name" }));
-        var inv2 = ModelFactory.CreateInvocationInfo(callerLineNumber: 20, expressionTexts: new EquatableArray<string>(new[] { "x => x.Age" }));
-        var group = new ObservationCodeGenerator.TypeGroup(inv1, new[] { inv1, inv2 });
+        var inv1 = ModelFactory.CreateInvocationInfo(callerLineNumber: 10, expressionTexts: new EquatableArray<string>([
+            "x => x.Name"
+        ]));
+        var inv2 = ModelFactory.CreateInvocationInfo(callerLineNumber: 20, expressionTexts: new EquatableArray<string>([
+            "x => x.Age"
+        ]));
+        var group = new ObservationCodeGenerator.TypeGroup(inv1, [inv1, inv2]);
 
         ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanged");
 
@@ -820,7 +1191,7 @@ public class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateInvocationInfo(hasSelector: true, returnTypeFullName: "global::System.Int32");
-        var group = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanged");
 
@@ -837,17 +1208,18 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateConcreteOverload_CallerArgExpr_MultiProperty_GeneratesMultipleExpressionChecks()
     {
         var sb = new StringBuilder();
-        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
-        {
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Name", "global::System.String") }),
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32") }),
-        });
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+            ]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+            ])
+        ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
             returnTypeFullName: "(global::System.String, global::System.Int32)",
             hasSelector: false,
-            expressionTexts: new EquatableArray<string>(new[] { "x => x.Name", "x => x.Age" }));
-        var group = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
+        var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanged");
 
@@ -865,16 +1237,17 @@ public class ObservationCodeGeneratorHelperTests
     public async Task GenerateMultiPropertyObservation_NoSelector_GeneratesTupleResult()
     {
         var sb = new StringBuilder();
-        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(new[]
-        {
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Name", "global::System.String") }),
-            new EquatableArray<PropertyPathSegment>(new[] { ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32") }),
-        });
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+            ]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+            ])
+        ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
             returnTypeFullName: "(global::System.String property1, global::System.Int32 property2)",
             hasSelector: false,
-            expressionTexts: new EquatableArray<string>(new[] { "x => x.Name", "x => x.Age" }));
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, isBeforeChange: false);
@@ -902,5 +1275,114 @@ public class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("__WhenChanged_ABCDEF0123456789");
         await Assert.That(result).Contains("private static");
         await Assert.That(result).Contains("global::System.IObservable");
+    }
+
+    /// <summary>
+    /// Verifies IsINPC returns true when classInfo implements IReactiveObject.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsINPC_ReactiveObject_ReturnsTrue()
+    {
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+        await Assert.That(ObservationCodeGenerator.IsINPC(classInfo)).IsTrue();
+    }
+
+    /// <summary>
+    /// Verifies IsINPC returns true when classInfo implements INPC directly.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsINPC_DirectINPC_ReturnsTrue()
+    {
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+        await Assert.That(ObservationCodeGenerator.IsINPC(classInfo)).IsTrue();
+    }
+
+    /// <summary>
+    /// Verifies IsINPC returns false when classInfo has no INPC support.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsINPC_NoINPC_ReturnsFalse()
+    {
+        var classInfo = ModelFactory.CreateClassBindingInfo();
+        await Assert.That(ObservationCodeGenerator.IsINPC(classInfo)).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies IsINPC returns false when classInfo is null.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsINPC_NullClassInfo_ReturnsFalse()
+    {
+        await Assert.That(ObservationCodeGenerator.IsINPC(null)).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies IsINPChanging returns true when classInfo implements IReactiveObject.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsINPChanging_ReactiveObject_ReturnsTrue()
+    {
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
+        await Assert.That(ObservationCodeGenerator.IsINPChanging(classInfo)).IsTrue();
+    }
+
+    /// <summary>
+    /// Verifies IsINPChanging returns true when classInfo implements INPChanging directly.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsINPChanging_DirectINPChanging_ReturnsTrue()
+    {
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
+        await Assert.That(ObservationCodeGenerator.IsINPChanging(classInfo)).IsTrue();
+    }
+
+    /// <summary>
+    /// Verifies IsINPChanging returns false when classInfo has no INPChanging support.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsINPChanging_NoINPChanging_ReturnsFalse()
+    {
+        var classInfo = ModelFactory.CreateClassBindingInfo();
+        await Assert.That(ObservationCodeGenerator.IsINPChanging(classInfo)).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies IsINPChanging returns false when classInfo is null.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsINPChanging_NullClassInfo_ReturnsFalse()
+    {
+        await Assert.That(ObservationCodeGenerator.IsINPChanging(null)).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies GetTypeCastName returns the fully qualified name when classInfo is provided.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetTypeCastName_WithClassInfo_ReturnsFullyQualifiedName()
+    {
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+        var result = ObservationCodeGenerator.GetTypeCastName(classInfo);
+        await Assert.That(result).IsEqualTo(classInfo.FullyQualifiedName);
+    }
+
+    /// <summary>
+    /// Verifies GetTypeCastName returns "object" when classInfo is null.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetTypeCastName_NullClassInfo_ReturnsObject()
+    {
+        var result = ObservationCodeGenerator.GetTypeCastName(null);
+        await Assert.That(result).IsEqualTo("object");
     }
 }

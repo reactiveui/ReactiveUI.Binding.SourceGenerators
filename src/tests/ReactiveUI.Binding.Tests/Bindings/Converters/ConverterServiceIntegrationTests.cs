@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 
 /// <summary>
@@ -228,17 +226,18 @@ public class ConverterServiceIntegrationTests
         await Assert.That(result).IsEqualTo(validAffinity);
     }
 
-    private sealed class TestFallbackConverter : IBindingFallbackConverter
+    /// <summary>
+    /// Test fallback converter for integration testing with configurable affinity.
+    /// </summary>
+    private sealed class TestFallbackConverter(int baseAffinity) : IBindingFallbackConverter
     {
-        private readonly int _baseAffinity;
-
-        public TestFallbackConverter(int baseAffinity) => _baseAffinity = baseAffinity;
-
+        /// <inheritdoc/>
         public int GetAffinityForObjects(
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type fromType,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-            Type toType) => _baseAffinity;
+            Type toType) => baseAffinity;
 
+        /// <inheritdoc/>
         public bool TryConvert(
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type fromType,
             object from,
@@ -252,25 +251,29 @@ public class ConverterServiceIntegrationTests
         }
     }
 
-    private sealed class TestSetMethodConverter : ISetMethodBindingConverter
+    /// <summary>
+    /// Test set-method converter for integration testing with configurable affinity.
+    /// </summary>
+    private sealed class TestSetMethodConverter(int baseAffinity) : ISetMethodBindingConverter
     {
-        private readonly int _baseAffinity;
+        /// <inheritdoc/>
+        public int GetAffinityForObjects(Type? fromType, Type? toType) => baseAffinity;
 
-        public TestSetMethodConverter(int baseAffinity) => _baseAffinity = baseAffinity;
-
-        public int GetAffinityForObjects(Type? fromType, Type? toType) => _baseAffinity;
-
+        /// <inheritdoc/>
         public object? PerformSet(object? toTarget, object? newValue, object?[]? arguments) => newValue;
     }
 
-    private sealed class TestTypedConverter<TFrom, TTo> : BindingTypeConverter<TFrom, TTo>
+    /// <summary>
+    /// Test typed converter for integration testing with configurable affinity.
+    /// </summary>
+    /// <typeparam name="TFrom">The source type for conversion.</typeparam>
+    /// <typeparam name="TTo">The target type for conversion.</typeparam>
+    private sealed class TestTypedConverter<TFrom, TTo>(int affinity) : BindingTypeConverter<TFrom, TTo>
     {
-        private readonly int _affinity;
+        /// <inheritdoc/>
+        public override int GetAffinityForObjects() => affinity;
 
-        public TestTypedConverter(int affinity) => _affinity = affinity;
-
-        public override int GetAffinityForObjects() => _affinity;
-
+        /// <inheritdoc/>
         public override bool TryConvert(TFrom? from, object? conversionHint, [NotNullWhen(true)] out TTo? result)
         {
             result = default;

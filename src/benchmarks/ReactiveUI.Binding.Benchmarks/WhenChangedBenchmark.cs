@@ -5,8 +5,6 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 
-using ReactiveUI.Binding;
-
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>
@@ -20,23 +18,27 @@ namespace ReactiveUI.Binding.Benchmarks;
 [MarkdownExporterAttribute.GitHub]
 public class WhenChangedBenchmark
 {
+    /// <summary>
+    /// Represents the number of property change events to be triggered during the benchmark tests.
+    /// </summary>
     private const int PropertyChangeCount = 1000;
 
+    /// <summary>
+    /// The view model instance used for observation benchmarks.
+    /// </summary>
     private BenchmarkViewModel _vm = null!;
 
     /// <summary>
     /// Sets up a fresh view model before each benchmark iteration.
     /// </summary>
     [IterationSetup]
-    public void Setup()
-    {
+    public void Setup() =>
         _vm = new BenchmarkViewModel
         {
             Name = "Initial",
             Age = 0,
             Child = new BenchmarkChildViewModel { Value = "ChildInitial" },
         };
-    }
 
     /// <summary>
     /// Single property observation: subscribe, fire N changes, dispose.

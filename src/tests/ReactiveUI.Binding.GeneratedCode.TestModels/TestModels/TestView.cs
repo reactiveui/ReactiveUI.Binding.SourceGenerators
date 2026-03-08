@@ -4,8 +4,6 @@
 
 using System.ComponentModel;
 
-using ReactiveUI.Binding;
-
 namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 /// <summary>
@@ -14,7 +12,14 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class TestView : INotifyPropertyChanged, IViewFor
 {
+    /// <summary>
+    /// The backer for DisplayName.
+    /// </summary>
     private string _displayName = string.Empty;
+
+    /// <summary>
+    /// The backer for DisplayAge.
+    /// </summary>
     private int _displayAge;
 
     /// <inheritdoc/>

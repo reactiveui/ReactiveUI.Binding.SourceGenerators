@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
+using ReactiveUI.Binding.Helpers;
 using ReactiveUI.Binding.SourceGenerators;
 
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
@@ -21,27 +22,25 @@ public class TypeAnalyzer : DiagnosticAnalyzer
 {
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(DiagnosticWarnings.NoObservableProperties);
+        [DiagnosticWarnings.NoObservableProperties];
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        if (context is null)
-        {
-            throw new System.ArgumentNullException(nameof(context));
-        }
-
+        ArgumentExceptionHelper.ThrowIfNull(context);
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
     }
 
+    /// <summary>
+    /// Analyzes a method invocation operation to determine whether the source type
+    /// has any observable property notification mechanism.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
     internal static void AnalyzeInvocation(OperationAnalysisContext context)
     {
-        if (context.Operation is not IInvocationOperation invocationOp)
-        {
-            return;
-        }
+        var invocationOp = (IInvocationOperation)context.Operation;
 
         var methodSymbol = invocationOp.TargetMethod;
         if (!AnalyzerHelpers.IsBindingExtensionMethod(methodSymbol))
@@ -49,29 +48,25 @@ public class TypeAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        // Get the source type (first type argument)
-        var sourceType = methodSymbol.TypeArguments.Length > 0
-            ? methodSymbol.TypeArguments[0] as INamedTypeSymbol
-            : null;
-
-        if (sourceType == null)
+        // Check if the source type lacks any observable mechanism
+        if (AnalyzerHelpers.LacksObservableMechanism(methodSymbol, context.Compilation, out var sourceType))
         {
-            return;
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    DiagnosticWarnings.NoObservableProperties,
+                    invocationOp.Syntax.GetLocation(),
+                    sourceType!.Name));
         }
-
-        // Check if the type has any observable mechanism
-        if (HasObservableMechanism(sourceType, context.Compilation))
-        {
-            return;
-        }
-
-        context.ReportDiagnostic(
-            Diagnostic.Create(
-                DiagnosticWarnings.NoObservableProperties,
-                invocationOp.Syntax.GetLocation(),
-                sourceType.Name));
     }
 
+    /// <summary>
+    /// Determines whether a type has any observable property notification mechanism,
+    /// including INPC, IReactiveObject, WPF/WinUI DependencyObject, NSObject (KVO),
+    /// WinForms Component, or Android View.
+    /// </summary>
+    /// <param name="typeSymbol">The type symbol to check.</param>
+    /// <param name="compilation">The current compilation for type resolution.</param>
+    /// <returns><c>true</c> if the type supports property observation; otherwise, <c>false</c>.</returns>
     internal static bool HasObservableMechanism(INamedTypeSymbol typeSymbol, Compilation compilation)
     {
         // Check interfaces
@@ -79,7 +74,7 @@ public class TypeAnalyzer : DiagnosticAnalyzer
         var iro = compilation.GetTypeByMetadataName(Constants.IReactiveObjectMetadataName);
 
         var allInterfaces = typeSymbol.AllInterfaces;
-        for (int i = 0; i < allInterfaces.Length; i++)
+        for (var i = 0; i < allInterfaces.Length; i++)
         {
             if (inpc != null && SymbolEqualityComparer.Default.Equals(allInterfaces[i], inpc))
             {

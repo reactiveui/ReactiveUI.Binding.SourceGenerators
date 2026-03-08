@@ -3,10 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
-
-using ReactiveUI.Binding.Expressions;
 using ReactiveUI.Binding.ObservableForProperty;
 
 namespace ReactiveUI.Binding.Fallback;
@@ -30,7 +27,7 @@ public static class RuntimeObservationFallback
     /// <returns>An observable that emits property values after they change.</returns>
     public static IObservable<TValue> WhenChanged<TObj, TValue>(
         TObj obj,
-        System.Linq.Expressions.Expression<Func<TObj, TValue>> property)
+        Expression<Func<TObj, TValue>> property)
         where TObj : class
     {
         ArgumentExceptionHelper.ThrowIfNull(property);
@@ -53,7 +50,7 @@ public static class RuntimeObservationFallback
     /// <returns>An observable that emits property values before they change.</returns>
     public static IObservable<TValue> WhenChanging<TObj, TValue>(
         TObj obj,
-        System.Linq.Expressions.Expression<Func<TObj, TValue>> property)
+        Expression<Func<TObj, TValue>> property)
         where TObj : class
     {
         ArgumentExceptionHelper.ThrowIfNull(property);
@@ -76,7 +73,7 @@ public static class RuntimeObservationFallback
     /// <returns>An observable that emits property values after they change.</returns>
     public static IObservable<TValue> WhenAnyValue<TSender, TValue>(
         TSender sender,
-        System.Linq.Expressions.Expression<Func<TSender, TValue>> property)
+        Expression<Func<TSender, TValue>> property)
         where TSender : class
     {
         ArgumentExceptionHelper.ThrowIfNull(property);
@@ -101,8 +98,8 @@ public static class RuntimeObservationFallback
     /// <returns>An observable that emits a tuple of property values when any changes.</returns>
     public static IObservable<(T1 Value1, T2 Value2)> WhenChanged<TObj, T1, T2>(
         TObj obj,
-        System.Linq.Expressions.Expression<Func<TObj, T1>> property1,
-        System.Linq.Expressions.Expression<Func<TObj, T2>> property2)
+        Expression<Func<TObj, T1>> property1,
+        Expression<Func<TObj, T2>> property2)
         where TObj : class
     {
         var o1 = WhenChanged(obj, property1);
@@ -124,9 +121,9 @@ public static class RuntimeObservationFallback
     /// <returns>An observable that emits a tuple of property values when any changes.</returns>
     public static IObservable<(T1 Value1, T2 Value2, T3 Value3)> WhenChanged<TObj, T1, T2, T3>(
         TObj obj,
-        System.Linq.Expressions.Expression<Func<TObj, T1>> property1,
-        System.Linq.Expressions.Expression<Func<TObj, T2>> property2,
-        System.Linq.Expressions.Expression<Func<TObj, T3>> property3)
+        Expression<Func<TObj, T1>> property1,
+        Expression<Func<TObj, T2>> property2,
+        Expression<Func<TObj, T3>> property3)
         where TObj : class
     {
         var o1 = WhenChanged(obj, property1);

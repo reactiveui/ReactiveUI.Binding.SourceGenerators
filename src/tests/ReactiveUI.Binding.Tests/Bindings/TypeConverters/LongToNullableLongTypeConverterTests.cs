@@ -29,7 +29,7 @@ public class LongToNullableLongTypeConverterTests
     public async Task TryConvert_AlwaysSucceeds()
     {
         var converter = new LongToNullableLongTypeConverter();
-        long value = 1234567890123456L;
+        var value = 1234567890123456L;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -67,7 +67,7 @@ public class LongToNullableLongTypeConverterTests
     public async Task TryConvertTyped_WithValidValue_ReturnsTrueAndOutput()
     {
         var converter = new LongToNullableLongTypeConverter();
-        long value = 42L;
+        var value = 42L;
 
         var success = converter.TryConvertTyped(value, null, out var result);
 
@@ -98,7 +98,7 @@ public class LongToNullableLongTypeConverterTests
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()
     {
         var converter = new LongToNullableLongTypeConverter();
-        string value = "invalid";
+        var value = "invalid";
 
         var success = converter.TryConvertTyped(value, null, out var result);
 

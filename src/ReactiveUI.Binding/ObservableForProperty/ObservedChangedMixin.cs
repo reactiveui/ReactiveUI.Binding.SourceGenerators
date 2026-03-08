@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 
 using ReactiveUI.Binding.Expressions;
@@ -21,10 +20,11 @@ public static class ObservedChangedMixin
     /// <typeparam name="TValue">The value type.</typeparam>
     /// <param name="item">The observed change.</param>
     /// <returns>The name of the property which has changed.</returns>
-    public static string GetPropertyName<TSender, TValue>(this IObservedChange<TSender, TValue> item) =>
-        item is null
-            ? throw new ArgumentNullException(nameof(item))
-            : Reflection.ExpressionToPropertyNames(item.Expression);
+    public static string GetPropertyName<TSender, TValue>(this IObservedChange<TSender, TValue> item)
+    {
+        ArgumentExceptionHelper.ThrowIfNull(item);
+        return Reflection.ExpressionToPropertyNames(item.Expression);
+    }
 
     /// <summary>
     /// Returns the current value of a property given a notification that it has changed.
@@ -34,12 +34,17 @@ public static class ObservedChangedMixin
     /// <param name="item">The observed change instance to get the value of.</param>
     /// <returns>The current value of the property.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
-    public static TValue GetValue<TSender, TValue>(this IObservedChange<TSender, TValue> item) =>
-        item is null
-            ? throw new ArgumentNullException(nameof(item))
-            : !item.TryGetValue(out var returnValue)
-                ? throw new Exception($"One of the properties in the expression '{item.GetPropertyName()}' was null")
-                : returnValue;
+    public static TValue GetValue<TSender, TValue>(this IObservedChange<TSender, TValue> item)
+    {
+        ArgumentExceptionHelper.ThrowIfNull(item);
+
+        if (!item.TryGetValue(out var returnValue))
+        {
+            throw new Exception($"One of the properties in the expression '{item.GetPropertyName()}' was null");
+        }
+
+        return returnValue;
+    }
 
     /// <summary>
     /// Returns the current value of a property given a notification that it has changed,
@@ -50,8 +55,11 @@ public static class ObservedChangedMixin
     /// <param name="item">The observed change instance to get the value of.</param>
     /// <returns>The current value of the property, or default.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
-    public static TValue? GetValueOrDefault<TSender, TValue>(this IObservedChange<TSender, TValue> item) =>
-        item is null ? throw new ArgumentNullException(nameof(item)) : !item.TryGetValue(out var returnValue) ? default : returnValue;
+    public static TValue? GetValueOrDefault<TSender, TValue>(this IObservedChange<TSender, TValue> item)
+    {
+        ArgumentExceptionHelper.ThrowIfNull(item);
+        return !item.TryGetValue(out var returnValue) ? default : returnValue;
+    }
 
     /// <summary>
     /// Given a stream of notification changes, this method will convert
@@ -99,7 +107,7 @@ public static class ObservedChangedMixin
     internal static void SetValueToProperty<TSender, TValue, TTarget>(
         this IObservedChange<TSender, TValue> item,
         TTarget target,
-        System.Linq.Expressions.Expression<Func<TTarget, TValue>> property)
+        Expression<Func<TTarget, TValue>> property)
     {
         if (target is not null)
         {

@@ -22,7 +22,7 @@ internal static class ArgumentExceptionHelper
     /// </summary>
     /// <param name="argument">The reference type argument to validate as non-null.</param>
     /// <param name="paramName">The name of the parameter with which <paramref name="argument"/> corresponds.</param>
-    public static void ThrowIfNull([NotNull] object? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
+    public static void ThrowIfNull([ValidatedNotNull, NotNull] object? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
     {
         if (argument is null)
         {
@@ -36,7 +36,7 @@ internal static class ArgumentExceptionHelper
     /// <param name="argument">The reference type argument to validate as non-null.</param>
     /// <param name="message">The exception message.</param>
     /// <param name="paramName">The name of the parameter with which <paramref name="argument"/> corresponds.</param>
-    public static void ThrowIfNullWithMessage([NotNull] object? argument, string message, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
+    public static void ThrowIfNullWithMessage([ValidatedNotNull, NotNull] object? argument, string message, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
     {
         if (argument is null)
         {
@@ -51,7 +51,7 @@ internal static class ArgumentExceptionHelper
     /// <param name="paramName">The name of the parameter with which <paramref name="argument"/> corresponds.</param>
     /// <exception cref="ArgumentNullException"><paramref name="argument"/> is null.</exception>
     /// <exception cref="ArgumentException"><paramref name="argument"/> is empty.</exception>
-    public static void ThrowIfNullOrEmpty([NotNull] string? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
+    public static void ThrowIfNullOrEmpty([ValidatedNotNull, NotNull] string? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
     {
         if (argument is null)
         {
@@ -71,7 +71,7 @@ internal static class ArgumentExceptionHelper
     /// <param name="paramName">The name of the parameter with which <paramref name="argument"/> corresponds.</param>
     /// <exception cref="ArgumentNullException"><paramref name="argument"/> is null.</exception>
     /// <exception cref="ArgumentException"><paramref name="argument"/> is empty or consists only of white-space characters.</exception>
-    public static void ThrowIfNullOrWhiteSpace([NotNull] string? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
+    public static void ThrowIfNullOrWhiteSpace([ValidatedNotNull, NotNull] string? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
     {
         if (argument is null)
         {
@@ -253,7 +253,7 @@ internal static class ArgumentExceptionHelper
     /// <typeparam name="T">The expected type.</typeparam>
     /// <param name="argument">The argument to validate.</param>
     /// <param name="paramName">The name of the parameter with which <paramref name="argument"/> corresponds.</param>
-    public static void ThrowIfNotOfType<T>([NotNull] object? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
+    public static void ThrowIfNotOfType<T>([ValidatedNotNull, NotNull] object? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
     {
         if (argument is not T)
         {

@@ -7,8 +7,6 @@ using System.Reactive.Concurrency;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 
-using ReactiveUI.Binding;
-
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>
@@ -22,9 +20,19 @@ namespace ReactiveUI.Binding.Benchmarks;
 [MarkdownExporterAttribute.GitHub]
 public class BindOneWayBenchmark
 {
+    /// <summary>
+    /// Represents the number of property change events to be triggered during the benchmark tests.
+    /// </summary>
     private const int PropertyChangeCount = 1000;
 
+    /// <summary>
+    /// The source view model of the benchmark.
+    /// </summary>
     private BenchmarkViewModel _source = null!;
+
+    /// <summary>
+    /// The target view of the benchmark.
+    /// </summary>
     private BenchmarkView _target = null!;
 
     /// <summary>

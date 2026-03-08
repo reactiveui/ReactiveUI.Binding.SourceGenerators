@@ -2,12 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-
-using ReactiveUI.Binding.Helpers;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Observables;
 
@@ -122,7 +116,7 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs1);
         ArgumentExceptionHelper.ThrowIfNull(obs2);
 
-        return Observables.RxBindingExtensions.Merge(
+        return RxBindingExtensions.Merge(
             sender.WhenAnyObservable(obs1),
             sender.WhenAnyObservable(obs2));
     }
@@ -184,7 +178,7 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs2);
         ArgumentExceptionHelper.ThrowIfNull(obs3);
 
-        return Observables.RxBindingExtensions.Merge(
+        return RxBindingExtensions.Merge(
             sender.WhenAnyObservable(obs1),
             sender.WhenAnyObservable(obs2),
             sender.WhenAnyObservable(obs3));
@@ -254,7 +248,7 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs3);
         ArgumentExceptionHelper.ThrowIfNull(obs4);
 
-        return Observables.RxBindingExtensions.Merge(
+        return RxBindingExtensions.Merge(
             sender.WhenAnyObservable(obs1),
             sender.WhenAnyObservable(obs2),
             sender.WhenAnyObservable(obs3),
@@ -332,7 +326,7 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs4);
         ArgumentExceptionHelper.ThrowIfNull(obs5);
 
-        return Observables.RxBindingExtensions.Merge(
+        return RxBindingExtensions.Merge(
             sender.WhenAnyObservable(obs1),
             sender.WhenAnyObservable(obs2),
             sender.WhenAnyObservable(obs3),
@@ -418,7 +412,7 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs5);
         ArgumentExceptionHelper.ThrowIfNull(obs6);
 
-        return Observables.RxBindingExtensions.Merge(
+        return RxBindingExtensions.Merge(
             sender.WhenAnyObservable(obs1),
             sender.WhenAnyObservable(obs2),
             sender.WhenAnyObservable(obs3),
@@ -512,7 +506,7 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs6);
         ArgumentExceptionHelper.ThrowIfNull(obs7);
 
-        return Observables.RxBindingExtensions.Merge(
+        return RxBindingExtensions.Merge(
             sender.WhenAnyObservable(obs1),
             sender.WhenAnyObservable(obs2),
             sender.WhenAnyObservable(obs3),
@@ -614,7 +608,7 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs7);
         ArgumentExceptionHelper.ThrowIfNull(obs8);
 
-        return Observables.RxBindingExtensions.Merge(
+        return RxBindingExtensions.Merge(
             sender.WhenAnyObservable(obs1),
             sender.WhenAnyObservable(obs2),
             sender.WhenAnyObservable(obs3),
@@ -724,7 +718,7 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs8);
         ArgumentExceptionHelper.ThrowIfNull(obs9);
 
-        return Observables.RxBindingExtensions.Merge(
+        return RxBindingExtensions.Merge(
             sender.WhenAnyObservable(obs1),
             sender.WhenAnyObservable(obs2),
             sender.WhenAnyObservable(obs3),
@@ -842,7 +836,7 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs9);
         ArgumentExceptionHelper.ThrowIfNull(obs10);
 
-        return Observables.RxBindingExtensions.Merge(
+        return RxBindingExtensions.Merge(
             sender.WhenAnyObservable(obs1),
             sender.WhenAnyObservable(obs2),
             sender.WhenAnyObservable(obs3),
@@ -968,7 +962,7 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs10);
         ArgumentExceptionHelper.ThrowIfNull(obs11);
 
-        return Observables.RxBindingExtensions.Merge(
+        return RxBindingExtensions.Merge(
             sender.WhenAnyObservable(obs1),
             sender.WhenAnyObservable(obs2),
             sender.WhenAnyObservable(obs3),
@@ -1102,7 +1096,7 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs11);
         ArgumentExceptionHelper.ThrowIfNull(obs12);
 
-        return Observables.RxBindingExtensions.Merge(
+        return RxBindingExtensions.Merge(
             sender.WhenAnyObservable(obs1),
             sender.WhenAnyObservable(obs2),
             sender.WhenAnyObservable(obs3),

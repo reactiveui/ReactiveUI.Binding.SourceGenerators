@@ -12,8 +12,19 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class Address : INotifyPropertyChanged, INotifyPropertyChanging
 {
+    /// <summary>
+    /// The backer for Street.
+    /// </summary>
     private string _street = string.Empty;
+
+    /// <summary>
+    /// The backer for City.
+    /// </summary>
     private string _city = string.Empty;
+
+    /// <summary>
+    /// The backer for ZipCode.
+    /// </summary>
     private string _zipCode = string.Empty;
 
     /// <inheritdoc/>

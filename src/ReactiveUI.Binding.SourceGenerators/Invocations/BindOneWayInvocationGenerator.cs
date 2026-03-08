@@ -5,6 +5,7 @@
 using Microsoft.CodeAnalysis;
 
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Invocations;
@@ -27,13 +28,8 @@ internal static class BindOneWayInvocationGenerator
     {
         var invocations = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (node, ct) => RoslynHelpers.IsBindInvocation(node, ct)
-                    && node is Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax inv
-                    && inv.Expression is Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax
-                    {
-                        Name.Identifier.Text: Constants.BindOneWayMethodName
-                    },
-                transform: MetadataExtractor.ExtractBindInvocation)
+                predicate: static (node, ct) => RoslynHelpers.IsBindOneWaySpecificInvocation(node, ct),
+                transform: BindingExtractor.ExtractBindInvocation)
             .Where(static x => x is not null)
             .Select(static (x, _) => x!);
 

@@ -29,7 +29,7 @@ public class DecimalToNullableDecimalTypeConverterTests
     public async Task TryConvert_AlwaysSucceeds()
     {
         var converter = new DecimalToNullableDecimalTypeConverter();
-        decimal value = 123.456789m;
+        var value = 123.456789m;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -67,7 +67,7 @@ public class DecimalToNullableDecimalTypeConverterTests
     public async Task TryConvertTyped_WithValidValue_ReturnsTrueAndOutput()
     {
         var converter = new DecimalToNullableDecimalTypeConverter();
-        decimal value = 42.5m;
+        var value = 42.5m;
 
         var success = converter.TryConvertTyped(value, null, out var result);
 
@@ -98,7 +98,7 @@ public class DecimalToNullableDecimalTypeConverterTests
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()
     {
         var converter = new DecimalToNullableDecimalTypeConverter();
-        string value = "invalid";
+        var value = "invalid";
 
         var success = converter.TryConvertTyped(value, null, out var result);
 

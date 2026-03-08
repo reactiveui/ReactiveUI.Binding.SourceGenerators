@@ -2,10 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Diagnostics.CodeAnalysis;
-
-using ReactiveUI.Binding.Helpers;
-
 namespace ReactiveUI.Binding;
 
 /// <summary>
@@ -38,12 +34,18 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public sealed class SetMethodBindingConverterRegistry
 {
+    /// <summary>
+    /// Synchronization gate for serializing write operations.
+    /// </summary>
 #if NET9_0_OR_GREATER
     private readonly Lock _gate = new();
 #else
     private readonly object _gate = new();
 #endif
 
+    /// <summary>
+    /// The current immutable snapshot of registered set-method converters, read via volatile access.
+    /// </summary>
     private Snapshot? _snapshot;
 
     /// <summary>

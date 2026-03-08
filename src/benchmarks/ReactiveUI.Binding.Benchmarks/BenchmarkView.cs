@@ -4,8 +4,6 @@
 
 using System.ComponentModel;
 
-using ReactiveUI;
-
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>
@@ -14,8 +12,19 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// </summary>
 public class BenchmarkView : IViewFor<BenchmarkViewModel>, INotifyPropertyChanged
 {
+    /// <summary>
+    /// The backing field for the <see cref="DisplayName"/> property.
+    /// </summary>
     private string _displayName = string.Empty;
+
+    /// <summary>
+    /// The backing field for the <see cref="DisplayAge"/> property.
+    /// </summary>
     private int _displayAge;
+
+    /// <summary>
+    /// The backing field for the <see cref="ViewModel"/> property.
+    /// </summary>
     private BenchmarkViewModel? _viewModel;
 
     /// <inheritdoc/>

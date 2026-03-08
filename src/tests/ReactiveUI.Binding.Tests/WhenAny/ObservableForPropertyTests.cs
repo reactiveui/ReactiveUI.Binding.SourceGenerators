@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Reactive.Linq;
-
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Tests.TestModels;
@@ -442,6 +440,9 @@ public class ObservableForPropertyTests
         await Assert.That(values[0].Value).IsNull();
     }
 
+    /// <summary>
+    /// Resets and initializes the ReactiveUI binding infrastructure for testing.
+    /// </summary>
     internal static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();

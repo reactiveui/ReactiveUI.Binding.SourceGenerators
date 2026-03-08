@@ -26,6 +26,9 @@ namespace ReactiveUI.Binding.Builder;
 /// </remarks>
 public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBuilder, IReactiveUIBindingInstance
 {
+    /// <summary>
+    /// Tracks whether core services have already been registered to prevent duplicate registration.
+    /// </summary>
     private bool _coreRegistered;
 
     /// <summary>
@@ -119,6 +122,18 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     }
 
     /// <summary>
+    /// Registers a custom command binder for binding commands to UI controls.
+    /// </summary>
+    /// <param name="binder">The command binder instance to register.</param>
+    /// <returns>The builder instance for chaining.</returns>
+    public IReactiveUIBindingBuilder WithCommandBinder(ICreatesCommandBinding binder)
+    {
+        ArgumentExceptionHelper.ThrowIfNull(binder);
+        CurrentMutable.RegisterLazySingleton<ICreatesCommandBinding>(() => binder);
+        return this;
+    }
+
+    /// <summary>
     /// Registers the core ReactiveUI.Binding services in an AOT-compatible manner.
     /// </summary>
     /// <returns>The builder instance for chaining.</returns>
@@ -153,10 +168,7 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     {
         var appInstance = (IReactiveUIBindingInstance)Build();
 
-        if (appInstance.Current is null)
-        {
-            throw new InvalidOperationException("Failed to create ReactiveUIBindingInstance instance");
-        }
+        ThrowIfCurrentNull(appInstance);
 
         // Set the global converter service
         BindingConverters.SetService(ConverterService);
@@ -165,5 +177,20 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
         RxBindingBuilder.MarkAsInitialized();
 
         return appInstance;
+    }
+
+    /// <summary>
+    /// Throws if the app instance's Current resolver is null after building.
+    /// This is a defensive guard that should never be hit in practice because
+    /// <see cref="Splat.Builder.AppBuilder.Build"/> always sets Current.
+    /// </summary>
+    /// <param name="appInstance">The built app instance to validate.</param>
+    [ExcludeFromCodeCoverage]
+    private static void ThrowIfCurrentNull(IReactiveUIBindingInstance appInstance)
+    {
+        if (appInstance.Current is null)
+        {
+            throw new InvalidOperationException("Failed to create ReactiveUIBindingInstance instance");
+        }
     }
 }

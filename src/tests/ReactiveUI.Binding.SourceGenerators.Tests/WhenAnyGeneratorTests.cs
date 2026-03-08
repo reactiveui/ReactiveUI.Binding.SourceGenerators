@@ -21,7 +21,7 @@ public class WhenAnyGeneratorTests
     public async Task SingleProperty_INPC()
     {
         var source = SharedSourceReader.ReadScenario("WhenAny/SinglePropertyINPC");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,7 @@ public class WhenAnyGeneratorTests
     public async Task MultiProperty_TwoProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenAny/MultiPropertyTwoProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -50,7 +50,7 @@ public class WhenAnyGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenAny/SinglePropertyINPC");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenAnyGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(WhenAnyGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -62,7 +62,7 @@ public class WhenAnyGeneratorTests
     public async Task SingleProperty_DeepChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenAny/DeepPropertyChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -75,7 +75,7 @@ public class WhenAnyGeneratorTests
     public async Task MultiProperty_DeepChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenAny/MultiPropertyDeepChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -88,7 +88,7 @@ public class WhenAnyGeneratorTests
     public async Task MultipleInvocations_SameTypeSignature()
     {
         var source = SharedSourceReader.ReadScenario("WhenAny/MultipleInvocationsSameType");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }

@@ -4,7 +4,6 @@
 
 using System.Collections.Concurrent;
 using System.Reflection;
-using System.Windows.Forms;
 
 namespace ReactiveUI.Binding.WinForms;
 
@@ -15,6 +14,12 @@ namespace ReactiveUI.Binding.WinForms;
 [RequiresUnreferencedCode("Uses reflection to find and subscribe to {PropertyName}Changed events on WinForms components.")]
 public class WinFormsCreatesObservableForProperty : ICreatesObservableForProperty
 {
+    /// <summary>
+    /// A concurrent dictionary cache used to store information about events corresponding
+    /// to property changes on WinForms components.
+    /// The key is a tuple consisting of a type and property name, and the value is the associated <see cref="EventInfo"/>
+    /// if the {PropertyName}Changed event exists, or null if it does not.
+    /// </summary>
     private static readonly ConcurrentDictionary<(Type Type, string PropertyName), EventInfo?> EventInfoCache = new();
 
     /// <inheritdoc/>
@@ -43,10 +48,7 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
         bool beforeChanged = false,
         bool suppressWarnings = false)
     {
-        if (sender is null)
-        {
-            throw new ArgumentNullException(nameof(sender));
-        }
+        ArgumentExceptionHelper.ThrowIfNull(sender);
 
         var ei = GetEventInfo(sender.GetType(), propertyName) ?? throw new ArgumentException(
             $"Could not find event {propertyName}Changed on type {sender.GetType().Name}",
@@ -62,6 +64,15 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
         });
     }
 
+    /// <summary>
+    /// Retrieves the <see cref="EventInfo"/> for the specified {PropertyName}Changed event
+    /// on the given type.
+    /// </summary>
+    /// <param name="type">The type to be inspected for the event.</param>
+    /// <param name="propertyName">The name of the property whose corresponding event information is to be retrieved.</param>
+    /// <returns>
+    /// An <see cref="EventInfo"/> object if the {PropertyName}Changed event is found; otherwise, null.
+    /// </returns>
     internal static EventInfo? GetEventInfo(Type type, string propertyName) =>
         EventInfoCache.GetOrAdd(
             (type, propertyName),

@@ -2,10 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
-using System.Linq.Expressions;
-using System.Threading;
-
 namespace ReactiveUI.Binding;
 
 /// <summary>
@@ -16,7 +12,14 @@ namespace ReactiveUI.Binding;
 public sealed class ReactiveBinding<TView, TValue> : IReactiveBinding<TView, TValue>
     where TView : IViewFor
 {
+    /// <summary>
+    /// The underlying subscription that is disposed when this binding is disposed.
+    /// </summary>
     private readonly IDisposable _subscription;
+
+    /// <summary>
+    /// Tracks whether this instance has been disposed (0 = not disposed, 1 = disposed).
+    /// </summary>
     private int _disposed;
 
     /// <summary>
@@ -56,9 +59,17 @@ public sealed class ReactiveBinding<TView, TValue> : IReactiveBinding<TView, TVa
     /// <inheritdoc/>
     public void Dispose()
     {
-        if (Interlocked.Exchange(ref _disposed, 1) == 0)
+        if (TrySetDisposed())
         {
             _subscription.Dispose();
         }
     }
+
+    /// <summary>
+    /// Atomically marks this instance as disposed.
+    /// </summary>
+    /// <returns><see langword="true"/> if this is the first disposal; otherwise <see langword="false"/>.</returns>
+    [ExcludeFromCodeCoverage]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool TrySetDisposed() => Interlocked.Exchange(ref _disposed, 1) == 0;
 }

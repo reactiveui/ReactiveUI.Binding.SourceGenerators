@@ -8,3 +8,5 @@ RXUIBIND003 | Usage | Warning | Expression contains private/protected member
 RXUIBIND004 | Usage | Warning | Type does not support before-change notifications
 RXUIBIND005 | Usage | Info | Source type implements INotifyDataErrorInfo; validation binding requires runtime engine
 RXUIBIND006 | Usage | Warning | Expression contains unsupported path segment (indexer, field, or method call)
+RXUIBIND007 | Usage | Warning | Control has no bindable event
+RXUIBIND008 | Usage | Warning | Property is not an IInteraction

@@ -266,7 +266,7 @@ public class ExpressionRewriterTests
     public async Task Rewrite_WithStaticMethodCall_ThrowsNotSupportedException()
     {
         var methodCall = System.Linq.Expressions.Expression.Call(
-            typeof(int).GetMethod("Parse", new[] { typeof(string) })!,
+            typeof(int).GetMethod("Parse", [typeof(string)])!,
             System.Linq.Expressions.Expression.Constant("42"));
 
         var ex = Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(methodCall));
@@ -383,11 +383,10 @@ public class ExpressionRewriterTests
     public async Task AllConstant_WithNonConstant_ReturnsFalse()
     {
         var list = new System.Collections.ObjectModel.ReadOnlyCollection<System.Linq.Expressions.Expression>(
-            new System.Linq.Expressions.Expression[]
-            {
-                System.Linq.Expressions.Expression.Constant(1),
-                System.Linq.Expressions.Expression.Parameter(typeof(int), "x"),
-            });
+        [
+            System.Linq.Expressions.Expression.Constant(1),
+                System.Linq.Expressions.Expression.Parameter(typeof(int), "x")
+        ]);
 
         var result = ExpressionRewriter.AllConstant(list);
 
@@ -402,11 +401,10 @@ public class ExpressionRewriterTests
     public async Task AllConstant_WithAllConstants_ReturnsTrue()
     {
         var list = new System.Collections.ObjectModel.ReadOnlyCollection<System.Linq.Expressions.Expression>(
-            new System.Linq.Expressions.Expression[]
-            {
-                System.Linq.Expressions.Expression.Constant(1),
-                System.Linq.Expressions.Expression.Constant(2),
-            });
+        [
+            System.Linq.Expressions.Expression.Constant(1),
+                System.Linq.Expressions.Expression.Constant(2)
+        ]);
 
         var result = ExpressionRewriter.AllConstant(list);
 
@@ -441,12 +439,11 @@ public class ExpressionRewriterTests
     {
         var rewriter = new ExpressionRewriter();
         var args = new System.Collections.ObjectModel.ReadOnlyCollection<System.Linq.Expressions.Expression>(
-            new System.Linq.Expressions.Expression[]
-            {
-                System.Linq.Expressions.Expression.Constant(1),
+        [
+            System.Linq.Expressions.Expression.Constant(1),
                 System.Linq.Expressions.Expression.Constant(2),
-                System.Linq.Expressions.Expression.Constant(3),
-            });
+                System.Linq.Expressions.Expression.Constant(3)
+        ]);
 
         var result = rewriter.VisitArgumentList(args);
 
@@ -605,17 +602,36 @@ public class ExpressionRewriterTests
         await Assert.That(property.Name).IsEqualTo("Length");
     }
 
+    /// <summary>
+    /// Test class used as a type parameter in expression lambdas for rewriter tests.
+    /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
     private sealed class TestClass
     {
+        /// <summary>
+        /// Gets an integer array for testing array index and length expressions.
+        /// </summary>
         public int[] Array { get; } = [1, 2, 3];
 
+        /// <summary>
+        /// Gets a list of integers for testing list indexer expressions.
+        /// </summary>
         public List<int> List { get; } = [4, 5, 6];
 
+        /// <summary>
+        /// Gets or sets a nested instance for testing nested member access expressions.
+        /// </summary>
         public TestClass? Nested { get; set; }
 
+        /// <summary>
+        /// Gets or sets a string property for testing simple member access expressions.
+        /// </summary>
         public string? Property { get; set; }
 
+        /// <summary>
+        /// Gets the value of <see cref="Property"/>. Used to test non-special-name method call rewriting.
+        /// </summary>
+        /// <returns>The current value of the <see cref="Property"/>.</returns>
         public string? GetValue() => Property;
     }
 }

@@ -55,7 +55,7 @@ public class EqualityTypeConverterTests
         var result = converter.TryConvertTyped(null, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(true);
+        await Assert.That((bool)output!).IsTrue();
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public class EqualityTypeConverterTests
         var result = converter.TryConvertTyped(obj, 43, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(false);
+        await Assert.That((bool)output!).IsFalse();
     }
 
     /// <summary>
@@ -87,7 +87,7 @@ public class EqualityTypeConverterTests
         var result = converter.TryConvertTyped(obj, 42, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(false);
+        await Assert.That((bool)output!).IsFalse();
     }
 
     /// <summary>
@@ -103,7 +103,7 @@ public class EqualityTypeConverterTests
         var result = converter.TryConvertTyped(obj, "other", out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(false);
+        await Assert.That((bool)output!).IsFalse();
     }
 
     /// <summary>
@@ -119,7 +119,7 @@ public class EqualityTypeConverterTests
         var result = converter.TryConvertTyped(obj, 42, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(true);
+        await Assert.That((bool)output!).IsTrue();
     }
 
     /// <summary>
@@ -135,7 +135,7 @@ public class EqualityTypeConverterTests
         var result = converter.TryConvertTyped(obj, "hello", out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(true);
+        await Assert.That((bool)output!).IsTrue();
     }
 
     /// <summary>
@@ -151,7 +151,7 @@ public class EqualityTypeConverterTests
         var result = converter.TryConvertTyped(obj, "test", out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(true);
+        await Assert.That((bool)output!).IsTrue();
     }
 
     /// <summary>
@@ -167,7 +167,7 @@ public class EqualityTypeConverterTests
         var result = converter.TryConvertTyped(obj, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(false);
+        await Assert.That((bool)output!).IsFalse();
     }
 
     /// <summary>
@@ -183,9 +183,9 @@ public class EqualityTypeConverterTests
         var result2 = converter.TryConvertTyped(null, "test", out var output2);
 
         await Assert.That(result1).IsTrue();
-        await Assert.That(output1).IsEqualTo(false);
+        await Assert.That((bool)output1!).IsFalse();
         await Assert.That(result2).IsTrue();
-        await Assert.That(output2).IsEqualTo(false);
+        await Assert.That((bool)output2!).IsFalse();
     }
 
     /// <summary>
@@ -201,7 +201,7 @@ public class EqualityTypeConverterTests
         var result = converter.TryConvertTyped(obj, obj, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(true);
+        await Assert.That((bool)output!).IsTrue();
     }
 
     /// <summary>
@@ -218,6 +218,6 @@ public class EqualityTypeConverterTests
         var result = converter.TryConvertTyped(obj, other, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(true);
+        await Assert.That((bool)output!).IsTrue();
     }
 }

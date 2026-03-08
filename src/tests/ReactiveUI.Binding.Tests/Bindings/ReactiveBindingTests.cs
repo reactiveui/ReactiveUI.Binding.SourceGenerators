@@ -2,11 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-
-using ReactiveUI.Binding;
-
 namespace ReactiveUI.Binding.Tests.Bindings;
 
 /// <summary>
@@ -21,7 +16,7 @@ public class ReactiveBindingTests
     [Test]
     public async Task Dispose_DisposesSubscription()
     {
-        bool disposed = false;
+        var disposed = false;
         var subscription = Disposable.Create(() => disposed = true);
         var view = new FakeView();
         var changed = Observable.Empty<string>();
@@ -41,7 +36,7 @@ public class ReactiveBindingTests
     [Test]
     public async Task Dispose_Twice_DoesNotThrow()
     {
-        int disposeCount = 0;
+        var disposeCount = 0;
         var subscription = Disposable.Create(() => disposeCount++);
         var view = new FakeView();
         var changed = Observable.Empty<string>();

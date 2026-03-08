@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
+using ReactiveUI.Binding.Helpers;
 using ReactiveUI.Binding.SourceGenerators;
 
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
@@ -22,32 +23,32 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
 {
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(
-            DiagnosticWarnings.NonInlineLambda,
+    [
+        DiagnosticWarnings.NonInlineLambda,
             DiagnosticWarnings.PrivateMember,
             DiagnosticWarnings.NoBeforeChangeSupport,
             DiagnosticWarnings.ValidationNotGenerated,
-            DiagnosticWarnings.UnsupportedPathSegment);
+            DiagnosticWarnings.UnsupportedPathSegment,
+            DiagnosticWarnings.NoBindableEvent,
+            DiagnosticWarnings.InvalidInteractionType
+    ];
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        if (context is null)
-        {
-            throw new System.ArgumentNullException(nameof(context));
-        }
-
+        ArgumentExceptionHelper.ThrowIfNull(context);
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
     }
 
+    /// <summary>
+    /// Analyzes a method invocation operation for binding-related diagnostics.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
     internal static void AnalyzeInvocation(OperationAnalysisContext context)
     {
-        if (context.Operation is not IInvocationOperation invocationOp)
-        {
-            return;
-        }
+        var invocationOp = (IInvocationOperation)context.Operation;
 
         var methodSymbol = invocationOp.TargetMethod;
         if (!AnalyzerHelpers.IsBindingExtensionMethod(methodSymbol))
@@ -55,7 +56,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        string methodName = methodSymbol.Name;
+        var methodName = methodSymbol.Name;
         var arguments = invocationOp.Arguments;
 
         // Check RXUIBIND001: Non-inline lambda
@@ -78,15 +79,33 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         {
             CheckValidationSupport(context, invocationOp);
         }
+
+        // Check RXUIBIND008: Invalid interaction type
+        if (methodName == Constants.BindInteractionMethodName)
+        {
+            CheckInteractionType(context, invocationOp);
+        }
+
+        // Check RXUIBIND007: No bindable event on control
+        if (methodName == Constants.BindCommandMethodName)
+        {
+            CheckBindableEvent(context, invocationOp);
+        }
     }
 
+    /// <summary>
+    /// Checks for RXUIBIND001: Expression arguments that are not inline lambdas.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
+    /// <param name="arguments">The invocation arguments to inspect.</param>
+    /// <param name="methodName">The name of the method being invoked.</param>
     internal static void CheckNonInlineLambda(
         OperationAnalysisContext context,
         ImmutableArray<IArgumentOperation> arguments,
         string methodName)
     {
         // Find the Expression<Func<...>> arguments
-        for (int i = 0; i < arguments.Length; i++)
+        for (var i = 0; i < arguments.Length; i++)
         {
             var arg = arguments[i];
             if (arg.Value.Syntax is not ExpressionSyntax expr)
@@ -95,14 +114,10 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             }
 
             // Check if this is an Expression<Func<...>> parameter
-            var parameterType = arg.Parameter?.Type;
-            if (parameterType == null)
-            {
-                continue;
-            }
+            var parameterType = arg.Parameter!.Type;
 
-            string typeDisplay = parameterType.ToDisplayString();
-            if (!typeDisplay.StartsWith("System.Linq.Expressions.Expression<", System.StringComparison.Ordinal))
+            var typeDisplay = parameterType.ToDisplayString();
+            if (!typeDisplay.StartsWith("System.Linq.Expressions.Expression<", StringComparison.Ordinal))
             {
                 continue;
             }
@@ -116,11 +131,16 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Checks for RXUIBIND003: Lambda expressions that access private or protected members.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
+    /// <param name="arguments">The invocation arguments to inspect.</param>
     internal static void CheckPrivateMember(
         OperationAnalysisContext context,
         ImmutableArray<IArgumentOperation> arguments)
     {
-        for (int i = 0; i < arguments.Length; i++)
+        for (var i = 0; i < arguments.Length; i++)
         {
             var arg = arguments[i];
             if (arg.Value.Syntax is not LambdaExpressionSyntax lambda)
@@ -129,13 +149,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             }
 
             // Walk the lambda body looking for member accesses
-            ExpressionSyntax? body = lambda switch
-            {
-                SimpleLambdaExpressionSyntax simple => simple.Body as ExpressionSyntax,
-                ParenthesizedLambdaExpressionSyntax parens => parens.Body as ExpressionSyntax,
-                _ => null
-            };
-
+            var body = GetLambdaBody(lambda);
             if (body == null)
             {
                 continue;
@@ -144,9 +158,8 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             var current = body;
             while (current is MemberAccessExpressionSyntax memberAccess)
             {
-                var memberSymbol = context.Operation.SemanticModel?.GetSymbolInfo(memberAccess).Symbol;
-                if (memberSymbol != null
-                    && memberSymbol.DeclaredAccessibility is Accessibility.Private or Accessibility.Protected)
+                var memberSymbol = context.Operation.SemanticModel!.GetSymbolInfo(memberAccess).Symbol;
+                if (memberSymbol is { DeclaredAccessibility: Accessibility.Private or Accessibility.Protected })
                 {
                     context.ReportDiagnostic(
                         Diagnostic.Create(
@@ -161,88 +174,246 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Checks for RXUIBIND004: WhenChanging invocations on types that do not support before-change notifications.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
+    /// <param name="invocationOp">The invocation operation being analyzed.</param>
+    /// <param name="methodSymbol">The method symbol of the invocation target.</param>
     internal static void CheckBeforeChangeSupport(
         OperationAnalysisContext context,
         IInvocationOperation invocationOp,
         IMethodSymbol methodSymbol)
     {
-        // Get the receiver type
-        var receiverType = methodSymbol.TypeArguments.Length > 0
-            ? methodSymbol.TypeArguments[0] as INamedTypeSymbol
-            : null;
-
-        if (receiverType == null)
-        {
-            return;
-        }
-
-        var compilation = context.Compilation;
-        if (!AnalyzerHelpers.HasBeforeChangeSupport(receiverType, compilation, out string mechanism))
+        if (AnalyzerHelpers.LacksBeforeChangeSupport(methodSymbol, context.Compilation, out var receiverType, out var mechanism))
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     DiagnosticWarnings.NoBeforeChangeSupport,
                     invocationOp.Syntax.GetLocation(),
-                    receiverType.Name,
+                    receiverType!.Name,
                     mechanism));
         }
     }
 
+    /// <summary>
+    /// Checks for RXUIBIND005: Binding invocations where the source type implements
+    /// <see cref="System.ComponentModel.INotifyDataErrorInfo"/>, which requires the runtime engine for validation binding.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
+    /// <param name="invocationOp">The invocation operation being analyzed.</param>
     internal static void CheckValidationSupport(
         OperationAnalysisContext context,
         IInvocationOperation invocationOp)
     {
-        var methodSymbol = invocationOp.TargetMethod;
-
-        // Get the source type (first type argument)
-        var sourceType = methodSymbol.TypeArguments.Length > 0
-            ? methodSymbol.TypeArguments[0] as INamedTypeSymbol
-            : null;
-
-        if (sourceType == null)
+        if (AnalyzerHelpers.ImplementsDataErrorInfo(
+                invocationOp.TargetMethod, context.Compilation, out var sourceType))
         {
-            return;
-        }
-
-        // Check if source implements INotifyDataErrorInfo
-        var dataErrorInfo = context.Compilation.GetTypeByMetadataName(Constants.INotifyDataErrorInfoMetadataName);
-        if (dataErrorInfo == null)
-        {
-            return;
-        }
-
-        var allInterfaces = sourceType.AllInterfaces;
-        for (int i = 0; i < allInterfaces.Length; i++)
-        {
-            if (SymbolEqualityComparer.Default.Equals(allInterfaces[i], dataErrorInfo))
-            {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(
-                        DiagnosticWarnings.ValidationNotGenerated,
-                        invocationOp.Syntax.GetLocation(),
-                        sourceType.Name));
-                return;
-            }
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    DiagnosticWarnings.ValidationNotGenerated,
+                    invocationOp.Syntax.GetLocation(),
+                    sourceType!.Name));
         }
     }
 
-    internal static void CheckUnsupportedPathSegment(
+    /// <summary>
+    /// Checks for RXUIBIND008: BindInteraction invocations where the property type does not implement
+    /// the <c>IInteraction&lt;TInput, TOutput&gt;</c> interface.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
+    /// <param name="invocationOp">The invocation operation being analyzed.</param>
+    internal static void CheckInteractionType(
         OperationAnalysisContext context,
-        ImmutableArray<IArgumentOperation> arguments)
+        IInvocationOperation invocationOp)
     {
-        for (int i = 0; i < arguments.Length; i++)
+        // Find the propertyName argument (the Expression<Func<TViewModel, IInteraction<...>>> parameter)
+        var arguments = invocationOp.Arguments;
+        for (var i = 0; i < arguments.Length; i++)
         {
             var arg = arguments[i];
-
-            // Only check Expression<Func<...>> parameters
-            var parameterType = arg.Parameter?.Type;
-            if (parameterType == null)
+            if (arg.Parameter!.Name != "propertyName")
             {
                 continue;
             }
 
-            string typeDisplay = parameterType.ToDisplayString();
-            if (!typeDisplay.StartsWith("System.Linq.Expressions.Expression<", System.StringComparison.Ordinal))
+            if (arg.Value.Syntax is not LambdaExpressionSyntax lambda)
+            {
+                break;
+            }
+
+            // Get the lambda body return type
+            var body = GetLambdaBody(lambda);
+
+            if (body == null)
+            {
+                break;
+            }
+
+            var typeInfo = context.Operation.SemanticModel!.GetTypeInfo(body);
+            if (typeInfo.Type == null)
+            {
+                break;
+            }
+
+            var interactionType = context.Compilation.GetTypeByMetadataName(Constants.IInteractionMetadataName);
+            if (interactionType == null)
+            {
+                break;
+            }
+
+            // Check if the type implements IInteraction<,>
+            var propertyType = typeInfo.Type;
+            if (!ImplementsOpenGenericInterface(propertyType, interactionType))
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        DiagnosticWarnings.InvalidInteractionType,
+                        body.GetLocation(),
+                        propertyType.ToDisplayString()));
+            }
+
+            break;
+        }
+    }
+
+    /// <summary>
+    /// Checks for RXUIBIND007: BindCommand invocations where the target control type
+    /// does not expose a default bindable event (Click, TouchUpInside, MouseUp, or Pressed).
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
+    /// <param name="invocationOp">The invocation operation being analyzed.</param>
+    internal static void CheckBindableEvent(
+        OperationAnalysisContext context,
+        IInvocationOperation invocationOp)
+    {
+        var methodSymbol = invocationOp.TargetMethod;
+        var arguments = invocationOp.Arguments;
+
+        // If toEvent is explicitly specified, skip this check
+        for (var i = 0; i < arguments.Length; i++)
+        {
+            var toEventArg = arguments[i];
+            if (toEventArg.Parameter!.Name != "toEvent")
+            {
+                continue;
+            }
+
+            if (!toEventArg.IsImplicit
+                && toEventArg.Value.ConstantValue.HasValue
+                && toEventArg.Value.ConstantValue.Value is string { Length: > 0 })
+            {
+                return;
+            }
+        }
+
+        // Find the controlName argument to get the control type
+        for (var i = 0; i < arguments.Length; i++)
+        {
+            var arg = arguments[i];
+            if (arg.Parameter!.Name != "controlName")
+            {
+                continue;
+            }
+
+            if (arg.Value.Syntax is not LambdaExpressionSyntax lambda)
+            {
+                break;
+            }
+
+            var body = GetLambdaBody(lambda);
+
+            if (body == null)
+            {
+                break;
+            }
+
+            var typeInfo = context.Operation.SemanticModel!.GetTypeInfo(body);
+            if (typeInfo.Type is not INamedTypeSymbol controlType)
+            {
+                break;
+            }
+
+            // Check for default events: Click, TouchUpInside, MouseUp, Pressed
+            string[] defaultEvents = ["Click", "TouchUpInside", "MouseUp", "Pressed"];
+            var foundEvent = false;
+            for (var j = 0; j < defaultEvents.Length; j++)
+            {
+                var members = controlType.GetMembers(defaultEvents[j]);
+                for (var k = 0; k < members.Length; k++)
+                {
+                    if (members[k] is IEventSymbol)
+                    {
+                        foundEvent = true;
+                        break;
+                    }
+                }
+
+                if (foundEvent)
+                {
+                    break;
+                }
+            }
+
+            if (!foundEvent)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        DiagnosticWarnings.NoBindableEvent,
+                        body.GetLocation(),
+                        controlType.Name));
+            }
+
+            break;
+        }
+    }
+
+    /// <summary>
+    /// Determines whether a type implements a specific open generic interface.
+    /// </summary>
+    /// <param name="type">The type symbol to check.</param>
+    /// <param name="openGenericInterface">The open generic interface to look for (e.g., <c>IInteraction&lt;,&gt;</c>).</param>
+    /// <returns><c>true</c> if the type implements the specified open generic interface; otherwise, <c>false</c>.</returns>
+    internal static bool ImplementsOpenGenericInterface(ITypeSymbol type, INamedTypeSymbol openGenericInterface)
+    {
+        if (type is INamedTypeSymbol { IsGenericType: true } named
+            && SymbolEqualityComparer.Default.Equals(named.ConstructedFrom, openGenericInterface))
+        {
+            return true;
+        }
+
+        var allInterfaces = type.AllInterfaces;
+        for (var i = 0; i < allInterfaces.Length; i++)
+        {
+            if (allInterfaces[i].IsGenericType
+                && SymbolEqualityComparer.Default.Equals(allInterfaces[i].ConstructedFrom, openGenericInterface))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Checks for RXUIBIND006: Lambda expressions containing unsupported path segments
+    /// such as indexers, field accesses, or method calls.
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
+    /// <param name="arguments">The invocation arguments to inspect.</param>
+    internal static void CheckUnsupportedPathSegment(
+        OperationAnalysisContext context,
+        ImmutableArray<IArgumentOperation> arguments)
+    {
+        for (var i = 0; i < arguments.Length; i++)
+        {
+            var arg = arguments[i];
+
+            // Only check Expression<Func<...>> parameters
+            var parameterType = arg.Parameter!.Type;
+
+            var typeDisplay = parameterType.ToDisplayString();
+            if (!typeDisplay.StartsWith("System.Linq.Expressions.Expression<", StringComparison.Ordinal))
             {
                 continue;
             }
@@ -252,12 +423,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            ExpressionSyntax? body = lambda switch
-            {
-                SimpleLambdaExpressionSyntax simple => simple.Body as ExpressionSyntax,
-                ParenthesizedLambdaExpressionSyntax parens => parens.Body as ExpressionSyntax,
-                _ => null
-            };
+            var body = GetLambdaBody(lambda);
 
             if (body == null)
             {
@@ -268,6 +434,11 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    /// <summary>
+    /// Walks a member access chain looking for unsupported path segments (method calls, indexers, or fields).
+    /// </summary>
+    /// <param name="context">The operation analysis context.</param>
+    /// <param name="expression">The expression to walk.</param>
     internal static void WalkForUnsupportedSegments(
         OperationAnalysisContext context,
         ExpressionSyntax expression)
@@ -300,8 +471,8 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             if (current is MemberAccessExpressionSyntax memberAccess)
             {
                 // Check if the member is a field
-                var memberSymbol = context.Operation.SemanticModel?.GetSymbolInfo(memberAccess).Symbol;
-                if (memberSymbol is IFieldSymbol fieldSymbol && !fieldSymbol.IsConst)
+                var memberSymbol = context.Operation.SemanticModel!.GetSymbolInfo(memberAccess).Symbol;
+                if (memberSymbol is IFieldSymbol { IsConst: false })
                 {
                     context.ReportDiagnostic(
                         Diagnostic.Create(
@@ -318,5 +489,26 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             // Lambda parameter or other terminal — stop walking
             break;
         }
+    }
+
+    /// <summary>
+    /// Extracts the body expression from a lambda expression syntax node.
+    /// Only <see cref="SimpleLambdaExpressionSyntax"/> and <see cref="ParenthesizedLambdaExpressionSyntax"/>
+    /// exist in Roslyn's C# syntax model.
+    /// </summary>
+    /// <param name="lambda">The lambda expression syntax node to extract the body from.</param>
+    /// <returns>
+    /// The body as an <see cref="ExpressionSyntax"/>, or <c>null</c> if the lambda body is a block statement.
+    /// </returns>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    internal static ExpressionSyntax? GetLambdaBody(LambdaExpressionSyntax lambda)
+    {
+        if (lambda is SimpleLambdaExpressionSyntax simple)
+        {
+            return simple.Body as ExpressionSyntax;
+        }
+
+        var parenthesized = (ParenthesizedLambdaExpressionSyntax)lambda;
+        return parenthesized.Body as ExpressionSyntax;
     }
 }

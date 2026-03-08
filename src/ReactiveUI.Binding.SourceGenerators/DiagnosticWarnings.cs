@@ -87,4 +87,28 @@ internal static class DiagnosticWarnings
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "The source generator can only observe simple property access chains (e.g., x => x.Foo.Bar). Indexers, fields, and method calls in the path require runtime expression analysis.");
+
+    /// <summary>
+    /// RXUIBIND007: BindCommand control has no bindable event.
+    /// </summary>
+    internal static readonly DiagnosticDescriptor NoBindableEvent = new(
+        id: "RXUIBIND007",
+        title: "Control has no bindable event",
+        messageFormat: "Control type '{0}' has no default bindable event (Click, TouchUpInside, Pressed) and no 'toEvent' was specified",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "The source generator could not find a default event to bind on the control type. Specify the 'toEvent' parameter explicitly.");
+
+    /// <summary>
+    /// RXUIBIND008: Property does not implement IInteraction.
+    /// </summary>
+    internal static readonly DiagnosticDescriptor InvalidInteractionType = new(
+        id: "RXUIBIND008",
+        title: "Property is not an IInteraction",
+        messageFormat: "Property '{0}' does not implement IInteraction<TInput, TOutput>",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "The property selected in the BindInteraction expression must implement IInteraction<TInput, TOutput>.");
 }

@@ -24,8 +24,12 @@ internal sealed class ManualObservable<T> : IObservable<T>
         return new NoOpDisposable();
     }
 
+    /// <summary>
+    /// A disposable that performs no action on dispose.
+    /// </summary>
     private sealed class NoOpDisposable : IDisposable
     {
+        /// <inheritdoc/>
         public void Dispose()
         {
         }

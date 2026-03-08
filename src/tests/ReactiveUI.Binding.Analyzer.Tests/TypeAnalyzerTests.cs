@@ -970,4 +970,53 @@ public class TypeAnalyzerTests
         var message = diagnostics[0].GetMessage();
         await Assert.That(message).Contains("UnobservableModel");
     }
+
+    /// <summary>
+    /// Verifies that RXUIBIND002 is not reported for a non-generic WhenChanged method
+    /// on the recognized extension class (e.g., a generated dispatch overload with concrete types).
+    /// Exercises the <c>ExtractFirstTypeArgument == null</c> guard in <c>TypeAnalyzer.AnalyzeInvocation</c>.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_NonGenericWhenChanged_NoDiagnostic()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+
+            namespace ReactiveUI.Binding
+            {
+                public static class __ReactiveUIGeneratedBindings
+                {
+                    // Non-generic generated dispatch overload (concrete types)
+                    public static object WhenChanged(
+                        TestApp.MyViewModel obj,
+                        string callerFilePath = "",
+                        int callerLineNumber = 0)
+                        => throw new NotImplementedException();
+                }
+            }
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
 }

@@ -12,6 +12,9 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class ObjChain3 : INotifyPropertyChanged
 {
+    /// <summary>
+    /// The backer for Host.
+    /// </summary>
     private HostTestFixture? _host;
 
     /// <inheritdoc/>

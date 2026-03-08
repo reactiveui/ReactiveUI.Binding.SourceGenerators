@@ -3,10 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
-using System.Reactive.Linq;
-
 using ReactiveUI.Binding.Expressions;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Tests.TestModels;
@@ -203,7 +199,7 @@ public class INPCObservableForPropertyTests
         var indexExpr = LinqExpression.MakeIndex(
             param,
             indexer,
-            new[] { LinqExpression.Constant("key") });
+            [LinqExpression.Constant("key")]);
 
         var emitted = false;
         using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item")
@@ -229,7 +225,7 @@ public class INPCObservableForPropertyTests
         var indexExpr = LinqExpression.MakeIndex(
             param,
             indexer,
-            new[] { LinqExpression.Constant("key") });
+            [LinqExpression.Constant("key")]);
 
         var emitted = false;
         using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item", beforeChanged: true)
@@ -255,7 +251,7 @@ public class INPCObservableForPropertyTests
         var indexExpr = LinqExpression.MakeIndex(
             param,
             indexer,
-            new[] { LinqExpression.Constant("key") });
+            [LinqExpression.Constant("key")]);
 
         var emitted = false;
         using var sub = sut.GetNotificationForProperty(vm, indexExpr, "SomeOtherProperty")
@@ -281,7 +277,7 @@ public class INPCObservableForPropertyTests
         var indexExpr = LinqExpression.MakeIndex(
             param,
             indexer,
-            new[] { LinqExpression.Constant("key") });
+            [LinqExpression.Constant("key")]);
 
         var emitted = false;
         using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item")
@@ -384,7 +380,7 @@ public class INPCObservableForPropertyTests
         var indexExpr = LinqExpression.MakeIndex(
             param,
             indexer,
-            new[] { LinqExpression.Constant("key") });
+            [LinqExpression.Constant("key")]);
 
         var emitted = false;
         using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item", beforeChanged: true)
@@ -412,7 +408,7 @@ public class INPCObservableForPropertyTests
         var indexExpr = LinqExpression.MakeIndex(
             param,
             indexer,
-            new[] { LinqExpression.Constant("key") });
+            [LinqExpression.Constant("key")]);
 
         var emitted = false;
         using var sub = sut.GetNotificationForProperty(vm, indexExpr, "SomeOtherProperty", beforeChanged: true)
@@ -487,7 +483,7 @@ public class INPCObservableForPropertyTests
         var indexExpr = LinqExpression.MakeIndex(
             param,
             indexer,
-            new[] { LinqExpression.Constant("key") });
+            [LinqExpression.Constant("key")]);
 
         var count = 0;
         using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item")
@@ -577,6 +573,10 @@ public class INPCObservableForPropertyTests
     /// </summary>
     private sealed class NullablePropertyViewModel : INotifyPropertyChanged
     {
+        /// <summary>
+        /// A private field representing a nullable string property used for testing
+        /// scenarios where the property's value may be null.
+        /// </summary>
         private string? _nullableName;
 
         /// <inheritdoc/>
@@ -638,6 +638,11 @@ public class INPCObservableForPropertyTests
     /// </summary>
     private sealed class IndexableViewModel : INotifyPropertyChanged, INotifyPropertyChanging
     {
+        /// <summary>
+        /// A private dictionary field used to store key-value pairs for the indexer implementation
+        /// of the IndexableViewModel class. This field is referenced when getting or setting
+        /// values through the indexer.
+        /// </summary>
         private readonly Dictionary<string, string> _items = new();
 
         /// <inheritdoc/>

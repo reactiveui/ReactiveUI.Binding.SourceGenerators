@@ -21,7 +21,7 @@ public class WhenAnyObservableGeneratorTests
     public async Task SingleObservable()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyObservable/SingleObservable");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,7 @@ public class WhenAnyObservableGeneratorTests
     public async Task TwoObservables_Merge()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyObservable/TwoObservablesMerge");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +47,7 @@ public class WhenAnyObservableGeneratorTests
     public async Task TwoObservables_WithSelector()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyObservable/TwoObservablesWithSelector");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -63,7 +63,7 @@ public class WhenAnyObservableGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyObservable/SingleObservable");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenAnyObservableGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(WhenAnyObservableGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -75,7 +75,7 @@ public class WhenAnyObservableGeneratorTests
     public async Task SingleObservable_DeepChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyObservable/DeepObservableSwitch");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -88,7 +88,7 @@ public class WhenAnyObservableGeneratorTests
     public async Task TwoObservables_DeepChain_Merge()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyObservable/DeepObservableMerge");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -101,7 +101,7 @@ public class WhenAnyObservableGeneratorTests
     public async Task TwoObservables_DeepChain_CombineLatest()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyObservable/DeepObservableCombineLatest");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -114,7 +114,7 @@ public class WhenAnyObservableGeneratorTests
     public async Task MultipleInvocations_SameTypeSignature()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyObservable/MultipleInvocationsSameType");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyObservableGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -122,7 +122,7 @@ public class WhenAnyObservableGeneratorTests
     /// <summary>
     /// Verifies that a method named "WhenAnyObservable" on a non-ReactiveUI extension class is ignored
     /// by the generator. Exercises the extension class name mismatch guard in
-    /// MetadataExtractor.ExtractWhenAnyObservableInvocation (lines 183-188).
+    /// the extraction helpers.ExtractWhenAnyObservableInvocation (lines 183-188).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

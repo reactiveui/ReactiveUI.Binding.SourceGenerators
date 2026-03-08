@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using Microsoft.CodeAnalysis.CSharp;
+
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.RuntimeExecution;
@@ -56,7 +58,7 @@ public class WhenChangedRuntimeTests
             }
             """;
 
-        var result = TestHelper.RunGenerator(source);
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
@@ -98,7 +100,7 @@ public class WhenChangedRuntimeTests
             }
             """;
 
-        var result = TestHelper.RunGenerator(source);
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
@@ -143,7 +145,7 @@ public class WhenChangedRuntimeTests
             }
             """;
 
-        var result = TestHelper.RunGenerator(source);
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
@@ -183,7 +185,7 @@ public class WhenChangedRuntimeTests
             }
             """;
 
-        var result = TestHelper.RunGenerator(source);
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();

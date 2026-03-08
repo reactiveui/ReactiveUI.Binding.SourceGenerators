@@ -5,8 +5,6 @@
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.ObservableForProperty;
 
-using Splat;
-
 namespace ReactiveUI.Binding.Tests.Builder;
 
 /// <summary>
@@ -35,6 +33,24 @@ public class ReactiveUIBindingModuleTests
 
         await Assert.That(hasINPC).IsTrue();
         await Assert.That(hasPOCO).IsTrue();
+    }
+
+    /// <summary>
+    /// Verifies that Configure does not register any command binders
+    /// (known patterns are handled at compile time by the source generator).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Configure_NoCommandBinders()
+    {
+        var resolver = new ModernDependencyResolver();
+        var module = new ReactiveUIBindingModule();
+
+        module.Configure(resolver);
+
+        var binders = resolver.GetServices<ICreatesCommandBinding>().ToList();
+
+        await Assert.That(binders.Count).IsEqualTo(0);
     }
 
     /// <summary>

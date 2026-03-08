@@ -12,6 +12,9 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class HostTestFixture : INotifyPropertyChanged, INotifyPropertyChanging
 {
+    /// <summary>
+    /// The backer for Child.
+    /// </summary>
     private TestViewModel? _child;
 
     /// <inheritdoc/>

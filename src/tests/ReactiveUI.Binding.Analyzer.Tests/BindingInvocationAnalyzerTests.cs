@@ -60,6 +60,58 @@ public class BindingInvocationAnalyzerTests
         """;
 
     /// <summary>
+    /// Preamble with BindInteraction and BindCommand stub methods.
+    /// </summary>
+    private const string InteractionCommandPreamble = """
+        using System;
+        using System.ComponentModel;
+        using System.Linq.Expressions;
+        using System.Threading.Tasks;
+        using System.Windows.Input;
+
+        namespace ReactiveUI.Binding
+        {
+            public interface IViewFor { object? ViewModel { get; set; } }
+            public interface IInteraction<TInput, TOutput> { }
+            public interface IInteractionContext<TInput, TOutput> { }
+
+            public static class ReactiveUIBindingExtensions
+            {
+                public static IDisposable BindInteraction<TViewModel, TView, TInput, TOutput>(
+                    this TView view,
+                    TViewModel? viewModel,
+                    Expression<Func<TViewModel, IInteraction<TInput, TOutput>>> propertyName,
+                    Func<IInteractionContext<TInput, TOutput>, Task> handler)
+                    where TViewModel : class
+                    where TView : class, IViewFor
+                    => throw new NotImplementedException();
+
+                // Unconstrained overload for analyzer testing of RXUIBIND008
+                public static IDisposable BindInteraction<TViewModel, TView, TProperty>(
+                    this TView view,
+                    TViewModel? viewModel,
+                    Expression<Func<TViewModel, TProperty>> propertyName,
+                    Func<object, Task> handler)
+                    where TViewModel : class
+                    where TView : class, IViewFor
+                    => throw new NotImplementedException();
+
+                public static IDisposable BindCommand<TView, TViewModel, TProp, TControl>(
+                    this TView view,
+                    TViewModel? viewModel,
+                    Expression<Func<TViewModel, TProp?>> propertyName,
+                    Expression<Func<TView, TControl>> controlName,
+                    string? toEvent = null)
+                    where TView : class, IViewFor
+                    where TViewModel : class
+                    where TProp : ICommand
+                    where TControl : class
+                    => throw new NotImplementedException();
+            }
+        }
+        """;
+
+    /// <summary>
     /// Placeholder test to verify the analyzer test infrastructure works.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -2730,5 +2782,745 @@ public class BindingInvocationAnalyzerTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
         var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND008 is reported when the interaction property type does not implement IInteraction.
+    /// Uses the unconstrained BindInteraction overload so the call compiles despite the wrong property type.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND008_InvalidInteractionType_ReportsDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string NotAnInteraction { get; set; } = "";
+                }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindInteraction(
+                            view, vm, x => x.NotAnInteraction, ctx => Task.CompletedTask);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var interactionDiags = diagnostics.Where(d => d.Id == "RXUIBIND008").ToArray();
+        await Assert.That(interactionDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND008 is not reported when the property is a valid IInteraction type.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND008_ValidInteractionType_NoDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyInteraction : ReactiveUI.Binding.IInteraction<string, bool> { }
+
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public MyInteraction Confirm { get; set; } = new();
+                }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindInteraction(
+                            view, vm, x => x.Confirm, ctx => Task.CompletedTask);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var interactionDiags = diagnostics.Where(d => d.Id == "RXUIBIND008").ToArray();
+        await Assert.That(interactionDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND007 is reported when the control has no default bindable event.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND007_NoBindableEvent_ReportsDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public ICommand? Save { get; set; }
+                }
+
+                public class NoEventControl { }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                    public NoEventControl Button { get; } = new();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindCommand(
+                            view, vm, x => x.Save, x => x.Button);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        await Assert.That(eventDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND007 is not reported when the control has a Click event.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND007_ControlWithClickEvent_NoDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public ICommand? Save { get; set; }
+                }
+
+                public class MyButton
+                {
+                    public event EventHandler? Click;
+                }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                    public MyButton Button { get; } = new();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindCommand(
+                            view, vm, x => x.Save, x => x.Button);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        await Assert.That(eventDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND007 is not reported when toEvent is explicitly specified.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND007_WithExplicitToEvent_NoDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public ICommand? Save { get; set; }
+                }
+
+                public class NoEventControl { }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                    public NoEventControl Button { get; } = new();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindCommand(
+                            view, vm, x => x.Save, x => x.Button, "CustomEvent");
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        await Assert.That(eventDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND001 is reported for non-inline lambda in BindInteraction.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND001_BindInteraction_NonInlineLambda_ReportsDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyInteraction : ReactiveUI.Binding.IInteraction<string, bool> { }
+
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public MyInteraction Confirm { get; set; } = new();
+                }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        Expression<Func<MyViewModel, ReactiveUI.Binding.IInteraction<string, bool>>> expr = x => x.Confirm;
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindInteraction(
+                            view, vm, expr, ctx => Task.CompletedTask);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        await Assert.That(nonInlineDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND008 is not reported when the property type IS IInteraction directly (not a class implementing it).
+    /// Covers the direct generic type check branch in ImplementsOpenGenericInterface.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND008_DirectInteractionInterface_NoDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public ReactiveUI.Binding.IInteraction<string, bool> Confirm { get; set; } = default!;
+                }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindInteraction(
+                            view, vm, x => x.Confirm, ctx => Task.CompletedTask);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var interactionDiags = diagnostics.Where(d => d.Id == "RXUIBIND008").ToArray();
+        await Assert.That(interactionDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND007 is reported when the control has a property named Click but no Click event.
+    /// Covers the branch where GetMembers("Click") returns a non-event member.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND007_ControlWithClickPropertyNotEvent_ReportsDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public ICommand? Save { get; set; }
+                }
+
+                public class ClickPropertyControl
+                {
+                    public string Click { get; set; } = "";
+                }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                    public ClickPropertyControl Button { get; } = new();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindCommand(
+                            view, vm, x => x.Save, x => x.Button);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        await Assert.That(eventDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND007 is not reported when the control has a TouchUpInside event.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND007_ControlWithTouchUpInsideEvent_NoDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public ICommand? Save { get; set; }
+                }
+
+                public class TouchButton
+                {
+                    public event EventHandler? TouchUpInside;
+                }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                    public TouchButton Button { get; } = new();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindCommand(
+                            view, vm, x => x.Save, x => x.Button);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        await Assert.That(eventDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND007 is not reported when the control has a MouseUp event.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND007_ControlWithMouseUpEvent_NoDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public ICommand? Save { get; set; }
+                }
+
+                public class MouseButton
+                {
+                    public event EventHandler? MouseUp;
+                }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                    public MouseButton Button { get; } = new();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindCommand(
+                            view, vm, x => x.Save, x => x.Button);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        await Assert.That(eventDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND007 is not reported when the control has a Pressed event.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND007_ControlWithPressedEvent_NoDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public ICommand? Save { get; set; }
+                }
+
+                public class PressButton
+                {
+                    public event EventHandler? Pressed;
+                }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                    public PressButton Button { get; } = new();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindCommand(
+                            view, vm, x => x.Save, x => x.Button);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        await Assert.That(eventDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND007 still reports when toEvent is passed as an empty string
+    /// (the check requires a non-empty string to suppress the diagnostic).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND007_WithEmptyToEvent_ReportsDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public ICommand? Save { get; set; }
+                }
+
+                public class NoEventControl { }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                    public NoEventControl Button { get; } = new();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindCommand(
+                            view, vm, x => x.Save, x => x.Button, toEvent: "");
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        await Assert.That(eventDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND007 uses parenthesized lambda for BindCommand control path.
+    /// Covers the ParenthesizedLambdaExpressionSyntax branch in GetLambdaBody.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND007_ParenthesizedLambda_ControlWithClickEvent_NoDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public ICommand? Save { get; set; }
+                }
+
+                public class MyButton
+                {
+                    public event EventHandler? Click;
+                }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                    public MyButton Button { get; } = new();
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindCommand(
+                            view, vm, (x) => x.Save, (x) => x.Button);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        await Assert.That(eventDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND008 check uses parenthesized lambda for BindInteraction property path.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND008_ParenthesizedLambda_ValidInteraction_NoDiagnostic()
+    {
+        var source = InteractionCommandPreamble + """
+
+            namespace TestApp
+            {
+                public class MyInteraction : ReactiveUI.Binding.IInteraction<string, bool> { }
+
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public MyInteraction Confirm { get; set; } = new();
+                }
+
+                public class MyView : ReactiveUI.Binding.IViewFor, INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public object? ViewModel { get; set; }
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.ReactiveUIBindingExtensions.BindInteraction(
+                            view, vm, (x) => x.Confirm, ctx => Task.CompletedTask);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var interactionDiags = diagnostics.Where(d => d.Id == "RXUIBIND008").ToArray();
+        await Assert.That(interactionDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies that RXUIBIND004 is not reported for a non-generic WhenChanging method
+    /// on the recognized extension class (e.g., a generated dispatch overload with concrete types).
+    /// Exercises the <c>ExtractFirstTypeArgument == null</c> guard in <c>CheckBeforeChangeSupport</c>.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND004_NonGenericWhenChanging_NoDiagnostic()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using System.Linq.Expressions;
+
+            namespace ReactiveUI.Binding
+            {
+                public static class __ReactiveUIGeneratedBindings
+                {
+                    // Non-generic generated dispatch overload (concrete types)
+                    public static object WhenChanging(
+                        TestApp.MyViewModel obj,
+                        string callerFilePath = "",
+                        int callerLineNumber = 0)
+                        => throw new NotImplementedException();
+                }
+            }
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanging(vm);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        await Assert.That(beforeChangeDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies that RXUIBIND005 is not reported for a non-generic BindOneWay method
+    /// on the recognized extension class (e.g., a generated dispatch overload with concrete types).
+    /// Exercises the <c>ExtractFirstTypeArgument == null</c> guard in <c>CheckValidationSupport</c>.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND005_NonGenericBindOneWay_NoDiagnostic()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using System.Linq.Expressions;
+
+            namespace ReactiveUI.Binding
+            {
+                public static class __ReactiveUIGeneratedBindings
+                {
+                    // Non-generic generated dispatch overload (concrete types)
+                    public static IDisposable BindOneWay(
+                        TestApp.MyViewModel source,
+                        TestApp.MyView target,
+                        string callerFilePath = "",
+                        int callerLineNumber = 0)
+                        => throw new NotImplementedException();
+                }
+            }
+
+            namespace TestApp
+            {
+                public class MyViewModel : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string Name { get; set; } = "";
+                }
+
+                public class MyView
+                {
+                    public string DisplayName { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        var vm = new MyViewModel();
+                        var view = new MyView();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindOneWay(vm, view);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var validationDiags = diagnostics.Where(d => d.Id == "RXUIBIND005").ToArray();
+        await Assert.That(validationDiags.Length).IsEqualTo(0);
     }
 }

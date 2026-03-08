@@ -11,6 +11,9 @@ namespace ReactiveUI.Binding.AotValidation;
 /// </summary>
 public class AotChildViewModel : INotifyPropertyChanged
 {
+    /// <summary>
+    /// Backing field for the <see cref="Value"/> property, holding the current string value.
+    /// </summary>
     private string _value = string.Empty;
 
     /// <inheritdoc/>

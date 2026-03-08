@@ -2,11 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
-using System.Linq.Expressions;
-using System.Reactive.Concurrency;
-using System.Runtime.CompilerServices;
-
 namespace ReactiveUI.Binding;
 
 /// <summary>
@@ -16,6 +11,12 @@ namespace ReactiveUI.Binding;
 [ExcludeFromCodeCoverage]
 public static class ReactiveSchedulerExtensions
 {
+    /// <summary>
+    /// The message displayed when no generated binding is found during certain binding operations.
+    /// This constant is used to provide a descriptive error message when a binding fails due
+    /// to the lack of compile-time generated bindings. To ensure optimal performance and to
+    /// avoid this error, ensure that the binding expression is an inline lambda.
+    /// </summary>
     private const string NoGeneratedBindingMessage =
         "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.";
 

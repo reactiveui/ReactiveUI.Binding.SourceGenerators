@@ -2,9 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.Expressions;
 using ReactiveUI.Binding.ObservableForProperty;
@@ -316,6 +313,9 @@ public class ReactiveNotifyPropertyChangedMixinTests
         await Assert.That(receivedValue).IsEqualTo("Test");
     }
 
+    /// <summary>
+    /// Resets and initializes the ReactiveUI binding infrastructure for testing.
+    /// </summary>
     private static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();

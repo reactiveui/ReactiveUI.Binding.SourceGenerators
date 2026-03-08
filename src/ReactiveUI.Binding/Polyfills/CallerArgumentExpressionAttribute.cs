@@ -6,6 +6,9 @@
 // https://github.com/SimonCropp/Polyfill
 #if !NET5_0_OR_GREATER
 
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+
 namespace System.Runtime.CompilerServices;
 
 /// <summary>
@@ -30,7 +33,5 @@ internal sealed class CallerArgumentExpressionAttribute : Attribute
 }
 
 #else
-using System.Runtime.CompilerServices;
-
 [assembly: TypeForwardedTo(typeof(CallerArgumentExpressionAttribute))]
 #endif

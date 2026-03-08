@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
 using System.ComponentModel;
 
 namespace ReactiveUI.Binding.Observables;
@@ -12,6 +11,7 @@ namespace ReactiveUI.Binding.Observables;
 /// Replacement for <c>System.Reactive.Linq.Observable.CombineLatest</c>.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
+[ExcludeFromCodeCoverage]
 public static class CombineLatestObservable
 {
     /// <summary>
@@ -27,10 +27,8 @@ public static class CombineLatestObservable
     public static IObservable<TResult> Create<T1, T2, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
-        Func<T1, T2, TResult> resultSelector)
-    {
-        return new CombineLatest2Observable<T1, T2, TResult>(source1, source2, resultSelector);
-    }
+        Func<T1, T2, TResult> resultSelector) =>
+        new CombineLatest2Observable<T1, T2, TResult>(source1, source2, resultSelector);
 
     /// <summary>
     /// Combines the latest values from three observables using a result selector.
@@ -48,10 +46,8 @@ public static class CombineLatestObservable
         IObservable<T1> source1,
         IObservable<T2> source2,
         IObservable<T3> source3,
-        Func<T1, T2, T3, TResult> resultSelector)
-    {
-        return new CombineLatest3Observable<T1, T2, T3, TResult>(source1, source2, source3, resultSelector);
-    }
+        Func<T1, T2, T3, TResult> resultSelector) =>
+        new CombineLatest3Observable<T1, T2, T3, TResult>(source1, source2, source3, resultSelector);
 
     /// <summary>
     /// Combines the latest values from four observables using a result selector.
@@ -72,10 +68,8 @@ public static class CombineLatestObservable
         IObservable<T2> source2,
         IObservable<T3> source3,
         IObservable<T4> source4,
-        Func<T1, T2, T3, T4, TResult> resultSelector)
-    {
-        return new CombineLatest4Observable<T1, T2, T3, T4, TResult>(source1, source2, source3, source4, resultSelector);
-    }
+        Func<T1, T2, T3, T4, TResult> resultSelector) =>
+        new CombineLatest4Observable<T1, T2, T3, T4, TResult>(source1, source2, source3, source4, resultSelector);
 
     /// <summary>
     /// Combines the latest values from five observables using a result selector.
@@ -99,10 +93,8 @@ public static class CombineLatestObservable
         IObservable<T3> source3,
         IObservable<T4> source4,
         IObservable<T5> source5,
-        Func<T1, T2, T3, T4, T5, TResult> resultSelector)
-    {
-        return new CombineLatest5Observable<T1, T2, T3, T4, T5, TResult>(source1, source2, source3, source4, source5, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, TResult> resultSelector) =>
+        new CombineLatest5Observable<T1, T2, T3, T4, T5, TResult>(source1, source2, source3, source4, source5, resultSelector);
 
     /// <summary>
     /// Combines the latest values from six observables using a result selector.
@@ -129,10 +121,8 @@ public static class CombineLatestObservable
         IObservable<T4> source4,
         IObservable<T5> source5,
         IObservable<T6> source6,
-        Func<T1, T2, T3, T4, T5, T6, TResult> resultSelector)
-    {
-        return new CombineLatest6Observable<T1, T2, T3, T4, T5, T6, TResult>(source1, source2, source3, source4, source5, source6, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, T6, TResult> resultSelector) =>
+        new CombineLatest6Observable<T1, T2, T3, T4, T5, T6, TResult>(source1, source2, source3, source4, source5, source6, resultSelector);
 
     /// <summary>
     /// Combines the latest values from seven observables using a result selector.
@@ -162,10 +152,8 @@ public static class CombineLatestObservable
         IObservable<T5> source5,
         IObservable<T6> source6,
         IObservable<T7> source7,
-        Func<T1, T2, T3, T4, T5, T6, T7, TResult> resultSelector)
-    {
-        return new CombineLatest7Observable<T1, T2, T3, T4, T5, T6, T7, TResult>(source1, source2, source3, source4, source5, source6, source7, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, T6, T7, TResult> resultSelector) =>
+        new CombineLatest7Observable<T1, T2, T3, T4, T5, T6, T7, TResult>(source1, source2, source3, source4, source5, source6, source7, resultSelector);
 
     /// <summary>
     /// Combines the latest values from eight observables using a result selector.
@@ -198,10 +186,8 @@ public static class CombineLatestObservable
         IObservable<T6> source6,
         IObservable<T7> source7,
         IObservable<T8> source8,
-        Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> resultSelector)
-    {
-        return new CombineLatest8Observable<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> resultSelector) =>
+        new CombineLatest8Observable<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, resultSelector);
 
     /// <summary>
     /// Combines the latest values from nine observables using a result selector.
@@ -237,10 +223,8 @@ public static class CombineLatestObservable
         IObservable<T7> source7,
         IObservable<T8> source8,
         IObservable<T9> source9,
-        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> resultSelector)
-    {
-        return new CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> resultSelector) =>
+        new CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, resultSelector);
 
     /// <summary>
     /// Combines the latest values from ten observables using a result selector.
@@ -279,10 +263,8 @@ public static class CombineLatestObservable
         IObservable<T8> source8,
         IObservable<T9> source9,
         IObservable<T10> source10,
-        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> resultSelector)
-    {
-        return new CombineLatest10Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> resultSelector) =>
+        new CombineLatest10Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, resultSelector);
 
     /// <summary>
     /// Combines the latest values from eleven observables using a result selector.
@@ -324,10 +306,8 @@ public static class CombineLatestObservable
         IObservable<T9> source9,
         IObservable<T10> source10,
         IObservable<T11> source11,
-        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> resultSelector)
-    {
-        return new CombineLatest11Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> resultSelector) =>
+        new CombineLatest11Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, resultSelector);
 
     /// <summary>
     /// Combines the latest values from twelve observables using a result selector.
@@ -372,10 +352,8 @@ public static class CombineLatestObservable
         IObservable<T10> source10,
         IObservable<T11> source11,
         IObservable<T12> source12,
-        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> resultSelector)
-    {
-        return new CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, source12, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> resultSelector) =>
+        new CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, source12, resultSelector);
 
     /// <summary>
     /// Combines the latest values from thirteen observables using a result selector.
@@ -423,10 +401,8 @@ public static class CombineLatestObservable
         IObservable<T11> source11,
         IObservable<T12> source12,
         IObservable<T13> source13,
-        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> resultSelector)
-    {
-        return new CombineLatest13Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, source12, source13, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> resultSelector) =>
+        new CombineLatest13Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, source12, source13, resultSelector);
 
     /// <summary>
     /// Combines the latest values from fourteen observables using a result selector.
@@ -477,10 +453,8 @@ public static class CombineLatestObservable
         IObservable<T12> source12,
         IObservable<T13> source13,
         IObservable<T14> source14,
-        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> resultSelector)
-    {
-        return new CombineLatest14Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, source12, source13, source14, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> resultSelector) =>
+        new CombineLatest14Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, source12, source13, source14, resultSelector);
 
     /// <summary>
     /// Combines the latest values from fifteen observables using a result selector.
@@ -534,10 +508,8 @@ public static class CombineLatestObservable
         IObservable<T13> source13,
         IObservable<T14> source14,
         IObservable<T15> source15,
-        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> resultSelector)
-    {
-        return new CombineLatest15Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, source12, source13, source14, source15, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> resultSelector) =>
+        new CombineLatest15Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, source12, source13, source14, source15, resultSelector);
 
     /// <summary>
     /// Combines the latest values from sixteen observables using a result selector.
@@ -594,8 +566,6 @@ public static class CombineLatestObservable
         IObservable<T14> source14,
         IObservable<T15> source15,
         IObservable<T16> source16,
-        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> resultSelector)
-    {
-        return new CombineLatest16Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, source12, source13, source14, source15, source16, resultSelector);
-    }
+        Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> resultSelector) =>
+        new CombineLatest16Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(source1, source2, source3, source4, source5, source6, source7, source8, source9, source10, source11, source12, source13, source14, source15, source16, resultSelector);
 }

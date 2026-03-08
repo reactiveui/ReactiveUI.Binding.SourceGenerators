@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
     <IsRoslynComponent>true</IsRoslynComponent>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -24,6 +23,12 @@
   <ItemGroup>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\DiagnosticWarnings.cs" Link="DiagnosticWarnings.cs" />
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Constants.cs" Link="Constants.cs" />
+  </ItemGroup>
+
+  <!-- Link polyfills and helpers from runtime library for netstandard2.0 compatibility -->
+  <ItemGroup>
+    <Compile Include="..\ReactiveUI.Binding\Polyfills\**.cs" Link="Polyfills" />
+    <Compile Include="..\ReactiveUI.Binding\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs" />
   </ItemGroup>
 
   <!-- Include analyzer release tracking files -->

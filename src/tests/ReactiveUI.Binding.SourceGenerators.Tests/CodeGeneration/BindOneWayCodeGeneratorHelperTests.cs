@@ -65,7 +65,7 @@ public class BindOneWayCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            new[] { inv });
+            [inv]);
 
         BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true);
 
@@ -90,7 +90,7 @@ public class BindOneWayCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            new[] { inv });
+            [inv]);
 
         BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false);
 
@@ -117,7 +117,7 @@ public class BindOneWayCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            new[] { inv });
+            [inv]);
 
         BindOneWayCodeGenerator.GenerateCallerArgExprOverload(sb, group);
 
@@ -145,7 +145,7 @@ public class BindOneWayCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            new[] { inv });
+            [inv]);
 
         BindOneWayCodeGenerator.GenerateCallerFilePathOverload(sb, group);
 
@@ -190,7 +190,7 @@ public class BindOneWayCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = BindOneWayCodeGenerator.FormatExtraArgs(group);
 
@@ -211,7 +211,7 @@ public class BindOneWayCodeGeneratorHelperTests
             "global::System.String",
             true,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = BindOneWayCodeGenerator.FormatExtraArgs(group);
 

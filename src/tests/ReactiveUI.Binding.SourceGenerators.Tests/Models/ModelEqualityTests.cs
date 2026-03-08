@@ -27,10 +27,9 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservableTypeInfo_Equals_SameValues_ReturnsTrue()
     {
-        var properties = new EquatableArray<ObservablePropertyInfo>(new[]
-        {
-            ModelFactory.CreateObservablePropertyInfo("Name"),
-        });
+        var properties = new EquatableArray<ObservablePropertyInfo>([
+            ModelFactory.CreateObservablePropertyInfo("Name")
+        ]);
 
         var a = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
         var b = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
@@ -45,10 +44,9 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservableTypeInfo_Equals_DifferentValues_ReturnsFalse()
     {
-        var properties = new EquatableArray<ObservablePropertyInfo>(new[]
-        {
-            ModelFactory.CreateObservablePropertyInfo("Name"),
-        });
+        var properties = new EquatableArray<ObservablePropertyInfo>([
+            ModelFactory.CreateObservablePropertyInfo("Name")
+        ]);
 
         var a = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
         var b = new ObservableTypeInfo("global::TestApp.OtherType", "OtherType", "INPC", 21, true, properties);
@@ -63,7 +61,7 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservableTypeInfo_Equals_ObjectNull_ReturnsFalse()
     {
-        var properties = new EquatableArray<ObservablePropertyInfo>(Array.Empty<ObservablePropertyInfo>());
+        var properties = new EquatableArray<ObservablePropertyInfo>([]);
         var a = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
 
         await Assert.That(a.Equals((object?)null)).IsFalse();
@@ -76,7 +74,7 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservableTypeInfo_Equals_ObjectWrongType_ReturnsFalse()
     {
-        var properties = new EquatableArray<ObservablePropertyInfo>(Array.Empty<ObservablePropertyInfo>());
+        var properties = new EquatableArray<ObservablePropertyInfo>([]);
         var a = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
 
         await Assert.That(a.Equals("string")).IsFalse();
@@ -89,10 +87,9 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservableTypeInfo_GetHashCode_SameValues_AreEqual()
     {
-        var properties = new EquatableArray<ObservablePropertyInfo>(new[]
-        {
-            ModelFactory.CreateObservablePropertyInfo("Name"),
-        });
+        var properties = new EquatableArray<ObservablePropertyInfo>([
+            ModelFactory.CreateObservablePropertyInfo("Name")
+        ]);
 
         var a = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
         var b = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
@@ -107,10 +104,9 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservableTypeInfo_OperatorEquals_SameValues_ReturnsTrue()
     {
-        var properties = new EquatableArray<ObservablePropertyInfo>(new[]
-        {
-            ModelFactory.CreateObservablePropertyInfo("Name"),
-        });
+        var properties = new EquatableArray<ObservablePropertyInfo>([
+            ModelFactory.CreateObservablePropertyInfo("Name")
+        ]);
 
         var a = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
         var b = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
@@ -125,7 +121,7 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservableTypeInfo_OperatorNotEquals_DifferentValues_ReturnsTrue()
     {
-        var properties = new EquatableArray<ObservablePropertyInfo>(Array.Empty<ObservablePropertyInfo>());
+        var properties = new EquatableArray<ObservablePropertyInfo>([]);
 
         var a = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
         var b = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "ReactiveObject", 24, true, properties);
@@ -140,7 +136,7 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservableTypeInfo_ToString_ContainsTypeName()
     {
-        var properties = new EquatableArray<ObservablePropertyInfo>(Array.Empty<ObservablePropertyInfo>());
+        var properties = new EquatableArray<ObservablePropertyInfo>([]);
         var a = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
 
         await Assert.That(a.ToString()).Contains("ObservableTypeInfo");
@@ -596,8 +592,8 @@ public class ModelEqualityTests
         var invA = ModelFactory.CreateInvocationInfo(callerLineNumber: 10);
         var invB = ModelFactory.CreateInvocationInfo(callerLineNumber: 20);
 
-        var a = new ObservationCodeGenerator.TypeGroup(invA, new[] { invA });
-        var b = new ObservationCodeGenerator.TypeGroup(invB, new[] { invB });
+        var a = new ObservationCodeGenerator.TypeGroup(invA, [invA]);
+        var b = new ObservationCodeGenerator.TypeGroup(invB, [invB]);
 
         await Assert.That(a.Equals(b)).IsFalse();
     }
@@ -610,7 +606,7 @@ public class ModelEqualityTests
     public async Task TypeGroup_Equals_ObjectNull_ReturnsFalse()
     {
         var inv = ModelFactory.CreateInvocationInfo();
-        var a = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var a = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         await Assert.That(a.Equals((object?)null)).IsFalse();
     }
@@ -623,7 +619,7 @@ public class ModelEqualityTests
     public async Task TypeGroup_Equals_ObjectWrongType_ReturnsFalse()
     {
         var inv = ModelFactory.CreateInvocationInfo();
-        var a = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var a = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         await Assert.That(a.Equals("string")).IsFalse();
     }
@@ -670,8 +666,8 @@ public class ModelEqualityTests
         var invA = ModelFactory.CreateInvocationInfo(callerLineNumber: 10);
         var invB = ModelFactory.CreateInvocationInfo(callerLineNumber: 20);
 
-        var a = new ObservationCodeGenerator.TypeGroup(invA, new[] { invA });
-        var b = new ObservationCodeGenerator.TypeGroup(invB, new[] { invB });
+        var a = new ObservationCodeGenerator.TypeGroup(invA, [invA]);
+        var b = new ObservationCodeGenerator.TypeGroup(invB, [invB]);
 
         await Assert.That(a != b).IsTrue();
     }
@@ -684,7 +680,7 @@ public class ModelEqualityTests
     public async Task TypeGroup_ToString_ContainsTypeName()
     {
         var inv = ModelFactory.CreateInvocationInfo();
-        var a = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var a = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         await Assert.That(a.ToString()).Contains("TypeGroup");
     }
@@ -697,7 +693,7 @@ public class ModelEqualityTests
     public async Task TypeGroup_SourceTypeFullName_DelegatesToFirst()
     {
         var inv = ModelFactory.CreateInvocationInfo(sourceTypeFullName: "global::TestApp.SpecialViewModel");
-        var a = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var a = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         await Assert.That(a.SourceTypeFullName).IsEqualTo("global::TestApp.SpecialViewModel");
     }
@@ -710,7 +706,7 @@ public class ModelEqualityTests
     public async Task TypeGroup_ReturnTypeFullName_DelegatesToFirst()
     {
         var inv = ModelFactory.CreateInvocationInfo(returnTypeFullName: "global::System.Int32");
-        var a = new ObservationCodeGenerator.TypeGroup(inv, new[] { inv });
+        var a = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
         await Assert.That(a.ReturnTypeFullName).IsEqualTo("global::System.Int32");
     }

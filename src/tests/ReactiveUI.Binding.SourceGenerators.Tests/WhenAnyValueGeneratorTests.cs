@@ -21,7 +21,7 @@ public class WhenAnyValueGeneratorTests
     public async Task SingleProperty_INPC()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyValue/SinglePropertyINPC");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,7 @@ public class WhenAnyValueGeneratorTests
     public async Task SingleProperty_ReactiveObject()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyValue/SinglePropertyReactiveObject");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +47,7 @@ public class WhenAnyValueGeneratorTests
     public async Task MultiProperty_TwoProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyValue/MultiPropertyTwoProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +60,7 @@ public class WhenAnyValueGeneratorTests
     public async Task MultiProperty_ThreeProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyValue/MultiPropertyThreeProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -73,7 +73,7 @@ public class WhenAnyValueGeneratorTests
     public async Task MultiProperty_WithSelector()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyValue/MultiPropertyWithSelector");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -86,7 +86,7 @@ public class WhenAnyValueGeneratorTests
     public async Task MultiProperty_FiveProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyValue/MultiPropertyFiveProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -99,7 +99,7 @@ public class WhenAnyValueGeneratorTests
     public async Task DeepPropertyChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyValue/DeepPropertyChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -112,7 +112,7 @@ public class WhenAnyValueGeneratorTests
     public async Task NullableProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyValue/NullableProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -125,7 +125,7 @@ public class WhenAnyValueGeneratorTests
     public async Task MultiProperty_TwelveProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyValue/MultiPropertyTwelveProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenAnyValueGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -141,7 +141,7 @@ public class WhenAnyValueGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenAnyValue/SinglePropertyINPC");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenAnyValueGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(WhenAnyValueGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 }

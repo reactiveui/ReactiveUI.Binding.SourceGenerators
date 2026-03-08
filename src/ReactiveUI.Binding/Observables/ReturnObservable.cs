@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
 using System.ComponentModel;
 
 namespace ReactiveUI.Binding.Observables;
@@ -15,24 +14,21 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ReturnObservable<T> : IObservable<T>
 {
+    /// <summary>
+    /// The single value to emit on subscription.
+    /// </summary>
     private readonly T _value;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ReturnObservable{T}"/> class.
     /// </summary>
     /// <param name="value">The value to emit.</param>
-    public ReturnObservable(T value)
-    {
-        _value = value;
-    }
+    public ReturnObservable(T value) => _value = value;
 
     /// <inheritdoc/>
     public IDisposable Subscribe(IObserver<T> observer)
     {
-        if (observer is null)
-        {
-            throw new ArgumentNullException(nameof(observer));
-        }
+        ArgumentExceptionHelper.ThrowIfNull(observer);
 
         observer.OnNext(_value);
         observer.OnCompleted();

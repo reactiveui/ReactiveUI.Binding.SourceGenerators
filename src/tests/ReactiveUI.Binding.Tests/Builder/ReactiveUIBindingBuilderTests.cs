@@ -5,8 +5,6 @@
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.Tests.TestModels;
 
-using Splat;
-
 namespace ReactiveUI.Binding.Tests.Builder;
 
 /// <summary>
@@ -358,12 +356,87 @@ public class ReactiveUIBindingBuilderTests
         await Assert.That(builder.ConverterService.SetMethodConverters.GetAllConverters().ToList()).Contains(setMethod);
     }
 
-    private sealed class TestModule : Splat.Builder.IModule
+    /// <summary>
+    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithCommandBinder"/> registers a
+    /// command binder that appears in Splat's <see cref="ICreatesCommandBinding"/> services.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WithCommandBinder_RegistersInSplat()
     {
-        private readonly Action _onConfigure;
+        RxBindingBuilder.ResetForTesting();
+        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+        var binder = new StubCommandBinder();
 
-        public TestModule(Action onConfigure) => _onConfigure = onConfigure;
+        builder.WithCommandBinder(binder);
+        builder.BuildApp();
 
-        public void Configure(IMutableDependencyResolver resolver) => _onConfigure();
+        var services = Locator.Current.GetServices<ICreatesCommandBinding>().ToList();
+        await Assert.That(services).Contains(binder);
+    }
+
+    /// <summary>
+    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithCommandBinder"/> returns the builder
+    /// for fluent chaining.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WithCommandBinder_ReturnsSelfForChaining()
+    {
+        RxBindingBuilder.ResetForTesting();
+        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+        var binder = new StubCommandBinder();
+
+        var result = builder.WithCommandBinder(binder);
+
+        await Assert.That(result).IsNotNull();
+    }
+
+    /// <summary>
+    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithCommandBinder"/> throws on null binder.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WithCommandBinder_NullBinder_Throws()
+    {
+        RxBindingBuilder.ResetForTesting();
+        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+
+        await Assert.That(() => builder.WithCommandBinder(null!))
+            .ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
+    /// A test <see cref="Splat.Builder.IModule"/> that invokes a callback when configured.
+    /// </summary>
+    /// <param name="onConfigure">The callback to invoke during configuration.</param>
+    private sealed class TestModule(Action onConfigure) : Splat.Builder.IModule
+    {
+        /// <inheritdoc/>
+        public void Configure(IMutableDependencyResolver resolver) => onConfigure();
+    }
+
+    /// <summary>
+    /// A stub implementation of <see cref="ICreatesCommandBinding"/> for testing registration.
+    /// </summary>
+    private sealed class StubCommandBinder : ICreatesCommandBinding
+    {
+        /// <inheritdoc/>
+        public int GetAffinityForObject<T>(bool hasEventTarget) => 0;
+
+        /// <inheritdoc/>
+        [RequiresUnreferencedCode("Test stub")]
+        public IDisposable? BindCommandToObject<T>(System.Windows.Input.ICommand? command, T? target, IObservable<object?> commandParameter)
+            where T : class => null;
+
+        /// <inheritdoc/>
+        [RequiresUnreferencedCode("Test stub")]
+        public IDisposable? BindCommandToObject<T, TEventArgs>(System.Windows.Input.ICommand? command, T? target, IObservable<object?> commandParameter, string eventName)
+            where T : class => null;
+
+        /// <inheritdoc/>
+        public IDisposable? BindCommandToObject<T, TEventArgs>(System.Windows.Input.ICommand? command, T? target, IObservable<object?> commandParameter, Action<EventHandler<TEventArgs>> addHandler, Action<EventHandler<TEventArgs>> removeHandler)
+            where T : class
+            where TEventArgs : EventArgs => null;
     }
 }

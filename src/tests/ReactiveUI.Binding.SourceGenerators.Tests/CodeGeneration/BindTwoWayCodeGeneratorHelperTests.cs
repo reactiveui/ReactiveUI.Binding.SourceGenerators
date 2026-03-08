@@ -65,7 +65,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            new[] { inv });
+            [inv]);
 
         BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true);
 
@@ -90,7 +90,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            new[] { inv });
+            [inv]);
 
         BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false);
 
@@ -119,7 +119,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            new[] { inv });
+            [inv]);
 
         BindTwoWayCodeGenerator.GenerateCallerArgExprOverload(sb, group);
 
@@ -149,7 +149,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            new[] { inv });
+            [inv]);
 
         BindTwoWayCodeGenerator.GenerateCallerFilePathOverload(sb, group);
 
@@ -199,7 +199,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = BindTwoWayCodeGenerator.FormatExtraArgs(group);
 
@@ -220,7 +220,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             "global::System.String",
             true,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = BindTwoWayCodeGenerator.FormatExtraArgs(group);
 
@@ -242,7 +242,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             "global::System.String",
             false,
             true,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = BindTwoWayCodeGenerator.FormatExtraArgs(group);
 
@@ -364,7 +364,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             "global::System.String",
             true,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         BindTwoWayCodeGenerator.AppendExtraParameters(sb, group);
 

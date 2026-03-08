@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using ReactiveUI.Binding;
-
 namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 
 /// <summary>
@@ -78,29 +76,25 @@ public class BindingTypeConverterRegistryTests
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task CloneRegistryShallow_NullInput_ThrowsArgumentNullException()
-    {
+    public async Task CloneRegistryShallow_NullInput_ThrowsArgumentNullException() =>
         await Assert.That(() => BindingTypeConverterRegistry.CloneRegistryShallow(null!))
             .ThrowsExactly<ArgumentNullException>();
-    }
 
     /// <summary>
     /// Minimal test implementation of <see cref="IBindingTypeConverter"/>.
     /// </summary>
-    private sealed class TestConverter : IBindingTypeConverter
+    private sealed class TestConverter(Type fromType, Type toType) : IBindingTypeConverter
     {
-        public TestConverter(Type fromType, Type toType)
-        {
-            FromType = fromType;
-            ToType = toType;
-        }
+        /// <inheritdoc/>
+        public Type FromType { get; } = fromType;
 
-        public Type FromType { get; }
+        /// <inheritdoc/>
+        public Type ToType { get; } = toType;
 
-        public Type ToType { get; }
-
+        /// <inheritdoc/>
         public int GetAffinityForObjects() => 2;
 
+        /// <inheritdoc/>
         public bool TryConvertTyped(object? from, object? conversionHint, out object? result)
         {
             result = null;

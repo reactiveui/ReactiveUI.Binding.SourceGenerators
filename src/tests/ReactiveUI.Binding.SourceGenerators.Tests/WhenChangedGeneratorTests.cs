@@ -21,7 +21,7 @@ public class WhenChangedGeneratorTests
     public async Task SingleProperty_INPC()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/SinglePropertyINPC");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +47,7 @@ public class WhenChangedGeneratorTests
             }
             """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +60,7 @@ public class WhenChangedGeneratorTests
     public async Task SingleProperty_ReactiveObject()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/SinglePropertyReactiveObject");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -73,7 +73,7 @@ public class WhenChangedGeneratorTests
     public async Task MultiProperty_TwoProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultiPropertyTwoProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -86,7 +86,7 @@ public class WhenChangedGeneratorTests
     public async Task MultiProperty_ThreeProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultiPropertyThreeProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -99,7 +99,7 @@ public class WhenChangedGeneratorTests
     public async Task MultiProperty_WithSelector()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultiPropertyWithSelector");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -112,7 +112,7 @@ public class WhenChangedGeneratorTests
     public async Task DeepPropertyChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/DeepPropertyChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -125,7 +125,7 @@ public class WhenChangedGeneratorTests
     public async Task NullableProperty()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/NullableProperty");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -138,7 +138,7 @@ public class WhenChangedGeneratorTests
     public async Task MultipleViewModels()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultipleViewModels");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -151,7 +151,7 @@ public class WhenChangedGeneratorTests
     public async Task IntProperty()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/IntProperty");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -164,7 +164,7 @@ public class WhenChangedGeneratorTests
     public async Task FourLevelDeepChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/FourLevelDeepChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -177,7 +177,7 @@ public class WhenChangedGeneratorTests
     public async Task MultipleInvocations_SameViewModel()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultipleInvocationsSameViewModel");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -192,7 +192,7 @@ public class WhenChangedGeneratorTests
     public async Task MultiProperty_WithDeepChains()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultiPropertyWithDeepChains");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -207,7 +207,7 @@ public class WhenChangedGeneratorTests
     public async Task NullForgivingDeepChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/NullForgivingDeepChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -259,7 +259,7 @@ public class WhenChangedGeneratorTests
             }
             """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -306,7 +306,7 @@ public class WhenChangedGeneratorTests
             }
             """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -358,7 +358,7 @@ public class WhenChangedGeneratorTests
             }
             """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -410,7 +410,7 @@ public class WhenChangedGeneratorTests
             }
             """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -462,7 +462,7 @@ public class WhenChangedGeneratorTests
             }
             """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -478,13 +478,13 @@ public class WhenChangedGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/SinglePropertyINPC");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp9);
+            source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
     /// <summary>
     /// Verifies that a method named "WhenChanged" on a non-ReactiveUI extension class is ignored
-    /// by the generator. Exercises the extension class name mismatch guard in MetadataExtractor
+    /// by the generator. Exercises the extension class name mismatch guard in the extraction helpers
     /// (lines 419-424 of ExtractInvocationInfo).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -530,7 +530,7 @@ public class WhenChangedGeneratorTests
 
     /// <summary>
     /// Verifies that an identity lambda (x => x) with no member access produces no dispatch code.
-    /// Exercises the segments.Count == 0 guard in MetadataExtractor.ExtractPropertyPathFromLambda (line 578-581).
+    /// Exercises the segments.Count == 0 guard in the extraction helpers.ExtractPropertyPathFromLambda (line 578-581).
     /// The compilation will have errors because the lambda return type is the object itself, not a property type,
     /// but the generator should not crash and should produce no diagnostics.
     /// </summary>
@@ -571,7 +571,7 @@ public class WhenChangedGeneratorTests
 
     /// <summary>
     /// Verifies that a block-body lambda (statement body) is skipped by the generator.
-    /// Exercises the body == null guard in MetadataExtractor.ExtractPropertyPathFromLambda (line 543-546)
+    /// Exercises the body == null guard in the extraction helpers.ExtractPropertyPathFromLambda (line 543-546)
     /// when the lambda body is a Block instead of an expression.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -612,7 +612,7 @@ public class WhenChangedGeneratorTests
     /// <summary>
     /// Verifies that a lambda accessing a field (non-property member) is skipped by the generator.
     /// Exercises the memberSymbolInfo.Symbol is not IPropertySymbol guard in
-    /// MetadataExtractor.ExtractPropertyPathFromLambda (line 558-561).
+    /// the extraction helpers.ExtractPropertyPathFromLambda (line 558-561).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -651,7 +651,7 @@ public class WhenChangedGeneratorTests
 
     /// <summary>
     /// Verifies that a lambda accessing a private property is skipped by the generator.
-    /// Exercises the DeclaredAccessibility check in MetadataExtractor.ExtractPropertyPathFromLambda
+    /// Exercises the DeclaredAccessibility check in the extraction helpers.ExtractPropertyPathFromLambda
     /// (lines 564-568). The compilation may have errors due to accessing a private member,
     /// but the generator should silently skip the invocation.
     /// </summary>
@@ -690,7 +690,7 @@ public class WhenChangedGeneratorTests
     /// <summary>
     /// Verifies that a lambda accessing a protected property is skipped by the generator.
     /// Exercises the DeclaredAccessibility check (not Public or Internal) in
-    /// MetadataExtractor.ExtractPropertyPathFromLambda (lines 564-568).
+    /// the extraction helpers.ExtractPropertyPathFromLambda (lines 564-568).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -727,7 +727,7 @@ public class WhenChangedGeneratorTests
     /// <summary>
     /// Verifies that a lambda accessing a method (not a property) on the chain is skipped.
     /// Exercises the memberSymbolInfo.Symbol is not IPropertySymbol guard in
-    /// MetadataExtractor.ExtractPropertyPathFromLambda (line 558-561) for method invocations.
+    /// the extraction helpers.ExtractPropertyPathFromLambda (line 558-561) for method invocations.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

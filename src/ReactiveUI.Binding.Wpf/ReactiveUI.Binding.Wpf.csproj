@@ -1,8 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(BindingWindowsOnlyTargets)</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
     <UseWpf>true</UseWpf>
     <PackageDescription>WPF platform support for ReactiveUI.Binding. Provides DependencyProperty observation and Visibility converters.</PackageDescription>
     <PackageTags>reactiveui;binding;wpf;dependencyproperty;system.reactive</PackageTags>
@@ -22,6 +20,7 @@
     <Using Include="System.Reactive.Linq" />
     <Using Include="System.Runtime.CompilerServices" />
     <Using Include="Splat" />
+    <Using Include="ReactiveUI.Binding.Helpers" />
   </ItemGroup>
 
   <ItemGroup>

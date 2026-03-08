@@ -29,7 +29,7 @@ public class DoubleToNullableDoubleTypeConverterTests
     public async Task TryConvert_AlwaysSucceeds()
     {
         var converter = new DoubleToNullableDoubleTypeConverter();
-        double value = 123.456789;
+        var value = 123.456789;
 
         var result = converter.TryConvert(value, null, out var output);
 

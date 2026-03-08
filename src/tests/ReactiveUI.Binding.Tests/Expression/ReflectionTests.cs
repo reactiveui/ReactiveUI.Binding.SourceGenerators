@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Linq.Expressions;
-
 using ReactiveUI.Binding.Expressions;
 using ReactiveUI.Binding.Tests.TestModels;
 
@@ -515,7 +513,7 @@ public class ReflectionTests
     [Test]
     public async Task TryGetValueForPropertyChain_EmptyChain_ThrowsInvalidOperationException()
     {
-        var act = () => Reflection.TryGetValueForPropertyChain<string>(out _, new TestModels.TestViewModel(), Array.Empty<System.Linq.Expressions.Expression>());
+        var act = () => Reflection.TryGetValueForPropertyChain<string>(out _, new TestViewModel(), []);
 
         await Assert.That(act).ThrowsExactly<InvalidOperationException>();
     }
@@ -527,7 +525,7 @@ public class ReflectionTests
     [Test]
     public async Task TryGetAllValuesForPropertyChain_EmptyChain_ThrowsInvalidOperationException()
     {
-        var act = () => Reflection.TryGetAllValuesForPropertyChain(out _, new TestModels.TestViewModel(), Array.Empty<System.Linq.Expressions.Expression>());
+        var act = () => Reflection.TryGetAllValuesForPropertyChain(out _, new TestViewModel(), []);
 
         await Assert.That(act).ThrowsExactly<InvalidOperationException>();
     }
@@ -539,7 +537,7 @@ public class ReflectionTests
     [Test]
     public async Task TrySetValueToPropertyChain_EmptyChain_ThrowsInvalidOperationException()
     {
-        var act = () => Reflection.TrySetValueToPropertyChain(new TestModels.TestViewModel(), Array.Empty<System.Linq.Expressions.Expression>(), "value");
+        var act = () => Reflection.TrySetValueToPropertyChain(new TestViewModel(), [], "value");
 
         await Assert.That(act).ThrowsExactly<InvalidOperationException>();
     }
@@ -551,7 +549,7 @@ public class ReflectionTests
     [Test]
     public async Task TryGetValueForPropertyChain_NullRoot_ReturnsFalse()
     {
-        Expression<Func<TestModels.TestViewModel, string>> expr = x => x.Name;
+        Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
@@ -568,7 +566,7 @@ public class ReflectionTests
     [Test]
     public async Task TryGetAllValuesForPropertyChain_NullAtLastStep_ReturnsFalse()
     {
-        Expression<Func<TestModels.TestViewModel, string>> expr = x => x.Name;
+        Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
@@ -585,7 +583,7 @@ public class ReflectionTests
     [Test]
     public async Task TrySetValueToPropertyChain_NullTarget_ReturnsFalse()
     {
-        Expression<Func<TestModels.TestViewModel, string>> expr = x => x.Name;
+        Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
@@ -714,7 +712,7 @@ public class ReflectionTests
         var itemsProperty = System.Linq.Expressions.Expression.Property(parameter, "Items");
         var indexer = typeof(Dictionary<string, int>).GetProperty("Item")!;
         var arg = System.Linq.Expressions.Expression.Constant("key1");
-        var indexExpr = System.Linq.Expressions.Expression.MakeIndex(itemsProperty, indexer, new[] { arg });
+        var indexExpr = System.Linq.Expressions.Expression.MakeIndex(itemsProperty, indexer, [arg]);
 
         // Build a full expression: parameter -> Items (MemberAccess) -> Item["key1"] (Index)
         var rewritten = Reflection.Rewrite(indexExpr);
@@ -740,7 +738,7 @@ public class ReflectionTests
         var indexExpr = System.Linq.Expressions.Expression.MakeIndex(
             parameter,
             indexer,
-            new[] { arg0, arg1 });
+            [arg0, arg1]);
 
         var rewritten = Reflection.Rewrite(indexExpr);
         var name = Reflection.ExpressionToPropertyNames(rewritten);
@@ -781,13 +779,35 @@ public class ReflectionTests
     [Test]
     public async Task TrySetValueToPropertyChain_ReadOnlyProperty_ShouldThrowTrue_Throws()
     {
-        System.Linq.Expressions.Expression<Func<ReadOnlyModel, string>> expr = x => x.ReadOnlyValue;
+        Expression<Func<ReadOnlyModel, string>> expr = x => x.ReadOnlyValue;
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
         var model = new ReadOnlyModel();
         var act = () => Reflection.TrySetValueToPropertyChain(model, chain, "NewValue", shouldThrow: true);
 
+        await Assert.That(act).ThrowsException();
+    }
+
+    /// <summary>
+    /// Verifies that TrySetValueToPropertyChain with shouldThrow=false on a read-only property
+    /// throws at the PropertyInfo.SetValue level (the setter delegate is non-null but the property
+    /// has no set accessor). Covers Reflection.cs line 293 where shouldThrow=false selects
+    /// GetValueSetterForProperty, and line 295 where the returned setter is invoked.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TrySetValueToPropertyChain_ReadOnlyProperty_ShouldThrowFalse_Throws()
+    {
+        Expression<Func<ReadOnlyModel, string>> expr = x => x.ReadOnlyValue;
+        var body = Reflection.Rewrite(expr.Body);
+        var chain = body.GetExpressionChain();
+
+        var model = new ReadOnlyModel();
+        var act = () => Reflection.TrySetValueToPropertyChain(model, chain, "NewValue", shouldThrow: false);
+
+        // GetValueSetterForProperty returns property.SetValue (non-null) for any PropertyInfo,
+        // but calling SetValue on a getter-only property throws ArgumentException.
         await Assert.That(act).ThrowsException();
     }
 
@@ -810,6 +830,9 @@ public class ReflectionTests
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
     private sealed class IndexedModel
     {
+        /// <summary>
+        /// Gets a list of integers for testing index expressions.
+        /// </summary>
         public List<int> Items { get; } = [10, 20, 30];
     }
 
@@ -819,6 +842,9 @@ public class ReflectionTests
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
     private sealed class MultiArgIndexedModel
     {
+        /// <summary>
+        /// Gets a dictionary of string-to-int mappings for testing multi-argument index expressions.
+        /// </summary>
         public Dictionary<string, int> Items { get; } = new() { ["key1"] = 42 };
     }
 
@@ -828,6 +854,9 @@ public class ReflectionTests
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
     private sealed class TrueMultiArgIndexedModel
     {
+        /// <summary>
+        /// Backing dictionary for the multi-parameter indexer.
+        /// </summary>
         private readonly Dictionary<(int Row, int Col), int> _data = new();
 
         /// <summary>

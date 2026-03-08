@@ -11,8 +11,20 @@ namespace ReactiveUI.Binding.AotValidation;
 /// </summary>
 public class AotViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
+    /// <summary>
+    /// Backing field for the <see cref="Name"/> property, representing the name associated with the view model.
+    /// </summary>
     private string _name = string.Empty;
+
+    /// <summary>
+    /// Backing field for the <see cref="Age"/> property, representing the age associated with the view model.
+    /// </summary>
     private int _age;
+
+    /// <summary>
+    /// Backing field for the <see cref="Child"/> property, representing the associated instance of <see cref="AotChildViewModel"/>
+    /// used for nested view model functionality within the parent <see cref="AotViewModel"/>.
+    /// </summary>
     private AotChildViewModel _child = new();
 
     /// <inheritdoc/>

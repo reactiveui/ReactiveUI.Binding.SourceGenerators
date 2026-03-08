@@ -79,7 +79,7 @@ public class BindCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = BindCodeGenerator.FormatExtraArgs(group);
 
@@ -100,7 +100,7 @@ public class BindCodeGeneratorHelperTests
             "global::System.String",
             true,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = BindCodeGenerator.FormatExtraArgs(group);
 
@@ -122,7 +122,7 @@ public class BindCodeGeneratorHelperTests
             "global::System.String",
             false,
             true,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = BindCodeGenerator.FormatExtraArgs(group);
 
@@ -143,7 +143,7 @@ public class BindCodeGeneratorHelperTests
             "global::System.String",
             true,
             true,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = BindCodeGenerator.FormatExtraArgs(group);
 
@@ -165,7 +165,7 @@ public class BindCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         var result = BindCodeGenerator.FormatReturnType(group);
 
@@ -249,7 +249,7 @@ public class BindCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            new[] { inv });
+            [inv]);
 
         BindCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true);
 
@@ -274,7 +274,7 @@ public class BindCodeGeneratorHelperTests
             "global::System.String",
             false,
             false,
-            new[] { inv });
+            [inv]);
 
         BindCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false);
 
@@ -325,7 +325,7 @@ public class BindCodeGeneratorHelperTests
             "global::System.Int32",
             true,
             false,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         BindCodeGenerator.AppendExtraParameters(sb, group);
 
@@ -350,7 +350,7 @@ public class BindCodeGeneratorHelperTests
             "global::System.String",
             false,
             true,
-            Array.Empty<BindingInvocationInfo>());
+            []);
 
         BindCodeGenerator.AppendExtraParameters(sb, group);
 

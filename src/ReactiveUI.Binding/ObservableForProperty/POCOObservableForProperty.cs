@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 
@@ -15,6 +14,9 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 /// </summary>
 public sealed class POCOObservableForProperty : ICreatesObservableForProperty
 {
+    /// <summary>
+    /// Tracks which (type, property) pairs have already emitted a POCO warning to avoid duplicate messages.
+    /// </summary>
     private static readonly ConcurrentDictionary<(Type Type, string PropertyName), byte> HasWarned = new();
 
     /// <inheritdoc/>
@@ -29,7 +31,7 @@ public sealed class POCOObservableForProperty : ICreatesObservableForProperty
 
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Uses reflection over runtime types which is not trim- or AOT-safe.")]
-    public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(object sender, System.Linq.Expressions.Expression expression, string propertyName, bool beforeChanged = false, bool suppressWarnings = false)
+    public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(object sender, Expression expression, string propertyName, bool beforeChanged = false, bool suppressWarnings = false)
     {
         ArgumentExceptionHelper.ThrowIfNull(sender);
         ArgumentExceptionHelper.ThrowIfNull(expression);
@@ -45,6 +47,12 @@ public sealed class POCOObservableForProperty : ICreatesObservableForProperty
             .Concat(Observable.Never<IObservedChange<object, object?>>());
     }
 
+    /// <summary>
+    /// Emits a debug warning the first time a POCO property is observed, indicating that
+    /// no change notifications will be sent after the initial value.
+    /// </summary>
+    /// <param name="sender">The object being observed.</param>
+    /// <param name="propertyName">The name of the property being observed.</param>
 #if NET8_0_OR_GREATER
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 #else

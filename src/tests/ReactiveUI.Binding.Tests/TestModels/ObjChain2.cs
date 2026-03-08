@@ -12,6 +12,9 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class ObjChain2 : INotifyPropertyChanged
 {
+    /// <summary>
+    /// The backer for Chain3.
+    /// </summary>
     private ObjChain3? _chain3;
 
     /// <inheritdoc/>

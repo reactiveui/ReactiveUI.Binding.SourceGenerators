@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Linq.Expressions;
 using System.Reflection;
 
 using ReactiveUI.Binding.Expressions;
@@ -300,7 +299,7 @@ public class ExpressionMixinsTests
         var indexExpr = System.Linq.Expressions.Expression.MakeIndex(
             param,
             indexer,
-            new[] { System.Linq.Expressions.Expression.Constant("key") });
+            [System.Linq.Expressions.Expression.Constant("key")]);
 
         var chain = indexExpr.GetExpressionChain().ToList();
 
@@ -309,17 +308,34 @@ public class ExpressionMixinsTests
         await Assert.That(chain[0].NodeType).IsEqualTo(ExpressionType.Index);
     }
 
+    /// <summary>
+    /// Test class with a list property for testing index expression chains.
+    /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
     private sealed class IndexTestClass
     {
+        /// <summary>
+        /// Gets a list of integers for testing index expressions.
+        /// </summary>
         public List<int> Items { get; } = [10, 20, 30];
     }
 
+    /// <summary>
+    /// Test class with a direct string indexer for testing index expressions on the parameter itself.
+    /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
     private sealed class DirectIndexableClass
     {
+        /// <summary>
+        /// Backing dictionary for the string indexer.
+        /// </summary>
         private readonly Dictionary<string, string> _data = new() { ["key"] = "value" };
 
+        /// <summary>
+        /// Gets or sets the value associated with the specified key.
+        /// </summary>
+        /// <param name="key">The key to look up.</param>
+        /// <returns>The value associated with the key, or an empty string if not found.</returns>
         public string this[string key]
         {
             get => _data.TryGetValue(key, out var val) ? val : string.Empty;

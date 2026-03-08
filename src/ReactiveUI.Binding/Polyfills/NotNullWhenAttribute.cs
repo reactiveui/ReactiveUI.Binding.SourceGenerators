@@ -6,17 +6,18 @@
 // https://github.com/SimonCropp/Polyfill
 #if !NETCOREAPP3_0_OR_GREATER && !NETSTANDARD2_1_OR_GREATER
 
+using System.Diagnostics;
+
 namespace System.Diagnostics.CodeAnalysis;
 
 /// <summary>
-///   Specifies that when a method returns <see cref="ReturnValue"/>,
-///   the parameter will not be <see langword="null"/> even if the corresponding type allows it.
+/// Specifies that when a method returns <see cref="ReturnValue"/>,
+/// the parameter will not be <see langword="null"/> even if the corresponding type allows it.
 /// </summary>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
 [AttributeUsage(AttributeTargets.Parameter)]
-internal sealed class NotNullWhenAttribute :
-    Attribute
+internal sealed class NotNullWhenAttribute : Attribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="NotNullWhenAttribute"/> class.
@@ -29,14 +30,12 @@ internal sealed class NotNullWhenAttribute :
         ReturnValue = returnValue;
 
     /// <summary>
-    ///   Gets a value indicating whether it is a return value condition.
-    ///   If the method returns this value, the associated parameter will not be <see langword="null"/>.
+    /// Gets a value indicating whether the return condition has been satisfied.
+    /// If the method returns this value, the associated parameter will not be <see langword="null"/>.
     /// </summary>
     public bool ReturnValue { get; }
 }
 
 #else
-using System.Runtime.CompilerServices;
-
-[assembly: TypeForwardedTo(typeof(System.Diagnostics.CodeAnalysis.NotNullWhenAttribute))]
+[assembly: TypeForwardedTo(typeof(NotNullWhenAttribute))]
 #endif

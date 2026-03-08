@@ -6,6 +6,8 @@
 // https://github.com/SimonCropp/Polyfill
 #if !NETCOREAPP3_0_OR_GREATER && !NETSTANDARD2_1_OR_GREATER
 
+using System.Diagnostics;
+
 namespace System.Diagnostics.CodeAnalysis;
 
 /// <summary>
@@ -35,7 +37,5 @@ internal sealed class DoesNotReturnIfAttribute : Attribute
     public bool ParameterValue { get; }
 }
 #else
-using System.Runtime.CompilerServices;
-
-[assembly: TypeForwardedTo(typeof(System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute))]
+[assembly: TypeForwardedTo(typeof(DoesNotReturnIfAttribute))]
 #endif

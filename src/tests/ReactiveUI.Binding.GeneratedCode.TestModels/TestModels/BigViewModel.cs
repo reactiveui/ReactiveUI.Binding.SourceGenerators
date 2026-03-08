@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System;
 using System.ComponentModel;
 
 namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
@@ -13,22 +14,89 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class BigViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
+    /// <summary>
+    /// The backer for Prop1.
+    /// </summary>
     private string _prop1 = string.Empty;
+
+    /// <summary>
+    /// The backer for Prop2.
+    /// </summary>
     private int _prop2;
+
+    /// <summary>
+    /// The backer for Prop3.
+    /// </summary>
     private double _prop3;
+
+    /// <summary>
+    /// The backer for Prop4.
+    /// </summary>
     private bool _prop4;
+
+    /// <summary>
+    /// The backer for Prop5.
+    /// </summary>
     private string _prop5 = string.Empty;
+
+    /// <summary>
+    /// The backer for Prop6.
+    /// </summary>
     private int _prop6;
+
+    /// <summary>
+    /// The backer for Prop7.
+    /// </summary>
     private double _prop7;
+
+    /// <summary>
+    /// The backer for Prop8.
+    /// </summary>
     private bool _prop8;
+
+    /// <summary>
+    /// The backer for Prop9.
+    /// </summary>
     private string _prop9 = string.Empty;
+
+    /// <summary>
+    /// The backer for Prop10.
+    /// </summary>
     private int _prop10;
+
+    /// <summary>
+    /// The backer for Prop11.
+    /// </summary>
     private double _prop11;
+
+    /// <summary>
+    /// The backer for Prop12.
+    /// </summary>
     private bool _prop12;
+
+    /// <summary>
+    /// The backer for Prop13.
+    /// </summary>
     private string _prop13 = string.Empty;
+
+    /// <summary>
+    /// The backer for Prop14.
+    /// </summary>
     private int _prop14;
+
+    /// <summary>
+    /// The backer for Prop15.
+    /// </summary>
     private double _prop15;
+
+    /// <summary>
+    /// The backer for Prop16.
+    /// </summary>
     private bool _prop16;
+
+    /// <summary>
+    /// The backer for Address.
+    /// </summary>
     private Address _address = new();
 
     /// <inheritdoc/>

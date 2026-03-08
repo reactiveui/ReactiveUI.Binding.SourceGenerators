@@ -9,6 +9,9 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class StubBindingTypeConverter : IBindingTypeConverter
 {
+    /// <summary>
+    /// The conversion logic.
+    /// </summary>
     private readonly Func<object?, object?, (bool success, object? result)> _tryConvert;
 
     /// <summary>

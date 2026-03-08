@@ -6,11 +6,13 @@
 // https://github.com/SimonCropp/Polyfill
 #if !NETCOREAPP3_0_OR_GREATER && !NETSTANDARD2_1_OR_GREATER
 
+using System.Diagnostics;
+
 namespace System.Diagnostics.CodeAnalysis;
 
 /// <summary>
-///   Specifies that an output is not <see langword="null"/> even if the
-///   corresponding type allows it.
+/// Specifies that an output is not <see langword="null"/> even if the
+/// corresponding type allows it.
 /// </summary>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]

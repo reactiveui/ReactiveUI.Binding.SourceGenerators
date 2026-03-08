@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 
@@ -41,7 +40,7 @@ internal static class WhenAnyObservableCodeGenerator
         // Group invocations by their method signature
         var groups = GroupByTypeSignature(invocations);
 
-        for (int g = 0; g < groups.Count; g++)
+        for (var g = 0; g < groups.Count; g++)
         {
             var group = groups[g];
 
@@ -50,11 +49,11 @@ internal static class WhenAnyObservableCodeGenerator
             sb.AppendLine();
 
             // Generate the observation methods for each invocation in this group
-            for (int i = 0; i < group.Invocations.Length; i++)
+            for (var i = 0; i < group.Invocations.Length; i++)
             {
                 var inv = group.Invocations[i];
                 var classInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.SourceTypeFullName);
-                string suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(inv.SourceTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, string.Join("|", inv.ExpressionTexts));
+                var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(inv.SourceTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, string.Join("|", inv.ExpressionTexts));
                 GenerateObservationMethod(sb, inv, classInfo, suffix);
             }
         }
@@ -77,21 +76,21 @@ internal static class WhenAnyObservableCodeGenerator
         bool supportsCallerArgExpr)
     {
         var first = group.First;
-        int propCount = first.PropertyPaths.Length;
-        bool hasSelector = first.HasSelector;
+        var propCount = first.PropertyPaths.Length;
+        var hasSelector = first.HasSelector;
 
-        sb.AppendLine($$"""
+        sb.AppendLine($"""
                 /// <summary>
-                /// Concrete typed overload for WhenAnyObservable on {{first.SourceTypeFullName}}.
+                /// Concrete typed overload for WhenAnyObservable on {first.SourceTypeFullName}.
                 /// </summary>
-                public static global::System.IObservable<{{first.ReturnTypeFullName}}> WhenAnyObservable(
-                    this {{first.SourceTypeFullName}} objectToMonitor,
+                public static global::System.IObservable<{first.ReturnTypeFullName}> WhenAnyObservable(
+                    this {first.SourceTypeFullName} objectToMonitor,
         """);
 
-        for (int i = 0; i < propCount; i++)
+        for (var i = 0; i < propCount; i++)
         {
-            string innerType = first.InnerObservableTypeFullNames[i];
-            string obsType = $"global::System.IObservable<{innerType}>?";
+            var innerType = first.InnerObservableTypeFullNames[i];
+            var obsType = $"global::System.IObservable<{innerType}>";
             sb.AppendLine($"            global::System.Linq.Expressions.Expression<global::System.Func<{first.SourceTypeFullName}, {obsType}>> obs{i + 1},");
         }
 
@@ -102,7 +101,7 @@ internal static class WhenAnyObservableCodeGenerator
 
         if (supportsCallerArgExpr)
         {
-            for (int i = 0; i < propCount; i++)
+            for (var i = 0; i < propCount; i++)
             {
                 sb.AppendLine($"            [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"obs{i + 1}\")] string obs{i + 1}Expression = \"\",");
             }
@@ -117,24 +116,24 @@ internal static class WhenAnyObservableCodeGenerator
         // Emit normalization to strip "static " prefix from CallerArgumentExpression values
         if (supportsCallerArgExpr)
         {
-            for (int i = 0; i < propCount; i++)
+            for (var i = 0; i < propCount; i++)
             {
-                string paramName = $"obs{i + 1}Expression";
-                sb.AppendLine($$"""            {{paramName}} = {{paramName}}.StartsWith("static ") ? {{paramName}}.Substring(7) : {{paramName}};""");
+                var paramName = $"obs{i + 1}Expression";
+                sb.AppendLine($"""            {paramName} = {paramName}.StartsWith("static ") ? {paramName}.Substring(7) : {paramName};""");
             }
 
             sb.AppendLine();
         }
 
-        for (int i = 0; i < group.Invocations.Length; i++)
+        for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            string condition = i == 0 ? "if" : "else if";
+            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
 
             if (supportsCallerArgExpr)
             {
                 sb.Append($"            {condition} (");
-                for (int p = 0; p < propCount; p++)
+                for (var p = 0; p < propCount; p++)
                 {
                     sb.Append($"obs{p + 1}Expression == \"{CodeGeneratorHelpers.EscapeString(inv.ExpressionTexts[p])}\"");
                     if (p < propCount - 1)
@@ -147,22 +146,20 @@ internal static class WhenAnyObservableCodeGenerator
             }
             else
             {
-                string suffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-                sb.AppendLine($$"""            {{condition}} (callerLineNumber == {{inv.CallerLineNumber}} && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(suffix)}}", global::System.StringComparison.OrdinalIgnoreCase))""");
+                var suffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
+                sb.AppendLine($"""            {condition} (callerLineNumber == {inv.CallerLineNumber} && callerFilePath.EndsWith("{CodeGeneratorHelpers.EscapeString(suffix)}", global::System.StringComparison.OrdinalIgnoreCase))""");
             }
 
             sb.AppendLine("            {");
-            string selectorArg = hasSelector ? ", selector" : string.Empty;
-            string methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(inv.SourceTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, string.Join("|", inv.ExpressionTexts));
+            var selectorArg = hasSelector ? ", selector" : string.Empty;
+            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(inv.SourceTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, string.Join("|", inv.ExpressionTexts));
             sb.AppendLine($"                return __WhenAnyObservable_{methodSuffix}(objectToMonitor{selectorArg});")
                 .AppendLine("            }");
         }
 
         // Runtime fallback: throw for now (WhenAnyObservable doesn't have a simple fallback path)
         sb.AppendLine("            throw new global::System.InvalidOperationException(\"No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.\");")
-            .AppendLine("""
-                    }
-            """);
+            .AppendLine("        }");
     }
 
     /// <summary>
@@ -178,7 +175,7 @@ internal static class WhenAnyObservableCodeGenerator
         ClassBindingInfo? classInfo,
         string suffix)
     {
-        string selectorParam = inv.HasSelector ? ", " + GetSelectorType(inv) + " selector" : string.Empty;
+        var selectorParam = inv.HasSelector ? ", " + GetSelectorType(inv) + " selector" : string.Empty;
 
         sb.AppendLine($$"""
                     private static global::System.IObservable<{{inv.ReturnTypeFullName}}> __WhenAnyObservable_{{suffix}}({{inv.SourceTypeFullName}} obj{{selectorParam}})
@@ -215,7 +212,7 @@ internal static class WhenAnyObservableCodeGenerator
         ClassBindingInfo? classInfo)
     {
         var path = inv.PropertyPaths[0];
-        string innerType = inv.InnerObservableTypeFullNames[0];
+        var innerType = inv.InnerObservableTypeFullNames[0];
 
         // Generate property observation for the observable property itself
         if (path.Length > 1)
@@ -231,10 +228,10 @@ internal static class WhenAnyObservableCodeGenerator
             .AppendLine();
 
         // Switch pattern: take the observable property value, replace null with Empty, and switch
-        sb.Append($$"""
+        sb.Append($"""
                         return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
                             global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty,
-                                __obs => __obs ?? (global::System.IObservable<{{innerType}}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{{innerType}}>.Instance));
+                                __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance));
             """);
     }
 
@@ -250,12 +247,12 @@ internal static class WhenAnyObservableCodeGenerator
         ClassBindingInfo? classInfo)
     {
         // Generate switched observable for each property
-        for (int i = 0; i < inv.PropertyPaths.Length; i++)
+        for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             var path = inv.PropertyPaths[i];
-            string innerType = inv.InnerObservableTypeFullNames[i];
-            string rawVar = "__obsProperty" + i;
-            string switchedVar = "__switched" + i;
+            var innerType = inv.InnerObservableTypeFullNames[i];
+            var rawVar = "__obsProperty" + i;
+            var switchedVar = "__switched" + i;
 
             if (path.Length > 1)
             {
@@ -268,16 +265,16 @@ internal static class WhenAnyObservableCodeGenerator
 
             sb.AppendLine()
                 .AppendLine()
-                .AppendLine($$"""
-                            var {{switchedVar}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{rawVar}},
-                                    __obs => __obs ?? (global::System.IObservable<{{innerType}}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{{innerType}}>.Instance));
+                .AppendLine($"""
+                            var {switchedVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({rawVar},
+                                    __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance));
                 """)
                 .AppendLine();
         }
 
         sb.AppendLine("            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(");
-        for (int i = 0; i < inv.PropertyPaths.Length; i++)
+        for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             sb.Append("                __switched").Append(i);
             if (i < inv.PropertyPaths.Length - 1)
@@ -302,12 +299,12 @@ internal static class WhenAnyObservableCodeGenerator
         ClassBindingInfo? classInfo)
     {
         // Generate switched observable for each property
-        for (int i = 0; i < inv.PropertyPaths.Length; i++)
+        for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             var path = inv.PropertyPaths[i];
-            string innerType = inv.InnerObservableTypeFullNames[i];
-            string rawVar = "__obsProperty" + i;
-            string switchedVar = "__switched" + i;
+            var innerType = inv.InnerObservableTypeFullNames[i];
+            var rawVar = "__obsProperty" + i;
+            var switchedVar = "__switched" + i;
 
             if (path.Length > 1)
             {
@@ -320,16 +317,16 @@ internal static class WhenAnyObservableCodeGenerator
 
             sb.AppendLine()
                 .AppendLine()
-                .AppendLine($$"""
-                            var {{switchedVar}} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{rawVar}},
-                                    __obs => __obs ?? (global::System.IObservable<{{innerType}}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{{innerType}}>.Instance));
+                .AppendLine($"""
+                            var {switchedVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({rawVar},
+                                    __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance));
                 """)
                 .AppendLine();
         }
 
         sb.AppendLine("            return global::ReactiveUI.Binding.Observables.CombineLatestObservable.Create(");
-        for (int i = 0; i < inv.PropertyPaths.Length; i++)
+        for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             sb.Append("                __switched").Append(i).AppendLine(",");
         }
@@ -345,7 +342,7 @@ internal static class WhenAnyObservableCodeGenerator
     internal static string GetSelectorType(WhenAnyObservableInvocationInfo inv)
     {
         var sb = new StringBuilder("global::System.Func<");
-        for (int i = 0; i < inv.InnerObservableTypeFullNames.Length; i++)
+        for (var i = 0; i < inv.InnerObservableTypeFullNames.Length; i++)
         {
             sb.Append(inv.InnerObservableTypeFullNames[i]).Append(", ");
         }
@@ -364,7 +361,7 @@ internal static class WhenAnyObservableCodeGenerator
         var groupMap = new Dictionary<string, List<WhenAnyObservableInvocationInfo>>(invocations.Length);
         var keySb = new StringBuilder(128);
 
-        for (int i = 0; i < invocations.Length; i++)
+        for (var i = 0; i < invocations.Length; i++)
         {
             var inv = invocations[i];
             keySb.Clear()
@@ -373,16 +370,16 @@ internal static class WhenAnyObservableCodeGenerator
                 .Append(inv.PropertyPaths.Length).Append('|')
                 .Append(inv.HasSelector);
 
-            for (int p = 0; p < inv.InnerObservableTypeFullNames.Length; p++)
+            for (var p = 0; p < inv.InnerObservableTypeFullNames.Length; p++)
             {
                 keySb.Append('|').Append(inv.InnerObservableTypeFullNames[p]);
             }
 
-            string key = keySb.ToString();
+            var key = keySb.ToString();
 
             if (!groupMap.TryGetValue(key, out var list))
             {
-                list = new List<WhenAnyObservableInvocationInfo>();
+                list = [];
                 groupMap[key] = list;
             }
 

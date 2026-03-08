@@ -13,10 +13,19 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class TestFixture : INotifyPropertyChanged, INotifyPropertyChanging
 {
+    /// <summary>The backing field for <see cref="IsNotNullString"/>.</summary>
     private string _isNotNullString = "Foo";
+
+    /// <summary>The backing field for <see cref="IsOnlyOneWord"/>.</summary>
     private string _isOnlyOneWord = "Baz";
+
+    /// <summary>The backing field for <see cref="PocoProperty"/>.</summary>
     private string _pocoProperty = string.Empty;
+
+    /// <summary>The backing field for <see cref="NullableInt"/>.</summary>
     private int? _nullableInt;
+
+    /// <summary>The backing field for <see cref="UsesExprRaiseSet"/>.</summary>
     private string _usesExprRaiseSet = string.Empty;
 
     /// <inheritdoc/>

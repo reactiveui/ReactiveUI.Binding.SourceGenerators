@@ -2,9 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System;
 using System.ComponentModel;
-using System.Threading;
 
 namespace ReactiveUI.Binding.Observables;
 
@@ -18,8 +16,19 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class PropertyChangingObservable<T> : IObservable<T>
 {
+    /// <summary>
+    /// The source object implementing <see cref="INotifyPropertyChanging"/>.
+    /// </summary>
     private readonly INotifyPropertyChanging _source;
+
+    /// <summary>
+    /// The name of the property to observe.
+    /// </summary>
     private readonly string _propertyName;
+
+    /// <summary>
+    /// A delegate that reads the current property value from the source.
+    /// </summary>
     private readonly Func<INotifyPropertyChanging, T> _getter;
 
     /// <summary>
@@ -33,27 +42,44 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
         string propertyName,
         Func<INotifyPropertyChanging, T> getter)
     {
-        _source = source ?? throw new ArgumentNullException(nameof(source));
-        _propertyName = propertyName ?? throw new ArgumentNullException(nameof(propertyName));
-        _getter = getter ?? throw new ArgumentNullException(nameof(getter));
+        ArgumentExceptionHelper.ThrowIfNull(source);
+        ArgumentExceptionHelper.ThrowIfNull(propertyName);
+        ArgumentExceptionHelper.ThrowIfNull(getter);
+        _source = source;
+        _propertyName = propertyName;
+        _getter = getter;
     }
 
     /// <inheritdoc/>
     public IDisposable Subscribe(IObserver<T> observer)
     {
-        if (observer is null)
-        {
-            throw new ArgumentNullException(nameof(observer));
-        }
+        ArgumentExceptionHelper.ThrowIfNull(observer);
 
         return new Subscription(this, observer);
     }
 
+    /// <summary>
+    /// Manages the event subscription for a single observer.
+    /// </summary>
     private sealed class Subscription : IDisposable
     {
+        /// <summary>
+        /// The parent observable that owns the source and property metadata.
+        /// </summary>
         private readonly PropertyChangingObservable<T> _parent;
+
+        /// <summary>
+        /// The downstream observer. Set to <see langword="null"/> on disposal.
+        /// </summary>
         private IObserver<T>? _observer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Subscription"/> class.
+        /// Subscribes to the <see cref="INotifyPropertyChanging.PropertyChanging"/> event
+        /// and emits the initial property value.
+        /// </summary>
+        /// <param name="parent">The parent observable.</param>
+        /// <param name="observer">The downstream observer.</param>
         public Subscription(PropertyChangingObservable<T> parent, IObserver<T> observer)
         {
             _parent = parent;
@@ -62,18 +88,33 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
             parent._source.PropertyChanging += OnPropertyChanging;
 
             // Emit initial (StartWith) value
-            T initial = parent._getter(parent._source);
+            var initial = parent._getter(parent._source);
             observer.OnNext(initial);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref _observer, null) != null)
+            if (TrySetDisposed())
             {
                 _parent._source.PropertyChanging -= OnPropertyChanging;
             }
         }
 
+        /// <summary>
+        /// Atomically nulls the observer, returning whether it was previously non-null.
+        /// </summary>
+        /// <returns><see langword="true"/> if this is the first disposal; otherwise <see langword="false"/>.</returns>
+        [ExcludeFromCodeCoverage]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool TrySetDisposed() => Interlocked.Exchange(ref _observer, null) != null;
+
+        /// <summary>
+        /// Handles the <see cref="INotifyPropertyChanging.PropertyChanging"/> event
+        /// and forwards the current property value to the observer.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments containing the property name.</param>
         private void OnPropertyChanging(object? sender, PropertyChangingEventArgs e)
         {
             if (e.PropertyName != _parent._propertyName
@@ -88,7 +129,7 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
                 return;
             }
 
-            T value = _parent._getter(_parent._source);
+            var value = _parent._getter(_parent._source);
             observer.OnNext(value);
         }
     }
