@@ -14,19 +14,19 @@ namespace ReactiveUI.Binding;
 public sealed class DefaultViewLocator : IViewLocator
 {
     /// <summary>
-    /// Synchronization lock for thread-safe access to mappings.
-    /// </summary>
-#if NET9_0_OR_GREATER
-    private static readonly Lock _lock = new();
-#else
-    private static readonly object _lock = new();
-#endif
-
-    /// <summary>
     /// Source-generated dispatch function set by the generated code.
     /// Signature: (viewModelInstance, contract) returns IViewFor or null.
     /// </summary>
     private static Func<object, string, IViewFor?>? _generatedDispatch;
+
+    /// <summary>
+    /// Synchronization lock for thread-safe access to this instance's mappings.
+    /// </summary>
+#if NET9_0_OR_GREATER
+    private readonly Lock _lock = new();
+#else
+    private readonly object _lock = new();
+#endif
 
     /// <summary>
     /// Runtime explicit mappings from (viewModelType, contract) to view factory.
