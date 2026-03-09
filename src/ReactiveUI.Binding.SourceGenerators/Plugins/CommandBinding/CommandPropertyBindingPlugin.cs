@@ -7,7 +7,7 @@ using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
-namespace ReactiveUI.Binding.SourceGenerators.Generators.CommandBinding;
+namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 
 /// <summary>
 /// Command binding plugin for controls that have a <c>Command</c> property (ICommand)
@@ -21,24 +21,20 @@ namespace ReactiveUI.Binding.SourceGenerators.Generators.CommandBinding;
 /// No Enabled synchronization is needed because these frameworks handle it
 /// internally through the Command property binding.
 /// </remarks>
-internal static class CommandPropertyBindingPlugin
+internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
 {
-    /// <summary>
-    /// Determines whether this plugin can handle the given invocation.
-    /// </summary>
-    /// <param name="inv">The BindCommand invocation info.</param>
-    /// <returns>True if the control has a settable Command property.</returns>
-    internal static bool CanHandle(BindCommandInvocationInfo inv)
+    /// <inheritdoc/>
+    public int Affinity => 5;
+
+    /// <inheritdoc/>
+    public bool RequiresCustomBinderFallback => false;
+
+    /// <inheritdoc/>
+    public bool CanHandle(BindCommandInvocationInfo inv)
         => inv.HasCommandProperty;
 
-    /// <summary>
-    /// Emits the command property binding code.
-    /// Sets <c>control.Command = cmd</c> directly and handles CommandParameter if available.
-    /// </summary>
-    /// <param name="sb">The string builder.</param>
-    /// <param name="inv">The BindCommand invocation info.</param>
-    /// <param name="controlAccess">The control access chain.</param>
-    internal static void EmitBinding(
+    /// <inheritdoc/>
+    public void EmitBinding(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess)

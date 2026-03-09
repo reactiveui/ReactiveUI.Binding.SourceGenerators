@@ -158,6 +158,125 @@ public class RuntimeObservationFallbackTests
     }
 
     /// <summary>
+    /// Verifies that WhenChanging with two properties emits tuples.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WhenChanging_TwoProperties_EmitsTuples()
+    {
+        EnsureInitialized();
+
+        var vm = new TestViewModel { Name = "Alice", Age = 30 };
+        var values = new List<(string Value1, int Value2)>();
+
+        using var sub = RuntimeObservationFallback.WhenChanging(
+            vm,
+            x => x.Name,
+            x => x.Age)
+            .Subscribe(values.Add);
+
+        vm.Name = "Bob";
+
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that WhenChanging with three properties emits tuples.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WhenChanging_ThreeProperties_EmitsTuples()
+    {
+        EnsureInitialized();
+
+        var vm = new TestViewModel { Name = "Alice", Age = 30, Address = new TestAddress { City = "Seattle" } };
+        var values = new List<(string Value1, int Value2, string? Value3)>();
+
+        using var sub = RuntimeObservationFallback.WhenChanging(
+            vm,
+            x => x.Name,
+            x => x.Age,
+            x => x.Address!.City)
+            .Subscribe(values.Add);
+
+        vm.Name = "Bob";
+
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies that WhenAnyValue with two properties emits tuples.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WhenAnyValue_TwoProperties_EmitsTuples()
+    {
+        EnsureInitialized();
+
+        var vm = new TestViewModel { Name = "Alice", Age = 30 };
+        var values = new List<(string Value1, int Value2)>();
+
+        using var sub = RuntimeObservationFallback.WhenAnyValue(
+            vm,
+            x => x.Name,
+            x => x.Age)
+            .Subscribe(values.Add);
+
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
+        await Assert.That(values[0].Value1).IsEqualTo("Alice");
+        await Assert.That(values[0].Value2).IsEqualTo(30);
+    }
+
+    /// <summary>
+    /// Verifies that WhenAnyValue with three properties emits tuples.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WhenAnyValue_ThreeProperties_EmitsTuples()
+    {
+        EnsureInitialized();
+
+        var vm = new TestViewModel { Name = "Alice", Age = 30, Address = new TestAddress { City = "Seattle" } };
+        var values = new List<(string Value1, int Value2, string? Value3)>();
+
+        using var sub = RuntimeObservationFallback.WhenAnyValue(
+            vm,
+            x => x.Name,
+            x => x.Age,
+            x => x.Address!.City)
+            .Subscribe(values.Add);
+
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
+        await Assert.That(values[0].Value1).IsEqualTo("Alice");
+        await Assert.That(values[0].Value2).IsEqualTo(30);
+        await Assert.That(values[0].Value3).IsEqualTo("Seattle");
+    }
+
+    /// <summary>
+    /// Verifies that WhenAnyValue with two properties updates on change.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WhenAnyValue_TwoProperties_UpdatesOnChange()
+    {
+        EnsureInitialized();
+
+        var vm = new TestViewModel { Name = "Alice", Age = 30 };
+        var values = new List<(string Value1, int Value2)>();
+
+        using var sub = RuntimeObservationFallback.WhenAnyValue(
+            vm,
+            x => x.Name,
+            x => x.Age)
+            .Subscribe(values.Add);
+
+        vm.Name = "Bob";
+
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values[^1].Value1).IsEqualTo("Bob");
+    }
+
+    /// <summary>
     /// Resets and initializes the ReactiveUI binding infrastructure for testing.
     /// </summary>
     internal static void EnsureInitialized()

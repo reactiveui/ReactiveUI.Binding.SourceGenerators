@@ -7,7 +7,7 @@ using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
-namespace ReactiveUI.Binding.SourceGenerators.Generators.CommandBinding;
+namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 
 /// <summary>
 /// Command binding plugin for controls that have a default event and an <c>Enabled</c> property.
@@ -20,23 +20,20 @@ namespace ReactiveUI.Binding.SourceGenerators.Generators.CommandBinding;
 /// Platforms covered: WinForms Control/ToolStripItem (Click+Enabled),
 /// Android View (Click+Enabled), Apple UIControl (TouchUpInside+Enabled).
 /// </remarks>
-internal static class EventEnabledBindingPlugin
+internal sealed class EventEnabledBindingPlugin : ICommandBindingPlugin
 {
-    /// <summary>
-    /// Determines whether this plugin can handle the given invocation.
-    /// </summary>
-    /// <param name="inv">The BindCommand invocation info.</param>
-    /// <returns>True if the control has a resolved event and an Enabled property.</returns>
-    internal static bool CanHandle(BindCommandInvocationInfo inv)
+    /// <inheritdoc/>
+    public int Affinity => 4;
+
+    /// <inheritdoc/>
+    public bool RequiresCustomBinderFallback => true;
+
+    /// <inheritdoc/>
+    public bool CanHandle(BindCommandInvocationInfo inv)
         => inv.ResolvedEventName != null && inv.HasEnabledProperty;
 
-    /// <summary>
-    /// Emits the event + Enabled synchronization binding code.
-    /// </summary>
-    /// <param name="sb">The string builder.</param>
-    /// <param name="inv">The BindCommand invocation info.</param>
-    /// <param name="controlAccess">The control access chain.</param>
-    internal static void EmitBinding(
+    /// <inheritdoc/>
+    public void EmitBinding(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess)

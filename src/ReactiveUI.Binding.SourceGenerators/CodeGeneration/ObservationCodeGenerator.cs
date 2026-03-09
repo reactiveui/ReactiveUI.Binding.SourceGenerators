@@ -82,8 +82,13 @@ internal static class ObservationCodeGenerator
         {
             var group = groups[g];
 
+            // Resolve the plugin affinity for the source type to emit the runtime override check
+            var groupClassInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, group.SourceTypeFullName);
+            var groupPlugin = groupClassInfo is not null ? ObservationPluginRegistry.GetBestPlugin(groupClassInfo) : null;
+            var groupAffinity = groupPlugin is not null ? groupPlugin.Affinity : -1;
+
             // Generate the concrete typed extension method overload
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, methodPrefix);
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, methodPrefix, groupAffinity);
             sb.AppendLine();
 
             // Generate the observation methods for each invocation in this group
@@ -107,10 +112,13 @@ internal static class ObservationCodeGenerator
             }
         }
 
-        // Emit helper classes for all used plugins that require them
-        foreach (var kind in usedPluginKinds)
+        // Emit helper classes for all used plugins that require them.
+        // Sort kinds for deterministic output order.
+        var sortedKinds = new List<string>(usedPluginKinds);
+        sortedKinds.Sort(StringComparer.Ordinal);
+        for (var k = 0; k < sortedKinds.Count; k++)
         {
-            var plugin = ObservationPluginRegistry.GetPluginByKind(kind);
+            var plugin = ObservationPluginRegistry.GetPluginByKind(sortedKinds[k]);
             if (plugin is not null)
             {
                 plugin.EmitHelperClasses(sb);
@@ -398,8 +406,8 @@ internal static class ObservationCodeGenerator
             var curObsVar = varName + "_s" + s;
             var lambdaParam = varName + "_p" + s;
 
-            // For inner segments, use the same plugin as the root for now.
-            // Future: per-segment plugin selection using ClassBindingInfo lookup.
+            // All plugins emit generic INPC-based PropertyObservable for inner segments,
+            // so reusing the root plugin is safe regardless of the inner segment's declaring type.
             var innerPlugin = rootPlugin;
 
             if (innerPlugin is not null)
@@ -493,16 +501,21 @@ internal static class ObservationCodeGenerator
 
     /// <summary>
     /// Generates a concrete typed extension method overload with dispatch logic.
+    /// When <paramref name="generatedAffinity"/> is non-negative, emits an affinity check
+    /// before the dispatch table to allow user-registered plugins with higher affinity
+    /// to override the source-generated observation at runtime.
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The type group containing invocations that share a signature.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
+    /// <param name="generatedAffinity">The affinity of the source generator's selected plugin, or -1 if unknown.</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         TypeGroup group,
         bool supportsCallerArgExpr,
-        string methodPrefix)
+        string methodPrefix,
+        int generatedAffinity = -1)
     {
         var first = group.First;
         var propCount = first.PropertyPaths.Length;
@@ -551,6 +564,13 @@ internal static class ObservationCodeGenerator
             }
 
             sb.AppendLine();
+        }
+
+        // Emit runtime affinity check: allow user-registered plugins to override generated observation.
+        // Only emit for overloads with <= 3 properties, matching RuntimeObservationFallback signatures.
+        if (generatedAffinity >= 0 && propCount <= 3)
+        {
+            EmitAffinityCheck(sb, first, methodPrefix, propCount, hasSelector, generatedAffinity);
         }
 
         for (var i = 0; i < group.Invocations.Length; i++)
@@ -605,6 +625,109 @@ internal static class ObservationCodeGenerator
         int propCount,
         bool hasSelector) =>
         sb.AppendLine($"            throw new global::System.InvalidOperationException(\"No generated {methodPrefix} dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.\");");
+
+    /// <summary>
+    /// Emits a runtime affinity check at the top of a concrete overload method body.
+    /// If a user-registered <c>ICreatesObservableForProperty</c> implementation has higher
+    /// affinity than the source generator's plugin, delegates to <c>RuntimeObservationFallback</c>.
+    /// </summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="first">The first invocation in the group, used for type information.</param>
+    /// <param name="methodPrefix">The method name prefix ("WhenChanged", "WhenChanging", or "WhenAnyValue").</param>
+    /// <param name="propCount">The number of property expressions.</param>
+    /// <param name="hasSelector">Whether a selector function is present.</param>
+    /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
+    internal static void EmitAffinityCheck(
+        StringBuilder sb,
+        InvocationInfo first,
+        string methodPrefix,
+        int propCount,
+        bool hasSelector,
+        int generatedAffinity)
+    {
+        var isBeforeChange = methodPrefix == "WhenChanging";
+
+        sb.AppendLine("            // Allow user-registered plugins with higher affinity to override generated observation")
+            .AppendLine($"            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof({first.SourceTypeFullName}), {generatedAffinity}, {(isBeforeChange ? "true" : "false")}))")
+            .AppendLine("            {");
+
+        EmitAffinityFallbackReturn(sb, first, methodPrefix, propCount, hasSelector);
+
+        sb.AppendLine("            }")
+            .AppendLine();
+    }
+
+    /// <summary>
+    /// Emits the return statement inside the affinity check block, delegating to
+    /// <c>RuntimeObservationFallback</c> with the appropriate method signature.
+    /// </summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="first">The first invocation in the group, used for type information.</param>
+    /// <param name="methodPrefix">The method name prefix.</param>
+    /// <param name="propCount">The number of property expressions.</param>
+    /// <param name="hasSelector">Whether a selector function is present.</param>
+    internal static void EmitAffinityFallbackReturn(
+        StringBuilder sb,
+        InvocationInfo first,
+        string methodPrefix,
+        int propCount,
+        bool hasSelector)
+    {
+        // Determine the fallback method name: WhenAnyValue maps to WhenAnyValue, others stay as-is
+        var fallbackMethod = methodPrefix;
+
+        // Build the property arguments (property1, property2, ...)
+        var propArgs = new StringBuilder();
+        for (var i = 0; i < propCount; i++)
+        {
+            propArgs.Append($", property{i + 1}");
+        }
+
+        if (!hasSelector)
+        {
+            // No selector: direct call to RuntimeObservationFallback
+            sb.AppendLine($"                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.{fallbackMethod}(objectToMonitor{propArgs});");
+        }
+        else if (propCount == 1)
+        {
+            // Single property with selector: wrap fallback with SelectObservable
+            var propType = first.PropertyPaths[0][first.PropertyPaths[0].Length - 1].PropertyTypeFullName;
+            sb.AppendLine($"                return new global::ReactiveUI.Binding.Observables.SelectObservable<{propType}, {first.ReturnTypeFullName}>(")
+                .AppendLine($"                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.{fallbackMethod}(objectToMonitor{propArgs}),")
+                .AppendLine("                    selector);");
+        }
+        else
+        {
+            // Multi-property with selector: wrap fallback tuple with selector decomposition
+            var tupleType = new StringBuilder("global::System.ValueTuple<");
+            for (var i = 0; i < propCount; i++)
+            {
+                var path = first.PropertyPaths[i];
+                tupleType.Append(path[path.Length - 1].PropertyTypeFullName);
+                if (i < propCount - 1)
+                {
+                    tupleType.Append(", ");
+                }
+            }
+
+            tupleType.Append('>');
+
+            // Build the selector decomposition lambda: __t => selector(__t.Item1, __t.Item2, ...)
+            var selectorArgs = new StringBuilder();
+            for (var i = 0; i < propCount; i++)
+            {
+                selectorArgs.Append("__t.Item").Append(i + 1);
+                if (i < propCount - 1)
+                {
+                    selectorArgs.Append(", ");
+                }
+            }
+
+            sb.AppendLine($"                return new global::ReactiveUI.Binding.Observables.SelectObservable<{tupleType}, {first.ReturnTypeFullName}>(")
+                .AppendLine($"                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.{fallbackMethod}(objectToMonitor{propArgs}),")
+                .AppendLine($"                    __t => selector({selectorArgs}));");
+        }
+    }
 
     /// <summary>
     /// Generates a single-property observation method body using plugin dispatch.
@@ -693,8 +816,8 @@ internal static class ObservationCodeGenerator
             var curVar = $"__obs{s}";
             var lambdaParam = $"__parent{s}";
 
-            // For inner segments, use the same plugin as the root for now.
-            // Future: per-segment plugin selection using ClassBindingInfo lookup.
+            // All plugins emit generic INPC-based PropertyObservable for inner segments,
+            // so reusing the root plugin is safe regardless of the inner segment's declaring type.
             var innerPlugin = rootPlugin;
 
             if (innerPlugin is not null)

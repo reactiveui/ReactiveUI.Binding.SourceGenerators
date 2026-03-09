@@ -284,7 +284,7 @@ public class WhenChangedGeneratorTests
                 {
                     private string _text = string.Empty;
                     public event PropertyChangedEventHandler? PropertyChanged;
-                    public event EventHandler TextChanged;
+                    public event EventHandler? TextChanged;
                     public string Text
                     {
                         get => _text;

@@ -24,6 +24,14 @@ namespace ReactiveUI.Binding
             property1Expression = property1Expression.StartsWith("static ") ? property1Expression.Substring(7) : property1Expression;
             property2Expression = property2Expression.StartsWith("static ") ? property2Expression.Substring(7) : property2Expression;
 
+            // Allow user-registered plugins with higher affinity to override generated observation
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.MultiPropertyWithDeepChains.MyViewModel), 5, false))
+            {
+                return new global::ReactiveUI.Binding.Observables.SelectObservable<global::System.ValueTuple<string, string>, string>(
+                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanged(objectToMonitor, property1, property2),
+                    __t => selector(__t.Item1, __t.Item2));
+            }
+
             if (property1Expression == "x => x.Address.City" && property2Expression == "x => x.Name")
             {
                 return __WhenChanged_7FFFD8A9CF83B95B(objectToMonitor, selector);

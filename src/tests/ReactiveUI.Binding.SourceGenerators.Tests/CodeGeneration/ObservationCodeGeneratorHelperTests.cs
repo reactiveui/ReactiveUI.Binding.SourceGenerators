@@ -1160,6 +1160,26 @@ public class ObservationCodeGeneratorHelperTests
     }
 
     /// <summary>
+    /// Verifies Generate with invocations but no matching class info skips affinity check
+    /// and does not emit ObservationAffinityChecker (covers null branches for groupClassInfo/groupPlugin).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Generate_NoMatchingClassInfo_SkipsAffinityCheck()
+    {
+        var inv = ModelFactory.CreateInvocationInfo();
+
+        var result = ObservationCodeGenerator.Generate(
+            [inv],
+            ImmutableArray<ClassBindingInfo>.Empty,
+            supportsCallerArgExpr: true,
+            "WhenChanged");
+
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result!).DoesNotContain("ObservationAffinityChecker");
+    }
+
+    /// <summary>
     /// Verifies GenerateConcreteOverload with multiple invocations in a group generates else if branching.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -1407,5 +1427,241 @@ public class ObservationCodeGeneratorHelperTests
     {
         var result = ObservationCodeGenerator.GetTypeCastName(null);
         await Assert.That(result).IsEqualTo("object");
+    }
+
+    /// <summary>
+    /// Verifies EmitAffinityCheck emits HasHigherAffinityPlugin check with correct type and affinity.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityCheck_SingleProperty_EmitsCorrectCheck()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo();
+
+        ObservationCodeGenerator.EmitAffinityCheck(sb, inv, "WhenChanged", propCount: 1, hasSelector: false, generatedAffinity: 5);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("ObservationAffinityChecker.HasHigherAffinityPlugin");
+        await Assert.That(result).Contains("typeof(global::TestApp.MyViewModel)");
+        await Assert.That(result).Contains(", 5, false)");
+    }
+
+    /// <summary>
+    /// Verifies EmitAffinityCheck emits beforeChanged=true for WhenChanging.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityCheck_WhenChanging_EmitsBeforeChangedTrue()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true);
+
+        ObservationCodeGenerator.EmitAffinityCheck(sb, inv, "WhenChanging", propCount: 1, hasSelector: false, generatedAffinity: 10);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains(", 10, true)");
+    }
+
+    /// <summary>
+    /// Verifies EmitAffinityFallbackReturn emits direct RuntimeObservationFallback call for single property without selector.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityFallbackReturn_SinglePropertyNoSelector_EmitsDirectFallback()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo();
+
+        ObservationCodeGenerator.EmitAffinityFallbackReturn(sb, inv, "WhenChanged", propCount: 1, hasSelector: false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("RuntimeObservationFallback.WhenChanged(objectToMonitor, property1)");
+    }
+
+    /// <summary>
+    /// Verifies EmitAffinityFallbackReturn emits SelectObservable wrapper for single property with selector.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityFallbackReturn_SinglePropertyWithSelector_EmitsSelectObservable()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo(hasSelector: true, returnTypeFullName: "global::System.Int32");
+
+        ObservationCodeGenerator.EmitAffinityFallbackReturn(sb, inv, "WhenChanged", propCount: 1, hasSelector: true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("SelectObservable<global::System.String, global::System.Int32>");
+        await Assert.That(result).Contains("RuntimeObservationFallback.WhenChanged(objectToMonitor, property1)");
+        await Assert.That(result).Contains("selector);");
+    }
+
+    /// <summary>
+    /// Verifies EmitAffinityFallbackReturn emits multi-property fallback for two properties without selector.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityFallbackReturn_TwoPropertiesNoSelector_EmitsMultiPropertyFallback()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(
+        [
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Age", "int")])
+        ]);
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
+
+        ObservationCodeGenerator.EmitAffinityFallbackReturn(sb, inv, "WhenChanged", propCount: 2, hasSelector: false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("RuntimeObservationFallback.WhenChanged(objectToMonitor, property1, property2)");
+    }
+
+    /// <summary>
+    /// Verifies EmitAffinityFallbackReturn emits tuple decomposition for multi-property with selector.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityFallbackReturn_TwoPropertiesWithSelector_EmitsTupleDecomposition()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(
+        [
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Age", "int")])
+        ]);
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            hasSelector: true,
+            returnTypeFullName: "global::System.String",
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
+
+        ObservationCodeGenerator.EmitAffinityFallbackReturn(sb, inv, "WhenChanged", propCount: 2, hasSelector: true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("SelectObservable<global::System.ValueTuple<global::System.String, int>, global::System.String>");
+        await Assert.That(result).Contains("__t => selector(__t.Item1, __t.Item2)");
+    }
+
+    /// <summary>
+    /// Verifies EmitAffinityFallbackReturn emits WhenChanging fallback for before-change observation.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityFallbackReturn_WhenChanging_EmitsCorrectMethodName()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true);
+
+        ObservationCodeGenerator.EmitAffinityFallbackReturn(sb, inv, "WhenChanging", propCount: 1, hasSelector: false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("RuntimeObservationFallback.WhenChanging(objectToMonitor, property1)");
+    }
+
+    /// <summary>
+    /// Verifies EmitAffinityFallbackReturn emits WhenAnyValue fallback correctly.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityFallbackReturn_WhenAnyValue_EmitsCorrectMethodName()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo();
+
+        ObservationCodeGenerator.EmitAffinityFallbackReturn(sb, inv, "WhenAnyValue", propCount: 1, hasSelector: false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("RuntimeObservationFallback.WhenAnyValue(objectToMonitor, property1)");
+    }
+
+    /// <summary>
+    /// Verifies EmitAffinityFallbackReturn emits three-property tuple decomposition with selector.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityFallbackReturn_ThreePropertiesWithSelector_EmitsThreeItemDecomposition()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(
+        [
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("Age", "int")]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("City", "global::System.String")])
+        ]);
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            hasSelector: true,
+            returnTypeFullName: "global::System.String",
+            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age", "x => x.City"]));
+
+        ObservationCodeGenerator.EmitAffinityFallbackReturn(sb, inv, "WhenChanged", propCount: 3, hasSelector: true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("__t => selector(__t.Item1, __t.Item2, __t.Item3)");
+    }
+
+    /// <summary>
+    /// Verifies GenerateConcreteOverload emits affinity check when generatedAffinity is provided.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateConcreteOverload_WithAffinity_EmitsAffinityCheck()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo();
+        var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
+
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanged", generatedAffinity: 5);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("ObservationAffinityChecker.HasHigherAffinityPlugin");
+        await Assert.That(result).Contains(", 5, false)");
+    }
+
+    /// <summary>
+    /// Verifies GenerateConcreteOverload does not emit affinity check when generatedAffinity is -1.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateConcreteOverload_WithoutAffinity_NoAffinityCheck()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo();
+        var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
+
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanged", generatedAffinity: -1);
+
+        var result = sb.ToString();
+        await Assert.That(result).DoesNotContain("ObservationAffinityChecker");
+    }
+
+    /// <summary>
+    /// Verifies GenerateConcreteOverload skips affinity check for more than 3 properties.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateConcreteOverload_FourProperties_SkipsAffinityCheck()
+    {
+        var sb = new StringBuilder();
+        var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>(
+        [
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("P1", "global::System.String")]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("P2", "global::System.String")]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("P3", "global::System.String")]),
+            new EquatableArray<PropertyPathSegment>([ModelFactory.CreatePropertyPathSegment("P4", "global::System.String")])
+        ]);
+        var inv = ModelFactory.CreateInvocationInfo(
+            propertyPaths: paths,
+            expressionTexts: new EquatableArray<string>(["x => x.P1", "x => x.P2", "x => x.P3", "x => x.P4"]));
+        var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
+
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanged", generatedAffinity: 5);
+
+        var result = sb.ToString();
+        await Assert.That(result).DoesNotContain("ObservationAffinityChecker");
     }
 }

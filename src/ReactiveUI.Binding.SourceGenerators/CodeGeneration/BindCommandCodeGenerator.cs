@@ -5,8 +5,8 @@
 using System.Collections.Immutable;
 using System.Text;
 
-using ReactiveUI.Binding.SourceGenerators.Generators.CommandBinding;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
@@ -332,27 +332,22 @@ internal static class BindCommandCodeGenerator
         ObservationCodeGenerator.EmitInlineObservation(
             sb, "viewModel", inv.CommandPropertyPath, inv.CommandTypeFullName, vmClassInfo, "commandObs");
 
-        // Try plugins in affinity order (highest first)
-        if (CommandPropertyBindingPlugin.CanHandle(inv))
+        // Try plugins in affinity order (highest first) via registry
+        var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
+        var generatedAffinity = plugin is not null ? plugin.Affinity : -1;
+        var hasEvent = inv.ResolvedEventName is not null;
+
+        // Emit affinity check: let user-registered ICreatesCommandBinding plugins override
+        // if they have higher affinity than the source-generated binding
+        EmitCommandAffinityCheck(sb, inv, controlAccess, generatedAffinity, hasEvent);
+
+        if (plugin is not null)
         {
-            CommandPropertyBindingPlugin.EmitBinding(sb, inv, controlAccess);
-        }
-        else if (EventEnabledBindingPlugin.CanHandle(inv))
-        {
-            // Emit custom binder check before event+Enabled binding
-            EmitCustomBinderFallback(sb, inv, controlAccess, hasEvent: true);
-            EventEnabledBindingPlugin.EmitBinding(sb, inv, controlAccess);
-        }
-        else if (DefaultEventBindingPlugin.CanHandle(inv))
-        {
-            // Emit custom binder check before basic event binding
-            EmitCustomBinderFallback(sb, inv, controlAccess, hasEvent: true);
-            DefaultEventBindingPlugin.EmitBinding(sb, inv, controlAccess);
+            plugin.EmitBinding(sb, inv, controlAccess);
         }
         else
         {
-            // No plugin matched — emit runtime fallback for custom binders, then throw
-            EmitCustomBinderFallback(sb, inv, controlAccess, hasEvent: false);
+            // No plugin matched — throw after the affinity check fallback
             sb.AppendLine("""
                         throw new global::System.InvalidOperationException(
                             "No bindable event found on the control. Specify the 'toEvent' parameter.");
@@ -364,57 +359,73 @@ internal static class BindCommandCodeGenerator
     }
 
     /// <summary>
-    /// Emits the custom binder check that tries registered <c>ICreatesCommandBinding</c> binders
-    /// before falling through to the generated event subscription code.
+    /// Emits the command binding affinity check that allows user-registered
+    /// <c>ICreatesCommandBinding</c> implementations to override the generated binding
+    /// when they have higher affinity. If no user plugin has higher affinity, falls through
+    /// to the generated event subscription code.
     /// </summary>
     /// <param name="sb">The string builder.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The control access chain (e.g., "view.MyButton").</param>
+    /// <param name="generatedAffinity">The affinity of the source-generated plugin, or -1 if none.</param>
     /// <param name="hasEvent">Whether a resolved event was found at compile time.</param>
-    internal static void EmitCustomBinderFallback(
+    internal static void EmitCommandAffinityCheck(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
+        int generatedAffinity,
         bool hasEvent)
     {
         // Build the parameter observable expression for the custom binder
-        string paramObsExpr;
-        if (inv.HasObservableParameter)
-        {
-            // Cast the typed observable to IObservable<object> via Select
-            paramObsExpr = "new global::ReactiveUI.Binding.Observables.SelectObservable<"
-                + inv.ParameterTypeFullName + ", object>(withParameter, __p => __p)";
-        }
-        else if (inv is { HasExpressionParameter: true, ParameterPropertyPath: not null })
-        {
-            // Read the parameter property at call time
-            var paramAccess = CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value);
-            paramObsExpr = "new global::ReactiveUI.Binding.Observables.ReturnObservable<object>(" + paramAccess + ")";
-        }
-        else
-        {
-            paramObsExpr = "global::ReactiveUI.Binding.Observables.EmptyObservable<object>.Instance";
-        }
+        var paramObsExpr = BuildParameterObservableExpression(inv);
 
         sb.AppendLine($$"""
 
-                        var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
-                            .GetBinder<{{inv.ControlTypeFullName}}>({{(hasEvent ? "true" : "false")}});
-                        if (__customBinder != null)
+                        if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
+                            .HasHigherAffinityPlugin<{{inv.ControlTypeFullName}}>({{generatedAffinity}}, {{(hasEvent ? "true" : "false")}}))
                         {
-                            var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                            var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
+                            var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
+                                .GetBinder<{{inv.ControlTypeFullName}}>({{(hasEvent ? "true" : "false")}});
+                            if (__customBinder != null)
                             {
-                                __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                                global::System.IObservable<object> __paramObs = {{paramObsExpr}};
-                                __serial.Disposable = __customBinder.BindCommandToObject<{{inv.ControlTypeFullName}}>(
-                                    __cmd, {{controlAccess}}, __paramObs)
-                                    ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                            });
-                            return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
+                                var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+                                var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
+                                {
+                                    __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                    global::System.IObservable<object> __paramObs = {{paramObsExpr}};
+                                    __serial.Disposable = __customBinder.BindCommandToObject<{{inv.ControlTypeFullName}}>(
+                                        __cmd, {{controlAccess}}, __paramObs)
+                                        ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                });
+                                return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
+                            }
                         }
 
             """);
+    }
+
+    /// <summary>
+    /// Builds the parameter observable expression string for custom binder fallback code.
+    /// </summary>
+    /// <param name="inv">The BindCommand invocation info.</param>
+    /// <returns>The parameter observable expression to embed in generated code.</returns>
+    internal static string BuildParameterObservableExpression(BindCommandInvocationInfo inv)
+    {
+        if (inv.HasObservableParameter)
+        {
+            // Cast the typed observable to IObservable<object> via Select
+            return "new global::ReactiveUI.Binding.Observables.SelectObservable<"
+                + inv.ParameterTypeFullName + ", object>(withParameter, __p => __p)";
+        }
+
+        if (inv is { HasExpressionParameter: true, ParameterPropertyPath: not null })
+        {
+            // Read the parameter property at call time
+            var paramAccess = CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value);
+            return "new global::ReactiveUI.Binding.Observables.ReturnObservable<object>(" + paramAccess + ")";
+        }
+
+        return "global::ReactiveUI.Binding.Observables.EmptyObservable<object>.Instance";
     }
 
     /// <summary>

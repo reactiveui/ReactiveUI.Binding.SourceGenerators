@@ -22,6 +22,15 @@ internal interface ICommandBindingPlugin
     int Affinity { get; }
 
     /// <summary>
+    /// Gets a value indicating whether the code generator should emit the custom binder
+    /// fallback check before this plugin's binding code. Event-based plugins return
+    /// <see langword="true"/> to allow runtime-registered custom binders to override;
+    /// the <c>CommandProperty</c> plugin returns <see langword="false"/> because
+    /// frameworks handle command binding internally.
+    /// </summary>
+    bool RequiresCustomBinderFallback { get; }
+
+    /// <summary>
     /// Determines whether this plugin can handle the given BindCommand invocation.
     /// </summary>
     /// <param name="inv">The BindCommand invocation info.</param>
