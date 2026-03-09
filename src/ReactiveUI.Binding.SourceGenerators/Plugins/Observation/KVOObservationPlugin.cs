@@ -283,7 +283,8 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
 
     /// <summary>
     /// Converts a .NET property name to a KVO key path using the standard naming convention.
-    /// Boolean properties get an "Is" prefix (e.g., <c>Enabled</c> → <c>"isEnabled"</c>).
+    /// Boolean properties get an "Is" prefix unless they already start with "Is"
+    /// (e.g., <c>Enabled</c> → <c>"isEnabled"</c>, but <c>IsEnabled</c> → <c>"isEnabled"</c>).
     /// All others: lowercase first character (e.g., <c>Text</c> → <c>"text"</c>).
     /// </summary>
     /// <param name="propertyName">The .NET property name.</param>
@@ -291,7 +292,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
     /// <returns>The KVO key path string.</returns>
     private static string ToKvoKeyPath(string propertyName, string propertyTypeFullName)
     {
-        if (propertyTypeFullName == "bool")
+        if (propertyTypeFullName == "bool" && !propertyName.StartsWith("Is", StringComparison.Ordinal))
         {
             propertyName = "Is" + propertyName;
         }

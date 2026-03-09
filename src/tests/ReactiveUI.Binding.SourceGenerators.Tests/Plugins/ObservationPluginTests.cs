@@ -667,6 +667,22 @@ public class ObservationPluginTests
     }
 
     /// <summary>
+    /// Verifies KVO key path for boolean property already starting with "Is" does not double-prefix.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task KVOPlugin_BooleanPropertyAlreadyStartingWithIs_DoesNotDoublePrefix()
+    {
+        var plugin = new KVOObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment("IsEnabled", "bool");
+
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyView", isBeforeChange: false, includeStartWith: true);
+
+        await Assert.That(sb.ToString()).Contains("\"isEnabled\"");
+    }
+
+    /// <summary>
     /// Verifies KVO key path for empty property name returns empty string.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
