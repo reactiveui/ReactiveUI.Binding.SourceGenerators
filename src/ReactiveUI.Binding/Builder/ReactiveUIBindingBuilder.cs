@@ -134,6 +134,22 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     }
 
     /// <summary>
+    /// Configures the default view locator with explicit view-to-view-model mappings.
+    /// </summary>
+    /// <param name="configure">An action that receives a <see cref="ViewMappingBuilder"/> for registering mappings.</param>
+    /// <returns>The builder instance for chaining.</returns>
+    public IReactiveUIBindingBuilder ConfigureViewLocator(Action<ViewMappingBuilder> configure)
+    {
+        ArgumentExceptionHelper.ThrowIfNull(configure);
+
+        var locator = new DefaultViewLocator();
+        var mappingBuilder = new ViewMappingBuilder(locator);
+        configure(mappingBuilder);
+        CurrentMutable.RegisterConstant<IViewLocator>(locator);
+        return this;
+    }
+
+    /// <summary>
     /// Registers the core ReactiveUI.Binding services in an AOT-compatible manner.
     /// </summary>
     /// <returns>The builder instance for chaining.</returns>
@@ -146,6 +162,10 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
 
             // Register core observation services
             WithPlatformModule(new ReactiveUIBindingModule());
+
+            // Register default view locator
+            CurrentMutable.RegisterLazySingleton<IViewLocator>(() => new DefaultViewLocator());
+
             _coreRegistered = true;
         }
 

@@ -162,4 +162,27 @@ public static class BuilderMixins
 
         return reactiveUiBindingBuilder.WithSetMethodConverter(converter);
     }
+
+    /// <summary>
+    /// Configures the default view locator with explicit view-to-view-model mappings from an <see cref="IAppBuilder"/>.
+    /// </summary>
+    /// <param name="appBuilder">The app builder instance.</param>
+    /// <param name="configure">An action that receives a <see cref="ViewMappingBuilder"/> for registering mappings.</param>
+    /// <returns>The builder instance for chaining.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
+    /// </exception>
+    public static IReactiveUIBindingBuilder ConfigureViewLocator(this IAppBuilder appBuilder, Action<ViewMappingBuilder> configure)
+    {
+        ArgumentExceptionHelper.ThrowIfNull(appBuilder);
+
+        if (appBuilder is not IReactiveUIBindingBuilder reactiveUiBindingBuilder)
+        {
+            throw new InvalidOperationException(
+                "The provided IAppBuilder is not an IReactiveUIBindingBuilder. " +
+                "Ensure you are using the ReactiveUI.Binding builder pattern.");
+        }
+
+        return reactiveUiBindingBuilder.ConfigureViewLocator(configure);
+    }
 }

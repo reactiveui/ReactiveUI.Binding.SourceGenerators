@@ -131,6 +131,11 @@ internal static class Constants
     internal const string BindCommandMethodName = "BindCommand";
 
     /// <summary>
+    /// Metadata name for the open generic <c>IViewFor&lt;T&gt;</c> interface used for view resolution.
+    /// </summary>
+    internal const string IViewForGenericMetadataName = "ReactiveUI.Binding.IViewFor`1";
+
+    /// <summary>
     /// Metadata name for the <c>IBindingTypeConverter</c> interface used for custom type conversions.
     /// </summary>
     internal const string IBindingTypeConverterMetadataName = "ReactiveUI.Binding.IBindingTypeConverter";

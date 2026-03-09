@@ -91,6 +91,9 @@ public class BindingGenerator : IIncrementalGenerator
             consolidated,
             static (ctx, data) => RegistrationGenerator.Generate(ctx, data));
 
+        // Pipeline C: View locator dispatch (IViewFor<T> scanning)
+        ViewLocatorDispatchGenerator.Register(context);
+
         // Pipeline B: Invocation detection (separate pipelines per API)
         // Each invocation generator receives supportsCallerArgExpr to control dispatch strategy
         WhenChangedInvocationGenerator.Register(context, allClasses, supportsCallerArgExpr);

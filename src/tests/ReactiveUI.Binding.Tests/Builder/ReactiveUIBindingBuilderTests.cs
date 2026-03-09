@@ -407,6 +407,28 @@ public class ReactiveUIBindingBuilderTests
     }
 
     /// <summary>
+    /// Verifies that ConfigureViewLocator registers a configured DefaultViewLocator.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ConfigureViewLocator_RegistersConfiguredLocator()
+    {
+        RxBindingBuilder.ResetForTesting();
+        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+
+        builder.WithCoreServices();
+        builder.ConfigureViewLocator(mappings =>
+            mappings.Map<ConfigTestViewModel, ConfigTestView>());
+        builder.BuildApp();
+
+        var locator = ViewLocator.GetCurrent();
+        var result = locator.ResolveView(new ConfigTestViewModel());
+
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result).IsTypeOf<ConfigTestView>();
+    }
+
+    /// <summary>
     /// A test <see cref="Splat.Builder.IModule"/> that invokes a callback when configured.
     /// </summary>
     /// <param name="onConfigure">The callback to invoke during configuration.</param>
@@ -438,5 +460,28 @@ public class ReactiveUIBindingBuilderTests
         public IDisposable? BindCommandToObject<T, TEventArgs>(System.Windows.Input.ICommand? command, T? target, IObservable<object?> commandParameter, Action<EventHandler<TEventArgs>> addHandler, Action<EventHandler<TEventArgs>> removeHandler)
             where T : class
             where TEventArgs : EventArgs => null;
+    }
+
+    /// <summary>
+    /// Simple view model for ConfigureViewLocator testing.
+    /// </summary>
+    private sealed class ConfigTestViewModel
+    {
+    }
+
+    /// <summary>
+    /// Simple view for ConfigureViewLocator testing.
+    /// </summary>
+    private sealed class ConfigTestView : IViewFor<ConfigTestViewModel>
+    {
+        /// <inheritdoc/>
+        public ConfigTestViewModel? ViewModel { get; set; }
+
+        /// <inheritdoc/>
+        object? IViewFor.ViewModel
+        {
+            get => ViewModel;
+            set => ViewModel = value as ConfigTestViewModel;
+        }
     }
 }

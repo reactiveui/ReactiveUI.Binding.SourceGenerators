@@ -74,6 +74,13 @@ public interface IReactiveUIBindingBuilder : IAppBuilder
     IReactiveUIBindingBuilder WithCommandBinder(ICreatesCommandBinding binder);
 
     /// <summary>
+    /// Configures the default view locator with explicit view-to-view-model mappings.
+    /// </summary>
+    /// <param name="configure">An action that receives a <see cref="ViewMappingBuilder"/> for registering mappings.</param>
+    /// <returns>The builder instance for chaining.</returns>
+    IReactiveUIBindingBuilder ConfigureViewLocator(Action<ViewMappingBuilder> configure);
+
+    /// <summary>
     /// Builds the application and returns the configured instance.
     /// </summary>
     /// <returns>The configured application instance.</returns>
