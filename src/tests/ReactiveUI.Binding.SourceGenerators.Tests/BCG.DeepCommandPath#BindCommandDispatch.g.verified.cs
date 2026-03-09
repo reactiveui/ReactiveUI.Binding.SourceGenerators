@@ -45,37 +45,41 @@ namespace ReactiveUI.Binding
                 return global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
             }
 
-        var __commandObs_s0 = (global::System.IObservable<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>(
-            viewModel,
-            "Child",
-            (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.MyViewModel)__o).Child,
-            false);
+            var __commandObs_s0 = (global::System.IObservable<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>(
+                viewModel,
+                "Child",
+                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.MyViewModel)__o).Child,
+                false);
 
-    var __commandObs_s1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-        global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__commandObs_s0,
-            __p1 => __p1 != null
-                ? (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Windows.Input.ICommand>(
-                    __p1,
-                    "SaveCommand",
-                    (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel)__o).SaveCommand,
-                    false)
-                : (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::System.Windows.Input.ICommand>(default(global::System.Windows.Input.ICommand))));
+        var __commandObs_s1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__commandObs_s0,
+                __p1 => __p1 != null
+                    ? (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Windows.Input.ICommand>(
+                        __p1,
+                        "SaveCommand",
+                        (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel)__o).SaveCommand,
+                        false)
+                    : (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::System.Windows.Input.ICommand>(default(global::System.Windows.Input.ICommand))));
         var commandObs = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__commandObs_s1);
 
-            var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
-                .GetBinder<global::SharedScenarios.BindCommand.DeepCommandPath.MyButton>(true);
-            if (__customBinder != null)
+            if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
+                .HasHigherAffinityPlugin<global::SharedScenarios.BindCommand.DeepCommandPath.MyButton>(3, true))
             {
-                var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
+                var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
+                    .GetBinder<global::SharedScenarios.BindCommand.DeepCommandPath.MyButton>(true);
+                if (__customBinder != null)
                 {
-                    __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                    global::System.IObservable<object> __paramObs = global::ReactiveUI.Binding.Observables.EmptyObservable<object>.Instance;
-                    __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.DeepCommandPath.MyButton>(
-                        __cmd, view.SaveButton, __paramObs)
-                        ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                });
-                return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
+                    var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+                    var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
+                    {
+                        __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                        global::System.IObservable<object> __paramObs = global::ReactiveUI.Binding.Observables.EmptyObservable<object>.Instance;
+                        __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.DeepCommandPath.MyButton>(
+                            __cmd, view.SaveButton, __paramObs)
+                            ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                    });
+                    return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
+                }
             }
 
 

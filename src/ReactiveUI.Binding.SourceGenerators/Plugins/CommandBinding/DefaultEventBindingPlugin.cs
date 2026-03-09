@@ -7,7 +7,7 @@ using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
-namespace ReactiveUI.Binding.SourceGenerators.Generators.CommandBinding;
+namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 
 /// <summary>
 /// Command binding plugin for controls that have a default event but no <c>Command</c>
@@ -19,23 +19,20 @@ namespace ReactiveUI.Binding.SourceGenerators.Generators.CommandBinding;
 /// Platforms covered: Any control with a Click/TouchUpInside/Pressed event
 /// that does not have Command or Enabled properties.
 /// </remarks>
-internal static class DefaultEventBindingPlugin
+internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
 {
-    /// <summary>
-    /// Determines whether this plugin can handle the given invocation.
-    /// </summary>
-    /// <param name="inv">The BindCommand invocation info.</param>
-    /// <returns>True if the control has a resolved event.</returns>
-    internal static bool CanHandle(BindCommandInvocationInfo inv)
+    /// <inheritdoc/>
+    public int Affinity => 3;
+
+    /// <inheritdoc/>
+    public bool RequiresCustomBinderFallback => true;
+
+    /// <inheritdoc/>
+    public bool CanHandle(BindCommandInvocationInfo inv)
         => inv.ResolvedEventName != null;
 
-    /// <summary>
-    /// Emits the basic event binding code without Enabled synchronization.
-    /// </summary>
-    /// <param name="sb">The string builder.</param>
-    /// <param name="inv">The BindCommand invocation info.</param>
-    /// <param name="controlAccess">The control access chain.</param>
-    internal static void EmitBinding(
+    /// <inheritdoc/>
+    public void EmitBinding(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess)

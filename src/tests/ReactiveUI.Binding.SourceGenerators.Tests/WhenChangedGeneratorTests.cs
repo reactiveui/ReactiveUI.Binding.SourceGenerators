@@ -284,6 +284,7 @@ public class WhenChangedGeneratorTests
                 {
                     private string _text = string.Empty;
                     public event PropertyChangedEventHandler? PropertyChanged;
+                    public event EventHandler? TextChanged;
                     public string Text
                     {
                         get => _text;
@@ -293,6 +294,7 @@ public class WhenChangedGeneratorTests
                             {
                                 _text = value;
                                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Text)));
+                                TextChanged?.Invoke(this, EventArgs.Empty);
                             }
                         }
                     }
@@ -379,7 +381,20 @@ public class WhenChangedGeneratorTests
 
             namespace Foundation
             {
-                public class NSObject {}
+                public class NSString
+                {
+                    private readonly string _value;
+                    public NSString(string value) { _value = value; }
+                    public static explicit operator NSString(string value) => new NSString(value);
+                }
+                public class NSDictionary {}
+                public enum NSKeyValueObservingOptions { New = 1, Old = 2 }
+                public class NSObject
+                {
+                    public virtual void ObserveValue(NSString keyPath, NSObject ofObject, NSDictionary change, IntPtr context) {}
+                    public void AddObserver(NSObject observer, NSString keyPath, NSKeyValueObservingOptions options, IntPtr context) {}
+                    public void RemoveObserver(NSObject observer, NSString keyPath) {}
+                }
             }
 
             namespace TestApp
@@ -431,13 +446,20 @@ public class WhenChangedGeneratorTests
 
             namespace Microsoft.UI.Xaml
             {
-                public class DependencyObject {}
+                public class DependencyProperty {}
+                public class DependencyObject
+                {
+                    public long RegisterPropertyChangedCallback(DependencyProperty dp, DependencyPropertyChangedCallback callback) => 0;
+                    public void UnregisterPropertyChangedCallback(DependencyProperty dp, long token) {}
+                }
+                public delegate void DependencyPropertyChangedCallback(DependencyObject sender, DependencyProperty dp);
             }
 
             namespace TestApp
             {
                 public class MyWinUIControl : Microsoft.UI.Xaml.DependencyObject, INotifyPropertyChanged
                 {
+                    public static readonly Microsoft.UI.Xaml.DependencyProperty TextProperty = new Microsoft.UI.Xaml.DependencyProperty();
                     private string _text = string.Empty;
                     public event PropertyChangedEventHandler? PropertyChanged;
                     public string Text

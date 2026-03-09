@@ -12,58 +12,11 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 namespace ReactiveUI.Binding.SourceGenerators.Generators;
 
 /// <summary>
-/// Consolidates all per-kind fallback generator results into a single RegisterSourceOutput.
-/// Generates all ICreatesObservableForProperty implementations and a registration class.
+/// Generates the consolidated registration output for all detected observable types.
+/// Produces a registration class listing all per-kind binder implementations.
 /// </summary>
 internal static class RegistrationGenerator
 {
-    /// <summary>
-    /// Consolidates all per-kind filtered type providers into a single pipeline.
-    /// </summary>
-    /// <param name="reactiveObj">The IReactiveObject type provider.</param>
-    /// <param name="inpc">The INPC type provider.</param>
-    /// <param name="wpf">The WPF DependencyObject type provider.</param>
-    /// <param name="winui">The WinUI DependencyObject type provider.</param>
-    /// <param name="kvo">The KVO/NSObject type provider.</param>
-    /// <param name="winforms">The WinForms Component type provider.</param>
-    /// <param name="android">The Android View type provider.</param>
-    /// <returns>A combined provider containing all observable type infos.</returns>
-    internal static IncrementalValueProvider<ImmutableArray<ObservableTypeInfo>> Consolidate(
-        IncrementalValuesProvider<ObservableTypeInfo> reactiveObj,
-        IncrementalValuesProvider<ObservableTypeInfo> inpc,
-        IncrementalValuesProvider<ObservableTypeInfo> wpf,
-        IncrementalValuesProvider<ObservableTypeInfo> winui,
-        IncrementalValuesProvider<ObservableTypeInfo> kvo,
-        IncrementalValuesProvider<ObservableTypeInfo> winforms,
-        IncrementalValuesProvider<ObservableTypeInfo> android) =>
-
-        // Collect all providers and combine into a single flattened array
-        reactiveObj.Collect()
-            .Combine(inpc.Collect())
-            .Combine(wpf.Collect())
-            .Combine(winui.Collect())
-            .Combine(kvo.Collect())
-            .Combine(winforms.Collect())
-            .Combine(android.Collect())
-            .Select(static (x, _) =>
-            {
-                var builder = ImmutableArray.CreateBuilder<ObservableTypeInfo>();
-
-                // Flatten the nested tuples
-                var (((((reactiveObjTypes, inpcTypes), wpfTypes), winuiTypes), kvoTypes), winformsTypes) = x.Left;
-                var androidTypes = x.Right;
-
-                builder.AddRange(reactiveObjTypes);
-                builder.AddRange(inpcTypes);
-                builder.AddRange(wpfTypes);
-                builder.AddRange(winuiTypes);
-                builder.AddRange(kvoTypes);
-                builder.AddRange(winformsTypes);
-                builder.AddRange(androidTypes);
-
-                return builder.ToImmutable();
-            });
-
     /// <summary>
     /// Generates the consolidated registration output: all per-kind binder classes.
     /// </summary>

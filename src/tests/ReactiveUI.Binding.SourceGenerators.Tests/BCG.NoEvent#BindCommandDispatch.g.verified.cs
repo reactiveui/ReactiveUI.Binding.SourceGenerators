@@ -51,20 +51,24 @@ namespace ReactiveUI.Binding
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.NoEvent.MyViewModel)__o).Save,
             true);
 
-            var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
-                .GetBinder<global::SharedScenarios.BindCommand.NoEvent.PlainControl>(false);
-            if (__customBinder != null)
+            if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
+                .HasHigherAffinityPlugin<global::SharedScenarios.BindCommand.NoEvent.PlainControl>(-1, false))
             {
-                var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
+                var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
+                    .GetBinder<global::SharedScenarios.BindCommand.NoEvent.PlainControl>(false);
+                if (__customBinder != null)
                 {
-                    __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                    global::System.IObservable<object> __paramObs = global::ReactiveUI.Binding.Observables.EmptyObservable<object>.Instance;
-                    __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.NoEvent.PlainControl>(
-                        __cmd, view.Label, __paramObs)
-                        ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                });
-                return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
+                    var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+                    var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
+                    {
+                        __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                        global::System.IObservable<object> __paramObs = global::ReactiveUI.Binding.Observables.EmptyObservable<object>.Instance;
+                        __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.NoEvent.PlainControl>(
+                            __cmd, view.Label, __paramObs)
+                            ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                    });
+                    return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
+                }
             }
 
             throw new global::System.InvalidOperationException(

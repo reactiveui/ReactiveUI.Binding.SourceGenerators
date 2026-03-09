@@ -20,6 +20,12 @@ namespace ReactiveUI.Binding
         {
             property1Expression = property1Expression.StartsWith("static ") ? property1Expression.Substring(7) : property1Expression;
 
+            // Allow user-registered plugins with higher affinity to override generated observation
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.SinglePropertyReactiveObject.MyViewModel), 10, false))
+            {
+                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanged(objectToMonitor, property1);
+            }
+
             if (property1Expression == "x => x.Name")
             {
                 return __WhenChanged_0000039705C7FA10(objectToMonitor);
@@ -29,11 +35,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenChanged_0000039705C7FA10(global::SharedScenarios.WhenChanged.SinglePropertyReactiveObject.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "Name",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.SinglePropertyReactiveObject.MyViewModel)__o).Name,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.SinglePropertyReactiveObject.MyViewModel)__o).Name, true);
         }
 
     }

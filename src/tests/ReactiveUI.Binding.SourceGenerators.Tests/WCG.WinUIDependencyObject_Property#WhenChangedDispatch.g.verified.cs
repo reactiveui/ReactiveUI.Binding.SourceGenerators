@@ -20,21 +20,108 @@ namespace ReactiveUI.Binding
         {
             property1Expression = property1Expression.StartsWith("static ") ? property1Expression.Substring(7) : property1Expression;
 
+            // Allow user-registered plugins with higher affinity to override generated observation
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::TestApp.MyWinUIControl), 6, false))
+            {
+                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanged(objectToMonitor, property1);
+            }
+
             if (property1Expression == "x => x.Text")
             {
-                return __WhenChanged_7FFFDEC5A3223C3D(objectToMonitor);
+                return __WhenChanged_7FFFDEC5A3223D16(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<string> __WhenChanged_7FFFDEC5A3223C3D(global::TestApp.MyWinUIControl obj)
+        private static global::System.IObservable<string> __WhenChanged_7FFFDEC5A3223D16(global::TestApp.MyWinUIControl obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "Text",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyWinUIControl)__o).Text,
-                true);
+            return new __WinUIDPObservable<string>((global::Microsoft.UI.Xaml.DependencyObject)obj, global::TestApp.MyWinUIControl.TextProperty, (global::Microsoft.UI.Xaml.DependencyObject __o) => ((global::TestApp.MyWinUIControl)__o).Text, true);
         }
 
+
+    /// <summary>
+    /// Fused observable for WinUI DependencyProperty observation.
+    /// Uses <c>RegisterPropertyChangedCallback</c> / <c>UnregisterPropertyChangedCallback</c>
+    /// for token-based subscription management.
+    /// </summary>
+    private sealed class __WinUIDPObservable<T> : global::System.IObservable<T>
+    {
+        private readonly global::Microsoft.UI.Xaml.DependencyObject _source;
+        private readonly global::Microsoft.UI.Xaml.DependencyProperty _dp;
+        private readonly global::System.Func<global::Microsoft.UI.Xaml.DependencyObject, T> _getter;
+        private readonly bool _distinctUntilChanged;
+
+        internal __WinUIDPObservable(
+            global::Microsoft.UI.Xaml.DependencyObject source,
+            global::Microsoft.UI.Xaml.DependencyProperty dp,
+            global::System.Func<global::Microsoft.UI.Xaml.DependencyObject, T> getter,
+            bool distinctUntilChanged)
+        {
+            _source = source;
+            _dp = dp;
+            _getter = getter;
+            _distinctUntilChanged = distinctUntilChanged;
+        }
+
+        public global::System.IDisposable Subscribe(global::System.IObserver<T> observer)
+        {
+            return new Subscription(this, observer);
+        }
+
+        private sealed class Subscription : global::System.IDisposable
+        {
+            private readonly __WinUIDPObservable<T> _parent;
+            private readonly long _token;
+            private readonly global::System.Collections.Generic.IEqualityComparer<T> _comparer;
+            private global::System.IObserver<T> _observer;
+            private T _lastValue;
+            private bool _hasValue;
+
+            internal Subscription(__WinUIDPObservable<T> parent, global::System.IObserver<T> observer)
+            {
+                _parent = parent;
+                _observer = observer;
+                _comparer = global::System.Collections.Generic.EqualityComparer<T>.Default;
+                _token = parent._source.RegisterPropertyChangedCallback(parent._dp, OnPropertyChanged);
+
+                // Emit initial value
+                var initial = parent._getter(parent._source);
+                _lastValue = initial;
+                _hasValue = true;
+                observer.OnNext(initial);
+            }
+
+            private void OnPropertyChanged(
+                global::Microsoft.UI.Xaml.DependencyObject sender,
+                global::Microsoft.UI.Xaml.DependencyProperty dp)
+            {
+                var obs = System.Threading.Volatile.Read(ref _observer);
+                if (obs == null)
+                {
+                    return;
+                }
+
+                var value = _parent._getter(sender);
+
+                if (_parent._distinctUntilChanged && _hasValue && _comparer.Equals(value, _lastValue))
+                {
+                    return;
+                }
+
+                _lastValue = value;
+                _hasValue = true;
+                obs.OnNext(value);
+            }
+
+            public void Dispose()
+            {
+                var obs = System.Threading.Interlocked.Exchange(ref _observer, null);
+                if (obs != null)
+                {
+                    _parent._source.UnregisterPropertyChangedCallback(_parent._dp, _token);
+                }
+            }
+        }
+    }
     }
 }

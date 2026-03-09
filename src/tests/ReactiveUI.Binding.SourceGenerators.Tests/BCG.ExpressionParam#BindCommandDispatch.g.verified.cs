@@ -53,20 +53,24 @@ namespace ReactiveUI.Binding
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.ExpressionParam.MyViewModel)__o).Save,
             true);
 
-            var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
-                .GetBinder<global::SharedScenarios.BindCommand.ExpressionParam.MyButton>(true);
-            if (__customBinder != null)
+            if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
+                .HasHigherAffinityPlugin<global::SharedScenarios.BindCommand.ExpressionParam.MyButton>(3, true))
             {
-                var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
+                var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
+                    .GetBinder<global::SharedScenarios.BindCommand.ExpressionParam.MyButton>(true);
+                if (__customBinder != null)
                 {
-                    __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                    global::System.IObservable<object> __paramObs = new global::ReactiveUI.Binding.Observables.ReturnObservable<object>(viewModel.CurrentItem);
-                    __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.ExpressionParam.MyButton>(
-                        __cmd, view.SaveButton, __paramObs)
-                        ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                });
-                return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
+                    var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+                    var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
+                    {
+                        __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                        global::System.IObservable<object> __paramObs = new global::ReactiveUI.Binding.Observables.ReturnObservable<object>(viewModel.CurrentItem);
+                        __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.ExpressionParam.MyButton>(
+                            __cmd, view.SaveButton, __paramObs)
+                            ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                    });
+                    return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
+                }
             }
 
 

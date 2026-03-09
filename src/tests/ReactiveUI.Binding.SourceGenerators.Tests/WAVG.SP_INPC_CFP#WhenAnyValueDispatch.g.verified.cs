@@ -17,6 +17,12 @@ namespace ReactiveUI.Binding
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
+            // Allow user-registered plugins with higher affinity to override generated observation
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.SinglePropertyINPC.MyViewModel), 5, false))
+            {
+                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenAnyValue(objectToMonitor, property1);
+            }
+
             if (callerLineNumber == 53 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
                 return __WhenAnyValue_000026349258316A(objectToMonitor);
@@ -26,11 +32,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenAnyValue_000026349258316A(global::SharedScenarios.WhenAnyValue.SinglePropertyINPC.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "Name",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.SinglePropertyINPC.MyViewModel)__o).Name,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.SinglePropertyINPC.MyViewModel)__o).Name, true);
         }
 
     }

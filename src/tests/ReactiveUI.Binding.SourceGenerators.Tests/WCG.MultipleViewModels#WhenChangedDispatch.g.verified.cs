@@ -20,6 +20,12 @@ namespace ReactiveUI.Binding
         {
             property1Expression = property1Expression.StartsWith("static ") ? property1Expression.Substring(7) : property1Expression;
 
+            // Allow user-registered plugins with higher affinity to override generated observation
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1), 5, false))
+            {
+                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanged(objectToMonitor, property1);
+            }
+
             if (property1Expression == "x => x.Name")
             {
                 return __WhenChanged_000013C2FFE01ECC(objectToMonitor);
@@ -29,11 +35,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenChanged_000013C2FFE01ECC(global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1 obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "Name",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1)__o).Name,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1)__o).Name, true);
         }
 
         /// <summary>
@@ -48,6 +50,12 @@ namespace ReactiveUI.Binding
         {
             property1Expression = property1Expression.StartsWith("static ") ? property1Expression.Substring(7) : property1Expression;
 
+            // Allow user-registered plugins with higher affinity to override generated observation
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2), 5, false))
+            {
+                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanged(objectToMonitor, property1);
+            }
+
             if (property1Expression == "x => x.Count")
             {
                 return __WhenChanged_00001520715BEF7F(objectToMonitor);
@@ -57,11 +65,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<int> __WhenChanged_00001520715BEF7F(global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2 obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
-                obj,
-                "Count",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2)__o).Count,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(obj, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2)__o).Count, true);
         }
 
     }

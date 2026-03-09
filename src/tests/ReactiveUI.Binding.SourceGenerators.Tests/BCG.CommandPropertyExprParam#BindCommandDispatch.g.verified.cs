@@ -53,6 +53,27 @@ namespace ReactiveUI.Binding
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.CommandPropertyExprParam.MyViewModel)__o).Save,
             true);
 
+            if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
+                .HasHigherAffinityPlugin<global::SharedScenarios.BindCommand.CommandPropertyExprParam.WpfLikeButton>(5, false))
+            {
+                var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
+                    .GetBinder<global::SharedScenarios.BindCommand.CommandPropertyExprParam.WpfLikeButton>(false);
+                if (__customBinder != null)
+                {
+                    var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+                    var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
+                    {
+                        __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                        global::System.IObservable<object> __paramObs = new global::ReactiveUI.Binding.Observables.ReturnObservable<object>(viewModel.CurrentItem);
+                        __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.CommandPropertyExprParam.WpfLikeButton>(
+                            __cmd, view.SaveButton, __paramObs)
+                            ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                    });
+                    return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
+                }
+            }
+
+
             var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
             var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
             {

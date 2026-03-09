@@ -6,8 +6,8 @@ using System.Collections.Immutable;
 using System.Text;
 
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
-using ReactiveUI.Binding.SourceGenerators.Generators.CommandBinding;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.CodeGeneration;
@@ -26,7 +26,8 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(hasCommandProperty: true);
 
-        var result = CommandPropertyBindingPlugin.CanHandle(inv);
+        var plugin = new CommandPropertyBindingPlugin();
+        var result = plugin.CanHandle(inv);
 
         await Assert.That(result).IsTrue();
     }
@@ -40,7 +41,8 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(hasCommandProperty: false);
 
-        var result = CommandPropertyBindingPlugin.CanHandle(inv);
+        var plugin = new CommandPropertyBindingPlugin();
+        var result = plugin.CanHandle(inv);
 
         await Assert.That(result).IsFalse();
     }
@@ -59,7 +61,8 @@ public class BindCommandCodeGeneratorHelperTests
             hasObservableParameter: true,
             parameterTypeFullName: "global::System.String");
 
-        CommandPropertyBindingPlugin.EmitBinding(sb, inv, "view.SaveButton");
+        var plugin = new CommandPropertyBindingPlugin();
+        plugin.EmitBinding(sb, inv, "view.SaveButton");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("Volatile.Write(ref __latestParam, p)");
@@ -85,7 +88,8 @@ public class BindCommandCodeGeneratorHelperTests
             parameterTypeFullName: "global::System.String",
             parameterPropertyPath: paramPath);
 
-        CommandPropertyBindingPlugin.EmitBinding(sb, inv, "view.SaveButton");
+        var plugin = new CommandPropertyBindingPlugin();
+        plugin.EmitBinding(sb, inv, "view.SaveButton");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("view.SaveButton.Command = cmd");
@@ -105,7 +109,8 @@ public class BindCommandCodeGeneratorHelperTests
             hasCommandProperty: true,
             hasCommandParameterProperty: false);
 
-        CommandPropertyBindingPlugin.EmitBinding(sb, inv, "view.SaveButton");
+        var plugin = new CommandPropertyBindingPlugin();
+        plugin.EmitBinding(sb, inv, "view.SaveButton");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("view.SaveButton.Command = cmd");
@@ -124,7 +129,8 @@ public class BindCommandCodeGeneratorHelperTests
             resolvedEventName: "Click",
             hasEnabledProperty: true);
 
-        var result = EventEnabledBindingPlugin.CanHandle(inv);
+        var plugin = new EventEnabledBindingPlugin();
+        var result = plugin.CanHandle(inv);
 
         await Assert.That(result).IsTrue();
     }
@@ -140,7 +146,8 @@ public class BindCommandCodeGeneratorHelperTests
             resolvedEventName: null,
             hasEnabledProperty: true);
 
-        var result = EventEnabledBindingPlugin.CanHandle(inv);
+        var plugin = new EventEnabledBindingPlugin();
+        var result = plugin.CanHandle(inv);
 
         await Assert.That(result).IsFalse();
     }
@@ -156,7 +163,8 @@ public class BindCommandCodeGeneratorHelperTests
             resolvedEventName: "Click",
             hasEnabledProperty: false);
 
-        var result = EventEnabledBindingPlugin.CanHandle(inv);
+        var plugin = new EventEnabledBindingPlugin();
+        var result = plugin.CanHandle(inv);
 
         await Assert.That(result).IsFalse();
     }
@@ -175,7 +183,8 @@ public class BindCommandCodeGeneratorHelperTests
             hasObservableParameter: true,
             parameterTypeFullName: "global::System.String");
 
-        EventEnabledBindingPlugin.EmitBinding(sb, inv, "view.SaveButton");
+        var plugin = new EventEnabledBindingPlugin();
+        plugin.EmitBinding(sb, inv, "view.SaveButton");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("view.SaveButton.Enabled = false");
@@ -202,7 +211,8 @@ public class BindCommandCodeGeneratorHelperTests
             parameterTypeFullName: "global::System.String",
             parameterPropertyPath: paramPath);
 
-        EventEnabledBindingPlugin.EmitBinding(sb, inv, "view.SaveButton");
+        var plugin = new EventEnabledBindingPlugin();
+        plugin.EmitBinding(sb, inv, "view.SaveButton");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("view.SaveButton.Enabled = cmd.CanExecute(viewModel.Param)");
@@ -222,7 +232,8 @@ public class BindCommandCodeGeneratorHelperTests
             resolvedEventName: "Click",
             hasEnabledProperty: true);
 
-        EventEnabledBindingPlugin.EmitBinding(sb, inv, "view.SaveButton");
+        var plugin = new EventEnabledBindingPlugin();
+        plugin.EmitBinding(sb, inv, "view.SaveButton");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("view.SaveButton.Enabled = cmd.CanExecute(null)");
@@ -243,7 +254,8 @@ public class BindCommandCodeGeneratorHelperTests
             resolvedEventArgsTypeFullName: null,
             hasEnabledProperty: true);
 
-        EventEnabledBindingPlugin.EmitBinding(sb, inv, "view.SaveButton");
+        var plugin = new EventEnabledBindingPlugin();
+        plugin.EmitBinding(sb, inv, "view.SaveButton");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("global::System.EventArgs");
@@ -258,7 +270,8 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(resolvedEventName: "Click");
 
-        var result = DefaultEventBindingPlugin.CanHandle(inv);
+        var plugin = new DefaultEventBindingPlugin();
+        var result = plugin.CanHandle(inv);
 
         await Assert.That(result).IsTrue();
     }
@@ -272,7 +285,8 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(resolvedEventName: null);
 
-        var result = DefaultEventBindingPlugin.CanHandle(inv);
+        var plugin = new DefaultEventBindingPlugin();
+        var result = plugin.CanHandle(inv);
 
         await Assert.That(result).IsFalse();
     }
@@ -289,7 +303,8 @@ public class BindCommandCodeGeneratorHelperTests
             resolvedEventName: "Click",
             resolvedEventArgsTypeFullName: null);
 
-        DefaultEventBindingPlugin.EmitBinding(sb, inv, "view.SaveButton");
+        var plugin = new DefaultEventBindingPlugin();
+        plugin.EmitBinding(sb, inv, "view.SaveButton");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("global::System.EventArgs");
@@ -307,7 +322,8 @@ public class BindCommandCodeGeneratorHelperTests
             resolvedEventName: "Click",
             resolvedEventArgsTypeFullName: "global::System.Windows.RoutedEventArgs");
 
-        DefaultEventBindingPlugin.EmitBinding(sb, inv, "view.SaveButton");
+        var plugin = new DefaultEventBindingPlugin();
+        plugin.EmitBinding(sb, inv, "view.SaveButton");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("global::System.Windows.RoutedEventArgs");
@@ -548,7 +564,7 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains("__BindCommand_TESTSUFFIX");
         await Assert.That(result).Contains(".Enabled =");
         await Assert.That(result).Contains("CanExecuteChanged");
-        await Assert.That(result).Contains("__customBinder");
+        await Assert.That(result).Contains("HasHigherAffinityPlugin");
     }
 
     /// <summary>
@@ -569,34 +585,35 @@ public class BindCommandCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains("No bindable event found");
-        await Assert.That(result).Contains("__customBinder");
+        await Assert.That(result).Contains("HasHigherAffinityPlugin");
     }
 
     /// <summary>
-    /// Verifies EmitCustomBinderFallback with observable parameter emits Select wrapper.
+    /// Verifies EmitCommandAffinityCheck with observable parameter emits Select wrapper.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitCustomBinderFallback_ObservableParam_EmitsSelectWrapper()
+    public async Task EmitCommandAffinityCheck_ObservableParam_EmitsSelectWrapper()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: "global::System.String");
 
-        BindCommandCodeGenerator.EmitCustomBinderFallback(sb, inv, "view.SaveButton", hasEvent: true);
+        BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, "view.SaveButton", generatedAffinity: 5, hasEvent: true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("SelectObservable<global::System.String, object>");
+        await Assert.That(result).Contains("HasHigherAffinityPlugin<global::TestApp.MyButton>(5, true)");
         await Assert.That(result).Contains("GetBinder<global::TestApp.MyButton>(true)");
     }
 
     /// <summary>
-    /// Verifies EmitCustomBinderFallback with expression parameter emits ReturnObservable.
+    /// Verifies EmitCommandAffinityCheck with expression parameter emits ReturnObservable.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitCustomBinderFallback_ExpressionParam_EmitsReturnObservable()
+    public async Task EmitCommandAffinityCheck_ExpressionParam_EmitsReturnObservable()
     {
         var paramPath = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment("Param", "global::System.String", "global::TestApp.MyViewModel")]);
@@ -606,27 +623,78 @@ public class BindCommandCodeGeneratorHelperTests
             parameterTypeFullName: "global::System.String",
             parameterPropertyPath: paramPath);
 
-        BindCommandCodeGenerator.EmitCustomBinderFallback(sb, inv, "view.SaveButton", hasEvent: true);
+        BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, "view.SaveButton", generatedAffinity: 3, hasEvent: true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("ReturnObservable<object>(viewModel.Param)");
+        await Assert.That(result).Contains("HasHigherAffinityPlugin<global::TestApp.MyButton>(3, true)");
     }
 
     /// <summary>
-    /// Verifies EmitCustomBinderFallback with no parameter emits EmptyObservable.
+    /// Verifies EmitCommandAffinityCheck with no parameter emits EmptyObservable.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitCustomBinderFallback_NoParam_EmitsEmptyObservable()
+    public async Task EmitCommandAffinityCheck_NoParam_EmitsEmptyObservable()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo();
 
-        BindCommandCodeGenerator.EmitCustomBinderFallback(sb, inv, "view.SaveButton", hasEvent: false);
+        BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, "view.SaveButton", generatedAffinity: -1, hasEvent: false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("EmptyObservable<object>.Instance");
+        await Assert.That(result).Contains("HasHigherAffinityPlugin<global::TestApp.MyButton>(-1, false)");
         await Assert.That(result).Contains("GetBinder<global::TestApp.MyButton>(false)");
+    }
+
+    /// <summary>
+    /// Verifies BuildParameterObservableExpression returns SelectObservable for observable parameter.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BuildParameterObservableExpression_ObservableParam_ReturnsSelectObservable()
+    {
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            hasObservableParameter: true,
+            parameterTypeFullName: "global::System.String");
+
+        var result = BindCommandCodeGenerator.BuildParameterObservableExpression(inv);
+
+        await Assert.That(result).Contains("SelectObservable<global::System.String, object>");
+    }
+
+    /// <summary>
+    /// Verifies BuildParameterObservableExpression returns ReturnObservable for expression parameter.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BuildParameterObservableExpression_ExpressionParam_ReturnsReturnObservable()
+    {
+        var paramPath = new EquatableArray<PropertyPathSegment>(
+            [ModelFactory.CreatePropertyPathSegment("Param", "global::System.String", "global::TestApp.MyViewModel")]);
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            hasExpressionParameter: true,
+            parameterTypeFullName: "global::System.String",
+            parameterPropertyPath: paramPath);
+
+        var result = BindCommandCodeGenerator.BuildParameterObservableExpression(inv);
+
+        await Assert.That(result).Contains("ReturnObservable<object>(viewModel.Param)");
+    }
+
+    /// <summary>
+    /// Verifies BuildParameterObservableExpression returns EmptyObservable when no parameter.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BuildParameterObservableExpression_NoParam_ReturnsEmptyObservable()
+    {
+        var inv = ModelFactory.CreateBindCommandInvocationInfo();
+
+        var result = BindCommandCodeGenerator.BuildParameterObservableExpression(inv);
+
+        await Assert.That(result).Contains("EmptyObservable<object>.Instance");
     }
 
     /// <summary>
