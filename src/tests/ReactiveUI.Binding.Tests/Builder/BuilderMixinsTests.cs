@@ -276,6 +276,68 @@ public class BuilderMixinsTests
     }
 
     /// <summary>
+    /// Verifies that <see cref="BuilderMixins.ConfigureViewLocator"/> delegates
+    /// to the underlying <see cref="IReactiveUIBindingBuilder.ConfigureViewLocator"/>.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ConfigureViewLocator_DelegatesToBuilder()
+    {
+        RxBindingBuilder.ResetForTesting();
+        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+
+        IAppBuilder appBuilder = builder;
+        appBuilder
+            .WithCoreServices()
+            .ConfigureViewLocator(mappings =>
+                mappings.Map<MixinTestViewModel, MixinTestView>())
+            .BuildApp();
+
+        var locator = ViewLocator.GetCurrent();
+        var result = locator.ResolveView(new MixinTestViewModel());
+
+        await Assert.That(result).IsNotNull();
+    }
+
+    /// <summary>
+    /// Verifies that <see cref="BuilderMixins.ConfigureViewLocator"/> throws when the
+    /// <see cref="IAppBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ConfigureViewLocator_WithNonReactiveUIBuilder_Throws()
+    {
+        IAppBuilder fakeBuilder = new FakeAppBuilder();
+
+        var action = () => fakeBuilder.ConfigureViewLocator(_ => { });
+
+        await Assert.That(action).ThrowsExactly<InvalidOperationException>();
+    }
+
+    /// <summary>
+    /// Simple view model for mixin testing.
+    /// </summary>
+    private sealed class MixinTestViewModel
+    {
+    }
+
+    /// <summary>
+    /// Simple view for mixin testing.
+    /// </summary>
+    private sealed class MixinTestView : IViewFor<MixinTestViewModel>
+    {
+        /// <inheritdoc/>
+        public MixinTestViewModel? ViewModel { get; set; }
+
+        /// <inheritdoc/>
+        object? IViewFor.ViewModel
+        {
+            get => ViewModel;
+            set => ViewModel = value as MixinTestViewModel;
+        }
+    }
+
+    /// <summary>
     /// A fake <see cref="IAppBuilder"/> that does NOT implement <see cref="IReactiveUIBindingBuilder"/>
     /// to test the guard clauses in <see cref="BuilderMixins"/>.
     /// </summary>

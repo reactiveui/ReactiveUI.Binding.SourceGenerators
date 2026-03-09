@@ -15,9 +15,10 @@ namespace ReactiveUI.Binding.SourceGenerators;
 
 /// <summary>
 /// The main incremental source generator entry point for ReactiveUI property observation and binding.
-/// Orchestrates two pipelines:
+/// Orchestrates three pipelines:
 /// Pipeline A (Type Detection): Detects notification mechanisms and generates high-affinity fallback binders.
 /// Pipeline B (Invocation Detection): Detects WhenChanged/WhenChanging/Bind calls and generates per-invocation code.
+/// Pipeline C (View Dispatch): Scans IViewFor&lt;T&gt; implementations and generates AOT-safe view locator dispatch.
 /// </summary>
 [Generator]
 public class BindingGenerator : IIncrementalGenerator
@@ -90,6 +91,9 @@ public class BindingGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(
             consolidated,
             static (ctx, data) => RegistrationGenerator.Generate(ctx, data));
+
+        // Pipeline C: View locator dispatch (IViewFor<T> scanning)
+        ViewLocatorDispatchGenerator.Register(context);
 
         // Pipeline B: Invocation detection (separate pipelines per API)
         // Each invocation generator receives supportsCallerArgExpr to control dispatch strategy
