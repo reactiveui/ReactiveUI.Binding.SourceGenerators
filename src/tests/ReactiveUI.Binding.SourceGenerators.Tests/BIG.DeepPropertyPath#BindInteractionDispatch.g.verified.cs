@@ -43,21 +43,21 @@ namespace ReactiveUI.Binding
         {
             return serial;
         }
-        var __interactionObs_s0 = (global::System.IObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>(
-            viewModel,
-            "Child",
-            (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel)__o).Child,
-            false);
+            var __interactionObs_s0 = (global::System.IObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>(
+                viewModel,
+                "Child",
+                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel)__o).Child,
+                false);
 
-    var __interactionObs_s1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-        global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__interactionObs_s0,
-            __p1 => __p1 != null
-                ? (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(
-                    __p1,
-                    "Confirm",
-                    (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm,
-                    false)
-                : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(default(global::ReactiveUI.Binding.Interaction<string, bool>))));
+        var __interactionObs_s1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__interactionObs_s0,
+                __p1 => __p1 != null
+                    ? (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(
+                        __p1,
+                        "Confirm",
+                        (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm,
+                        false)
+                    : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(default(global::ReactiveUI.Binding.Interaction<string, bool>))));
         var interactionObs = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__interactionObs_s1);
 
             var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(interactionObs, interaction =>

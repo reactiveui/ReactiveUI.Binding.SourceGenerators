@@ -29,11 +29,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<int> __WhenChanged_7FFFEF8ACA05AF18(global::SharedScenarios.WhenChanged.IntProperty.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
-                obj,
-                "Count",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.IntProperty.MyViewModel)__o).Count,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(obj, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.IntProperty.MyViewModel)__o).Count, true);
         }
 
     }

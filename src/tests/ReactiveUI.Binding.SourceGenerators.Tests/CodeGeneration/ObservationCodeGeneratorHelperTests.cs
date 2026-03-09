@@ -841,7 +841,7 @@ public class ObservationCodeGeneratorHelperTests
     }
 
     /// <summary>
-    /// Verifies GenerateDeepChainVariable with null classInfo generates after-change code with PropertyObservable.
+    /// Verifies GenerateDeepChainVariable with null classInfo generates after-change code with ReturnObservable fallback.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -857,7 +857,7 @@ public class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains("var __propObs0_s0");
-        await Assert.That(result).Contains("PropertyObservable");
+        await Assert.That(result).Contains("ReturnObservable");
     }
 
     /// <summary>
@@ -882,7 +882,7 @@ public class ObservationCodeGeneratorHelperTests
     }
 
     /// <summary>
-    /// Verifies GenerateDeepChainObservation with null classInfo generates after-change code.
+    /// Verifies GenerateDeepChainObservation with null classInfo generates after-change code with ReturnObservable fallback.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -902,7 +902,7 @@ public class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.GenerateDeepChainObservation(sb, inv, classInfo: null, isBeforeChange: false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("PropertyObservable");
+        await Assert.That(result).Contains("ReturnObservable");
         await Assert.That(result).Contains("Switch");
     }
 
@@ -1361,6 +1361,29 @@ public class ObservationCodeGeneratorHelperTests
     public async Task IsINPChanging_NullClassInfo_ReturnsFalse()
     {
         await Assert.That(ObservationCodeGenerator.IsINPChanging(null)).IsFalse();
+    }
+
+    /// <summary>
+    /// Verifies EmitInlineObservation with deep chain and null classInfo generates ReturnObservable fallback.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitInlineObservation_DeepChain_NullClassInfo_GeneratesReturnObservable()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>([
+            ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+            ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+        ]);
+
+        ObservationCodeGenerator.EmitInlineObservation(sb, "source", path, "global::System.String", classInfo: null, "sourceObs");
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("ReturnObservable");
+        await Assert.That(result).Contains("__sourceObs_s0");
+        await Assert.That(result).Contains("__sourceObs_s1");
+        await Assert.That(result).Contains("Switch");
+        await Assert.That(result).Contains("DistinctUntilChanged");
     }
 
     /// <summary>

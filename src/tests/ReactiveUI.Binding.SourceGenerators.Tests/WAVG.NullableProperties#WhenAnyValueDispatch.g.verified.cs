@@ -29,11 +29,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenAnyValue_00001B08EE21666C(global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "NullableName",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableName,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "NullableName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableName, true);
         }
 
         /// <summary>
@@ -57,11 +53,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<int?> __WhenAnyValue_00001B08D596EC4E(global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int?>(
-                obj,
-                "NullableAge",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableAge,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int?>(obj, "NullableAge", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableAge, true);
         }
 
     }

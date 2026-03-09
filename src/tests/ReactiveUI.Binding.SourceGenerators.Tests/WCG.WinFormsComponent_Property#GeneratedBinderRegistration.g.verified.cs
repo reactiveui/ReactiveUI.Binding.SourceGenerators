@@ -18,7 +18,6 @@ namespace ReactiveUI.Binding.Generated
         {
             // Generated binder registrations will be added here in future phases.
             // Each per-kind binder provides high-affinity observation for detected types.
-            // Detected types for kind: INPC
             // Detected types for kind: WinForms
         }
     }

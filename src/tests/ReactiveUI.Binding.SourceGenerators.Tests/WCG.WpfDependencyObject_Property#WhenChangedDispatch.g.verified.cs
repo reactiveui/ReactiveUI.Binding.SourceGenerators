@@ -29,11 +29,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenChanged_7FFFDFDB348EF24C(global::TestApp.MyWpfControl obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "Text",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyWpfControl)__o).Text,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Text", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyWpfControl)__o).Text, true);
         }
 
     }

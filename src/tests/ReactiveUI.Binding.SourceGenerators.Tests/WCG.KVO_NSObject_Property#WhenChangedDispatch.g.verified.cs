@@ -22,19 +22,136 @@ namespace ReactiveUI.Binding
 
             if (property1Expression == "x => x.Text")
             {
-                return __WhenChanged_000018C06482B8DB(objectToMonitor);
+                return __WhenChanged_000018C06482BA6E(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<string> __WhenChanged_000018C06482B8DB(global::TestApp.MyAppleView obj)
+        private static global::System.IObservable<string> __WhenChanged_000018C06482BA6E(global::TestApp.MyAppleView obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "Text",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyAppleView)__o).Text,
-                true);
+            return new __KVOObservable<string>((global::Foundation.NSObject)obj, "text", (global::Foundation.NSObject __o) => ((global::TestApp.MyAppleView)__o).Text, true, false);
         }
 
+
+    /// <summary>
+    /// NSObject subclass that receives KVO ObserveValue callbacks and forwards
+    /// them to a delegate. Mirrors ReactiveUI's BlockObserveValueDelegate pattern.
+    /// </summary>
+    private sealed class __KVOObserver : global::Foundation.NSObject
+    {
+        private readonly global::System.Action _callback;
+
+        internal __KVOObserver(global::System.Action callback)
+        {
+            _callback = callback;
+        }
+
+        public override void ObserveValue(
+            global::Foundation.NSString keyPath,
+            global::Foundation.NSObject ofObject,
+            global::Foundation.NSDictionary change,
+            global::System.IntPtr context)
+        {
+            _callback();
+        }
+    }
+
+    /// <summary>
+    /// Fused observable for Apple KVO property observation.
+    /// Uses <c>NSObject.AddObserver</c> / <c>NSObject.RemoveObserver</c>
+    /// with a compile-time resolved KVO key path.
+    /// </summary>
+    private sealed class __KVOObservable<T> : global::System.IObservable<T>
+    {
+        private readonly global::Foundation.NSObject _source;
+        private readonly global::Foundation.NSString _keyPath;
+        private readonly global::System.Func<global::Foundation.NSObject, T> _getter;
+        private readonly bool _distinctUntilChanged;
+        private readonly global::Foundation.NSKeyValueObservingOptions _options;
+
+        internal __KVOObservable(
+            global::Foundation.NSObject source,
+            string keyPath,
+            global::System.Func<global::Foundation.NSObject, T> getter,
+            bool distinctUntilChanged,
+            bool beforeChange)
+        {
+            _source = source;
+            _keyPath = (global::Foundation.NSString)keyPath;
+            _getter = getter;
+            _distinctUntilChanged = distinctUntilChanged;
+            _options = beforeChange
+                ? global::Foundation.NSKeyValueObservingOptions.Old
+                : global::Foundation.NSKeyValueObservingOptions.New;
+        }
+
+        public global::System.IDisposable Subscribe(global::System.IObserver<T> observer)
+        {
+            return new Subscription(this, observer);
+        }
+
+        private sealed class Subscription : global::System.IDisposable
+        {
+            private readonly __KVOObservable<T> _parent;
+            private readonly __KVOObserver _kvoObserver;
+            private readonly global::System.Runtime.InteropServices.GCHandle _handle;
+            private readonly global::System.Collections.Generic.IEqualityComparer<T> _comparer;
+            private global::System.IObserver<T> _observer;
+            private T _lastValue;
+            private bool _hasValue;
+
+            internal Subscription(__KVOObservable<T> parent, global::System.IObserver<T> observer)
+            {
+                _parent = parent;
+                _observer = observer;
+                _comparer = global::System.Collections.Generic.EqualityComparer<T>.Default;
+
+                _kvoObserver = new __KVOObserver(OnValueChanged);
+                _handle = global::System.Runtime.InteropServices.GCHandle.Alloc(_kvoObserver);
+
+                parent._source.AddObserver(
+                    _kvoObserver,
+                    parent._keyPath,
+                    parent._options,
+                    global::System.IntPtr.Zero);
+
+                // Emit initial value
+                var initial = parent._getter(parent._source);
+                _lastValue = initial;
+                _hasValue = true;
+                observer.OnNext(initial);
+            }
+
+            private void OnValueChanged()
+            {
+                var obs = System.Threading.Volatile.Read(ref _observer);
+                if (obs == null)
+                {
+                    return;
+                }
+
+                var value = _parent._getter(_parent._source);
+
+                if (_parent._distinctUntilChanged && _hasValue && _comparer.Equals(value, _lastValue))
+                {
+                    return;
+                }
+
+                _lastValue = value;
+                _hasValue = true;
+                obs.OnNext(value);
+            }
+
+            public void Dispose()
+            {
+                var obs = System.Threading.Interlocked.Exchange(ref _observer, null);
+                if (obs != null)
+                {
+                    _parent._source.RemoveObserver(_kvoObserver, _parent._keyPath);
+                    _handle.Free();
+                }
+            }
+        }
+    }
     }
 }

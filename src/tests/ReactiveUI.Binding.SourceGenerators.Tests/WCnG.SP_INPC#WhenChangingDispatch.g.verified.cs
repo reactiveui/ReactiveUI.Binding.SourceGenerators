@@ -29,10 +29,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenChanging_7FFFD2B6A9CCFCAE(global::SharedScenarios.WhenChanging.SinglePropertyINPC.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
-                (global::System.ComponentModel.INotifyPropertyChanging)obj,
-                "Name",
-                (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.SinglePropertyINPC.MyViewModel)__o).Name);
+            return new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>((global::System.ComponentModel.INotifyPropertyChanging)obj, "Name", (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.SinglePropertyINPC.MyViewModel)__o).Name);
         }
 
     }

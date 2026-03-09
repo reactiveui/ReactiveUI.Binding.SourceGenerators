@@ -29,11 +29,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenChanged_000013C2FFE01ECC(global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1 obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "Name",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1)__o).Name,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1)__o).Name, true);
         }
 
         /// <summary>
@@ -57,11 +53,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<int> __WhenChanged_00001520715BEF7F(global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2 obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
-                obj,
-                "Count",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2)__o).Count,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(obj, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2)__o).Count, true);
         }
 
     }

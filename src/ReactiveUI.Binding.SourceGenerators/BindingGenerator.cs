@@ -6,9 +6,10 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 using ReactiveUI.Binding.SourceGenerators.Generators;
-using ReactiveUI.Binding.SourceGenerators.Generators.Observation;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Invocations;
+using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins;
 
 namespace ReactiveUI.Binding.SourceGenerators;
 
@@ -60,18 +61,31 @@ public class BindingGenerator : IIncrementalGenerator
             .Where(static x => x is not null)
             .Select(static (x, _) => x!);
 
-        // Per-kind fallback generators FILTER from allClasses (no independent RegisterSourceOutput)
-        var reactiveObjTypes = ReactiveObjectBindingGenerator.Filter(allClasses);
-        var inpcTypes = INPCBindingGenerator.Filter(allClasses);
-        var wpfTypes = WpfBindingGenerator.Filter(allClasses);
-        var winuiTypes = WinUIBindingGenerator.Filter(allClasses);
-        var kvoTypes = KVOBindingGenerator.Filter(allClasses);
-        var winformsTypes = WinFormsBindingGenerator.Filter(allClasses);
-        var androidTypes = AndroidBindingGenerator.Filter(allClasses);
+        // Single plugin-based step replaces 7 separate filter calls.
+        // Each type is matched against the plugin registry; the highest-affinity
+        // matching plugin determines the observation kind and capabilities.
+        var allObservableTypes = allClasses
+            .Select(static (classInfo, _) =>
+            {
+                var plugin = ObservationPluginRegistry.GetBestPlugin(classInfo);
+                if (plugin is null)
+                {
+                    return null;
+                }
 
-        // Consolidate all per-kind results → single RegisterSourceOutput
-        var consolidated = RegistrationGenerator.Consolidate(
-            reactiveObjTypes, inpcTypes, wpfTypes, winuiTypes, kvoTypes, winformsTypes, androidTypes);
+                return new ObservableTypeInfo(
+                    classInfo.FullyQualifiedName,
+                    classInfo.MetadataName,
+                    plugin.ObservationKind,
+                    plugin.Affinity,
+                    plugin.SupportsBeforeChanged,
+                    classInfo.Properties);
+            })
+            .Where(static x => x is not null)
+            .Select(static (x, _) => x!);
+
+        // Consolidate all observable types → single RegisterSourceOutput
+        var consolidated = allObservableTypes.Collect();
 
         context.RegisterSourceOutput(
             consolidated,

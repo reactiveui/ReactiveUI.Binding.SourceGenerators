@@ -29,11 +29,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenChanged_7FFFF613BD504CA2(global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "NullableName",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel)__o).NullableName,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "NullableName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel)__o).NullableName, true);
         }
 
     }

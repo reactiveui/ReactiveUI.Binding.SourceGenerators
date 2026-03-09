@@ -22,18 +22,14 @@ namespace ReactiveUI.Binding
 
             if (property1Expression == "x => x.Text")
             {
-                return __WhenChanged_0000245FAC302F91(objectToMonitor);
+                return __WhenChanged_0000245FAC302FCF(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<string> __WhenChanged_0000245FAC302F91(global::TestApp.MyWinFormsControl obj)
+        private static global::System.IObservable<string> __WhenChanged_0000245FAC302FCF(global::TestApp.MyWinFormsControl obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "Text",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyWinFormsControl)__o).Text,
-                true);
+            return new global::ReactiveUI.Binding.Observables.EventObservable<string>(__h => ((global::TestApp.MyWinFormsControl)obj).TextChanged += __h, __h => ((global::TestApp.MyWinFormsControl)obj).TextChanged -= __h, () => ((global::TestApp.MyWinFormsControl)obj).Text, true);
         }
 
     }

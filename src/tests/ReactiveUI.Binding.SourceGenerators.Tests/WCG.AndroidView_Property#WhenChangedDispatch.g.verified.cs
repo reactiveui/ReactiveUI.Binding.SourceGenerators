@@ -29,11 +29,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenChanged_7FFFE0F8FBCE6944(global::TestApp.MyAndroidView obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "Text",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyAndroidView)__o).Text,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Text", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyAndroidView)__o).Text, true);
         }
 
     }

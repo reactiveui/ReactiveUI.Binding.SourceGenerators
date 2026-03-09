@@ -29,10 +29,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenChanging_7FFFD5A9BCD0713E(global::TestApp.MyReactiveViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
-                (global::System.ComponentModel.INotifyPropertyChanging)obj,
-                "Name",
-                (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::TestApp.MyReactiveViewModel)__o).Name);
+            return new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>((global::System.ComponentModel.INotifyPropertyChanging)obj, "Name", (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::TestApp.MyReactiveViewModel)__o).Name);
         }
 
     }

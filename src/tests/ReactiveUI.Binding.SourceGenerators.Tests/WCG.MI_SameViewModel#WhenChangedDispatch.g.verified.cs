@@ -29,11 +29,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenChanged_7FFFDB8E16EAB1F1(global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "Name",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel)__o).Name,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel)__o).Name, true);
         }
 
         /// <summary>
@@ -57,11 +53,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<int> __WhenChanged_7FFFDB8E19F329B9(global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
-                obj,
-                "Age",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel)__o).Age,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(obj, "Age", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel)__o).Age, true);
         }
 
         /// <summary>
@@ -85,11 +77,7 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<double> __WhenChanged_7FFFDB8D81A70E60(global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<double>(
-                obj,
-                "Score",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel)__o).Score,
-                true);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<double>(obj, "Score", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel)__o).Score, true);
         }
 
     }
