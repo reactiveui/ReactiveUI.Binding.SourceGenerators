@@ -159,7 +159,8 @@ ReactiveUI.Binding.SourceGenerators is an **incremental source generator** that 
 ```
 src/
 ├── ReactiveUI.Binding/                          # Runtime library (net8.0;net9.0;net10.0;net462-net481)
-│   └── Interfaces/                              # ICreatesObservableForProperty, IObservedChange, etc.
+│   ├── Interfaces/                              # ICreatesObservableForProperty, IObservedChange, etc.
+│   └── View/                                    # ViewLocator, DefaultViewLocator, IViewFor<T>, attributes
 │
 ├── ReactiveUI.Binding.SourceGenerators/         # Source generator (netstandard2.0)
 │   ├── BindingGenerator.cs                      # [Generator] IIncrementalGenerator entry point
@@ -171,7 +172,8 @@ src/
 │   │   ├── EquatableArray.cs
 │   │   ├── ClassBindingInfo.cs                  # Type-level: notification mechanism flags
 │   │   ├── InvocationInfo.cs                    # Per-call-site: WhenChanged/WhenChanging
-│   │   └── BindingInvocationInfo.cs             # Per-call-site: BindOneWay/BindTwoWay
+│   │   ├── BindingInvocationInfo.cs             # Per-call-site: BindOneWay/BindTwoWay
+│   │   └── ViewRegistrationInfo.cs              # Per-IViewFor<T>: view dispatch mapping
 │   ├── Generators/                              # Per-kind fallback generators (Pipeline A)
 │   │   ├── ReactiveObjectBindingGenerator.cs    # IReactiveObject (affinity 24)
 │   │   ├── INPCBindingGenerator.cs              # INotifyPropertyChanged (affinity 21)
@@ -180,13 +182,17 @@ src/
 │   │   ├── KVOBindingGenerator.cs               # Apple KVO/NSObject (affinity 25)
 │   │   ├── WinFormsBindingGenerator.cs          # WinForms Component (affinity 23)
 │   │   ├── AndroidBindingGenerator.cs           # Android View (affinity 19)
-│   │   └── RegistrationGenerator.cs             # Consolidates all → [ModuleInitializer]
+│   │   ├── RegistrationGenerator.cs             # Consolidates all → [ModuleInitializer]
+│   │   └── ViewLocatorDispatchGenerator.cs      # IViewFor<T> → AOT view dispatch (Pipeline C)
 │   ├── Invocations/                             # Per-invocation generators (Pipeline B)
 │   │   ├── WhenChangedInvocationGenerator.cs    # After-change observation
 │   │   ├── WhenChangingInvocationGenerator.cs   # Before-change observation
 │   │   ├── BindOneWayInvocationGenerator.cs     # One-way binding
 │   │   ├── BindTwoWayInvocationGenerator.cs     # Two-way binding
 │   │   └── WhenAnyValueInvocationGenerator.cs   # WhenAnyValue compat shim
+│   ├── Helpers/                                 # Extraction and validation helpers
+│   │   ├── ViewRegistrationExtractor.cs         # IViewFor<T> → ViewRegistrationInfo extraction
+│   │   └── ...                                  # ExtractorValidation, SymbolHelpers, etc.
 │   └── CodeGeneration/
 │       └── CodeGenerator.cs                     # StringBuilder-based code generation
 │
@@ -201,11 +207,13 @@ src/
     └── ReactiveUI.Binding.Tests/                  # Runtime library tests
 ```
 
-### Two Pipelines
+### Three Pipelines
 
 **Pipeline A (Type Detection)**: Scans classes with base lists → builds `ClassBindingInfo` POCOs with boolean flags for each notification mechanism (IReactiveObject, INPC, WPF DP, WinUI DP, KVO, WinForms, Android). Per-kind generators filter from this shared pipeline. Consolidates into a single `[ModuleInitializer]` registration.
 
 **Pipeline B (Invocation Detection)**: Scans method invocations (`WhenChanged`, `WhenChanging`, `BindOneWay`, `BindTwoWay`, `WhenAnyValue`) → extracts lambda property paths → generates optimized per-call-site observation/binding code. Uses **CallerFilePath + CallerLineNumber dispatch**: API stubs capture caller info, generated dispatch table routes to compile-time generated methods.
+
+**Pipeline C (View Dispatch)**: Scans classes implementing `IViewFor<T>` → extracts `ViewRegistrationInfo` POCOs (VM FQN, View FQN, constructor availability, `[ViewContract]` contract, `[SingleInstanceView]` flag) → generates `ViewDispatch.g.cs` with a type-switch dispatch function. Supports contract-based multi-view resolution (contract checks emitted before default), singleton caching via `Interlocked.CompareExchange`, and 3-tier resolution (service locator → direct construction → null). Views can be excluded with `[ExcludeFromViewRegistration]`.
 
 ### API Pattern
 
