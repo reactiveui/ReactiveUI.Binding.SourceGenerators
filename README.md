@@ -26,6 +26,7 @@ A C# source generator that replaces ReactiveUI's runtime expression-tree binding
 - [How do I install?](#how-do-i-install)
 - [Supported APIs](#supported-apis)
 - [Usage Examples](#usage-examples)
+- [View Locator](#view-locator)
 - [Supported Notification Mechanisms](#supported-notification-mechanisms)
 - [Packages](#packages)
 - [Rx Library Compatibility](#rx-library-compatibility)
@@ -142,6 +143,8 @@ Platform-specific packages provide DependencyProperty observation and other plat
 | `BindTwoWay` | Two-way binding between source and target |
 | `OneWayBind` | ReactiveUI compatibility shim for one-way binding |
 | `Bind` | ReactiveUI compatibility shim for two-way binding |
+| `BindCommand` | Bind a command property to a UI element |
+| `BindInteraction` | Bind an interaction to a handler |
 
 All APIs support single properties, deep property chains (e.g. `x => x.Address.City`), and multi-property observation (up to 12 properties for `WhenAnyValue`/`WhenChanged`).
 
@@ -219,6 +222,56 @@ IObservable<string> obs = vm.WhenChanged(x => x.Name, RxApp.MainThreadScheduler)
 IDisposable binding = vm.BindOneWay(view, x => x.Name, x => x.NameLabel,
     scheduler: RxApp.MainThreadScheduler);
 ```
+
+### View Locator
+
+The source generator automatically detects classes implementing `IViewFor<T>` and generates an AOT-safe view dispatch table. Views are resolved without reflection via a compile-time type-switch.
+
+```csharp
+// Implement IViewFor<T> and the generator registers the mapping automatically
+public class LoginView : ReactiveUI.Binding.IViewFor<LoginViewModel>
+{
+    public LoginViewModel ViewModel { get; set; }
+    object ReactiveUI.Binding.IViewFor.ViewModel
+    {
+        get => ViewModel;
+        set => ViewModel = (LoginViewModel)value;
+    }
+}
+
+// Resolve a view at runtime
+IViewFor view = ViewLocator.Current.ResolveView(myViewModel);
+```
+
+#### View Attributes
+
+| Attribute | Description |
+|-----------|-------------|
+| `[ViewContract("name")]` | Registers the view under a named contract, enabling multiple views per ViewModel. Pass the contract string to `ResolveView` to select a specific view. |
+| `[SingleInstanceView]` | Caches a singleton instance of the view instead of creating a new one per resolution. Not suitable for views reused multiple times in the visual tree. |
+| `[ExcludeFromViewRegistration]` | Excludes the view from automatic source-generated registration (e.g. for base classes or test doubles). |
+
+```csharp
+// Contract-based resolution: multiple views for one ViewModel
+[ViewContract("compact")]
+public class CompactDashboardView : IViewFor<DashboardViewModel> { /* ... */ }
+
+public class FullDashboardView : IViewFor<DashboardViewModel> { /* ... */ }
+
+// Resolve the compact view
+var compactView = ViewLocator.Current.ResolveView(vm, "compact");
+
+// Resolve the default view
+var defaultView = ViewLocator.Current.ResolveView(vm);
+```
+
+#### Resolution Strategy
+
+The generated dispatch follows a 3-tier resolution strategy per view:
+
+1. **Service locator** -- checks `Splat.AppLocator.Current` for DI-registered views
+2. **Direct construction** -- falls back to `new View()` if a parameterless constructor exists
+3. **Singleton cache** -- for `[SingleInstanceView]`, caches and reuses a single instance (thread-safe via `Interlocked.CompareExchange`)
 
 ## Supported Notification Mechanisms
 
@@ -362,6 +415,8 @@ src/
 ```
 
 The generator and analyzer both target netstandard2.0 (Roslyn requirement). The runtime library targets .NET 8.0, 9.0, 10.0, and .NET Framework 4.6.2-4.8.1. Generated output is C# 7.3 compatible to support the widest range of consumer projects.
+
+A third pipeline scans for `IViewFor<T>` implementations and generates an AOT-safe view dispatch table (`ViewDispatch.g.cs`) with type-switch resolution, singleton caching, and contract-based selection.
 
 ## Contribute
 

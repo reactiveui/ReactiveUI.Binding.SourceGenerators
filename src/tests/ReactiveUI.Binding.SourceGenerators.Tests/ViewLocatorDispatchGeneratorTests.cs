@@ -275,4 +275,239 @@ public class ViewLocatorDispatchGeneratorTests
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
+
+    /// <summary>
+    /// Verifies that a view marked with [ExcludeFromViewRegistration] is not included in dispatch.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public Task ExcludedViewIsSkipped()
+    {
+        const string source = """
+            using System.ComponentModel;
+
+            namespace TestApp
+            {
+                public class ExcludedViewModel : INotifyPropertyChanged
+                {
+                    public string Name { get; set; }
+                    public event PropertyChangedEventHandler PropertyChanged;
+                }
+
+                [ReactiveUI.Binding.ExcludeFromViewRegistration]
+                public class ExcludedView : ReactiveUI.Binding.IViewFor<ExcludedViewModel>
+                {
+                    public ExcludedViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (ExcludedViewModel)value;
+                    }
+                }
+            }
+            """;
+
+        // Excluded views should not produce ViewDispatch.g.cs
+        var result = TestHelper.RunGenerator(source);
+        return Verify(result.Driver)
+            .UseTypeName("VDG")
+            .UseMethodName("ExclAttr");
+    }
+
+    /// <summary>
+    /// Verifies that a view marked with [SingleInstanceView] generates singleton dispatch code.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public Task SingleInstanceViewGeneratesSingletonCache()
+    {
+        const string source = """
+            using System.ComponentModel;
+
+            namespace TestApp
+            {
+                public class SingletonViewModel : INotifyPropertyChanged
+                {
+                    public string Name { get; set; }
+                    public event PropertyChangedEventHandler PropertyChanged;
+                }
+
+                [ReactiveUI.Binding.SingleInstanceView]
+                public class SingletonView : ReactiveUI.Binding.IViewFor<SingletonViewModel>
+                {
+                    public SingletonViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (SingletonViewModel)value;
+                    }
+                }
+            }
+            """;
+
+        return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
+    }
+
+    /// <summary>
+    /// Verifies that a view marked with [ViewContract] generates contract-aware dispatch code.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public Task ViewContractGeneratesContractDispatch()
+    {
+        const string source = """
+            using System.ComponentModel;
+
+            namespace TestApp
+            {
+                public class ContractViewModel : INotifyPropertyChanged
+                {
+                    public string Name { get; set; }
+                    public event PropertyChangedEventHandler PropertyChanged;
+                }
+
+                [ReactiveUI.Binding.ViewContract("compact")]
+                public class CompactView : ReactiveUI.Binding.IViewFor<ContractViewModel>
+                {
+                    public ContractViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (ContractViewModel)value;
+                    }
+                }
+            }
+            """;
+
+        return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
+    }
+
+    /// <summary>
+    /// Verifies that when a ViewModel has both a default view and a contract view,
+    /// the contract-specific check is emitted first so it is not shadowed by the default branch.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public Task DefaultAndContractViewsDispatchCorrectly()
+    {
+        const string source = """
+            using System.ComponentModel;
+
+            namespace TestApp
+            {
+                public class DashboardViewModel : INotifyPropertyChanged
+                {
+                    public string Title { get; set; }
+                    public event PropertyChangedEventHandler PropertyChanged;
+                }
+
+                public class DashboardView : ReactiveUI.Binding.IViewFor<DashboardViewModel>
+                {
+                    public DashboardViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (DashboardViewModel)value;
+                    }
+                }
+
+                [ReactiveUI.Binding.ViewContract("compact")]
+                public class CompactDashboardView : ReactiveUI.Binding.IViewFor<DashboardViewModel>
+                {
+                    public DashboardViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (DashboardViewModel)value;
+                    }
+                }
+            }
+            """;
+
+        return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
+    }
+
+    /// <summary>
+    /// Verifies that when a ViewModel has multiple contract views but no default view,
+    /// the dispatch block contains only contract checks with no default fallback return.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public Task MultipleContractViewsWithoutDefault()
+    {
+        const string source = """
+            using System.ComponentModel;
+
+            namespace TestApp
+            {
+                public class ThemeViewModel : INotifyPropertyChanged
+                {
+                    public string Name { get; set; }
+                    public event PropertyChangedEventHandler PropertyChanged;
+                }
+
+                [ReactiveUI.Binding.ViewContract("light")]
+                public class LightThemeView : ReactiveUI.Binding.IViewFor<ThemeViewModel>
+                {
+                    public ThemeViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (ThemeViewModel)value;
+                    }
+                }
+
+                [ReactiveUI.Binding.ViewContract("dark")]
+                public class DarkThemeView : ReactiveUI.Binding.IViewFor<ThemeViewModel>
+                {
+                    public ThemeViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (ThemeViewModel)value;
+                    }
+                }
+            }
+            """;
+
+        return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
+    }
+
+    /// <summary>
+    /// Verifies that [SingleInstanceView] on a view without parameterless constructor
+    /// generates service-locator-only dispatch (no singleton cache field).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public Task SingleInstanceViewWithoutParameterlessCtor()
+    {
+        const string source = """
+            using System.ComponentModel;
+
+            namespace TestApp
+            {
+                public class NoCtorSingletonViewModel : INotifyPropertyChanged
+                {
+                    public string Name { get; set; }
+                    public event PropertyChangedEventHandler PropertyChanged;
+                }
+
+                [ReactiveUI.Binding.SingleInstanceView]
+                public class NoCtorSingletonView : ReactiveUI.Binding.IViewFor<NoCtorSingletonViewModel>
+                {
+                    private readonly string _cfg;
+                    public NoCtorSingletonView(string cfg) { _cfg = cfg; }
+
+                    public NoCtorSingletonViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (NoCtorSingletonViewModel)value;
+                    }
+                }
+            }
+            """;
+
+        return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
+    }
 }

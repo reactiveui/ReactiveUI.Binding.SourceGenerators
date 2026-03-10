@@ -384,6 +384,25 @@ public class DefaultViewLocatorTests
     }
 
     /// <summary>
+    /// Verifies that CreateMappingBuilder returns a builder that registers mappings on this locator.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CreateMappingBuilder_RegistersOnLocator()
+    {
+        var locator = new DefaultViewLocator();
+        var builder = locator.CreateMappingBuilder();
+
+        builder.Map<TestViewModel, TestView>();
+
+        var vm = new TestViewModel();
+        var result = locator.ResolveView(vm);
+
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result).IsTypeOf<TestView>();
+    }
+
+    /// <summary>
     /// Simple view model for testing.
     /// </summary>
     private sealed class TestViewModel

@@ -39,4 +39,4 @@ internal sealed record BindingInvocationInfo(
     string MethodName,
     string SourceExpressionText,
     string TargetExpressionText,
-    bool HasConverterOverride) : IEquatable<BindingInvocationInfo>;
+    bool HasConverterOverride);

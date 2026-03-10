@@ -34,10 +34,16 @@ namespace ReactiveUI.Binding
             private static global::ReactiveUI.Binding.IViewFor __TryResolveView(
                 object instance, string contract)
             {
-            // global::TestApp.PrivateCtorViewModel -> global::TestApp.PrivateCtorView
-            if (instance is global::TestApp.PrivateCtorViewModel)
+            // global::TestApp.DashboardViewModel — multiple views
+            if (instance is global::TestApp.DashboardViewModel)
             {
-                return __ResolveView_0(contract);
+            // -> global::TestApp.CompactDashboardView [contract: "compact"]
+            if (contract == "compact")
+            {
+                return __ResolveView_1(contract);
+            }
+            // -> global::TestApp.DashboardView (default)
+            return __ResolveView_0(contract);
             }
 
                 // No compile-time mapping found; fall back to runtime resolution.
@@ -45,8 +51,8 @@ namespace ReactiveUI.Binding
             }
 
             /// <summary>
-            /// Resolves a view for <see cref="global::TestApp.PrivateCtorViewModel"/>.
-        /// Service locator only — no direct construction available.
+            /// Resolves a view for <see cref="global::TestApp.DashboardViewModel"/>.
+        /// Tries the service locator first, then falls back to direct construction.
             /// </summary>
             /// <param name="contract">The contract string (empty string for default).</param>
             /// <returns>The resolved view, or <see langword="null"/> if resolution fails.</returns>
@@ -57,13 +63,37 @@ namespace ReactiveUI.Binding
 
                 // Prefer service-locator-registered view (supports DI-configured instances).
                 var view = global::Splat.AppLocator.Current
-                    .GetService<global::ReactiveUI.Binding.IViewFor<global::TestApp.PrivateCtorViewModel>>(
+                    .GetService<global::ReactiveUI.Binding.IViewFor<global::TestApp.DashboardViewModel>>(
                         svcContract);
                 if (view != null)
                 {
                     return view;
                 }
-                return null;
+                    // Fallback: direct construction (global::TestApp.DashboardView has a parameterless constructor).
+                    return new global::TestApp.DashboardView();
+            }
+
+            /// <summary>
+            /// Resolves a view for <see cref="global::TestApp.DashboardViewModel"/>.
+        /// Tries the service locator first, then falls back to direct construction.
+            /// </summary>
+            /// <param name="contract">The contract string (empty string for default).</param>
+            /// <returns>The resolved view, or <see langword="null"/> if resolution fails.</returns>
+            private static global::ReactiveUI.Binding.IViewFor __ResolveView_1(string contract)
+            {
+                // Normalize contract: empty string means no contract (null for Splat lookup).
+                string svcContract = contract.Length == 0 ? null : contract;
+
+                // Prefer service-locator-registered view (supports DI-configured instances).
+                var view = global::Splat.AppLocator.Current
+                    .GetService<global::ReactiveUI.Binding.IViewFor<global::TestApp.DashboardViewModel>>(
+                        svcContract);
+                if (view != null)
+                {
+                    return view;
+                }
+                    // Fallback: direct construction (global::TestApp.CompactDashboardView has a parameterless constructor).
+                    return new global::TestApp.CompactDashboardView();
             }
     }
 }

@@ -186,6 +186,12 @@ public sealed class DefaultViewLocator : IViewLocator
     }
 
     /// <summary>
+    /// Creates a new <see cref="ViewMappingBuilder"/> for fluent registration of view-to-view-model mappings.
+    /// </summary>
+    /// <returns>A new <see cref="ViewMappingBuilder"/> targeting this locator instance.</returns>
+    public ViewMappingBuilder CreateMappingBuilder() => new(this);
+
+    /// <summary>
     /// Resets the generated view dispatch for testing purposes.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]

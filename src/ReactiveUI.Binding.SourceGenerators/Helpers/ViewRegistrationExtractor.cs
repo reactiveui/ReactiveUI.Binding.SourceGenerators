@@ -48,12 +48,76 @@ internal static class ViewRegistrationExtractor
                 && SymbolEqualityComparer.Default.Equals(iface.OriginalDefinition, iViewForGeneric)
                 && iface.TypeArguments.Length == 1)
             {
+                // Check [ExcludeFromViewRegistration] only after confirming IViewFor<T> is
+                // resolvable, so attribute resolution via EnsureNotNull cannot throw in
+                // compilations that don't reference ReactiveUI.Binding.
+                if (HasAttribute(typeSymbol, Constants.ExcludeFromViewRegistrationAttributeMetadataName, semanticModel.Compilation))
+                {
+                    return null;
+                }
+
                 var viewModelType = iface.TypeArguments[0];
                 var viewModelFqn = viewModelType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 var viewFqn = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 var hasParameterlessCtor = HasAccessibleParameterlessConstructor(typeSymbol);
+                var contract = ExtractViewContract(typeSymbol, semanticModel.Compilation);
+                var isSingleInstance = HasAttribute(typeSymbol, Constants.SingleInstanceViewAttributeMetadataName, semanticModel.Compilation);
 
-                return new ViewRegistrationInfo(viewModelFqn, viewFqn, hasParameterlessCtor);
+                return new ViewRegistrationInfo(viewModelFqn, viewFqn, hasParameterlessCtor, contract, isSingleInstance);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Checks whether the type has the specified attribute applied.
+    /// </summary>
+    /// <param name="type">The type to check.</param>
+    /// <param name="attributeMetadataName">The metadata name of the attribute.</param>
+    /// <param name="compilation">The compilation for symbol resolution.</param>
+    /// <returns><see langword="true"/> if the attribute is present; otherwise, <see langword="false"/>.</returns>
+    private static bool HasAttribute(INamedTypeSymbol type, string attributeMetadataName, Compilation compilation)
+    {
+        // Attribute types live in the same assembly as IViewFor<T>; if IViewFor<T> resolved, these will too.
+        var attributeSymbol = InvalidOperationExceptionHelper.EnsureNotNull(
+            compilation.GetTypeByMetadataName(attributeMetadataName),
+            attributeMetadataName);
+
+        var attributes = type.GetAttributes();
+        for (var i = 0; i < attributes.Length; i++)
+        {
+            if (SymbolEqualityComparer.Default.Equals(attributes[i].AttributeClass, attributeSymbol))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Extracts the contract string from <c>[ViewContract("...")]</c> if present.
+    /// </summary>
+    /// <param name="type">The type to check.</param>
+    /// <param name="compilation">The compilation for symbol resolution.</param>
+    /// <returns>The contract string, or <see langword="null"/> if not present.</returns>
+    private static string? ExtractViewContract(INamedTypeSymbol type, Compilation compilation)
+    {
+        // ViewContractAttribute lives in the same assembly as IViewFor<T>; always resolvable here.
+        var attributeSymbol = InvalidOperationExceptionHelper.EnsureNotNull(
+            compilation.GetTypeByMetadataName(Constants.ViewContractAttributeMetadataName),
+            Constants.ViewContractAttributeMetadataName);
+
+        var attributes = type.GetAttributes();
+        for (var i = 0; i < attributes.Length; i++)
+        {
+            var attr = attributes[i];
+            if (SymbolEqualityComparer.Default.Equals(attr.AttributeClass, attributeSymbol)
+                && attr.ConstructorArguments.Length == 1
+                && attr.ConstructorArguments[0].Value is string contract)
+            {
+                return contract;
             }
         }
 

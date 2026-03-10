@@ -12,7 +12,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="ViewModelFullyQualifiedName">The fully qualified name of the view model type (global:: prefixed).</param>
 /// <param name="ViewFullyQualifiedName">The fully qualified name of the view type (global:: prefixed).</param>
 /// <param name="HasParameterlessConstructor">Whether the view type has a parameterless constructor for direct instantiation.</param>
+/// <param name="Contract">The contract string from <c>[ViewContract]</c>, or <see langword="null"/> for default registration.</param>
+/// <param name="IsSingleInstance">Whether the view is marked with <c>[SingleInstanceView]</c> for cached singleton resolution.</param>
 internal sealed record ViewRegistrationInfo(
     string ViewModelFullyQualifiedName,
     string ViewFullyQualifiedName,
-    bool HasParameterlessConstructor) : IEquatable<ViewRegistrationInfo>;
+    bool HasParameterlessConstructor,
+    string? Contract,
+    bool IsSingleInstance);

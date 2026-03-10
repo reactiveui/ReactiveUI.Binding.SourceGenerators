@@ -15,4 +15,4 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 internal sealed record PropertyPathSegment(
     string PropertyName,
     string PropertyTypeFullName,
-    string DeclaringTypeFullName) : IEquatable<PropertyPathSegment>;
+    string DeclaringTypeFullName);

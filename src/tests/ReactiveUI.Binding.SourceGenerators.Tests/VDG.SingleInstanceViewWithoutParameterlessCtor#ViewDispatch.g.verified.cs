@@ -34,8 +34,8 @@ namespace ReactiveUI.Binding
             private static global::ReactiveUI.Binding.IViewFor __TryResolveView(
                 object instance, string contract)
             {
-            // global::TestApp.PrivateCtorViewModel -> global::TestApp.PrivateCtorView
-            if (instance is global::TestApp.PrivateCtorViewModel)
+            // global::TestApp.NoCtorSingletonViewModel -> global::TestApp.NoCtorSingletonView
+            if (instance is global::TestApp.NoCtorSingletonViewModel)
             {
                 return __ResolveView_0(contract);
             }
@@ -45,8 +45,8 @@ namespace ReactiveUI.Binding
             }
 
             /// <summary>
-            /// Resolves a view for <see cref="global::TestApp.PrivateCtorViewModel"/>.
-        /// Service locator only — no direct construction available.
+            /// Resolves a view for <see cref="global::TestApp.NoCtorSingletonViewModel"/>.
+        /// Service locator only — [SingleInstanceView] without parameterless constructor.
             /// </summary>
             /// <param name="contract">The contract string (empty string for default).</param>
             /// <returns>The resolved view, or <see langword="null"/> if resolution fails.</returns>
@@ -57,7 +57,7 @@ namespace ReactiveUI.Binding
 
                 // Prefer service-locator-registered view (supports DI-configured instances).
                 var view = global::Splat.AppLocator.Current
-                    .GetService<global::ReactiveUI.Binding.IViewFor<global::TestApp.PrivateCtorViewModel>>(
+                    .GetService<global::ReactiveUI.Binding.IViewFor<global::TestApp.NoCtorSingletonViewModel>>(
                         svcContract);
                 if (view != null)
                 {

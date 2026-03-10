@@ -21,4 +21,4 @@ internal sealed record ObservableTypeInfo(
     string ObservationKind,
     int Affinity,
     bool SupportsBeforeChanged,
-    EquatableArray<ObservablePropertyInfo> Properties) : IEquatable<ObservableTypeInfo>;
+    EquatableArray<ObservablePropertyInfo> Properties);
