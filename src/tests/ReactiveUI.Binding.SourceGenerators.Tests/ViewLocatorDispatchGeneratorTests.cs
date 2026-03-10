@@ -383,6 +383,97 @@ public class ViewLocatorDispatchGeneratorTests
     }
 
     /// <summary>
+    /// Verifies that when a ViewModel has both a default view and a contract view,
+    /// the contract-specific check is emitted first so it is not shadowed by the default branch.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public Task DefaultAndContractViewsDispatchCorrectly()
+    {
+        const string source = """
+            using System.ComponentModel;
+
+            namespace TestApp
+            {
+                public class DashboardViewModel : INotifyPropertyChanged
+                {
+                    public string Title { get; set; }
+                    public event PropertyChangedEventHandler PropertyChanged;
+                }
+
+                public class DashboardView : ReactiveUI.Binding.IViewFor<DashboardViewModel>
+                {
+                    public DashboardViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (DashboardViewModel)value;
+                    }
+                }
+
+                [ReactiveUI.Binding.ViewContract("compact")]
+                public class CompactDashboardView : ReactiveUI.Binding.IViewFor<DashboardViewModel>
+                {
+                    public DashboardViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (DashboardViewModel)value;
+                    }
+                }
+            }
+            """;
+
+        return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
+    }
+
+    /// <summary>
+    /// Verifies that when a ViewModel has multiple contract views but no default view,
+    /// the dispatch block contains only contract checks with no default fallback return.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public Task MultipleContractViewsWithoutDefault()
+    {
+        const string source = """
+            using System.ComponentModel;
+
+            namespace TestApp
+            {
+                public class ThemeViewModel : INotifyPropertyChanged
+                {
+                    public string Name { get; set; }
+                    public event PropertyChangedEventHandler PropertyChanged;
+                }
+
+                [ReactiveUI.Binding.ViewContract("light")]
+                public class LightThemeView : ReactiveUI.Binding.IViewFor<ThemeViewModel>
+                {
+                    public ThemeViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (ThemeViewModel)value;
+                    }
+                }
+
+                [ReactiveUI.Binding.ViewContract("dark")]
+                public class DarkThemeView : ReactiveUI.Binding.IViewFor<ThemeViewModel>
+                {
+                    public ThemeViewModel ViewModel { get; set; }
+                    object ReactiveUI.Binding.IViewFor.ViewModel
+                    {
+                        get => ViewModel;
+                        set => ViewModel = (ThemeViewModel)value;
+                    }
+                }
+            }
+            """;
+
+        return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
+    }
+
+    /// <summary>
     /// Verifies that [SingleInstanceView] on a view without parameterless constructor
     /// generates service-locator-only dispatch (no singleton cache field).
     /// </summary>

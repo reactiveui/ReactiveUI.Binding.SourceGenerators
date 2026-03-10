@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
@@ -145,35 +146,41 @@ internal static class ViewLocatorDispatchGenerator
                               {
                   """);
 
+        // Group registrations by ViewModel FQN so contract-specific checks
+        // are emitted before the default (no-contract) branch within a single
+        // type-switch block. Without grouping, a default branch emitted first
+        // would unconditionally match and shadow contract-specific branches.
+        var vmOrder = new List<string>(registrations.Count);
+        var vmGroupIndices = new Dictionary<string, List<int>>(registrations.Count);
         for (var i = 0; i < registrations.Count; i++)
         {
-            var reg = registrations[i];
-            var resolverMethodName = "__ResolveView_" + i;
+            var vmFqn = registrations[i].ViewModelFullyQualifiedName;
+            if (!vmGroupIndices.TryGetValue(vmFqn, out var indices))
+            {
+                indices = new List<int>();
+                vmGroupIndices[vmFqn] = indices;
+                vmOrder.Add(vmFqn);
+            }
+
+            indices.Add(i);
+        }
+
+        for (var g = 0; g < vmOrder.Count; g++)
+        {
+            var vmFqn = vmOrder[g];
+            var indices = vmGroupIndices[vmFqn];
 
             sb.AppendLine();
 
-            if (reg.Contract is not null)
+            if (indices.Count == 1)
             {
-                sb.Append($$"""
-                                    // {{reg.ViewModelFullyQualifiedName}} -> {{reg.ViewFullyQualifiedName}} [contract: "{{reg.Contract}}"]
-                                    if (instance is {{reg.ViewModelFullyQualifiedName}})
-                                    {
-                                        if (contract == "{{reg.Contract}}")
-                                        {
-                                            return {{resolverMethodName}}(contract);
-                                        }
-                                    }
-                        """);
+                // Single registration per VM: emit the compact form.
+                EmitSingleRegistrationDispatch(sb, registrations, indices[0]);
             }
             else
             {
-                sb.Append($$"""
-                                    // {{reg.ViewModelFullyQualifiedName}} -> {{reg.ViewFullyQualifiedName}}
-                                    if (instance is {{reg.ViewModelFullyQualifiedName}})
-                                    {
-                                        return {{resolverMethodName}}(contract);
-                                    }
-                        """);
+                // Multiple registrations for same VM: group into single type-switch.
+                EmitGroupedDispatch(sb, registrations, vmFqn, indices);
             }
         }
 
@@ -197,6 +204,100 @@ internal static class ViewLocatorDispatchGenerator
     }
 
     /// <summary>
+    /// Emits a dispatch branch for a single registration (one view per VM type).
+    /// Preserves the compact output format used by existing tests.
+    /// </summary>
+    /// <param name="sb">The string builder.</param>
+    /// <param name="registrations">All registrations.</param>
+    /// <param name="index">The registration index.</param>
+    private static void EmitSingleRegistrationDispatch(StringBuilder sb, List<ViewRegistrationInfo> registrations, int index)
+    {
+        var reg = registrations[index];
+        var resolverMethodName = "__ResolveView_" + index;
+
+        if (reg.Contract is not null)
+        {
+            var escapedLiteral = SymbolDisplay.FormatLiteral(reg.Contract, true);
+            sb.Append($$"""
+                                    // {{reg.ViewModelFullyQualifiedName}} -> {{reg.ViewFullyQualifiedName}} [contract: {{escapedLiteral}}]
+                                    if (instance is {{reg.ViewModelFullyQualifiedName}})
+                                    {
+                                        if (contract == {{escapedLiteral}})
+                                        {
+                                            return {{resolverMethodName}}(contract);
+                                        }
+                                    }
+                        """);
+        }
+        else
+        {
+            sb.Append($$"""
+                                    // {{reg.ViewModelFullyQualifiedName}} -> {{reg.ViewFullyQualifiedName}}
+                                    if (instance is {{reg.ViewModelFullyQualifiedName}})
+                                    {
+                                        return {{resolverMethodName}}(contract);
+                                    }
+                        """);
+        }
+    }
+
+    /// <summary>
+    /// Emits a grouped dispatch branch for a VM type with multiple registrations.
+    /// Contract-specific checks are emitted first, with the default (no-contract) branch last.
+    /// </summary>
+    /// <param name="sb">The string builder.</param>
+    /// <param name="registrations">All registrations.</param>
+    /// <param name="vmFqn">The fully qualified VM type name.</param>
+    /// <param name="indices">The registration indices for this VM type.</param>
+    private static void EmitGroupedDispatch(StringBuilder sb, List<ViewRegistrationInfo> registrations, string vmFqn, List<int> indices)
+    {
+        sb.Append($$"""
+                                    // {{vmFqn}} — multiple views
+                                    if (instance is {{vmFqn}})
+                                    {
+                        """);
+
+        // Contract-specific branches first
+        for (var j = 0; j < indices.Count; j++)
+        {
+            var idx = indices[j];
+            var reg = registrations[idx];
+            if (reg.Contract is not null)
+            {
+                var escapedLiteral = SymbolDisplay.FormatLiteral(reg.Contract, true);
+                var resolverMethodName = "__ResolveView_" + idx;
+                sb.AppendLine().Append($$"""
+                                        // -> {{reg.ViewFullyQualifiedName}} [contract: {{escapedLiteral}}]
+                                        if (contract == {{escapedLiteral}})
+                                        {
+                                            return {{resolverMethodName}}(contract);
+                                        }
+                            """);
+            }
+        }
+
+        // Default (no-contract) branch last
+        for (var j = 0; j < indices.Count; j++)
+        {
+            var idx = indices[j];
+            var reg = registrations[idx];
+            if (reg.Contract is null)
+            {
+                var resolverMethodName = "__ResolveView_" + idx;
+                sb.AppendLine().Append($$"""
+                                        // -> {{reg.ViewFullyQualifiedName}} (default)
+                                        return {{resolverMethodName}}(contract);
+                            """);
+                break; // Only one default per VM (deduplicated earlier)
+            }
+        }
+
+        sb.AppendLine().Append("""
+                                    }
+                        """);
+    }
+
+    /// <summary>
     /// Generates a per-view-model resolver method.
     /// </summary>
     /// <param name="sb">The string builder.</param>
@@ -206,11 +307,13 @@ internal static class ViewLocatorDispatchGenerator
     {
         var methodName = "__ResolveView_" + index;
 
-        var strategyDoc = reg.IsSingleInstance
-            ? "        /// Returns a cached singleton instance (marked with [SingleInstanceView])."
-            : reg.HasParameterlessConstructor
-                ? "        /// Tries the service locator first, then falls back to direct construction."
-                : "        /// Service locator only — no direct construction available.";
+        var strategyDoc = (reg.IsSingleInstance, reg.HasParameterlessConstructor) switch
+        {
+            (true, true) => "        /// Returns a cached singleton instance (marked with [SingleInstanceView]).",
+            (true, false) => "        /// Service locator only — [SingleInstanceView] without parameterless constructor.",
+            (false, true) => "        /// Tries the service locator first, then falls back to direct construction.",
+            (false, false) => "        /// Service locator only — no direct construction available.",
+        };
 
         sb.AppendLine().Append($$"""
 
@@ -245,7 +348,10 @@ internal static class ViewLocatorDispatchGenerator
                                       // Fallback: singleton construction ({{reg.ViewFullyQualifiedName}} has [SingleInstanceView]).
                                       if ({{fieldName}} == null)
                                       {
-                                          {{fieldName}} = new {{reg.ViewFullyQualifiedName}}();
+                                          System.Threading.Interlocked.CompareExchange(
+                                              ref {{fieldName}},
+                                              new {{reg.ViewFullyQualifiedName}}(),
+                                              null);
                                       }
 
                                       return {{fieldName}};

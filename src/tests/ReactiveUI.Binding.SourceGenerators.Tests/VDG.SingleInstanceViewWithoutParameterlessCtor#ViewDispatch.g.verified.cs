@@ -46,7 +46,7 @@ namespace ReactiveUI.Binding
 
             /// <summary>
             /// Resolves a view for <see cref="global::TestApp.NoCtorSingletonViewModel"/>.
-        /// Returns a cached singleton instance (marked with [SingleInstanceView]).
+        /// Service locator only — [SingleInstanceView] without parameterless constructor.
             /// </summary>
             /// <param name="contract">The contract string (empty string for default).</param>
             /// <returns>The resolved view, or <see langword="null"/> if resolution fails.</returns>

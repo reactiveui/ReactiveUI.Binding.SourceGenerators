@@ -33,12 +33,6 @@ internal static class ViewRegistrationExtractor
             return null;
         }
 
-        // Skip types marked with [ExcludeFromViewRegistration]
-        if (HasAttribute(typeSymbol, Constants.ExcludeFromViewRegistrationAttributeMetadataName, semanticModel.Compilation))
-        {
-            return null;
-        }
-
         var iViewForGeneric = semanticModel.Compilation.GetTypeByMetadataName(
             Constants.IViewForGenericMetadataName);
 
@@ -54,6 +48,14 @@ internal static class ViewRegistrationExtractor
                 && SymbolEqualityComparer.Default.Equals(iface.OriginalDefinition, iViewForGeneric)
                 && iface.TypeArguments.Length == 1)
             {
+                // Check [ExcludeFromViewRegistration] only after confirming IViewFor<T> is
+                // resolvable, so attribute resolution via EnsureNotNull cannot throw in
+                // compilations that don't reference ReactiveUI.Binding.
+                if (HasAttribute(typeSymbol, Constants.ExcludeFromViewRegistrationAttributeMetadataName, semanticModel.Compilation))
+                {
+                    return null;
+                }
+
                 var viewModelType = iface.TypeArguments[0];
                 var viewModelFqn = viewModelType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 var viewFqn = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
