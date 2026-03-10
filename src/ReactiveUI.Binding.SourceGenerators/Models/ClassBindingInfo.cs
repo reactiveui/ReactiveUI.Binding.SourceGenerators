@@ -31,4 +31,4 @@ internal sealed record ClassBindingInfo(
     bool InheritsNSObject,
     bool InheritsWinFormsComponent,
     bool InheritsAndroidView,
-    EquatableArray<ObservablePropertyInfo> Properties) : IEquatable<ClassBindingInfo>;
+    EquatableArray<ObservablePropertyInfo> Properties);

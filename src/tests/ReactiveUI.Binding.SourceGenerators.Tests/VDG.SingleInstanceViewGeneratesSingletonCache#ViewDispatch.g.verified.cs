@@ -7,6 +7,10 @@ namespace ReactiveUI.Binding
     internal static partial class __ReactiveUIGeneratedBindings
     {
             /// <summary>
+            /// Cached singleton instance for <see cref="global::TestApp.SingletonView"/> (marked with [SingleInstanceView]).
+            /// </summary>
+            private static global::TestApp.SingletonView __singletonView_0;
+            /// <summary>
             /// Triggers view dispatch registration when the generated bindings class is loaded.
             /// </summary>
             private static readonly bool __viewDispatchRegistered = __RegisterViewDispatch();
@@ -34,8 +38,8 @@ namespace ReactiveUI.Binding
             private static global::ReactiveUI.Binding.IViewFor __TryResolveView(
                 object instance, string contract)
             {
-            // global::TestApp.PrivateCtorViewModel -> global::TestApp.PrivateCtorView
-            if (instance is global::TestApp.PrivateCtorViewModel)
+            // global::TestApp.SingletonViewModel -> global::TestApp.SingletonView
+            if (instance is global::TestApp.SingletonViewModel)
             {
                 return __ResolveView_0(contract);
             }
@@ -45,8 +49,8 @@ namespace ReactiveUI.Binding
             }
 
             /// <summary>
-            /// Resolves a view for <see cref="global::TestApp.PrivateCtorViewModel"/>.
-        /// Service locator only — no direct construction available.
+            /// Resolves a view for <see cref="global::TestApp.SingletonViewModel"/>.
+        /// Returns a cached singleton instance (marked with [SingleInstanceView]).
             /// </summary>
             /// <param name="contract">The contract string (empty string for default).</param>
             /// <returns>The resolved view, or <see langword="null"/> if resolution fails.</returns>
@@ -57,13 +61,19 @@ namespace ReactiveUI.Binding
 
                 // Prefer service-locator-registered view (supports DI-configured instances).
                 var view = global::Splat.AppLocator.Current
-                    .GetService<global::ReactiveUI.Binding.IViewFor<global::TestApp.PrivateCtorViewModel>>(
+                    .GetService<global::ReactiveUI.Binding.IViewFor<global::TestApp.SingletonViewModel>>(
                         svcContract);
                 if (view != null)
                 {
                     return view;
                 }
-                return null;
+                    // Fallback: singleton construction (global::TestApp.SingletonView has [SingleInstanceView]).
+                    if (__singletonView_0 == null)
+                    {
+                        __singletonView_0 = new global::TestApp.SingletonView();
+                    }
+
+                    return __singletonView_0;
             }
     }
 }

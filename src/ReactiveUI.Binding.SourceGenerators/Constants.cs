@@ -136,6 +136,21 @@ internal static class Constants
     internal const string IViewForGenericMetadataName = "ReactiveUI.Binding.IViewFor`1";
 
     /// <summary>
+    /// Metadata name for the <c>ExcludeFromViewRegistrationAttribute</c> used to skip view auto-registration.
+    /// </summary>
+    internal const string ExcludeFromViewRegistrationAttributeMetadataName = "ReactiveUI.Binding.ExcludeFromViewRegistrationAttribute";
+
+    /// <summary>
+    /// Metadata name for the <c>SingleInstanceViewAttribute</c> used for singleton view caching.
+    /// </summary>
+    internal const string SingleInstanceViewAttributeMetadataName = "ReactiveUI.Binding.SingleInstanceViewAttribute";
+
+    /// <summary>
+    /// Metadata name for the <c>ViewContractAttribute</c> used for contract-based view registration.
+    /// </summary>
+    internal const string ViewContractAttributeMetadataName = "ReactiveUI.Binding.ViewContractAttribute";
+
+    /// <summary>
     /// Metadata name for the <c>IBindingTypeConverter</c> interface used for custom type conversions.
     /// </summary>
     internal const string IBindingTypeConverterMetadataName = "ReactiveUI.Binding.IBindingTypeConverter";

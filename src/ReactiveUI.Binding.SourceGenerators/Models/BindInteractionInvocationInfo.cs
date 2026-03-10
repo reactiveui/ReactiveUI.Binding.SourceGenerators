@@ -30,4 +30,4 @@ internal sealed record BindInteractionInvocationInfo(
     bool IsTaskHandler,
     string? DontCareTypeFullName,
     string MethodName,
-    string ExpressionText) : IEquatable<BindInteractionInvocationInfo>;
+    string ExpressionText);

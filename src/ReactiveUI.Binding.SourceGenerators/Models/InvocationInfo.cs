@@ -27,4 +27,4 @@ internal sealed record InvocationInfo(
     bool IsBeforeChange,
     bool HasSelector,
     string MethodName,
-    EquatableArray<string> ExpressionTexts) : IEquatable<InvocationInfo>;
+    EquatableArray<string> ExpressionTexts);

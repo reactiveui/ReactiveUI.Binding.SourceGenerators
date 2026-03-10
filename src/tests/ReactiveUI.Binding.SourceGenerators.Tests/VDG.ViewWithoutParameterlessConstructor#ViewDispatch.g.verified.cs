@@ -6,65 +6,64 @@ namespace ReactiveUI.Binding
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
-        /// <summary>
-        /// Triggers view dispatch registration when the generated bindings class is loaded.
-        /// </summary>
-        private static readonly bool __viewDispatchRegistered = __RegisterViewDispatch();
+            /// <summary>
+            /// Triggers view dispatch registration when the generated bindings class is loaded.
+            /// </summary>
+            private static readonly bool __viewDispatchRegistered = __RegisterViewDispatch();
 
-        /// <summary>
-        /// Registers the source-generated view dispatch function with
-        /// <see cref="global::ReactiveUI.Binding.DefaultViewLocator"/>.
-        /// Called once via static field initializer when this class is first accessed.
-        /// </summary>
-        /// <returns>Always returns <see langword="true"/>.</returns>
-        private static bool __RegisterViewDispatch()
-        {
-            global::ReactiveUI.Binding.DefaultViewLocator.SetGeneratedViewDispatch(
-                __TryResolveView);
-            return true;
-        }
+            /// <summary>
+            /// Registers the source-generated view dispatch function with
+            /// <see cref="global::ReactiveUI.Binding.DefaultViewLocator"/>.
+            /// Called once via static field initializer when this class is first accessed.
+            /// </summary>
+            /// <returns>Always returns <see langword="true"/>.</returns>
+            private static bool __RegisterViewDispatch()
+            {
+                global::ReactiveUI.Binding.DefaultViewLocator.SetGeneratedViewDispatch(
+                    __TryResolveView);
+                return true;
+            }
 
-        /// <summary>
-        /// Compile-time generated type-switch dispatch for view resolution.
-        /// Attempts to resolve a view for the given view model instance without reflection.
-        /// </summary>
-        /// <param name="instance">The view model instance to resolve a view for.</param>
-        /// <param name="contract">The contract string (empty string for default).</param>
-        /// <returns>The resolved view, or <see langword="null"/> if no generated mapping exists.</returns>
-        private static global::ReactiveUI.Binding.IViewFor __TryResolveView(
-            object instance, string contract)
-        {
+            /// <summary>
+            /// Compile-time generated type-switch dispatch for view resolution.
+            /// Attempts to resolve a view for the given view model instance without reflection.
+            /// </summary>
+            /// <param name="instance">The view model instance to resolve a view for.</param>
+            /// <param name="contract">The contract string (empty string for default).</param>
+            /// <returns>The resolved view, or <see langword="null"/> if no generated mapping exists.</returns>
+            private static global::ReactiveUI.Binding.IViewFor __TryResolveView(
+                object instance, string contract)
+            {
             // global::TestApp.SettingsViewModel -> global::TestApp.SettingsView
             if (instance is global::TestApp.SettingsViewModel)
             {
                 return __ResolveView_0(contract);
             }
 
-            // No compile-time mapping found; fall back to runtime resolution.
-            return null;
-        }
-
-        /// <summary>
-        /// Resolves a view for <see cref="global::TestApp.SettingsViewModel"/>.
-        /// Service locator only — no direct construction available.
-        /// </summary>
-        /// <param name="contract">The contract string (empty string for default).</param>
-        /// <returns>The resolved view, or <see langword="null"/> if resolution fails.</returns>
-        private static global::ReactiveUI.Binding.IViewFor __ResolveView_0(string contract)
-        {
-            // Normalize contract: empty string means no contract (null for Splat lookup).
-            string svcContract = contract.Length == 0 ? null : contract;
-
-            // Prefer service-locator-registered view (supports DI-configured instances).
-            var view = global::Splat.AppLocator.Current
-                .GetService<global::ReactiveUI.Binding.IViewFor<global::TestApp.SettingsViewModel>>(
-                    svcContract);
-            if (view != null)
-            {
-                return view;
+                // No compile-time mapping found; fall back to runtime resolution.
+                return null;
             }
 
-            return null;
-        }
+            /// <summary>
+            /// Resolves a view for <see cref="global::TestApp.SettingsViewModel"/>.
+        /// Service locator only — no direct construction available.
+            /// </summary>
+            /// <param name="contract">The contract string (empty string for default).</param>
+            /// <returns>The resolved view, or <see langword="null"/> if resolution fails.</returns>
+            private static global::ReactiveUI.Binding.IViewFor __ResolveView_0(string contract)
+            {
+                // Normalize contract: empty string means no contract (null for Splat lookup).
+                string svcContract = contract.Length == 0 ? null : contract;
+
+                // Prefer service-locator-registered view (supports DI-configured instances).
+                var view = global::Splat.AppLocator.Current
+                    .GetService<global::ReactiveUI.Binding.IViewFor<global::TestApp.SettingsViewModel>>(
+                        svcContract);
+                if (view != null)
+                {
+                    return view;
+                }
+                return null;
+            }
     }
 }

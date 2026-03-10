@@ -51,4 +51,4 @@ internal sealed record BindCommandInvocationInfo(
     string? ParameterExpressionText,
     bool HasCommandProperty,
     bool HasCommandParameterProperty,
-    bool HasEnabledProperty) : IEquatable<BindCommandInvocationInfo>;
+    bool HasEnabledProperty);

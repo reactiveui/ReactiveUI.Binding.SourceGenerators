@@ -18,4 +18,4 @@ internal sealed record ObservablePropertyInfo(
     string PropertyTypeFullName,
     bool HasPublicGetter,
     bool IsIndexer,
-    bool IsDependencyProperty) : IEquatable<ObservablePropertyInfo>;
+    bool IsDependencyProperty);

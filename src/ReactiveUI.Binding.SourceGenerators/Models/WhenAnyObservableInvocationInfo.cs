@@ -25,4 +25,4 @@ internal sealed record WhenAnyObservableInvocationInfo(
     EquatableArray<string> InnerObservableTypeFullNames,
     string ReturnTypeFullName,
     bool HasSelector,
-    EquatableArray<string> ExpressionTexts) : IEquatable<WhenAnyObservableInvocationInfo>;
+    EquatableArray<string> ExpressionTexts);
