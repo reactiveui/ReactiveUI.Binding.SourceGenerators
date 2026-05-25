@@ -23,6 +23,10 @@
     <ProjectReference Include="..\..\ReactiveUI.Binding.Reactive\ReactiveUI.Binding.Reactive.csproj" />
     <ProjectReference Include="..\..\ReactiveUI.Binding.SourceGenerators\ReactiveUI.Binding.SourceGenerators.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\TransitiveAssemblyResolver.cs" Link="Shared\TransitiveAssemblyResolver.cs" />
+  </ItemGroup>
+
   <PropertyGroup>
     <SharedScenariosPath>$(MSBuildProjectDirectory)\..\SharedScenarios\</SharedScenariosPath>
   </PropertyGroup>

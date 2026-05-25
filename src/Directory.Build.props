@@ -18,7 +18,7 @@
 
     <!-- MAUI targets -->
     <BindingMauiWindowsTargets>net9.0-windows10.0.19041.0;net10.0-windows10.0.19041.0</BindingMauiWindowsTargets>
-    <BindingAndroidTargets>net9.0-android;net10.0-android</BindingAndroidTargets>
+    <BindingAndroidTargets>net10.0-android</BindingAndroidTargets>
     <BindingAppleTargets>net9.0-ios;net9.0-macos;net9.0-maccatalyst;net9.0-tvos;net10.0-ios;net10.0-macos;net10.0-maccatalyst;net10.0-tvos</BindingAppleTargets>
 
     <BindingMauiTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(BindingMauiWindowsTargets)</BindingMauiTargets>
@@ -73,8 +73,8 @@
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <TUnitImplicitUsings>false</TUnitImplicitUsings>
-    <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
+    <TUnitImplicitUsings>true</TUnitImplicitUsings>
+    <TUnitAssertionsImplicitUsings>true</TUnitAssertionsImplicitUsings>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
