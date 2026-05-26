@@ -213,6 +213,7 @@ public static class TestHelper
         "PlatformDetectionSnapshotTests" => "PDS",
         "BindInteractionGeneratorTests" => "BIG",
         "BindCommandGeneratorTests" => "BCG",
+        "BindToGeneratorTests" => "BToG",
         "ViewLocatorDispatchGeneratorTests" => "VDG",
         _ => typeName,
     };

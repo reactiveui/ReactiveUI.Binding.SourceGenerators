@@ -1,0 +1,38 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+using System.ComponentModel;
+
+namespace SharedScenarios.BindTo.WithConverterOverride
+{
+    /// <summary>
+    /// Target View with a string property bound via an explicit converter.
+    /// </summary>
+    public class MyView : INotifyPropertyChanged
+    {
+        /// <summary>
+        /// The backing field for <see cref="Caption"/>.
+        /// </summary>
+        private string _caption = string.Empty;
+
+        /// <inheritdoc/>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Gets or sets the caption.
+        /// </summary>
+        public string Caption
+        {
+            get => _caption;
+            set
+            {
+                if (_caption != value)
+                {
+                    _caption = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Caption)));
+                }
+            }
+        }
+    }
+}

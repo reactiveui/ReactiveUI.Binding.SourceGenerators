@@ -108,5 +108,6 @@ public class BindingGenerator : IIncrementalGenerator
         WhenAnyObservableInvocationGenerator.Register(context, allClasses, supportsCallerArgExpr);
         BindInteractionInvocationGenerator.Register(context, allClasses, supportsCallerArgExpr);
         BindCommandInvocationGenerator.Register(context, allClasses, supportsCallerArgExpr);
+        BindToInvocationGenerator.Register(context, allClasses, supportsCallerArgExpr);
     }
 }

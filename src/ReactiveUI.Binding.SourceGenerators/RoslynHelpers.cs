@@ -209,4 +209,20 @@ internal static class RoslynHelpers
                 Name.Identifier.Text: Constants.BindCommandMethodName
             }
         };
+
+    /// <summary>
+    /// Pipeline B predicate: detects BindTo invocations (observable stream to target property).
+    /// </summary>
+    /// <param name="node">The syntax node to check.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>true if the node is a BindTo invocation; otherwise, false.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsBindToInvocation(SyntaxNode node, CancellationToken ct)
+        => node is InvocationExpressionSyntax
+        {
+            Expression: MemberAccessExpressionSyntax
+            {
+                Name.Identifier.Text: Constants.BindToMethodName
+            }
+        };
 }

@@ -15,8 +15,10 @@ using ReactiveUI.Binding.SourceGenerators;
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
 
 /// <summary>
-/// Analyzes WhenChanged/WhenChanging/BindOneWay/BindTwoWay invocations for common issues.
-/// Reports RXUIBIND001, RXUIBIND003, RXUIBIND004, RXUIBIND005.
+/// Analyzes binding and observation invocations (WhenChanged, WhenChanging, BindOneWay, BindTwoWay,
+/// OneWayBind, Bind, BindTo, BindCommand, BindInteraction) for common issues. The generic lambda checks
+/// (RXUIBIND001/003/006) apply to every recognized extension method; the remaining checks are
+/// method-specific (RXUIBIND004, RXUIBIND005, RXUIBIND007, RXUIBIND008).
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class BindingInvocationAnalyzer : DiagnosticAnalyzer

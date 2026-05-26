@@ -55,6 +55,13 @@ public class BindingInvocationAnalyzerTests
                     where TSource : class
                     where TTarget : class
                     => throw new NotImplementedException();
+
+                public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
+                    this IObservable<TValue> source,
+                    TTarget target,
+                    Expression<Func<TTarget, TTargetValue>> property)
+                    where TTarget : class
+                    => throw new NotImplementedException();
             }
         }
         """;
@@ -3522,5 +3529,138 @@ public class BindingInvocationAnalyzerTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
         var validationDiags = diagnostics.Where(d => d.Id == "RXUIBIND005").ToArray();
         await Assert.That(validationDiags.Length).IsEqualTo(0);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND001 is reported for BindTo with a non-inline target lambda.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND001_BindTo_NonInlineLambda_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyView : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string NameText { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        IObservable<string> source = null!;
+                        var view = new MyView();
+                        Expression<Func<MyView, string>> expr = x => x.NameText;
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindTo(source, view, expr);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        await Assert.That(nonInlineDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND003 is reported for BindTo when the target lambda accesses a private member.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND003_BindTo_PrivateMember_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyView : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    private string Secret { get; set; } = "";
+
+                    public void Test()
+                    {
+                        IObservable<string> source = null!;
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindTo(source, this, x => x.Secret);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        await Assert.That(privateDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies RXUIBIND006 is reported for BindTo when the target property path contains a method call.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND006_BindTo_MethodCallInPath_ReportsDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyView : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string GetName() => "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        IObservable<string> source = null!;
+                        var view = new MyView();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindTo(source, view, x => x.GetName());
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Verifies BindTo with an inline target lambda accessing a public property reports no diagnostics.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND_BindTo_InlineLambda_NoDiagnostic()
+    {
+        var source = Preamble + """
+
+            namespace TestApp
+            {
+                public class MyView : INotifyPropertyChanged
+                {
+                    public event PropertyChangedEventHandler? PropertyChanged;
+                    public string NameText { get; set; } = "";
+                }
+
+                public class Usage
+                {
+                    public void Test()
+                    {
+                        IObservable<string> source = null!;
+                        var view = new MyView();
+                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindTo(source, view, x => x.NameText);
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(source);
+        var bindDiags = diagnostics.Where(d => d.Id.StartsWith("RXUIBIND", StringComparison.Ordinal)).ToArray();
+        await Assert.That(bindDiags.Length).IsEqualTo(0);
     }
 }

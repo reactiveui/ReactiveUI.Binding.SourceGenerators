@@ -51,6 +51,7 @@
     <None Update="WAVG.*.verified.cs" DependentUpon="WhenAnyValueGeneratorTests.cs" />
     <None Update="WCG.*.verified.cs" DependentUpon="WhenChangedGeneratorTests.cs" />
     <None Update="WCnG.*.verified.cs" DependentUpon="WhenChangingGeneratorTests.cs" />
+    <None Update="BToG.*.verified.cs" DependentUpon="BindToGeneratorTests.cs" />
     <None Update="PDS.*.verified.cs" DependentUpon="PlatformDetectionSnapshotTests.cs" />
   </ItemGroup>
 
