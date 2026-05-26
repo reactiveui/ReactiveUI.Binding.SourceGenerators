@@ -1,0 +1,29 @@
+name: SonarCloud
+
+on:
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
+
+permissions:
+    contents: read
+
+jobs:
+    sonarcloud:
+        uses: reactiveui/actions-common/.github/workflows/workflow-common-sonarcloud.yml@main
+        with:
+            productNamespacePrefix: ReactiveUI.Binding
+            installWorkloads: true
+            minverMinimumMajorMinor: '3.3'
+            sonarProjectKey: reactiveui_ReactiveUI.Binding.SourceGenerators
+            sonarOrganization: reactiveui
+            sonarExclusions: '**/tests/**,**/benchmarks/**,**/TestResults/**'
+            sonarCoverageExclusions: '**/tests/**,**/benchmarks/**,**/*Tests/**,**/*Tests.cs,**/*TestModels/**'
+            sonarCpdExclusions: '**/tests/**,**/benchmarks/**'
+            sonarTestExclusions: '**/tests/**,**/benchmarks/**'
+            # Matches ci-build.yml: the MTP/TUnit suite is far slower on Windows net10
+            # than on net8/9, so allow generous headroom for the coverage run.
+            testTimeout: '15m'
+        secrets:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
