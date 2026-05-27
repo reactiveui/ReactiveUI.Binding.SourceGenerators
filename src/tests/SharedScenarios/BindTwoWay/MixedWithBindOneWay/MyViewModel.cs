@@ -38,7 +38,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _name = value;
-            PropertyChanged?.Invoke(this, new(nameof(Name)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
         }
     }
 
@@ -56,7 +56,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _readOnlyCount = value;
-            PropertyChanged?.Invoke(this, new(nameof(ReadOnlyCount)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ReadOnlyCount)));
         }
     }
 }

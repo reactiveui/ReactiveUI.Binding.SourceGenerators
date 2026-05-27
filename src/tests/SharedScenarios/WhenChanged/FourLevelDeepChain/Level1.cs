@@ -14,7 +14,7 @@ public class Level1 : INotifyPropertyChanged
     /// <summary>
     /// The backing field for <see cref="Model"/>.
     /// </summary>
-    private Level2 _model = new();
+    private Level2 _model = new Level2();
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -33,7 +33,7 @@ public class Level1 : INotifyPropertyChanged
             }
 
             _model = value;
-            PropertyChanged?.Invoke(this, new(nameof(Model)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Model)));
         }
     }
 }

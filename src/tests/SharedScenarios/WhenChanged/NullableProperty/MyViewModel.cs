@@ -33,7 +33,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _nullableName = value;
-            PropertyChanged?.Invoke(this, new(nameof(NullableName)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NullableName)));
         }
     }
 }

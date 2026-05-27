@@ -33,7 +33,7 @@ public class MyView : INotifyPropertyChanged
             }
 
             _caption = value;
-            PropertyChanged?.Invoke(this, new(nameof(Caption)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Caption)));
         }
     }
 }

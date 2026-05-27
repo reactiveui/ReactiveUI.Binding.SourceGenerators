@@ -33,7 +33,7 @@ public class MyView : INotifyPropertyChanged
             }
 
             _displayCount = value;
-            PropertyChanged?.Invoke(this, new(nameof(DisplayCount)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayCount)));
         }
     }
 }

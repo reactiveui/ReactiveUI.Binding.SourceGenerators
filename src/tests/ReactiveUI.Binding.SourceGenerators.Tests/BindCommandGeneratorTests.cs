@@ -81,7 +81,7 @@ public class BindCommandGeneratorTests
         var result = await TestHelper.TestPassWithResult(
             source,
             typeof(BindCommandGeneratorTests),
-            LanguageVersion.CSharp7_3);
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -97,7 +97,7 @@ public class BindCommandGeneratorTests
         var result = await TestHelper.TestPassWithResult(
             source,
             typeof(BindCommandGeneratorTests),
-            LanguageVersion.CSharp7_3);
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -113,7 +113,7 @@ public class BindCommandGeneratorTests
         var result = await TestHelper.TestPassWithResult(
             source,
             typeof(BindCommandGeneratorTests),
-            LanguageVersion.CSharp7_3);
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 

@@ -39,7 +39,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _command1 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Command1)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Command1)));
         }
     }
 
@@ -57,7 +57,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _command2 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Command2)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Command2)));
         }
     }
 }

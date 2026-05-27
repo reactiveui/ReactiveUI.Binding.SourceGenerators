@@ -39,7 +39,7 @@ public class ChildModel : INotifyPropertyChanged
             }
 
             _count = value;
-            PropertyChanged?.Invoke(this, new(nameof(Count)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
         }
     }
 
@@ -57,7 +57,7 @@ public class ChildModel : INotifyPropertyChanged
             }
 
             _message = value;
-            PropertyChanged?.Invoke(this, new(nameof(Message)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Message)));
         }
     }
 }

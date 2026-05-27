@@ -33,7 +33,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _child = value;
-            PropertyChanged?.Invoke(this, new(nameof(Child)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Child)));
         }
     }
 }

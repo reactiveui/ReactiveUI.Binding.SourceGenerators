@@ -15,5 +15,5 @@ public class MyViewModel
     /// <summary>
     /// Gets the confirmation interaction.
     /// </summary>
-    public Interaction<string, bool> Confirm { get; } = new();
+    public Interaction<string, bool> Confirm { get; } = new Interaction<string, bool>();
 }

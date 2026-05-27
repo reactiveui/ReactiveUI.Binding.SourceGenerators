@@ -520,7 +520,7 @@ public class WhenChangedGeneratorTests
         var result = await TestHelper.TestPassWithResult(
             source,
             typeof(WhenChangedGeneratorTests),
-            LanguageVersion.CSharp7_3);
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 

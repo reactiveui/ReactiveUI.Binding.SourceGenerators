@@ -42,7 +42,7 @@ public class MyView : IViewFor, INotifyPropertyChanged
             }
 
             _nameText = value;
-            PropertyChanged?.Invoke(this, new(nameof(NameText)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameText)));
         }
     }
 
@@ -60,7 +60,7 @@ public class MyView : IViewFor, INotifyPropertyChanged
             }
 
             _ageText = value;
-            PropertyChanged?.Invoke(this, new(nameof(AgeText)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AgeText)));
         }
     }
 }

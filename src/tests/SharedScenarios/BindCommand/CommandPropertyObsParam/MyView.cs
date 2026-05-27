@@ -22,6 +22,6 @@ public class MyView : IViewFor, INotifyPropertyChanged
     /// <summary>
     /// Gets the save button.
     /// </summary>
-    public WpfLikeButton SaveButton { get; } = new();
+    public WpfLikeButton SaveButton { get; } = new WpfLikeButton();
 }
 #pragma warning restore CS0067

@@ -53,7 +53,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _prop1 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Prop1)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Prop1)));
         }
     }
 
@@ -71,7 +71,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _prop2 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Prop2)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Prop2)));
         }
     }
 
@@ -89,7 +89,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _prop3 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Prop3)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Prop3)));
         }
     }
 
@@ -107,7 +107,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _prop4 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Prop4)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Prop4)));
         }
     }
 
@@ -125,7 +125,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _prop5 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Prop5)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Prop5)));
         }
     }
 }

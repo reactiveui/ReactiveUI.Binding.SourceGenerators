@@ -33,7 +33,7 @@ public class ViewModel2 : INotifyPropertyChanged
             }
 
             _count = value;
-            PropertyChanged?.Invoke(this, new(nameof(Count)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
         }
     }
 }

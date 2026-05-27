@@ -34,7 +34,7 @@ public class ChildViewModel : INotifyPropertyChanged
             }
 
             _saveCommand = value;
-            PropertyChanged?.Invoke(this, new(nameof(SaveCommand)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SaveCommand)));
         }
     }
 }

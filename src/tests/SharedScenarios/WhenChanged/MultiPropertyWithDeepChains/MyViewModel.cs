@@ -19,7 +19,7 @@ public class MyViewModel : INotifyPropertyChanged
     /// <summary>
     /// The backing field for <see cref="Address"/>.
     /// </summary>
-    private AddressModel _address = new();
+    private AddressModel _address = new AddressModel();
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -38,7 +38,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _name = value;
-            PropertyChanged?.Invoke(this, new(nameof(Name)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
         }
     }
 
@@ -56,7 +56,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _address = value;
-            PropertyChanged?.Invoke(this, new(nameof(Address)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Address)));
         }
     }
 }

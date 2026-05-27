@@ -38,7 +38,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _firstName = value;
-            PropertyChanged?.Invoke(this, new(nameof(FirstName)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FirstName)));
         }
     }
 
@@ -56,7 +56,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _lastName = value;
-            PropertyChanged?.Invoke(this, new(nameof(LastName)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastName)));
         }
     }
 }

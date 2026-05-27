@@ -17,6 +17,20 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 public static class TestHelper
 {
     /// <summary>
+    /// Returns the C# language version used to exercise the <c>CallerFilePath</c> + <c>CallerLineNumber</c>
+    /// dispatch fallback. The version is deliberately kept below C# 10 (where
+    /// <c>CallerArgumentExpression</c> would take over) so the file/line dispatch path is exercised, while
+    /// still being high enough to compile the scenario source. Scenario view models use nullable reference
+    /// type annotations (a C# 8 feature); compiling them under C# 7.3 would raise
+    /// "nullable reference types is not available". When the scenario has no nullable annotations, C# 7.3 is
+    /// used so the generated output is also asserted valid on the minimum supported language version.
+    /// </summary>
+    /// <param name="nullableEnabled">Whether the scenario source uses nullable reference type annotations.</param>
+    /// <returns>C# 8 when the scenario uses nullable annotations; otherwise C# 7.3.</returns>
+    public static LanguageVersion FallbackLanguageVersion(bool nullableEnabled) =>
+        nullableEnabled ? LanguageVersion.CSharp8 : LanguageVersion.CSharp7_3;
+
+    /// <summary>
     /// Creates a compilation from source code, targeting C# 7.3 to verify generated output compatibility.
     /// </summary>
     /// <param name="source">The source code to compile.</param>

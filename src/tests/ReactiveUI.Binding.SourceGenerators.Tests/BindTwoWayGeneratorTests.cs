@@ -123,7 +123,7 @@ public class BindTwoWayGeneratorTests
         var result = await TestHelper.TestPassWithResult(
             source,
             typeof(BindTwoWayGeneratorTests),
-            LanguageVersion.CSharp7_3);
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -166,7 +166,7 @@ public class BindTwoWayGeneratorTests
         var result = await TestHelper.TestPassWithResult(
             source,
             typeof(BindTwoWayGeneratorTests),
-            LanguageVersion.CSharp7_3);
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 }

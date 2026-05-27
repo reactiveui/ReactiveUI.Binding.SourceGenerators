@@ -38,7 +38,7 @@ public class MyView : INotifyPropertyChanged
             }
 
             _nameText = value;
-            PropertyChanged?.Invoke(this, new(nameof(NameText)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameText)));
         }
     }
 
@@ -56,7 +56,7 @@ public class MyView : INotifyPropertyChanged
             }
 
             _countDisplay = value;
-            PropertyChanged?.Invoke(this, new(nameof(CountDisplay)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CountDisplay)));
         }
     }
 }

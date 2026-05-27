@@ -15,7 +15,7 @@ public class ChildViewModel : INotifyPropertyChanged
     /// <summary>
     /// The backing field for <see cref="Confirm"/>.
     /// </summary>
-    private Interaction<string, bool> _confirm = new();
+    private Interaction<string, bool> _confirm = new Interaction<string, bool>();
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -34,7 +34,7 @@ public class ChildViewModel : INotifyPropertyChanged
             }
 
             _confirm = value;
-            PropertyChanged?.Invoke(this, new(nameof(Confirm)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Confirm)));
         }
     }
 }

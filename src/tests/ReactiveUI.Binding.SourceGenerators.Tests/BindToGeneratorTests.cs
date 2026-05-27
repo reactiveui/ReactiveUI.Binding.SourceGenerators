@@ -81,7 +81,7 @@ public class BindToGeneratorTests
         var result = await TestHelper.TestPassWithResult(
             source,
             typeof(BindToGeneratorTests),
-            LanguageVersion.CSharp7_3);
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 }

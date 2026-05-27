@@ -14,7 +14,7 @@ public class ParentViewModel : INotifyPropertyChanged, INotifyPropertyChanging
     /// <summary>
     /// The backing field for <see cref="Child"/>.
     /// </summary>
-    private ChildModel _child = new();
+    private ChildModel _child = new ChildModel();
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -35,9 +35,9 @@ public class ParentViewModel : INotifyPropertyChanged, INotifyPropertyChanging
                 return;
             }
 
-            PropertyChanging?.Invoke(this, new(nameof(Child)));
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Child)));
             _child = value;
-            PropertyChanged?.Invoke(this, new(nameof(Child)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Child)));
         }
     }
 }

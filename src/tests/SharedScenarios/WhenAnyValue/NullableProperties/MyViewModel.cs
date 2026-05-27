@@ -38,7 +38,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _nullableName = value;
-            PropertyChanged?.Invoke(this, new(nameof(NullableName)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NullableName)));
         }
     }
 
@@ -56,7 +56,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _nullableAge = value;
-            PropertyChanged?.Invoke(this, new(nameof(NullableAge)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NullableAge)));
         }
     }
 }

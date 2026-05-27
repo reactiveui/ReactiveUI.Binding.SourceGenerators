@@ -33,7 +33,7 @@ public class ChildModel : INotifyPropertyChanged
             }
 
             _name = value;
-            PropertyChanged?.Invoke(this, new(nameof(Name)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
         }
     }
 }

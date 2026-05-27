@@ -34,7 +34,7 @@ public class MyViewModel : INotifyPropertyChanged
             }
 
             _save = value;
-            PropertyChanged?.Invoke(this, new(nameof(Save)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Save)));
         }
     }
 }

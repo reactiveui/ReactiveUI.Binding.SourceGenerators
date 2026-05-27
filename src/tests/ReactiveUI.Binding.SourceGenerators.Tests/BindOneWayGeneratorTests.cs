@@ -109,7 +109,7 @@ public class BindOneWayGeneratorTests
         var result = await TestHelper.TestPassWithResult(
             source,
             typeof(BindOneWayGeneratorTests),
-            LanguageVersion.CSharp7_3);
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -152,7 +152,7 @@ public class BindOneWayGeneratorTests
         var result = await TestHelper.TestPassWithResult(
             source,
             typeof(BindOneWayGeneratorTests),
-            LanguageVersion.CSharp7_3);
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 

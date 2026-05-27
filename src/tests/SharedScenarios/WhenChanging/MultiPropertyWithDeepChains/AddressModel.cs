@@ -35,9 +35,9 @@ public class AddressModel : INotifyPropertyChanged, INotifyPropertyChanging
                 return;
             }
 
-            PropertyChanging?.Invoke(this, new(nameof(City)));
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(City)));
             _city = value;
-            PropertyChanged?.Invoke(this, new(nameof(City)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(City)));
         }
     }
 }

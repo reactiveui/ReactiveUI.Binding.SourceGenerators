@@ -40,9 +40,9 @@ public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
                 return;
             }
 
-            PropertyChanging?.Invoke(this, new(nameof(Name)));
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Name)));
             _name = value;
-            PropertyChanged?.Invoke(this, new(nameof(Name)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
         }
     }
 
@@ -59,9 +59,9 @@ public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
                 return;
             }
 
-            PropertyChanging?.Invoke(this, new(nameof(Age)));
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Age)));
             _age = value;
-            PropertyChanged?.Invoke(this, new(nameof(Age)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Age)));
         }
     }
 }

@@ -37,7 +37,7 @@ public class MyView : IViewFor, INotifyPropertyChanged
             }
 
             _countText = value;
-            PropertyChanged?.Invoke(this, new(nameof(CountText)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CountText)));
         }
     }
 }

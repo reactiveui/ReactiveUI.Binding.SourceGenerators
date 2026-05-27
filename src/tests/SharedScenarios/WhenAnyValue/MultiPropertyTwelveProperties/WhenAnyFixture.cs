@@ -88,7 +88,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value1 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value1)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value1)));
         }
     }
 
@@ -106,7 +106,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value2 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value2)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value2)));
         }
     }
 
@@ -124,7 +124,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value3 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value3)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value3)));
         }
     }
 
@@ -142,7 +142,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value4 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value4)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value4)));
         }
     }
 
@@ -160,7 +160,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value5 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value5)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value5)));
         }
     }
 
@@ -178,7 +178,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value6 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value6)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value6)));
         }
     }
 
@@ -196,7 +196,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value7 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value7)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value7)));
         }
     }
 
@@ -214,7 +214,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value8 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value8)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value8)));
         }
     }
 
@@ -232,7 +232,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value9 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value9)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value9)));
         }
     }
 
@@ -250,7 +250,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value10 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value10)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value10)));
         }
     }
 
@@ -268,7 +268,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value11 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value11)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value11)));
         }
     }
 
@@ -286,7 +286,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
             }
 
             _value12 = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value12)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value12)));
         }
     }
 }

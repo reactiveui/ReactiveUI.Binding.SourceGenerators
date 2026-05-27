@@ -35,9 +35,9 @@ public class Model : INotifyPropertyChanged, INotifyPropertyChanging
                 return;
             }
 
-            PropertyChanging?.Invoke(this, new(nameof(Value)));
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Value)));
             _value = value;
-            PropertyChanged?.Invoke(this, new(nameof(Value)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
         }
     }
 }

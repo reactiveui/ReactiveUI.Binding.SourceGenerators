@@ -22,6 +22,6 @@ public class MyView : IViewFor, INotifyPropertyChanged
     /// <summary>
     /// Gets the plain control (no Click event).
     /// </summary>
-    public PlainControl Label { get; } = new();
+    public PlainControl Label { get; } = new PlainControl();
 }
 #pragma warning restore CS0067

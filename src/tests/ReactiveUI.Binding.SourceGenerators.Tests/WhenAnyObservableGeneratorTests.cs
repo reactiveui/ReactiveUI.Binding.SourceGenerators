@@ -73,7 +73,7 @@ public class WhenAnyObservableGeneratorTests
         var result = await TestHelper.TestPassWithResult(
             source,
             typeof(WhenAnyObservableGeneratorTests),
-            LanguageVersion.CSharp7_3);
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 

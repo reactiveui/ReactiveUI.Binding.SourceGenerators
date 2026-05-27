@@ -38,7 +38,7 @@ public class MyView : INotifyPropertyChanged
             }
 
             _nameText = value;
-            PropertyChanged?.Invoke(this, new(nameof(NameText)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameText)));
         }
     }
 
@@ -56,7 +56,7 @@ public class MyView : INotifyPropertyChanged
             }
 
             _ageDisplay = value;
-            PropertyChanged?.Invoke(this, new(nameof(AgeDisplay)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AgeDisplay)));
         }
     }
 }

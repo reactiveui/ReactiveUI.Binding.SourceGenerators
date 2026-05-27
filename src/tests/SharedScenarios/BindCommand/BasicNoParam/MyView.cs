@@ -22,6 +22,6 @@ public class MyView : IViewFor, INotifyPropertyChanged
     /// <summary>
     /// Gets the save button.
     /// </summary>
-    public MyButton SaveButton { get; } = new();
+    public MyButton SaveButton { get; } = new MyButton();
 }
 #pragma warning restore CS0067
