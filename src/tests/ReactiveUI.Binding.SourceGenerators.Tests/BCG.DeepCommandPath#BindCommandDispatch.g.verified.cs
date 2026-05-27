@@ -17,7 +17,7 @@ namespace ReactiveUI.Binding
             this global::SharedScenarios.BindCommand.DeepCommandPath.MyView view,
             global::SharedScenarios.BindCommand.DeepCommandPath.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.DeepCommandPath.MyViewModel, global::System.Windows.Input.ICommand?>> propertyName,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.DeepCommandPath.MyView, global::SharedScenarios.BindCommand.DeepCommandPath.MyButton?>> controlName,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.DeepCommandPath.MyView, global::SharedScenarios.BindCommand.DeepCommandPath.MyButton>> controlName,
             string? toEvent = null,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("propertyName")] string propertyNameExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("controlName")] string controlNameExpression = "",

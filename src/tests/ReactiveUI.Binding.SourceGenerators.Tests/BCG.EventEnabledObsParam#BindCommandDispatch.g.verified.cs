@@ -17,7 +17,7 @@ namespace ReactiveUI.Binding
             this global::SharedScenarios.BindCommand.EventEnabledObsParam.MyView view,
             global::SharedScenarios.BindCommand.EventEnabledObsParam.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.EventEnabledObsParam.MyViewModel, global::System.Windows.Input.ICommand?>> propertyName,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.EventEnabledObsParam.MyView, global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton?>> controlName,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.EventEnabledObsParam.MyView, global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton>> controlName,
             global::System.IObservable<string> withParameter,
             string? toEvent = null,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("propertyName")] string propertyNameExpression = "",

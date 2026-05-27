@@ -16,6 +16,10 @@ namespace ReactiveUI.Binding;
     "Major Code Smell",
     "S107:Methods should not have too many parameters",
     Justification = "Deliberately large arity intrinsic to the N-argument binding/observable API surface.")]
+[SuppressMessage(
+    "Critical Code Smell",
+    "S2360:Optional parameters should not be used",
+    Justification = "Optional toEvent and CallerInfo params are part of the dispatch stub contract; overloads here would shadow the generated overloads and break dispatch.")]
 public static partial class ReactiveUIBindingExtensions
 {
     /// <summary>

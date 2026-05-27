@@ -150,8 +150,18 @@ internal static class BindCommandCodeGenerator
         BindCommandTypeGroup group,
         bool supportsNullable)
     {
+        // The command selector is nullable (a command property may be null), matching the runtime stub's
+        // Expression<Func<TViewModel, TProp?>>. The control selector stays non-nullable to match the stub's
+        // Expression<Func<TView, TControl>> (TControl is a non-null class) so overload resolution selects this
+        // generated overload instead of falling through to the runtime fallback.
         var commandType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].CommandPropertyPath, supportsNullable);
-        var controlType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].ControlPropertyPath, supportsNullable);
+        var controlType = group.ControlTypeFullName;
+
+        // The expression-form command-parameter selector is nullable for reference-type parameters, matching the
+        // runtime stub's Expression<Func<TViewModel, TParam?>> so the parameter lambda may return null without CS8603.
+        var withParameterExprType = supportsNullable && group.Invocations[0].ParameterIsReferenceType
+            ? group.ParameterTypeFullName + "?"
+            : group.ParameterTypeFullName;
         sb.AppendLine($"""
                                /// <summary>
                                /// Concrete typed overload for BindCommand on {group.ViewTypeFullName}.
@@ -171,7 +181,7 @@ internal static class BindCommandCodeGenerator
         else if (group.HasExpressionParameter)
         {
             sb.AppendLine(
-                $"            global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {group.ParameterTypeFullName}>> withParameter,");
+                $"            global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {withParameterExprType}>> withParameter,");
         }
 
         sb.AppendLine($"""
@@ -239,8 +249,18 @@ internal static class BindCommandCodeGenerator
         BindCommandTypeGroup group,
         bool supportsNullable)
     {
+        // The command selector is nullable (a command property may be null), matching the runtime stub's
+        // Expression<Func<TViewModel, TProp?>>. The control selector stays non-nullable to match the stub's
+        // Expression<Func<TView, TControl>> (TControl is a non-null class) so overload resolution selects this
+        // generated overload instead of falling through to the runtime fallback.
         var commandType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].CommandPropertyPath, supportsNullable);
-        var controlType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].ControlPropertyPath, supportsNullable);
+        var controlType = group.ControlTypeFullName;
+
+        // The expression-form command-parameter selector is nullable for reference-type parameters, matching the
+        // runtime stub's Expression<Func<TViewModel, TParam?>> so the parameter lambda may return null without CS8603.
+        var withParameterExprType = supportsNullable && group.Invocations[0].ParameterIsReferenceType
+            ? group.ParameterTypeFullName + "?"
+            : group.ParameterTypeFullName;
         sb.AppendLine($"""
                                /// <summary>
                                /// Concrete typed overload for BindCommand on {group.ViewTypeFullName}.
@@ -260,7 +280,7 @@ internal static class BindCommandCodeGenerator
         else if (group.HasExpressionParameter)
         {
             sb.AppendLine(
-                $"            global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {group.ParameterTypeFullName}>> withParameter,");
+                $"            global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {withParameterExprType}>> withParameter,");
         }
 
         sb.AppendLine($$"""

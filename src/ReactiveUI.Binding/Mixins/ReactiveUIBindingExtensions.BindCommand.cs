@@ -34,11 +34,9 @@ public static partial class ReactiveUIBindingExtensions
         TViewModel? viewModel,
         Expression<Func<TViewModel, TProp?>> propertyName,
         Expression<Func<TView, TControl>> controlName,
-        string? toEvent,
-        [CallerArgumentExpression("propertyName")]
-        string propertyNameExpression = "",
-        [CallerArgumentExpression("controlName")]
-        string controlNameExpression = "",
+        string? toEvent = null,
+        [CallerArgumentExpression("propertyName")] string propertyNameExpression = "",
+        [CallerArgumentExpression("controlName")] string controlNameExpression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TView : class, IViewFor
@@ -66,7 +64,7 @@ public static partial class ReactiveUIBindingExtensions
         TViewModel? viewModel,
         Expression<Func<TViewModel, TProp?>> propertyName,
         Expression<Func<TView, TControl>> controlName,
-        string? toEvent,
+        string? toEvent = null,
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TView : class, IViewFor
@@ -77,29 +75,6 @@ public static partial class ReactiveUIBindingExtensions
     {
         throw new InvalidOperationException(NoGeneratedBindingMessage);
     }
-
-    /// <summary>
-    /// Binds a command from a view model to a control on a view using the control's default event.
-    /// </summary>
-    /// <typeparam name="TView">The type of the view.</typeparam>
-    /// <typeparam name="TViewModel">The type of the view model.</typeparam>
-    /// <typeparam name="TProp">The type of the command property.</typeparam>
-    /// <typeparam name="TControl">The type of the control.</typeparam>
-    /// <param name="view">The view to bind to.</param>
-    /// <param name="viewModel">The view model containing the command.</param>
-    /// <param name="propertyName">An expression that selects the command property on the view model.</param>
-    /// <param name="controlName">An expression that selects the control on the view.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    public static IDisposable BindCommand<TView, TViewModel, TProp, TControl>(
-        this TView view,
-        TViewModel? viewModel,
-        Expression<Func<TViewModel, TProp?>> propertyName,
-        Expression<Func<TView, TControl>> controlName)
-        where TView : class, IViewFor
-        where TViewModel : class
-        where TProp : ICommand
-        where TControl : class =>
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -127,11 +102,9 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TViewModel, TProp?>> propertyName,
         Expression<Func<TView, TControl>> controlName,
         IObservable<TParam?> withParameter,
-        string? toEvent,
-        [CallerArgumentExpression("propertyName")]
-        string propertyNameExpression = "",
-        [CallerArgumentExpression("controlName")]
-        string controlNameExpression = "",
+        string? toEvent = null,
+        [CallerArgumentExpression("propertyName")] string propertyNameExpression = "",
+        [CallerArgumentExpression("controlName")] string controlNameExpression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TView : class, IViewFor
@@ -162,7 +135,7 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TViewModel, TProp?>> propertyName,
         Expression<Func<TView, TControl>> controlName,
         IObservable<TParam?> withParameter,
-        string? toEvent,
+        string? toEvent = null,
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TView : class, IViewFor
@@ -173,32 +146,6 @@ public static partial class ReactiveUIBindingExtensions
     {
         throw new InvalidOperationException(NoGeneratedBindingMessage);
     }
-
-    /// <summary>
-    /// Binds a command (with an observable parameter source) to a control using the control's default event.
-    /// </summary>
-    /// <typeparam name="TView">The type of the view.</typeparam>
-    /// <typeparam name="TViewModel">The type of the view model.</typeparam>
-    /// <typeparam name="TProp">The type of the command property.</typeparam>
-    /// <typeparam name="TControl">The type of the control.</typeparam>
-    /// <typeparam name="TParam">The type of the command parameter.</typeparam>
-    /// <param name="view">The view to bind to.</param>
-    /// <param name="viewModel">The view model containing the command.</param>
-    /// <param name="propertyName">An expression that selects the command property on the view model.</param>
-    /// <param name="controlName">An expression that selects the control on the view.</param>
-    /// <param name="withParameter">An observable that provides the command parameter.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    public static IDisposable BindCommand<TView, TViewModel, TProp, TControl, TParam>(
-        this TView view,
-        TViewModel? viewModel,
-        Expression<Func<TViewModel, TProp?>> propertyName,
-        Expression<Func<TView, TControl>> controlName,
-        IObservable<TParam?> withParameter)
-        where TView : class, IViewFor
-        where TViewModel : class
-        where TProp : ICommand
-        where TControl : class =>
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -227,13 +174,10 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TViewModel, TProp?>> propertyName,
         Expression<Func<TView, TControl>> controlName,
         Expression<Func<TViewModel, TParam?>> withParameter,
-        string? toEvent,
-        [CallerArgumentExpression("propertyName")]
-        string propertyNameExpression = "",
-        [CallerArgumentExpression("controlName")]
-        string controlNameExpression = "",
-        [CallerArgumentExpression("withParameter")]
-        string withParameterExpression = "",
+        string? toEvent = null,
+        [CallerArgumentExpression("propertyName")] string propertyNameExpression = "",
+        [CallerArgumentExpression("controlName")] string controlNameExpression = "",
+        [CallerArgumentExpression("withParameter")] string withParameterExpression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TView : class, IViewFor
@@ -264,7 +208,7 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TViewModel, TProp?>> propertyName,
         Expression<Func<TView, TControl>> controlName,
         Expression<Func<TViewModel, TParam?>> withParameter,
-        string? toEvent,
+        string? toEvent = null,
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TView : class, IViewFor
@@ -275,30 +219,4 @@ public static partial class ReactiveUIBindingExtensions
     {
         throw new InvalidOperationException(NoGeneratedBindingMessage);
     }
-
-    /// <summary>
-    /// Binds a command (with an expression parameter source) to a control using the control's default event.
-    /// </summary>
-    /// <typeparam name="TView">The type of the view.</typeparam>
-    /// <typeparam name="TViewModel">The type of the view model.</typeparam>
-    /// <typeparam name="TProp">The type of the command property.</typeparam>
-    /// <typeparam name="TControl">The type of the control.</typeparam>
-    /// <typeparam name="TParam">The type of the command parameter.</typeparam>
-    /// <param name="view">The view to bind to.</param>
-    /// <param name="viewModel">The view model containing the command.</param>
-    /// <param name="propertyName">An expression that selects the command property on the view model.</param>
-    /// <param name="controlName">An expression that selects the control on the view.</param>
-    /// <param name="withParameter">An expression that selects the command parameter property on the view model.</param>
-    /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    public static IDisposable BindCommand<TView, TViewModel, TProp, TControl, TParam>(
-        this TView view,
-        TViewModel? viewModel,
-        Expression<Func<TViewModel, TProp?>> propertyName,
-        Expression<Func<TView, TControl>> controlName,
-        Expression<Func<TViewModel, TParam?>> withParameter)
-        where TView : class, IViewFor
-        where TViewModel : class
-        where TProp : ICommand
-        where TControl : class =>
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
 }

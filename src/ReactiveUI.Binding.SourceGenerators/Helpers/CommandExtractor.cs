@@ -340,6 +340,12 @@ internal static class CommandExtractor
                     result.ParameterPropertyPath = paramResult.Value.PropertyPath;
                     result.ParameterTypeFullName = paramResult.Value.TypeFullName;
                     result.ParameterExpressionText = paramResult.Value.ExpressionText;
+
+                    // The parameter selector's leaf type determines whether the generated withParameter
+                    // expression is annotated nullable; without this the lambda over a nullable property raises CS8603.
+                    var paramPath = paramResult.Value.PropertyPath;
+                    result.ParameterIsReferenceType = paramPath is { Length: > 0 }
+                        && paramPath[paramPath.Length - 1].IsReferenceType;
                 }
             }
             else if (param.Type is INamedTypeSymbol observableType && SymbolHelpers.IsIObservable(observableType))
