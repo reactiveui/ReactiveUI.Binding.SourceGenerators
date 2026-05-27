@@ -16,7 +16,7 @@ jobs:
             productNamespacePrefix: ReactiveUI.Binding
             installWorkloads: true
             minverMinimumMajorMinor: '3.3'
-            sonarProjectKey: reactiveui_ReactiveUI.Binding.SourceGenerators
+            sonarProjectKey: ReactiveUI.Binding.SourceGenerators
             sonarOrganization: reactiveui
             sonarExclusions: '**/tests/**,**/benchmarks/**,**/TestResults/**'
             sonarCoverageExclusions: '**/tests/**,**/benchmarks/**,**/*Tests/**,**/*Tests.cs,**/*TestModels/**'
