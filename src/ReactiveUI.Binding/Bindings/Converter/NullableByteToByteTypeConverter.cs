@@ -12,6 +12,11 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public sealed class NullableByteToByteTypeConverter : IBindingTypeConverter<byte?, byte>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
     public Type FromType => typeof(byte?);
 
@@ -19,7 +24,7 @@ public sealed class NullableByteToByteTypeConverter : IBindingTypeConverter<byte
     public Type ToType => typeof(byte);
 
     /// <inheritdoc/>
-    public int GetAffinityForObjects() => 2;
+    public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public bool TryConvert(byte? from, object? conversionHint, [NotNullWhen(true)] out byte result)
@@ -37,19 +42,25 @@ public sealed class NullableByteToByteTypeConverter : IBindingTypeConverter<byte
     /// <inheritdoc/>
     public bool TryConvertTyped(object? from, object? conversionHint, [NotNullWhen(true)] out object? result)
     {
-        if (from is null)
+        switch (from)
         {
-            result = null;
-            return TryConvert(null, conversionHint, out _);
-        }
+            case null:
+                {
+                    result = null;
+                    return TryConvert(null, conversionHint, out _);
+                }
 
-        if (from is byte value)
-        {
-            result = value;
-            return true;
-        }
+            case byte value:
+                {
+                    result = value;
+                    return true;
+                }
 
-        result = null;
-        return false;
+            default:
+                {
+                    result = null;
+                    return false;
+                }
+        }
     }
 }

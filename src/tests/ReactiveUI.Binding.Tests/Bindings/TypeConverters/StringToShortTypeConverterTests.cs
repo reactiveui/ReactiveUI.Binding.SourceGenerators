@@ -10,6 +10,26 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToShortTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Short value parsed from a positive numeric string.
+    /// </summary>
+    private const short ParsedShort = 12_345;
+
+    /// <summary>
+    /// Short value parsed from a negative numeric string.
+    /// </summary>
+    private const short NegativeShort = -12_345;
+
+    /// <summary>
+    /// Short value parsed in the typed conversion test.
+    /// </summary>
+    private const short TypedShort = 1_000;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +38,7 @@ public class StringToShortTypeConverterTests
     {
         var converter = new StringToShortTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,8 +49,7 @@ public class StringToShortTypeConverterTests
     public async Task TryConvert_EmptyString_ReturnsFalse()
     {
         var converter = new StringToShortTypeConverter();
-
-        var result = converter.TryConvert(string.Empty, null, out var output);
+        var result = converter.TryConvert(string.Empty, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -43,8 +62,7 @@ public class StringToShortTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToShortTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -57,8 +75,7 @@ public class StringToShortTypeConverterTests
     public async Task TryConvert_OutOfRangeValue_ReturnsFalse()
     {
         var converter = new StringToShortTypeConverter();
-
-        var result = converter.TryConvert("99999", null, out var output);
+        var result = converter.TryConvert("99999", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -75,7 +92,7 @@ public class StringToShortTypeConverterTests
         var result = converter.TryConvert("12345", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((short)12345);
+        await Assert.That(output).IsEqualTo((short)ParsedShort);
     }
 
     /// <summary>
@@ -120,7 +137,7 @@ public class StringToShortTypeConverterTests
         var result = converter.TryConvert("-12345", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((short)-12345);
+        await Assert.That(output).IsEqualTo((short)NegativeShort);
     }
 
     /// <summary>
@@ -135,7 +152,7 @@ public class StringToShortTypeConverterTests
         var result = converter.TryConvertTyped("1000", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((short)1000);
+        await Assert.That(output).IsEqualTo((short)TypedShort);
     }
 
     /// <summary>
@@ -147,7 +164,7 @@ public class StringToShortTypeConverterTests
     {
         var converter = new StringToShortTypeConverter();
 
-        var result = converter.TryConvertTyped(1234, null, out var output);
+        var result = converter.TryConvertTyped(1_234, null, out var output);
 
         await Assert.That(result).IsFalse();
         await Assert.That(output).IsNull();

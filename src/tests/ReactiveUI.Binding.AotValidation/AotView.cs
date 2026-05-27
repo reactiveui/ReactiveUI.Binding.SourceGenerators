@@ -27,11 +27,13 @@ public class AotView : INotifyPropertyChanged
         get => _displayName;
         set
         {
-            if (_displayName != value)
+            if (_displayName == value)
             {
-                _displayName = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayName)));
+                return;
             }
+
+            _displayName = value;
+            PropertyChanged?.Invoke(this, new(nameof(DisplayName)));
         }
     }
 }

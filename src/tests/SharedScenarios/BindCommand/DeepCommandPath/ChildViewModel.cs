@@ -5,35 +5,36 @@
 using System.ComponentModel;
 using System.Windows.Input;
 
-namespace SharedScenarios.BindCommand.DeepCommandPath
+namespace SharedScenarios.BindCommand.DeepCommandPath;
+
+/// <summary>
+/// Child ViewModel that owns the command.
+/// </summary>
+public class ChildViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// Child ViewModel that owns the command.
+    /// The backing field for <see cref="SaveCommand"/>.
     /// </summary>
-    public class ChildViewModel : INotifyPropertyChanged
+    private ICommand? _saveCommand;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the save command.
+    /// </summary>
+    public ICommand? SaveCommand
     {
-        /// <summary>
-        /// The backing field for <see cref="SaveCommand"/>.
-        /// </summary>
-        private ICommand? _saveCommand;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the save command.
-        /// </summary>
-        public ICommand? SaveCommand
+        get => _saveCommand;
+        set
         {
-            get => _saveCommand;
-            set
+            if (_saveCommand == value)
             {
-                if (_saveCommand != value)
-                {
-                    _saveCommand = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SaveCommand)));
-                }
+                return;
             }
+
+            _saveCommand = value;
+            PropertyChanged?.Invoke(this, new(nameof(SaveCommand)));
         }
     }
 }

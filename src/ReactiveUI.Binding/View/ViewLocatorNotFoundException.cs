@@ -16,7 +16,8 @@ public class ViewLocatorNotFoundException : Exception
     /// Initializes a new instance of the <see cref="ViewLocatorNotFoundException"/> class.
     /// </summary>
     public ViewLocatorNotFoundException()
-        : base("No IViewLocator is registered. Call RxBindingBuilder.CreateReactiveUIBindingBuilder().WithCoreServices().BuildApp() to register default services.")
+        : base(
+            "No IViewLocator is registered. Call RxBindingBuilder.CreateReactiveUIBindingBuilder().WithCoreServices().BuildApp() to register default services.")
     {
     }
 

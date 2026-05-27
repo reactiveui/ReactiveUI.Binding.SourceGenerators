@@ -5,7 +5,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -25,12 +24,12 @@ public class EventHelpersTests
     public async Task FindEventArgsType_ActionDelegate_ReturnsEventArgs()
     {
         const string source = """
-            using System;
-            namespace TestApp
-            {
-                public class MyButton { public event Action Clicked; }
-            }
-            """;
+                              using System;
+                              namespace TestApp
+                              {
+                                  public class MyButton { public event Action Clicked; }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyButton");
@@ -48,11 +47,11 @@ public class EventHelpersTests
     public async Task FindEventArgsType_NoMatchingEvent_ReturnsNull()
     {
         const string source = """
-            namespace TestApp
-            {
-                public class MyButton { }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class MyButton { }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyButton");
@@ -70,12 +69,12 @@ public class EventHelpersTests
     public async Task FindDefaultEvent_ControlWithClickEvent_ReturnsClick()
     {
         const string source = """
-            using System;
-            namespace TestApp
-            {
-                public class MyButton { public event EventHandler Click; }
-            }
-            """;
+                              using System;
+                              namespace TestApp
+                              {
+                                  public class MyButton { public event EventHandler Click; }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyButton");
@@ -94,12 +93,12 @@ public class EventHelpersTests
     public async Task FindDefaultEvent_ControlWithTouchUpInsideEvent_ReturnsTouchUpInside()
     {
         const string source = """
-            using System;
-            namespace TestApp
-            {
-                public class TouchControl { public event EventHandler TouchUpInside; }
-            }
-            """;
+                              using System;
+                              namespace TestApp
+                              {
+                                  public class TouchControl { public event EventHandler TouchUpInside; }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "TouchControl");
@@ -117,12 +116,12 @@ public class EventHelpersTests
     public async Task FindDefaultEvent_ControlWithNoMatchingEvent_ReturnsNull()
     {
         const string source = """
-            using System;
-            namespace TestApp
-            {
-                public class PlainControl { public event EventHandler Hover; }
-            }
-            """;
+                              using System;
+                              namespace TestApp
+                              {
+                                  public class PlainControl { public event EventHandler Hover; }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "PlainControl");
@@ -143,14 +142,14 @@ public class EventHelpersTests
     public async Task FindEventArgsType_PropertyNamedClick_ReturnsNull()
     {
         const string source = """
-            namespace TestApp
-            {
-                public class ControlWithClickProperty
-                {
-                    public bool Click { get; set; }
-                }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class ControlWithClickProperty
+                                  {
+                                      public bool Click { get; set; }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "ControlWithClickProperty");
@@ -169,14 +168,14 @@ public class EventHelpersTests
     public async Task FindEventArgsType_MethodNamedClick_ReturnsNull()
     {
         const string source = """
-            namespace TestApp
-            {
-                public class ControlWithClickMethod
-                {
-                    public void Click() { }
-                }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class ControlWithClickMethod
+                                  {
+                                      public void Click() { }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "ControlWithClickMethod");

@@ -22,5 +22,5 @@ public enum BindingDirection
     /// <summary>
     /// One-way asynchronous binding from source to target.
     /// </summary>
-    AsyncOneWay,
+    AsyncOneWay
 }

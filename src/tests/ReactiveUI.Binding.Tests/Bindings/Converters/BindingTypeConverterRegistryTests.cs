@@ -34,7 +34,7 @@ public class BindingTypeConverterRegistryTests
         var list = new List<IBindingTypeConverter> { converter };
         var source = new Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>>
         {
-            [(typeof(string), typeof(int))] = list,
+            [(typeof(string), typeof(int))] = list
         };
 
         var clone = BindingTypeConverterRegistry.CloneRegistryShallow(source);
@@ -58,7 +58,7 @@ public class BindingTypeConverterRegistryTests
         var list = new List<IBindingTypeConverter> { converter };
         var source = new Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>>
         {
-            [(typeof(string), typeof(int))] = list,
+            [(typeof(string), typeof(int))] = list
         };
 
         var clone = BindingTypeConverterRegistry.CloneRegistryShallow(source);
@@ -85,6 +85,11 @@ public class BindingTypeConverterRegistryTests
     /// </summary>
     private sealed class TestConverter(Type fromType, Type toType) : IBindingTypeConverter
     {
+        /// <summary>
+        /// Affinity returned by this stub converter indicating a strong match.
+        /// </summary>
+        private const int StubAffinity = 2;
+
         /// <inheritdoc/>
         public Type FromType { get; } = fromType;
 
@@ -92,7 +97,7 @@ public class BindingTypeConverterRegistryTests
         public Type ToType { get; } = toType;
 
         /// <inheritdoc/>
-        public int GetAffinityForObjects() => 2;
+        public int GetAffinityForObjects() => StubAffinity;
 
         /// <inheritdoc/>
         public bool TryConvertTyped(object? from, object? conversionHint, out object? result)

@@ -13,20 +13,35 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAny;
 public class WhenAnyTests
 {
     /// <summary>
+    /// The initial name value used across the WhenAny tests.
+    /// </summary>
+    private const string InitialName = "Initial";
+
+    /// <summary>
+    /// The expected emission count after an initial value plus one change.
+    /// </summary>
+    private const int ExpectedEmissionCount = 2;
+
+    /// <summary>
+    /// The updated age value used in change-emission tests.
+    /// </summary>
+    private const int AgeValue = 25;
+
+    /// <summary>
     /// Verifies that a single-property WhenAny with value selector emits the initial value.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsInitialValue()
     {
-        var vm = new TestViewModel { Name = "Initial" };
+        var vm = new TestViewModel { Name = InitialName };
         var values = new List<string>();
 
         using var sub = WhenAnyScenarios.SingleProperty_Name(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo("Initial");
+        await Assert.That(values[0]).IsEqualTo(InitialName);
     }
 
     /// <summary>
@@ -36,7 +51,7 @@ public class WhenAnyTests
     [Test]
     public async Task SingleProperty_EmitsOnChange()
     {
-        var vm = new TestViewModel { Name = "Initial" };
+        var vm = new TestViewModel { Name = InitialName };
         var values = new List<string>();
 
         using var sub = WhenAnyScenarios.SingleProperty_Name(vm)
@@ -44,7 +59,7 @@ public class WhenAnyTests
 
         vm.Name = "Changed";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
         await Assert.That(values).Contains("Changed");
     }
 
@@ -100,7 +115,7 @@ public class WhenAnyTests
 
         await Assert.That(values[^1]).IsEqualTo("Bob_30");
 
-        vm.Age = 25;
+        vm.Age = AgeValue;
 
         await Assert.That(values[^1]).IsEqualTo("Bob_25");
     }
@@ -112,7 +127,7 @@ public class WhenAnyTests
     [Test]
     public async Task Disposal_StopsListening()
     {
-        var vm = new TestViewModel { Name = "Initial" };
+        var vm = new TestViewModel { Name = InitialName };
         var values = new List<string>();
 
         var sub = WhenAnyScenarios.SingleProperty_Name(vm)
@@ -123,6 +138,6 @@ public class WhenAnyTests
         vm.Name = "AfterDisposal";
 
         await Assert.That(values.Count).IsEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo("Initial");
+        await Assert.That(values[0]).IsEqualTo(InitialName);
     }
 }

@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class NullableSingleToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class NullableSingleToStringTypeConverterTests
     {
         var converter = new NullableSingleToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -34,7 +39,7 @@ public class NullableSingleToStringTypeConverterTests
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(float.MaxValue.ToString());
+        await Assert.That(output).IsEqualTo(float.MaxValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -50,7 +55,7 @@ public class NullableSingleToStringTypeConverterTests
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(float.MinValue.ToString());
+        await Assert.That(output).IsEqualTo(float.MinValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -77,8 +82,7 @@ public class NullableSingleToStringTypeConverterTests
     public async Task TryConvert_NullValue_ReturnsTrue()
     {
         var converter = new NullableSingleToStringTypeConverter();
-
-        var result = converter.TryConvert(null, null, out var output);
+        var result = converter.TryConvert(null, null, out _);
 
         await Assert.That(result).IsTrue();
     }

@@ -4,39 +4,40 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanging.FourLevelDeepChain
+namespace SharedScenarios.WhenChanging.FourLevelDeepChain;
+
+/// <summary>
+/// Second level in the deep chain with before-change notifications.
+/// </summary>
+public class Level2 : INotifyPropertyChanged, INotifyPropertyChanging
 {
     /// <summary>
-    /// Second level in the deep chain with before-change notifications.
+    /// The backing field for <see cref="Model"/>.
     /// </summary>
-    public class Level2 : INotifyPropertyChanged, INotifyPropertyChanging
+    private Level3 _model = new();
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <inheritdoc/>
+    public event PropertyChangingEventHandler? PropertyChanging;
+
+    /// <summary>
+    /// Gets or sets the level 3 model.
+    /// </summary>
+    public Level3 Model
     {
-        /// <summary>
-        /// The backing field for <see cref="Model"/>.
-        /// </summary>
-        private Level3 _model = new();
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <inheritdoc/>
-        public event PropertyChangingEventHandler? PropertyChanging;
-
-        /// <summary>
-        /// Gets or sets the level 3 model.
-        /// </summary>
-        public Level3 Model
+        get => _model;
+        set
         {
-            get => _model;
-            set
+            if (_model == value)
             {
-                if (_model != value)
-                {
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Model)));
-                    _model = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Model)));
-                }
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Model)));
+            _model = value;
+            PropertyChanged?.Invoke(this, new(nameof(Model)));
         }
     }
 }

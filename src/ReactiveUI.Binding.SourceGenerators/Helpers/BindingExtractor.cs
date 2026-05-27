@@ -4,7 +4,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -14,6 +13,12 @@ namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 /// </summary>
 internal static class BindingExtractor
 {
+    /// <summary>
+    /// The minimum number of arguments a binding invocation must have
+    /// (source/view, target/view model, source property, target property).
+    /// </summary>
+    private const int MinimumBindingArgumentCount = 3;
+
     /// <summary>
     /// Pipeline B transform: extracts BindingInvocationInfo from a BindOneWay/BindTwoWay/OneWayBind/Bind invocation.
     /// </summary>
@@ -40,11 +45,11 @@ internal static class BindingExtractor
         }
 
         var methodName = memberAccess.Name.Identifier.Text;
-        var isTwoWay = methodName == Constants.BindTwoWayMethodName || methodName == Constants.BindMethodName;
+        var isTwoWay = methodName is Constants.BindTwoWayMethodName or Constants.BindMethodName;
 
         // Need at least 3 arguments: source/view (this), target/viewModel, sourceProp/vmProp, targetProp/viewProp
         var args = invocation.ArgumentList.Arguments;
-        InvalidOperationExceptionHelper.EnsureMinimumArguments(args.Count, 3);
+        InvalidOperationExceptionHelper.EnsureMinimumArguments(args.Count, MinimumBindingArgumentCount);
 
         // Extract property paths
         var sourcePropertyArg = args[1].Expression;
@@ -70,9 +75,58 @@ internal static class BindingExtractor
         var sourcePropertyTypeFullName = sourcePropertyPath[sourcePropertyPath.Length - 1].PropertyTypeFullName;
         var targetPropertyTypeFullName = targetPropertyPath[targetPropertyPath.Length - 1].PropertyTypeFullName;
 
-        var hasConversion = false;
-        var hasScheduler = false;
-        var hasConverterOverride = false;
+        DetectBindingParameters(
+            methodSymbol,
+            out var hasConversion,
+            out var hasScheduler,
+            out var hasConverterOverride);
+
+        var filePath = invocation.SyntaxTree.FilePath;
+        var lineNumber = invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+        var sourceExpressionText =
+            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(sourcePropertyArg.ToString());
+        var targetExpressionText =
+            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString());
+
+        var isViewFirst = methodName is Constants.OneWayBindMethodName or Constants.BindMethodName;
+        var sourceTypeFullName = isViewFirst ? firstArgTypeName : receiverTypeName;
+        var targetTypeFullName = isViewFirst ? receiverTypeName : firstArgTypeName;
+
+        return new(
+            filePath,
+            lineNumber,
+            sourceTypeFullName,
+            new(sourcePropertyPath),
+            targetTypeFullName,
+            new(targetPropertyPath),
+            sourcePropertyTypeFullName,
+            targetPropertyTypeFullName,
+            hasConversion,
+            hasScheduler,
+            isTwoWay,
+            methodName,
+            sourceExpressionText,
+            targetExpressionText,
+            hasConverterOverride);
+    }
+
+    /// <summary>
+    /// Scans the method parameters to detect conversion, scheduler, and converter-override
+    /// capabilities of the binding overload.
+    /// </summary>
+    /// <param name="methodSymbol">The resolved method symbol.</param>
+    /// <param name="hasConversion">Set to true if a conversion/selector parameter exists.</param>
+    /// <param name="hasScheduler">Set to true if a <c>scheduler</c> parameter exists.</param>
+    /// <param name="hasConverterOverride">Set to true if an <c>IBindingTypeConverter</c> converter override exists.</param>
+    private static void DetectBindingParameters(
+        IMethodSymbol methodSymbol,
+        out bool hasConversion,
+        out bool hasScheduler,
+        out bool hasConverterOverride)
+    {
+        hasConversion = false;
+        hasScheduler = false;
+        hasConverterOverride = false;
 
         foreach (var parameter in methodSymbol.Parameters)
         {
@@ -91,31 +145,5 @@ internal static class BindingExtractor
                 hasScheduler = true;
             }
         }
-
-        var filePath = invocation.SyntaxTree.FilePath;
-        var lineNumber = invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-        var sourceExpressionText = CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(sourcePropertyArg.ToString());
-        var targetExpressionText = CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString());
-
-        var isViewFirst = methodName == Constants.OneWayBindMethodName || methodName == Constants.BindMethodName;
-        var sourceTypeFullName = isViewFirst ? firstArgTypeName : receiverTypeName;
-        var targetTypeFullName = isViewFirst ? receiverTypeName : firstArgTypeName;
-
-        return new BindingInvocationInfo(
-            CallerFilePath: filePath,
-            CallerLineNumber: lineNumber,
-            SourceTypeFullName: sourceTypeFullName,
-            SourcePropertyPath: new EquatableArray<PropertyPathSegment>(sourcePropertyPath),
-            TargetTypeFullName: targetTypeFullName,
-            TargetPropertyPath: new EquatableArray<PropertyPathSegment>(targetPropertyPath),
-            SourcePropertyTypeFullName: sourcePropertyTypeFullName,
-            TargetPropertyTypeFullName: targetPropertyTypeFullName,
-            HasConversion: hasConversion,
-            HasScheduler: hasScheduler,
-            IsTwoWay: isTwoWay,
-            MethodName: methodName,
-            SourceExpressionText: sourceExpressionText,
-            TargetExpressionText: targetExpressionText,
-            HasConverterOverride: hasConverterOverride);
     }
 }

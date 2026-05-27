@@ -41,12 +41,14 @@ public class Address : INotifyPropertyChanged, INotifyPropertyChanging
         get => _street;
         set
         {
-            if (_street != value)
+            if (_street == value)
             {
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Street)));
-                _street = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Street)));
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Street)));
+            _street = value;
+            PropertyChanged?.Invoke(this, new(nameof(Street)));
         }
     }
 
@@ -58,12 +60,14 @@ public class Address : INotifyPropertyChanged, INotifyPropertyChanging
         get => _city;
         set
         {
-            if (_city != value)
+            if (_city == value)
             {
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(City)));
-                _city = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(City)));
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(City)));
+            _city = value;
+            PropertyChanged?.Invoke(this, new(nameof(City)));
         }
     }
 
@@ -75,12 +79,14 @@ public class Address : INotifyPropertyChanged, INotifyPropertyChanging
         get => _zipCode;
         set
         {
-            if (_zipCode != value)
+            if (_zipCode == value)
             {
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(ZipCode)));
-                _zipCode = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZipCode)));
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(ZipCode)));
+            _zipCode = value;
+            PropertyChanged?.Invoke(this, new(nameof(ZipCode)));
         }
     }
 }

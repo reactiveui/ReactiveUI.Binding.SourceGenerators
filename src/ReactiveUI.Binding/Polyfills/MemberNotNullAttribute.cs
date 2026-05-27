@@ -6,10 +6,6 @@
 // https://github.com/SimonCropp/Polyfill
 #if !NET
 
-using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-
 using Targets = System.AttributeTargets;
 
 namespace System.Diagnostics.CodeAnalysis;
@@ -31,8 +27,8 @@ internal sealed class MemberNotNullAttribute : Attribute
     /// Initializes a new instance of the <see cref="MemberNotNullAttribute"/> class.
     /// </summary>
     /// <param name="member">Field or property member name.</param>
-    public MemberNotNullAttribute(string member) =>
-        Members = new[] { member };
+    public MemberNotNullAttribute([SuppressMessage("Design", "CA1019:Define accessors for attribute arguments", Justification = "For polyfill")] string member) =>
+        Members = [member];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MemberNotNullAttribute"/> class.

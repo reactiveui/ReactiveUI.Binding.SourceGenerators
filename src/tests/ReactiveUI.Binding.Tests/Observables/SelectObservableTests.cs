@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reactive.Subjects;
-
 using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
@@ -13,6 +12,31 @@ namespace ReactiveUI.Binding.Tests.Observables;
 /// </summary>
 public class SelectObservableTests
 {
+    /// <summary>
+    /// The first value pushed through the source observable.
+    /// </summary>
+    private const int FirstInput = 5;
+
+    /// <summary>
+    /// The second value pushed through the source observable.
+    /// </summary>
+    private const int SecondInput = 10;
+
+    /// <summary>
+    /// The expected number of projected results.
+    /// </summary>
+    private const int ExpectedResultCount = 2;
+
+    /// <summary>
+    /// The expected first projected result (first input doubled).
+    /// </summary>
+    private const int FirstExpectedResult = 10;
+
+    /// <summary>
+    /// The expected second projected result (second input doubled).
+    /// </summary>
+    private const int SecondExpectedResult = 20;
+
     /// <summary>
     /// Verifies that error propagates through Select.
     /// </summary>
@@ -122,12 +146,12 @@ public class SelectObservableTests
             _ => { },
             () => { }));
 
-        source.OnNext(5);
-        source.OnNext(10);
+        source.OnNext(FirstInput);
+        source.OnNext(SecondInput);
 
-        await Assert.That(results).Count().IsEqualTo(2);
-        await Assert.That(results[0]).IsEqualTo(10);
-        await Assert.That(results[1]).IsEqualTo(20);
+        await Assert.That(results).Count().IsEqualTo(ExpectedResultCount);
+        await Assert.That(results[0]).IsEqualTo(FirstExpectedResult);
+        await Assert.That(results[1]).IsEqualTo(SecondExpectedResult);
     }
 
     /// <summary>

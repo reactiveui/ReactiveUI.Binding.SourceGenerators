@@ -5,7 +5,6 @@
 // Polyfill implementation adapted from SimonCropp/Polyfill
 // https://github.com/SimonCropp/Polyfill
 #if !NET
-
 using System.Diagnostics;
 
 namespace System.Diagnostics.CodeAnalysis;

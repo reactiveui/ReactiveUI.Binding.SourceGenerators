@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
@@ -56,13 +55,13 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            hasCommandProperty: true,
-            hasCommandParameterProperty: true,
             hasObservableParameter: true,
-            parameterTypeFullName: "global::System.String");
+            parameterTypeFullName: "global::System.String",
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
 
         var plugin = new CommandPropertyBindingPlugin();
-        plugin.EmitBinding(sb, inv, "view.SaveButton");
+        plugin.EmitBinding(sb, inv, "view.SaveButton", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("Volatile.Write(ref __latestParam, p)");
@@ -82,14 +81,14 @@ public class BindCommandCodeGeneratorHelperTests
             [ModelFactory.CreatePropertyPathSegment("Param", "global::System.String", "global::TestApp.MyViewModel")]);
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            hasCommandProperty: true,
-            hasCommandParameterProperty: true,
             hasExpressionParameter: true,
             parameterTypeFullName: "global::System.String",
-            parameterPropertyPath: paramPath);
+            parameterPropertyPath: paramPath,
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
 
         var plugin = new CommandPropertyBindingPlugin();
-        plugin.EmitBinding(sb, inv, "view.SaveButton");
+        plugin.EmitBinding(sb, inv, "view.SaveButton", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("view.SaveButton.Command = cmd");
@@ -110,7 +109,7 @@ public class BindCommandCodeGeneratorHelperTests
             hasCommandParameterProperty: false);
 
         var plugin = new CommandPropertyBindingPlugin();
-        plugin.EmitBinding(sb, inv, "view.SaveButton");
+        plugin.EmitBinding(sb, inv, "view.SaveButton", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("view.SaveButton.Command = cmd");
@@ -178,13 +177,13 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            resolvedEventName: "Click",
-            hasEnabledProperty: true,
             hasObservableParameter: true,
-            parameterTypeFullName: "global::System.String");
+            parameterTypeFullName: "global::System.String",
+            resolvedEventName: "Click",
+            hasEnabledProperty: true);
 
         var plugin = new EventEnabledBindingPlugin();
-        plugin.EmitBinding(sb, inv, "view.SaveButton");
+        plugin.EmitBinding(sb, inv, "view.SaveButton", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("view.SaveButton.Enabled = false");
@@ -205,14 +204,14 @@ public class BindCommandCodeGeneratorHelperTests
             [ModelFactory.CreatePropertyPathSegment("Param", "global::System.String", "global::TestApp.MyViewModel")]);
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            resolvedEventName: "Click",
-            hasEnabledProperty: true,
             hasExpressionParameter: true,
             parameterTypeFullName: "global::System.String",
-            parameterPropertyPath: paramPath);
+            parameterPropertyPath: paramPath,
+            resolvedEventName: "Click",
+            hasEnabledProperty: true);
 
         var plugin = new EventEnabledBindingPlugin();
-        plugin.EmitBinding(sb, inv, "view.SaveButton");
+        plugin.EmitBinding(sb, inv, "view.SaveButton", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("view.SaveButton.Enabled = cmd.CanExecute(viewModel.Param)");
@@ -233,7 +232,7 @@ public class BindCommandCodeGeneratorHelperTests
             hasEnabledProperty: true);
 
         var plugin = new EventEnabledBindingPlugin();
-        plugin.EmitBinding(sb, inv, "view.SaveButton");
+        plugin.EmitBinding(sb, inv, "view.SaveButton", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("view.SaveButton.Enabled = cmd.CanExecute(null)");
@@ -255,7 +254,7 @@ public class BindCommandCodeGeneratorHelperTests
             hasEnabledProperty: true);
 
         var plugin = new EventEnabledBindingPlugin();
-        plugin.EmitBinding(sb, inv, "view.SaveButton");
+        plugin.EmitBinding(sb, inv, "view.SaveButton", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("global::System.EventArgs");
@@ -304,7 +303,7 @@ public class BindCommandCodeGeneratorHelperTests
             resolvedEventArgsTypeFullName: null);
 
         var plugin = new DefaultEventBindingPlugin();
-        plugin.EmitBinding(sb, inv, "view.SaveButton");
+        plugin.EmitBinding(sb, inv, "view.SaveButton", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("global::System.EventArgs");
@@ -323,7 +322,7 @@ public class BindCommandCodeGeneratorHelperTests
             resolvedEventArgsTypeFullName: "global::System.Windows.RoutedEventArgs");
 
         var plugin = new DefaultEventBindingPlugin();
-        plugin.EmitBinding(sb, inv, "view.SaveButton");
+        plugin.EmitBinding(sb, inv, "view.SaveButton", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("global::System.Windows.RoutedEventArgs");
@@ -381,7 +380,7 @@ public class BindCommandCodeGeneratorHelperTests
             null,
             [inv]);
 
-        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true);
+        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -407,7 +406,7 @@ public class BindCommandCodeGeneratorHelperTests
             null,
             [inv]);
 
-        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false);
+        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerFilePath.EndsWith");
@@ -435,7 +434,7 @@ public class BindCommandCodeGeneratorHelperTests
             "global::System.String",
             [inv]);
 
-        BindCommandCodeGenerator.GenerateCallerArgExprOverload(sb, group);
+        BindCommandCodeGenerator.GenerateCallerArgExprOverload(sb, group, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("IObservable<global::System.String> withParameter");
@@ -463,7 +462,7 @@ public class BindCommandCodeGeneratorHelperTests
             "global::System.String",
             [inv]);
 
-        BindCommandCodeGenerator.GenerateCallerArgExprOverload(sb, group);
+        BindCommandCodeGenerator.GenerateCallerArgExprOverload(sb, group, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("Expression<global::System.Func<");
@@ -491,7 +490,7 @@ public class BindCommandCodeGeneratorHelperTests
             "global::System.String",
             [inv]);
 
-        BindCommandCodeGenerator.GenerateCallerFilePathOverload(sb, group);
+        BindCommandCodeGenerator.GenerateCallerFilePathOverload(sb, group, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("IObservable<global::System.String> withParameter");
@@ -518,7 +517,7 @@ public class BindCommandCodeGeneratorHelperTests
             "global::System.String",
             [inv]);
 
-        BindCommandCodeGenerator.GenerateCallerFilePathOverload(sb, group);
+        BindCommandCodeGenerator.GenerateCallerFilePathOverload(sb, group, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("Expression<global::System.Func<");
@@ -537,7 +536,7 @@ public class BindCommandCodeGeneratorHelperTests
             hasCommandParameterProperty: false);
         var vmClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, vmClassInfo, "TESTSUFFIX");
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, vmClassInfo, "TESTSUFFIX", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__BindCommand_TESTSUFFIX");
@@ -553,12 +552,12 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            resolvedEventName: "Click",
             hasCommandProperty: false,
-            hasEnabledProperty: true,
-            resolvedEventName: "Click");
+            hasEnabledProperty: true);
         var vmClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, vmClassInfo, "TESTSUFFIX");
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, vmClassInfo, "TESTSUFFIX", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__BindCommand_TESTSUFFIX");
@@ -576,12 +575,12 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            resolvedEventName: null,
             hasCommandProperty: false,
-            hasEnabledProperty: false,
-            resolvedEventName: null);
+            hasEnabledProperty: false);
         var vmClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, vmClassInfo, "TESTSUFFIX");
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, vmClassInfo, "TESTSUFFIX", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("No bindable event found");
@@ -600,7 +599,7 @@ public class BindCommandCodeGeneratorHelperTests
             hasObservableParameter: true,
             parameterTypeFullName: "global::System.String");
 
-        BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, "view.SaveButton", generatedAffinity: 5, hasEvent: true);
+        BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, "view.SaveButton", 5, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("SelectObservable<global::System.String, object>");
@@ -623,7 +622,7 @@ public class BindCommandCodeGeneratorHelperTests
             parameterTypeFullName: "global::System.String",
             parameterPropertyPath: paramPath);
 
-        BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, "view.SaveButton", generatedAffinity: 3, hasEvent: true);
+        BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, "view.SaveButton", 3, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("ReturnObservable<object>(viewModel.Param)");
@@ -640,7 +639,7 @@ public class BindCommandCodeGeneratorHelperTests
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo();
 
-        BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, "view.SaveButton", generatedAffinity: -1, hasEvent: false);
+        BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, "view.SaveButton", -1, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("EmptyObservable<object>.Instance");
@@ -705,9 +704,9 @@ public class BindCommandCodeGeneratorHelperTests
     public async Task Generate_EmptyInvocations_ReturnsNull()
     {
         var result = BindCommandCodeGenerator.Generate(
-            ImmutableArray<BindCommandInvocationInfo>.Empty,
-            ImmutableArray<ClassBindingInfo>.Empty,
-            true);
+            [],
+            [],
+            new LanguageFeatures(true, true, true));
 
         await Assert.That(result).IsNull();
     }
@@ -721,8 +720,8 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var result = BindCommandCodeGenerator.Generate(
             default,
-            ImmutableArray<ClassBindingInfo>.Empty,
-            true);
+            [],
+            new LanguageFeatures(true, true, true));
 
         await Assert.That(result).IsNull();
     }
@@ -741,30 +740,206 @@ public class BindCommandCodeGeneratorHelperTests
             resolvedEventName: "Click");
         var vmClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, vmClassInfo, "TESTSUFFIX");
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, vmClassInfo, "TESTSUFFIX", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("IObservable<global::System.String> withParameter");
     }
 
     /// <summary>
-    /// Verifies GenerateBindCommandMethod with expression parameter generates correct method params.
+    /// Verifies GenerateBindCommandMethod with an expression parameter reads the parameter value from the
+    /// view model at call time. The <c>Expression&lt;Func&lt;...&gt;&gt;</c> parameter itself lives on the
+    /// public overload (covered by <see cref="GenerateCallerArgExprOverload_WithExpressionParam_IncludesWithParameterExpr"/>);
+    /// the worker consumes the compile-time-extracted property path via a <c>ReturnObservable</c>.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateBindCommandMethod_WithExpressionParam_IncludesExpressionParam()
+    public async Task GenerateBindCommandMethod_WithExpressionParam_ReadsParameterFromViewModel()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasExpressionParameter: true,
             parameterTypeFullName: "global::System.String",
+            parameterPropertyPath: new EquatableArray<PropertyPathSegment>(
+                [ModelFactory.CreatePropertyPathSegment("Param", "global::System.String", "global::TestApp.MyViewModel")]),
             resolvedEventName: "Click");
         var vmClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, vmClassInfo, "TESTSUFFIX");
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, vmClassInfo, "TESTSUFFIX", false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("Expression<global::System.Func<");
-        await Assert.That(result).Contains("withParameter");
+        await Assert.That(result).Contains("ReturnObservable<object>");
+        await Assert.That(result).Contains("viewModel.Param");
+    }
+
+    // ───────────────────────────────────────────────────────────────────────────
+    // Nullability annotations (C# 8+ targets emit nullable-aware syntax; C# 7.3 does not)
+    // ───────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Verifies the DefaultEvent plugin emits a nullable handler <c>sender</c> parameter (<c>object?</c>)
+    /// under nullable support, so the generated local function matches the <c>EventHandler</c> delegate.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DefaultEventPlugin_EmitBinding_SupportsNullable_EmitsNullableSender()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(resolvedEventName: "Click");
+
+        new DefaultEventBindingPlugin().EmitBinding(sb, inv, "view.SaveButton", true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("void __Handler(object? sender,");
+        await Assert.That(result).DoesNotContain("void __Handler(object sender,");
+    }
+
+    /// <summary>
+    /// Verifies the DefaultEvent plugin emits a plain <c>object sender</c> (no nullable annotation) when the
+    /// target does not support nullable reference types (C# 7.3, where <c>object?</c> is a compile error).
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DefaultEventPlugin_EmitBinding_NoNullable_EmitsPlainSender()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(resolvedEventName: "Click");
+
+        new DefaultEventBindingPlugin().EmitBinding(sb, inv, "view.SaveButton", false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("void __Handler(object sender,");
+        await Assert.That(result).DoesNotContain("object? sender");
+    }
+
+    /// <summary>
+    /// Verifies the EventEnabled plugin also emits a nullable handler <c>sender</c> under nullable support.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EventEnabledPlugin_EmitBinding_SupportsNullable_EmitsNullableSender()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            resolvedEventName: "Click",
+            hasEnabledProperty: true);
+
+        new EventEnabledBindingPlugin().EmitBinding(sb, inv, "view.SaveButton", true);
+
+        await Assert.That(sb.ToString()).Contains("void __Handler(object? sender,");
+    }
+
+    /// <summary>
+    /// Verifies a reference-typed observable command parameter declares <c>__latestParam</c> as nullable
+    /// under nullable support, so its <c>= default</c> initializer (which is null for reference types) is
+    /// null-clean.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyPlugin_EmitBinding_SupportsNullable_ReferenceParam_EmitsNullableLatestParam()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            hasObservableParameter: true,
+            parameterTypeFullName: "global::System.String",
+            parameterIsReferenceType: true,
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
+
+        new CommandPropertyBindingPlugin().EmitBinding(sb, inv, "view.SaveButton", true);
+
+        await Assert.That(sb.ToString()).Contains("global::System.String? __latestParam = default;");
+    }
+
+    /// <summary>
+    /// Verifies a value-typed observable command parameter keeps a non-nullable <c>__latestParam</c> even
+    /// under nullable support — a value-type <c>default</c> is not null, and annotating it would change the
+    /// declared type's semantics.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyPlugin_EmitBinding_SupportsNullable_ValueParam_KeepsNonNullableLatestParam()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            hasObservableParameter: true,
+            parameterTypeFullName: "global::System.Int32",
+            parameterIsReferenceType: false,
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
+
+        new CommandPropertyBindingPlugin().EmitBinding(sb, inv, "view.SaveButton", true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("global::System.Int32 __latestParam = default;");
+        await Assert.That(result).DoesNotContain("global::System.Int32? __latestParam");
+    }
+
+    /// <summary>
+    /// Verifies the concrete BindCommand overload emits a nullable optional <c>toEvent</c> parameter
+    /// (<c>string?</c>) under nullable support.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateConcreteOverload_SupportsNullable_EmitsNullableToEvent()
+    {
+        var sb = new StringBuilder();
+        var group = BindCommandCodeGenerator.GroupByTypeSignature(
+            [ModelFactory.CreateBindCommandInvocationInfo()])[0];
+
+        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, true, true);
+
+        await Assert.That(sb.ToString()).Contains("string? toEvent = null");
+    }
+
+    /// <summary>
+    /// Verifies the concrete BindCommand overload emits a non-nullable <c>toEvent</c> parameter on C# 7.3.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateConcreteOverload_NoNullable_EmitsPlainToEvent()
+    {
+        var sb = new StringBuilder();
+        var group = BindCommandCodeGenerator.GroupByTypeSignature(
+            [ModelFactory.CreateBindCommandInvocationInfo()])[0];
+
+        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("string toEvent = null");
+        await Assert.That(result).DoesNotContain("string? toEvent");
+    }
+
+    /// <summary>
+    /// Verifies the full BindCommand generation emits a <c>#nullable enable</c> directive when the consumer
+    /// compilation supports nullable reference types.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Generate_SupportsNullable_EmitsNullableEnableDirective()
+    {
+        var result = BindCommandCodeGenerator.Generate(
+            [ModelFactory.CreateBindCommandInvocationInfo()],
+            [],
+            new LanguageFeatures(true, true, true));
+
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result!).Contains("#nullable enable");
+    }
+
+    /// <summary>
+    /// Verifies the full BindCommand generation omits the <c>#nullable enable</c> directive on C# 7.3.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Generate_NoNullable_OmitsNullableEnableDirective()
+    {
+        var result = BindCommandCodeGenerator.Generate(
+            [ModelFactory.CreateBindCommandInvocationInfo()],
+            [],
+            new LanguageFeatures(true, false, true));
+
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result!).DoesNotContain("#nullable enable");
     }
 }

@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class UriToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class UriToStringTypeConverterTests
     {
         var converter = new UriToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -61,9 +66,9 @@ public class UriToStringTypeConverterTests
     public async Task TryConvert_Null_ReturnsFalse()
     {
         var converter = new UriToStringTypeConverter();
-        Uri? value = null;
+        const Uri? value = null;
 
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(value, null, out _);
 
         await Assert.That(result).IsFalse();
     }

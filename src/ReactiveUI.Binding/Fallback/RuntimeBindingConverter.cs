@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.Fallback;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Resolution order matches ReactiveUI: an explicit <paramref name="converterOverride"/> wins; otherwise
+/// Resolution order matches ReactiveUI: an explicit converter override wins; otherwise
 /// the global <see cref="BindingConverters.Current"/> service resolves the best converter for the runtime
 /// type pair. When no converter can produce a value, the conversion fails and the generated binding skips
 /// the assignment for that emission.

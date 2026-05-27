@@ -14,6 +14,11 @@ namespace ReactiveUI.Binding.Tests.WhenAny;
 public class ExpressionChainTests
 {
     /// <summary>
+    /// The expected number of emitted values when two notifications are produced.
+    /// </summary>
+    private const int ExpectedTwoEmissions = 2;
+
+    /// <summary>
     /// Verifies basic usage notifies on change.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -27,10 +32,10 @@ public class ExpressionChainTests
         var values = new List<string>();
 
         using var sub = fixture.SubscribeToExpressionChain<TestFixture, string>(
-            expr.Body,
-            beforeChange: false,
-            skipInitial: false,
-            isDistinct: true)
+                expr.Body,
+                false,
+                false,
+                true)
             .Select(x => x.Value)
             .Subscribe(values.Add);
 
@@ -39,7 +44,7 @@ public class ExpressionChainTests
 
         fixture.IsNotNullString = "End";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
         await Assert.That(values[1]).IsEqualTo("End");
     }
 
@@ -57,10 +62,10 @@ public class ExpressionChainTests
         var values = new List<string>();
 
         using var sub = fixture.SubscribeToExpressionChain<TestFixture, string>(
-            expr.Body,
-            beforeChange: true,
-            skipInitial: false,
-            isDistinct: false)
+                expr.Body,
+                true,
+                false,
+                false)
             .Select(x => x.Value)
             .Subscribe(values.Add);
 
@@ -69,7 +74,7 @@ public class ExpressionChainTests
         fixture.IsNotNullString = "After";
 
         // Should have received a notification (before-change)
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
 
     /// <summary>
@@ -86,10 +91,7 @@ public class ExpressionChainTests
         var values = new List<string>();
 
         using var sub = fixture.SubscribeToExpressionChain<TestFixture, string>(
-            expr.Body,
-            beforeChange: false,
-            skipInitial: true,
-            isDistinct: true)
+                expr.Body)
             .Select(x => x.Value)
             .Subscribe(values.Add);
 
@@ -116,10 +118,7 @@ public class ExpressionChainTests
         var values = new List<string>();
 
         using var sub = fixture.SubscribeToExpressionChain<TestFixture, string>(
-            expr.Body,
-            beforeChange: false,
-            skipInitial: true,
-            isDistinct: true)
+                expr.Body)
             .Select(x => x.Value)
             .Subscribe(values.Add);
 
@@ -127,7 +126,7 @@ public class ExpressionChainTests
         fixture.IsNotNullString = "B";
         fixture.IsNotNullString = "B"; // Same value — setter will short-circuit
 
-        await Assert.That(values.Count).IsEqualTo(2);
+        await Assert.That(values.Count).IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(values[0]).IsEqualTo("A");
         await Assert.That(values[1]).IsEqualTo("B");
     }
@@ -147,14 +146,14 @@ public class ExpressionChainTests
 
         // Child is null initially
         using var sub = fixture.SubscribeToExpressionChain<HostTestFixture, string>(
-            expr.Body,
-            beforeChange: false,
-            skipInitial: false,
-            isDistinct: false)
+                expr.Body,
+                false,
+                false,
+                false)
             .Subscribe(values.Add);
 
         // Set Child to something
-        fixture.Child = new TestFixture { IsNotNullString = "Hello" };
+        fixture.Child = new() { IsNotNullString = "Hello" };
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
     }

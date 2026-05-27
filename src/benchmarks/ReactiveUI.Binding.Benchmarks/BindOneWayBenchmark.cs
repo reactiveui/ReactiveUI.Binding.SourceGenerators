@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reactive.Concurrency;
-
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 
@@ -23,7 +22,12 @@ public class BindOneWayBenchmark
     /// <summary>
     /// Represents the number of property change events to be triggered during the benchmark tests.
     /// </summary>
-    private const int PropertyChangeCount = 1000;
+    private const int PropertyChangeCount = 1_000;
+
+    /// <summary>
+    /// The number of consecutive bindings created in the setup/teardown benchmark.
+    /// </summary>
+    private const int BindingCount = 10;
 
     /// <summary>
     /// The source view model of the benchmark.
@@ -41,8 +45,8 @@ public class BindOneWayBenchmark
     [IterationSetup]
     public void Setup()
     {
-        _source = new BenchmarkViewModel { Name = "Initial", Age = 0 };
-        _target = new BenchmarkView();
+        _source = new() { Name = "Initial", Age = 0 };
+        _target = new();
     }
 
     /// <summary>
@@ -88,15 +92,15 @@ public class BindOneWayBenchmark
     [Benchmark(Description = "10x Setup/Teardown")]
     public void SetupTeardown()
     {
-        var bindings = new IDisposable[10];
+        var bindings = new IDisposable[BindingCount];
 
-        for (var i = 0; i < 10; i++)
+        for (var i = 0; i < BindingCount; i++)
         {
             _source.Name = $"VM_{i}";
             bindings[i] = _source.BindOneWay(_target, x => x.Name, x => x.DisplayName);
         }
 
-        for (var i = 0; i < 10; i++)
+        for (var i = 0; i < BindingCount; i++)
         {
             bindings[i].Dispose();
         }

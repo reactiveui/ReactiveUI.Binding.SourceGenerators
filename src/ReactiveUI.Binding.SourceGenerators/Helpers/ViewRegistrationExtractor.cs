@@ -4,7 +4,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -26,9 +25,8 @@ internal static class ViewRegistrationExtractor
     {
         var classDecl = (ClassDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
-        var typeSymbol = semanticModel.GetDeclaredSymbol(classDecl, ct) as INamedTypeSymbol;
 
-        if (typeSymbol is null || typeSymbol.IsAbstract)
+        if (semanticModel.GetDeclaredSymbol(classDecl, ct) is not INamedTypeSymbol typeSymbol || typeSymbol.IsAbstract)
         {
             return null;
         }
@@ -51,7 +49,10 @@ internal static class ViewRegistrationExtractor
                 // Check [ExcludeFromViewRegistration] only after confirming IViewFor<T> is
                 // resolvable, so attribute resolution via EnsureNotNull cannot throw in
                 // compilations that don't reference ReactiveUI.Binding.
-                if (HasAttribute(typeSymbol, Constants.ExcludeFromViewRegistrationAttributeMetadataName, semanticModel.Compilation))
+                if (HasAttribute(
+                    typeSymbol,
+                    Constants.ExcludeFromViewRegistrationAttributeMetadataName,
+                    semanticModel.Compilation))
                 {
                     return null;
                 }
@@ -61,9 +62,12 @@ internal static class ViewRegistrationExtractor
                 var viewFqn = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 var hasParameterlessCtor = HasAccessibleParameterlessConstructor(typeSymbol);
                 var contract = ExtractViewContract(typeSymbol, semanticModel.Compilation);
-                var isSingleInstance = HasAttribute(typeSymbol, Constants.SingleInstanceViewAttributeMetadataName, semanticModel.Compilation);
+                var isSingleInstance = HasAttribute(
+                    typeSymbol,
+                    Constants.SingleInstanceViewAttributeMetadataName,
+                    semanticModel.Compilation);
 
-                return new ViewRegistrationInfo(viewModelFqn, viewFqn, hasParameterlessCtor, contract, isSingleInstance);
+                return new(viewModelFqn, viewFqn, hasParameterlessCtor, contract, isSingleInstance);
             }
         }
 

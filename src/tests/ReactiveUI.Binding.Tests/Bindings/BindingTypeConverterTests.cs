@@ -12,6 +12,11 @@ namespace ReactiveUI.Binding.Tests.Bindings;
 public class BindingTypeConverterTests
 {
     /// <summary>
+    /// Integer value parsed from the string "42" in conversion tests.
+    /// </summary>
+    private const int ParsedInteger = 42;
+
+    /// <summary>
     ///     Verifies that <see cref="BindingTypeConverter{TFrom, TTo}.FromType" />
     ///     returns the correct source type.
     /// </summary>
@@ -66,7 +71,7 @@ public class BindingTypeConverterTests
         var result = converter.TryConvertTyped("42", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(42);
+        await Assert.That(output).IsEqualTo(ParsedInteger);
     }
 
     /// <summary>

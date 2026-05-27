@@ -13,14 +13,14 @@ namespace ReactiveUI.Binding.Wpf;
 public class DependencyObjectObservableForProperty : ICreatesObservableForProperty
 {
     /// <inheritdoc/>
-    public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false)
+    public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
     {
         if (!typeof(DependencyObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
         {
             return 0;
         }
 
-        return GetDependencyProperty(type, propertyName) is not null ? 4 : 0;
+        return GetDependencyProperty(type, propertyName) is not null ? BindingAffinity.WpfDependencyObject : 0;
     }
 
     /// <inheritdoc/>
@@ -28,31 +28,33 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         object sender,
         System.Linq.Expressions.Expression expression,
         string propertyName,
-        bool beforeChanged = false,
-        bool suppressWarnings = false)
+        bool beforeChanged,
+        bool suppressWarnings)
     {
         ArgumentExceptionHelper.ThrowIfNull(sender);
 
         var type = sender.GetType();
 
         var dependencyProperty = GetDependencyProperty(type, propertyName) ?? throw new ArgumentException(
-                                            $"The property {propertyName} does not have a dependency property.",
-                                            nameof(propertyName));
+            $"The property {propertyName} does not have a dependency property.",
+            nameof(propertyName));
         var dependencyPropertyDescriptor = DependencyPropertyDescriptor.FromProperty(dependencyProperty, type);
 
         if (dependencyPropertyDescriptor is null)
         {
             if (!suppressWarnings)
             {
-                Debug.WriteLine($"[ReactiveUI.Binding.Wpf] Error: Couldn't find dependency property {propertyName} on {type.Name}");
+                Debug.WriteLine(
+                    $"[ReactiveUI.Binding.Wpf] Error: Couldn't find dependency property {propertyName} on {type.Name}");
             }
 
-            throw new NullReferenceException("Couldn't find dependency property " + propertyName + " on " + type.Name);
+            throw new InvalidOperationException("Couldn't find dependency property " + propertyName + " on " + type.Name);
         }
 
         return Observable.Create<IObservedChange<object, object?>>(subj =>
         {
-            var handler = new EventHandler((_, _) => subj.OnNext(new ObservedChange<object, object?>(sender, expression, default)));
+            var handler = new EventHandler((_, _) =>
+                subj.OnNext(new ObservedChange<object, object?>(sender, expression, default)));
 
             dependencyPropertyDescriptor.AddValueChanged(sender, handler);
             return Disposable.Create(() => dependencyPropertyDescriptor.RemoveValueChanged(sender, handler));

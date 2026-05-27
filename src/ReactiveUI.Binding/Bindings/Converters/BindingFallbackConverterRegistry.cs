@@ -66,13 +66,13 @@ public sealed class BindingFallbackConverterRegistry
 
         lock (_gate)
         {
-            var snap = _snapshot ?? new Snapshot(new List<IBindingFallbackConverter>(8));
+            var snap = _snapshot ?? new Snapshot(new(8));
 
             // Copy-on-write update: clone the list
             var newList = new List<IBindingFallbackConverter>(snap.Converters) { converter };
 
             // Publish the new snapshot (atomic via reference assignment)
-            _snapshot = new Snapshot(newList);
+            _snapshot = new(newList);
         }
     }
 

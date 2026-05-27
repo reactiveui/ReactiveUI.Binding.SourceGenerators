@@ -6,7 +6,6 @@ using System.ComponentModel;
 using ReactiveUI.Binding.Expressions;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Tests.TestModels;
-
 using LinqExpression = System.Linq.Expressions.Expression;
 
 namespace ReactiveUI.Binding.Tests.ObservableForProperty;
@@ -17,6 +16,37 @@ namespace ReactiveUI.Binding.Tests.ObservableForProperty;
 public class INPCObservableForPropertyTests
 {
     /// <summary>
+    /// The affinity score returned for INotifyPropertyChanged-compatible types.
+    /// </summary>
+    private const int InpcAffinity = 5;
+
+    /// <summary>
+    /// A sample name value assigned during notification tests.
+    /// </summary>
+    private const string SampleName = "Alice";
+
+    /// <summary>
+    /// A sample indexer value used during notification tests.
+    /// </summary>
+    private const string SampleValue = "value";
+
+    /// <summary>
+    /// The name of the non-indexer property used in PropertyChanging tests.
+    /// </summary>
+    private const string SomePropName = "SomeProp";
+
+    /// <summary>
+    /// A sample age value assigned to an unrelated property.
+    /// </summary>
+    private const int SampleAge = 30;
+
+    /// <summary>
+    /// The expected number of emissions when distinct filtering is disabled and the initial value is not
+    /// skipped: the initial value plus the three subsequent property changes.
+    /// </summary>
+    private const int ExpectedNonDistinctCount = 4;
+
+    /// <summary>
     /// Verifies affinity is 5 for types implementing INotifyPropertyChanged.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -25,9 +55,9 @@ public class INPCObservableForPropertyTests
     {
         var sut = new INPCObservableForProperty();
 
-        var affinity = sut.GetAffinityForObject(typeof(TestViewModel), "Name", beforeChanged: false);
+        var affinity = sut.GetAffinityForObject(typeof(TestViewModel), "Name");
 
-        await Assert.That(affinity).IsEqualTo(5);
+        await Assert.That(affinity).IsEqualTo(InpcAffinity);
     }
 
     /// <summary>
@@ -39,9 +69,9 @@ public class INPCObservableForPropertyTests
     {
         var sut = new INPCObservableForProperty();
 
-        var affinity = sut.GetAffinityForObject(typeof(TestViewModel), "Name", beforeChanged: true);
+        var affinity = sut.GetAffinityForObject(typeof(TestViewModel), "Name", true);
 
-        await Assert.That(affinity).IsEqualTo(5);
+        await Assert.That(affinity).IsEqualTo(InpcAffinity);
     }
 
     /// <summary>
@@ -53,7 +83,7 @@ public class INPCObservableForPropertyTests
     {
         var sut = new INPCObservableForProperty();
 
-        var affinity = sut.GetAffinityForObject(typeof(PocoModel), "Value", beforeChanged: false);
+        var affinity = sut.GetAffinityForObject(typeof(PocoModel), "Value");
 
         await Assert.That(affinity).IsEqualTo(0);
     }
@@ -75,7 +105,7 @@ public class INPCObservableForPropertyTests
         using var sub = sut.GetNotificationForProperty(vm, body, "Name")
             .Subscribe(_ => emitted = true);
 
-        vm.Name = "Alice";
+        vm.Name = SampleName;
 
         await Assert.That(emitted).IsTrue();
     }
@@ -94,10 +124,10 @@ public class INPCObservableForPropertyTests
         var body = Reflection.Rewrite(expr.Body);
 
         var emitted = false;
-        using var sub = sut.GetNotificationForProperty(vm, body, "Name", beforeChanged: true)
+        using var sub = sut.GetNotificationForProperty(vm, body, "Name", true)
             .Subscribe(_ => emitted = true);
 
-        vm.Name = "Alice";
+        vm.Name = SampleName;
 
         await Assert.That(emitted).IsTrue();
     }
@@ -120,7 +150,7 @@ public class INPCObservableForPropertyTests
             .Subscribe(_ => emitted = true);
 
         // Change Age, not Name
-        vm.Age = 30;
+        vm.Age = SampleAge;
 
         await Assert.That(emitted).IsFalse();
     }
@@ -178,7 +208,7 @@ public class INPCObservableForPropertyTests
     {
         var sut = new INPCObservableForProperty();
 
-        var affinity = sut.GetAffinityForObject(typeof(NonChangingViewModel), "Name", beforeChanged: true);
+        var affinity = sut.GetAffinityForObject(typeof(NonChangingViewModel), "Name", true);
 
         await Assert.That(affinity).IsEqualTo(0);
     }
@@ -205,7 +235,7 @@ public class INPCObservableForPropertyTests
         using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item")
             .Subscribe(_ => emitted = true);
 
-        vm["key"] = "value";
+        vm["key"] = SampleValue;
 
         await Assert.That(emitted).IsTrue();
     }
@@ -228,10 +258,10 @@ public class INPCObservableForPropertyTests
             [LinqExpression.Constant("key")]);
 
         var emitted = false;
-        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item", beforeChanged: true)
+        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item", true)
             .Subscribe(_ => emitted = true);
 
-        vm["key"] = "value";
+        vm["key"] = SampleValue;
 
         await Assert.That(emitted).IsTrue();
     }
@@ -257,7 +287,7 @@ public class INPCObservableForPropertyTests
         using var sub = sut.GetNotificationForProperty(vm, indexExpr, "SomeOtherProperty")
             .Subscribe(_ => emitted = true);
 
-        vm["key"] = "value";
+        vm["key"] = SampleValue;
 
         await Assert.That(emitted).IsFalse();
     }
@@ -331,14 +361,14 @@ public class INPCObservableForPropertyTests
         var vm = new TestViewModel();
 
         var values = new List<string>();
-        using var sub = vm.ObservableForProperty<TestViewModel, string>("Name", isDistinct: false)
+        using var sub = vm.ObservableForProperty<TestViewModel, string>("Name", beforeChange: false, skipInitial: false, isDistinct: false)
             .Subscribe(x => values.Add(x.Value));
 
-        vm.Name = "Alice";
+        vm.Name = SampleName;
         vm.Name = string.Empty;
-        vm.Name = "Alice";
+        vm.Name = SampleName;
 
-        await Assert.That(values.Count).IsEqualTo(3);
+        await Assert.That(values.Count).IsEqualTo(ExpectedNonDistinctCount);
     }
 
     /// <summary>
@@ -383,7 +413,7 @@ public class INPCObservableForPropertyTests
             [LinqExpression.Constant("key")]);
 
         var emitted = false;
-        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item", beforeChanged: true)
+        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "Item", true)
             .Subscribe(_ => emitted = true);
 
         vm.RaiseAllPropertyChanging();
@@ -411,10 +441,10 @@ public class INPCObservableForPropertyTests
             [LinqExpression.Constant("key")]);
 
         var emitted = false;
-        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "SomeOtherProperty", beforeChanged: true)
+        using var sub = sut.GetNotificationForProperty(vm, indexExpr, "SomeOtherProperty", true)
             .Subscribe(_ => emitted = true);
 
-        vm["key"] = "value";
+        vm["key"] = SampleValue;
 
         await Assert.That(emitted).IsFalse();
     }
@@ -434,7 +464,7 @@ public class INPCObservableForPropertyTests
         var body = Reflection.Rewrite(expr.Body);
 
         var emitted = false;
-        using var sub = sut.GetNotificationForProperty(vm, body, "SomeProp", beforeChanged: true)
+        using var sub = sut.GetNotificationForProperty(vm, body, SomePropName, true)
             .Subscribe(_ => emitted = true);
 
         vm.RaiseAllPropertyChanging();
@@ -458,10 +488,10 @@ public class INPCObservableForPropertyTests
         var body = Reflection.Rewrite(expr.Body);
 
         var emitted = false;
-        using var sub = sut.GetNotificationForProperty(vm, body, "SomeProp", beforeChanged: true)
+        using var sub = sut.GetNotificationForProperty(vm, body, SomePropName, true)
             .Subscribe(_ => emitted = true);
 
-        vm["key"] = "value"; // raises PropertyChanging for "Item[]", not "SomeProp"
+        vm["key"] = SampleValue; // raises PropertyChanging for "Item[]", not "SomeProp"
 
         await Assert.That(emitted).IsFalse();
     }
@@ -473,7 +503,8 @@ public class INPCObservableForPropertyTests
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GetNotificationForProperty_IndexExpression_PropertyChanged_NullPropertyName_EmitsNotification_Variant()
+    public async Task
+        GetNotificationForProperty_IndexExpression_PropertyChanged_NullPropertyName_EmitsNotification_Variant()
     {
         var sut = new INPCObservableForProperty();
         var vm = new IndexableViewModel();
@@ -510,7 +541,7 @@ public class INPCObservableForPropertyTests
         var body = Reflection.Rewrite(expr.Body);
 
         var count = 0;
-        using var sub = sut.GetNotificationForProperty(vm, body, "SomeProp")
+        using var sub = sut.GetNotificationForProperty(vm, body, SomePropName)
             .Subscribe(_ => count++);
 
         vm.RaiseAllPropertiesChanged();
@@ -534,7 +565,7 @@ public class INPCObservableForPropertyTests
         var body = Reflection.Rewrite(expr.Body);
 
         var count = 0;
-        using var sub = sut.GetNotificationForProperty(vm, body, "SomeProp")
+        using var sub = sut.GetNotificationForProperty(vm, body, SomePropName)
             .Subscribe(_ => count++);
 
         // Fire with empty string property name - should trigger (all properties changed)
@@ -559,7 +590,7 @@ public class INPCObservableForPropertyTests
         var body = Reflection.Rewrite(expr.Body);
 
         var count = 0;
-        using var sub = sut.GetNotificationForProperty(vm, body, "SomeProp", beforeChanged: true)
+        using var sub = sut.GetNotificationForProperty(vm, body, SomePropName, true)
             .Subscribe(_ => count++);
 
         // Fire with empty string property name - should trigger (all properties changing)
@@ -591,7 +622,7 @@ public class INPCObservableForPropertyTests
             set
             {
                 _nullableName = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NullableName)));
+                PropertyChanged?.Invoke(this, new(nameof(NullableName)));
             }
         }
     }
@@ -599,7 +630,10 @@ public class INPCObservableForPropertyTests
     /// <summary>
     /// A test model that implements INotifyPropertyChanged but NOT INotifyPropertyChanging.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in typeof() expression.")]
+    [SuppressMessage(
+        "Performance",
+        "CA1812:Avoid uninstantiated internal classes",
+        Justification = "Referenced only via typeof metadata to assert affinity behavior; never constructed by design.")]
     private sealed class NonChangingViewModel : INotifyPropertyChanged
     {
         /// <inheritdoc/>
@@ -630,7 +664,7 @@ public class INPCObservableForPropertyTests
         /// Raises PropertyChanged with null property name (all properties changed).
         /// </summary>
         public void RaiseAllPropertiesChanged() =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+            PropertyChanged?.Invoke(this, new(null));
     }
 
     /// <summary>
@@ -643,7 +677,7 @@ public class INPCObservableForPropertyTests
         /// of the IndexableViewModel class. This field is referenced when getting or setting
         /// values through the indexer.
         /// </summary>
-        private readonly Dictionary<string, string> _items = new();
+        private readonly Dictionary<string, string> _items = [];
 
         /// <inheritdoc/>
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -666,9 +700,9 @@ public class INPCObservableForPropertyTests
             get => _items.TryGetValue(key, out var val) ? val : string.Empty;
             set
             {
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs("Item[]"));
+                PropertyChanging?.Invoke(this, new("Item[]"));
                 _items[key] = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item[]"));
+                PropertyChanged?.Invoke(this, new("Item[]"));
             }
         }
 
@@ -676,26 +710,26 @@ public class INPCObservableForPropertyTests
         /// Raises PropertyChanged with null property name (all properties changed).
         /// </summary>
         public void RaiseAllPropertiesChanged() =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+            PropertyChanged?.Invoke(this, new(null));
 
         /// <summary>
         /// Raises PropertyChanged with a specific property name.
         /// </summary>
         /// <param name="propertyName">The property name to raise.</param>
         public void RaisePropertyChangedWithName(string? propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new(propertyName));
 
         /// <summary>
         /// Raises PropertyChanging with null property name (all properties changing).
         /// </summary>
         public void RaiseAllPropertyChanging() =>
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(null));
+            PropertyChanging?.Invoke(this, new(null));
 
         /// <summary>
         /// Raises PropertyChanging with a specific property name.
         /// </summary>
         /// <param name="propertyName">The property name to raise.</param>
         public void RaisePropertyChangingWithName(string? propertyName) =>
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
+            PropertyChanging?.Invoke(this, new(propertyName));
     }
 }

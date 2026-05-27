@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenChanged.NullableProperty
+namespace SharedScenarios.WhenChanged.NullableProperty;
+
+/// <summary>
+/// Exercises WhenChanged with a nullable property type.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenChanged with a nullable property type.
+    /// Creates a WhenChanged observable for the NullableName property.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenChanged observable for the NullableName property.
-        /// </summary>
-        /// <param name="vm">The view model to observe.</param>
-        /// <returns>An observable of nullable name values.</returns>
-        public static IObservable<string?> Execute(MyViewModel vm)
-            => vm.WhenChanged(x => x.NullableName!);
-    }
+    /// <param name="vm">The view model to observe.</param>
+    /// <returns>An observable of nullable name values.</returns>
+    public static IObservable<string?> Execute(MyViewModel vm)
+        => vm.WhenChanged(x => x.NullableName!);
 }

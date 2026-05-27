@@ -4,7 +4,6 @@
 
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.Mixins;
-
 using Splat.Builder;
 
 namespace ReactiveUI.Binding.Tests.TestExecutors;

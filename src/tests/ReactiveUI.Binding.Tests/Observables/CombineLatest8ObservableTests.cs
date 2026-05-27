@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reactive.Subjects;
-
 using ReactiveUI.Binding.Observables;
 using ReactiveUI.Binding.Tests.TestModels;
 
@@ -14,13 +13,76 @@ namespace ReactiveUI.Binding.Tests.Observables;
 /// </summary>
 public class CombineLatest8ObservableTests
 {
+    /// <summary>The value emitted by the first source on the initial round.</summary>
+    private const int FirstValue = 1;
+
+    /// <summary>The value emitted by the second source on the initial round.</summary>
+    private const int SecondValue = 2;
+
+    /// <summary>The value emitted by the third source on the initial round.</summary>
+    private const int ThirdValue = 3;
+
+    /// <summary>The value emitted by the fourth source on the initial round.</summary>
+    private const int FourthValue = 4;
+
+    /// <summary>The value emitted by the fifth source on the initial round.</summary>
+    private const int FifthValue = 5;
+
+    /// <summary>The value emitted by the sixth source on the initial round.</summary>
+    private const int SixthValue = 6;
+
+    /// <summary>The value emitted by the seventh source on the initial round.</summary>
+    private const int SeventhValue = 7;
+
+    /// <summary>The value emitted by the eighth source on the initial round.</summary>
+    private const int EighthValue = 8;
+
+    /// <summary>The value emitted by the first source after the subscription is disposed.</summary>
+    private const int FirstUpdatedValue = 10;
+
+    /// <summary>The value emitted by the second source after the subscription is disposed.</summary>
+    private const int SecondUpdatedValue = 20;
+
+    /// <summary>The value emitted by the third source after the subscription is disposed.</summary>
+    private const int ThirdUpdatedValue = 30;
+
+    /// <summary>The value emitted by the fourth source after the subscription is disposed.</summary>
+    private const int FourthUpdatedValue = 40;
+
+    /// <summary>The value emitted by the fifth source after the subscription is disposed.</summary>
+    private const int FifthUpdatedValue = 50;
+
+    /// <summary>The value emitted by the sixth source after the subscription is disposed.</summary>
+    private const int SixthUpdatedValue = 60;
+
+    /// <summary>The value emitted by the seventh source after the subscription is disposed.</summary>
+    private const int SeventhUpdatedValue = 70;
+
+    /// <summary>The value emitted by the eighth source after the subscription is disposed.</summary>
+    private const int EighthUpdatedValue = 80;
+
+    /// <summary>The expected combined result of the initial source values.</summary>
+    private const int ExpectedSum = 36;
+
+    /// <summary>The expected number of emissions observed by the subscriber.</summary>
+    private const int ExpectedEmissionCount = 1;
+
+    /// <summary>The message used for errors that are expected to be ignored.</summary>
+    private const string IgnoredErrorMessage = "should be ignored";
+
     /// <summary>
     /// Verifies that a null first source throws <see cref="ArgumentNullException"/>.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task Constructor_NullSource1_Throws()
     {
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var act = () => CombineLatestObservable.Create(
             (IObservable<int>)null!,
             new Subject<int>(),
@@ -30,7 +92,7 @@ public class CombineLatest8ObservableTests
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
@@ -38,9 +100,15 @@ public class CombineLatest8ObservableTests
     /// Verifies that a null second source throws <see cref="ArgumentNullException"/>.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task Constructor_NullSource2_Throws()
     {
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var act = () => CombineLatestObservable.Create(
             new Subject<int>(),
             (IObservable<int>)null!,
@@ -50,7 +118,7 @@ public class CombineLatest8ObservableTests
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
@@ -58,9 +126,15 @@ public class CombineLatest8ObservableTests
     /// Verifies that a null third source throws <see cref="ArgumentNullException"/>.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task Constructor_NullSource3_Throws()
     {
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var act = () => CombineLatestObservable.Create(
             new Subject<int>(),
             new Subject<int>(),
@@ -70,7 +144,7 @@ public class CombineLatest8ObservableTests
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
@@ -78,9 +152,15 @@ public class CombineLatest8ObservableTests
     /// Verifies that a null fourth source throws <see cref="ArgumentNullException"/>.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task Constructor_NullSource4_Throws()
     {
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var act = () => CombineLatestObservable.Create(
             new Subject<int>(),
             new Subject<int>(),
@@ -90,7 +170,7 @@ public class CombineLatest8ObservableTests
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
@@ -98,9 +178,15 @@ public class CombineLatest8ObservableTests
     /// Verifies that a null fifth source throws <see cref="ArgumentNullException"/>.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task Constructor_NullSource5_Throws()
     {
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var act = () => CombineLatestObservable.Create(
             new Subject<int>(),
             new Subject<int>(),
@@ -110,7 +196,7 @@ public class CombineLatest8ObservableTests
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
@@ -118,9 +204,15 @@ public class CombineLatest8ObservableTests
     /// Verifies that a null sixth source throws <see cref="ArgumentNullException"/>.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task Constructor_NullSource6_Throws()
     {
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var act = () => CombineLatestObservable.Create(
             new Subject<int>(),
             new Subject<int>(),
@@ -130,7 +222,7 @@ public class CombineLatest8ObservableTests
             (IObservable<int>)null!,
             new Subject<int>(),
             new Subject<int>(),
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
@@ -138,9 +230,15 @@ public class CombineLatest8ObservableTests
     /// Verifies that a null seventh source throws <see cref="ArgumentNullException"/>.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task Constructor_NullSource7_Throws()
     {
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var act = () => CombineLatestObservable.Create(
             new Subject<int>(),
             new Subject<int>(),
@@ -150,7 +248,7 @@ public class CombineLatest8ObservableTests
             new Subject<int>(),
             (IObservable<int>)null!,
             new Subject<int>(),
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
@@ -158,9 +256,15 @@ public class CombineLatest8ObservableTests
     /// Verifies that a null eighth source throws <see cref="ArgumentNullException"/>.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task Constructor_NullSource8_Throws()
     {
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var act = () => CombineLatestObservable.Create(
             new Subject<int>(),
             new Subject<int>(),
@@ -170,7 +274,7 @@ public class CombineLatest8ObservableTests
             new Subject<int>(),
             new Subject<int>(),
             (IObservable<int>)null!,
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
@@ -198,9 +302,15 @@ public class CombineLatest8ObservableTests
     /// Verifies that subscribing with a null observer throws <see cref="ArgumentNullException"/>.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task Subscribe_NullObserver_Throws()
     {
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var combined = CombineLatestObservable.Create(
             new Subject<int>(),
             new Subject<int>(),
@@ -210,7 +320,7 @@ public class CombineLatest8ObservableTests
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
 
         var act = () => combined.Subscribe(null!);
 
@@ -221,9 +331,15 @@ public class CombineLatest8ObservableTests
     /// Verifies that disposing twice does not throw an exception.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task Dispose_CalledTwice_NoException()
     {
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var combined = CombineLatestObservable.Create(
             new Subject<int>(),
             new Subject<int>(),
@@ -233,7 +349,7 @@ public class CombineLatest8ObservableTests
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
 
         var subscription = combined.Subscribe(new AnonymousObserver<int>(_ => { }, _ => { }, () => { }));
         subscription.Dispose();
@@ -246,6 +362,10 @@ public class CombineLatest8ObservableTests
     /// Verifies that a source emitting after dispose does not throw.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task SourceEmitsAfterDispose_NoException()
     {
@@ -257,6 +377,8 @@ public class CombineLatest8ObservableTests
         var source6 = new Subject<int>();
         var source7 = new Subject<int>();
         var source8 = new Subject<int>();
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var combined = CombineLatestObservable.Create(
             source1,
             source2,
@@ -266,32 +388,36 @@ public class CombineLatest8ObservableTests
             source6,
             source7,
             source8,
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
 
         var results = new List<int>();
         var subscription = combined.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
 
-        source1.OnNext(1);
-        source2.OnNext(2);
-        source3.OnNext(3);
-        source4.OnNext(4);
-        source5.OnNext(5);
-        source6.OnNext(6);
-        source7.OnNext(7);
-        source8.OnNext(8);
+        source1.OnNext(FirstValue);
+        source2.OnNext(SecondValue);
+        source3.OnNext(ThirdValue);
+        source4.OnNext(FourthValue);
+        source5.OnNext(FifthValue);
+        source6.OnNext(SixthValue);
+        source7.OnNext(SeventhValue);
+        source8.OnNext(EighthValue);
         subscription.Dispose();
 
-        source1.OnNext(10);
-        source2.OnNext(20);
+        source1.OnNext(FirstUpdatedValue);
+        source2.OnNext(SecondUpdatedValue);
 
-        await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo(36);
+        await Assert.That(results).Count().IsEqualTo(ExpectedEmissionCount);
+        await Assert.That(results[0]).IsEqualTo(ExpectedSum);
     }
 
     /// <summary>
     /// Verifies that an error after dispose is ignored.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorAfterDispose_IsIgnored()
     {
@@ -303,6 +429,8 @@ public class CombineLatest8ObservableTests
         var source6 = new Subject<int>();
         var source7 = new Subject<int>();
         var source8 = new Subject<int>();
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var combined = CombineLatestObservable.Create(
             source1,
             source2,
@@ -312,7 +440,7 @@ public class CombineLatest8ObservableTests
             source6,
             source7,
             source8,
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
 
         Exception? receivedError = null;
         var subscription = combined.Subscribe(new AnonymousObserver<int>(
@@ -321,14 +449,14 @@ public class CombineLatest8ObservableTests
             () => { }));
 
         subscription.Dispose();
-        source1.OnError(new InvalidOperationException("should be ignored"));
-        source2.OnError(new InvalidOperationException("should be ignored"));
-        source3.OnError(new InvalidOperationException("should be ignored"));
-        source4.OnError(new InvalidOperationException("should be ignored"));
-        source5.OnError(new InvalidOperationException("should be ignored"));
-        source6.OnError(new InvalidOperationException("should be ignored"));
-        source7.OnError(new InvalidOperationException("should be ignored"));
-        source8.OnError(new InvalidOperationException("should be ignored"));
+        source1.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        source2.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        source3.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        source4.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        source5.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        source6.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        source7.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        source8.OnError(new InvalidOperationException(IgnoredErrorMessage));
 
         await Assert.That(receivedError).IsNull();
     }
@@ -338,6 +466,10 @@ public class CombineLatest8ObservableTests
     /// when the subscription has been disposed but the observers are still reachable.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorAfterDispose_AllObservers_CoverNullPath()
     {
@@ -349,6 +481,8 @@ public class CombineLatest8ObservableTests
         var manual6 = new ManualObservable<int>();
         var manual7 = new ManualObservable<int>();
         var manual8 = new ManualObservable<int>();
+        Func<int, int, int, int, int, int, int, int, int> selector =
+            (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h;
         var combined = CombineLatestObservable.Create(
             manual1,
             manual2,
@@ -358,7 +492,7 @@ public class CombineLatest8ObservableTests
             manual6,
             manual7,
             manual8,
-            (Func<int, int, int, int, int, int, int, int, int>)((a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
+            selector);
 
         Exception? receivedError = null;
         var subscription = combined.Subscribe(new AnonymousObserver<int>(
@@ -367,34 +501,34 @@ public class CombineLatest8ObservableTests
             () => { }));
 
         // Set all has-value flags so TryEmit reaches _observer?.OnNext
-        manual1.Observer!.OnNext(1);
-        manual2.Observer!.OnNext(2);
-        manual3.Observer!.OnNext(3);
-        manual4.Observer!.OnNext(4);
-        manual5.Observer!.OnNext(5);
-        manual6.Observer!.OnNext(6);
-        manual7.Observer!.OnNext(7);
-        manual8.Observer!.OnNext(8);
+        manual1.Observer!.OnNext(FirstValue);
+        manual2.Observer!.OnNext(SecondValue);
+        manual3.Observer!.OnNext(ThirdValue);
+        manual4.Observer!.OnNext(FourthValue);
+        manual5.Observer!.OnNext(FifthValue);
+        manual6.Observer!.OnNext(SixthValue);
+        manual7.Observer!.OnNext(SeventhValue);
+        manual8.Observer!.OnNext(EighthValue);
 
         subscription.Dispose();
 
         // These reach the observers because ManualObservable retains references
-        manual1.Observer.OnNext(10);
-        manual2.Observer.OnNext(20);
-        manual3.Observer.OnNext(30);
-        manual4.Observer.OnNext(40);
-        manual5.Observer.OnNext(50);
-        manual6.Observer.OnNext(60);
-        manual7.Observer.OnNext(70);
-        manual8.Observer.OnNext(80);
-        manual1.Observer.OnError(new InvalidOperationException("should be ignored"));
-        manual2.Observer.OnError(new InvalidOperationException("should be ignored"));
-        manual3.Observer.OnError(new InvalidOperationException("should be ignored"));
-        manual4.Observer.OnError(new InvalidOperationException("should be ignored"));
-        manual5.Observer.OnError(new InvalidOperationException("should be ignored"));
-        manual6.Observer.OnError(new InvalidOperationException("should be ignored"));
-        manual7.Observer.OnError(new InvalidOperationException("should be ignored"));
-        manual8.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual1.Observer.OnNext(FirstUpdatedValue);
+        manual2.Observer.OnNext(SecondUpdatedValue);
+        manual3.Observer.OnNext(ThirdUpdatedValue);
+        manual4.Observer.OnNext(FourthUpdatedValue);
+        manual5.Observer.OnNext(FifthUpdatedValue);
+        manual6.Observer.OnNext(SixthUpdatedValue);
+        manual7.Observer.OnNext(SeventhUpdatedValue);
+        manual8.Observer.OnNext(EighthUpdatedValue);
+        manual1.Observer.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        manual2.Observer.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        manual3.Observer.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        manual4.Observer.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        manual5.Observer.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        manual6.Observer.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        manual7.Observer.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        manual8.Observer.OnError(new InvalidOperationException(IgnoredErrorMessage));
 
         await Assert.That(receivedError).IsNull();
     }
@@ -403,6 +537,10 @@ public class CombineLatest8ObservableTests
     /// Verifies that an error in the first source observable is propagated to the subscriber.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource1_PropagatedToSubscriber()
     {
@@ -445,6 +583,10 @@ public class CombineLatest8ObservableTests
     /// Verifies that an error in the second source observable is propagated to the subscriber.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource2_PropagatedToSubscriber()
     {
@@ -487,6 +629,10 @@ public class CombineLatest8ObservableTests
     /// Verifies that an error in the third source observable is propagated to the subscriber.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource3_PropagatedToSubscriber()
     {
@@ -529,6 +675,10 @@ public class CombineLatest8ObservableTests
     /// Verifies that an error in the fourth source observable is propagated to the subscriber.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource4_PropagatedToSubscriber()
     {
@@ -571,6 +721,10 @@ public class CombineLatest8ObservableTests
     /// Verifies that an error in the fifth source observable is propagated to the subscriber.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource5_PropagatedToSubscriber()
     {
@@ -613,6 +767,10 @@ public class CombineLatest8ObservableTests
     /// Verifies that an error in the sixth source observable is propagated to the subscriber.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource6_PropagatedToSubscriber()
     {
@@ -655,6 +813,10 @@ public class CombineLatest8ObservableTests
     /// Verifies that an error in the seventh source observable is propagated to the subscriber.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource7_PropagatedToSubscriber()
     {
@@ -697,6 +859,10 @@ public class CombineLatest8ObservableTests
     /// Verifies that an error in the eighth source observable is propagated to the subscriber.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource8_PropagatedToSubscriber()
     {
@@ -739,6 +905,10 @@ public class CombineLatest8ObservableTests
     /// Verifies that OnCompleted from a single source does not propagate completion.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S107:Methods should not have too many parameters",
+        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task CompletedInSource_DoesNotPropagateCompletion()
     {
@@ -769,14 +939,14 @@ public class CombineLatest8ObservableTests
             _ => { },
             () => completed = true));
 
-        source1.OnNext(1);
-        source2.OnNext(2);
-        source3.OnNext(3);
-        source4.OnNext(4);
-        source5.OnNext(5);
-        source6.OnNext(6);
-        source7.OnNext(7);
-        source8.OnNext(8);
+        source1.OnNext(FirstValue);
+        source2.OnNext(SecondValue);
+        source3.OnNext(ThirdValue);
+        source4.OnNext(FourthValue);
+        source5.OnNext(FifthValue);
+        source6.OnNext(SixthValue);
+        source7.OnNext(SeventhValue);
+        source8.OnNext(EighthValue);
 
         source1.OnCompleted();
         source2.OnCompleted();
@@ -788,7 +958,7 @@ public class CombineLatest8ObservableTests
         source8.OnCompleted();
 
         await Assert.That(completed).IsFalse();
-        await Assert.That(results).Count().IsEqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(ExpectedEmissionCount);
     }
 
     /// <summary>

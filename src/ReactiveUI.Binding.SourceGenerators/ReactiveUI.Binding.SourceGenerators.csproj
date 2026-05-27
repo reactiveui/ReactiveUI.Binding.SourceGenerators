@@ -13,37 +13,45 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="ReactiveUI.Binding.SourceGenerators.Tests" />
+    <InternalsVisibleTo Include="ReactiveUI.Binding.SourceGenerators.Tests"/>
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="AnalyzerReleases.Shipped.md" />
-    <None Include="AnalyzerReleases.Unshipped.md" />
+    <None Include="AnalyzerReleases.Shipped.md"/>
+    <None Include="AnalyzerReleases.Unshipped.md"/>
+  </ItemGroup>
+
+  <!-- Ship the MSBuild props that exposes ReactiveUIBindingEmitGeneratedCodeMarkers to consumers and the generator -->
+  <ItemGroup>
+    <None Include="build\ReactiveUI.Binding.SourceGenerators.props"
+          Pack="true"
+          PackagePath="build\ReactiveUI.Binding.SourceGenerators.props;buildTransitive\ReactiveUI.Binding.SourceGenerators.props"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all"/>
   </ItemGroup>
 
   <!-- Link polyfills and helpers from runtime library for netstandard2.0 compatibility -->
   <ItemGroup>
-    <Compile Include="..\ReactiveUI.Binding\Polyfills\**.cs" Link="Polyfills" />
-    <Compile Include="..\ReactiveUI.Binding\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs" />
+    <Compile Include="..\ReactiveUI.Binding\Polyfills\**.cs" Link="Polyfills"/>
+    <Compile Include="..\ReactiveUI.Binding\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs"/>
+    <Compile Include="..\ReactiveUI.Binding\Bindings\BindingAffinity.cs" Link="Bindings\BindingAffinity.cs"/>
   </ItemGroup>
 
   <ItemGroup>
     <!-- Reference the analyzer project to force it to build -->
-    <ProjectReference Include="..\ReactiveUI.Binding.Analyzer\ReactiveUI.Binding.Analyzer.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\ReactiveUI.Binding.Analyzer\ReactiveUI.Binding.Analyzer.csproj" PrivateAssets="all" ReferenceOutputAssembly="false"/>
   </ItemGroup>
 
   <Target Name="PackBuildOutputs" DependsOnTargets="ResolveReferences">
     <ItemGroup>
       <!-- Package the generator -->
-      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="analyzers/dotnet/cs" Visible="false" />
+      <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="analyzers/dotnet/cs" Visible="false"/>
 
       <!-- Package the analyzer -->
-      <TfmSpecificPackageFile Include="..\ReactiveUI.Binding.Analyzer\bin\$(Configuration)\netstandard2.0\ReactiveUI.Binding.Analyzer.dll" PackagePath="analyzers/dotnet/cs" Visible="false" />
+      <TfmSpecificPackageFile Include="..\ReactiveUI.Binding.Analyzer\bin\$(Configuration)\netstandard2.0\ReactiveUI.Binding.Analyzer.dll" PackagePath="analyzers/dotnet/cs" Visible="false"/>
     </ItemGroup>
   </Target>
 </Project>

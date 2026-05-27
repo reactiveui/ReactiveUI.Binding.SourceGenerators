@@ -4,21 +4,20 @@
 
 using System;
 
-namespace SharedScenarios.BindCommand.CustomEvent
+namespace SharedScenarios.BindCommand.CustomEvent;
+
+/// <summary>
+/// A button control with a custom MouseUp event.
+/// </summary>
+public class MyButton
 {
     /// <summary>
-    /// A button control with a custom MouseUp event.
+    /// Occurs when the mouse button is released.
     /// </summary>
-    public class MyButton
-    {
-        /// <summary>
-        /// Occurs when the mouse button is released.
-        /// </summary>
-        public event EventHandler? MouseUp;
+    public event EventHandler? MouseUp;
 
-        /// <summary>
-        /// Simulates a mouse up event.
-        /// </summary>
-        public void PerformMouseUp() => MouseUp?.Invoke(this, EventArgs.Empty);
-    }
+    /// <summary>
+    /// Simulates a mouse up event.
+    /// </summary>
+    public void PerformMouseUp() => MouseUp?.Invoke(this, EventArgs.Empty);
 }

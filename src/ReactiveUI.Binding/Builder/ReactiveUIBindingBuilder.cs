@@ -129,7 +129,7 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     public IReactiveUIBindingBuilder WithCommandBinder(ICreatesCommandBinding binder)
     {
         ArgumentExceptionHelper.ThrowIfNull(binder);
-        CurrentMutable.RegisterLazySingleton<ICreatesCommandBinding>(() => binder);
+        CurrentMutable.RegisterLazySingleton(() => binder);
         return this;
     }
 
@@ -173,11 +173,8 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     }
 
     /// <inheritdoc/>
-    IReactiveUIBindingBuilder IReactiveUIBindingBuilder.WithCoreServices()
-    {
-        var result = (IReactiveUIBindingBuilder)WithCoreServices();
-        return result;
-    }
+    IReactiveUIBindingBuilder IReactiveUIBindingBuilder.WithCoreServices() =>
+        (IReactiveUIBindingBuilder)WithCoreServices();
 
     /// <summary>
     /// Builds the application and returns the configured instance.
@@ -202,15 +199,17 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     /// <summary>
     /// Throws if the app instance's Current resolver is null after building.
     /// This is a defensive guard that should never be hit in practice because
-    /// <see cref="Splat.Builder.AppBuilder.Build"/> always sets Current.
+    /// <see cref="AppBuilder.Build"/> always sets Current.
     /// </summary>
     /// <param name="appInstance">The built app instance to validate.</param>
     [ExcludeFromCodeCoverage]
     private static void ThrowIfCurrentNull(IReactiveUIBindingInstance appInstance)
     {
-        if (appInstance.Current is null)
+        if (appInstance.Current is not null)
         {
-            throw new InvalidOperationException("Failed to create ReactiveUIBindingInstance instance");
+            return;
         }
+
+        throw new InvalidOperationException("Failed to create ReactiveUIBindingInstance instance");
     }
 }

@@ -2,102 +2,170 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using ReactiveUI.Binding;
-using ReactiveUI.Binding.AotValidation;
+using System;
 
-var passed = 0;
-var failed = 0;
+namespace ReactiveUI.Binding.AotValidation;
 
-// 1. WhenChanged — single property
+/// <summary>
+/// Entry point that exercises the source-generated bindings to confirm they work under Native AOT.
+/// Each scenario is a dedicated method so the validation surface is easy to read and extend.
+/// </summary>
+internal static class Program
 {
-    var vm = new AotViewModel { Name = "Alice" };
-    string? last = null;
-    using var sub = vm.WhenChanged(x => x.Name).Subscribe(v => last = v);
-    AssertEqual("WhenChanged initial", "Alice", last);
-    vm.Name = "Bob";
-    AssertEqual("WhenChanged after set", "Bob", last);
-}
+    /// <summary>A sample name value used across the WhenChanged scenarios.</summary>
+    private const string Alice = "Alice";
 
-// 2. WhenChanged — deep chain
-{
-    var vm = new AotViewModel();
-    vm.Child.Value = "Deep";
-    string? last = null;
-    using var sub = vm.WhenChanged(x => x.Child.Value).Subscribe(v => last = v);
-    AssertEqual("WhenChanged deep initial", "Deep", last);
-    vm.Child.Value = "Deeper";
-    AssertEqual("WhenChanged deep after set", "Deeper", last);
-}
+    /// <summary>The updated string value used to assert change propagation.</summary>
+    private const string UpdatedName = "Updated";
 
-// 3. WhenChanged — two properties
-{
-    var vm = new AotViewModel { Name = "Alice", Age = 30 };
-    (string name, int age) last = default;
-    using var sub = vm.WhenChanged(x => x.Name, x => x.Age).Subscribe(v => last = v);
-    AssertEqual("WhenChanged two-prop name", "Alice", last.name);
-    AssertEqual("WhenChanged two-prop age", 30, last.age);
-    vm.Age = 31;
-    AssertEqual("WhenChanged two-prop age update", 31, last.age);
-}
+    /// <summary>The initial source name value used in the binding scenarios.</summary>
+    private const string SourceName = "Source";
 
-// 4. WhenChanged on view type (required for BindTwoWay — the generator needs a
-//    WhenChanged call site on AotView to produce a dispatch entry for it)
-{
-    var view = new AotView { DisplayName = "ViewVal" };
-    string? last = null;
-    using var sub = view.WhenChanged(x => x.DisplayName).Subscribe(v => last = v);
-    AssertEqual("WhenChanged on view initial", "ViewVal", last);
-    view.DisplayName = "Updated";
-    AssertEqual("WhenChanged on view after set", "Updated", last);
-}
+    /// <summary>The initial age value used in the two-property scenario.</summary>
+    private const int InitialAge = 30;
 
-// 5. BindOneWay
-{
-    var source = new AotViewModel { Name = "Source" };
-    var target = new AotView();
-    using var binding = source.BindOneWay(target, x => x.Name, x => x.DisplayName);
-    AssertEqual("BindOneWay initial", "Source", target.DisplayName);
-    source.Name = "Updated";
-    AssertEqual("BindOneWay after set", "Updated", target.DisplayName);
-}
+    /// <summary>The updated age value used to assert change propagation.</summary>
+    private const int UpdatedAge = 31;
 
-// 6. BindTwoWay
-{
-    var source = new AotViewModel { Name = "Source" };
-    var target = new AotView();
-    using var binding = source.BindTwoWay(target, x => x.Name, x => x.DisplayName);
-    AssertEqual("BindTwoWay initial", "Source", target.DisplayName);
-    source.Name = "FromSource";
-    AssertEqual("BindTwoWay source→target", "FromSource", target.DisplayName);
-    target.DisplayName = "FromTarget";
-    AssertEqual("BindTwoWay target→source", "FromTarget", source.Name);
-}
+    /// <summary>The number of scenarios that have passed.</summary>
+    private static int _passed;
 
-// 7. BindOneWay disposal
-{
-    var source = new AotViewModel { Name = "Before" };
-    var target = new AotView();
-    var binding = source.BindOneWay(target, x => x.Name, x => x.DisplayName);
-    AssertEqual("BindOneWay pre-dispose", "Before", target.DisplayName);
-    binding.Dispose();
-    source.Name = "After";
-    AssertEqual("BindOneWay post-dispose unchanged", "Before", target.DisplayName);
-}
+    /// <summary>The number of scenarios that have failed.</summary>
+    private static int _failed;
 
-Console.WriteLine();
-Console.WriteLine($"AOT Validation: {passed} passed, {failed} failed");
-return failed > 0 ? 1 : 0;
-
-void AssertEqual<T>(string label, T expected, T? actual)
-{
-    if (Equals(expected, actual))
+    /// <summary>
+    /// Runs every AOT binding validation scenario and reports the aggregate result.
+    /// </summary>
+    /// <returns>Zero if every scenario passed; otherwise, one.</returns>
+    private static int Main()
     {
-        Console.WriteLine($"  PASS: {label}");
-        passed++;
+        ValidateWhenChangedSingleProperty();
+        ValidateWhenChangedDeepChain();
+        ValidateWhenChangedTwoProperties();
+        ValidateWhenChangedOnViewType();
+        ValidateBindOneWay();
+        ValidateBindTwoWay();
+        ValidateBindOneWayDisposal();
+
+        Console.WriteLine();
+        Console.WriteLine($"AOT Validation: {_passed} passed, {_failed} failed");
+        return _failed > 0 ? 1 : 0;
     }
-    else
+
+    /// <summary>
+    /// WhenChanged on a single property emits the initial value and subsequent changes.
+    /// </summary>
+    private static void ValidateWhenChangedSingleProperty()
     {
-        Console.WriteLine($"  FAIL: {label} — expected '{expected}', got '{actual}'");
-        failed++;
+        var vm = new AotViewModel { Name = Alice };
+        string? last = null;
+        using var sub = vm.WhenChanged(x => x.Name).Subscribe(v => last = v);
+        AssertEqual("WhenChanged initial", Alice, last);
+        vm.Name = "Bob";
+        AssertEqual("WhenChanged after set", "Bob", last);
+    }
+
+    /// <summary>
+    /// WhenChanged across a deep property chain tracks changes to the leaf value.
+    /// </summary>
+    private static void ValidateWhenChangedDeepChain()
+    {
+        var vm = new AotViewModel();
+        vm.Child.Value = "Deep";
+        string? last = null;
+        using var sub = vm.WhenChanged(x => x.Child.Value).Subscribe(v => last = v);
+        AssertEqual("WhenChanged deep initial", "Deep", last);
+        vm.Child.Value = "Deeper";
+        AssertEqual("WhenChanged deep after set", "Deeper", last);
+    }
+
+    /// <summary>
+    /// WhenChanged on two properties emits a tuple and updates when either changes.
+    /// </summary>
+    private static void ValidateWhenChangedTwoProperties()
+    {
+        var vm = new AotViewModel { Name = Alice, Age = InitialAge };
+        (string name, int age) last = default;
+        using var sub = vm.WhenChanged(x => x.Name, x => x.Age).Subscribe(v => last = v);
+        AssertEqual("WhenChanged two-prop name", Alice, last.name);
+        AssertEqual("WhenChanged two-prop age", InitialAge, last.age);
+        vm.Age = UpdatedAge;
+        AssertEqual("WhenChanged two-prop age update", UpdatedAge, last.age);
+    }
+
+    /// <summary>
+    /// WhenChanged on the view type produces a dispatch entry required by BindTwoWay.
+    /// </summary>
+    private static void ValidateWhenChangedOnViewType()
+    {
+        var view = new AotView { DisplayName = "ViewVal" };
+        string? last = null;
+        using var sub = view.WhenChanged(x => x.DisplayName).Subscribe(v => last = v);
+        AssertEqual("WhenChanged on view initial", "ViewVal", last);
+        view.DisplayName = UpdatedName;
+        AssertEqual("WhenChanged on view after set", UpdatedName, last);
+    }
+
+    /// <summary>
+    /// BindOneWay propagates source changes to the target property.
+    /// </summary>
+    private static void ValidateBindOneWay()
+    {
+        var source = new AotViewModel { Name = SourceName };
+        var target = new AotView();
+        using var binding = source.BindOneWay(target, x => x.Name, x => x.DisplayName);
+        AssertEqual("BindOneWay initial", SourceName, target.DisplayName);
+        source.Name = UpdatedName;
+        AssertEqual("BindOneWay after set", UpdatedName, target.DisplayName);
+    }
+
+    /// <summary>
+    /// BindTwoWay propagates changes in both directions between source and target.
+    /// </summary>
+    private static void ValidateBindTwoWay()
+    {
+        var source = new AotViewModel { Name = SourceName };
+        var target = new AotView();
+        using var binding = source.BindTwoWay(target, x => x.Name, x => x.DisplayName);
+        AssertEqual("BindTwoWay initial", SourceName, target.DisplayName);
+        source.Name = "FromSource";
+        AssertEqual("BindTwoWay source→target", "FromSource", target.DisplayName);
+        target.DisplayName = "FromTarget";
+        AssertEqual("BindTwoWay target→source", "FromTarget", source.Name);
+    }
+
+    /// <summary>
+    /// BindOneWay stops propagating once the binding is disposed.
+    /// </summary>
+    private static void ValidateBindOneWayDisposal()
+    {
+        var source = new AotViewModel { Name = "Before" };
+        var target = new AotView();
+        var binding = source.BindOneWay(target, x => x.Name, x => x.DisplayName);
+        AssertEqual("BindOneWay pre-dispose", "Before", target.DisplayName);
+        binding.Dispose();
+        source.Name = "After";
+        AssertEqual("BindOneWay post-dispose unchanged", "Before", target.DisplayName);
+    }
+
+    /// <summary>
+    /// Compares an expected and actual value, recording a pass or failure to the console.
+    /// </summary>
+    /// <typeparam name="T">The value type being compared.</typeparam>
+    /// <param name="label">A human-readable label for the scenario.</param>
+    /// <param name="expected">The expected value.</param>
+    /// <param name="actual">The actual value produced by the binding.</param>
+    private static void AssertEqual<T>(string label, T expected, T? actual)
+    {
+        if (Equals(expected, actual))
+        {
+            Console.WriteLine($"  PASS: {label}");
+            _passed++;
+        }
+        else
+        {
+            Console.WriteLine($"  FAIL: {label} — expected '{expected}', got '{actual}'");
+            _failed++;
+        }
     }
 }

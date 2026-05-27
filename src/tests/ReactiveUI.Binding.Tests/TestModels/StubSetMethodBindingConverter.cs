@@ -10,15 +10,29 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 public class StubSetMethodBindingConverter : ISetMethodBindingConverter
 {
     /// <summary>
+    /// The default affinity score used when none is supplied.
+    /// </summary>
+    private const int DefaultAffinity = 10;
+
+    /// <summary>
     /// The affinity score to return.
     /// </summary>
     private readonly int _affinity;
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="StubSetMethodBindingConverter"/> class
+    /// using the default affinity score.
+    /// </summary>
+    public StubSetMethodBindingConverter()
+        : this(DefaultAffinity)
+    {
+    }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="StubSetMethodBindingConverter"/> class.
     /// </summary>
     /// <param name="affinity">The affinity score to return.</param>
-    public StubSetMethodBindingConverter(int affinity = 10) => _affinity = affinity;
+    public StubSetMethodBindingConverter(int affinity) => _affinity = affinity;
 
     /// <inheritdoc/>
     public int GetAffinityForObjects(Type? fromType, Type? toType) => _affinity;

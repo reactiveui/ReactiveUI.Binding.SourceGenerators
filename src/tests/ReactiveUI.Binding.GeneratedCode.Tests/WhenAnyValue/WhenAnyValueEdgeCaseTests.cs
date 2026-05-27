@@ -14,13 +14,48 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAnyValue;
 public class WhenAnyValueEdgeCaseTests
 {
     /// <summary>
+    /// The initial fixture value used in disposal and subscription tests.
+    /// </summary>
+    private const string InitialValue = "Initial";
+
+    /// <summary>
+    /// The initial nested city value used in deep-chain tests.
+    /// </summary>
+    private const string Seattle = "Seattle";
+
+    /// <summary>
+    /// The updated nested city value used in deep-chain tests.
+    /// </summary>
+    private const string Portland = "Portland";
+
+    /// <summary>
+    /// The expected emission count after an initial value plus one change.
+    /// </summary>
+    private const int ExpectedEmissionCount = 2;
+
+    /// <summary>
+    /// The number of property changes applied in the rapid-change test.
+    /// </summary>
+    private const int ChangeCount = 100;
+
+    /// <summary>
+    /// The expected emission count after the initial value plus 100 changes.
+    /// </summary>
+    private const int ExpectedRapidEmissionCount = 101;
+
+    /// <summary>
+    /// The expected emission count after the initial value plus 12 property changes.
+    /// </summary>
+    private const int ExpectedTwelvePropertyCount = 13;
+
+    /// <summary>
     /// Verifies that disposing the WhenAnyValue subscription stops listening for changes.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Disposal_StopsListening()
     {
-        var fixture = new WhenAnyTestFixture { Value1 = "Initial" };
+        var fixture = new WhenAnyTestFixture { Value1 = InitialValue };
         var values = new List<string>();
 
         var sub = WhenAnyValueScenarios.SingleProperty(fixture)
@@ -31,7 +66,7 @@ public class WhenAnyValueEdgeCaseTests
         fixture.Value1 = "AfterDisposal";
 
         await Assert.That(values.Count).IsEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo("Initial");
+        await Assert.That(values[0]).IsEqualTo(InitialValue);
     }
 
     /// <summary>
@@ -68,14 +103,14 @@ public class WhenAnyValueEdgeCaseTests
     public async Task DeepChain_EmitsNestedPropertyValue()
     {
         var vm = new BigViewModel();
-        vm.Address.City = "Seattle";
+        vm.Address.City = Seattle;
         var values = new List<string>();
 
         using var sub = WhenAnyValueScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo("Seattle");
+        await Assert.That(values[0]).IsEqualTo(Seattle);
     }
 
     /// <summary>
@@ -86,16 +121,16 @@ public class WhenAnyValueEdgeCaseTests
     public async Task DeepChain_EmitsOnNestedPropertyChange()
     {
         var vm = new BigViewModel();
-        vm.Address.City = "Seattle";
+        vm.Address.City = Seattle;
         var values = new List<string>();
 
         using var sub = WhenAnyValueScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
-        vm.Address.City = "Portland";
+        vm.Address.City = Portland;
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
-        await Assert.That(values).Contains("Portland");
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
+        await Assert.That(values).Contains(Portland);
     }
 
     /// <summary>
@@ -106,16 +141,16 @@ public class WhenAnyValueEdgeCaseTests
     public async Task DeepChain_IntermediateObjectReplacement()
     {
         var vm = new BigViewModel();
-        vm.Address.City = "Seattle";
+        vm.Address.City = Seattle;
         var values = new List<string>();
 
         using var sub = WhenAnyValueScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
-        var newAddress = new Address { City = "Portland" };
+        var newAddress = new Address { City = Portland };
         vm.Address = newAddress;
 
-        await Assert.That(values).Contains("Portland");
+        await Assert.That(values).Contains(Portland);
 
         // Verify resubscription
         newAddress.City = "Eugene";
@@ -156,12 +191,12 @@ public class WhenAnyValueEdgeCaseTests
         using var sub = WhenAnyValueScenarios.SingleProperty(fixture)
             .Subscribe(values.Add);
 
-        for (var i = 0; i < 100; i++)
+        for (var i = 0; i < ChangeCount; i++)
         {
             fixture.Value1 = $"Value_{i}";
         }
 
-        await Assert.That(values.Count).IsEqualTo(101); // initial + 100 changes
+        await Assert.That(values.Count).IsEqualTo(ExpectedRapidEmissionCount); // initial + 100 changes
         await Assert.That(values[0]).IsEqualTo("A");
         await Assert.That(values[^1]).IsEqualTo("Value_99");
     }
@@ -174,7 +209,7 @@ public class WhenAnyValueEdgeCaseTests
     [Test]
     public async Task MultipleSubscriptions_ReceiveIndependentEmissions()
     {
-        var fixture = new WhenAnyTestFixture { Value1 = "Initial" };
+        var fixture = new WhenAnyTestFixture { Value1 = InitialValue };
         var values1 = new List<string>();
         var values2 = new List<string>();
 
@@ -185,8 +220,8 @@ public class WhenAnyValueEdgeCaseTests
 
         fixture.Value1 = "Changed";
 
-        await Assert.That(values1.Count).IsGreaterThanOrEqualTo(2);
-        await Assert.That(values2.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values1.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
+        await Assert.That(values2.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
         await Assert.That(values1).Contains("Changed");
         await Assert.That(values2).Contains("Changed");
     }
@@ -222,6 +257,6 @@ public class WhenAnyValueEdgeCaseTests
         fixture.Value11 = "k";
         fixture.Value12 = "l";
 
-        await Assert.That(count).IsEqualTo(13); // initial + 12 changes
+        await Assert.That(count).IsEqualTo(ExpectedTwelvePropertyCount); // initial + 12 changes
     }
 }

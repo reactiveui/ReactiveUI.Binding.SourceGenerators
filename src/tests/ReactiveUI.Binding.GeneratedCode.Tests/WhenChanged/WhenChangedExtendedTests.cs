@@ -20,7 +20,14 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task FiveProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e" };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e"
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.FiveProperties(vm)
@@ -36,7 +43,15 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task SixProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6 };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.SixProperties(vm)
@@ -52,7 +67,16 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task SevenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6, Prop7 = 7.0 };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6,
+            Prop7 = 7.0
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.SevenProperties(vm)
@@ -68,7 +92,17 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task EightProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6, Prop7 = 7.0, Prop8 = false };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6,
+            Prop7 = 7.0,
+            Prop8 = false
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.EightProperties(vm)
@@ -84,7 +118,18 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task NineProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6, Prop7 = 7.0, Prop8 = false, Prop9 = "i" };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6,
+            Prop7 = 7.0,
+            Prop8 = false,
+            Prop9 = "i"
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.NineProperties(vm)
@@ -100,7 +145,19 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task TenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6, Prop7 = 7.0, Prop8 = false, Prop9 = "i", Prop10 = 10 };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6,
+            Prop7 = 7.0,
+            Prop8 = false,
+            Prop9 = "i",
+            Prop10 = 10
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.TenProperties(vm)
@@ -116,7 +173,20 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task ElevenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6, Prop7 = 7.0, Prop8 = false, Prop9 = "i", Prop10 = 10, Prop11 = 11.0 };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6,
+            Prop7 = 7.0,
+            Prop8 = false,
+            Prop9 = "i",
+            Prop10 = 10,
+            Prop11 = 11.0
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.ElevenProperties(vm)
@@ -132,7 +202,21 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task TwelveProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6, Prop7 = 7.0, Prop8 = false, Prop9 = "i", Prop10 = 10, Prop11 = 11.0, Prop12 = true };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6,
+            Prop7 = 7.0,
+            Prop8 = false,
+            Prop9 = "i",
+            Prop10 = 10,
+            Prop11 = 11.0,
+            Prop12 = true
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.TwelveProperties(vm)
@@ -148,7 +232,22 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task ThirteenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6, Prop7 = 7.0, Prop8 = false, Prop9 = "i", Prop10 = 10, Prop11 = 11.0, Prop12 = true, Prop13 = "m" };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6,
+            Prop7 = 7.0,
+            Prop8 = false,
+            Prop9 = "i",
+            Prop10 = 10,
+            Prop11 = 11.0,
+            Prop12 = true,
+            Prop13 = "m"
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.ThirteenProperties(vm)
@@ -164,7 +263,23 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task FourteenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6, Prop7 = 7.0, Prop8 = false, Prop9 = "i", Prop10 = 10, Prop11 = 11.0, Prop12 = true, Prop13 = "m", Prop14 = 14 };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6,
+            Prop7 = 7.0,
+            Prop8 = false,
+            Prop9 = "i",
+            Prop10 = 10,
+            Prop11 = 11.0,
+            Prop12 = true,
+            Prop13 = "m",
+            Prop14 = 14
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.FourteenProperties(vm)
@@ -180,7 +295,24 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task FifteenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6, Prop7 = 7.0, Prop8 = false, Prop9 = "i", Prop10 = 10, Prop11 = 11.0, Prop12 = true, Prop13 = "m", Prop14 = 14, Prop15 = 15.0 };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6,
+            Prop7 = 7.0,
+            Prop8 = false,
+            Prop9 = "i",
+            Prop10 = 10,
+            Prop11 = 11.0,
+            Prop12 = true,
+            Prop13 = "m",
+            Prop14 = 14,
+            Prop15 = 15.0
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.FifteenProperties(vm)
@@ -196,7 +328,25 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task SixteenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6, Prop7 = 7.0, Prop8 = false, Prop9 = "i", Prop10 = 10, Prop11 = 11.0, Prop12 = true, Prop13 = "m", Prop14 = 14, Prop15 = 15.0, Prop16 = false };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6,
+            Prop7 = 7.0,
+            Prop8 = false,
+            Prop9 = "i",
+            Prop10 = 10,
+            Prop11 = 11.0,
+            Prop12 = true,
+            Prop13 = "m",
+            Prop14 = 14,
+            Prop15 = 15.0,
+            Prop16 = false
+        };
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.SixteenProperties(vm)
@@ -212,7 +362,25 @@ public class WhenChangedExtendedTests
     [Test]
     public async Task WithSelector_SixteenProperties()
     {
-        var vm = new BigViewModel { Prop1 = "a", Prop2 = 2, Prop3 = 3.0, Prop4 = true, Prop5 = "e", Prop6 = 6, Prop7 = 7.0, Prop8 = false, Prop9 = "i", Prop10 = 10, Prop11 = 11.0, Prop12 = true, Prop13 = "m", Prop14 = 14, Prop15 = 15.0, Prop16 = false };
+        var vm = new BigViewModel
+        {
+            Prop1 = "a",
+            Prop2 = 2,
+            Prop3 = 3.0,
+            Prop4 = true,
+            Prop5 = "e",
+            Prop6 = 6,
+            Prop7 = 7.0,
+            Prop8 = false,
+            Prop9 = "i",
+            Prop10 = 10,
+            Prop11 = 11.0,
+            Prop12 = true,
+            Prop13 = "m",
+            Prop14 = 14,
+            Prop15 = 15.0,
+            Prop16 = false
+        };
         var values = new List<string>();
 
         using var sub = WhenChangedExtendedScenarios.WithSelector_SixteenProperties(vm)

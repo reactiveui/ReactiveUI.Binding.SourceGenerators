@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp;
-
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -22,7 +21,7 @@ public class CommandExtractorHelperTests
     {
         var argument = ParseFirstArgument("Method(toEvent: \"Click\")");
 
-        var result = CommandExtractor.IsToEventArgument(argument, argumentIndex: 0, parameterIndex: 5);
+        var result = CommandExtractor.IsToEventArgument(argument, 0, 5);
 
         await Assert.That(result).IsTrue();
     }
@@ -36,7 +35,7 @@ public class CommandExtractorHelperTests
     {
         var argument = ParseFirstArgument("Method(scheduler: null)");
 
-        var result = CommandExtractor.IsToEventArgument(argument, argumentIndex: 0, parameterIndex: 5);
+        var result = CommandExtractor.IsToEventArgument(argument, 0, 5);
 
         await Assert.That(result).IsFalse();
     }
@@ -50,7 +49,7 @@ public class CommandExtractorHelperTests
     {
         var argument = ParseFirstArgument("Method(\"Click\")");
 
-        var result = CommandExtractor.IsToEventArgument(argument, argumentIndex: 3, parameterIndex: 3);
+        var result = CommandExtractor.IsToEventArgument(argument, 3, 3);
 
         await Assert.That(result).IsTrue();
     }
@@ -64,7 +63,7 @@ public class CommandExtractorHelperTests
     {
         var argument = ParseFirstArgument("Method(\"Click\")");
 
-        var result = CommandExtractor.IsToEventArgument(argument, argumentIndex: 2, parameterIndex: 5);
+        var result = CommandExtractor.IsToEventArgument(argument, 2, 5);
 
         await Assert.That(result).IsFalse();
     }
@@ -76,15 +75,15 @@ public class CommandExtractorHelperTests
     [Test]
     public async Task HasCommandProperties_NoCommand_ReturnsFalse()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class PlainControl
-                {
-                    public string Text { get; set; } = "";
-                }
-            }
-            """;
+        const string source = """
+                              namespace TestApp
+                              {
+                                  public class PlainControl
+                                  {
+                                      public string Text { get; set; } = "";
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
@@ -104,16 +103,16 @@ public class CommandExtractorHelperTests
     [Test]
     public async Task HasCommandProperties_WithCommand_ReturnsTrue()
     {
-        var source = """
-            using System.Windows.Input;
-            namespace TestApp
-            {
-                public class ButtonControl
-                {
-                    public ICommand Command { get; set; }
-                }
-            }
-            """;
+        const string source = """
+                              using System.Windows.Input;
+                              namespace TestApp
+                              {
+                                  public class ButtonControl
+                                  {
+                                      public ICommand Command { get; set; }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
@@ -133,17 +132,17 @@ public class CommandExtractorHelperTests
     [Test]
     public async Task HasCommandProperties_WithCommandAndParameter_ReturnsTrueWithParam()
     {
-        var source = """
-            using System.Windows.Input;
-            namespace TestApp
-            {
-                public class ButtonControl
-                {
-                    public ICommand Command { get; set; }
-                    public object CommandParameter { get; set; }
-                }
-            }
-            """;
+        const string source = """
+                              using System.Windows.Input;
+                              namespace TestApp
+                              {
+                                  public class ButtonControl
+                                  {
+                                      public ICommand Command { get; set; }
+                                      public object CommandParameter { get; set; }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
@@ -163,16 +162,16 @@ public class CommandExtractorHelperTests
     [Test]
     public async Task HasCommandProperties_ReadOnlyCommand_ReturnsFalse()
     {
-        var source = """
-            using System.Windows.Input;
-            namespace TestApp
-            {
-                public class ReadOnlyCommandControl
-                {
-                    public ICommand Command { get; }
-                }
-            }
-            """;
+        const string source = """
+                              using System.Windows.Input;
+                              namespace TestApp
+                              {
+                                  public class ReadOnlyCommandControl
+                                  {
+                                      public ICommand Command { get; }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
@@ -192,15 +191,15 @@ public class CommandExtractorHelperTests
     [Test]
     public async Task HasEnabledProperty_NoEnabledProperty_ReturnsFalse()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class PlainControl
-                {
-                    public string Text { get; set; } = "";
-                }
-            }
-            """;
+        const string source = """
+                              namespace TestApp
+                              {
+                                  public class PlainControl
+                                  {
+                                      public string Text { get; set; } = "";
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
@@ -219,15 +218,15 @@ public class CommandExtractorHelperTests
     [Test]
     public async Task HasEnabledProperty_WithEnabled_ReturnsTrue()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class WinFormsControl
-                {
-                    public bool Enabled { get; set; }
-                }
-            }
-            """;
+        const string source = """
+                              namespace TestApp
+                              {
+                                  public class WinFormsControl
+                                  {
+                                      public bool Enabled { get; set; }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
@@ -246,15 +245,15 @@ public class CommandExtractorHelperTests
     [Test]
     public async Task HasEnabledProperty_StringEnabled_ReturnsFalse()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class ControlWithStringEnabled
-                {
-                    public string Enabled { get; set; } = "";
-                }
-            }
-            """;
+        const string source = """
+                              namespace TestApp
+                              {
+                                  public class ControlWithStringEnabled
+                                  {
+                                      public string Enabled { get; set; } = "";
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
@@ -274,34 +273,35 @@ public class CommandExtractorHelperTests
     [Test]
     public async Task FindParameterLambda_ThreeArgsOnly_ReturnsNull()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class Vm { public string Name { get; set; } = ""; }
-                public class View { public string Text { get; set; } = ""; }
+        const string source = """
+                              namespace TestApp
+                              {
+                                  public class Vm { public string Name { get; set; } = ""; }
+                                  public class View { public string Text { get; set; } = ""; }
 
-                public class Caller
-                {
-                    public void Go()
-                    {
-                        Method(new Vm(), new View(), "test");
-                    }
+                                  public class Caller
+                                  {
+                                      public void Go()
+                                      {
+                                          Method(new Vm(), new View(), "test");
+                                      }
 
-                    public void Method(Vm vm, View view, string s) { }
-                }
-            }
-            """;
+                                      public void Method(Vm vm, View view, string s) { }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
         var model = compilation.GetSemanticModel(tree);
 
-        var invocation = tree.GetRoot()
+        var invocation = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()
             .First();
 
-        var result = CommandExtractor.FindParameterLambda(invocation.ArgumentList.Arguments, model, CancellationToken.None);
+        var result =
+            CommandExtractor.FindParameterLambda(invocation.ArgumentList.Arguments, model, CancellationToken.None);
 
         await Assert.That(result).IsNull();
     }
@@ -314,34 +314,35 @@ public class CommandExtractorHelperTests
     [Test]
     public async Task FindParameterLambda_NonLambdaArgs_ReturnsNull()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class Vm { public string Name { get; set; } = ""; }
-                public class View { public string Text { get; set; } = ""; }
+        const string source = """
+                              namespace TestApp
+                              {
+                                  public class Vm { public string Name { get; set; } = ""; }
+                                  public class View { public string Text { get; set; } = ""; }
 
-                public class Caller
-                {
-                    public void Go()
-                    {
-                        Method(new Vm(), new View(), "test", "not a lambda");
-                    }
+                                  public class Caller
+                                  {
+                                      public void Go()
+                                      {
+                                          Method(new Vm(), new View(), "test", "not a lambda");
+                                      }
 
-                    public void Method(Vm vm, View view, string s1, string s2) { }
-                }
-            }
-            """;
+                                      public void Method(Vm vm, View view, string s1, string s2) { }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
         var model = compilation.GetSemanticModel(tree);
 
-        var invocation = tree.GetRoot()
+        var invocation = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()
             .First();
 
-        var result = CommandExtractor.FindParameterLambda(invocation.ArgumentList.Arguments, model, CancellationToken.None);
+        var result =
+            CommandExtractor.FindParameterLambda(invocation.ArgumentList.Arguments, model, CancellationToken.None);
 
         await Assert.That(result).IsNull();
     }

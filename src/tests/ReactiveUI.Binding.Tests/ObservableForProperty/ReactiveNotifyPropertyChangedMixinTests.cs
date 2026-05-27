@@ -16,6 +16,21 @@ namespace ReactiveUI.Binding.Tests.ObservableForProperty;
 public class ReactiveNotifyPropertyChangedMixinTests
 {
     /// <summary>
+    /// A changed property value used across notification tests.
+    /// </summary>
+    private const string ChangedValue = "Changed";
+
+    /// <summary>
+    /// The expected number of emissions after a single change (kicker plus one change).
+    /// </summary>
+    private const int ExpectedTwoEmissions = 2;
+
+    /// <summary>
+    /// The expected number of emissions after two successive changes (kicker plus two changes).
+    /// </summary>
+    private const int ExpectedThreeEmissions = 3;
+
+    /// <summary>
     /// Verifies that NestedObservedChanges returns a single-element observable with default value
     /// when the sourceChange value is null.
     /// Covers ReactiveNotifyPropertyChangedMixin.cs line 230-232 (sourceChange.Value is null branch).
@@ -32,7 +47,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         var sourceChange = new ObservedChange<object?, object?>(null, body, null);
 
         var results = new List<IObservedChange<object?, object?>>();
-        using var sub = ReactiveNotifyPropertyChangedMixin.NestedObservedChanges(body, sourceChange, beforeChange: false)
+        using var sub = ReactiveNotifyPropertyChangedMixin.NestedObservedChanges(body, sourceChange, false)
             .Subscribe(results.Add);
 
         await Assert.That(results.Count).IsEqualTo(1);
@@ -58,16 +73,16 @@ public class ReactiveNotifyPropertyChangedMixinTests
         var sourceChange = new ObservedChange<object?, object?>(null, body, vm);
 
         var results = new List<IObservedChange<object?, object?>>();
-        using var sub = ReactiveNotifyPropertyChangedMixin.NestedObservedChanges(body, sourceChange, beforeChange: false)
+        using var sub = ReactiveNotifyPropertyChangedMixin.NestedObservedChanges(body, sourceChange, false)
             .Subscribe(results.Add);
 
         // Should have the kicker (StartWith)
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(1);
 
         // Now change the property - should emit another notification
-        vm.Name = "Changed";
+        vm.Name = ChangedValue;
 
-        await Assert.That(results.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(results.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
 
     /// <summary>
@@ -85,7 +100,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         // A ParameterExpression has no member info, so GetMemberInfo will throw
         var paramExpr = System.Linq.Expressions.Expression.Parameter(typeof(TestViewModel), "x");
 
-        var action = () => ReactiveNotifyPropertyChangedMixin.NotifyForProperty(vm, paramExpr, beforeChange: false);
+        var action = () => ReactiveNotifyPropertyChangedMixin.NotifyForProperty(vm, paramExpr, false);
 
         await Assert.That(action).ThrowsException();
     }
@@ -106,19 +121,18 @@ public class ReactiveNotifyPropertyChangedMixinTests
         Expression<Func<TestFixture, string>> expr = x => x.IsNotNullString;
 
         var values = new List<IObservedChange<TestFixture, string>>();
-        using var sub = ReactiveNotifyPropertyChangedMixin.SubscribeToExpressionChain<TestFixture, string>(
-            fixture,
-            expr.Body,
-            beforeChange: false,
-            skipInitial: false,
-            isDistinct: false)
+        using var sub = fixture.SubscribeToExpressionChain<TestFixture, string>(
+                expr.Body,
+                false,
+                false,
+                false)
             .Subscribe(values.Add);
 
         fixture.IsNotNullString = "B";
         fixture.IsNotNullString = "C";
 
         // Should have initial + 2 changes = at least 3
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(3);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedThreeEmissions);
     }
 
     /// <summary>
@@ -136,12 +150,11 @@ public class ReactiveNotifyPropertyChangedMixinTests
         Expression<Func<TestFixture, string>> expr = x => x.IsNotNullString;
 
         var values = new List<IObservedChange<TestFixture, string>>();
-        using var sub = ReactiveNotifyPropertyChangedMixin.SubscribeToExpressionChain<TestFixture, string>(
-            fixture,
-            expr.Body,
-            beforeChange: false,
-            skipInitial: false,
-            isDistinct: true)
+        using var sub = fixture.SubscribeToExpressionChain<TestFixture, string>(
+                expr.Body,
+                false,
+                false,
+                true)
             .Subscribe(values.Add);
 
         // Change to different values
@@ -149,7 +162,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         fixture.IsNotNullString = "C";
 
         // All values are distinct, so all should come through
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(3);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedThreeEmissions);
     }
 
     /// <summary>
@@ -167,21 +180,20 @@ public class ReactiveNotifyPropertyChangedMixinTests
         Expression<Func<TestFixture, string>> expr = x => x.IsNotNullString;
 
         var values = new List<IObservedChange<TestFixture, string>>();
-        using var sub = ReactiveNotifyPropertyChangedMixin.SubscribeToExpressionChain<TestFixture, string>(
-            fixture,
-            expr.Body,
-            beforeChange: false,
-            skipInitial: true,
-            isDistinct: false)
+        using var sub = fixture.SubscribeToExpressionChain<TestFixture, string>(
+                expr.Body,
+                false,
+                true,
+                false)
             .Subscribe(values.Add);
 
         // No initial value should have been emitted
         await Assert.That(values.Count).IsEqualTo(0);
 
-        fixture.IsNotNullString = "Changed";
+        fixture.IsNotNullString = ChangedValue;
 
         await Assert.That(values.Count).IsEqualTo(1);
-        await Assert.That(values[0].Value).IsEqualTo("Changed");
+        await Assert.That(values[0].Value).IsEqualTo(ChangedValue);
     }
 
     /// <summary>
@@ -195,18 +207,14 @@ public class ReactiveNotifyPropertyChangedMixinTests
         EnsureInitialized();
 
         // A deep chain where intermediate becomes null will produce a null-sender change
-        var fixture = new HostTestFixture
-        {
-            Child = new TestFixture { IsNotNullString = "Hello" }
-        };
+        var fixture = new HostTestFixture { Child = new() { IsNotNullString = "Hello" } };
 
         var values = new List<IObservedChange<HostTestFixture, string>>();
-        using var sub = ReactiveNotifyPropertyChangedMixin.SubscribeToExpressionChain<HostTestFixture, string>(
-            fixture,
-            ((Expression<Func<HostTestFixture, string>>)(x => x.Child!.IsNotNullString)).Body,
-            beforeChange: false,
-            skipInitial: false,
-            isDistinct: false)
+        using var sub = fixture.SubscribeToExpressionChain<HostTestFixture, string>(
+                ((Expression<Func<HostTestFixture, string>>)(x => x.Child!.IsNotNullString)).Body,
+                false,
+                false,
+                false)
             .Subscribe(values.Add);
 
         var initialCount = values.Count;
@@ -215,7 +223,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         fixture.Child = null;
 
         // Setting it back should produce a new emission
-        fixture.Child = new TestFixture { IsNotNullString = "World" };
+        fixture.Child = new() { IsNotNullString = "World" };
 
         await Assert.That(values.Count).IsGreaterThan(initialCount);
     }
@@ -233,7 +241,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         var vm = new TestViewModel();
 
         var values = new List<IObservedChange<TestViewModel, string>>();
-        using var sub = vm.ObservableForProperty<TestViewModel, string>("Name", beforeChange: true)
+        using var sub = vm.ObservableForProperty<TestViewModel, string>("Name", true)
             .Subscribe(values.Add);
 
         vm.Name = "Alice";
@@ -254,7 +262,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         var vm = new TestViewModel();
 
         var values = new List<IObservedChange<TestViewModel, string>>();
-        using var sub = vm.ObservableForProperty(x => x.Name, beforeChange: true)
+        using var sub = vm.ObservableForProperty(x => x.Name, true, true, true)
             .Subscribe(values.Add);
 
         vm.Name = "Bob";
@@ -281,16 +289,16 @@ public class ReactiveNotifyPropertyChangedMixinTests
         var sourceChange = new ObservedChange<object?, object?>(null, body, vm);
 
         var results = new List<IObservedChange<object?, object?>>();
-        using var sub = ReactiveNotifyPropertyChangedMixin.NestedObservedChanges(body, sourceChange, beforeChange: true)
+        using var sub = ReactiveNotifyPropertyChangedMixin.NestedObservedChanges(body, sourceChange, true)
             .Subscribe(results.Add);
 
         // Should have the kicker from StartWith
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(1);
 
         // Changing the property should trigger a PropertyChanging notification
-        vm.Name = "Changed";
+        vm.Name = ChangedValue;
 
-        await Assert.That(results.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(results.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
 
     /// <summary>

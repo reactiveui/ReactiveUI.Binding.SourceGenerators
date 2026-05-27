@@ -22,7 +22,7 @@ public interface ICreatesObservableForProperty
     /// <param name="propertyName">The property name being observed.</param>
     /// <param name="beforeChanged">Whether before-change (PropertyChanging) is requested.</param>
     /// <returns>The affinity score. Positive means supported.</returns>
-    int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false);
+    int GetAffinityForObject(Type type, string propertyName, bool beforeChanged);
 
     /// <summary>
     /// Creates an observable that fires when the specified property changes.
@@ -37,6 +37,6 @@ public interface ICreatesObservableForProperty
         object sender,
         Expression expression,
         string propertyName,
-        bool beforeChanged = false,
-        bool suppressWarnings = false);
+        bool beforeChanged,
+        bool suppressWarnings);
 }

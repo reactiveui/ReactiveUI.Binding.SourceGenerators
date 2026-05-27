@@ -22,6 +22,10 @@ namespace ReactiveUI.Binding;
 /// properties, WinForms event-based binding).
 /// </para>
 /// </remarks>
+[SuppressMessage(
+    "Major Code Smell",
+    "S4018:Generic methods should provide type parameter for type inference",
+    Justification = "The type parameter denotes the target type (value/control/view), supplied explicitly by callers; it is not derivable from the arguments. Public API.")]
 public interface ICreatesCommandBinding
 {
     /// <summary>
@@ -33,7 +37,10 @@ public interface ICreatesCommandBinding
     /// <typeparam name="T">The type of the control to bind to.</typeparam>
     /// <param name="hasEventTarget">Whether the caller specifies a custom event target.</param>
     /// <returns>A positive integer if binding is supported, or zero/negative if not.</returns>
-    int GetAffinityForObject<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents | DynamicallyAccessedMemberTypes.PublicProperties)] T>(bool hasEventTarget);
+    int GetAffinityForObject<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents |
+                                    DynamicallyAccessedMemberTypes.PublicProperties)]
+    T>(bool hasEventTarget);
 
     /// <summary>
     /// Binds an <see cref="ICommand"/> to a UI object using the default event.
@@ -45,10 +52,14 @@ public interface ICreatesCommandBinding
     /// <param name="commandParameter">An observable that provides the command parameter value.</param>
     /// <returns>An <see cref="IDisposable"/> that disconnects the binding when disposed, or <see langword="null"/> if no binding was created.</returns>
     [RequiresUnreferencedCode("String/reflection-based event binding may require members removed by trimming.")]
-    IDisposable? BindCommandToObject<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicEvents | DynamicallyAccessedMemberTypes.NonPublicEvents)] T>(
-            ICommand? command,
-            T? target,
-            IObservable<object?> commandParameter)
+    IDisposable? BindCommandToObject<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
+                                    DynamicallyAccessedMemberTypes.PublicEvents |
+                                    DynamicallyAccessedMemberTypes.NonPublicEvents)]
+    T>(
+        ICommand? command,
+        T? target,
+        IObservable<object?> commandParameter)
         where T : class;
 
     /// <summary>
@@ -63,10 +74,10 @@ public interface ICreatesCommandBinding
     /// <returns>An <see cref="IDisposable"/> that disconnects the binding when disposed, or <see langword="null"/> if no binding was created.</returns>
     [RequiresUnreferencedCode("String/reflection-based event binding may require members removed by trimming.")]
     IDisposable? BindCommandToObject<T, TEventArgs>(
-            ICommand? command,
-            T? target,
-            IObservable<object?> commandParameter,
-            string eventName)
+        ICommand? command,
+        T? target,
+        IObservable<object?> commandParameter,
+        string eventName)
         where T : class;
 
     /// <summary>
@@ -81,7 +92,11 @@ public interface ICreatesCommandBinding
     /// <param name="addHandler">Adds the handler to the target event.</param>
     /// <param name="removeHandler">Removes the handler from the target event.</param>
     /// <returns>A disposable that unbinds the command.</returns>
-    IDisposable? BindCommandToObject<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicEvents | DynamicallyAccessedMemberTypes.NonPublicEvents)] T, TEventArgs>(
+    IDisposable? BindCommandToObject<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
+                                    DynamicallyAccessedMemberTypes.PublicEvents |
+                                    DynamicallyAccessedMemberTypes.NonPublicEvents)]
+    T, TEventArgs>(
         ICommand? command,
         T? target,
         IObservable<object?> commandParameter,

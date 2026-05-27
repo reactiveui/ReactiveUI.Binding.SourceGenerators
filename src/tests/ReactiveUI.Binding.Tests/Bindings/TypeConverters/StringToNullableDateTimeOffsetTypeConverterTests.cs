@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToNullableDateTimeOffsetTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class StringToNullableDateTimeOffsetTypeConverterTests
     {
         var converter = new StringToNullableDateTimeOffsetTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,7 +34,7 @@ public class StringToNullableDateTimeOffsetTypeConverterTests
     public async Task TryConvert_ValidString_Succeeds()
     {
         var converter = new StringToNullableDateTimeOffsetTypeConverter();
-        var expected = new DateTimeOffset(2024, 1, 15, 10, 30, 0, TimeSpan.Zero);
+        var expected = new DateTimeOffset(2_024, 1, 15, 10, 30, 0, TimeSpan.Zero);
 
         var result = converter.TryConvert(expected.ToString(), null, out var output);
 
@@ -75,8 +80,7 @@ public class StringToNullableDateTimeOffsetTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToNullableDateTimeOffsetTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }

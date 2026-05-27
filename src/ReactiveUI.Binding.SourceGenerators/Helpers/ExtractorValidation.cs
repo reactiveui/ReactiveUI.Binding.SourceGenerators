@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-
 using Microsoft.CodeAnalysis;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -16,6 +15,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 internal static class ExtractorValidation
 {
     /// <summary>
+    /// The number of parameters on a standard .NET event handler delegate (sender, event args).
+    /// </summary>
+    private const int StandardEventHandlerParameterCount = 2;
+
+    /// <summary>
     /// Checks whether a containing type name matches one of the recognized
     /// extension class names used by this generator (stub, scheduler, or generated).
     /// </summary>
@@ -23,9 +27,9 @@ internal static class ExtractorValidation
     /// <returns><see langword="true"/> if the name is recognized; otherwise <see langword="false"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsRecognizedExtensionClass(string? containingTypeName) =>
-        containingTypeName == Constants.StubExtensionClassName
-        || containingTypeName == Constants.SchedulerExtensionClassName
-        || containingTypeName == Constants.GeneratedExtensionClassName;
+        containingTypeName is Constants.StubExtensionClassName
+            or Constants.SchedulerExtensionClassName
+            or Constants.GeneratedExtensionClassName;
 
     /// <summary>
     /// Checks whether an invocation has at least the required number of arguments.
@@ -75,7 +79,9 @@ internal static class ExtractorValidation
     /// <param name="parameters">The method parameters to search.</param>
     /// <param name="parameterNames">The parameter names to match (e.g. "selector", "conversionFunc").</param>
     /// <returns>The fully qualified return type, or null if no matching parameter was found.</returns>
-    internal static string? FindSelectorReturnType(ImmutableArray<IParameterSymbol> parameters, params string[] parameterNames)
+    internal static string? FindSelectorReturnType(
+        ImmutableArray<IParameterSymbol> parameters,
+        params string[] parameterNames)
     {
         for (var i = 0; i < parameters.Length; i++)
         {
@@ -111,7 +117,7 @@ internal static class ExtractorValidation
         }
 
         var invokeMethod = namedDelegateType.DelegateInvokeMethod;
-        if (invokeMethod is { Parameters.Length: 2 })
+        if (invokeMethod is { Parameters.Length: StandardEventHandlerParameterCount })
         {
             return invokeMethod.Parameters[1].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         }

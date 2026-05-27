@@ -11,6 +11,10 @@ namespace ReactiveUI.Binding;
 /// using a three-tier resolution strategy: source-generated AOT-safe dispatch, explicit runtime
 /// mappings, and service locator fallback.
 /// </summary>
+[SuppressMessage(
+    "Major Code Smell",
+    "S4018:Generic methods should provide type parameter for type inference",
+    Justification = "The type parameter denotes the target type (value/control/view), supplied explicitly by callers; it is not derivable from the arguments. Public API.")]
 public sealed class DefaultViewLocator : IViewLocator
 {
     /// <summary>
@@ -32,7 +36,7 @@ public sealed class DefaultViewLocator : IViewLocator
     /// Runtime explicit mappings from (viewModelType, contract) to view factory.
     /// Uses copy-on-write semantics for thread safety.
     /// </summary>
-    private Dictionary<(Type ViewModelType, string Contract), Func<IViewFor>> _mappings = new();
+    private Dictionary<(Type ViewModelType, string Contract), Func<IViewFor>> _mappings = [];
 
     /// <summary>
     /// Registers the source-generated view dispatch function.
@@ -51,19 +55,24 @@ public sealed class DefaultViewLocator : IViewLocator
     /// </summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <typeparam name="TView">The view type. Must implement <see cref="IViewFor"/>.</typeparam>
-    /// <param name="contract">An optional contract string for named registrations.</param>
-    public void Map<TViewModel, TView>(string? contract = null)
+    public void Map<TViewModel, TView>()
+        where TViewModel : class
+        where TView : IViewFor, new() => Map<TViewModel, TView>(null);
+
+    /// <summary>
+    /// Registers an explicit view mapping for a view model type.
+    /// </summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <typeparam name="TView">The view type. Must implement <see cref="IViewFor"/>.</typeparam>
+    /// <param name="contract">A contract string for named registrations.</param>
+    public void Map<TViewModel, TView>(string? contract)
         where TViewModel : class
         where TView : IViewFor, new()
     {
         var key = (typeof(TViewModel), contract ?? string.Empty);
         lock (_lock)
         {
-            var copy = new Dictionary<(Type ViewModelType, string Contract), Func<IViewFor>>(_mappings)
-            {
-                [key] = static () => new TView(),
-            };
-            _mappings = copy;
+            _mappings = new(_mappings) { [key] = static () => new TView() };
         }
     }
 
@@ -72,8 +81,16 @@ public sealed class DefaultViewLocator : IViewLocator
     /// </summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <param name="factory">A factory function that creates the view.</param>
-    /// <param name="contract">An optional contract string for named registrations.</param>
-    public void Map<TViewModel>(Func<IViewFor> factory, string? contract = null)
+    public void Map<TViewModel>(Func<IViewFor> factory)
+        where TViewModel : class => Map<TViewModel>(factory, null);
+
+    /// <summary>
+    /// Registers an explicit view mapping with a custom factory for a view model type.
+    /// </summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <param name="factory">A factory function that creates the view.</param>
+    /// <param name="contract">A contract string for named registrations.</param>
+    public void Map<TViewModel>(Func<IViewFor> factory, string? contract)
         where TViewModel : class
     {
         ArgumentExceptionHelper.ThrowIfNull(factory);
@@ -81,11 +98,7 @@ public sealed class DefaultViewLocator : IViewLocator
         var key = (typeof(TViewModel), contract ?? string.Empty);
         lock (_lock)
         {
-            var copy = new Dictionary<(Type ViewModelType, string Contract), Func<IViewFor>>(_mappings)
-            {
-                [key] = factory,
-            };
-            _mappings = copy;
+            _mappings = new(_mappings) { [key] = factory };
         }
     }
 
@@ -93,9 +106,17 @@ public sealed class DefaultViewLocator : IViewLocator
     /// Removes an explicit view mapping for a view model type.
     /// </summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
-    /// <param name="contract">An optional contract string for named registrations.</param>
     /// <returns><see langword="true"/> if the mapping was removed; otherwise, <see langword="false"/>.</returns>
-    public bool Unmap<TViewModel>(string? contract = null)
+    public bool Unmap<TViewModel>()
+        where TViewModel : class => Unmap<TViewModel>(null);
+
+    /// <summary>
+    /// Removes an explicit view mapping for a view model type.
+    /// </summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <param name="contract">A contract string for named registrations.</param>
+    /// <returns><see langword="true"/> if the mapping was removed; otherwise, <see langword="false"/>.</returns>
+    public bool Unmap<TViewModel>(string? contract)
         where TViewModel : class
     {
         var key = (typeof(TViewModel), contract ?? string.Empty);
@@ -109,7 +130,7 @@ public sealed class DefaultViewLocator : IViewLocator
     }
 
     /// <inheritdoc/>
-    public IViewFor? ResolveView<TViewModel>(TViewModel viewModel, string? contract = null)
+    public IViewFor? ResolveView<TViewModel>(TViewModel viewModel, string? contract)
         where TViewModel : class
     {
         if (viewModel is null)
@@ -142,17 +163,17 @@ public sealed class DefaultViewLocator : IViewLocator
         // 3. Service locator lookup (AOT-safe for registered types)
         view = AppLocator.Current.GetService<IViewFor<TViewModel>>(
             normalizedContract.Length == 0 ? null : normalizedContract);
-        if (view is not null)
+        if (view is null)
         {
-            SetViewModelOnView(view, viewModel);
-            return view;
+            return null;
         }
 
-        return null;
+        SetViewModelOnView(view, viewModel);
+        return view;
     }
 
     /// <inheritdoc/>
-    public IViewFor? ResolveView(object? viewModel, string? contract = null)
+    public IViewFor? ResolveView(object? viewModel, string? contract)
     {
         if (viewModel is null)
         {
@@ -202,10 +223,7 @@ public sealed class DefaultViewLocator : IViewLocator
     /// </summary>
     /// <param name="view">The view to set the view model on.</param>
     /// <param name="viewModel">The view model instance.</param>
-    private static void SetViewModelOnView(IViewFor view, object viewModel)
-    {
-        view.ViewModel = viewModel;
-    }
+    private static void SetViewModelOnView(IViewFor view, object viewModel) => view.ViewModel = viewModel;
 
     /// <summary>
     /// Fallback resolution using MakeGenericType. Not AOT-safe but provides backward compatibility.
@@ -245,11 +263,11 @@ public sealed class DefaultViewLocator : IViewLocator
     private IViewFor? TryResolveFromMappings(Type viewModelType, string contract)
     {
         var mappings = _mappings;
-        if (mappings.TryGetValue((viewModelType, contract), out var factory))
+        if (!mappings.TryGetValue((viewModelType, contract), out var factory))
         {
-            return factory();
+            return null;
         }
 
-        return null;
+        return factory();
     }
 }

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using ReactiveUI.Binding.Fallback;
-
 using Splat;
 
 namespace ReactiveUI.Binding.Tests.Fallback;
@@ -123,7 +122,7 @@ public class ObservationAffinityCheckerTests
         AppLocator.UnregisterAll<ICreatesObservableForProperty>();
         try
         {
-            var plugin = new StubObservableForProperty(beforeChangedAffinity: 20, afterChangedAffinity: 0);
+            var plugin = new StubObservableForProperty(20, 0);
             AppLocator.Register<ICreatesObservableForProperty>(() => plugin);
 
             var resultBeforeChanged = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), 10, true);
@@ -231,7 +230,7 @@ public class ObservationAffinityCheckerTests
         }
 
         /// <inheritdoc/>
-        public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false) =>
+        public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged) =>
             beforeChanged ? _beforeChangedAffinity : _afterChangedAffinity;
 
         /// <inheritdoc/>
@@ -239,8 +238,8 @@ public class ObservationAffinityCheckerTests
             object sender,
             System.Linq.Expressions.Expression expression,
             string propertyName,
-            bool beforeChanged = false,
-            bool suppressWarnings = false) =>
+            bool beforeChanged,
+            bool suppressWarnings) =>
             throw new NotSupportedException("Not needed for affinity tests.");
     }
 }

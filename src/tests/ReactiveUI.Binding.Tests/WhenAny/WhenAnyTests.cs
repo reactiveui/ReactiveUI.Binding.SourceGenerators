@@ -13,6 +13,11 @@ namespace ReactiveUI.Binding.Tests.WhenAny;
 public class WhenAnyTests
 {
     /// <summary>
+    /// The expected number of emitted values after the second notification.
+    /// </summary>
+    private const int ExpectedTwoEmissions = 2;
+
+    /// <summary>
     /// Verifies that WhenAny with a single property and selector returns the selector result.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -25,8 +30,8 @@ public class WhenAnyTests
         var values = new List<string>();
 
         using var sub = fixture.WhenAny(
-            x => x.IsNotNullString,
-            change => change.Value)
+                x => x.IsNotNullString,
+                change => change.Value)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -34,7 +39,7 @@ public class WhenAnyTests
 
         fixture.IsNotNullString = "Changed";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
         await Assert.That(values[1]).IsEqualTo("Changed");
     }
 
@@ -47,17 +52,13 @@ public class WhenAnyTests
     {
         EnsureInitialized();
 
-        var fixture = new TestFixture
-        {
-            IsNotNullString = "Hello",
-            IsOnlyOneWord = "World"
-        };
+        var fixture = new TestFixture { IsNotNullString = "Hello", IsOnlyOneWord = "World" };
         var values = new List<string>();
 
         using var sub = fixture.WhenAny(
-            x => x.IsNotNullString,
-            x => x.IsOnlyOneWord,
-            (c1, c2) => $"{c1.Value} {c2.Value}")
+                x => x.IsNotNullString,
+                x => x.IsOnlyOneWord,
+                (c1, c2) => $"{c1.Value} {c2.Value}")
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -77,8 +78,8 @@ public class WhenAnyTests
         var values = new List<string>();
 
         using var sub = fixture.WhenAny(
-            x => x.IsNotNullString,
-            change => change.Value)
+                x => x.IsNotNullString,
+                change => change.Value)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -90,16 +91,16 @@ public class WhenAnyTests
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WorksWithINPCObjects()
+    public async Task WorksWithINotifyPropertyChangedObjects()
     {
         EnsureInitialized();
 
-        var obj = new NonReactiveINPCObject { InpcProperty = "Start" };
+        var obj = new NonReactiveINotifyPropertyChangedObject { InpcProperty = "Start" };
         var values = new List<string>();
 
         using var sub = obj.WhenAny(
-            x => x.InpcProperty,
-            change => change.Value)
+                x => x.InpcProperty,
+                change => change.Value)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -107,7 +108,7 @@ public class WhenAnyTests
 
         obj.InpcProperty = "End";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
 
     /// <summary>
@@ -123,8 +124,8 @@ public class WhenAnyTests
         IObservedChange<TestFixture, string>? captured = null;
 
         using var sub = fixture.WhenAny(
-            x => x.IsNotNullString,
-            change => change)
+                x => x.IsNotNullString,
+                change => change)
             .Subscribe(c => captured = c);
 
         await Assert.That(captured).IsNotNull();

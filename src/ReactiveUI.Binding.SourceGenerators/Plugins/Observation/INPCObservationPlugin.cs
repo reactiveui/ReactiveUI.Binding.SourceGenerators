@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -14,10 +13,20 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// Supports both after-change and before-change (if type also implements INotifyPropertyChanging).
 /// Generates <c>PropertyObservable</c> / <c>PropertyChangingObservable</c> from the runtime library.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Minor Code Smell",
+    "S101:Types should be named in PascalCase",
+    Justification = "INPC is an established acronym (INotifyPropertyChanged) matching the ReactiveUI domain terminology.")]
 internal sealed class INPCObservationPlugin : IObservationPlugin
 {
+    /// <summary>
+    /// The affinity score for the INotifyPropertyChanged observation plugin
+    /// (matches ReactiveUI's INPCObservableForProperty).
+    /// </summary>
+    private static readonly int INPCAffinity = BindingAffinity.Explicit;
+
     /// <inheritdoc/>
-    public int Affinity => 5;
+    public int Affinity => INPCAffinity;
 
     /// <inheritdoc/>
     public string ObservationKind => "INPC";
@@ -49,11 +58,16 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
     {
         if (isBeforeChange)
         {
-            sb.Append($"""new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>((global::System.ComponentModel.INotifyPropertyChanging){rootVar}, "{segment.PropertyName}", (global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName})""");
+            sb.Append(
+                $"new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>((" +
+                $"""global::System.ComponentModel.INotifyPropertyChanging){rootVar}, "{segment.PropertyName}", (""" +
+                $"global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName})");
         }
         else
         {
-            sb.Append($"""new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>({rootVar}, "{segment.PropertyName}", (global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName}, {(includeStartWith ? "true" : "false")})""");
+            sb.Append(
+                $"""new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>({rootVar}, "{segment.PropertyName}", (""" +
+                $"global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName}, {(includeStartWith ? "true" : "false")})");
         }
     }
 
@@ -64,28 +78,21 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
         PropertyPathSegment segment,
         string castTypeName,
         bool isBeforeChange,
-        string varName)
-    {
-        if (isBeforeChange)
-        {
-            sb.Append($"""
-                            var {varName} = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>(
-                                (global::System.ComponentModel.INotifyPropertyChanging){rootVar},
-                                "{segment.PropertyName}",
-                                (global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName});
-                """);
-        }
-        else
-        {
-            sb.Append($"""
-                            var {varName} = new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>(
-                                {rootVar},
-                                "{segment.PropertyName}",
-                                (global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName},
-                                true);
-                """);
-        }
-    }
+        string varName) =>
+        sb.Append(isBeforeChange
+            ? $"""
+                           var {varName} = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>(
+                               (global::System.ComponentModel.INotifyPropertyChanging){rootVar},
+                               "{segment.PropertyName}",
+                               (global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName});
+               """
+            : $"""
+                           var {varName} = new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>(
+                               {rootVar},
+                               "{segment.PropertyName}",
+                               (global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName},
+                               true);
+               """);
 
     /// <inheritdoc/>
     public void EmitDeepChainRootSegment(
@@ -94,28 +101,21 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
         PropertyPathSegment segment,
         string castTypeName,
         bool isBeforeChange,
-        string obsVarName)
-    {
-        if (isBeforeChange)
-        {
-            sb.AppendLine($"""
-                            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>(
-                                (global::System.ComponentModel.INotifyPropertyChanging){rootVar},
-                                "{segment.PropertyName}",
-                                (global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName});
-                """);
-        }
-        else
-        {
-            sb.AppendLine($"""
-                            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>(
-                                {rootVar},
-                                "{segment.PropertyName}",
-                                (global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName},
-                                false);
-                """);
-        }
-    }
+        string obsVarName) =>
+        sb.AppendLine(isBeforeChange
+            ? $"""
+            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>(
+                (global::System.ComponentModel.INotifyPropertyChanging){rootVar},
+                "{segment.PropertyName}",
+                (global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName});
+"""
+            : $"""
+                           var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>(
+                               {rootVar},
+                               "{segment.PropertyName}",
+                               (global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName},
+                               false);
+               """);
 
     /// <inheritdoc/>
     public void EmitDeepChainInnerSegment(
@@ -128,35 +128,29 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
     {
         var segType = segment.PropertyTypeFullName;
 
-        if (isBeforeChange)
-        {
-            sb.AppendLine()
-                .AppendLine($"""
-                            var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                    {lambdaParam} => {lambdaParam} != null
-                                        ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segType}>(
-                                            (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
-                                            "{segment.PropertyName}",
-                                            (global::System.ComponentModel.INotifyPropertyChanging __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName})
-                                        : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))));
-                    """);
-        }
-        else
-        {
-            sb.AppendLine()
-                .AppendLine($"""
-                            var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                    {lambdaParam} => {lambdaParam} != null
-                                        ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{segType}>(
-                                            {lambdaParam},
-                                            "{segment.PropertyName}",
-                                            (global::System.ComponentModel.INotifyPropertyChanged __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName},
-                                            false)
-                                        : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))));
-                    """);
-        }
+        sb.AppendLine()
+            .AppendLine(isBeforeChange
+                ? $"""
+                           var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                               global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
+                                   {lambdaParam} => {lambdaParam} != null
+                                       ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segType}>(
+                                           (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
+                                           "{segment.PropertyName}",
+                                           (global::System.ComponentModel.INotifyPropertyChanging __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName})
+                                       : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))));
+                   """
+                : $"""
+                           var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                               global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
+                                   {lambdaParam} => {lambdaParam} != null
+                                       ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{segType}>(
+                                           {lambdaParam},
+                                           "{segment.PropertyName}",
+                                           (global::System.ComponentModel.INotifyPropertyChanged __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName},
+                                           false)
+                                       : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))));
+                   """);
     }
 
     /// <inheritdoc/>
@@ -165,14 +159,12 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
         string rootVar,
         PropertyPathSegment segment,
         string castTypeName,
-        string varName)
-    {
+        string varName) =>
         sb.AppendLine($"""
-                    var {varName} = new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>(
-                        {rootVar},
-                        "{segment.PropertyName}",
-                        (global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName},
-                        true);
-            """);
-    }
+                               var {varName} = new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>(
+                                   {rootVar},
+                                   "{segment.PropertyName}",
+                                   (global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName},
+                                   true);
+                       """);
 }

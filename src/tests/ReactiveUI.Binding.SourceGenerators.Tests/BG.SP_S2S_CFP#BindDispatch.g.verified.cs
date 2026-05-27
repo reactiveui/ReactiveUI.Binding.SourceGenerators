@@ -20,16 +20,16 @@ namespace ReactiveUI.Binding
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 86
+            if (callerLineNumber == 90
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __Bind_000011908961B77F(viewModel, view);
+                return __Bind_000011908961B7FB(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object view, bool isViewModel)> __Bind_000011908961B77F(global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyStringToString.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object view, bool isViewModel)> __Bind_000011908961B7FB(global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyStringToString.MyView view)
         {
             // Bind: Name <-> NameText
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

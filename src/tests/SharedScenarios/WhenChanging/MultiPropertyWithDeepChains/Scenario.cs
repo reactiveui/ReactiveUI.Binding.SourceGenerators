@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenChanging.MultiPropertyWithDeepChains
+namespace SharedScenarios.WhenChanging.MultiPropertyWithDeepChains;
+
+/// <summary>
+/// Exercises WhenChanging with a mix of deep chain (Address.City) and shallow (Name) properties.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenChanging with a mix of deep chain (Address.City) and shallow (Name) properties.
+    /// Creates a WhenChanging observable combining Address.City and Name with a selector.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenChanging observable combining Address.City and Name with a selector.
-        /// </summary>
-        /// <param name="vm">The view model to observe.</param>
-        /// <returns>An observable of combined city and name strings (before change).</returns>
-        public static IObservable<string> Execute(MyViewModel vm)
-            => vm.WhenChanging(x => x.Address.City, x => x.Name, (city, name) => $"{city}: {name}");
-    }
+    /// <param name="vm">The view model to observe.</param>
+    /// <returns>An observable of combined city and name strings (before change).</returns>
+    public static IObservable<string> Execute(MyViewModel vm)
+        => vm.WhenChanging(x => x.Address.City, x => x.Name, (city, name) => $"{city}: {name}");
 }

@@ -4,7 +4,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -15,6 +14,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 /// </summary>
 internal static class BindToExtractor
 {
+    /// <summary>
+    /// The minimum number of arguments a BindTo invocation must have (target, property).
+    /// </summary>
+    private const int MinimumBindToArgumentCount = 2;
+
     /// <summary>
     /// Pipeline B transform: extracts <see cref="BindToInvocationInfo"/> from a <c>BindTo</c> invocation.
     /// </summary>
@@ -40,7 +44,7 @@ internal static class BindToExtractor
 
         // Need at least 2 arguments: target, property.
         var args = invocation.ArgumentList.Arguments;
-        if (!ExtractorValidation.HasMinimumArguments(args.Count, 2))
+        if (!ExtractorValidation.HasMinimumArguments(args.Count, MinimumBindToArgumentCount))
         {
             return null;
         }
@@ -60,7 +64,8 @@ internal static class BindToExtractor
             return null;
         }
 
-        var targetTypeName = ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
+        var targetTypeName =
+            ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
         if (targetTypeName == null)
         {
             return null;
@@ -69,35 +74,23 @@ internal static class BindToExtractor
         var sourceValueTypeFullName = sourceValueType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var targetPropertyTypeFullName = targetPropertyPath[targetPropertyPath.Length - 1].PropertyTypeFullName;
 
-        var hasConversionHint = false;
-        var hasConverterOverride = false;
-        foreach (var parameter in methodSymbol.Parameters)
-        {
-            if (parameter.Name == "conversionHint")
-            {
-                hasConversionHint = true;
-            }
-            else if (parameter.Name == "converterOverride"
-                && parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).EndsWith("IBindingTypeConverter", StringComparison.Ordinal))
-            {
-                hasConverterOverride = true;
-            }
-        }
+        DetectConversionParameters(methodSymbol, out var hasConversionHint, out var hasConverterOverride);
 
         var filePath = invocation.SyntaxTree.FilePath;
         var lineNumber = invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-        var targetExpressionText = CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString());
+        var targetExpressionText =
+            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString());
 
-        return new BindToInvocationInfo(
-            CallerFilePath: filePath,
-            CallerLineNumber: lineNumber,
-            SourceValueTypeFullName: sourceValueTypeFullName,
-            TargetTypeFullName: targetTypeName,
-            TargetPropertyPath: new EquatableArray<PropertyPathSegment>(targetPropertyPath),
-            TargetPropertyTypeFullName: targetPropertyTypeFullName,
-            HasConversionHint: hasConversionHint,
-            HasConverterOverride: hasConverterOverride,
-            TargetExpressionText: targetExpressionText);
+        return new(
+            filePath,
+            lineNumber,
+            sourceValueTypeFullName,
+            targetTypeName,
+            new(targetPropertyPath),
+            targetPropertyTypeFullName,
+            hasConversionHint,
+            hasConverterOverride,
+            targetExpressionText);
     }
 
     /// <summary>
@@ -114,18 +107,50 @@ internal static class BindToExtractor
             return direct.TypeArguments[0];
         }
 
-        if (receiver is not null)
+        if (receiver is null)
         {
-            foreach (var iface in receiver.AllInterfaces)
+            return null;
+        }
+
+        foreach (var iface in receiver.AllInterfaces)
+        {
+            if (iface is { Name: "IObservable", TypeArguments.Length: 1 }
+                && iface.ContainingNamespace?.ToDisplayString() == "System")
             {
-                if (iface is { Name: "IObservable", TypeArguments.Length: 1 }
-                    && iface.ContainingNamespace?.ToDisplayString() == "System")
-                {
-                    return iface.TypeArguments[0];
-                }
+                return iface.TypeArguments[0];
             }
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Scans the method parameters to detect the presence of a <c>conversionHint</c> parameter
+    /// and an <c>IBindingTypeConverter</c>-typed <c>converterOverride</c> parameter.
+    /// </summary>
+    /// <param name="methodSymbol">The resolved method symbol.</param>
+    /// <param name="hasConversionHint">Set to true if a <c>conversionHint</c> parameter exists.</param>
+    /// <param name="hasConverterOverride">Set to true if an <c>IBindingTypeConverter</c> converter override exists.</param>
+    private static void DetectConversionParameters(
+        IMethodSymbol methodSymbol,
+        out bool hasConversionHint,
+        out bool hasConverterOverride)
+    {
+        hasConversionHint = false;
+        hasConverterOverride = false;
+
+        foreach (var parameter in methodSymbol.Parameters)
+        {
+            if (parameter.Name == "conversionHint")
+            {
+                hasConversionHint = true;
+            }
+            else if (parameter.Name == "converterOverride"
+                     && parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                         .EndsWith("IBindingTypeConverter", StringComparison.Ordinal))
+            {
+                hasConverterOverride = true;
+            }
+        }
     }
 }

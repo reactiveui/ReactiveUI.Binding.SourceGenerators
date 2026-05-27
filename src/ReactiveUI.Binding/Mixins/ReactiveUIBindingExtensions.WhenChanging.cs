@@ -27,7 +27,8 @@ public static partial class ReactiveUIBindingExtensions
     public static IObservable<T1> WhenChanging<TObj, T1>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
@@ -75,8 +76,10 @@ public static partial class ReactiveUIBindingExtensions
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
@@ -135,9 +138,12 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
         Expression<Func<TObj, T3>> property3,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
@@ -199,16 +205,25 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4)> WhenChanging<TObj, T1, T2, T3, T4>(
+    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4)> WhenChanging<
+        TObj,
+        T1,
+        T2,
+        T3,
+        T4>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
         Expression<Func<TObj, T3>> property3,
         Expression<Func<TObj, T4>> property4,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
@@ -278,18 +293,29 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5)> WhenChanging<TObj, T1, T2, T3, T4, T5>(
+    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5)> WhenChanging<
+        TObj,
+        T1,
+        T2,
+        T3,
+        T4,
+        T5>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
         Expression<Func<TObj, T3>> property3,
         Expression<Func<TObj, T4>> property4,
         Expression<Func<TObj, T5>> property5,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
@@ -367,22 +393,29 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6>(
-        this TObj objectToMonitor,
-        Expression<Func<TObj, T1>> property1,
-        Expression<Func<TObj, T2>> property2,
-        Expression<Func<TObj, T3>> property3,
-        Expression<Func<TObj, T4>> property4,
-        Expression<Func<TObj, T5>> property5,
-        Expression<Func<TObj, T6>> property6,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
+    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6)>
+        WhenChanging<TObj, T1, T2, T3, T4, T5, T6>(
+            this TObj objectToMonitor,
+            Expression<Func<TObj, T1>> property1,
+            Expression<Func<TObj, T2>> property2,
+            Expression<Func<TObj, T3>> property3,
+            Expression<Func<TObj, T4>> property4,
+            Expression<Func<TObj, T5>> property5,
+            Expression<Func<TObj, T6>> property6,
+            [CallerArgumentExpression("property1")]
+            string property1Expression = "",
+            [CallerArgumentExpression("property2")]
+            string property2Expression = "",
+            [CallerArgumentExpression("property3")]
+            string property3Expression = "",
+            [CallerArgumentExpression("property4")]
+            string property4Expression = "",
+            [CallerArgumentExpression("property5")]
+            string property5Expression = "",
+            [CallerArgumentExpression("property6")]
+            string property6Expression = "",
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
     /// <summary>
@@ -466,24 +499,33 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7>(
-        this TObj objectToMonitor,
-        Expression<Func<TObj, T1>> property1,
-        Expression<Func<TObj, T2>> property2,
-        Expression<Func<TObj, T3>> property3,
-        Expression<Func<TObj, T4>> property4,
-        Expression<Func<TObj, T5>> property5,
-        Expression<Func<TObj, T6>> property6,
-        Expression<Func<TObj, T7>> property7,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
+    public static
+        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7)>
+        WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7>(
+            this TObj objectToMonitor,
+            Expression<Func<TObj, T1>> property1,
+            Expression<Func<TObj, T2>> property2,
+            Expression<Func<TObj, T3>> property3,
+            Expression<Func<TObj, T4>> property4,
+            Expression<Func<TObj, T5>> property5,
+            Expression<Func<TObj, T6>> property6,
+            Expression<Func<TObj, T7>> property7,
+            [CallerArgumentExpression("property1")]
+            string property1Expression = "",
+            [CallerArgumentExpression("property2")]
+            string property2Expression = "",
+            [CallerArgumentExpression("property3")]
+            string property3Expression = "",
+            [CallerArgumentExpression("property4")]
+            string property4Expression = "",
+            [CallerArgumentExpression("property5")]
+            string property5Expression = "",
+            [CallerArgumentExpression("property6")]
+            string property6Expression = "",
+            [CallerArgumentExpression("property7")]
+            string property7Expression = "",
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
     /// <summary>
@@ -575,26 +617,37 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8>(
-        this TObj objectToMonitor,
-        Expression<Func<TObj, T1>> property1,
-        Expression<Func<TObj, T2>> property2,
-        Expression<Func<TObj, T3>> property3,
-        Expression<Func<TObj, T4>> property4,
-        Expression<Func<TObj, T5>> property5,
-        Expression<Func<TObj, T6>> property6,
-        Expression<Func<TObj, T7>> property7,
-        Expression<Func<TObj, T8>> property8,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
+    public static
+        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+            T8
+            property8)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8>(
+            this TObj objectToMonitor,
+            Expression<Func<TObj, T1>> property1,
+            Expression<Func<TObj, T2>> property2,
+            Expression<Func<TObj, T3>> property3,
+            Expression<Func<TObj, T4>> property4,
+            Expression<Func<TObj, T5>> property5,
+            Expression<Func<TObj, T6>> property6,
+            Expression<Func<TObj, T7>> property7,
+            Expression<Func<TObj, T8>> property8,
+            [CallerArgumentExpression("property1")]
+            string property1Expression = "",
+            [CallerArgumentExpression("property2")]
+            string property2Expression = "",
+            [CallerArgumentExpression("property3")]
+            string property3Expression = "",
+            [CallerArgumentExpression("property4")]
+            string property4Expression = "",
+            [CallerArgumentExpression("property5")]
+            string property5Expression = "",
+            [CallerArgumentExpression("property6")]
+            string property6Expression = "",
+            [CallerArgumentExpression("property7")]
+            string property7Expression = "",
+            [CallerArgumentExpression("property8")]
+            string property8Expression = "",
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
     /// <summary>
@@ -694,28 +747,40 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
-        this TObj objectToMonitor,
-        Expression<Func<TObj, T1>> property1,
-        Expression<Func<TObj, T2>> property2,
-        Expression<Func<TObj, T3>> property3,
-        Expression<Func<TObj, T4>> property4,
-        Expression<Func<TObj, T5>> property5,
-        Expression<Func<TObj, T6>> property6,
-        Expression<Func<TObj, T7>> property7,
-        Expression<Func<TObj, T8>> property8,
-        Expression<Func<TObj, T9>> property9,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
+    public static
+        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+            T8
+            property8, T9 property9)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+            this TObj objectToMonitor,
+            Expression<Func<TObj, T1>> property1,
+            Expression<Func<TObj, T2>> property2,
+            Expression<Func<TObj, T3>> property3,
+            Expression<Func<TObj, T4>> property4,
+            Expression<Func<TObj, T5>> property5,
+            Expression<Func<TObj, T6>> property6,
+            Expression<Func<TObj, T7>> property7,
+            Expression<Func<TObj, T8>> property8,
+            Expression<Func<TObj, T9>> property9,
+            [CallerArgumentExpression("property1")]
+            string property1Expression = "",
+            [CallerArgumentExpression("property2")]
+            string property2Expression = "",
+            [CallerArgumentExpression("property3")]
+            string property3Expression = "",
+            [CallerArgumentExpression("property4")]
+            string property4Expression = "",
+            [CallerArgumentExpression("property5")]
+            string property5Expression = "",
+            [CallerArgumentExpression("property6")]
+            string property6Expression = "",
+            [CallerArgumentExpression("property7")]
+            string property7Expression = "",
+            [CallerArgumentExpression("property8")]
+            string property8Expression = "",
+            [CallerArgumentExpression("property9")]
+            string property9Expression = "",
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
     /// <summary>
@@ -744,7 +809,16 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+    public static IObservable<(
+        T1 property1,
+        T2 property2,
+        T3 property3,
+        T4 property4,
+        T5 property5,
+        T6 property6,
+        T7 property7,
+        T8 property8,
+        T9 property9)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
@@ -823,30 +897,43 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
-        this TObj objectToMonitor,
-        Expression<Func<TObj, T1>> property1,
-        Expression<Func<TObj, T2>> property2,
-        Expression<Func<TObj, T3>> property3,
-        Expression<Func<TObj, T4>> property4,
-        Expression<Func<TObj, T5>> property5,
-        Expression<Func<TObj, T6>> property6,
-        Expression<Func<TObj, T7>> property7,
-        Expression<Func<TObj, T8>> property8,
-        Expression<Func<TObj, T9>> property9,
-        Expression<Func<TObj, T10>> property10,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
+    public static
+        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+            T8
+            property8, T9 property9, T10 property10)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+            this TObj objectToMonitor,
+            Expression<Func<TObj, T1>> property1,
+            Expression<Func<TObj, T2>> property2,
+            Expression<Func<TObj, T3>> property3,
+            Expression<Func<TObj, T4>> property4,
+            Expression<Func<TObj, T5>> property5,
+            Expression<Func<TObj, T6>> property6,
+            Expression<Func<TObj, T7>> property7,
+            Expression<Func<TObj, T8>> property8,
+            Expression<Func<TObj, T9>> property9,
+            Expression<Func<TObj, T10>> property10,
+            [CallerArgumentExpression("property1")]
+            string property1Expression = "",
+            [CallerArgumentExpression("property2")]
+            string property2Expression = "",
+            [CallerArgumentExpression("property3")]
+            string property3Expression = "",
+            [CallerArgumentExpression("property4")]
+            string property4Expression = "",
+            [CallerArgumentExpression("property5")]
+            string property5Expression = "",
+            [CallerArgumentExpression("property6")]
+            string property6Expression = "",
+            [CallerArgumentExpression("property7")]
+            string property7Expression = "",
+            [CallerArgumentExpression("property8")]
+            string property8Expression = "",
+            [CallerArgumentExpression("property9")]
+            string property9Expression = "",
+            [CallerArgumentExpression("property10")]
+            string property10Expression = "",
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
     /// <summary>
@@ -877,7 +964,17 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+    public static IObservable<(
+        T1 property1,
+        T2 property2,
+        T3 property3,
+        T4 property4,
+        T5 property5,
+        T6 property6,
+        T7 property7,
+        T8 property8,
+        T9 property9,
+        T10 property10)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
@@ -962,32 +1059,58 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
-        this TObj objectToMonitor,
-        Expression<Func<TObj, T1>> property1,
-        Expression<Func<TObj, T2>> property2,
-        Expression<Func<TObj, T3>> property3,
-        Expression<Func<TObj, T4>> property4,
-        Expression<Func<TObj, T5>> property5,
-        Expression<Func<TObj, T6>> property6,
-        Expression<Func<TObj, T7>> property7,
-        Expression<Func<TObj, T8>> property8,
-        Expression<Func<TObj, T9>> property9,
-        Expression<Func<TObj, T10>> property10,
-        Expression<Func<TObj, T11>> property11,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
+    public static
+        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+            T8
+            property8, T9 property9, T10 property10, T11 property11)> WhenChanging<
+                TObj,
+                T1,
+                T2,
+                T3,
+                T4,
+                T5,
+                T6,
+                T7,
+                T8,
+                T9,
+                T10,
+                T11>(
+            this TObj objectToMonitor,
+            Expression<Func<TObj, T1>> property1,
+            Expression<Func<TObj, T2>> property2,
+            Expression<Func<TObj, T3>> property3,
+            Expression<Func<TObj, T4>> property4,
+            Expression<Func<TObj, T5>> property5,
+            Expression<Func<TObj, T6>> property6,
+            Expression<Func<TObj, T7>> property7,
+            Expression<Func<TObj, T8>> property8,
+            Expression<Func<TObj, T9>> property9,
+            Expression<Func<TObj, T10>> property10,
+            Expression<Func<TObj, T11>> property11,
+            [CallerArgumentExpression("property1")]
+            string property1Expression = "",
+            [CallerArgumentExpression("property2")]
+            string property2Expression = "",
+            [CallerArgumentExpression("property3")]
+            string property3Expression = "",
+            [CallerArgumentExpression("property4")]
+            string property4Expression = "",
+            [CallerArgumentExpression("property5")]
+            string property5Expression = "",
+            [CallerArgumentExpression("property6")]
+            string property6Expression = "",
+            [CallerArgumentExpression("property7")]
+            string property7Expression = "",
+            [CallerArgumentExpression("property8")]
+            string property8Expression = "",
+            [CallerArgumentExpression("property9")]
+            string property9Expression = "",
+            [CallerArgumentExpression("property10")]
+            string property10Expression = "",
+            [CallerArgumentExpression("property11")]
+            string property11Expression = "",
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
     /// <summary>
@@ -1020,7 +1143,18 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
+    public static IObservable<(
+        T1 property1,
+        T2 property2,
+        T3 property3,
+        T4 property4,
+        T5 property5,
+        T6 property6,
+        T7 property7,
+        T8 property8,
+        T9 property9,
+        T10 property10,
+        T11 property11)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
@@ -1111,34 +1245,62 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11, T12 property12)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
-        this TObj objectToMonitor,
-        Expression<Func<TObj, T1>> property1,
-        Expression<Func<TObj, T2>> property2,
-        Expression<Func<TObj, T3>> property3,
-        Expression<Func<TObj, T4>> property4,
-        Expression<Func<TObj, T5>> property5,
-        Expression<Func<TObj, T6>> property6,
-        Expression<Func<TObj, T7>> property7,
-        Expression<Func<TObj, T8>> property8,
-        Expression<Func<TObj, T9>> property9,
-        Expression<Func<TObj, T10>> property10,
-        Expression<Func<TObj, T11>> property11,
-        Expression<Func<TObj, T12>> property12,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerArgumentExpression("property12")] string property12Expression = "",
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
+    public static
+        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+            T8
+            property8, T9 property9, T10 property10, T11 property11, T12 property12)> WhenChanging<
+                TObj,
+                T1,
+                T2,
+                T3,
+                T4,
+                T5,
+                T6,
+                T7,
+                T8,
+                T9,
+                T10,
+                T11,
+                T12>(
+            this TObj objectToMonitor,
+            Expression<Func<TObj, T1>> property1,
+            Expression<Func<TObj, T2>> property2,
+            Expression<Func<TObj, T3>> property3,
+            Expression<Func<TObj, T4>> property4,
+            Expression<Func<TObj, T5>> property5,
+            Expression<Func<TObj, T6>> property6,
+            Expression<Func<TObj, T7>> property7,
+            Expression<Func<TObj, T8>> property8,
+            Expression<Func<TObj, T9>> property9,
+            Expression<Func<TObj, T10>> property10,
+            Expression<Func<TObj, T11>> property11,
+            Expression<Func<TObj, T12>> property12,
+            [CallerArgumentExpression("property1")]
+            string property1Expression = "",
+            [CallerArgumentExpression("property2")]
+            string property2Expression = "",
+            [CallerArgumentExpression("property3")]
+            string property3Expression = "",
+            [CallerArgumentExpression("property4")]
+            string property4Expression = "",
+            [CallerArgumentExpression("property5")]
+            string property5Expression = "",
+            [CallerArgumentExpression("property6")]
+            string property6Expression = "",
+            [CallerArgumentExpression("property7")]
+            string property7Expression = "",
+            [CallerArgumentExpression("property8")]
+            string property8Expression = "",
+            [CallerArgumentExpression("property9")]
+            string property9Expression = "",
+            [CallerArgumentExpression("property10")]
+            string property10Expression = "",
+            [CallerArgumentExpression("property11")]
+            string property11Expression = "",
+            [CallerArgumentExpression("property12")]
+            string property12Expression = "",
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
     /// <summary>
@@ -1173,7 +1335,19 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11, T12 property12)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
+    public static IObservable<(
+        T1 property1,
+        T2 property2,
+        T3 property3,
+        T4 property4,
+        T5 property5,
+        T6 property6,
+        T7 property7,
+        T8 property8,
+        T9 property9,
+        T10 property10,
+        T11 property11,
+        T12 property12)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
@@ -1270,36 +1444,66 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
-        this TObj objectToMonitor,
-        Expression<Func<TObj, T1>> property1,
-        Expression<Func<TObj, T2>> property2,
-        Expression<Func<TObj, T3>> property3,
-        Expression<Func<TObj, T4>> property4,
-        Expression<Func<TObj, T5>> property5,
-        Expression<Func<TObj, T6>> property6,
-        Expression<Func<TObj, T7>> property7,
-        Expression<Func<TObj, T8>> property8,
-        Expression<Func<TObj, T9>> property9,
-        Expression<Func<TObj, T10>> property10,
-        Expression<Func<TObj, T11>> property11,
-        Expression<Func<TObj, T12>> property12,
-        Expression<Func<TObj, T13>> property13,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerArgumentExpression("property12")] string property12Expression = "",
-        [CallerArgumentExpression("property13")] string property13Expression = "",
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
+    public static
+        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+            T8
+            property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13)> WhenChanging<
+                TObj,
+                T1,
+                T2,
+                T3,
+                T4,
+                T5,
+                T6,
+                T7,
+                T8,
+                T9,
+                T10,
+                T11,
+                T12,
+                T13>(
+            this TObj objectToMonitor,
+            Expression<Func<TObj, T1>> property1,
+            Expression<Func<TObj, T2>> property2,
+            Expression<Func<TObj, T3>> property3,
+            Expression<Func<TObj, T4>> property4,
+            Expression<Func<TObj, T5>> property5,
+            Expression<Func<TObj, T6>> property6,
+            Expression<Func<TObj, T7>> property7,
+            Expression<Func<TObj, T8>> property8,
+            Expression<Func<TObj, T9>> property9,
+            Expression<Func<TObj, T10>> property10,
+            Expression<Func<TObj, T11>> property11,
+            Expression<Func<TObj, T12>> property12,
+            Expression<Func<TObj, T13>> property13,
+            [CallerArgumentExpression("property1")]
+            string property1Expression = "",
+            [CallerArgumentExpression("property2")]
+            string property2Expression = "",
+            [CallerArgumentExpression("property3")]
+            string property3Expression = "",
+            [CallerArgumentExpression("property4")]
+            string property4Expression = "",
+            [CallerArgumentExpression("property5")]
+            string property5Expression = "",
+            [CallerArgumentExpression("property6")]
+            string property6Expression = "",
+            [CallerArgumentExpression("property7")]
+            string property7Expression = "",
+            [CallerArgumentExpression("property8")]
+            string property8Expression = "",
+            [CallerArgumentExpression("property9")]
+            string property9Expression = "",
+            [CallerArgumentExpression("property10")]
+            string property10Expression = "",
+            [CallerArgumentExpression("property11")]
+            string property11Expression = "",
+            [CallerArgumentExpression("property12")]
+            string property12Expression = "",
+            [CallerArgumentExpression("property13")]
+            string property13Expression = "",
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
     /// <summary>
@@ -1336,7 +1540,20 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
+    public static IObservable<(
+        T1 property1,
+        T2 property2,
+        T3 property3,
+        T4 property4,
+        T5 property5,
+        T6 property6,
+        T7 property7,
+        T8 property8,
+        T9 property9,
+        T10 property10,
+        T11 property11,
+        T12 property12,
+        T13 property13)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
@@ -1385,7 +1602,8 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property11),
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property12),
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property13),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13) => (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13));
+            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13) =>
+                (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13));
     }
 
 #if NET8_0_OR_GREATER
@@ -1439,38 +1657,56 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
-        this TObj objectToMonitor,
-        Expression<Func<TObj, T1>> property1,
-        Expression<Func<TObj, T2>> property2,
-        Expression<Func<TObj, T3>> property3,
-        Expression<Func<TObj, T4>> property4,
-        Expression<Func<TObj, T5>> property5,
-        Expression<Func<TObj, T6>> property6,
-        Expression<Func<TObj, T7>> property7,
-        Expression<Func<TObj, T8>> property8,
-        Expression<Func<TObj, T9>> property9,
-        Expression<Func<TObj, T10>> property10,
-        Expression<Func<TObj, T11>> property11,
-        Expression<Func<TObj, T12>> property12,
-        Expression<Func<TObj, T13>> property13,
-        Expression<Func<TObj, T14>> property14,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerArgumentExpression("property12")] string property12Expression = "",
-        [CallerArgumentExpression("property13")] string property13Expression = "",
-        [CallerArgumentExpression("property14")] string property14Expression = "",
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
+    public static
+        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+            T8
+            property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14)>
+        WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
+            this TObj objectToMonitor,
+            Expression<Func<TObj, T1>> property1,
+            Expression<Func<TObj, T2>> property2,
+            Expression<Func<TObj, T3>> property3,
+            Expression<Func<TObj, T4>> property4,
+            Expression<Func<TObj, T5>> property5,
+            Expression<Func<TObj, T6>> property6,
+            Expression<Func<TObj, T7>> property7,
+            Expression<Func<TObj, T8>> property8,
+            Expression<Func<TObj, T9>> property9,
+            Expression<Func<TObj, T10>> property10,
+            Expression<Func<TObj, T11>> property11,
+            Expression<Func<TObj, T12>> property12,
+            Expression<Func<TObj, T13>> property13,
+            Expression<Func<TObj, T14>> property14,
+            [CallerArgumentExpression("property1")]
+            string property1Expression = "",
+            [CallerArgumentExpression("property2")]
+            string property2Expression = "",
+            [CallerArgumentExpression("property3")]
+            string property3Expression = "",
+            [CallerArgumentExpression("property4")]
+            string property4Expression = "",
+            [CallerArgumentExpression("property5")]
+            string property5Expression = "",
+            [CallerArgumentExpression("property6")]
+            string property6Expression = "",
+            [CallerArgumentExpression("property7")]
+            string property7Expression = "",
+            [CallerArgumentExpression("property8")]
+            string property8Expression = "",
+            [CallerArgumentExpression("property9")]
+            string property9Expression = "",
+            [CallerArgumentExpression("property10")]
+            string property10Expression = "",
+            [CallerArgumentExpression("property11")]
+            string property11Expression = "",
+            [CallerArgumentExpression("property12")]
+            string property12Expression = "",
+            [CallerArgumentExpression("property13")]
+            string property13Expression = "",
+            [CallerArgumentExpression("property14")]
+            string property14Expression = "",
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
     /// <summary>
@@ -1509,7 +1745,21 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
+    public static IObservable<(
+        T1 property1,
+        T2 property2,
+        T3 property3,
+        T4 property4,
+        T5 property5,
+        T6 property6,
+        T7 property7,
+        T8 property8,
+        T9 property9,
+        T10 property10,
+        T11 property11,
+        T12 property12,
+        T13 property13,
+        T14 property14)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
@@ -1561,7 +1811,8 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property12),
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property13),
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property14),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14) => (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14));
+            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14) =>
+                (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14));
     }
 
 #if NET8_0_OR_GREATER
@@ -1618,40 +1869,59 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14, T15 property15)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
-        this TObj objectToMonitor,
-        Expression<Func<TObj, T1>> property1,
-        Expression<Func<TObj, T2>> property2,
-        Expression<Func<TObj, T3>> property3,
-        Expression<Func<TObj, T4>> property4,
-        Expression<Func<TObj, T5>> property5,
-        Expression<Func<TObj, T6>> property6,
-        Expression<Func<TObj, T7>> property7,
-        Expression<Func<TObj, T8>> property8,
-        Expression<Func<TObj, T9>> property9,
-        Expression<Func<TObj, T10>> property10,
-        Expression<Func<TObj, T11>> property11,
-        Expression<Func<TObj, T12>> property12,
-        Expression<Func<TObj, T13>> property13,
-        Expression<Func<TObj, T14>> property14,
-        Expression<Func<TObj, T15>> property15,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerArgumentExpression("property12")] string property12Expression = "",
-        [CallerArgumentExpression("property13")] string property13Expression = "",
-        [CallerArgumentExpression("property14")] string property14Expression = "",
-        [CallerArgumentExpression("property15")] string property15Expression = "",
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
+    public static
+        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+            T8
+            property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14, T15
+            property15)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
+            this TObj objectToMonitor,
+            Expression<Func<TObj, T1>> property1,
+            Expression<Func<TObj, T2>> property2,
+            Expression<Func<TObj, T3>> property3,
+            Expression<Func<TObj, T4>> property4,
+            Expression<Func<TObj, T5>> property5,
+            Expression<Func<TObj, T6>> property6,
+            Expression<Func<TObj, T7>> property7,
+            Expression<Func<TObj, T8>> property8,
+            Expression<Func<TObj, T9>> property9,
+            Expression<Func<TObj, T10>> property10,
+            Expression<Func<TObj, T11>> property11,
+            Expression<Func<TObj, T12>> property12,
+            Expression<Func<TObj, T13>> property13,
+            Expression<Func<TObj, T14>> property14,
+            Expression<Func<TObj, T15>> property15,
+            [CallerArgumentExpression("property1")]
+            string property1Expression = "",
+            [CallerArgumentExpression("property2")]
+            string property2Expression = "",
+            [CallerArgumentExpression("property3")]
+            string property3Expression = "",
+            [CallerArgumentExpression("property4")]
+            string property4Expression = "",
+            [CallerArgumentExpression("property5")]
+            string property5Expression = "",
+            [CallerArgumentExpression("property6")]
+            string property6Expression = "",
+            [CallerArgumentExpression("property7")]
+            string property7Expression = "",
+            [CallerArgumentExpression("property8")]
+            string property8Expression = "",
+            [CallerArgumentExpression("property9")]
+            string property9Expression = "",
+            [CallerArgumentExpression("property10")]
+            string property10Expression = "",
+            [CallerArgumentExpression("property11")]
+            string property11Expression = "",
+            [CallerArgumentExpression("property12")]
+            string property12Expression = "",
+            [CallerArgumentExpression("property13")]
+            string property13Expression = "",
+            [CallerArgumentExpression("property14")]
+            string property14Expression = "",
+            [CallerArgumentExpression("property15")]
+            string property15Expression = "",
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
     /// <summary>
@@ -1692,7 +1962,22 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14, T15 property15)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
+    public static IObservable<(
+        T1 property1,
+        T2 property2,
+        T3 property3,
+        T4 property4,
+        T5 property5,
+        T6 property6,
+        T7 property7,
+        T8 property8,
+        T9 property9,
+        T10 property10,
+        T11 property11,
+        T12 property12,
+        T13 property13,
+        T14 property14,
+        T15 property15)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
@@ -1747,7 +2032,8 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property13),
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property14),
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property15),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) => (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15));
+            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) =>
+                (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15));
     }
 
 #if NET8_0_OR_GREATER
@@ -1807,42 +2093,79 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14, T15 property15, T16 property16)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(
-        this TObj objectToMonitor,
-        Expression<Func<TObj, T1>> property1,
-        Expression<Func<TObj, T2>> property2,
-        Expression<Func<TObj, T3>> property3,
-        Expression<Func<TObj, T4>> property4,
-        Expression<Func<TObj, T5>> property5,
-        Expression<Func<TObj, T6>> property6,
-        Expression<Func<TObj, T7>> property7,
-        Expression<Func<TObj, T8>> property8,
-        Expression<Func<TObj, T9>> property9,
-        Expression<Func<TObj, T10>> property10,
-        Expression<Func<TObj, T11>> property11,
-        Expression<Func<TObj, T12>> property12,
-        Expression<Func<TObj, T13>> property13,
-        Expression<Func<TObj, T14>> property14,
-        Expression<Func<TObj, T15>> property15,
-        Expression<Func<TObj, T16>> property16,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerArgumentExpression("property12")] string property12Expression = "",
-        [CallerArgumentExpression("property13")] string property13Expression = "",
-        [CallerArgumentExpression("property14")] string property14Expression = "",
-        [CallerArgumentExpression("property15")] string property15Expression = "",
-        [CallerArgumentExpression("property16")] string property16Expression = "",
-        [CallerFilePath] string callerFilePath = "",
-        [CallerLineNumber] int callerLineNumber = 0)
+    public static
+        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+            T8
+            property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14, T15
+            property15, T16 property16)> WhenChanging<
+                TObj,
+                T1,
+                T2,
+                T3,
+                T4,
+                T5,
+                T6,
+                T7,
+                T8,
+                T9,
+                T10,
+                T11,
+                T12,
+                T13,
+                T14,
+                T15,
+                T16>(
+            this TObj objectToMonitor,
+            Expression<Func<TObj, T1>> property1,
+            Expression<Func<TObj, T2>> property2,
+            Expression<Func<TObj, T3>> property3,
+            Expression<Func<TObj, T4>> property4,
+            Expression<Func<TObj, T5>> property5,
+            Expression<Func<TObj, T6>> property6,
+            Expression<Func<TObj, T7>> property7,
+            Expression<Func<TObj, T8>> property8,
+            Expression<Func<TObj, T9>> property9,
+            Expression<Func<TObj, T10>> property10,
+            Expression<Func<TObj, T11>> property11,
+            Expression<Func<TObj, T12>> property12,
+            Expression<Func<TObj, T13>> property13,
+            Expression<Func<TObj, T14>> property14,
+            Expression<Func<TObj, T15>> property15,
+            Expression<Func<TObj, T16>> property16,
+            [CallerArgumentExpression("property1")]
+            string property1Expression = "",
+            [CallerArgumentExpression("property2")]
+            string property2Expression = "",
+            [CallerArgumentExpression("property3")]
+            string property3Expression = "",
+            [CallerArgumentExpression("property4")]
+            string property4Expression = "",
+            [CallerArgumentExpression("property5")]
+            string property5Expression = "",
+            [CallerArgumentExpression("property6")]
+            string property6Expression = "",
+            [CallerArgumentExpression("property7")]
+            string property7Expression = "",
+            [CallerArgumentExpression("property8")]
+            string property8Expression = "",
+            [CallerArgumentExpression("property9")]
+            string property9Expression = "",
+            [CallerArgumentExpression("property10")]
+            string property10Expression = "",
+            [CallerArgumentExpression("property11")]
+            string property11Expression = "",
+            [CallerArgumentExpression("property12")]
+            string property12Expression = "",
+            [CallerArgumentExpression("property13")]
+            string property13Expression = "",
+            [CallerArgumentExpression("property14")]
+            string property14Expression = "",
+            [CallerArgumentExpression("property15")]
+            string property15Expression = "",
+            [CallerArgumentExpression("property16")]
+            string property16Expression = "",
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
     /// <summary>
@@ -1885,7 +2208,23 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14, T15 property15, T16 property16)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(
+    public static IObservable<(
+        T1 property1,
+        T2 property2,
+        T3 property3,
+        T4 property4,
+        T5 property5,
+        T6 property6,
+        T7 property7,
+        T8 property8,
+        T9 property9,
+        T10 property10,
+        T11 property11,
+        T12 property12,
+        T13 property13,
+        T14 property14,
+        T15 property15,
+        T16 property16)> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
@@ -1943,6 +2282,7 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property14),
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property15),
             RuntimeObservationFallback.WhenChanging(objectToMonitor, property16),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) => (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16));
+            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) => (v1, v2, v3, v4, v5, v6, v7, v8,
+                v9, v10, v11, v12, v13, v14, v15, v16));
     }
 }

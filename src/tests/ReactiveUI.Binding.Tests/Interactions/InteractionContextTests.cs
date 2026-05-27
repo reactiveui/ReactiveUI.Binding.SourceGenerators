@@ -10,6 +10,21 @@ namespace ReactiveUI.Binding.Tests.Interactions;
 public class InteractionContextTests
 {
     /// <summary>
+    /// A sample input value used across the interaction-context tests.
+    /// </summary>
+    private const string SampleInput = "input";
+
+    /// <summary>
+    /// A sample output value set on the interaction context.
+    /// </summary>
+    private const int SampleOutput = 42;
+
+    /// <summary>
+    /// A secondary output value used to verify SetOutput cannot be called twice.
+    /// </summary>
+    private const int SecondOutput = 2;
+
+    /// <summary>
     /// Verifies that Input returns the value passed at construction.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
@@ -27,7 +42,7 @@ public class InteractionContextTests
     [Test]
     public async Task IsHandled_FalseBeforeSetOutput()
     {
-        var context = CreateContext("input");
+        var context = CreateContext(SampleInput);
         await Assert.That(context.IsHandled).IsFalse();
     }
 
@@ -38,8 +53,8 @@ public class InteractionContextTests
     [Test]
     public async Task SetOutput_SetsIsHandledTrue()
     {
-        var context = CreateContext("input");
-        context.SetOutput(42);
+        var context = CreateContext(SampleInput);
+        context.SetOutput(SampleOutput);
         await Assert.That(context.IsHandled).IsTrue();
     }
 
@@ -50,9 +65,9 @@ public class InteractionContextTests
     [Test]
     public async Task GetOutput_ReturnsSetValue()
     {
-        var context = CreateContext("input");
-        context.SetOutput(42);
-        await Assert.That(context.GetOutput()).IsEqualTo(42);
+        var context = CreateContext(SampleInput);
+        context.SetOutput(SampleOutput);
+        await Assert.That(context.GetOutput()).IsEqualTo(SampleOutput);
     }
 
     /// <summary>
@@ -62,9 +77,9 @@ public class InteractionContextTests
     [Test]
     public async Task SetOutput_CalledTwice_Throws()
     {
-        var context = CreateContext("input");
+        var context = CreateContext(SampleInput);
         context.SetOutput(1);
-        await Assert.That(() => context.SetOutput(2)).Throws<InvalidOperationException>();
+        await Assert.That(() => context.SetOutput(SecondOutput)).Throws<InvalidOperationException>();
     }
 
     /// <summary>
@@ -74,21 +89,16 @@ public class InteractionContextTests
     [Test]
     public async Task GetOutput_BeforeSetOutput_Throws()
     {
-        var context = CreateContext("input");
-        await Assert.That(() => context.GetOutput()).Throws<InvalidOperationException>();
+        var context = CreateContext(SampleInput);
+        await Assert.That(context.GetOutput).Throws<InvalidOperationException>();
     }
 
     /// <summary>
-    /// Creates an <see cref="InteractionContext{TInput, TOutput}"/> using reflection
-    /// since the constructor is internal.
+    /// Creates an <see cref="InteractionContext{TInput, TOutput}"/>. The internal constructor is
+    /// directly accessible to this assembly via <c>InternalsVisibleTo</c>.
     /// </summary>
     /// <param name="input">The input value for the interaction context.</param>
     /// <returns>A new <see cref="InteractionContext{TInput, TOutput}"/> instance.</returns>
     private static InteractionContext<string, int> CreateContext(string input) =>
-        (InteractionContext<string, int>)Activator.CreateInstance(
-            typeof(InteractionContext<string, int>),
-            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
-            null,
-            [input],
-            null)!;
+        new(input);
 }

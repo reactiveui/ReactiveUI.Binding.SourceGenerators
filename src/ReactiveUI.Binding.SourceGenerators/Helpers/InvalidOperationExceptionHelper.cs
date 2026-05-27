@@ -50,10 +50,12 @@ internal static class InvalidOperationExceptionHelper
     /// <exception cref="InvalidOperationException">Thrown when <paramref name="count"/> is less than <paramref name="minimum"/>.</exception>
     internal static void EnsureMinimumArguments(int count, int minimum)
     {
-        if (count < minimum)
+        if (count >= minimum)
         {
-            throw new InvalidOperationException(
-                $"Expected at least {minimum} arguments but found {count} in source generator pipeline");
+            return;
         }
+
+        throw new InvalidOperationException(
+            $"Expected at least {minimum} arguments but found {count} in source generator pipeline");
     }
 }

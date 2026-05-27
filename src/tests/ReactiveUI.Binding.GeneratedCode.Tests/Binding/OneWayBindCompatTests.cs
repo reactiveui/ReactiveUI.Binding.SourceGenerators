@@ -13,18 +13,23 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 public class OneWayBindCompatTests
 {
     /// <summary>
+    /// The initial property value used across the binding tests.
+    /// </summary>
+    private const string HelloValue = "Hello";
+
+    /// <summary>
     /// Verifies that OneWayBind syncs the initial value from view model to view.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OneWayBind_SyncsInitialValue()
     {
-        var vm = new TestViewModel { Name = "Hello" };
+        var vm = new TestViewModel { Name = HelloValue };
         var view = new TestView();
 
         using var binding = OneWayBindCompatScenarios.StringProperty(view, vm);
 
-        await Assert.That(view.DisplayName).IsEqualTo("Hello");
+        await Assert.That(view.DisplayName).IsEqualTo(HelloValue);
     }
 
     /// <summary>
@@ -34,7 +39,7 @@ public class OneWayBindCompatTests
     [Test]
     public async Task OneWayBind_SyncsOnSourceChange()
     {
-        var vm = new TestViewModel { Name = "Hello" };
+        var vm = new TestViewModel { Name = HelloValue };
         var view = new TestView();
 
         using var binding = OneWayBindCompatScenarios.StringProperty(view, vm);
@@ -51,7 +56,7 @@ public class OneWayBindCompatTests
     [Test]
     public async Task OneWayBind_Disposal_StopsSyncing()
     {
-        var vm = new TestViewModel { Name = "Hello" };
+        var vm = new TestViewModel { Name = HelloValue };
         var view = new TestView();
 
         var binding = OneWayBindCompatScenarios.StringProperty(view, vm);
@@ -59,6 +64,6 @@ public class OneWayBindCompatTests
 
         vm.Name = "AfterDisposal";
 
-        await Assert.That(view.DisplayName).IsEqualTo("Hello");
+        await Assert.That(view.DisplayName).IsEqualTo(HelloValue);
     }
 }

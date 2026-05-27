@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-using System.Reactive.Linq;
 using ReactiveUI.Binding.ObservableForProperty;
+using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Fallback;
 
@@ -32,58 +32,9 @@ public static class RuntimeObservationFallback
     {
         ArgumentExceptionHelper.ThrowIfNull(property);
 
-        return obj.SubscribeToExpressionChain<TObj, TValue>(
-                property.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value);
-    }
-
-    /// <summary>
-    /// Runtime fallback for WhenChanging with a single property.
-    /// </summary>
-    /// <typeparam name="TObj">The type of object being observed.</typeparam>
-    /// <typeparam name="TValue">The type of the property value.</typeparam>
-    /// <param name="obj">The object to observe.</param>
-    /// <param name="property">The property expression.</param>
-    /// <returns>An observable that emits property values before they change.</returns>
-    public static IObservable<TValue> WhenChanging<TObj, TValue>(
-        TObj obj,
-        Expression<Func<TObj, TValue>> property)
-        where TObj : class
-    {
-        ArgumentExceptionHelper.ThrowIfNull(property);
-
-        return obj.SubscribeToExpressionChain<TObj, TValue>(
-                property.Body,
-                beforeChange: true,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value);
-    }
-
-    /// <summary>
-    /// Runtime fallback for WhenAnyValue with a single property.
-    /// </summary>
-    /// <typeparam name="TSender">The type of object being observed.</typeparam>
-    /// <typeparam name="TValue">The type of the property value.</typeparam>
-    /// <param name="sender">The object to observe.</param>
-    /// <param name="property">The property expression.</param>
-    /// <returns>An observable that emits property values after they change.</returns>
-    public static IObservable<TValue> WhenAnyValue<TSender, TValue>(
-        TSender sender,
-        Expression<Func<TSender, TValue>> property)
-        where TSender : class
-    {
-        ArgumentExceptionHelper.ThrowIfNull(property);
-
-        return sender.SubscribeToExpressionChain<TSender, TValue>(
-                property.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value);
+        return new SelectObservable<IObservedChange<TObj, TValue>, TValue>(
+            obj.SubscribeToExpressionChain<TObj, TValue>(property.Body, skipInitial: false),
+            x => x.Value);
     }
 
     /// <summary>
@@ -104,7 +55,7 @@ public static class RuntimeObservationFallback
     {
         var o1 = WhenChanged(obj, property1);
         var o2 = WhenChanged(obj, property2);
-        return o1.CombineLatest(o2, (v1, v2) => (v1, v2));
+        return CombineLatestObservable.Create(o1, o2, (v1, v2) => (v1, v2));
     }
 
     /// <summary>
@@ -129,7 +80,27 @@ public static class RuntimeObservationFallback
         var o1 = WhenChanged(obj, property1);
         var o2 = WhenChanged(obj, property2);
         var o3 = WhenChanged(obj, property3);
-        return o1.CombineLatest(o2, o3, (v1, v2, v3) => (v1, v2, v3));
+        return CombineLatestObservable.Create(o1, o2, o3, (v1, v2, v3) => (v1, v2, v3));
+    }
+
+    /// <summary>
+    /// Runtime fallback for WhenChanging with a single property.
+    /// </summary>
+    /// <typeparam name="TObj">The type of object being observed.</typeparam>
+    /// <typeparam name="TValue">The type of the property value.</typeparam>
+    /// <param name="obj">The object to observe.</param>
+    /// <param name="property">The property expression.</param>
+    /// <returns>An observable that emits property values before they change.</returns>
+    public static IObservable<TValue> WhenChanging<TObj, TValue>(
+        TObj obj,
+        Expression<Func<TObj, TValue>> property)
+        where TObj : class
+    {
+        ArgumentExceptionHelper.ThrowIfNull(property);
+
+        return new SelectObservable<IObservedChange<TObj, TValue>, TValue>(
+            obj.SubscribeToExpressionChain<TObj, TValue>(property.Body, true, false, true),
+            x => x.Value);
     }
 
     /// <summary>
@@ -150,7 +121,7 @@ public static class RuntimeObservationFallback
     {
         var o1 = WhenChanging(obj, property1);
         var o2 = WhenChanging(obj, property2);
-        return o1.CombineLatest(o2, (v1, v2) => (v1, v2));
+        return CombineLatestObservable.Create(o1, o2, (v1, v2) => (v1, v2));
     }
 
     /// <summary>
@@ -175,7 +146,27 @@ public static class RuntimeObservationFallback
         var o1 = WhenChanging(obj, property1);
         var o2 = WhenChanging(obj, property2);
         var o3 = WhenChanging(obj, property3);
-        return o1.CombineLatest(o2, o3, (v1, v2, v3) => (v1, v2, v3));
+        return CombineLatestObservable.Create(o1, o2, o3, (v1, v2, v3) => (v1, v2, v3));
+    }
+
+    /// <summary>
+    /// Runtime fallback for WhenAnyValue with a single property.
+    /// </summary>
+    /// <typeparam name="TSender">The type of object being observed.</typeparam>
+    /// <typeparam name="TValue">The type of the property value.</typeparam>
+    /// <param name="sender">The object to observe.</param>
+    /// <param name="property">The property expression.</param>
+    /// <returns>An observable that emits property values after they change.</returns>
+    public static IObservable<TValue> WhenAnyValue<TSender, TValue>(
+        TSender sender,
+        Expression<Func<TSender, TValue>> property)
+        where TSender : class
+    {
+        ArgumentExceptionHelper.ThrowIfNull(property);
+
+        return new SelectObservable<IObservedChange<TSender, TValue>, TValue>(
+            sender.SubscribeToExpressionChain<TSender, TValue>(property.Body, skipInitial: false),
+            x => x.Value);
     }
 
     /// <summary>
@@ -196,7 +187,7 @@ public static class RuntimeObservationFallback
     {
         var o1 = WhenAnyValue(sender, property1);
         var o2 = WhenAnyValue(sender, property2);
-        return o1.CombineLatest(o2, (v1, v2) => (v1, v2));
+        return CombineLatestObservable.Create(o1, o2, (v1, v2) => (v1, v2));
     }
 
     /// <summary>
@@ -221,6 +212,6 @@ public static class RuntimeObservationFallback
         var o1 = WhenAnyValue(sender, property1);
         var o2 = WhenAnyValue(sender, property2);
         var o3 = WhenAnyValue(sender, property3);
-        return o1.CombineLatest(o2, o3, (v1, v2, v3) => (v1, v2, v3));
+        return CombineLatestObservable.Create(o1, o2, o3, (v1, v2, v3) => (v1, v2, v3));
     }
 }

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reactive.Subjects;
-
 using ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
@@ -14,6 +13,16 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAnyObservable;
 /// </summary>
 public class WhenAnyObservableTests
 {
+    /// <summary>
+    /// The value emitted from the first observable.
+    /// </summary>
+    private const string From1 = "From1";
+
+    /// <summary>
+    /// The value emitted from the second observable.
+    /// </summary>
+    private const string From2 = "From2";
+
     /// <summary>
     /// Verifies that single observable Switch pattern emits inner values.
     /// </summary>
@@ -47,17 +56,17 @@ public class WhenAnyObservableTests
         using var sub = WhenAnyObservableScenarios.SingleObservable_Switch(vm)
             .Subscribe(values.Add);
 
-        subject1.OnNext("From1");
+        subject1.OnNext(From1);
 
-        await Assert.That(values).Contains("From1");
+        await Assert.That(values).Contains(From1);
 
         // Replace with new observable
         var subject2 = new Subject<string>();
         vm.MyCommand = subject2;
 
-        subject2.OnNext("From2");
+        subject2.OnNext(From2);
 
-        await Assert.That(values).Contains("From2");
+        await Assert.That(values).Contains(From2);
 
         // Old observable should no longer propagate
         subject1.OnNext("StaleFrom1");
@@ -80,11 +89,11 @@ public class WhenAnyObservableTests
         using var sub = WhenAnyObservableScenarios.TwoObservables_Merge(vm)
             .Subscribe(values.Add);
 
-        subject1.OnNext("From1");
-        subject2.OnNext("From2");
+        subject1.OnNext(From1);
+        subject2.OnNext(From2);
 
-        await Assert.That(values).Contains("From1");
-        await Assert.That(values).Contains("From2");
+        await Assert.That(values).Contains(From1);
+        await Assert.That(values).Contains(From2);
     }
 
     /// <summary>

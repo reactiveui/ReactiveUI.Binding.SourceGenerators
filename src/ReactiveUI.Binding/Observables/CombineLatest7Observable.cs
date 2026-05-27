@@ -19,6 +19,10 @@ namespace ReactiveUI.Binding.Observables;
 /// <typeparam name="TResult">The result element type.</typeparam>
 [EditorBrowsable(EditorBrowsableState.Never)]
 [ExcludeFromCodeCoverage]
+[SuppressMessage(
+    "Major Code Smell",
+    "S107:Methods should not have too many parameters",
+    Justification = "Deliberately large arity intrinsic to the N-argument binding/observable API surface.")]
 internal sealed class CombineLatest7Observable<T1, T2, T3, T4, T5, T6, T7, TResult> : IObservable<TResult>
 {
     /// <summary>
@@ -121,6 +125,31 @@ internal sealed class CombineLatest7Observable<T1, T2, T3, T4, T5, T6, T7, TResu
     /// </summary>
     private sealed class Subscription : IDisposable
     {
+        /// <summary>
+        /// The subscription array index for source 3.
+        /// </summary>
+        private const int Source3Index = 2;
+
+        /// <summary>
+        /// The subscription array index for source 4.
+        /// </summary>
+        private const int Source4Index = 3;
+
+        /// <summary>
+        /// The subscription array index for source 5.
+        /// </summary>
+        private const int Source5Index = 4;
+
+        /// <summary>
+        /// The subscription array index for source 6.
+        /// </summary>
+        private const int Source6Index = 5;
+
+        /// <summary>
+        /// The subscription array index for source 7.
+        /// </summary>
+        private const int Source7Index = 6;
+
         /// <summary>
         /// The function to combine the latest values from all sources into a result.
         /// </summary>
@@ -244,7 +273,7 @@ internal sealed class CombineLatest7Observable<T1, T2, T3, T4, T5, T6, T7, TResu
         public void Subscribe3(IObservable<T3> source)
         {
             var sub = source.Subscribe(new Observer3(this));
-            Volatile.Write(ref _subscriptions[2], sub);
+            Volatile.Write(ref _subscriptions[Source3Index], sub);
         }
 
         /// <summary>
@@ -254,7 +283,7 @@ internal sealed class CombineLatest7Observable<T1, T2, T3, T4, T5, T6, T7, TResu
         public void Subscribe4(IObservable<T4> source)
         {
             var sub = source.Subscribe(new Observer4(this));
-            Volatile.Write(ref _subscriptions[3], sub);
+            Volatile.Write(ref _subscriptions[Source4Index], sub);
         }
 
         /// <summary>
@@ -264,7 +293,7 @@ internal sealed class CombineLatest7Observable<T1, T2, T3, T4, T5, T6, T7, TResu
         public void Subscribe5(IObservable<T5> source)
         {
             var sub = source.Subscribe(new Observer5(this));
-            Volatile.Write(ref _subscriptions[4], sub);
+            Volatile.Write(ref _subscriptions[Source5Index], sub);
         }
 
         /// <summary>
@@ -274,7 +303,7 @@ internal sealed class CombineLatest7Observable<T1, T2, T3, T4, T5, T6, T7, TResu
         public void Subscribe6(IObservable<T6> source)
         {
             var sub = source.Subscribe(new Observer6(this));
-            Volatile.Write(ref _subscriptions[5], sub);
+            Volatile.Write(ref _subscriptions[Source6Index], sub);
         }
 
         /// <summary>
@@ -284,18 +313,20 @@ internal sealed class CombineLatest7Observable<T1, T2, T3, T4, T5, T6, T7, TResu
         public void Subscribe7(IObservable<T7> source)
         {
             var sub = source.Subscribe(new Observer7(this));
-            Volatile.Write(ref _subscriptions[6], sub);
+            Volatile.Write(ref _subscriptions[Source7Index], sub);
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref _observer, null) != null)
+            if (Interlocked.Exchange(ref _observer, null) == null)
             {
-                for (var i = 0; i < _subscriptions.Length; i++)
-                {
-                    Interlocked.Exchange(ref _subscriptions[i], null)?.Dispose();
-                }
+                return;
+            }
+
+            for (var i = 0; i < _subscriptions.Length; i++)
+            {
+                Interlocked.Exchange(ref _subscriptions[i], null)?.Dispose();
             }
         }
 
@@ -304,10 +335,12 @@ internal sealed class CombineLatest7Observable<T1, T2, T3, T4, T5, T6, T7, TResu
         /// </summary>
         private void TryEmit()
         {
-            if (_has1 && _has2 && _has3 && _has4 && _has5 && _has6 && _has7)
+            if (!_has1 || !_has2 || !_has3 || !_has4 || !_has5 || !_has6 || !_has7)
             {
-                _observer?.OnNext(_resultSelector(_value1, _value2, _value3, _value4, _value5, _value6, _value7));
+                return;
             }
+
+            _observer?.OnNext(_resultSelector(_value1, _value2, _value3, _value4, _value5, _value6, _value7));
         }
 
         /// <summary>

@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using ReactiveUI.Binding.CommandBinding;
 using ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
@@ -12,6 +11,16 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 /// </summary>
 public class BindInteractionTests
 {
+    /// <summary>
+    /// The interaction input value used across the handler tests.
+    /// </summary>
+    private const string Question = "question";
+
+    /// <summary>
+    /// The number of sequential Handle calls in the multiple-calls test.
+    /// </summary>
+    private const int HandleCallCount = 5;
+
     /// <summary>
     /// Verifies that a task-based handler is registered and produces the expected output.
     /// </summary>
@@ -24,7 +33,7 @@ public class BindInteractionTests
 
         using var binding = BindInteractionScenarios.TaskHandler(vm, view);
 
-        var result = await vm.Confirm.Handle("question");
+        var result = await vm.Confirm.Handle(Question);
 
         await Assert.That(result).IsTrue();
     }
@@ -41,7 +50,7 @@ public class BindInteractionTests
 
         using var binding = BindInteractionScenarios.ObservableHandler(vm, view);
 
-        var result = await vm.Confirm.Handle("question");
+        var result = await vm.Confirm.Handle(Question);
 
         await Assert.That(result).IsTrue();
     }
@@ -59,7 +68,7 @@ public class BindInteractionTests
         var binding = BindInteractionScenarios.TaskHandler(vm, view);
         binding.Dispose();
 
-        await Assert.That(() => vm.Confirm.Handle("question"))
+        await Assert.That(() => vm.Confirm.Handle(Question))
             .ThrowsExactly<UnhandledInteractionException<string, bool>>();
     }
 
@@ -96,15 +105,12 @@ public class BindInteractionTests
     [Test]
     public async Task DeepPropertyPath_Handle_ReturnsExpectedOutput()
     {
-        var vm = new SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel
-        {
-            Child = new SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel(),
-        };
+        var vm = new SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel { Child = new() };
         var view = new SharedScenarios.BindInteraction.DeepPropertyPath.MyView();
 
         using var binding = BindInteractionScenarios.DeepPropertyPath(vm, view);
 
-        var result = await vm.Child!.Confirm.Handle("question");
+        var result = await vm.Child!.Confirm.Handle(Question);
 
         await Assert.That(result).IsTrue();
     }
@@ -117,10 +123,7 @@ public class BindInteractionTests
     public async Task DeepPropertyPath_ChildReplaced_HandlerFollowsNewChild()
     {
         var originalChild = new SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel();
-        var vm = new SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel
-        {
-            Child = originalChild,
-        };
+        var vm = new SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel { Child = originalChild };
         var view = new SharedScenarios.BindInteraction.DeepPropertyPath.MyView();
 
         using var binding = BindInteractionScenarios.DeepPropertyPath(vm, view);
@@ -150,7 +153,7 @@ public class BindInteractionTests
         var binding = BindInteractionScenarios.ObservableHandler(vm, view);
         binding.Dispose();
 
-        await Assert.That(() => vm.Confirm.Handle("question"))
+        await Assert.That(() => vm.Confirm.Handle(Question))
             .ThrowsExactly<UnhandledInteractionException<string, bool>>();
     }
 
@@ -193,13 +196,13 @@ public class BindInteractionTests
         using var binding = BindInteractionScenarios.DeepPropertyPath(vm, view);
 
         // Handler works initially
-        var result = await child.Confirm.Handle("question");
+        var result = await child.Confirm.Handle(Question);
         await Assert.That(result).IsTrue();
 
         // Setting child to null should unregister
         vm.Child = null;
 
-        await Assert.That(() => child.Confirm.Handle("question"))
+        await Assert.That(() => child.Confirm.Handle(Question))
             .ThrowsExactly<UnhandledInteractionException<string, bool>>();
     }
 
@@ -216,7 +219,7 @@ public class BindInteractionTests
         var binding = BindInteractionScenarios.TaskHandler(vm, view);
         binding.Dispose();
 
-        var action = () => binding.Dispose();
+        var action = binding.Dispose;
         await Assert.That(action).ThrowsNothing();
     }
 
@@ -232,7 +235,7 @@ public class BindInteractionTests
 
         using var binding = BindInteractionScenarios.TaskHandler(vm, view);
 
-        for (var i = 0; i < 5; i++)
+        for (var i = 0; i < HandleCallCount; i++)
         {
             var result = await vm.Confirm.Handle($"question-{i}");
             await Assert.That(result).IsTrue();

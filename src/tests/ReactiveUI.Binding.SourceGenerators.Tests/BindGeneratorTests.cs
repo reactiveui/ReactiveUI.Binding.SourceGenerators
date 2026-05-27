@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp;
-
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -76,7 +75,9 @@ public class BindGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("Bind/SinglePropertyStringToString");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(BindGeneratorTests),
+            LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 

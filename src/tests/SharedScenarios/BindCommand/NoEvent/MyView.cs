@@ -3,27 +3,25 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindCommand.NoEvent
-{
-    /// <summary>
-    /// View containing a plain control with no events.
-    /// </summary>
+namespace SharedScenarios.BindCommand.NoEvent;
+
+/// <summary>
+/// View containing a plain control with no events.
+/// </summary>
 #pragma warning disable CS0067 // Event is never used
-    public class MyView : IViewFor, INotifyPropertyChanged
-    {
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
+public class MyView : IViewFor, INotifyPropertyChanged
+{
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-        /// <inheritdoc/>
-        public object? ViewModel { get; set; }
+    /// <inheritdoc/>
+    public object? ViewModel { get; set; }
 
-        /// <summary>
-        /// Gets the plain control (no Click event).
-        /// </summary>
-        public PlainControl Label { get; } = new PlainControl();
-    }
-#pragma warning restore CS0067
+    /// <summary>
+    /// Gets the plain control (no Click event).
+    /// </summary>
+    public PlainControl Label { get; } = new();
 }
+#pragma warning restore CS0067

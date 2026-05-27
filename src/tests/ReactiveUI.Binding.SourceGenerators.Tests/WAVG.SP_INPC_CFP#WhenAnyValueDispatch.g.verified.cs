@@ -23,14 +23,14 @@ namespace ReactiveUI.Binding
                 return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenAnyValue(objectToMonitor, property1);
             }
 
-            if (callerLineNumber == 53 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
+            if (callerLineNumber == 55 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __WhenAnyValue_000026349258316A(objectToMonitor);
+                return __WhenAnyValue_0000263492582AFF(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenAnyValue dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<string> __WhenAnyValue_000026349258316A(global::SharedScenarios.WhenAnyValue.SinglePropertyINPC.MyViewModel obj)
+        private static global::System.IObservable<string> __WhenAnyValue_0000263492582AFF(global::SharedScenarios.WhenAnyValue.SinglePropertyINPC.MyViewModel obj)
         {
             return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.SinglePropertyINPC.MyViewModel)__o).Name, true);
         }

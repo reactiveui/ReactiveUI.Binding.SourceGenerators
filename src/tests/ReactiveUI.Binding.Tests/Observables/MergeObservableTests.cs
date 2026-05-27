@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reactive.Subjects;
-
 using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
@@ -13,6 +12,21 @@ namespace ReactiveUI.Binding.Tests.Observables;
 /// </summary>
 public class MergeObservableTests
 {
+    /// <summary>
+    /// The value emitted by the second source observable.
+    /// </summary>
+    private const int SecondSourceValue = 2;
+
+    /// <summary>
+    /// The expected number of emitted values when both sources fire once.
+    /// </summary>
+    private const int ExpectedMergedCount = 2;
+
+    /// <summary>
+    /// A sentinel value emitted after disposal that must not be observed.
+    /// </summary>
+    private const int PostDisposalValue = 99;
+
     /// <summary>
     /// Verifies that Subscribe throws ArgumentNullException when observer is null.
     /// </summary>
@@ -60,14 +74,14 @@ public class MergeObservableTests
             () => { }));
 
         source1.OnNext(1);
-        source2.OnNext(2);
+        source2.OnNext(SecondSourceValue);
 
         var expectedError = new InvalidOperationException("source error");
         source1.OnError(expectedError);
 
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedMergedCount);
         await Assert.That(results[0]).IsEqualTo(1);
-        await Assert.That(results[1]).IsEqualTo(2);
+        await Assert.That(results[1]).IsEqualTo(SecondSourceValue);
         await Assert.That(receivedError).IsNotNull();
         await Assert.That(receivedError).IsEqualTo(expectedError);
     }
@@ -92,8 +106,8 @@ public class MergeObservableTests
 
         source1.OnNext(1);
         subscription.Dispose();
-        source1.OnNext(99);
-        source2.OnNext(99);
+        source1.OnNext(PostDisposalValue);
+        source2.OnNext(PostDisposalValue);
 
         await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]).IsEqualTo(1);

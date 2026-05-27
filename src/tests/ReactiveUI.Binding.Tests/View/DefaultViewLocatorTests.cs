@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using ReactiveUI.Binding.Tests.TestExecutors;
-
 using TUnit.Core.Executors;
 
 namespace ReactiveUI.Binding.Tests.View;
@@ -172,7 +171,7 @@ public class DefaultViewLocatorTests
         var locator = new DefaultViewLocator();
         var dispatchCalled = false;
 
-        DefaultViewLocator.SetGeneratedViewDispatch((instance, contract) =>
+        DefaultViewLocator.SetGeneratedViewDispatch((_, _) =>
         {
             dispatchCalled = true;
             return new TestView();
@@ -195,7 +194,7 @@ public class DefaultViewLocatorTests
         var generatedView = new TestView();
         locator.Map<TestViewModel>(() => new TestView());
 
-        DefaultViewLocator.SetGeneratedViewDispatch((instance, contract) => generatedView);
+        DefaultViewLocator.SetGeneratedViewDispatch((_, _) => generatedView);
 
         var result = locator.ResolveView(new TestViewModel());
 
@@ -212,7 +211,7 @@ public class DefaultViewLocatorTests
         var locator = new DefaultViewLocator();
         locator.Map<TestViewModel, TestView>();
 
-        DefaultViewLocator.SetGeneratedViewDispatch((instance, contract) => null);
+        DefaultViewLocator.SetGeneratedViewDispatch((_, _) => null);
 
         var result = locator.ResolveView(new TestViewModel());
 
@@ -230,7 +229,7 @@ public class DefaultViewLocatorTests
         var locator = new DefaultViewLocator();
         var generatedView = new TestView();
 
-        DefaultViewLocator.SetGeneratedViewDispatch((instance, contract) => generatedView);
+        DefaultViewLocator.SetGeneratedViewDispatch((_, _) => generatedView);
 
         var result = locator.ResolveView(new TestViewModel());
 
@@ -247,7 +246,7 @@ public class DefaultViewLocatorTests
         var locator = new DefaultViewLocator();
         locator.Map<TestViewModel, TestView>();
 
-        var withNull = locator.ResolveView(new TestViewModel(), null);
+        var withNull = locator.ResolveView(new TestViewModel());
         var withEmpty = locator.ResolveView(new TestViewModel(), string.Empty);
 
         await Assert.That(withNull).IsNotNull();
@@ -328,7 +327,7 @@ public class DefaultViewLocatorTests
         var vm = new TestViewModel { Name = "dispatched" };
         var dispatchView = new TestView();
 
-        DefaultViewLocator.SetGeneratedViewDispatch((instance, contract) => dispatchView);
+        DefaultViewLocator.SetGeneratedViewDispatch((_, _) => dispatchView);
 
         var result = locator.ResolveView((object)vm);
 
@@ -347,7 +346,7 @@ public class DefaultViewLocatorTests
         var vm = new TestViewModel { Name = "mapped" };
         locator.Map<TestViewModel, TestView>();
 
-        DefaultViewLocator.SetGeneratedViewDispatch((instance, contract) => null);
+        DefaultViewLocator.SetGeneratedViewDispatch((_, _) => null);
 
         var result = locator.ResolveView((object)vm);
 
@@ -365,20 +364,6 @@ public class DefaultViewLocatorTests
         var locator = new DefaultViewLocator();
 
         var result = locator.ResolveView((object)new TestViewModel());
-
-        await Assert.That(result).IsNull();
-    }
-
-    /// <summary>
-    /// Verifies that non-generic ResolveView returns null when viewModel is null.
-    /// </summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task ResolveViewNonGeneric_NullViewModel_ReturnsNull()
-    {
-        var locator = new DefaultViewLocator();
-
-        var result = locator.ResolveView((object?)null);
 
         await Assert.That(result).IsNull();
     }

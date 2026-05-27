@@ -14,6 +14,41 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 public class BindingEdgeCaseTests
 {
     /// <summary>
+    /// The initial deep-chain city value.
+    /// </summary>
+    private const string Seattle = "Seattle";
+
+    /// <summary>
+    /// The updated deep-chain city value.
+    /// </summary>
+    private const string Portland = "Portland";
+
+    /// <summary>
+    /// The pre-set source property value.
+    /// </summary>
+    private const string PreSet = "PreSet";
+
+    /// <summary>
+    /// The initial double property test value.
+    /// </summary>
+    private const double DoubleValue = 3.14;
+
+    /// <summary>
+    /// The updated double property test value.
+    /// </summary>
+    private const double UpdatedDoubleValue = 2.71;
+
+    /// <summary>
+    /// The square root of two double property test value.
+    /// </summary>
+    private const double SqrtTwo = 1.41;
+
+    /// <summary>
+    /// The number of rapid sequential changes in the rapid-changes test.
+    /// </summary>
+    private const int RapidChangeCount = 100;
+
+    /// <summary>
     /// Verifies that BindOneWay with a deep chain source property syncs the initial value.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -21,12 +56,12 @@ public class BindingEdgeCaseTests
     public async Task BindOneWay_DeepChainSource_SyncsInitialValue()
     {
         var source = new BigViewModel();
-        source.Address.City = "Seattle";
+        source.Address.City = Seattle;
         var target = new BigView();
 
         using var binding = BindOneWayScenarios.DeepChainProperty(source, target);
 
-        await Assert.That(target.ViewProp1).IsEqualTo("Seattle");
+        await Assert.That(target.ViewProp1).IsEqualTo(Seattle);
     }
 
     /// <summary>
@@ -37,14 +72,14 @@ public class BindingEdgeCaseTests
     public async Task BindOneWay_DeepChainSource_SyncsNestedChanges()
     {
         var source = new BigViewModel();
-        source.Address.City = "Seattle";
+        source.Address.City = Seattle;
         var target = new BigView();
 
         using var binding = BindOneWayScenarios.DeepChainProperty(source, target);
 
-        source.Address.City = "Portland";
+        source.Address.City = Portland;
 
-        await Assert.That(target.ViewProp1).IsEqualTo("Portland");
+        await Assert.That(target.ViewProp1).IsEqualTo(Portland);
     }
 
     /// <summary>
@@ -55,14 +90,14 @@ public class BindingEdgeCaseTests
     public async Task BindOneWay_DeepChainSource_IntermediateReplacement()
     {
         var source = new BigViewModel();
-        source.Address.City = "Seattle";
+        source.Address.City = Seattle;
         var target = new BigView();
 
         using var binding = BindOneWayScenarios.DeepChainProperty(source, target);
 
-        source.Address = new Address { City = "Portland" };
+        source.Address = new() { City = Portland };
 
-        await Assert.That(target.ViewProp1).IsEqualTo("Portland");
+        await Assert.That(target.ViewProp1).IsEqualTo(Portland);
 
         // Further changes on the new address
         source.Address.City = "Eugene";
@@ -129,18 +164,18 @@ public class BindingEdgeCaseTests
     [Test]
     public async Task BindTwoWay_DoubleProperty_SyncsBothDirections()
     {
-        var source = new BigViewModel { Prop3 = 3.14 };
+        var source = new BigViewModel { Prop3 = DoubleValue };
         var target = new BigView();
 
         using var binding = BindTwoWayScenarios.DoubleProperty(source, target);
 
-        await Assert.That(target.ViewProp3).IsEqualTo(3.14);
+        await Assert.That(target.ViewProp3).IsEqualTo(DoubleValue);
 
-        source.Prop3 = 2.71;
-        await Assert.That(target.ViewProp3).IsEqualTo(2.71);
+        source.Prop3 = UpdatedDoubleValue;
+        await Assert.That(target.ViewProp3).IsEqualTo(UpdatedDoubleValue);
 
-        target.ViewProp3 = 1.41;
-        await Assert.That(source.Prop3).IsEqualTo(1.41);
+        target.ViewProp3 = SqrtTwo;
+        await Assert.That(source.Prop3).IsEqualTo(SqrtTwo);
     }
 
     /// <summary>
@@ -172,17 +207,17 @@ public class BindingEdgeCaseTests
     public async Task BindOneWay_DeepChainSource_Disposal()
     {
         var source = new BigViewModel();
-        source.Address.City = "Seattle";
+        source.Address.City = Seattle;
         var target = new BigView();
 
         var binding = BindOneWayScenarios.DeepChainProperty(source, target);
-        await Assert.That(target.ViewProp1).IsEqualTo("Seattle");
+        await Assert.That(target.ViewProp1).IsEqualTo(Seattle);
 
         binding.Dispose();
 
-        source.Address.City = "Portland";
+        source.Address.City = Portland;
 
-        await Assert.That(target.ViewProp1).IsEqualTo("Seattle");
+        await Assert.That(target.ViewProp1).IsEqualTo(Seattle);
     }
 
     /// <summary>
@@ -193,13 +228,13 @@ public class BindingEdgeCaseTests
     [Test]
     public async Task BindOneWay_SourcePropertySetBeforeBinding_SyncsOnSubscription()
     {
-        var source = new BigViewModel { Prop1 = "PreSet" };
+        var source = new BigViewModel { Prop1 = PreSet };
         var target = new BigView();
 
         // Property is already set before binding is created
         using var binding = BindOneWayScenarios.StringProperty(source, target);
 
-        await Assert.That(target.ViewProp1).IsEqualTo("PreSet");
+        await Assert.That(target.ViewProp1).IsEqualTo(PreSet);
     }
 
     /// <summary>
@@ -210,13 +245,13 @@ public class BindingEdgeCaseTests
     [Test]
     public async Task BindTwoWay_SourcePropertySetBeforeBinding_SyncsAndBiDirectional()
     {
-        var source = new BigViewModel { Prop1 = "PreSet" };
+        var source = new BigViewModel { Prop1 = PreSet };
         var target = new BigView();
 
         using var binding = BindTwoWayScenarios.StringProperty(source, target);
 
         // Pre-set value should sync
-        await Assert.That(target.ViewProp1).IsEqualTo("PreSet");
+        await Assert.That(target.ViewProp1).IsEqualTo(PreSet);
 
         // Bidirectional should still work
         target.ViewProp1 = "FromView";
@@ -238,7 +273,7 @@ public class BindingEdgeCaseTests
 
         using var binding = BindOneWayScenarios.StringProperty(source, target);
 
-        for (var i = 0; i < 100; i++)
+        for (var i = 0; i < RapidChangeCount; i++)
         {
             source.Prop1 = $"Value_{i}";
         }

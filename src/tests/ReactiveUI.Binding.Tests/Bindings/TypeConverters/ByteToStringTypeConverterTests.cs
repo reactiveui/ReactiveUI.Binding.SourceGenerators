@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class ByteToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class ByteToStringTypeConverterTests
     {
         var converter = new ByteToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,7 +34,7 @@ public class ByteToStringTypeConverterTests
     public async Task TryConvert_ByteToString_Succeeds()
     {
         var converter = new ByteToStringTypeConverter();
-        byte value = 123;
+        const byte value = 123;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -45,7 +50,7 @@ public class ByteToStringTypeConverterTests
     public async Task TryConvert_MaxValue_Succeeds()
     {
         var converter = new ByteToStringTypeConverter();
-        var value = byte.MaxValue;
+        const byte value = byte.MaxValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -61,7 +66,7 @@ public class ByteToStringTypeConverterTests
     public async Task TryConvert_MinValue_Succeeds()
     {
         var converter = new ByteToStringTypeConverter();
-        var value = byte.MinValue;
+        const byte value = byte.MinValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -77,7 +82,7 @@ public class ByteToStringTypeConverterTests
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new ByteToStringTypeConverter();
-        byte value = 5;
+        const byte value = 5;
 
         var result = converter.TryConvert(value, 3, out var output);
 
@@ -93,7 +98,7 @@ public class ByteToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
     {
         var converter = new ByteToStringTypeConverter();
-        byte value = 255;
+        const byte value = 255;
 
         var result = converter.TryConvert(value, "X", out var output);
 

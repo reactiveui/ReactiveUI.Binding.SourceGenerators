@@ -12,10 +12,10 @@
 
   <ItemGroup>
     <!-- Testing Framework -->
-    <PackageVersion Include="NSubstitute" Version="5.3.0" />
-    <PackageVersion Include="TUnit" Version="1.45.29" />
-    <PackageVersion Include="Verify.TUnit" Version="31.17.0" />
-    <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0" />
+    <PackageVersion Include="NSubstitute" Version="5.3.0"/>
+    <PackageVersion Include="TUnit" Version="1.45.29"/>
+    <PackageVersion Include="Verify.TUnit" Version="31.17.0"/>
+    <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0"/>
 
     <!--
       Roslyn / Code Analysis — Microsoft.CodeAnalysis.CSharp(.Workspaces) are
@@ -29,34 +29,36 @@
       (the RS#### authoring rules) with no impact on the end-user-facing Roslyn
       version, so it tracks the latest stable release independently.
     -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
 
     <!-- Test Infrastructure -->
-    <PackageVersion Include="Basic.Reference.Assemblies.Net100" Version="1.8.8" />
-    <PackageVersion Include="Basic.Reference.Assemblies.Net90" Version="1.8.8" />
-    <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.8.8" />
+    <PackageVersion Include="Basic.Reference.Assemblies.Net100" Version="1.8.8"/>
+    <PackageVersion Include="Basic.Reference.Assemblies.Net90" Version="1.8.8"/>
+    <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.8.8"/>
 
     <!-- Dependencies -->
-    <PackageVersion Include="Splat" Version="19.4.0" />
-    <PackageVersion Include="System.Reactive" Version="6.1.0" />
+    <PackageVersion Include="Splat" Version="19.4.0"/>
+    <PackageVersion Include="System.Reactive" Version="6.1.0"/>
 
     <!-- Build Tools -->
-    <PackageVersion Include="MinVer" Version="7.0.0" />
-    <PackageVersion Include="stylecop.analyzers" Version="1.2.0-beta.556" />
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.300" />
+    <PackageVersion Include="MinVer" Version="7.0.0"/>
+    <PackageVersion Include="stylecop.analyzers" Version="1.2.0-beta.556"/>
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0"/>
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.300"/>
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.26.0.140279"/>
+    <PackageVersion Include="Blazor.Common.Analyzers" Version="2.0.0"/>
 
     <!-- MAUI -->
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
+    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)"/>
 
     <!-- Benchmarking -->
-    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8"/>
 
     <!-- Test App Dependencies-->
-    <PackageVersion Include="ReactiveUI" Version="23.2.27" />
-    <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.6.30" />
+    <PackageVersion Include="ReactiveUI" Version="23.2.27"/>
+    <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.6.30"/>
   </ItemGroup>
 </Project>

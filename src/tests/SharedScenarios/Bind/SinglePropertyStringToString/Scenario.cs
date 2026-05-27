@@ -4,20 +4,19 @@
 
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.Bind.SinglePropertyStringToString
+namespace SharedScenarios.Bind.SinglePropertyStringToString;
+
+/// <summary>
+/// Exercises Bind (view-first two-way) with string-to-string property binding.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises Bind (view-first two-way) with string-to-string property binding.
+    /// Creates a two-way binding between ViewModel.Name and View.NameText using view-first syntax.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a two-way binding between ViewModel.Name and View.NameText using view-first syntax.
-        /// </summary>
-        /// <param name="view">The target view.</param>
-        /// <param name="vm">The source view model.</param>
-        /// <returns>A reactive binding representing the binding.</returns>
-        public static IReactiveBinding<MyView, (object? view, bool isViewModel)> Execute(MyView view, MyViewModel vm)
-            => view.Bind(vm, x => x.Name, x => x.NameText);
-    }
+    /// <param name="view">The target view.</param>
+    /// <param name="vm">The source view model.</param>
+    /// <returns>A reactive binding representing the binding.</returns>
+    public static IReactiveBinding<MyView, (object? view, bool isViewModel)> Execute(MyView view, MyViewModel vm)
+        => view.Bind(vm, x => x.Name, x => x.NameText);
 }

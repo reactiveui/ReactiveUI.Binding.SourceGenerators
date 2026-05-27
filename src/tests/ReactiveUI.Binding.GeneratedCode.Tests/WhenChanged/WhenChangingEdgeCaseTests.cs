@@ -14,6 +14,26 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 public class WhenChangingEdgeCaseTests
 {
     /// <summary>
+    /// The initial city value used by deep-chain tests.
+    /// </summary>
+    private const string Seattle = "Seattle";
+
+    /// <summary>
+    /// The minimum number of emissions expected after a single change.
+    /// </summary>
+    private const int MinEmissionsAfterChange = 2;
+
+    /// <summary>
+    /// The minimum number of emissions expected after two changes.
+    /// </summary>
+    private const int MinEmissionsAfterTwoChanges = 3;
+
+    /// <summary>
+    /// The updated value for the integer property in two-property tests.
+    /// </summary>
+    private const int UpdatedIntValue = 2;
+
+    /// <summary>
     /// Verifies that deep chain WhenChanging emits the initial nested property value.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -21,14 +41,14 @@ public class WhenChangingEdgeCaseTests
     public async Task DeepChain_EmitsInitialValue()
     {
         var vm = new BigViewModel();
-        vm.Address.City = "Seattle";
+        vm.Address.City = Seattle;
         var values = new List<string>();
 
         using var sub = WhenChangingScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo("Seattle");
+        await Assert.That(values[0]).IsEqualTo(Seattle);
     }
 
     /// <summary>
@@ -40,7 +60,7 @@ public class WhenChangingEdgeCaseTests
     public async Task DeepChain_EmitsBeforeNestedChange()
     {
         var vm = new BigViewModel();
-        vm.Address.City = "Seattle";
+        vm.Address.City = Seattle;
         var values = new List<string>();
 
         using var sub = WhenChangingScenarios.DeepChain_AddressCity(vm)
@@ -49,9 +69,9 @@ public class WhenChangingEdgeCaseTests
         vm.Address.City = "Portland";
 
         // Should have emitted "Seattle" (initial) and "Seattle" again (before change to Portland)
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
-        await Assert.That(values[0]).IsEqualTo("Seattle");
-        await Assert.That(values[1]).IsEqualTo("Seattle");
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterChange);
+        await Assert.That(values[0]).IsEqualTo(Seattle);
+        await Assert.That(values[1]).IsEqualTo(Seattle);
     }
 
     /// <summary>
@@ -75,7 +95,7 @@ public class WhenChangingEdgeCaseTests
         // Change Prop1 — should emit before-change values
         vm.Prop1 = "B";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterChange);
 
         // The before-change value for Prop1 should still be "A"
         await Assert.That(values[1].property1).IsEqualTo("A");
@@ -90,7 +110,7 @@ public class WhenChangingEdgeCaseTests
     public async Task DeepChain_Disposal_StopsListening()
     {
         var vm = new BigViewModel();
-        vm.Address.City = "Seattle";
+        vm.Address.City = Seattle;
         var values = new List<string>();
 
         var sub = WhenChangingScenarios.DeepChain_AddressCity(vm)
@@ -101,7 +121,7 @@ public class WhenChangingEdgeCaseTests
         vm.Address.City = "Portland";
 
         await Assert.That(values.Count).IsEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo("Seattle");
+        await Assert.That(values[0]).IsEqualTo(Seattle);
     }
 
     /// <summary>
@@ -118,9 +138,9 @@ public class WhenChangingEdgeCaseTests
             .Subscribe(values.Add);
 
         vm.Prop1 = "B";
-        vm.Prop2 = 2;
+        vm.Prop2 = UpdatedIntValue;
 
         // Should have at least 3 emissions: initial + 2 changes
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(3);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterTwoChanges);
     }
 }

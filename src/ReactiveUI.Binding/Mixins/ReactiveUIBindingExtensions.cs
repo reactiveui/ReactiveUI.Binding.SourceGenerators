@@ -12,6 +12,10 @@ namespace ReactiveUI.Binding;
 /// Supports 1-16 property selectors for observation APIs (WhenChanged, WhenChanging, WhenAnyValue).
 /// </summary>
 [ExcludeFromCodeCoverage]
+[SuppressMessage(
+    "Major Code Smell",
+    "S107:Methods should not have too many parameters",
+    Justification = "Deliberately large arity intrinsic to the N-argument binding/observable API surface.")]
 public static partial class ReactiveUIBindingExtensions
 {
     /// <summary>

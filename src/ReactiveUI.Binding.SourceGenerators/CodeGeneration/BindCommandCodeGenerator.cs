@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
 
@@ -20,20 +19,21 @@ internal static class BindCommandCodeGenerator
     /// </summary>
     /// <param name="invocations">All detected BindCommand invocations.</param>
     /// <param name="allClasses">All detected class binding info.</param>
-    /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression (C# 10+) is available.</param>
+    /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
     /// <returns>Generated source code string, or null if no invocations.</returns>
     internal static string? Generate(
         ImmutableArray<BindCommandInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        bool supportsCallerArgExpr)
+        LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        var sb = new StringBuilder(invocations.Length * 1024);
-        CodeGeneratorHelpers.AppendExtensionClassHeader(sb);
+        var sb = new StringBuilder(invocations.Length * 1_024);
+        var supportsCallerArgExpr = features.SupportsCallerArgExpr;
+        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         sb.AppendLine();
 
         var groups = GroupByTypeSignature(invocations);
@@ -42,7 +42,7 @@ internal static class BindCommandCodeGenerator
         {
             var group = groups[g];
 
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr);
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable);
             sb.AppendLine();
 
             for (var i = 0; i < group.Invocations.Length; i++)
@@ -54,7 +54,7 @@ internal static class BindCommandCodeGenerator
                     inv.CallerFilePath,
                     inv.CallerLineNumber,
                     inv.CommandExpressionText + "|" + inv.ControlExpressionText);
-                GenerateBindCommandMethod(sb, inv, vmClassInfo, suffix);
+                GenerateBindCommandMethod(sb, inv, vmClassInfo, suffix, features.SupportsNullable);
             }
         }
 
@@ -69,7 +69,8 @@ internal static class BindCommandCodeGenerator
     /// </summary>
     /// <param name="invocations">The BindCommand invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
-    internal static List<BindCommandTypeGroup> GroupByTypeSignature(ImmutableArray<BindCommandInvocationInfo> invocations)
+    internal static List<BindCommandTypeGroup> GroupByTypeSignature(
+        ImmutableArray<BindCommandInvocationInfo> invocations)
     {
         var groupMap = new Dictionary<string, List<BindCommandInvocationInfo>>(invocations.Length);
         var keySb = new StringBuilder(128);
@@ -101,7 +102,7 @@ internal static class BindCommandCodeGenerator
         foreach (var kvp in groupMap)
         {
             var first = kvp.Value[0];
-            result.Add(new BindCommandTypeGroup(
+            result.Add(new(
                 first.ViewTypeFullName,
                 first.ViewModelTypeFullName,
                 first.CommandTypeFullName,
@@ -109,7 +110,7 @@ internal static class BindCommandCodeGenerator
                 first.HasObservableParameter,
                 first.HasExpressionParameter,
                 first.ParameterTypeFullName,
-                kvp.Value.ToArray()));
+                [.. kvp.Value]));
         }
 
         return result;
@@ -121,18 +122,20 @@ internal static class BindCommandCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindCommand type group.</param>
     /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is available.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         BindCommandTypeGroup group,
-        bool supportsCallerArgExpr)
+        bool supportsCallerArgExpr,
+        bool supportsNullable)
     {
         if (supportsCallerArgExpr)
         {
-            GenerateCallerArgExprOverload(sb, group);
+            GenerateCallerArgExprOverload(sb, group, supportsNullable);
         }
         else
         {
-            GenerateCallerFilePathOverload(sb, group);
+            GenerateCallerFilePathOverload(sb, group, supportsNullable);
         }
     }
 
@@ -141,21 +144,25 @@ internal static class BindCommandCodeGenerator
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindCommand type group.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void GenerateCallerArgExprOverload(
         StringBuilder sb,
-        BindCommandTypeGroup group)
+        BindCommandTypeGroup group,
+        bool supportsNullable)
     {
+        var commandType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].CommandPropertyPath, supportsNullable);
+        var controlType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].ControlPropertyPath, supportsNullable);
         sb.AppendLine($"""
-                    /// <summary>
-                    /// Concrete typed overload for BindCommand on {group.ViewTypeFullName}.
-                    /// Uses CallerArgumentExpression for dispatch.
-                    /// </summary>
-                    public static global::System.IDisposable BindCommand(
-                        this {group.ViewTypeFullName} view,
-                        {group.ViewModelTypeFullName} viewModel,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {group.CommandTypeFullName}>> propertyName,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewTypeFullName}, {group.ControlTypeFullName}>> controlName,
-            """);
+                               /// <summary>
+                               /// Concrete typed overload for BindCommand on {group.ViewTypeFullName}.
+                               /// Uses CallerArgumentExpression for dispatch.
+                               /// </summary>
+                               public static global::System.IDisposable BindCommand(
+                                   this {group.ViewTypeFullName} view,
+                                   {group.ViewModelTypeFullName} viewModel,
+                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {commandType}>> propertyName,
+                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewTypeFullName}, {controlType}>> controlName,
+                       """);
 
         if (group.HasObservableParameter)
         {
@@ -163,30 +170,31 @@ internal static class BindCommandCodeGenerator
         }
         else if (group.HasExpressionParameter)
         {
-            sb.AppendLine($"            global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {group.ParameterTypeFullName}>> withParameter,");
+            sb.AppendLine(
+                $"            global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {group.ParameterTypeFullName}>> withParameter,");
         }
 
-        sb.AppendLine("""
-                        string toEvent = null,
-                        [global::System.Runtime.CompilerServices.CallerArgumentExpression("propertyName")] string propertyNameExpression = "",
-                        [global::System.Runtime.CompilerServices.CallerArgumentExpression("controlName")] string controlNameExpression = "",
-            """);
+        sb.AppendLine($"""
+                                  string{(supportsNullable ? "?" : string.Empty)} toEvent = null,
+                                  [global::System.Runtime.CompilerServices.CallerArgumentExpression("propertyName")] string propertyNameExpression = "",
+                                  [global::System.Runtime.CompilerServices.CallerArgumentExpression("controlName")] string controlNameExpression = "",
+                      """);
 
         if (group.HasExpressionParameter)
         {
             sb.AppendLine("""
-                        [global::System.Runtime.CompilerServices.CallerArgumentExpression("withParameter")] string withParameterExpression = "",
-            """);
+                                      [global::System.Runtime.CompilerServices.CallerArgumentExpression("withParameter")] string withParameterExpression = "",
+                          """);
         }
 
         sb.AppendLine("""
-                        [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                        [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                    {
-                        propertyNameExpression = propertyNameExpression.StartsWith("static ") ? propertyNameExpression.Substring(7) : propertyNameExpression;
-                        controlNameExpression = controlNameExpression.StartsWith("static ") ? controlNameExpression.Substring(7) : controlNameExpression;
+                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
+                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
+                              {
+                                  propertyNameExpression = propertyNameExpression.StartsWith("static ") ? propertyNameExpression.Substring(7) : propertyNameExpression;
+                                  controlNameExpression = controlNameExpression.StartsWith("static ") ? controlNameExpression.Substring(7) : controlNameExpression;
 
-            """);
+                      """);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -200,23 +208,24 @@ internal static class BindCommandCodeGenerator
             var escapedCmdExpr = CodeGeneratorHelpers.EscapeString(inv.CommandExpressionText);
             var escapedCtrlExpr = CodeGeneratorHelpers.EscapeString(inv.ControlExpressionText);
 
-            var extraArgs = group.HasObservableParameter || group.HasExpressionParameter
-                ? ", withParameter" : string.Empty;
+            var extraArgs = group.HasObservableParameter
+                ? ", withParameter"
+                : string.Empty;
 
             sb.AppendLine($$"""
-                            {{condition}} (propertyNameExpression == "{{escapedCmdExpr}}"
-                                && controlNameExpression == "{{escapedCtrlExpr}}")
-                            {
-                                return __BindCommand_{{methodSuffix}}(view, viewModel{{extraArgs}});
-                            }
-                """);
+                                        {{condition}} (propertyNameExpression == "{{escapedCmdExpr}}"
+                                            && controlNameExpression == "{{escapedCtrlExpr}}")
+                                        {
+                                            return __BindCommand_{{methodSuffix}}(view, viewModel{{extraArgs}});
+                                        }
+                            """);
         }
 
         sb.AppendLine("""
-                        throw new global::System.InvalidOperationException(
-                            "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                    }
-            """);
+                                  throw new global::System.InvalidOperationException(
+                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
+                              }
+                      """);
     }
 
     /// <summary>
@@ -224,21 +233,25 @@ internal static class BindCommandCodeGenerator
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindCommand type group.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void GenerateCallerFilePathOverload(
         StringBuilder sb,
-        BindCommandTypeGroup group)
+        BindCommandTypeGroup group,
+        bool supportsNullable)
     {
+        var commandType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].CommandPropertyPath, supportsNullable);
+        var controlType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].ControlPropertyPath, supportsNullable);
         sb.AppendLine($"""
-                    /// <summary>
-                    /// Concrete typed overload for BindCommand on {group.ViewTypeFullName}.
-                    /// Uses CallerFilePath + CallerLineNumber for dispatch.
-                    /// </summary>
-                    public static global::System.IDisposable BindCommand(
-                        this {group.ViewTypeFullName} view,
-                        {group.ViewModelTypeFullName} viewModel,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {group.CommandTypeFullName}>> propertyName,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewTypeFullName}, {group.ControlTypeFullName}>> controlName,
-            """);
+                               /// <summary>
+                               /// Concrete typed overload for BindCommand on {group.ViewTypeFullName}.
+                               /// Uses CallerFilePath + CallerLineNumber for dispatch.
+                               /// </summary>
+                               public static global::System.IDisposable BindCommand(
+                                   this {group.ViewTypeFullName} view,
+                                   {group.ViewModelTypeFullName} viewModel,
+                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {commandType}>> propertyName,
+                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewTypeFullName}, {controlType}>> controlName,
+                       """);
 
         if (group.HasObservableParameter)
         {
@@ -246,15 +259,16 @@ internal static class BindCommandCodeGenerator
         }
         else if (group.HasExpressionParameter)
         {
-            sb.AppendLine($"            global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {group.ParameterTypeFullName}>> withParameter,");
+            sb.AppendLine(
+                $"            global::System.Linq.Expressions.Expression<global::System.Func<{group.ViewModelTypeFullName}, {group.ParameterTypeFullName}>> withParameter,");
         }
 
-        sb.AppendLine("""
-                        string toEvent = null,
-                        [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                        [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                    {
-            """);
+        sb.AppendLine($$"""
+                                  string{{(supportsNullable ? "?" : string.Empty)}} toEvent = null,
+                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
+                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
+                              {
+                      """);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -267,23 +281,24 @@ internal static class BindCommandCodeGenerator
             var pathSuffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
             var condition = CodeGeneratorHelpers.ConditionKeyword(i);
 
-            var extraArgs = group.HasObservableParameter || group.HasExpressionParameter
-                ? ", withParameter" : string.Empty;
+            var extraArgs = group.HasObservableParameter
+                ? ", withParameter"
+                : string.Empty;
 
             sb.AppendLine($$"""
-                            {{condition}} (callerLineNumber == {{inv.CallerLineNumber}}
-                                && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(pathSuffix)}}", global::System.StringComparison.OrdinalIgnoreCase))
-                            {
-                                return __BindCommand_{{methodSuffix}}(view, viewModel{{extraArgs}});
-                            }
-                """);
+                                        {{condition}} (callerLineNumber == {{inv.CallerLineNumber}}
+                                            && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(pathSuffix)}}", global::System.StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            return __BindCommand_{{methodSuffix}}(view, viewModel{{extraArgs}});
+                                        }
+                            """);
         }
 
         sb.AppendLine("""
-                        throw new global::System.InvalidOperationException(
-                            "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                    }
-            """);
+                                  throw new global::System.InvalidOperationException(
+                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
+                              }
+                      """);
     }
 
     /// <summary>
@@ -293,44 +308,48 @@ internal static class BindCommandCodeGenerator
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="vmClassInfo">The view model type class binding info.</param>
     /// <param name="suffix">The stable method name suffix.</param>
+    /// <param name="supportsNullable">There can be a null type.</param>
     internal static void GenerateBindCommandMethod(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         ClassBindingInfo? vmClassInfo,
-        string suffix)
+        string suffix,
+        bool supportsNullable)
     {
         var cmdPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.CommandPropertyPath);
         var ctrlPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.ControlPropertyPath);
 
-        var extraParams = string.Empty;
-        if (inv.HasObservableParameter)
-        {
-            extraParams = $", global::System.IObservable<{inv.ParameterTypeFullName}> withParameter";
-        }
-        else if (inv.HasExpressionParameter)
-        {
-            extraParams = $", global::System.Linq.Expressions.Expression<global::System.Func<{inv.ViewModelTypeFullName}, {inv.ParameterTypeFullName}>> withParameter";
-        }
+        // Only the observable-parameter worker actually consumes 'withParameter' (see
+        // BuildParameterObservableExpression). The expression-parameter case reads the value via the
+        // compile-time-extracted ParameterPropertyPath, so the worker takes no extra parameter there.
+        var extraParams = inv.HasObservableParameter
+            ? $", global::System.IObservable<{inv.ParameterTypeFullName}> withParameter"
+            : string.Empty;
 
         sb.AppendLine($$"""
-                    private static global::System.IDisposable __BindCommand_{{suffix}}(
-                        {{inv.ViewTypeFullName}} view,
-                        {{inv.ViewModelTypeFullName}} viewModel{{extraParams}})
-                    {
-                        // BindCommand: {{cmdPathComment}} -> {{ctrlPathComment}} (event: {{inv.ResolvedEventName ?? "none"}})
-                        if (viewModel == null)
-                        {
-                            return global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                        }
+                                private static global::System.IDisposable __BindCommand_{{suffix}}(
+                                    {{inv.ViewTypeFullName}} view,
+                                    {{inv.ViewModelTypeFullName}} viewModel{{extraParams}})
+                                {
+                                    // BindCommand: {{cmdPathComment}} -> {{ctrlPathComment}} (event: {{inv.ResolvedEventName ?? "none"}})
+                                    if (viewModel == null)
+                                    {
+                                        return global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                    }
 
-            """);
+                        """);
 
         // Get the control access chain
         var controlAccess = CodeGeneratorHelpers.BuildPropertyAccessChain("view", inv.ControlPropertyPath);
 
         // Emit command observation (for rebinding when command property changes)
         ObservationCodeGenerator.EmitInlineObservation(
-            sb, "viewModel", inv.CommandPropertyPath, inv.CommandTypeFullName, vmClassInfo, "commandObs");
+            sb,
+            "viewModel",
+            inv.CommandPropertyPath,
+            inv.CommandTypeFullName,
+            vmClassInfo,
+            "commandObs");
 
         // Try plugins in affinity order (highest first) via registry
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
@@ -343,16 +362,16 @@ internal static class BindCommandCodeGenerator
 
         if (plugin is not null)
         {
-            plugin.EmitBinding(sb, inv, controlAccess);
+            plugin.EmitBinding(sb, inv, controlAccess, supportsNullable);
         }
         else
         {
             // No plugin matched — throw after the affinity check fallback
             sb.AppendLine("""
-                        throw new global::System.InvalidOperationException(
-                            "No bindable event found on the control. Specify the 'toEvent' parameter.");
-                    }
-            """);
+                                      throw new global::System.InvalidOperationException(
+                                          "No bindable event found on the control. Specify the 'toEvent' parameter.");
+                                  }
+                          """);
         }
 
         sb.AppendLine();
@@ -381,27 +400,27 @@ internal static class BindCommandCodeGenerator
 
         sb.AppendLine($$"""
 
-                        if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
-                            .HasHigherAffinityPlugin<{{inv.ControlTypeFullName}}>({{generatedAffinity}}, {{(hasEvent ? "true" : "false")}}))
-                        {
-                            var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
-                                .GetBinder<{{inv.ControlTypeFullName}}>({{(hasEvent ? "true" : "false")}});
-                            if (__customBinder != null)
-                            {
-                                var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                                var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
-                                {
-                                    __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                                    global::System.IObservable<object> __paramObs = {{paramObsExpr}};
-                                    __serial.Disposable = __customBinder.BindCommandToObject<{{inv.ControlTypeFullName}}>(
-                                        __cmd, {{controlAccess}}, __paramObs)
-                                        ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                                });
-                                return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
-                            }
-                        }
+                                    if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
+                                        .HasHigherAffinityPlugin<{{inv.ControlTypeFullName}}>({{generatedAffinity}}, {{(hasEvent ? "true" : "false")}}))
+                                    {
+                                        var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
+                                            .GetBinder<{{inv.ControlTypeFullName}}>({{(hasEvent ? "true" : "false")}});
+                                        if (__customBinder != null)
+                                        {
+                                            var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+                                            var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
+                                            {
+                                                __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                                global::System.IObservable<object> __paramObs = {{paramObsExpr}};
+                                                __serial.Disposable = __customBinder.BindCommandToObject<{{inv.ControlTypeFullName}}>(
+                                                    __cmd, {{controlAccess}}, __paramObs)
+                                                    ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                            });
+                                            return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
+                                        }
+                                    }
 
-            """);
+                        """);
     }
 
     /// <summary>
@@ -415,13 +434,14 @@ internal static class BindCommandCodeGenerator
         {
             // Cast the typed observable to IObservable<object> via Select
             return "new global::ReactiveUI.Binding.Observables.SelectObservable<"
-                + inv.ParameterTypeFullName + ", object>(withParameter, __p => __p)";
+                   + inv.ParameterTypeFullName + ", object>(withParameter, __p => __p)";
         }
 
         if (inv is { HasExpressionParameter: true, ParameterPropertyPath: not null })
         {
             // Read the parameter property at call time
-            var paramAccess = CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value);
+            var paramAccess =
+                CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value);
             return "new global::ReactiveUI.Binding.Observables.ReturnObservable<object>(" + paramAccess + ")";
         }
 

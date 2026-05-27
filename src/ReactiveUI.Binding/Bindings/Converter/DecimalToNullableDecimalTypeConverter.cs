@@ -9,6 +9,11 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public sealed class DecimalToNullableDecimalTypeConverter : IBindingTypeConverter<decimal, decimal?>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
     public Type FromType => typeof(decimal);
 
@@ -16,7 +21,7 @@ public sealed class DecimalToNullableDecimalTypeConverter : IBindingTypeConverte
     public Type ToType => typeof(decimal?);
 
     /// <inheritdoc/>
-    public int GetAffinityForObjects() => 2;
+    public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public bool TryConvert(decimal from, object? conversionHint, out decimal? result)

@@ -9,13 +9,18 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public sealed class DateTimeToStringTypeConverter : BindingTypeConverter<DateTime, string>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
-    public override int GetAffinityForObjects() => 2;
+    public override int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public override bool TryConvert(DateTime from, object? conversionHint, [NotNullWhen(true)] out string? result)
     {
-        result = from.ToString();
+        result = from.ToString(System.Globalization.CultureInfo.CurrentCulture);
         return true;
     }
 }

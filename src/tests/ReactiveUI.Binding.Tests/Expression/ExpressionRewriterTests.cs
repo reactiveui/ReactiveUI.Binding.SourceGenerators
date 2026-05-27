@@ -12,6 +12,31 @@ namespace ReactiveUI.Binding.Tests.Expression;
 public class ExpressionRewriterTests
 {
     /// <summary>
+    ///     The name of the property used across rewriter tests.
+    /// </summary>
+    private const string PropertyName = "Property";
+
+    /// <summary>
+    ///     The expected number of rewritten arguments in the argument-list test.
+    /// </summary>
+    private const int ExpectedArgumentCount = 3;
+
+    /// <summary>
+    ///     The index of the third rewritten argument.
+    /// </summary>
+    private const int ThirdArgumentIndex = 2;
+
+    /// <summary>
+    ///     The second constant value used in the argument-list test.
+    /// </summary>
+    private const int SecondConstant = 2;
+
+    /// <summary>
+    ///     The third constant value used in the argument-list test.
+    /// </summary>
+    private const int ThirdConstant = 3;
+
+    /// <summary>
     ///     Verifies that array index expressions are rewritten to index expressions.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -28,10 +53,12 @@ public class ExpressionRewriterTests
     /// <summary>
     ///     Verifies that array index with non-constant index throws.
     /// </summary>
+    /// <param name="index">A non-constant index, supplied as a parameter so it is captured as a
+    ///     non-constant closure reference (a <c>const</c> or literal would be inlined into the tree).</param>
     [Test]
-    public void Rewrite_WithArrayIndexNonConstant_Throws()
+    [Arguments(0)]
+    public void Rewrite_WithArrayIndexNonConstant_Throws(int index)
     {
-        var index = 0;
         Expression<Func<TestClass, int>> expr = x => x.Array[index];
 
         Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(expr.Body));
@@ -130,10 +157,12 @@ public class ExpressionRewriterTests
     /// <summary>
     ///     Verifies that list indexer with non-constant index throws.
     /// </summary>
+    /// <param name="index">A non-constant index, supplied as a parameter so it is captured as a
+    ///     non-constant closure reference (a <c>const</c> or literal would be inlined into the tree).</param>
     [Test]
-    public void Rewrite_WithListIndexerNonConstant_Throws()
+    [Arguments(0)]
+    public void Rewrite_WithListIndexerNonConstant_Throws(int index)
     {
-        var index = 0;
         Expression<Func<TestClass, int>> expr = x => x.List[index];
 
         Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(expr.Body));
@@ -248,14 +277,14 @@ public class ExpressionRewriterTests
     public async Task Rewrite_WithConvertWrappingMemberAccess_UnwrapsToMemberAccess()
     {
         var parameter = System.Linq.Expressions.Expression.Parameter(typeof(TestClass), "x");
-        var property = System.Linq.Expressions.Expression.Property(parameter, "Property");
+        var property = System.Linq.Expressions.Expression.Property(parameter, PropertyName);
         var convert = System.Linq.Expressions.Expression.Convert(property, typeof(object));
 
         var result = Reflection.Rewrite(convert);
 
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.MemberAccess);
         var memberExpr = (MemberExpression)result;
-        await Assert.That(memberExpr.Member.Name).IsEqualTo("Property");
+        await Assert.That(memberExpr.Member.Name).IsEqualTo(PropertyName);
     }
 
     /// <summary>
@@ -385,7 +414,7 @@ public class ExpressionRewriterTests
         var list = new System.Collections.ObjectModel.ReadOnlyCollection<System.Linq.Expressions.Expression>(
         [
             System.Linq.Expressions.Expression.Constant(1),
-                System.Linq.Expressions.Expression.Parameter(typeof(int), "x")
+            System.Linq.Expressions.Expression.Parameter(typeof(int), "x")
         ]);
 
         var result = ExpressionRewriter.AllConstant(list);
@@ -403,7 +432,7 @@ public class ExpressionRewriterTests
         var list = new System.Collections.ObjectModel.ReadOnlyCollection<System.Linq.Expressions.Expression>(
         [
             System.Linq.Expressions.Expression.Constant(1),
-                System.Linq.Expressions.Expression.Constant(2)
+            System.Linq.Expressions.Expression.Constant(2)
         ]);
 
         var result = ExpressionRewriter.AllConstant(list);
@@ -441,16 +470,16 @@ public class ExpressionRewriterTests
         var args = new System.Collections.ObjectModel.ReadOnlyCollection<System.Linq.Expressions.Expression>(
         [
             System.Linq.Expressions.Expression.Constant(1),
-                System.Linq.Expressions.Expression.Constant(2),
-                System.Linq.Expressions.Expression.Constant(3)
+            System.Linq.Expressions.Expression.Constant(SecondConstant),
+            System.Linq.Expressions.Expression.Constant(ThirdConstant)
         ]);
 
         var result = rewriter.VisitArgumentList(args);
 
-        await Assert.That(result.Length).IsEqualTo(3);
+        await Assert.That(result.Length).IsEqualTo(ExpectedArgumentCount);
         await Assert.That(result[0].NodeType).IsEqualTo(ExpressionType.Constant);
         await Assert.That(result[1].NodeType).IsEqualTo(ExpressionType.Constant);
-        await Assert.That(result[2].NodeType).IsEqualTo(ExpressionType.Constant);
+        await Assert.That(result[ThirdArgumentIndex].NodeType).IsEqualTo(ExpressionType.Constant);
     }
 
     /// <summary>
@@ -516,7 +545,7 @@ public class ExpressionRewriterTests
     public async Task Rewrite_DoubleConvert_UnwrapsCompletely()
     {
         var parameter = System.Linq.Expressions.Expression.Parameter(typeof(TestClass), "x");
-        var property = System.Linq.Expressions.Expression.Property(parameter, "Property");
+        var property = System.Linq.Expressions.Expression.Property(parameter, PropertyName);
         var innerConvert = System.Linq.Expressions.Expression.Convert(property, typeof(object));
         var outerConvert = System.Linq.Expressions.Expression.Convert(innerConvert, typeof(object));
 
@@ -524,7 +553,7 @@ public class ExpressionRewriterTests
 
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.MemberAccess);
         var memberExpr = (MemberExpression)result;
-        await Assert.That(memberExpr.Member.Name).IsEqualTo("Property");
+        await Assert.That(memberExpr.Member.Name).IsEqualTo(PropertyName);
     }
 
     /// <summary>
@@ -605,27 +634,63 @@ public class ExpressionRewriterTests
     /// <summary>
     /// Test class used as a type parameter in expression lambdas for rewriter tests.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
+    [SuppressMessage(
+        "Performance",
+        "CA1812:Avoid uninstantiated internal classes",
+        Justification = "Referenced only inside inspected expression-lambda trees (never compiled), so no construction is visible to the analyzer.")]
     private sealed class TestClass
     {
         /// <summary>
+        /// The second sample value stored in <see cref="Array"/>.
+        /// </summary>
+        private const int ArraySecondValue = 2;
+
+        /// <summary>
+        /// The third sample value stored in <see cref="Array"/>.
+        /// </summary>
+        private const int ArrayThirdValue = 3;
+
+        /// <summary>
+        /// The first sample value stored in <see cref="List"/>.
+        /// </summary>
+        private const int ListFirstValue = 4;
+
+        /// <summary>
+        /// The second sample value stored in <see cref="List"/>.
+        /// </summary>
+        private const int ListSecondValue = 5;
+
+        /// <summary>
+        /// The third sample value stored in <see cref="List"/>.
+        /// </summary>
+        private const int ListThirdValue = 6;
+
+        /// <summary>
         /// Gets an integer array for testing array index and length expressions.
         /// </summary>
-        public int[] Array { get; } = [1, 2, 3];
+        public int[] Array { get; } = [1, ArraySecondValue, ArrayThirdValue];
 
         /// <summary>
         /// Gets a list of integers for testing list indexer expressions.
         /// </summary>
-        public List<int> List { get; } = [4, 5, 6];
+        public List<int> List { get; } = [ListFirstValue, ListSecondValue, ListThirdValue];
 
         /// <summary>
         /// Gets or sets a nested instance for testing nested member access expressions.
         /// </summary>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S3459:Unassigned members should be removed",
+            Justification = "Referenced only as expression-tree metadata in rewriter tests; never assigned at runtime.")]
         public TestClass? Nested { get; set; }
 
         /// <summary>
         /// Gets or sets a string property for testing simple member access expressions.
         /// </summary>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S3459:Unassigned members should be removed",
+            Justification = "Referenced only via expression-tree lambdas (and GetValue) in rewriter tests; never assigned at runtime.")]
         public string? Property { get; set; }
 
         /// <summary>

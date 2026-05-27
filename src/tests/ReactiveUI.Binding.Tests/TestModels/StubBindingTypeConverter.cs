@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 public class StubBindingTypeConverter : IBindingTypeConverter
 {
     /// <summary>
+    /// Affinity returned by this stub converter to indicate it can handle the conversion.
+    /// </summary>
+    private const int StubAffinity = 10;
+
+    /// <summary>
     /// The conversion logic.
     /// </summary>
     private readonly Func<object?, object?, (bool success, object? result)> _tryConvert;
@@ -20,7 +25,10 @@ public class StubBindingTypeConverter : IBindingTypeConverter
     /// <param name="fromType">The source type.</param>
     /// <param name="toType">The target type.</param>
     /// <param name="tryConvert">The conversion logic.</param>
-    public StubBindingTypeConverter(Type fromType, Type toType, Func<object?, object?, (bool success, object? result)> tryConvert)
+    public StubBindingTypeConverter(
+        Type fromType,
+        Type toType,
+        Func<object?, object?, (bool success, object? result)> tryConvert)
     {
         FromType = fromType;
         ToType = toType;
@@ -34,7 +42,7 @@ public class StubBindingTypeConverter : IBindingTypeConverter
     public Type ToType { get; }
 
     /// <inheritdoc/>
-    public int GetAffinityForObjects() => 10;
+    public int GetAffinityForObjects() => StubAffinity;
 
     /// <inheritdoc/>
     public bool TryConvertTyped(object? from, object? conversionHint, out object? result)

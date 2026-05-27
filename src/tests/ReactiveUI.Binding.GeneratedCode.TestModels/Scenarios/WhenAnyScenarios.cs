@@ -26,7 +26,8 @@ public static class WhenAnyScenarios
     /// </summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of IObservedChange for the Name property.</returns>
-    public static IObservable<IObservedChange<TestViewModel, string>> SingleProperty_Name_ObservedChange(TestViewModel vm)
+    public static IObservable<IObservedChange<TestViewModel, string>> SingleProperty_Name_ObservedChange(
+        TestViewModel vm)
         => vm.WhenAny(x => x.Name, c => c);
 
     /// <summary>

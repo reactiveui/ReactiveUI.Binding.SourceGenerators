@@ -5,35 +5,36 @@
 using System;
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenAnyObservable.SingleObservable
+namespace SharedScenarios.WhenAnyObservable.SingleObservable;
+
+/// <summary>
+/// ViewModel implementing INotifyPropertyChanged with a property that is itself an observable.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel implementing INotifyPropertyChanged with a property that is itself an observable.
+    /// The backing field for <see cref="MyCommand"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private IObservable<string>? _myCommand;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the command observable.
+    /// </summary>
+    public IObservable<string>? MyCommand
     {
-        /// <summary>
-        /// The backing field for <see cref="MyCommand"/>.
-        /// </summary>
-        private IObservable<string>? _myCommand;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the command observable.
-        /// </summary>
-        public IObservable<string>? MyCommand
+        get => _myCommand;
+        set
         {
-            get => _myCommand;
-            set
+            if (_myCommand == value)
             {
-                if (_myCommand != value)
-                {
-                    _myCommand = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MyCommand)));
-                }
+                return;
             }
+
+            _myCommand = value;
+            PropertyChanged?.Invoke(this, new(nameof(MyCommand)));
         }
     }
 }

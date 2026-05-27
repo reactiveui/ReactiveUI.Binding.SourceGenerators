@@ -10,6 +10,16 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class ByteToNullableByteTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Sample byte value used for conversion round-trips.
+    /// </summary>
+    private const byte SampleByte = 42;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +28,7 @@ public class ByteToNullableByteTypeConverterTests
     {
         var converter = new ByteToNullableByteTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,12 +39,12 @@ public class ByteToNullableByteTypeConverterTests
     public async Task TryConvert_AlwaysSucceeds()
     {
         var converter = new ByteToNullableByteTypeConverter();
-        byte value = 42;
+        const byte value = 42;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((byte?)42);
+        await Assert.That(output).IsEqualTo((byte?)SampleByte);
     }
 
     /// <summary>
@@ -67,12 +77,12 @@ public class ByteToNullableByteTypeConverterTests
     public async Task TryConvertTyped_WithValidValue_ReturnsTrueAndOutput()
     {
         var converter = new ByteToNullableByteTypeConverter();
-        byte value = 42;
+        const byte value = 42;
 
         var success = converter.TryConvertTyped(value, null, out var result);
 
         await Assert.That(success).IsTrue();
-        await Assert.That(result).IsEqualTo((byte?)42);
+        await Assert.That(result).IsEqualTo((byte?)SampleByte);
     }
 
     /// <summary>
@@ -98,7 +108,7 @@ public class ByteToNullableByteTypeConverterTests
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()
     {
         var converter = new ByteToNullableByteTypeConverter();
-        var value = "invalid";
+        const string value = "invalid";
 
         var success = converter.TryConvertTyped(value, null, out var result);
 

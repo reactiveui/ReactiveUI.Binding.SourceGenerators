@@ -28,8 +28,7 @@ public static class ObservationAffinityChecker
     {
         ArgumentExceptionHelper.ThrowIfNull(type);
 
-        var services = AppLocator.Current.GetServices<ICreatesObservableForProperty>();
-        foreach (var plugin in services)
+        foreach (var plugin in AppLocator.Current.GetServices<ICreatesObservableForProperty>())
         {
             if (plugin.GetAffinityForObject(type, string.Empty, beforeChanged) > generatedAffinity)
             {

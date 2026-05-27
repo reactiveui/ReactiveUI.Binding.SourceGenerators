@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-
 using Microsoft.CodeAnalysis;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -32,11 +31,13 @@ public sealed class GeneratorTestResult
         GeneratorDiagnostics = generatorDiagnostics;
 
         var compilationDiagnostics = outputCompilation.GetDiagnostics();
-        CompilationErrors = [
+        CompilationErrors =
+        [
             ..compilationDiagnostics
                 .Where(d => d.Severity == DiagnosticSeverity.Error)
         ];
-        CompilationWarnings = [
+        CompilationWarnings =
+        [
             ..compilationDiagnostics
                 .Where(d => d.Severity == DiagnosticSeverity.Warning)
         ];

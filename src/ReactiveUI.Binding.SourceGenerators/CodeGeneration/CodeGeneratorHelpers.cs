@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
@@ -15,6 +14,44 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class CodeGeneratorHelpers
 {
+    /// <summary>
+    /// The initial seed value for the polynomial hash used by <see cref="ComputeStableMethodSuffix"/>.
+    /// </summary>
+    private const long HashSeed = 17L;
+
+    /// <summary>
+    /// The multiplier applied at each step of the polynomial hash used by <see cref="ComputeStableMethodSuffix"/>.
+    /// </summary>
+    private const long HashMultiplier = 31L;
+
+    /// <summary>
+    /// The FNV-1a 32-bit offset basis used by <see cref="StableStringHash"/>.
+    /// </summary>
+    private const uint FnvOffsetBasis = 2_166_136_261;
+
+    /// <summary>
+    /// The FNV-1a 32-bit prime used by <see cref="StableStringHash"/>.
+    /// </summary>
+    private const int FnvPrime = 16_777_619;
+
+    /// <summary>
+    /// Returns the leaf property type of a path for use as a generated <c>Expression&lt;Func&lt;…, T&gt;&gt;</c>
+    /// selector parameter, annotated nullable (<c>T?</c>) when the target supports nullable reference types and
+    /// the leaf is a reference type. This lets the generated selector accept lambdas over nullable
+    /// reference-typed properties without a CS8603 mismatch; value-type leaves are left unchanged (annotating
+    /// them would insert a Convert node and break expression-path extraction).
+    /// </summary>
+    /// <param name="path">The property path; its last segment is the selector's leaf.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <returns>The leaf type name, suffixed with <c>?</c> where appropriate.</returns>
+    internal static string NullableSelectorLeafType(EquatableArray<PropertyPathSegment> path, bool supportsNullable)
+    {
+        var leaf = path[path.Length - 1];
+        return supportsNullable && leaf.IsReferenceType
+            ? leaf.PropertyTypeFullName + "?"
+            : leaf.PropertyTypeFullName;
+    }
+
     /// <summary>
     /// Builds a dotted property access chain from a root variable and property path segments.
     /// </summary>
@@ -44,7 +81,8 @@ internal static class CodeGeneratorHelpers
     /// <param name="param">The lambda parameter name.</param>
     /// <param name="path">The property path segments.</param>
     /// <returns>A dotted access chain like "x.Address.City".</returns>
-    internal static string BuildPropertyAccessLambda(string param, EquatableArray<PropertyPathSegment> path) => BuildPropertyAccessChain(param, path);
+    internal static string BuildPropertyAccessLambda(string param, EquatableArray<PropertyPathSegment> path) =>
+        BuildPropertyAccessChain(param, path);
 
     /// <summary>
     /// Builds a property setter chain for assignment (e.g., target.Header.Title).
@@ -52,7 +90,8 @@ internal static class CodeGeneratorHelpers
     /// <param name="root">The root variable name.</param>
     /// <param name="path">The property path segments.</param>
     /// <returns>A dotted access chain suitable for the left side of an assignment.</returns>
-    internal static string BuildPropertySetterChain(string root, EquatableArray<PropertyPathSegment> path) => BuildPropertyAccessChain(root, path);
+    internal static string BuildPropertySetterChain(string root, EquatableArray<PropertyPathSegment> path) =>
+        BuildPropertyAccessChain(root, path);
 
     /// <summary>
     /// Builds a human-readable dotted property path string for comments.
@@ -127,7 +166,7 @@ internal static class CodeGeneratorHelpers
         for (var i = 0; i < value.Length; i++)
         {
             var c = value[i];
-            if (c == '\\' || c == '"')
+            if (c is '\\' or '"')
             {
                 needsEscape = true;
                 break;
@@ -170,12 +209,12 @@ internal static class CodeGeneratorHelpers
     /// <returns>The normalized text (e.g., "x =&gt; x.Name").</returns>
     internal static string NormalizeLambdaText(string expressionText)
     {
-        const string staticPrefix = "static ";
-        if (expressionText.Length > staticPrefix.Length
+        const string StaticPrefix = "static ";
+        if (expressionText.Length > StaticPrefix.Length
             && expressionText[0] == 's'
-            && expressionText.StartsWith(staticPrefix, StringComparison.Ordinal))
+            && expressionText.StartsWith(StaticPrefix, StringComparison.Ordinal))
         {
-            return expressionText.Substring(staticPrefix.Length);
+            return expressionText.Substring(StaticPrefix.Length);
         }
 
         return expressionText;
@@ -185,10 +224,20 @@ internal static class CodeGeneratorHelpers
     /// Appends the standard auto-generated file header and opens the extension partial class.
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
-    internal static void AppendExtensionClassHeader(StringBuilder sb) =>
+    /// <param name="features">
+    /// The consumer compilation's language-feature and generation-option snapshot. Controls whether the
+    /// <c>// &lt;auto-generated/&gt;</c> + <c>#pragma warning disable</c> markers and the <c>#nullable enable</c>
+    /// directive are emitted.
+    /// </param>
+    internal static void AppendExtensionClassHeader(StringBuilder sb, LanguageFeatures features)
+    {
+        AppendGeneratedFileMarkers(sb, features.EmitGeneratedCodeMarkers);
+        if (features.SupportsNullable)
+        {
+            sb.AppendLine("#nullable enable");
+        }
+
         sb.Append("""
-                  // <auto-generated/>
-                  #pragma warning disable
 
                   using System;
 
@@ -197,6 +246,25 @@ internal static class CodeGeneratorHelpers
                       internal static partial class __ReactiveUIGeneratedBindings
                       {
                   """);
+    }
+
+    /// <summary>
+    /// Appends the <c>// &lt;auto-generated/&gt;</c> comment and <c>#pragma warning disable</c> directive that
+    /// mark a file as generated, suppressing compiler/analyzer diagnostics in consumer builds. Skipped when
+    /// the consumer opts out via <c>ReactiveUIBindingEmitGeneratedCodeMarkers=false</c> to surface diagnostics.
+    /// </summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="emitGeneratedCodeMarkers">Whether to emit the generated-file markers.</param>
+    internal static void AppendGeneratedFileMarkers(StringBuilder sb, bool emitGeneratedCodeMarkers)
+    {
+        if (!emitGeneratedCodeMarkers)
+        {
+            return;
+        }
+
+        sb.AppendLine("// <auto-generated/>")
+            .AppendLine("#pragma warning disable");
+    }
 
     /// <summary>
     /// Appends the closing braces for the extension partial class and namespace.
@@ -219,16 +287,20 @@ internal static class CodeGeneratorHelpers
     /// <param name="callerLineNumber">The caller line number.</param>
     /// <param name="discriminator">Additional discriminator for uniqueness (e.g., expression text).</param>
     /// <returns>A 16-character uppercase hex string suitable for use as a method name suffix.</returns>
-    internal static string ComputeStableMethodSuffix(string sourceType, string callerFilePath, int callerLineNumber, string discriminator = "")
+    internal static string ComputeStableMethodSuffix(
+        string sourceType,
+        string callerFilePath,
+        int callerLineNumber,
+        string discriminator = "")
     {
         unchecked
         {
-            var hash = 17L;
-            hash = (hash * 31L) + StableStringHash(sourceType);
-            hash = (hash * 31L) + StableStringHash(callerFilePath);
-            hash = (hash * 31L) + callerLineNumber;
-            hash = (hash * 31L) + StableStringHash(discriminator);
-            return (hash & 0x7FFFFFFFFFFFFFFFL).ToString("X16");
+            var hash = HashSeed;
+            hash = (hash * HashMultiplier) + StableStringHash(sourceType);
+            hash = (hash * HashMultiplier) + StableStringHash(callerFilePath);
+            hash = (hash * HashMultiplier) + callerLineNumber;
+            hash = (hash * HashMultiplier) + StableStringHash(discriminator);
+            return (hash & long.MaxValue).ToString("X16");
         }
     }
 
@@ -238,7 +310,9 @@ internal static class CodeGeneratorHelpers
     /// <param name="allClasses">All detected class binding infos.</param>
     /// <param name="fullyQualifiedName">The fully qualified name to match.</param>
     /// <returns>The matching class info, or null if not found.</returns>
-    internal static ClassBindingInfo? FindClassInfo(ImmutableArray<ClassBindingInfo> allClasses, string fullyQualifiedName)
+    internal static ClassBindingInfo? FindClassInfo(
+        ImmutableArray<ClassBindingInfo> allClasses,
+        string fullyQualifiedName)
     {
         for (var i = 0; i < allClasses.Length; i++)
         {
@@ -266,10 +340,10 @@ internal static class CodeGeneratorHelpers
 
         unchecked
         {
-            var hash = (int)2166136261;
+            var hash = (int)FnvOffsetBasis;
             for (var i = 0; i < s.Length; i++)
             {
-                hash = (hash ^ s[i]) * 16777619;
+                hash = (hash ^ s[i]) * FnvPrime;
             }
 
             return hash;

@@ -106,24 +106,59 @@ internal static partial class SharedSourceReader
         List<string> typeBlocks)
     {
         var i = 0;
+        CollectCopyright(lines, ref i, copyrightLines);
+        CollectUsings(lines, ref i, usingDirectives);
+        var isFileScoped = ReadNamespace(lines, ref i, ref namespaceName);
 
-        // 1. Copyright header (only capture from first file)
-        while (i < lines.Length && (lines[i].StartsWith("//", StringComparison.Ordinal) || string.IsNullOrWhiteSpace(lines[i])))
+        string? body;
+        if (isFileScoped)
         {
-            if (copyrightLines.Count == 0 && lines[i].StartsWith("//", StringComparison.Ordinal))
-            {
-                // First file - start collecting
-                copyrightLines.Add(lines[i]);
-            }
-            else if (copyrightLines.Count is > 0 and < 3 && lines[i].StartsWith("//", StringComparison.Ordinal))
+            // File-scoped namespace ("namespace X;") has no braces: every remaining line is a top-level
+            // member of the namespace, so take the rest of the file verbatim.
+            body = ExtractRemainingBody(lines, ref i);
+        }
+        else
+        {
+            SkipToBodyStart(lines, ref i);
+            body = ExtractTypeBlock(lines, ref i);
+        }
+
+        if (body == null)
+        {
+            return;
+        }
+
+        typeBlocks.Add(body);
+    }
+
+    /// <summary>
+    /// Collects up to the first three copyright comment lines from the file header.
+    /// </summary>
+    /// <param name="lines">The file lines.</param>
+    /// <param name="i">The current line index, advanced past the header.</param>
+    /// <param name="copyrightLines">The list to which copyright lines are added.</param>
+    private static void CollectCopyright(string[] lines, ref int i, List<string> copyrightLines)
+    {
+        while (i < lines.Length &&
+               (lines[i].StartsWith("//", StringComparison.Ordinal) || string.IsNullOrWhiteSpace(lines[i])))
+        {
+            if (copyrightLines.Count < 3 && lines[i].StartsWith("//", StringComparison.Ordinal))
             {
                 copyrightLines.Add(lines[i]);
             }
 
             i++;
         }
+    }
 
-        // 2. Using directives
+    /// <summary>
+    /// Collects using directives, skipping blank lines, until a non-using, non-blank line is reached.
+    /// </summary>
+    /// <param name="lines">The file lines.</param>
+    /// <param name="i">The current line index, advanced past the using block.</param>
+    /// <param name="usingDirectives">The set to which using directives are added.</param>
+    private static void CollectUsings(string[] lines, ref int i, LinkedHashSet<string> usingDirectives)
+    {
         while (i < lines.Length)
         {
             var trimmed = lines[i].Trim();
@@ -141,56 +176,47 @@ internal static partial class SharedSourceReader
                 break;
             }
         }
+    }
 
-        // 3. Namespace declaration
-        if (i < lines.Length)
+    /// <summary>
+    /// Reads the namespace declaration if present, capturing the name on first encounter.
+    /// </summary>
+    /// <param name="lines">The file lines.</param>
+    /// <param name="i">The current line index, advanced past the namespace line when matched.</param>
+    /// <param name="namespaceName">A reference to the shared namespace name.</param>
+    /// <returns><see langword="true"/> if the namespace is file-scoped (<c>namespace X;</c>); otherwise <see langword="false"/>.</returns>
+    private static bool ReadNamespace(string[] lines, ref int i, ref string? namespaceName)
+    {
+        if (i >= lines.Length)
         {
-            var nsMatch = NamespaceRegex().Match(lines[i]);
-            if (nsMatch.Success)
-            {
-                namespaceName ??= nsMatch.Groups[1].Value;
-                i++;
-            }
+            return false;
         }
 
-        // 4. Skip opening brace
-        while (i < lines.Length && lines[i].Trim() != "{")
+        var nsMatch = NamespaceRegex().Match(lines[i]);
+        if (!nsMatch.Success)
         {
-            i++;
+            return false;
         }
 
-        i++; // skip {
+        namespaceName ??= nsMatch.Groups[1].Value;
+        var isFileScoped = lines[i].TrimEnd().EndsWith(";", StringComparison.Ordinal);
+        i++;
+        return isFileScoped;
+    }
 
-        // 5. Collect the body (everything until the final closing brace)
+    /// <summary>
+    /// Returns all remaining lines (the top-level members of a file-scoped namespace), trimming leading
+    /// and trailing blank lines.
+    /// </summary>
+    /// <param name="lines">The file lines.</param>
+    /// <param name="i">The current line index, advanced to the end of the file.</param>
+    /// <returns>The trimmed body text, or <c>null</c> if there is no content.</returns>
+    private static string? ExtractRemainingBody(string[] lines, ref int i)
+    {
         var bodyStart = i;
-        var braceDepth = 1;
-        var bodyEnd = bodyStart;
-        while (i < lines.Length && braceDepth > 0)
-        {
-            foreach (var ch in lines[i])
-            {
-                if (ch == '{')
-                {
-                    braceDepth++;
-                }
-                else if (ch == '}')
-                {
-                    braceDepth--;
-                    if (braceDepth == 0)
-                    {
-                        break;
-                    }
-                }
-            }
+        var bodyEnd = lines.Length - 1;
+        i = lines.Length;
 
-            if (braceDepth > 0)
-            {
-                bodyEnd = i;
-                i++;
-            }
-        }
-
-        // Trim leading/trailing blank lines from body
         while (bodyStart <= bodyEnd && string.IsNullOrWhiteSpace(lines[bodyStart]))
         {
             bodyStart++;
@@ -201,11 +227,94 @@ internal static partial class SharedSourceReader
             bodyEnd--;
         }
 
-        if (bodyStart <= bodyEnd)
+        if (bodyStart > bodyEnd)
         {
-            var body = string.Join(Environment.NewLine, lines[bodyStart..(bodyEnd + 1)]);
-            typeBlocks.Add(body);
+            return null;
         }
+
+        return string.Join(Environment.NewLine, lines[bodyStart..(bodyEnd + 1)]);
+    }
+
+    /// <summary>
+    /// Advances past the namespace's opening brace to the first body line.
+    /// </summary>
+    /// <param name="lines">The file lines.</param>
+    /// <param name="i">The current line index, advanced past the opening brace.</param>
+    private static void SkipToBodyStart(string[] lines, ref int i)
+    {
+        while (i < lines.Length && lines[i].Trim() != "{")
+        {
+            i++;
+        }
+
+        i++; // move past the opening brace
+    }
+
+    /// <summary>
+    /// Collects the namespace body (all type declarations) until the final closing brace,
+    /// trimming leading and trailing blank lines.
+    /// </summary>
+    /// <param name="lines">The file lines.</param>
+    /// <param name="i">The current line index, advanced through the body.</param>
+    /// <returns>The trimmed body text, or <c>null</c> if the body is empty.</returns>
+    private static string? ExtractTypeBlock(string[] lines, ref int i)
+    {
+        var bodyStart = i;
+        var braceDepth = 1;
+        var bodyEnd = bodyStart;
+        while (i < lines.Length && braceDepth > 0)
+        {
+            braceDepth = UpdateBraceDepth(lines[i], braceDepth);
+            if (braceDepth > 0)
+            {
+                bodyEnd = i;
+                i++;
+            }
+        }
+
+        while (bodyStart <= bodyEnd && string.IsNullOrWhiteSpace(lines[bodyStart]))
+        {
+            bodyStart++;
+        }
+
+        while (bodyEnd >= bodyStart && string.IsNullOrWhiteSpace(lines[bodyEnd]))
+        {
+            bodyEnd--;
+        }
+
+        if (bodyStart > bodyEnd)
+        {
+            return null;
+        }
+
+        return string.Join(Environment.NewLine, lines[bodyStart..(bodyEnd + 1)]);
+    }
+
+    /// <summary>
+    /// Updates the running brace depth for a single line, stopping at the matching close brace.
+    /// </summary>
+    /// <param name="line">The line to scan.</param>
+    /// <param name="braceDepth">The current brace depth.</param>
+    /// <returns>The updated brace depth (zero once the matching close brace is found).</returns>
+    private static int UpdateBraceDepth(string line, int braceDepth)
+    {
+        foreach (var ch in line)
+        {
+            if (ch == '{')
+            {
+                braceDepth++;
+            }
+            else if (ch == '}')
+            {
+                braceDepth--;
+                if (braceDepth == 0)
+                {
+                    break;
+                }
+            }
+        }
+
+        return braceDepth;
     }
 
     /// <summary>
@@ -255,23 +364,21 @@ internal static partial class SharedSourceReader
         /// Adds an item to the set if it's not already present.
         /// </summary>
         /// <param name="item">The item to add.</param>
-        /// <returns><c>true</c> if the item was added; <c>false</c> if it was already present.</returns>
-        public bool Add(T item)
+        public void Add(T item)
         {
-            if (_set.Add(item))
+            if (!_set.Add(item))
             {
-                _list.Add(item);
-                return true;
+                return;
             }
 
-            return false;
+            _list.Add(item);
         }
 
         /// <summary>
         /// Converts the set to a list.
         /// </summary>
         /// <returns>A new list containing the set elements in insertion order.</returns>
-        public List<T> ToList() => [.._list];
+        public List<T> ToList() => [.. _list];
 
         /// <inheritdoc/>
         public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();

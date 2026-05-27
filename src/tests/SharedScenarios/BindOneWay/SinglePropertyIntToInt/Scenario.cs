@@ -5,20 +5,19 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindOneWay.SinglePropertyIntToInt
+namespace SharedScenarios.BindOneWay.SinglePropertyIntToInt;
+
+/// <summary>
+/// Exercises BindOneWay with int-to-int property binding.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindOneWay with int-to-int property binding.
+    /// Creates a one-way binding from ViewModel.Count to View.DisplayCount.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a one-way binding from ViewModel.Count to View.DisplayCount.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view)
-            => vm.BindOneWay(view, x => x.Count, x => x.DisplayCount);
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view)
+        => vm.BindOneWay(view, x => x.Count, x => x.DisplayCount);
 }

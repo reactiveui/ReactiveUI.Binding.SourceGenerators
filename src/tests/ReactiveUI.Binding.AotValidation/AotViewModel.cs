@@ -41,12 +41,14 @@ public class AotViewModel : INotifyPropertyChanged, INotifyPropertyChanging
         get => _name;
         set
         {
-            if (_name != value)
+            if (_name == value)
             {
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Name)));
-                _name = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Name)));
+            _name = value;
+            PropertyChanged?.Invoke(this, new(nameof(Name)));
         }
     }
 
@@ -58,12 +60,14 @@ public class AotViewModel : INotifyPropertyChanged, INotifyPropertyChanging
         get => _age;
         set
         {
-            if (_age != value)
+            if (_age == value)
             {
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Age)));
-                _age = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Age)));
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Age)));
+            _age = value;
+            PropertyChanged?.Invoke(this, new(nameof(Age)));
         }
     }
 
@@ -75,12 +79,14 @@ public class AotViewModel : INotifyPropertyChanged, INotifyPropertyChanging
         get => _child;
         set
         {
-            if (_child != value)
+            if (_child == value)
             {
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Child)));
-                _child = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Child)));
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Child)));
+            _child = value;
+            PropertyChanged?.Invoke(this, new(nameof(Child)));
         }
     }
 }

@@ -64,7 +64,7 @@ public class ModelEqualityTests
         var properties = new EquatableArray<ObservablePropertyInfo>([]);
         var a = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
 
-        await Assert.That(a.Equals((object?)null)).IsFalse();
+        await Assert.That(a.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>
@@ -124,7 +124,13 @@ public class ModelEqualityTests
         var properties = new EquatableArray<ObservablePropertyInfo>([]);
 
         var a = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "INPC", 21, true, properties);
-        var b = new ObservableTypeInfo("global::TestApp.MyViewModel", "MyViewModel", "ReactiveObject", 24, true, properties);
+        var b = new ObservableTypeInfo(
+            "global::TestApp.MyViewModel",
+            "MyViewModel",
+            "ReactiveObject",
+            24,
+            true,
+            properties);
 
         await Assert.That(a != b).IsTrue();
     }
@@ -181,7 +187,7 @@ public class ModelEqualityTests
     {
         var a = new ObservablePropertyInfo("Name", "global::System.String", true, false, false);
 
-        await Assert.That(a.Equals((object?)null)).IsFalse();
+        await Assert.That(a.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>
@@ -286,7 +292,7 @@ public class ModelEqualityTests
     {
         var a = ModelFactory.CreateInvocationInfo();
 
-        await Assert.That(a.Equals((object?)null)).IsFalse();
+        await Assert.That(a.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>
@@ -391,7 +397,7 @@ public class ModelEqualityTests
     {
         var a = ModelFactory.CreateBindingInvocationInfo();
 
-        await Assert.That(a.Equals((object?)null)).IsFalse();
+        await Assert.That(a.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>
@@ -468,8 +474,8 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_SameValues_ReturnsTrue()
     {
-        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel");
-        var b = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel");
+        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel", true);
+        var b = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel", true);
 
         await Assert.That(a.Equals(b)).IsTrue();
     }
@@ -481,8 +487,8 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_DifferentValues_ReturnsFalse()
     {
-        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel");
-        var b = new PropertyPathSegment("Age", "global::System.Int32", "global::TestApp.MyViewModel");
+        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel", true);
+        var b = new PropertyPathSegment("Age", "global::System.Int32", "global::TestApp.MyViewModel", false);
 
         await Assert.That(a.Equals(b)).IsFalse();
     }
@@ -494,9 +500,9 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_ObjectNull_ReturnsFalse()
     {
-        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel");
+        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel", true);
 
-        await Assert.That(a.Equals((object?)null)).IsFalse();
+        await Assert.That(a.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>
@@ -506,7 +512,7 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_ObjectWrongType_ReturnsFalse()
     {
-        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel");
+        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel", true);
 
         await Assert.That(a.Equals("string")).IsFalse();
     }
@@ -518,8 +524,8 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_GetHashCode_SameValues_AreEqual()
     {
-        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel");
-        var b = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel");
+        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel", true);
+        var b = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel", true);
 
         await Assert.That(a.GetHashCode()).IsEqualTo(b.GetHashCode());
     }
@@ -531,8 +537,8 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_OperatorEquals_SameValues_ReturnsTrue()
     {
-        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel");
-        var b = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel");
+        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel", true);
+        var b = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel", true);
 
         await Assert.That(a == b).IsTrue();
     }
@@ -544,8 +550,8 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_OperatorNotEquals_DifferentValues_ReturnsTrue()
     {
-        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel");
-        var b = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.OtherType");
+        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel", true);
+        var b = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.OtherType", true);
 
         await Assert.That(a != b).IsTrue();
     }
@@ -557,7 +563,7 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_ToString_ContainsTypeName()
     {
-        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel");
+        var a = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.MyViewModel", true);
 
         await Assert.That(a.ToString()).Contains("PropertyPathSegment");
     }
@@ -608,7 +614,7 @@ public class ModelEqualityTests
         var inv = ModelFactory.CreateInvocationInfo();
         var a = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        await Assert.That(a.Equals((object?)null)).IsFalse();
+        await Assert.That(a.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>
@@ -710,4 +716,12 @@ public class ModelEqualityTests
 
         await Assert.That(a.ReturnTypeFullName).IsEqualTo("global::System.Int32");
     }
+
+    /// <summary>
+    /// Returns a null object reference through a method call, so the equality-with-null assertions exercise
+    /// the generated <c>Equals(object?)</c> override at runtime without flow analysis folding the comparison
+    /// to a constant (CA1508).
+    /// </summary>
+    /// <returns>A null object reference.</returns>
+    private static object? NullReference() => null;
 }

@@ -13,6 +13,11 @@ namespace ReactiveUI.Binding.Tests.Builder;
 public class ReactiveUIBindingBuilderTests
 {
     /// <summary>
+    /// The minimum number of observable-for-property services expected after core registration.
+    /// </summary>
+    private const int MinimumCoreObservableServices = 2;
+
+    /// <summary>
     /// Verifies that the builder can be created and has a non-null ConverterService.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -40,7 +45,7 @@ public class ReactiveUIBindingBuilderTests
 
         var services = Locator.Current.GetServices<ICreatesObservableForProperty>().ToList();
 
-        await Assert.That(services.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(services.Count).IsGreaterThanOrEqualTo(MinimumCoreObservableServices);
     }
 
     /// <summary>
@@ -109,7 +114,7 @@ public class ReactiveUIBindingBuilderTests
 
         // Should not throw; services registered once
         var services = Locator.Current.GetServices<ICreatesObservableForProperty>().ToList();
-        await Assert.That(services.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(services.Count).IsGreaterThanOrEqualTo(MinimumCoreObservableServices);
     }
 
     /// <summary>
@@ -141,7 +146,7 @@ public class ReactiveUIBindingBuilderTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(bool),
-            (from, hint) => (true, true));
+            (_, _) => (true, true));
 
         builder.WithConverter(converter);
 
@@ -163,7 +168,7 @@ public class ReactiveUIBindingBuilderTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(string),
-            (from, hint) => (true, from?.ToString()));
+            (from, _) => (true, from?.ToString()));
 
         var result = builder.WithConverter(converter);
 
@@ -180,8 +185,7 @@ public class ReactiveUIBindingBuilderTests
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        var converter = new StubFallbackConverter(
-            (fromType, from, toType, hint) => (true, "converted"));
+        var converter = new StubFallbackConverter((_, _, _, _) => (true, "converted"));
 
         builder.WithFallbackConverter(converter);
 
@@ -199,8 +203,7 @@ public class ReactiveUIBindingBuilderTests
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        var converter = new StubFallbackConverter(
-            (fromType, from, toType, hint) => (true, "converted"));
+        var converter = new StubFallbackConverter((_, _, _, _) => (true, "converted"));
 
         var result = builder.WithFallbackConverter(converter);
 
@@ -286,9 +289,7 @@ public class ReactiveUIBindingBuilderTests
     public async Task WithCoreServices_ExplicitInterface_ReturnsIReactiveUIBindingBuilder()
     {
         RxBindingBuilder.ResetForTesting();
-        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-
-        IReactiveUIBindingBuilder iBuilder = builder;
+        IReactiveUIBindingBuilder iBuilder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         var result = iBuilder.WithCoreServices();
 
         await Assert.That(result).IsNotNull();
@@ -325,7 +326,7 @@ public class ReactiveUIBindingBuilderTests
 
         builder.BuildApp();
 
-        var action = () => RxBindingBuilder.EnsureInitialized();
+        var action = RxBindingBuilder.EnsureInitialized;
         await Assert.That(action).ThrowsNothing();
     }
 
@@ -342,16 +343,16 @@ public class ReactiveUIBindingBuilderTests
         var typed = new StubBindingTypeConverter(
             typeof(double),
             typeof(string),
-            (from, hint) => (true, from?.ToString()));
-        var fallback = new StubFallbackConverter(
-            (fromType, from, toType, hint) => (true, "fallback"));
+            (from, _) => (true, from?.ToString()));
+        var fallback = new StubFallbackConverter((_, _, _, _) => (true, "fallback"));
         var setMethod = new StubSetMethodBindingConverter();
 
         builder.WithConverter(typed);
         builder.WithFallbackConverter(fallback);
         builder.WithSetMethodConverter(setMethod);
 
-        await Assert.That(builder.ConverterService.TypedConverters.TryGetConverter(typeof(double), typeof(string))).IsNotNull();
+        await Assert.That(builder.ConverterService.TypedConverters.TryGetConverter(typeof(double), typeof(string)))
+            .IsNotNull();
         await Assert.That(builder.ConverterService.FallbackConverters.GetAllConverters().ToList()).Contains(fallback);
         await Assert.That(builder.ConverterService.SetMethodConverters.GetAllConverters().ToList()).Contains(setMethod);
     }
@@ -444,20 +445,40 @@ public class ReactiveUIBindingBuilderTests
     private sealed class StubCommandBinder : ICreatesCommandBinding
     {
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public int GetAffinityForObject<T>(bool hasEventTarget) => 0;
 
         /// <inheritdoc/>
         [RequiresUnreferencedCode("Test stub")]
-        public IDisposable? BindCommandToObject<T>(System.Windows.Input.ICommand? command, T? target, IObservable<object?> commandParameter)
+        public IDisposable? BindCommandToObject<T>(
+            System.Windows.Input.ICommand? command,
+            T? target,
+            IObservable<object?> commandParameter)
             where T : class => null;
 
         /// <inheritdoc/>
         [RequiresUnreferencedCode("Test stub")]
-        public IDisposable? BindCommandToObject<T, TEventArgs>(System.Windows.Input.ICommand? command, T? target, IObservable<object?> commandParameter, string eventName)
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        public IDisposable? BindCommandToObject<T, TEventArgs>(
+            System.Windows.Input.ICommand? command,
+            T? target,
+            IObservable<object?> commandParameter,
+            string eventName)
             where T : class => null;
 
         /// <inheritdoc/>
-        public IDisposable? BindCommandToObject<T, TEventArgs>(System.Windows.Input.ICommand? command, T? target, IObservable<object?> commandParameter, Action<EventHandler<TEventArgs>> addHandler, Action<EventHandler<TEventArgs>> removeHandler)
+        public IDisposable? BindCommandToObject<T, TEventArgs>(
+            System.Windows.Input.ICommand? command,
+            T? target,
+            IObservable<object?> commandParameter,
+            Action<EventHandler<TEventArgs>> addHandler,
+            Action<EventHandler<TEventArgs>> removeHandler)
             where T : class
             where TEventArgs : EventArgs => null;
     }
@@ -465,9 +486,8 @@ public class ReactiveUIBindingBuilderTests
     /// <summary>
     /// Simple view model for ConfigureViewLocator testing.
     /// </summary>
-    private sealed class ConfigTestViewModel
-    {
-    }
+    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Test class")]
+    private sealed class ConfigTestViewModel;
 
     /// <summary>
     /// Simple view for ConfigureViewLocator testing.

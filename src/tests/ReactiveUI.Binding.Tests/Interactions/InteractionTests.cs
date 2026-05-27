@@ -10,6 +10,21 @@ namespace ReactiveUI.Binding.Tests.Interactions;
 public class InteractionTests
 {
     /// <summary>
+    /// The expected output of the synchronous handler (the length of "hello").
+    /// </summary>
+    private const int HelloLength = 5;
+
+    /// <summary>
+    /// A sample output value set by handlers under test.
+    /// </summary>
+    private const int SampleOutput = 42;
+
+    /// <summary>
+    /// An alternative output value used by the Action-overload test.
+    /// </summary>
+    private const int ActionOutput = 99;
+
+    /// <summary>
     /// Verifies that Handle returns the output set by a synchronous handler.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
@@ -20,7 +35,7 @@ public class InteractionTests
         using var registration = interaction.RegisterHandler(ctx => ctx.SetOutput(ctx.Input.Length));
 
         var result = await interaction.Handle("hello");
-        await Assert.That(result).IsEqualTo(5);
+        await Assert.That(result).IsEqualTo(HelloLength);
     }
 
     /// <summary>
@@ -49,14 +64,14 @@ public class InteractionTests
     public async Task Handle_ObservableHandler_ReturnsOutput()
     {
         var interaction = new Interaction<string, int>();
-        using var registration = interaction.RegisterHandler<int>(ctx =>
+        using var registration = interaction.RegisterHandler(ctx =>
         {
-            ctx.SetOutput(42);
-            return new ReactiveUI.Binding.Observables.ReturnObservable<int>(0);
+            ctx.SetOutput(SampleOutput);
+            return new Binding.Observables.ReturnObservable<int>(0);
         });
 
         var result = await interaction.Handle("test");
-        await Assert.That(result).IsEqualTo(42);
+        await Assert.That(result).IsEqualTo(SampleOutput);
     }
 
     /// <summary>
@@ -82,7 +97,7 @@ public class InteractionTests
     public async Task Handle_NoHandlers_ThrowsUnhandledInteractionException()
     {
         var interaction = new Interaction<string, int>();
-        await Assert.That(async () => await interaction.Handle("test"))
+        await Assert.That(() => interaction.Handle("test"))
             .ThrowsExactly<UnhandledInteractionException<string, int>>();
     }
 
@@ -94,10 +109,10 @@ public class InteractionTests
     public async Task Dispose_UnregistersHandler()
     {
         var interaction = new Interaction<string, int>();
-        var registration = interaction.RegisterHandler(ctx => ctx.SetOutput(42));
+        var registration = interaction.RegisterHandler(ctx => ctx.SetOutput(SampleOutput));
         registration.Dispose();
 
-        await Assert.That(async () => await interaction.Handle("test"))
+        await Assert.That(() => interaction.Handle("test"))
             .ThrowsExactly<UnhandledInteractionException<string, int>>();
     }
 
@@ -151,7 +166,8 @@ public class InteractionTests
     public async Task RegisterHandler_ObservableHandler_NullHandler_Throws()
     {
         var interaction = new Interaction<string, bool>();
-        await Assert.That(() => interaction.RegisterHandler<int>((Func<IInteractionContext<string, bool>, IObservable<int>>)null!))
+        await Assert.That(() =>
+                interaction.RegisterHandler((Func<IInteractionContext<string, bool>, IObservable<int>>)null!))
             .ThrowsExactly<ArgumentNullException>();
     }
 
@@ -164,15 +180,15 @@ public class InteractionTests
     public async Task Handle_ObservableHandler_OnError_PropagatesException()
     {
         var interaction = new Interaction<string, bool>();
-        using var registration = interaction.RegisterHandler<int>(ctx =>
+        using var registration = interaction.RegisterHandler(ctx =>
         {
             ctx.SetOutput(true);
             return new ErrorObservable<int>(new InvalidOperationException("test error"));
         });
 
-        await Assert.That(async () => await interaction.Handle("test"))
+        await Assert.That(() => interaction.Handle("test"))
             .ThrowsExactly<InvalidOperationException>()
-            .WithMessage("test error");
+            .WithMessage("test error", StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -183,10 +199,10 @@ public class InteractionTests
     public async Task RegisterHandler_Action_SetsOutput()
     {
         var interaction = new Interaction<string, int>();
-        using var registration = interaction.RegisterHandler(ctx => ctx.SetOutput(99));
+        using var registration = interaction.RegisterHandler(ctx => ctx.SetOutput(ActionOutput));
 
         var result = await interaction.Handle("test");
-        await Assert.That(result).IsEqualTo(99);
+        await Assert.That(result).IsEqualTo(ActionOutput);
     }
 
     /// <summary>
@@ -199,7 +215,7 @@ public class InteractionTests
         public IDisposable Subscribe(IObserver<T> observer)
         {
             observer.OnError(error);
-            return ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+            return Binding.Observables.EmptyDisposable.Instance;
         }
     }
 }

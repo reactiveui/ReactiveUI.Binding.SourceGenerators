@@ -5,56 +5,59 @@
 using System.ComponentModel;
 using System.Windows.Input;
 
-namespace SharedScenarios.BindCommand.ExpressionParam
+namespace SharedScenarios.BindCommand.ExpressionParam;
+
+/// <summary>
+/// ViewModel exposing an ICommand property and a string parameter property.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel exposing an ICommand property and a string parameter property.
+    /// The backing field for <see cref="Save"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private ICommand? _save;
+
+    /// <summary>
+    /// The backing field for <see cref="CurrentItem"/>.
+    /// </summary>
+    private string? _currentItem;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the save command.
+    /// </summary>
+    public ICommand? Save
     {
-        /// <summary>
-        /// The backing field for <see cref="Save"/>.
-        /// </summary>
-        private ICommand? _save;
-
-        /// <summary>
-        /// The backing field for <see cref="CurrentItem"/>.
-        /// </summary>
-        private string? _currentItem;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the save command.
-        /// </summary>
-        public ICommand? Save
+        get => _save;
+        set
         {
-            get => _save;
-            set
+            if (_save == value)
             {
-                if (_save != value)
-                {
-                    _save = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Save)));
-                }
+                return;
             }
+
+            _save = value;
+            PropertyChanged?.Invoke(this, new(nameof(Save)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the current item used as command parameter.
-        /// </summary>
-        public string? CurrentItem
+    /// <summary>
+    /// Gets or sets the current item used as command parameter.
+    /// </summary>
+    public string? CurrentItem
+    {
+        get => _currentItem;
+        set
         {
-            get => _currentItem;
-            set
+            if (_currentItem == value)
             {
-                if (_currentItem != value)
-                {
-                    _currentItem = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentItem)));
-                }
+                return;
             }
+
+            _currentItem = value;
+            PropertyChanged?.Invoke(this, new(nameof(CurrentItem)));
         }
     }
 }

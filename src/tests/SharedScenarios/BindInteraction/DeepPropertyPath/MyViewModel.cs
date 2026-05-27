@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.BindInteraction.DeepPropertyPath
+namespace SharedScenarios.BindInteraction.DeepPropertyPath;
+
+/// <summary>
+/// ViewModel with a nested child that holds the interaction.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel with a nested child that holds the interaction.
+    /// The backing field for <see cref="Child"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private ChildViewModel? _child;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the child view model.
+    /// </summary>
+    public ChildViewModel? Child
     {
-        /// <summary>
-        /// The backing field for <see cref="Child"/>.
-        /// </summary>
-        private ChildViewModel? _child;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the child view model.
-        /// </summary>
-        public ChildViewModel? Child
+        get => _child;
+        set
         {
-            get => _child;
-            set
+            if (_child == value)
             {
-                if (_child != value)
-                {
-                    _child = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Child)));
-                }
+                return;
             }
+
+            _child = value;
+            PropertyChanged?.Invoke(this, new(nameof(Child)));
         }
     }
 }

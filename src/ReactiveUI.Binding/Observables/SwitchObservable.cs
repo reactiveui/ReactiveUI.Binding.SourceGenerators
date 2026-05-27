@@ -97,10 +97,12 @@ public sealed class SwitchObservable<T> : IObservable<T>
         /// <inheritdoc/>
         public void OnError(Exception error)
         {
-            if (Volatile.Read(ref _disposed) == 0)
+            if (Volatile.Read(ref _disposed) != 0)
             {
-                _observer.OnError(error);
+                return;
             }
+
+            _observer.OnError(error);
         }
 
         /// <inheritdoc/>
@@ -112,10 +114,12 @@ public sealed class SwitchObservable<T> : IObservable<T>
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (TrySetDisposed())
+            if (!TrySetDisposed())
             {
-                DisposeSubscriptions();
+                return;
             }
+
+            DisposeSubscriptions();
         }
 
         /// <summary>
@@ -141,7 +145,8 @@ public sealed class SwitchObservable<T> : IObservable<T>
         /// <returns><see langword="true"/> if the slot was empty and the value was stored; otherwise <see langword="false"/>.</returns>
         [ExcludeFromCodeCoverage]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool TrySetInnerSubscription(IDisposable subscription) => Interlocked.CompareExchange(ref _innerSubscription, subscription, null) == null;
+        internal bool TrySetInnerSubscription(IDisposable subscription) =>
+            Interlocked.CompareExchange(ref _innerSubscription, subscription, null) == null;
 
         /// <summary>
         /// Disposes a newly created subscription if a concurrent OnNext or Dispose has already
@@ -153,10 +158,12 @@ public sealed class SwitchObservable<T> : IObservable<T>
         [ExcludeFromCodeCoverage]
         private void DisposeIfRace(IDisposable sub)
         {
-            if (!TrySetInnerSubscription(sub))
+            if (TrySetInnerSubscription(sub))
             {
-                sub.Dispose();
+                return;
             }
+
+            sub.Dispose();
         }
 
         /// <summary>
@@ -190,19 +197,23 @@ public sealed class SwitchObservable<T> : IObservable<T>
             /// <inheritdoc/>
             public void OnNext(T value)
             {
-                if (Volatile.Read(ref _parent._disposed) == 0)
+                if (Volatile.Read(ref _parent._disposed) != 0)
                 {
-                    _parent._observer.OnNext(value);
+                    return;
                 }
+
+                _parent._observer.OnNext(value);
             }
 
             /// <inheritdoc/>
             public void OnError(Exception error)
             {
-                if (Volatile.Read(ref _parent._disposed) == 0)
+                if (Volatile.Read(ref _parent._disposed) != 0)
                 {
-                    _parent._observer.OnError(error);
+                    return;
                 }
+
+                _parent._observer.OnError(error);
             }
 
             /// <inheritdoc/>

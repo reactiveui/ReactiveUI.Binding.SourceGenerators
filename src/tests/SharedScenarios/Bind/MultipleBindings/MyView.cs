@@ -3,62 +3,64 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.Bind.MultipleBindings
+namespace SharedScenarios.Bind.MultipleBindings;
+
+/// <summary>
+/// Target View with multiple properties.
+/// </summary>
+public class MyView : IViewFor, INotifyPropertyChanged
 {
     /// <summary>
-    /// Target View with multiple properties.
+    /// The backing field for <see cref="NameText"/>.
     /// </summary>
-    public class MyView : IViewFor, INotifyPropertyChanged
+    private string _nameText = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="AgeText"/>.
+    /// </summary>
+    private int _ageText;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <inheritdoc/>
+    public object? ViewModel { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name text.
+    /// </summary>
+    public string NameText
     {
-        /// <summary>
-        /// The backing field for <see cref="NameText"/>.
-        /// </summary>
-        private string _nameText = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="AgeText"/>.
-        /// </summary>
-        private int _ageText;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <inheritdoc/>
-        public object? ViewModel { get; set; }
-
-        /// <summary>
-        /// Gets or sets the name text.
-        /// </summary>
-        public string NameText
+        get => _nameText;
+        set
         {
-            get => _nameText;
-            set
+            if (_nameText == value)
             {
-                if (_nameText != value)
-                {
-                    _nameText = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameText)));
-                }
+                return;
             }
+
+            _nameText = value;
+            PropertyChanged?.Invoke(this, new(nameof(NameText)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the age text.
-        /// </summary>
-        public int AgeText
+    /// <summary>
+    /// Gets or sets the age text.
+    /// </summary>
+    public int AgeText
+    {
+        get => _ageText;
+        set
         {
-            get => _ageText;
-            set
+            if (_ageText == value)
             {
-                if (_ageText != value)
-                {
-                    _ageText = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AgeText)));
-                }
+                return;
             }
+
+            _ageText = value;
+            PropertyChanged?.Invoke(this, new(nameof(AgeText)));
         }
     }
 }

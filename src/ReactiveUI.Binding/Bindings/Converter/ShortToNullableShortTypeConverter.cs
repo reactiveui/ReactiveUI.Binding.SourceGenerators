@@ -9,6 +9,11 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public sealed class ShortToNullableShortTypeConverter : IBindingTypeConverter<short, short?>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
     public Type FromType => typeof(short);
 
@@ -16,7 +21,7 @@ public sealed class ShortToNullableShortTypeConverter : IBindingTypeConverter<sh
     public Type ToType => typeof(short?);
 
     /// <inheritdoc/>
-    public int GetAffinityForObjects() => 2;
+    public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public bool TryConvert(short from, object? conversionHint, out short? result)

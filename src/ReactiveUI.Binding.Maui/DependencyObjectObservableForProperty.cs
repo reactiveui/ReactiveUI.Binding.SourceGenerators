@@ -21,7 +21,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
 {
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Uses reflection to find DependencyProperty.")]
-    public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false)
+    public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
     {
         if (!typeof(DependencyObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
         {
@@ -33,7 +33,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
             return 0;
         }
 
-        return 6;
+        return BindingAffinity.WinUiDependencyObject;
     }
 
     /// <inheritdoc/>
@@ -42,8 +42,8 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         object sender,
         Expression expression,
         string propertyName,
-        bool beforeChanged = false,
-        bool suppressWarnings = false)
+        bool beforeChanged,
+        bool suppressWarnings)
     {
         ArgumentExceptionHelper.ThrowIfNull(sender);
 
@@ -105,7 +105,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         while (current is not null)
         {
             var ret = current.GetDeclaredProperty(propertyName);
-            if (ret is not null && ret.GetMethod is not null && ret.GetMethod.IsStatic)
+            if (ret is not null && ret.GetMethod?.IsStatic == true)
             {
                 return ret;
             }

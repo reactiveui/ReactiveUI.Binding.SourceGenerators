@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenAny.SinglePropertyINPC
+namespace SharedScenarios.WhenAny.SinglePropertyINPC;
+
+/// <summary>
+/// Exercises WhenAny on a single INPC property with a selector.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenAny on a single INPC property with a selector.
+    /// Creates a WhenAny observable for the Name property, extracting the value from IObservedChange.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenAny observable for the Name property, extracting the value from IObservedChange.
-        /// </summary>
-        /// <param name="vm">The view model to observe.</param>
-        /// <returns>An observable of name values.</returns>
-        public static IObservable<string> Execute(MyViewModel vm)
-            => vm.WhenAny(x => x.Name, c => c.Value);
-    }
+    /// <param name="vm">The view model to observe.</param>
+    /// <returns>An observable of name values.</returns>
+    public static IObservable<string> Execute(MyViewModel vm)
+        => vm.WhenAny(x => x.Name, c => c.Value);
 }

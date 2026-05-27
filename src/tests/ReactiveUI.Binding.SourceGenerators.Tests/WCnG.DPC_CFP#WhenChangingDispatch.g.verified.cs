@@ -23,14 +23,14 @@ namespace ReactiveUI.Binding
                 return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanging(objectToMonitor, property1);
             }
 
-            if (callerLineNumber == 91 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
+            if (callerLineNumber == 95 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __WhenChanging_7FFFF85E7720BF9D(objectToMonitor);
+                return __WhenChanging_7FFFF85E7720B498(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenChanging dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<string> __WhenChanging_7FFFF85E7720BF9D(global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel obj)
+        private static global::System.IObservable<string> __WhenChanging_7FFFF85E7720B498(global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel obj)
         {
             var __obs0 = (global::System.IObservable<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel>(
                 (global::System.ComponentModel.INotifyPropertyChanging)obj,

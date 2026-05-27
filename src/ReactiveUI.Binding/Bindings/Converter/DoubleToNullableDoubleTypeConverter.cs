@@ -9,6 +9,11 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public sealed class DoubleToNullableDoubleTypeConverter : IBindingTypeConverter<double, double?>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
     public Type FromType => typeof(double);
 
@@ -16,7 +21,7 @@ public sealed class DoubleToNullableDoubleTypeConverter : IBindingTypeConverter<
     public Type ToType => typeof(double?);
 
     /// <inheritdoc/>
-    public int GetAffinityForObjects() => 2;
+    public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public bool TryConvert(double from, object? conversionHint, out double? result)

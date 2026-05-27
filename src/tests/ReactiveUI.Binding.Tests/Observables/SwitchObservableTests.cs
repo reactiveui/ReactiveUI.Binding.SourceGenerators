@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reactive.Subjects;
-
 using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
@@ -13,6 +12,26 @@ namespace ReactiveUI.Binding.Tests.Observables;
 /// </summary>
 public class SwitchObservableTests
 {
+    /// <summary>
+    /// A generic value emitted by an inner observable in tests.
+    /// </summary>
+    private const int SampleValue = 42;
+
+    /// <summary>
+    /// A value emitted from a disposed inner observable that must be ignored.
+    /// </summary>
+    private const int IgnoredValue = 99;
+
+    /// <summary>
+    /// The value emitted by the second inner observable.
+    /// </summary>
+    private const int SecondInnerValue = 2;
+
+    /// <summary>
+    /// The expected number of emitted values when two inner emissions are received.
+    /// </summary>
+    private const int ExpectedTwoEmissions = 2;
+
     /// <summary>
     /// Verifies that Subscribe throws ArgumentNullException when observer is null.
     /// </summary>
@@ -86,13 +105,13 @@ public class SwitchObservableTests
             () => { }));
 
         outerSubject.OnNext(innerSubject);
-        innerSubject.OnNext(42);
+        innerSubject.OnNext(SampleValue);
 
         var expectedError = new InvalidOperationException("inner error");
         innerSubject.OnError(expectedError);
 
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo(42);
+        await Assert.That(results[0]).IsEqualTo(SampleValue);
         await Assert.That(receivedError).IsNotNull();
         await Assert.That(receivedError).IsEqualTo(expectedError);
     }
@@ -124,14 +143,14 @@ public class SwitchObservableTests
         outerSubject.OnNext(inner2);
 
         // Emit from old inner - should be ignored because it was disposed
-        inner1.OnNext(99);
+        inner1.OnNext(IgnoredValue);
 
         // Emit from new inner - should be received
-        inner2.OnNext(2);
+        inner2.OnNext(SecondInnerValue);
 
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(results[0]).IsEqualTo(1);
-        await Assert.That(results[1]).IsEqualTo(2);
+        await Assert.That(results[1]).IsEqualTo(SecondInnerValue);
     }
 
     /// <summary>
@@ -159,7 +178,7 @@ public class SwitchObservableTests
         subscription.Dispose();
 
         // Emit after disposal - should not be received
-        innerSubject.OnNext(2);
+        innerSubject.OnNext(SecondInnerValue);
         outerSubject.OnNext(new Subject<int>());
 
         await Assert.That(results).Count().IsEqualTo(1);
@@ -233,10 +252,10 @@ public class SwitchObservableTests
         outerSubject.OnCompleted();
 
         // Inner should still emit after outer completes
-        innerSubject.OnNext(42);
+        innerSubject.OnNext(SampleValue);
 
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo(42);
+        await Assert.That(results[0]).IsEqualTo(SampleValue);
     }
 
     /// <summary>
@@ -367,7 +386,7 @@ public class SwitchObservableTests
 
         // Now call OnNext on the outer observer even after dispose
         // ManualObservable retains the observer reference regardless of disposal
-        manualOuter.Observer?.OnNext(Observable.Return(42));
+        manualOuter.Observer?.OnNext(Observable.Return(SampleValue));
 
         // The OnNext should have been ignored due to _disposed != 0
         await Assert.That(results).IsEmpty();

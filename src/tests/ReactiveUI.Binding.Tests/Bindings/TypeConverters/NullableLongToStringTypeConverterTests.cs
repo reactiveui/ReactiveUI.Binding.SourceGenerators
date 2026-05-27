@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class NullableLongToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class NullableLongToStringTypeConverterTests
     {
         var converter = new NullableLongToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,7 +34,7 @@ public class NullableLongToStringTypeConverterTests
     public async Task TryConvert_LongNullableToString_Succeeds()
     {
         var converter = new NullableLongToStringTypeConverter();
-        long? value = 123456789012;
+        long? value = 123_456_789_012;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -77,8 +82,7 @@ public class NullableLongToStringTypeConverterTests
     public async Task TryConvert_NullValue_ReturnsTrue()
     {
         var converter = new NullableLongToStringTypeConverter();
-
-        var result = converter.TryConvert(null, null, out var output);
+        var result = converter.TryConvert(null, null, out _);
 
         await Assert.That(result).IsTrue();
     }

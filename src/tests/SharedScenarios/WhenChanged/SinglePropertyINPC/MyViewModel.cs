@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanged.SinglePropertyINPC
+namespace SharedScenarios.WhenChanged.SinglePropertyINPC;
+
+/// <summary>
+/// ViewModel implementing INotifyPropertyChanged with a single string property.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel implementing INotifyPropertyChanged with a single string property.
+    /// The backing field for <see cref="Name"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private string _name = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the name.
+    /// </summary>
+    public string Name
     {
-        /// <summary>
-        /// The backing field for <see cref="Name"/>.
-        /// </summary>
-        private string _name = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        public string Name
+        get => _name;
+        set
         {
-            get => _name;
-            set
+            if (_name == value)
             {
-                if (_name != value)
-                {
-                    _name = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-                }
+                return;
             }
+
+            _name = value;
+            PropertyChanged?.Invoke(this, new(nameof(Name)));
         }
     }
 }

@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class LongToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class LongToStringTypeConverterTests
     {
         var converter = new LongToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,7 +34,7 @@ public class LongToStringTypeConverterTests
     public async Task TryConvert_LongToString_Succeeds()
     {
         var converter = new LongToStringTypeConverter();
-        var value = 123456789012;
+        const long value = 123_456_789_012;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -45,7 +50,7 @@ public class LongToStringTypeConverterTests
     public async Task TryConvert_MaxValue_Succeeds()
     {
         var converter = new LongToStringTypeConverter();
-        var value = long.MaxValue;
+        const long value = long.MaxValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -61,7 +66,7 @@ public class LongToStringTypeConverterTests
     public async Task TryConvert_MinValue_Succeeds()
     {
         var converter = new LongToStringTypeConverter();
-        var value = long.MinValue;
+        const long value = long.MinValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -77,7 +82,7 @@ public class LongToStringTypeConverterTests
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new LongToStringTypeConverter();
-        long value = 42;
+        const long value = 42;
 
         var result = converter.TryConvert(value, 10, out var output);
 
@@ -93,7 +98,7 @@ public class LongToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
     {
         var converter = new LongToStringTypeConverter();
-        long value = 255;
+        const long value = 255;
 
         var result = converter.TryConvert(value, "X", out var output);
 

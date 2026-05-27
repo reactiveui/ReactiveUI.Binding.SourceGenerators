@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.BindTwoWay.SinglePropertyWithConverters
+namespace SharedScenarios.BindTwoWay.SinglePropertyWithConverters;
+
+/// <summary>
+/// Source ViewModel with an integer property.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// Source ViewModel with an integer property.
+    /// The backing field for <see cref="Count"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private int _count;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the count.
+    /// </summary>
+    public int Count
     {
-        /// <summary>
-        /// The backing field for <see cref="Count"/>.
-        /// </summary>
-        private int _count;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the count.
-        /// </summary>
-        public int Count
+        get => _count;
+        set
         {
-            get => _count;
-            set
+            if (_count == value)
             {
-                if (_count != value)
-                {
-                    _count = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
-                }
+                return;
             }
+
+            _count = value;
+            PropertyChanged?.Invoke(this, new(nameof(Count)));
         }
     }
 }

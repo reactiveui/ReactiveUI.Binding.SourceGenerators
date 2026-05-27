@@ -4,7 +4,6 @@
 
 using System.Reactive.Concurrency;
 using System.Reactive.Subjects;
-
 using ReactiveUI.Binding.Reactive;
 
 namespace ReactiveUI.Binding.Tests.Reactive;
@@ -14,6 +13,31 @@ namespace ReactiveUI.Binding.Tests.Reactive;
 /// </summary>
 public class ObserveOnObservableTests
 {
+    /// <summary>
+    ///     The second value pushed through the source observable.
+    /// </summary>
+    private const int SecondValue = 2;
+
+    /// <summary>
+    ///     The third value pushed through the source observable.
+    /// </summary>
+    private const int ThirdValue = 3;
+
+    /// <summary>
+    ///     The index of the third received value.
+    /// </summary>
+    private const int ThirdIndex = 2;
+
+    /// <summary>
+    ///     The expected number of forwarded notifications when three values are pushed.
+    /// </summary>
+    private const int ExpectedThreeCount = 3;
+
+    /// <summary>
+    ///     The delay, in milliseconds, allowed for the scheduler to process notifications.
+    /// </summary>
+    private const int SchedulerProcessingDelayMs = 50;
+
     /// <summary>
     ///     Verifies that notifications are forwarded to the observer.
     /// </summary>
@@ -28,21 +52,21 @@ public class ObserveOnObservableTests
         var completed = new TaskCompletionSource<bool>();
 
         observable.Subscribe(
-            value => received.Add(value),
+            received.Add,
             () => completed.SetResult(true));
 
         subject.OnNext(1);
-        subject.OnNext(2);
-        subject.OnNext(3);
+        subject.OnNext(SecondValue);
+        subject.OnNext(ThirdValue);
         subject.OnCompleted();
 
         await completed.Task;
         scheduler.Dispose();
 
-        await Assert.That(received.Count).IsEqualTo(3);
+        await Assert.That(received.Count).IsEqualTo(ExpectedThreeCount);
         await Assert.That(received[0]).IsEqualTo(1);
-        await Assert.That(received[1]).IsEqualTo(2);
-        await Assert.That(received[2]).IsEqualTo(3);
+        await Assert.That(received[1]).IsEqualTo(SecondValue);
+        await Assert.That(received[ThirdIndex]).IsEqualTo(ThirdValue);
     }
 
     /// <summary>
@@ -59,7 +83,7 @@ public class ObserveOnObservableTests
 
         observable.Subscribe(
             _ => { },
-            ex => errorReceived.SetResult(ex));
+            errorReceived.SetResult);
 
         var expected = new InvalidOperationException("test error");
         subject.OnError(expected);
@@ -82,19 +106,19 @@ public class ObserveOnObservableTests
         var observable = new ObserveOnObservable<int>(subject, scheduler);
         var received = new List<int>();
 
-        var subscription = observable.Subscribe(value => received.Add(value));
+        var subscription = observable.Subscribe(received.Add);
 
         subject.OnNext(1);
 
         // Allow time for scheduler to process
-        await Task.Delay(50);
+        await Task.Delay(SchedulerProcessingDelayMs);
 
         subscription.Dispose();
 
-        subject.OnNext(2); // Should not be received
+        subject.OnNext(SecondValue); // Should not be received
 
         // Allow time for any potential delivery
-        await Task.Delay(50);
+        await Task.Delay(SchedulerProcessingDelayMs);
         scheduler.Dispose();
 
         await Assert.That(received.Count).IsEqualTo(1);
@@ -121,7 +145,7 @@ public class ObserveOnObservableTests
     public void Constructor_NullSource_ThrowsArgumentNullException()
     {
         var scheduler = new EventLoopScheduler();
-        Assert.Throws<ArgumentNullException>(() => new ObserveOnObservable<int>(null!, scheduler));
+        Assert.Throws<ArgumentNullException>(() => _ = new ObserveOnObservable<int>(null!, scheduler));
         scheduler.Dispose();
     }
 
@@ -132,6 +156,6 @@ public class ObserveOnObservableTests
     public void Constructor_NullScheduler_ThrowsArgumentNullException()
     {
         var subject = new Subject<int>();
-        Assert.Throws<ArgumentNullException>(() => new ObserveOnObservable<int>(subject, null!));
+        Assert.Throws<ArgumentNullException>(() => _ = new ObserveOnObservable<int>(subject, null!));
     }
 }

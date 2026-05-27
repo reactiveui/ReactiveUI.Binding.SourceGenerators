@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenChanged.FourLevelDeepChain
+namespace SharedScenarios.WhenChanged.FourLevelDeepChain;
+
+/// <summary>
+/// Exercises WhenChanged with a 4-level deep property chain.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenChanged with a 4-level deep property chain.
+    /// Creates a WhenChanged observable for Model.Model.Model.Value.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenChanged observable for Model.Model.Model.Value.
-        /// </summary>
-        /// <param name="chain">The top-level object in the chain.</param>
-        /// <returns>An observable of value strings from the leaf.</returns>
-        public static IObservable<string> Execute(Level1 chain)
-            => chain.WhenChanged(x => x.Model.Model.Model.Value);
-    }
+    /// <param name="chain">The top-level object in the chain.</param>
+    /// <returns>An observable of value strings from the leaf.</returns>
+    public static IObservable<string> Execute(Level1 chain)
+        => chain.WhenChanged(x => x.Model.Model.Model.Value);
 }

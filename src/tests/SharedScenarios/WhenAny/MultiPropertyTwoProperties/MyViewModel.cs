@@ -4,56 +4,59 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenAny.MultiPropertyTwoProperties
+namespace SharedScenarios.WhenAny.MultiPropertyTwoProperties;
+
+/// <summary>
+/// ViewModel with first and last name properties.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel with first and last name properties.
+    /// The backing field for <see cref="FirstName"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private string _firstName = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="LastName"/>.
+    /// </summary>
+    private string _lastName = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the first name.
+    /// </summary>
+    public string FirstName
     {
-        /// <summary>
-        /// The backing field for <see cref="FirstName"/>.
-        /// </summary>
-        private string _firstName = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="LastName"/>.
-        /// </summary>
-        private string _lastName = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the first name.
-        /// </summary>
-        public string FirstName
+        get => _firstName;
+        set
         {
-            get => _firstName;
-            set
+            if (_firstName == value)
             {
-                if (_firstName != value)
-                {
-                    _firstName = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FirstName)));
-                }
+                return;
             }
+
+            _firstName = value;
+            PropertyChanged?.Invoke(this, new(nameof(FirstName)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the last name.
-        /// </summary>
-        public string LastName
+    /// <summary>
+    /// Gets or sets the last name.
+    /// </summary>
+    public string LastName
+    {
+        get => _lastName;
+        set
         {
-            get => _lastName;
-            set
+            if (_lastName == value)
             {
-                if (_lastName != value)
-                {
-                    _lastName = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastName)));
-                }
+                return;
             }
+
+            _lastName = value;
+            PropertyChanged?.Invoke(this, new(nameof(LastName)));
         }
     }
 }

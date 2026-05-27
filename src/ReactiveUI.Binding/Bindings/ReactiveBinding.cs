@@ -59,10 +59,12 @@ public sealed class ReactiveBinding<TView, TValue> : IReactiveBinding<TView, TVa
     /// <inheritdoc/>
     public void Dispose()
     {
-        if (TrySetDisposed())
+        if (!TrySetDisposed())
         {
-            _subscription.Dispose();
+            return;
         }
+
+        _subscription.Dispose();
     }
 
     /// <summary>

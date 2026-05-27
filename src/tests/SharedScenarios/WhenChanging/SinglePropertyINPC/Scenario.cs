@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenChanging.SinglePropertyINPC
+namespace SharedScenarios.WhenChanging.SinglePropertyINPC;
+
+/// <summary>
+/// Exercises WhenChanging on a single INPC property.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenChanging on a single INPC property.
+    /// Creates a WhenChanging observable for the Name property.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenChanging observable for the Name property.
-        /// </summary>
-        /// <param name="vm">The view model to observe.</param>
-        /// <returns>An observable of name values (before change).</returns>
-        public static IObservable<string> Execute(MyViewModel vm)
-            => vm.WhenChanging(x => x.Name);
-    }
+    /// <param name="vm">The view model to observe.</param>
+    /// <returns>An observable of name values (before change).</returns>
+    public static IObservable<string> Execute(MyViewModel vm)
+        => vm.WhenChanging(x => x.Name);
 }

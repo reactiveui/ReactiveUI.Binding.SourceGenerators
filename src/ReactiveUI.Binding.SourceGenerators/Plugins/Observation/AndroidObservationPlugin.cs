@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -34,8 +33,14 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// </remarks>
 internal sealed class AndroidObservationPlugin : IObservationPlugin
 {
+    /// <summary>
+    /// The affinity score for the Android View observation plugin
+    /// (matches ReactiveUI's AndroidObservableForWidgets).
+    /// </summary>
+    private static readonly int AndroidAffinity = BindingAffinity.Explicit;
+
     /// <inheritdoc/>
-    public int Affinity => 5;
+    public int Affinity => AndroidAffinity;
 
     /// <inheritdoc/>
     public string ObservationKind => "Android";
@@ -63,12 +68,12 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         PropertyPathSegment segment,
         string castTypeName,
         bool isBeforeChange,
-        bool includeStartWith)
-    {
+        bool includeStartWith) =>
+
         // Android View does not implement INPC. Emit ReturnObservable as POCO fallback.
         // Returns the current property value once, no ongoing observation.
-        sb.Append($"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName})");
-    }
+        sb.Append(
+            $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName})");
 
     /// <inheritdoc/>
     public void EmitShallowObservationVariable(
@@ -77,10 +82,9 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         PropertyPathSegment segment,
         string castTypeName,
         bool isBeforeChange,
-        string varName)
-    {
-        sb.Append($"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
-    }
+        string varName) =>
+        sb.Append(
+            $"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
 
     /// <inheritdoc/>
     public void EmitDeepChainRootSegment(
@@ -89,10 +93,10 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         PropertyPathSegment segment,
         string castTypeName,
         bool isBeforeChange,
-        string obsVarName)
-    {
-        sb.AppendLine($"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
-    }
+        string obsVarName) =>
+        sb.AppendLine(
+            $"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>" +
+            $")new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
 
     /// <inheritdoc/>
     public void EmitDeepChainInnerSegment(
@@ -108,11 +112,11 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
 
         sb.AppendLine()
             .AppendLine($"""
-                            var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                    {lambdaParam} => (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(
-                                        {lambdaParam} != null ? (({declType}){lambdaParam}).{segment.PropertyName} : default({segType}))));
-                    """);
+                                 var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
+                                     global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
+                                         {lambdaParam} => (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(
+                                             {lambdaParam} != null ? (({declType}){lambdaParam}).{segment.PropertyName} : default({segType}))));
+                         """);
     }
 
     /// <inheritdoc/>
@@ -121,8 +125,7 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         string rootVar,
         PropertyPathSegment segment,
         string castTypeName,
-        string varName)
-    {
-        sb.AppendLine($"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
-    }
+        string varName) =>
+        sb.AppendLine(
+            $"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
 }

@@ -30,11 +30,13 @@ public class ObservablePropertyViewModel : INotifyPropertyChanged
         get => _myCommand;
         set
         {
-            if (_myCommand != value)
+            if (_myCommand == value)
             {
-                _myCommand = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MyCommand)));
+                return;
             }
+
+            _myCommand = value;
+            PropertyChanged?.Invoke(this, new(nameof(MyCommand)));
         }
     }
 
@@ -46,11 +48,13 @@ public class ObservablePropertyViewModel : INotifyPropertyChanged
         get => _otherCommand;
         set
         {
-            if (_otherCommand != value)
+            if (_otherCommand == value)
             {
-                _otherCommand = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OtherCommand)));
+                return;
             }
+
+            _otherCommand = value;
+            PropertyChanged?.Invoke(this, new(nameof(OtherCommand)));
         }
     }
 }

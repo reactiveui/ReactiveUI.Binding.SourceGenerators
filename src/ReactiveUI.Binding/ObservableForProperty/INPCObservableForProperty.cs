@@ -3,77 +3,53 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-using System.Reactive.Linq;
 using System.Reflection;
+using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.ObservableForProperty;
 
 /// <summary>
 /// Generates Observables based on observing INotifyPropertyChanged objects.
 /// </summary>
+[SuppressMessage(
+    "Minor Code Smell",
+    "S101:Types should be named in PascalCase",
+    Justification = "INPC is an established acronym for INotifyPropertyChanged and matches the ReactiveUI public API name.")]
 public class INPCObservableForProperty : ICreatesObservableForProperty
 {
+    /// <summary>
+    /// The affinity returned when the target type implements the relevant notification interface.
+    /// </summary>
+    private static readonly int SupportedAffinity = BindingAffinity.Explicit;
+
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Uses reflection over runtime types which is not trim- or AOT-safe.")]
     public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
     {
         var target = beforeChanged ? typeof(INotifyPropertyChanging) : typeof(INotifyPropertyChanged);
-        return target.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) ? 5 : 0;
+        return target.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) ? SupportedAffinity : 0;
     }
 
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Uses reflection over runtime types which is not trim- or AOT-safe.")]
-    public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(object sender, Expression expression, string propertyName, bool beforeChanged = false, bool suppressWarnings = false)
+    public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(
+        object sender,
+        Expression expression,
+        string propertyName,
+        bool beforeChanged,
+        bool suppressWarnings)
     {
         ArgumentExceptionHelper.ThrowIfNull(expression);
 
-        if (beforeChanged && sender is INotifyPropertyChanging before)
+        // Before-change uses INotifyPropertyChanging; after-change (and the before-change fallback for
+        // types that only implement INotifyPropertyChanged) uses PropertyChanged. A single fused sink
+        // wires the event, filters by name, and emits the observed change directly.
+        if ((beforeChanged && sender is INotifyPropertyChanging) || sender is INotifyPropertyChanged)
         {
-            var obs = Observable.FromEvent<PropertyChangingEventHandler, string?>(
-             eventHandler =>
-             {
-                 void Handler(object? eventSender, PropertyChangingEventArgs e) => eventHandler(e.PropertyName);
-                 return Handler;
-             },
-             x => before.PropertyChanging += x,
-             x => before.PropertyChanging -= x);
-
-            if (expression.NodeType == ExpressionType.Index)
-            {
-                return obs.Where(x => string.IsNullOrEmpty(x)
-                                      || x!.Equals(propertyName + "[]", StringComparison.InvariantCulture))
-                          .Select(_ => new ObservedChange<object, object?>(sender, expression, default));
-            }
-
-            return obs.Where(x => string.IsNullOrEmpty(x)
-                                  || x!.Equals(propertyName, StringComparison.InvariantCulture))
-                      .Select(_ => new ObservedChange<object, object?>(sender, expression, default));
+            var expectedName = expression.NodeType == ExpressionType.Index ? propertyName + "[]" : propertyName;
+            return new NotifyPropertyChangedObservable(sender, expression, expectedName, beforeChanged);
         }
-        else if (sender is INotifyPropertyChanged after)
-        {
-            var obs = Observable.FromEvent<PropertyChangedEventHandler, string?>(
-             eventHandler =>
-             {
-                 void Handler(object? eventSender, PropertyChangedEventArgs e) => eventHandler(e.PropertyName);
-                 return Handler;
-             },
-             x => after.PropertyChanged += x,
-             x => after.PropertyChanged -= x);
 
-            if (expression.NodeType == ExpressionType.Index)
-            {
-                return obs.Where(x => string.IsNullOrEmpty(x)
-                                      || x!.Equals(propertyName + "[]", StringComparison.InvariantCulture))
-                          .Select(_ => new ObservedChange<object, object?>(sender, expression, default));
-            }
-
-            return obs.Where(x => string.IsNullOrEmpty(x)
-                                  || x!.Equals(propertyName, StringComparison.InvariantCulture))
-                      .Select(_ => new ObservedChange<object, object?>(sender, expression, default));
-        }
-        else
-        {
-            return Observable.Never<IObservedChange<object, object?>>();
-        }
+        return NeverObservable<IObservedChange<object, object?>>.Instance;
     }
 }

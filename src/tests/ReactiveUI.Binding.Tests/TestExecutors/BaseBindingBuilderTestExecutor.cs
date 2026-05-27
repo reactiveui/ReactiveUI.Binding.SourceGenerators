@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using ReactiveUI.Binding.Builder;
-
 using TUnit.Core.Interfaces;
 
 namespace ReactiveUI.Binding.Tests.TestExecutors;

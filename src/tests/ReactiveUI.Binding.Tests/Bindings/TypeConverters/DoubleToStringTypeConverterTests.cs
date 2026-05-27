@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class DoubleToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class DoubleToStringTypeConverterTests
     {
         var converter = new DoubleToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,12 +34,12 @@ public class DoubleToStringTypeConverterTests
     public async Task TryConvert_DoubleToString_Succeeds()
     {
         var converter = new DoubleToStringTypeConverter();
-        var value = 123.456;
+        const double value = 123.456;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(value.ToString());
+        await Assert.That(output).IsEqualTo(value.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -45,12 +50,12 @@ public class DoubleToStringTypeConverterTests
     public async Task TryConvert_MaxValue_Succeeds()
     {
         var converter = new DoubleToStringTypeConverter();
-        var value = double.MaxValue;
+        const double value = double.MaxValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(double.MaxValue.ToString());
+        await Assert.That(output).IsEqualTo(double.MaxValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -61,12 +66,12 @@ public class DoubleToStringTypeConverterTests
     public async Task TryConvert_MinValue_Succeeds()
     {
         var converter = new DoubleToStringTypeConverter();
-        var value = double.MinValue;
+        const double value = double.MinValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(double.MinValue.ToString());
+        await Assert.That(output).IsEqualTo(double.MinValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -77,12 +82,12 @@ public class DoubleToStringTypeConverterTests
     public async Task TryConvert_NegativeValue_Succeeds()
     {
         var converter = new DoubleToStringTypeConverter();
-        var value = -123.456;
+        const double value = -123.456;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(value.ToString());
+        await Assert.That(output).IsEqualTo(value.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -93,7 +98,7 @@ public class DoubleToStringTypeConverterTests
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new DoubleToStringTypeConverter();
-        var value = 42.5;
+        const double value = 42.5;
 
         var result = converter.TryConvert(value, 2, out var output);
 
@@ -109,7 +114,7 @@ public class DoubleToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_CustomPrecision()
     {
         var converter = new DoubleToStringTypeConverter();
-        var value = 0.123456789;
+        const double value = 0.123456789;
 
         var result = converter.TryConvert(value, "0.0000", out var output);
 
@@ -125,7 +130,7 @@ public class DoubleToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_GeneralFormat()
     {
         var converter = new DoubleToStringTypeConverter();
-        var value = 123.456;
+        const double value = 123.456;
 
         var result = converter.TryConvert(value, "G", out var output);
 
@@ -141,7 +146,7 @@ public class DoubleToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_RoundTripFormat()
     {
         var converter = new DoubleToStringTypeConverter();
-        var value = 123.456789012345;
+        const double value = 123.456789012345;
 
         var result = converter.TryConvert(value, "R", out var output);
 
@@ -157,7 +162,7 @@ public class DoubleToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_ScientificFormat()
     {
         var converter = new DoubleToStringTypeConverter();
-        var value = 12345.6789;
+        const double value = 12345.6789;
 
         var result = converter.TryConvert(value, "E3", out var output);
 

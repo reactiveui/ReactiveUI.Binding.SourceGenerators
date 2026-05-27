@@ -5,20 +5,19 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindCommand.ExpressionParam
+namespace SharedScenarios.BindCommand.ExpressionParam;
+
+/// <summary>
+/// Exercises BindCommand with an expression-based parameter.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindCommand with an expression-based parameter.
+    /// Binds the Save command to the SaveButton's Click event with an expression parameter.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Binds the Save command to the SaveButton's Click event with an expression parameter.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view)
-            => view.BindCommand(vm, x => x.Save, x => x.SaveButton, x => x.CurrentItem);
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view)
+        => view.BindCommand(vm, x => x.Save, x => x.SaveButton, x => x.CurrentItem);
 }

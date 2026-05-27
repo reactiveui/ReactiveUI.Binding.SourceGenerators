@@ -5,25 +5,24 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindTwoWay.SinglePropertyWithConverters
+namespace SharedScenarios.BindTwoWay.SinglePropertyWithConverters;
+
+/// <summary>
+/// Exercises BindTwoWay with conversion functions between int and string.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindTwoWay with conversion functions between int and string.
+    /// Creates a two-way binding between ViewModel.Count and View.CountText with int-string converters.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a two-way binding between ViewModel.Count and View.CountText with int-string converters.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view)
-            => vm.BindTwoWay(
-                view,
-                x => x.Count,
-                x => x.CountText,
-                count => count.ToString(),
-                text => int.Parse(text));
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view)
+        => vm.BindTwoWay(
+            view,
+            x => x.Count,
+            x => x.CountText,
+            count => count.ToString(),
+            int.Parse);
 }

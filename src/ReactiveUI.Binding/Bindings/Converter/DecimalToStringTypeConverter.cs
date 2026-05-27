@@ -9,25 +9,36 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public sealed class DecimalToStringTypeConverter : BindingTypeConverter<decimal, string>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
-    public override int GetAffinityForObjects() => 2;
+    public override int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public override bool TryConvert(decimal from, object? conversionHint, [NotNullWhen(true)] out string? result)
     {
-        if (conversionHint is int decimalPlaces)
+        switch (conversionHint)
         {
-            result = from.ToString($"F{decimalPlaces}");
-            return true;
-        }
+            case int decimalPlaces:
+                {
+                    result = from.ToString($"F{decimalPlaces}");
+                    return true;
+                }
 
-        if (conversionHint is string format)
-        {
-            result = from.ToString(format);
-            return true;
-        }
+            case string format:
+                {
+                    result = from.ToString(format);
+                    return true;
+                }
 
-        result = from.ToString();
-        return true;
+            default:
+                {
+                    result = from.ToString(System.Globalization.CultureInfo.CurrentCulture);
+                    return true;
+                }
+        }
     }
 }

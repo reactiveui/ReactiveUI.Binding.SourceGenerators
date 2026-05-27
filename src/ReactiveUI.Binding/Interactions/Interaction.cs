@@ -61,7 +61,8 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
     }
 
     /// <inheritdoc />
-    public IDisposable RegisterHandler<TDontCare>(Func<IInteractionContext<TInput, TOutput>, IObservable<TDontCare>> handler)
+    public IDisposable RegisterHandler<TDontCare>(
+        Func<IInteractionContext<TInput, TOutput>, IObservable<TDontCare>> handler)
     {
         ArgumentExceptionHelper.ThrowIfNull(handler);
 
@@ -102,7 +103,7 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
     {
         lock (_sync)
         {
-            return _handlers.ToArray();
+            return [.. _handlers];
         }
     }
 

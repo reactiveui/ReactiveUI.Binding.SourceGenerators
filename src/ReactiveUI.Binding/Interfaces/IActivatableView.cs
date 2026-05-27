@@ -7,6 +7,5 @@ namespace ReactiveUI.Binding;
 /// <summary>
 /// Marker interface for views that support activation and deactivation lifecycle events.
 /// </summary>
-public interface IActivatableView
-{
-}
+[SuppressMessage("Design", "CA1040:Avoid empty interfaces", Justification = "Marker interface")]
+public interface IActivatableView;

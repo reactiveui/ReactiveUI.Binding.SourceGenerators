@@ -13,6 +13,11 @@ namespace ReactiveUI.Binding.Tests.Builder;
 public class ReactiveUIBindingModuleTests
 {
     /// <summary>
+    /// The expected number of observable-for-property services registered by the module.
+    /// </summary>
+    private const int ExpectedObservableServices = 2;
+
+    /// <summary>
     /// Verifies that Configure registers INPC and POCO observable for property implementations.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -26,10 +31,10 @@ public class ReactiveUIBindingModuleTests
 
         var services = resolver.GetServices<ICreatesObservableForProperty>().ToList();
 
-        await Assert.That(services.Count).IsEqualTo(2);
+        await Assert.That(services.Count).IsEqualTo(ExpectedObservableServices);
 
-        var hasINPC = services.Any(s => s is INPCObservableForProperty);
-        var hasPOCO = services.Any(s => s is POCOObservableForProperty);
+        var hasINPC = services.Exists(s => s is INPCObservableForProperty);
+        var hasPOCO = services.Exists(s => s is POCOObservableForProperty);
 
         await Assert.That(hasINPC).IsTrue();
         await Assert.That(hasPOCO).IsTrue();

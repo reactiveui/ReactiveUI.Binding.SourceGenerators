@@ -26,9 +26,10 @@ public sealed class PropertyObservable<T> : IObservable<T>
     private readonly string _propertyName;
 
     /// <summary>
-    /// A delegate that reads the current property value from the source.
+    /// A delegate that reads the current property value from the source. The value may be
+    /// <see langword="null"/> for reference-typed properties.
     /// </summary>
-    private readonly Func<INotifyPropertyChanged, T> _getter;
+    private readonly Func<INotifyPropertyChanged, T?> _getter;
 
     /// <summary>
     /// Whether to suppress duplicate consecutive values.
@@ -45,7 +46,7 @@ public sealed class PropertyObservable<T> : IObservable<T>
     public PropertyObservable(
         INotifyPropertyChanged source,
         string propertyName,
-        Func<INotifyPropertyChanged, T> getter,
+        Func<INotifyPropertyChanged, T?> getter,
         bool distinctUntilChanged)
     {
         ArgumentExceptionHelper.ThrowIfNull(source);
@@ -68,7 +69,7 @@ public sealed class PropertyObservable<T> : IObservable<T>
     /// <summary>
     /// Manages the event subscription for a single observer, with optional distinct-until-changed filtering.
     /// </summary>
-    private sealed class Subscription : IDisposable
+    internal sealed class Subscription : IDisposable
     {
         /// <summary>
         /// The parent observable that owns the source and property metadata.
@@ -78,7 +79,7 @@ public sealed class PropertyObservable<T> : IObservable<T>
         /// <summary>
         /// The equality comparer used for distinct-until-changed filtering.
         /// </summary>
-        private readonly IEqualityComparer<T> _comparer;
+        private readonly EqualityComparer<T> _comparer;
 
         /// <summary>
         /// The downstream observer. Set to <see langword="null"/> on disposal.
@@ -87,8 +88,9 @@ public sealed class PropertyObservable<T> : IObservable<T>
 
         /// <summary>
         /// The most recently emitted value, used for distinct-until-changed comparison.
+        /// May be <see langword="null"/> for reference-typed properties.
         /// </summary>
-        private T _lastValue;
+        private T? _lastValue;
 
         /// <summary>
         /// Whether at least one value has been emitted.
@@ -114,16 +116,18 @@ public sealed class PropertyObservable<T> : IObservable<T>
             var initial = parent._getter(parent._source);
             _lastValue = initial;
             _hasValue = true;
-            observer.OnNext(initial);
+            observer.OnNext(initial!);
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (TrySetDisposed())
+            if (!TrySetDisposed())
             {
-                _parent._source.PropertyChanged -= OnPropertyChanged;
+                return;
             }
+
+            _parent._source.PropertyChanged -= OnPropertyChanged;
         }
 
         /// <summary>
@@ -156,14 +160,14 @@ public sealed class PropertyObservable<T> : IObservable<T>
 
             var value = _parent._getter(_parent._source);
 
-            if (_parent._distinctUntilChanged && _hasValue && _comparer.Equals(value, _lastValue))
+            if (_parent._distinctUntilChanged && _hasValue && _comparer.Equals(value!, _lastValue!))
             {
                 return;
             }
 
             _lastValue = value;
             _hasValue = true;
-            observer.OnNext(value);
+            observer.OnNext(value!);
         }
     }
 }

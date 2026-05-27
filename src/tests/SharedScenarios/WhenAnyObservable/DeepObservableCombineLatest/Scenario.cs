@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenAnyObservable.DeepObservableCombineLatest
+namespace SharedScenarios.WhenAnyObservable.DeepObservableCombineLatest;
+
+/// <summary>
+/// Exercises WhenAnyObservable with deep property chains and a selector (CombineLatest pattern).
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenAnyObservable with deep property chains and a selector (CombineLatest pattern).
+    /// Creates a WhenAnyObservable that combines two deep observable properties using a selector.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenAnyObservable that combines two deep observable properties using a selector.
-        /// </summary>
-        /// <param name="vm">The parent view model to observe.</param>
-        /// <returns>An observable that combines values from both deep observable properties.</returns>
-        public static IObservable<string> Execute(ParentViewModel vm)
-            => vm.WhenAnyObservable(x => x.Child.Count, x => x.Child.Message, (count, message) => $"{message}: {count}");
-    }
+    /// <param name="vm">The parent view model to observe.</param>
+    /// <returns>An observable that combines values from both deep observable properties.</returns>
+    public static IObservable<string> Execute(ParentViewModel vm)
+        => vm.WhenAnyObservable(x => x.Child.Count, x => x.Child.Message, (count, message) => $"{message}: {count}");
 }

@@ -10,6 +10,41 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToSingleTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Single value parsed from a positive numeric string.
+    /// </summary>
+    private const float ParsedSingle = 123.456f;
+
+    /// <summary>
+    /// Single value parsed from a negative numeric string.
+    /// </summary>
+    private const float NegativeSingle = -123.456f;
+
+    /// <summary>
+    /// Single value parsed from scientific notation.
+    /// </summary>
+    private const float ScientificSingle = 1.23E+5f;
+
+    /// <summary>
+    /// Single value parsed in the typed conversion test.
+    /// </summary>
+    private const float TypedSingle = 456.789f;
+
+    /// <summary>
+    /// Tolerance used when comparing parsed single-precision values.
+    /// </summary>
+    private const float SingleTolerance = 0.001f;
+
+    /// <summary>
+    /// Tolerance used when comparing scientific-notation single values.
+    /// </summary>
+    private const float ScientificTolerance = 0.1f;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +53,7 @@ public class StringToSingleTypeConverterTests
     {
         var converter = new StringToSingleTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,8 +64,7 @@ public class StringToSingleTypeConverterTests
     public async Task TryConvert_EmptyString_ReturnsFalse()
     {
         var converter = new StringToSingleTypeConverter();
-
-        var result = converter.TryConvert(string.Empty, null, out var output);
+        var result = converter.TryConvert(string.Empty, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -43,8 +77,7 @@ public class StringToSingleTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToSingleTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -61,7 +94,7 @@ public class StringToSingleTypeConverterTests
         var result = converter.TryConvert("123.456", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(123.456f).Within(0.001f);
+        await Assert.That(output).IsEqualTo(ParsedSingle).Within(SingleTolerance);
     }
 
     /// <summary>
@@ -106,7 +139,7 @@ public class StringToSingleTypeConverterTests
         var result = converter.TryConvert("-123.456", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(-123.456f).Within(0.001f);
+        await Assert.That(output).IsEqualTo(NegativeSingle).Within(SingleTolerance);
     }
 
     /// <summary>
@@ -121,7 +154,7 @@ public class StringToSingleTypeConverterTests
         var result = converter.TryConvert("1.23E+5", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(1.23E+5f).Within(0.1f);
+        await Assert.That(output).IsEqualTo(ScientificSingle).Within(ScientificTolerance);
     }
 
     /// <summary>
@@ -137,7 +170,7 @@ public class StringToSingleTypeConverterTests
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsTypeOf<float>();
-        await Assert.That((float)output!).IsEqualTo(456.789f).Within(0.001f);
+        await Assert.That((float)output!).IsEqualTo(TypedSingle).Within(SingleTolerance);
     }
 
     /// <summary>

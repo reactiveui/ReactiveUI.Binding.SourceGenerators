@@ -10,6 +10,21 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class NullableLongToLongTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Sample long value used for conversion round-trips.
+    /// </summary>
+    private const long SampleLong = 1_234_567_890_123_456L;
+
+    /// <summary>
+    /// Smaller long value used for conversion checks.
+    /// </summary>
+    private const long SmallLong = 42L;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +33,7 @@ public class NullableLongToLongTypeConverterTests
     {
         var converter = new NullableLongToLongTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,12 +44,12 @@ public class NullableLongToLongTypeConverterTests
     public async Task TryConvert_WithValue_Succeeds()
     {
         var converter = new NullableLongToLongTypeConverter();
-        long? value = 1234567890123456L;
+        long? value = 1_234_567_890_123_456L;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(1234567890123456L);
+        await Assert.That(output).IsEqualTo(SampleLong);
     }
 
     /// <summary>
@@ -46,8 +61,7 @@ public class NullableLongToLongTypeConverterTests
     {
         var converter = new NullableLongToLongTypeConverter();
         long? value = null;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(value, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -87,7 +101,7 @@ public class NullableLongToLongTypeConverterTests
         var success = converter.TryConvertTyped(value, null, out var result);
 
         await Assert.That(success).IsTrue();
-        await Assert.That(result).IsEqualTo(42L);
+        await Assert.That(result).IsEqualTo(SmallLong);
     }
 
     /// <summary>
@@ -113,7 +127,7 @@ public class NullableLongToLongTypeConverterTests
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()
     {
         var converter = new NullableLongToLongTypeConverter();
-        var value = "invalid";
+        const string value = "invalid";
 
         var success = converter.TryConvertTyped(value, null, out var result);
 

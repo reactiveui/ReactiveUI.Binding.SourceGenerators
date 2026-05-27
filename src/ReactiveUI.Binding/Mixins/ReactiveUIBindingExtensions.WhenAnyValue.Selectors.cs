@@ -29,7 +29,8 @@ public static partial class ReactiveUIBindingExtensions
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Func<T1, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -79,8 +80,10 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
         Func<T1, T2, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -137,9 +140,12 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T2>> property2,
         Expression<Func<TSender, T3>> property3,
         Func<T1, T2, T3, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -170,8 +176,12 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(t.property1, t.property2, t.property3));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -203,10 +213,14 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T3>> property3,
         Expression<Func<TSender, T4>> property4,
         Func<T1, T2, T3, T4, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -240,8 +254,13 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(t.property1, t.property2, t.property3, t.property4));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -277,11 +296,16 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T4>> property4,
         Expression<Func<TSender, T5>> property5,
         Func<T1, T2, T3, T4, T5, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -318,8 +342,14 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -359,12 +389,18 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T5>> property5,
         Expression<Func<TSender, T6>> property6,
         Func<T1, T2, T3, T4, T5, T6, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -404,8 +440,15 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, property6, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            property6,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -449,13 +492,20 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T6>> property6,
         Expression<Func<TSender, T7>> property7,
         Func<T1, T2, T3, T4, T5, T6, T7, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -498,8 +548,23 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, property6, property7, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6, t.property7));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            property6,
+            property7,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(
+                t.property1,
+                t.property2,
+                t.property3,
+                t.property4,
+                t.property5,
+                t.property6,
+                t.property7));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -547,14 +612,22 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T7>> property7,
         Expression<Func<TSender, T8>> property8,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -600,8 +673,25 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, property6, property7, property8, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6, t.property7, t.property8));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            property6,
+            property7,
+            property8,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(
+                t.property1,
+                t.property2,
+                t.property3,
+                t.property4,
+                t.property5,
+                t.property6,
+                t.property7,
+                t.property8));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -653,15 +743,24 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T8>> property8,
         Expression<Func<TSender, T9>> property9,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -710,8 +809,27 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, property6, property7, property8, property9, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6, t.property7, t.property8, t.property9));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            property6,
+            property7,
+            property8,
+            property9,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(
+                t.property1,
+                t.property2,
+                t.property3,
+                t.property4,
+                t.property5,
+                t.property6,
+                t.property7,
+                t.property8,
+                t.property9));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -767,16 +885,26 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T9>> property9,
         Expression<Func<TSender, T10>> property10,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
+        [CallerArgumentExpression("property10")]
+        string property10Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -828,8 +956,29 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6, t.property7, t.property8, t.property9, t.property10));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            property6,
+            property7,
+            property8,
+            property9,
+            property10,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(
+                t.property1,
+                t.property2,
+                t.property3,
+                t.property4,
+                t.property5,
+                t.property6,
+                t.property7,
+                t.property8,
+                t.property9,
+                t.property10));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -889,17 +1038,28 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T10>> property10,
         Expression<Func<TSender, T11>> property11,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
+        [CallerArgumentExpression("property10")]
+        string property10Expression = "",
+        [CallerArgumentExpression("property11")]
+        string property11Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -954,8 +1114,31 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, property11, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6, t.property7, t.property8, t.property9, t.property10, t.property11));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            property6,
+            property7,
+            property8,
+            property9,
+            property10,
+            property11,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(
+                t.property1,
+                t.property2,
+                t.property3,
+                t.property4,
+                t.property5,
+                t.property6,
+                t.property7,
+                t.property8,
+                t.property9,
+                t.property10,
+                t.property11));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1019,18 +1202,30 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T11>> property11,
         Expression<Func<TSender, T12>> property12,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerArgumentExpression("property12")] string property12Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
+        [CallerArgumentExpression("property10")]
+        string property10Expression = "",
+        [CallerArgumentExpression("property11")]
+        string property11Expression = "",
+        [CallerArgumentExpression("property12")]
+        string property12Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1088,8 +1283,33 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, property11, property12, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6, t.property7, t.property8, t.property9, t.property10, t.property11, t.property12));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            property6,
+            property7,
+            property8,
+            property9,
+            property10,
+            property11,
+            property12,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(
+                t.property1,
+                t.property2,
+                t.property3,
+                t.property4,
+                t.property5,
+                t.property6,
+                t.property7,
+                t.property8,
+                t.property9,
+                t.property10,
+                t.property11,
+                t.property12));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1157,19 +1377,32 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T12>> property12,
         Expression<Func<TSender, T13>> property13,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerArgumentExpression("property12")] string property12Expression = "",
-        [CallerArgumentExpression("property13")] string property13Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
+        [CallerArgumentExpression("property10")]
+        string property10Expression = "",
+        [CallerArgumentExpression("property11")]
+        string property11Expression = "",
+        [CallerArgumentExpression("property12")]
+        string property12Expression = "",
+        [CallerArgumentExpression("property13")]
+        string property13Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1230,8 +1463,35 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, property11, property12, property13, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6, t.property7, t.property8, t.property9, t.property10, t.property11, t.property12, t.property13));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            property6,
+            property7,
+            property8,
+            property9,
+            property10,
+            property11,
+            property12,
+            property13,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(
+                t.property1,
+                t.property2,
+                t.property3,
+                t.property4,
+                t.property5,
+                t.property6,
+                t.property7,
+                t.property8,
+                t.property9,
+                t.property10,
+                t.property11,
+                t.property12,
+                t.property13));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1286,7 +1546,23 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TRet>(
+    public static IObservable<TRet> WhenAnyValue<
+        TSender,
+        T1,
+        T2,
+        T3,
+        T4,
+        T5,
+        T6,
+        T7,
+        T8,
+        T9,
+        T10,
+        T11,
+        T12,
+        T13,
+        T14,
+        TRet>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -1303,20 +1579,34 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T13>> property13,
         Expression<Func<TSender, T14>> property14,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerArgumentExpression("property12")] string property12Expression = "",
-        [CallerArgumentExpression("property13")] string property13Expression = "",
-        [CallerArgumentExpression("property14")] string property14Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
+        [CallerArgumentExpression("property10")]
+        string property10Expression = "",
+        [CallerArgumentExpression("property11")]
+        string property11Expression = "",
+        [CallerArgumentExpression("property12")]
+        string property12Expression = "",
+        [CallerArgumentExpression("property13")]
+        string property13Expression = "",
+        [CallerArgumentExpression("property14")]
+        string property14Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1380,8 +1670,37 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, property11, property12, property13, property14, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6, t.property7, t.property8, t.property9, t.property10, t.property11, t.property12, t.property13, t.property14));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            property6,
+            property7,
+            property8,
+            property9,
+            property10,
+            property11,
+            property12,
+            property13,
+            property14,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(
+                t.property1,
+                t.property2,
+                t.property3,
+                t.property4,
+                t.property5,
+                t.property6,
+                t.property7,
+                t.property8,
+                t.property9,
+                t.property10,
+                t.property11,
+                t.property12,
+                t.property13,
+                t.property14));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1439,7 +1758,24 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TRet>(
+    public static IObservable<TRet> WhenAnyValue<
+        TSender,
+        T1,
+        T2,
+        T3,
+        T4,
+        T5,
+        T6,
+        T7,
+        T8,
+        T9,
+        T10,
+        T11,
+        T12,
+        T13,
+        T14,
+        T15,
+        TRet>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -1457,21 +1793,36 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T14>> property14,
         Expression<Func<TSender, T15>> property15,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerArgumentExpression("property12")] string property12Expression = "",
-        [CallerArgumentExpression("property13")] string property13Expression = "",
-        [CallerArgumentExpression("property14")] string property14Expression = "",
-        [CallerArgumentExpression("property15")] string property15Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
+        [CallerArgumentExpression("property10")]
+        string property10Expression = "",
+        [CallerArgumentExpression("property11")]
+        string property11Expression = "",
+        [CallerArgumentExpression("property12")]
+        string property12Expression = "",
+        [CallerArgumentExpression("property13")]
+        string property13Expression = "",
+        [CallerArgumentExpression("property14")]
+        string property14Expression = "",
+        [CallerArgumentExpression("property15")]
+        string property15Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1538,8 +1889,39 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, property11, property12, property13, property14, property15, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6, t.property7, t.property8, t.property9, t.property10, t.property11, t.property12, t.property13, t.property14, t.property15));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            property6,
+            property7,
+            property8,
+            property9,
+            property10,
+            property11,
+            property12,
+            property13,
+            property14,
+            property15,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(
+                t.property1,
+                t.property2,
+                t.property3,
+                t.property4,
+                t.property5,
+                t.property6,
+                t.property7,
+                t.property8,
+                t.property9,
+                t.property10,
+                t.property11,
+                t.property12,
+                t.property13,
+                t.property14,
+                t.property15));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1600,7 +1982,25 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TRet>(
+    public static IObservable<TRet> WhenAnyValue<
+        TSender,
+        T1,
+        T2,
+        T3,
+        T4,
+        T5,
+        T6,
+        T7,
+        T8,
+        T9,
+        T10,
+        T11,
+        T12,
+        T13,
+        T14,
+        T15,
+        T16,
+        TRet>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -1619,22 +2019,38 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T15>> property15,
         Expression<Func<TSender, T16>> property16,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerArgumentExpression("property12")] string property12Expression = "",
-        [CallerArgumentExpression("property13")] string property13Expression = "",
-        [CallerArgumentExpression("property14")] string property14Expression = "",
-        [CallerArgumentExpression("property15")] string property15Expression = "",
-        [CallerArgumentExpression("property16")] string property16Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
+        [CallerArgumentExpression("property10")]
+        string property10Expression = "",
+        [CallerArgumentExpression("property11")]
+        string property11Expression = "",
+        [CallerArgumentExpression("property12")]
+        string property12Expression = "",
+        [CallerArgumentExpression("property13")]
+        string property13Expression = "",
+        [CallerArgumentExpression("property14")]
+        string property14Expression = "",
+        [CallerArgumentExpression("property15")]
+        string property15Expression = "",
+        [CallerArgumentExpression("property16")]
+        string property16Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1704,6 +2120,39 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #endif
-        => sender.WhenAnyValue(property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, property11, property12, property13, property14, property15, property16, callerFilePath: callerFilePath, callerLineNumber: callerLineNumber)
-            .Select(t => selector(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6, t.property7, t.property8, t.property9, t.property10, t.property11, t.property12, t.property13, t.property14, t.property15, t.property16));
+        => sender.WhenAnyValue(
+            property1,
+            property2,
+            property3,
+            property4,
+            property5,
+            property6,
+            property7,
+            property8,
+            property9,
+            property10,
+            property11,
+            property12,
+            property13,
+            property14,
+            property15,
+            property16,
+            callerFilePath: callerFilePath,
+            callerLineNumber: callerLineNumber).Select(t => selector(
+                t.property1,
+                t.property2,
+                t.property3,
+                t.property4,
+                t.property5,
+                t.property6,
+                t.property7,
+                t.property8,
+                t.property9,
+                t.property10,
+                t.property11,
+                t.property12,
+                t.property13,
+                t.property14,
+                t.property15,
+                t.property16));
 }

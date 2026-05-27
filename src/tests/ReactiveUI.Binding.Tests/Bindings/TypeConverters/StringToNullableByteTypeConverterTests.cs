@@ -10,6 +10,16 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToNullableByteTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Byte value parsed from a typical numeric string.
+    /// </summary>
+    private const byte ParsedByte = 123;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +28,7 @@ public class StringToNullableByteTypeConverterTests
     {
         var converter = new StringToNullableByteTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,8 +39,7 @@ public class StringToNullableByteTypeConverterTests
     public async Task TryConvert_EmptyString_ReturnsTrue()
     {
         var converter = new StringToNullableByteTypeConverter();
-
-        var result = converter.TryConvert(string.Empty, null, out var output);
+        var result = converter.TryConvert(string.Empty, null, out _);
 
         await Assert.That(result).IsTrue();
     }
@@ -43,8 +52,7 @@ public class StringToNullableByteTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToNullableByteTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -57,8 +65,7 @@ public class StringToNullableByteTypeConverterTests
     public async Task TryConvert_NegativeValue_ReturnsFalse()
     {
         var converter = new StringToNullableByteTypeConverter();
-
-        var result = converter.TryConvert("-1", null, out var output);
+        var result = converter.TryConvert("-1", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -71,8 +78,7 @@ public class StringToNullableByteTypeConverterTests
     public async Task TryConvert_OutOfRangeValue_ReturnsFalse()
     {
         var converter = new StringToNullableByteTypeConverter();
-
-        var result = converter.TryConvert("999", null, out var output);
+        var result = converter.TryConvert("999", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -89,6 +95,6 @@ public class StringToNullableByteTypeConverterTests
         var result = converter.TryConvert("123", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((byte)123);
+        await Assert.That(output).IsEqualTo((byte)ParsedByte);
     }
 }

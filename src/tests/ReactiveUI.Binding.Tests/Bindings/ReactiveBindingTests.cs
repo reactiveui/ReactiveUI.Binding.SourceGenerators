@@ -22,7 +22,10 @@ public class ReactiveBindingTests
         var changed = Observable.Empty<string>();
 
         var binding = new ReactiveBinding<FakeView, string>(
-            view, changed, BindingDirection.OneWay, subscription);
+            view,
+            changed,
+            BindingDirection.OneWay,
+            subscription);
 
         binding.Dispose();
 
@@ -42,7 +45,10 @@ public class ReactiveBindingTests
         var changed = Observable.Empty<string>();
 
         var binding = new ReactiveBinding<FakeView, string>(
-            view, changed, BindingDirection.OneWay, subscription);
+            view,
+            changed,
+            BindingDirection.OneWay,
+            subscription);
 
         binding.Dispose();
         binding.Dispose();
@@ -62,7 +68,10 @@ public class ReactiveBindingTests
         var subscription = Disposable.Empty;
 
         var binding = new ReactiveBinding<FakeView, int>(
-            view, changed, BindingDirection.TwoWay, subscription);
+            view,
+            changed,
+            BindingDirection.TwoWay,
+            subscription);
 
         await Assert.That(binding.View).IsEqualTo(view);
         await Assert.That(binding.Direction).IsEqualTo(BindingDirection.TwoWay);

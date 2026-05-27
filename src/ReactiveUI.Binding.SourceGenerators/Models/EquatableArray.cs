@@ -15,6 +15,11 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnu
     where T : IEquatable<T>
 {
     /// <summary>
+    /// The multiplier used in the deterministic hash-combine loop.
+    /// </summary>
+    private const int HashMultiplier = 31;
+
+    /// <summary>
     /// The underlying array, or null if default-constructed.
     /// </summary>
     private readonly T[]? _array;
@@ -136,7 +141,7 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnu
             var hash = 17;
             for (var i = 0; i < array.Length; i++)
             {
-                hash = (hash * 31) + (array[i]?.GetHashCode() ?? 0);
+                hash = (hash * HashMultiplier) + (array[i]?.GetHashCode() ?? 0);
             }
 
             return hash;

@@ -4,7 +4,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -21,7 +20,7 @@ internal static class ObservationExtractor
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     internal static InvocationInfo? ExtractWhenChangedInvocation(GeneratorSyntaxContext context, CancellationToken ct)
-        => ExtractInvocationInfo(context, isBeforeChange: false, Constants.WhenChangedMethodName, ct);
+        => ExtractInvocationInfo(context, false, Constants.WhenChangedMethodName, ct);
 
     /// <summary>
     /// Pipeline B transform: extracts InvocationInfo from a WhenChanging invocation.
@@ -30,7 +29,7 @@ internal static class ObservationExtractor
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     internal static InvocationInfo? ExtractWhenChangingInvocation(GeneratorSyntaxContext context, CancellationToken ct)
-        => ExtractInvocationInfo(context, isBeforeChange: true, Constants.WhenChangingMethodName, ct);
+        => ExtractInvocationInfo(context, true, Constants.WhenChangingMethodName, ct);
 
     /// <summary>
     /// Pipeline B transform: extracts InvocationInfo from a WhenAnyValue invocation.
@@ -39,7 +38,7 @@ internal static class ObservationExtractor
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     internal static InvocationInfo? ExtractWhenAnyValueInvocation(GeneratorSyntaxContext context, CancellationToken ct)
-        => ExtractInvocationInfo(context, isBeforeChange: false, Constants.WhenAnyValueMethodName, ct);
+        => ExtractInvocationInfo(context, false, Constants.WhenAnyValueMethodName, ct);
 
     /// <summary>
     /// Pipeline B transform: extracts InvocationInfo from a WhenAny invocation (with IObservedChange selector).
@@ -48,7 +47,7 @@ internal static class ObservationExtractor
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
     internal static InvocationInfo? ExtractWhenAnyInvocation(GeneratorSyntaxContext context, CancellationToken ct)
-        => ExtractInvocationInfo(context, isBeforeChange: false, Constants.WhenAnyMethodName, ct);
+        => ExtractInvocationInfo(context, false, Constants.WhenAnyMethodName, ct);
 
     /// <summary>
     /// Extracts the invocation info from the generator syntax context.
@@ -84,28 +83,14 @@ internal static class ObservationExtractor
         var args = invocation.ArgumentList.Arguments;
         var propertyPaths = new List<EquatableArray<PropertyPathSegment>>(args.Count);
         var expressionTexts = new List<string>(args.Count);
-        var hasSelector = false;
 
-        // Loop over parameters to identify expressions and selector
-        for (var i = 0; i < methodSymbol.Parameters.Length; i++)
-        {
-            var parameter = methodSymbol.Parameters[i];
-
-            // Check if parameter type is Expression<Func<...>>
-            if (parameter.Type is INamedTypeSymbol { Name: "Expression" })
-            {
-                var path = SyntaxHelpers.ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
-                if (path != null)
-                {
-                    propertyPaths.Add(new EquatableArray<PropertyPathSegment>(path));
-                    expressionTexts.Add(CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
-                }
-            }
-            else if (parameter.Name is "conversionFunc" or "selector")
-            {
-                hasSelector = true;
-            }
-        }
+        var hasSelector = CollectPropertyPaths(
+            methodSymbol,
+            args,
+            semanticModel,
+            propertyPaths,
+            expressionTexts,
+            ct);
 
         if (propertyPaths.Count == 0)
         {
@@ -117,56 +102,114 @@ internal static class ObservationExtractor
             ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type),
             "source type display name");
 
-        // Compute the return type from the collected property paths rather than
-        // from methodSymbol.ReturnType. This avoids an off-by-one issue where
-        // overload resolution might resolve to a previously-generated concrete
-        // overload with a different property count, yielding a wrong return type.
-        string returnTypeFullName;
+        var returnTypeFullName = ComputeReturnTypeFullName(methodSymbol, propertyPaths, hasSelector);
+
+        var filePath = invocation.SyntaxTree.FilePath;
+        var lineNumber = invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+
+        return new(
+            filePath,
+            lineNumber,
+            sourceTypeFullName,
+            new([.. propertyPaths]),
+            returnTypeFullName,
+            isBeforeChange,
+            hasSelector,
+            expectedMethodName,
+            new([.. expressionTexts]));
+    }
+
+    /// <summary>
+    /// Loops over the method parameters, collecting property paths and expression texts for
+    /// each <c>Expression&lt;Func&lt;...&gt;&gt;</c> argument and detecting a selector parameter.
+    /// </summary>
+    /// <param name="methodSymbol">The resolved method symbol.</param>
+    /// <param name="args">The invocation argument list.</param>
+    /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="propertyPaths">The list to append extracted property paths to.</param>
+    /// <param name="expressionTexts">The list to append normalized expression texts to.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns><see langword="true"/> if a selector/conversion parameter was found.</returns>
+    private static bool CollectPropertyPaths(
+        IMethodSymbol methodSymbol,
+        SeparatedSyntaxList<ArgumentSyntax> args,
+        SemanticModel semanticModel,
+        List<EquatableArray<PropertyPathSegment>> propertyPaths,
+        List<string> expressionTexts,
+        CancellationToken ct)
+    {
+        var hasSelector = false;
+
+        for (var i = 0; i < methodSymbol.Parameters.Length; i++)
+        {
+            var parameter = methodSymbol.Parameters[i];
+
+            // Check if parameter type is Expression<Func<...>>
+            if (parameter.Type is INamedTypeSymbol { Name: "Expression" })
+            {
+                var path = SyntaxHelpers.ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
+                if (path != null)
+                {
+                    propertyPaths.Add(new(path));
+                    expressionTexts.Add(
+                        CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
+                }
+            }
+            else if (parameter.Name is "conversionFunc" or "selector")
+            {
+                hasSelector = true;
+            }
+        }
+
+        return hasSelector;
+    }
+
+    /// <summary>
+    /// Computes the observation return type from the collected property paths rather than from
+    /// <c>methodSymbol.ReturnType</c>. This avoids an off-by-one issue where overload resolution
+    /// might resolve to a previously-generated concrete overload with a different property count.
+    /// </summary>
+    /// <param name="methodSymbol">The resolved method symbol.</param>
+    /// <param name="propertyPaths">The collected property paths.</param>
+    /// <param name="hasSelector">Whether the overload has a selector/conversion parameter.</param>
+    /// <returns>The fully qualified return type name.</returns>
+    private static string ComputeReturnTypeFullName(
+        IMethodSymbol methodSymbol,
+        List<EquatableArray<PropertyPathSegment>> propertyPaths,
+        bool hasSelector)
+    {
         if (hasSelector)
         {
             // For selector overloads, find the selector parameter's Func<..., TReturn>
             // and extract TReturn (the last type argument).
             // hasSelector is only true when the parameter exists, so this always returns non-null.
-            returnTypeFullName = ExtractorValidation.FindSelectorReturnType(
-                methodSymbol.Parameters, "conversionFunc", "selector")!;
+            return ExtractorValidation.FindSelectorReturnType(
+                methodSymbol.Parameters,
+                "conversionFunc",
+                "selector")!;
         }
-        else if (propertyPaths.Count == 1)
+
+        if (propertyPaths.Count == 1)
         {
             // Single property: return type is the leaf property type.
             var singlePath = propertyPaths[0];
-            returnTypeFullName = singlePath[singlePath.Length - 1].PropertyTypeFullName;
+            return singlePath[singlePath.Length - 1].PropertyTypeFullName;
         }
-        else
+
+        // Multiple properties: return type is a named value tuple.
+        var tupleBuilder = new System.Text.StringBuilder("(");
+        for (var i = 0; i < propertyPaths.Count; i++)
         {
-            // Multiple properties: return type is a named value tuple.
-            var tupleBuilder = new System.Text.StringBuilder("(");
-            for (var i = 0; i < propertyPaths.Count; i++)
+            var path = propertyPaths[i];
+            var leafType = path[path.Length - 1].PropertyTypeFullName;
+            tupleBuilder.Append(leafType).Append(" property").Append(i + 1);
+            if (i < propertyPaths.Count - 1)
             {
-                var path = propertyPaths[i];
-                var leafType = path[path.Length - 1].PropertyTypeFullName;
-                tupleBuilder.Append(leafType).Append(" property").Append(i + 1);
-                if (i < propertyPaths.Count - 1)
-                {
-                    tupleBuilder.Append(", ");
-                }
+                tupleBuilder.Append(", ");
             }
-
-            tupleBuilder.Append(')');
-            returnTypeFullName = tupleBuilder.ToString();
         }
 
-        var filePath = invocation.SyntaxTree.FilePath;
-        var lineNumber = invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-
-        return new InvocationInfo(
-            CallerFilePath: filePath,
-            CallerLineNumber: lineNumber,
-            SourceTypeFullName: sourceTypeFullName,
-            PropertyPaths: new EquatableArray<EquatableArray<PropertyPathSegment>>(propertyPaths.ToArray()),
-            ReturnTypeFullName: returnTypeFullName,
-            IsBeforeChange: isBeforeChange,
-            HasSelector: hasSelector,
-            MethodName: expectedMethodName,
-            ExpressionTexts: new EquatableArray<string>(expressionTexts.ToArray()));
+        tupleBuilder.Append(')');
+        return tupleBuilder.ToString();
     }
 }

@@ -9,6 +9,11 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public sealed class ByteToNullableByteTypeConverter : IBindingTypeConverter<byte, byte?>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
     public Type FromType => typeof(byte);
 
@@ -16,7 +21,7 @@ public sealed class ByteToNullableByteTypeConverter : IBindingTypeConverter<byte
     public Type ToType => typeof(byte?);
 
     /// <inheritdoc/>
-    public int GetAffinityForObjects() => 2;
+    public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public bool TryConvert(byte from, object? conversionHint, out byte? result)

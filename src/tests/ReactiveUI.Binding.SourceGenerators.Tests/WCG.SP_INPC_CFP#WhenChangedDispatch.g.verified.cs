@@ -23,14 +23,14 @@ namespace ReactiveUI.Binding
                 return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanged(objectToMonitor, property1);
             }
 
-            if (callerLineNumber == 53 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
+            if (callerLineNumber == 55 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __WhenChanged_7FFFD2E8D6FC87F9(objectToMonitor);
+                return __WhenChanged_7FFFD2E8D6FC818E(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<string> __WhenChanged_7FFFD2E8D6FC87F9(global::SharedScenarios.WhenChanged.SinglePropertyINPC.MyViewModel obj)
+        private static global::System.IObservable<string> __WhenChanged_7FFFD2E8D6FC818E(global::SharedScenarios.WhenChanged.SinglePropertyINPC.MyViewModel obj)
         {
             return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.SinglePropertyINPC.MyViewModel)__o).Name, true);
         }

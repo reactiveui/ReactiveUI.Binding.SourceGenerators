@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp;
-
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -21,7 +20,8 @@ public class WhenChangingGeneratorTests
     public async Task SingleProperty_INPC()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/SinglePropertyINPC");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,8 @@ public class WhenChangingGeneratorTests
     public async Task SingleProperty_ReactiveObject()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/SinglePropertyReactiveObject");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +48,8 @@ public class WhenChangingGeneratorTests
     public async Task MultiProperty_TwoProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyTwoProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +62,8 @@ public class WhenChangingGeneratorTests
     public async Task DeepPropertyChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/DeepPropertyChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -73,7 +76,8 @@ public class WhenChangingGeneratorTests
     public async Task MultiProperty_WithSelector()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyWithSelector");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -87,42 +91,43 @@ public class WhenChangingGeneratorTests
     public async Task INPChangingOnly_Property()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
+                              using System;
+                              using System.ComponentModel;
 
-            using ReactiveUI.Binding;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyChangingViewModel : INotifyPropertyChanged, INotifyPropertyChanging
-                {
-                    private string _name = string.Empty;
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public event PropertyChangingEventHandler? PropertyChanging;
-                    public string Name
-                    {
-                        get => _name;
-                        set
-                        {
-                            if (_name != value)
-                            {
-                                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Name)));
-                                _name = value;
-                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-                            }
-                        }
-                    }
-                }
+                              namespace TestApp
+                              {
+                                  public class MyChangingViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+                                  {
+                                      private string _name = string.Empty;
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public event PropertyChangingEventHandler? PropertyChanging;
+                                      public string Name
+                                      {
+                                          get => _name;
+                                          set
+                                          {
+                                              if (_name != value)
+                                              {
+                                                  PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Name)));
+                                                  _name = value;
+                                                  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+                                              }
+                                          }
+                                      }
+                                  }
 
-                public static class Scenario
-                {
-                    public static IObservable<string> Execute(MyChangingViewModel vm)
-                        => vm.WhenChanging(x => x.Name);
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static IObservable<string> Execute(MyChangingViewModel vm)
+                                          => vm.WhenChanging(x => x.Name);
+                                  }
+                              }
+                              """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -136,32 +141,33 @@ public class WhenChangingGeneratorTests
     public async Task ReactiveObject_Changing_Property()
     {
         const string source = """
-            using System;
+                              using System;
 
-            using ReactiveUI;
-            using ReactiveUI.Binding;
+                              using ReactiveUI;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyReactiveViewModel : ReactiveObject
-                {
-                    private string _name = string.Empty;
-                    public string Name
-                    {
-                        get => _name;
-                        set => this.RaiseAndSetIfChanged(ref _name, value);
-                    }
-                }
+                              namespace TestApp
+                              {
+                                  public class MyReactiveViewModel : ReactiveObject
+                                  {
+                                      private string _name = string.Empty;
+                                      public string Name
+                                      {
+                                          get => _name;
+                                          set => this.RaiseAndSetIfChanged(ref _name, value);
+                                      }
+                                  }
 
-                public static class Scenario
-                {
-                    public static IObservable<string> Execute(MyReactiveViewModel vm)
-                        => vm.WhenChanging(x => x.Name);
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static IObservable<string> Execute(MyReactiveViewModel vm)
+                                          => vm.WhenChanging(x => x.Name);
+                                  }
+                              }
+                              """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -177,7 +183,9 @@ public class WhenChangingGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/SinglePropertyINPC");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(WhenChangingGeneratorTests),
+            LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -191,7 +199,8 @@ public class WhenChangingGeneratorTests
     public async Task FourLevelDeepChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/FourLevelDeepChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -206,7 +215,8 @@ public class WhenChangingGeneratorTests
     public async Task MultiProperty_ThreeProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyThreeProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -222,7 +232,8 @@ public class WhenChangingGeneratorTests
     public async Task MultiProperty_WithDeepChains()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyWithDeepChains");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -238,7 +249,9 @@ public class WhenChangingGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/DeepPropertyChain");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(WhenChangingGeneratorTests),
+            LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -253,7 +266,9 @@ public class WhenChangingGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/MultiPropertyTwoProperties");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(WhenChangingGeneratorTests),
+            LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -268,7 +283,9 @@ public class WhenChangingGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenChanging/FourLevelDeepChain");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenChangingGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(WhenChangingGeneratorTests),
+            LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 }

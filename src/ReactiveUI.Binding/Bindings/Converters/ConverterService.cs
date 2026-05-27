@@ -49,9 +49,9 @@ public sealed class ConverterService
     /// </summary>
     public ConverterService()
     {
-        TypedConverters = new BindingTypeConverterRegistry();
-        FallbackConverters = new BindingFallbackConverterRegistry();
-        SetMethodConverters = new SetMethodBindingConverterRegistry();
+        TypedConverters = new();
+        FallbackConverters = new();
+        SetMethodConverters = new();
     }
 
     /// <summary>
@@ -110,8 +110,7 @@ public sealed class ConverterService
         }
 
         // Phase 2: Try fallback converters (runtime type checking)
-        var fallback = FallbackConverters.TryGetConverter(fromType, toType);
-        return fallback;
+        return FallbackConverters.TryGetConverter(fromType, toType);
     }
 
     /// <summary>

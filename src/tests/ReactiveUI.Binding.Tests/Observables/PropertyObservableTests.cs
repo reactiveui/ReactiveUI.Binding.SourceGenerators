@@ -14,13 +14,38 @@ namespace ReactiveUI.Binding.Tests.Observables;
 public class PropertyObservableTests
 {
     /// <summary>
+    /// The initial name value assigned to the view model under test.
+    /// </summary>
+    private const string InitialName = "Alice";
+
+    /// <summary>
+    /// The expected number of emissions when the initial value plus one change are observed.
+    /// </summary>
+    private const int ExpectedTwoEmissions = 2;
+
+    /// <summary>
+    /// The expected number of emissions after a third notification.
+    /// </summary>
+    private const int ExpectedThreeEmissions = 3;
+
+    /// <summary>
+    /// A sample age value assigned to an unrelated property.
+    /// </summary>
+    private const int SampleAge = 26;
+
+    /// <summary>
+    /// The number of rapid property-changed iterations in the concurrency test.
+    /// </summary>
+    private const int ConcurrencyIterations = 100;
+
+    /// <summary>
     /// Verifies that Subscribe throws ArgumentNullException when observer is null.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_NullObserver_ThrowsArgumentNullException()
     {
-        var vm = new TestViewModel { Name = "Alice" };
+        var vm = new TestViewModel { Name = InitialName };
         var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
 
         var action = () => observable.Subscribe(null!);
@@ -73,14 +98,14 @@ public class PropertyObservableTests
     [Test]
     public async Task Subscribe_EmitsCurrentValueImmediately()
     {
-        var vm = new TestViewModel { Name = "Alice" };
+        var vm = new TestViewModel { Name = InitialName };
         var results = new List<string>();
         var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
 
         observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
 
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo("Alice");
+        await Assert.That(results[0]).IsEqualTo(InitialName);
     }
 
     /// <summary>
@@ -90,14 +115,14 @@ public class PropertyObservableTests
     [Test]
     public async Task PropertyChanged_TriggersEmission()
     {
-        var vm = new TestViewModel { Name = "Alice" };
+        var vm = new TestViewModel { Name = InitialName };
         var results = new List<string>();
         var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
 
         observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
         vm.Name = "Bob";
 
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(results[1]).IsEqualTo("Bob");
     }
 
@@ -108,15 +133,15 @@ public class PropertyObservableTests
     [Test]
     public async Task PropertyChanged_WrongProperty_DoesNotTriggerEmission()
     {
-        var vm = new TestViewModel { Name = "Alice", Age = 25 };
+        var vm = new TestViewModel { Name = InitialName, Age = 25 };
         var results = new List<string>();
         var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
 
         observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
-        vm.Age = 26;
+        vm.Age = SampleAge;
 
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo("Alice");
+        await Assert.That(results[0]).IsEqualTo(InitialName);
     }
 
     /// <summary>
@@ -126,17 +151,17 @@ public class PropertyObservableTests
     [Test]
     public async Task PropertyChanged_NullOrEmpty_TriggersEmission()
     {
-        var vm = new ManualTestViewModel { Name = "Alice" };
+        var vm = new ManualTestViewModel { Name = InitialName };
         var results = new List<string>();
         var observable = new PropertyObservable<string>(vm, "Name", x => ((ManualTestViewModel)x).Name, false);
 
         observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
 
         vm.RaisePropertyChanged(string.Empty);
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
 
         vm.RaisePropertyChanged(null);
-        await Assert.That(results).Count().IsEqualTo(3);
+        await Assert.That(results).Count().IsEqualTo(ExpectedThreeEmissions);
     }
 
     /// <summary>
@@ -146,12 +171,12 @@ public class PropertyObservableTests
     [Test]
     public async Task DistinctUntilChanged_True_SuppressesDuplicates()
     {
-        var vm = new ManualTestViewModel { Name = "Alice" };
+        var vm = new ManualTestViewModel { Name = InitialName };
         var results = new List<string>();
         var observable = new PropertyObservable<string>(vm, "Name", x => ((ManualTestViewModel)x).Name, true);
 
         observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
-        vm.Name = "Alice"; // Same value
+        vm.Name = InitialName; // Same value
         vm.RaisePropertyChanged("Name");
 
         await Assert.That(results).Count().IsEqualTo(1);
@@ -164,15 +189,15 @@ public class PropertyObservableTests
     [Test]
     public async Task DistinctUntilChanged_False_AllowsDuplicates()
     {
-        var vm = new ManualTestViewModel { Name = "Alice" };
+        var vm = new ManualTestViewModel { Name = InitialName };
         var results = new List<string>();
         var observable = new PropertyObservable<string>(vm, "Name", x => ((ManualTestViewModel)x).Name, false);
 
         observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
-        vm.Name = "Alice"; // Same value
+        vm.Name = InitialName; // Same value
         vm.RaisePropertyChanged("Name");
 
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
     }
 
     /// <summary>
@@ -182,7 +207,7 @@ public class PropertyObservableTests
     [Test]
     public async Task Dispose_RemovesEventHandler()
     {
-        var vm = new TestViewModel { Name = "Alice" };
+        var vm = new TestViewModel { Name = InitialName };
         var results = new List<string>();
         var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
 
@@ -191,7 +216,7 @@ public class PropertyObservableTests
 
         vm.Name = "Bob";
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo("Alice");
+        await Assert.That(results[0]).IsEqualTo(InitialName);
     }
 
     /// <summary>
@@ -201,7 +226,7 @@ public class PropertyObservableTests
     [Test]
     public async Task Dispose_CalledTwice_NoException()
     {
-        var vm = new TestViewModel { Name = "Alice" };
+        var vm = new TestViewModel { Name = InitialName };
         var observable = new PropertyObservable<string>(vm, nameof(vm.Name), x => ((TestViewModel)x).Name, false);
 
         var subscription = observable.Subscribe(new AnonymousObserver<string>(_ => { }, _ => { }, () => { }));
@@ -218,7 +243,7 @@ public class PropertyObservableTests
     [Test]
     public async Task PropertyChangedAfterDispose_DoesNotThrow()
     {
-        var vm = new ManualTestViewModel { Name = "Alice" };
+        var vm = new ManualTestViewModel { Name = InitialName };
         var results = new List<string>();
         var observable = new PropertyObservable<string>(vm, "Name", x => ((ManualTestViewModel)x).Name, false);
 
@@ -234,25 +259,25 @@ public class PropertyObservableTests
 
     /// <summary>
     /// Verifies that the <c>if (observer is null) { return; }</c> guard in OnPropertyChanged
-    /// is exercised by nulling <c>_observer</c> via reflection without calling Dispose (which
-    /// would unregister the handler). This deterministically covers the race-condition guard path.
+    /// is exercised by nulling the observer via <see cref="PropertyObservable{T}.Subscription.TrySetDisposed"/>
+    /// without calling Dispose (which would unregister the handler). This deterministically covers the
+    /// race-condition guard path.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
-    public async Task OnPropertyChanged_ObserverNulledViaReflection_DoesNotThrow()
+    public async Task OnPropertyChanged_ObserverNulledWithoutUnregistering_DoesNotThrow()
     {
-        var vm = new ManualTestViewModel { Name = "Alice" };
+        var vm = new ManualTestViewModel { Name = InitialName };
         var results = new List<string>();
         var observable = new PropertyObservable<string>(vm, "Name", x => ((ManualTestViewModel)x).Name, false);
 
         var subscription = observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
 
-        // Null _observer via reflection WITHOUT calling Dispose so the PropertyChanged
-        // event handler remains registered — when the event fires, OnPropertyChanged runs
-        // with _observer == null, deterministically hitting the null-guard branch.
-        var observerField = subscription.GetType()
-            .GetField("_observer", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-        observerField?.SetValue(subscription, null);
+        // Null the observer WITHOUT calling Dispose so the PropertyChanged event handler remains
+        // registered — when the event fires, OnPropertyChanged runs with a null observer,
+        // deterministically hitting the null-guard branch. TrySetDisposed performs exactly the
+        // atomic null-out that Dispose's first step does, minus the handler unregistration.
+        ((PropertyObservable<string>.Subscription)subscription).TrySetDisposed();
 
         var action = () => vm.RaisePropertyChanged("Name");
         await Assert.That(action).ThrowsNothing();
@@ -284,15 +309,15 @@ public class PropertyObservableTests
 
         // Start a background task that rapidly disposes while property changes occur
         var disposed = false;
-        var disposeTask = Task.Run(() =>
+        var disposeTask = Task.Run(async () =>
         {
-            Thread.Sleep(1);
+            await Task.Delay(10);
             subscription.Dispose();
             disposed = true;
         });
 
         // Rapidly raise property changed events
-        for (var i = 0; i < 100 && !disposed; i++)
+        for (var i = 0; i < ConcurrencyIterations && !disposed; i++)
         {
             vm.Name = $"Value{i}";
             vm.RaisePropertyChanged("Name");
@@ -315,14 +340,14 @@ public class PropertyObservableTests
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
-        public string Name { get; set; } = "Alice";
+        public string Name { get; set; } = InitialName;
 
         /// <summary>
         /// Raises the <see cref="PropertyChanged"/> event for the specified property.
         /// </summary>
         /// <param name="propertyName">The name of the property that changed.</param>
         public void RaisePropertyChanged(string? propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new(propertyName));
     }
 
     /// <summary>
@@ -343,7 +368,7 @@ public class PropertyObservableTests
         /// </summary>
         /// <param name="propertyName">The name of the property that changed.</param>
         public void RaisePropertyChanged(string? propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new(propertyName));
     }
 
     /// <summary>

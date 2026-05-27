@@ -5,20 +5,19 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindCommand.BasicNoParam
+namespace SharedScenarios.BindCommand.BasicNoParam;
+
+/// <summary>
+/// Exercises BindCommand with a simple button and no parameter.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindCommand with a simple button and no parameter.
+    /// Binds the Save command to the SaveButton's Click event.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Binds the Save command to the SaveButton's Click event.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view)
-            => view.BindCommand(vm, x => x.Save, x => x.SaveButton);
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view)
+        => view.BindCommand(vm, x => x.Save, x => x.SaveButton);
 }

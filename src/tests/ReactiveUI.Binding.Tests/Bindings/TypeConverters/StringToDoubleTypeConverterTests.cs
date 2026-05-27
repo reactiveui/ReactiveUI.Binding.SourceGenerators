@@ -10,6 +10,31 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToDoubleTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Double value parsed from scientific notation.
+    /// </summary>
+    private const double ScientificDouble = 1.23E+10;
+
+    /// <summary>
+    /// Double value parsed from a positive numeric string.
+    /// </summary>
+    private const double ParsedDouble = 123.456;
+
+    /// <summary>
+    /// Double value parsed from a negative numeric string.
+    /// </summary>
+    private const double NegativeDouble = -123.456;
+
+    /// <summary>
+    /// Double value parsed in the typed conversion test.
+    /// </summary>
+    private const double TypedDouble = 456.789;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +43,7 @@ public class StringToDoubleTypeConverterTests
     {
         var converter = new StringToDoubleTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,8 +54,7 @@ public class StringToDoubleTypeConverterTests
     public async Task TryConvert_EmptyString_ReturnsFalse()
     {
         var converter = new StringToDoubleTypeConverter();
-
-        var result = converter.TryConvert(string.Empty, null, out var output);
+        var result = converter.TryConvert(string.Empty, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -43,8 +67,7 @@ public class StringToDoubleTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToDoubleTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -61,7 +84,7 @@ public class StringToDoubleTypeConverterTests
         var result = converter.TryConvert("1.23E+10", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(1.23E+10);
+        await Assert.That(output).IsEqualTo(ScientificDouble);
     }
 
     /// <summary>
@@ -76,7 +99,7 @@ public class StringToDoubleTypeConverterTests
         var result = converter.TryConvert("123.456", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(123.456);
+        await Assert.That(output).IsEqualTo(ParsedDouble);
     }
 
     /// <summary>
@@ -121,7 +144,7 @@ public class StringToDoubleTypeConverterTests
         var result = converter.TryConvert("-123.456", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(-123.456);
+        await Assert.That(output).IsEqualTo(NegativeDouble);
     }
 
     /// <summary>
@@ -136,7 +159,7 @@ public class StringToDoubleTypeConverterTests
         var result = converter.TryConvertTyped("456.789", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(456.789);
+        await Assert.That(output).IsEqualTo(TypedDouble);
     }
 
     /// <summary>

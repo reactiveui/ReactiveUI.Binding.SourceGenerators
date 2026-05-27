@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.BindTo.SameTypeString
+namespace SharedScenarios.BindTo.SameTypeString;
+
+/// <summary>
+/// Target View with a string property.
+/// </summary>
+public class MyView : INotifyPropertyChanged
 {
     /// <summary>
-    /// Target View with a string property.
+    /// The backing field for <see cref="Caption"/>.
     /// </summary>
-    public class MyView : INotifyPropertyChanged
+    private string _caption = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the caption.
+    /// </summary>
+    public string Caption
     {
-        /// <summary>
-        /// The backing field for <see cref="Caption"/>.
-        /// </summary>
-        private string _caption = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the caption.
-        /// </summary>
-        public string Caption
+        get => _caption;
+        set
         {
-            get => _caption;
-            set
+            if (_caption == value)
             {
-                if (_caption != value)
-                {
-                    _caption = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Caption)));
-                }
+                return;
             }
+
+            _caption = value;
+            PropertyChanged?.Invoke(this, new(nameof(Caption)));
         }
     }
 }

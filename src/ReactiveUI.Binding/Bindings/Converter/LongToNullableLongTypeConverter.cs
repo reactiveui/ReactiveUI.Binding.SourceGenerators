@@ -9,6 +9,11 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public sealed class LongToNullableLongTypeConverter : IBindingTypeConverter<long, long?>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
     public Type FromType => typeof(long);
 
@@ -16,7 +21,7 @@ public sealed class LongToNullableLongTypeConverter : IBindingTypeConverter<long
     public Type ToType => typeof(long?);
 
     /// <inheritdoc/>
-    public int GetAffinityForObjects() => 2;
+    public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public bool TryConvert(long from, object? conversionHint, out long? result)

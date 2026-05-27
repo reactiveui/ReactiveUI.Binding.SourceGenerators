@@ -155,9 +155,17 @@ public class RxBindingBuilderTests
         public bool HasRegistration(Type? serviceType, string? contract) => false;
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public bool HasRegistration<T>() => false;
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public bool HasRegistration<T>(string? contract) => false;
 
         /// <inheritdoc/>
@@ -181,6 +189,28 @@ public class RxBindingBuilderTests
         }
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        public void Register<TService, TImplementation>()
+            where TService : class
+            where TImplementation : class, TService, new()
+        {
+        }
+
+        /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        public void Register<TService, TImplementation>(string? contract)
+            where TService : class
+            where TImplementation : class, TService, new()
+        {
+        }
+
+        /// <inheritdoc/>
         public void UnregisterCurrent(Type? serviceType)
         {
         }
@@ -191,11 +221,19 @@ public class RxBindingBuilderTests
         }
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public void UnregisterCurrent<T>()
         {
         }
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public void UnregisterCurrent<T>(string? contract)
         {
         }
@@ -211,44 +249,47 @@ public class RxBindingBuilderTests
         }
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public void UnregisterAll<T>()
         {
         }
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public void UnregisterAll<T>(string? contract)
         {
         }
 
         /// <inheritdoc/>
         public IDisposable ServiceRegistrationCallback(Type serviceType, Action<IDisposable> callback) =>
-            System.Reactive.Disposables.Disposable.Empty;
+            Disposable.Empty;
 
         /// <inheritdoc/>
-        public IDisposable ServiceRegistrationCallback(Type serviceType, string? contract, Action<IDisposable> callback) =>
-            System.Reactive.Disposables.Disposable.Empty;
+        public IDisposable
+            ServiceRegistrationCallback(Type serviceType, string? contract, Action<IDisposable> callback) =>
+            Disposable.Empty;
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public IDisposable ServiceRegistrationCallback<T>(Action<IDisposable> callback) =>
-            System.Reactive.Disposables.Disposable.Empty;
+            Disposable.Empty;
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public IDisposable ServiceRegistrationCallback<T>(string? contract, Action<IDisposable> callback) =>
-            System.Reactive.Disposables.Disposable.Empty;
-
-        /// <inheritdoc/>
-        public void Register<TService, TImplementation>()
-            where TService : class
-            where TImplementation : class, TService, new()
-        {
-        }
-
-        /// <inheritdoc/>
-        public void Register<TService, TImplementation>(string? contract)
-            where TService : class
-            where TImplementation : class, TService, new()
-        {
-        }
+            Disposable.Empty;
 
         /// <inheritdoc/>
         public void RegisterConstant<T>(T? value)

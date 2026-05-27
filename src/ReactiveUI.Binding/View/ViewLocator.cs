@@ -16,14 +16,6 @@ public static class ViewLocator
     /// <exception cref="ViewLocatorNotFoundException">
     /// Thrown when no <see cref="IViewLocator"/> is registered.
     /// </exception>
-    public static IViewLocator GetCurrent()
-    {
-        var locator = AppLocator.Current.GetService<IViewLocator>();
-        if (locator is null)
-        {
-            throw new ViewLocatorNotFoundException();
-        }
-
-        return locator;
-    }
+    public static IViewLocator GetCurrent() =>
+        AppLocator.Current.GetService<IViewLocator>() ?? throw new ViewLocatorNotFoundException();
 }

@@ -12,6 +12,11 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public sealed class NullableIntegerToIntegerTypeConverter : IBindingTypeConverter<int?, int>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
     public Type FromType => typeof(int?);
 
@@ -19,7 +24,7 @@ public sealed class NullableIntegerToIntegerTypeConverter : IBindingTypeConverte
     public Type ToType => typeof(int);
 
     /// <inheritdoc/>
-    public int GetAffinityForObjects() => 2;
+    public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public bool TryConvert(int? from, object? conversionHint, [NotNullWhen(true)] out int result)
@@ -37,19 +42,25 @@ public sealed class NullableIntegerToIntegerTypeConverter : IBindingTypeConverte
     /// <inheritdoc/>
     public bool TryConvertTyped(object? from, object? conversionHint, [NotNullWhen(true)] out object? result)
     {
-        if (from is null)
+        switch (from)
         {
-            result = null;
-            return TryConvert(null, conversionHint, out _);
-        }
+            case null:
+                {
+                    result = null;
+                    return TryConvert(null, conversionHint, out _);
+                }
 
-        if (from is int value)
-        {
-            result = value;
-            return true;
-        }
+            case int value:
+                {
+                    result = value;
+                    return true;
+                }
 
-        result = null;
-        return false;
+            default:
+                {
+                    result = null;
+                    return false;
+                }
+        }
     }
 }

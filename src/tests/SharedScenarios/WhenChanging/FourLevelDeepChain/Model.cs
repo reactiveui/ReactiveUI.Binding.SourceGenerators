@@ -4,39 +4,40 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanging.FourLevelDeepChain
+namespace SharedScenarios.WhenChanging.FourLevelDeepChain;
+
+/// <summary>
+/// Leaf model with a string value and before-change notifications.
+/// </summary>
+public class Model : INotifyPropertyChanged, INotifyPropertyChanging
 {
     /// <summary>
-    /// Leaf model with a string value and before-change notifications.
+    /// The backing field for <see cref="Value"/>.
     /// </summary>
-    public class Model : INotifyPropertyChanged, INotifyPropertyChanging
+    private string _value = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <inheritdoc/>
+    public event PropertyChangingEventHandler? PropertyChanging;
+
+    /// <summary>
+    /// Gets or sets the value.
+    /// </summary>
+    public string Value
     {
-        /// <summary>
-        /// The backing field for <see cref="Value"/>.
-        /// </summary>
-        private string _value = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <inheritdoc/>
-        public event PropertyChangingEventHandler? PropertyChanging;
-
-        /// <summary>
-        /// Gets or sets the value.
-        /// </summary>
-        public string Value
+        get => _value;
+        set
         {
-            get => _value;
-            set
+            if (_value == value)
             {
-                if (_value != value)
-                {
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Value)));
-                    _value = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
-                }
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Value)));
+            _value = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value)));
         }
     }
 }

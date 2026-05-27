@@ -57,11 +57,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value1;
         set
         {
-            if (_value1 != value)
+            if (_value1 == value)
             {
-                _value1 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value1 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -71,11 +73,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value2;
         set
         {
-            if (_value2 != value)
+            if (_value2 == value)
             {
-                _value2 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value2 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -85,11 +89,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value3;
         set
         {
-            if (_value3 != value)
+            if (_value3 == value)
             {
-                _value3 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value3 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -99,11 +105,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value4;
         set
         {
-            if (_value4 != value)
+            if (_value4 == value)
             {
-                _value4 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value4 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -113,11 +121,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value5;
         set
         {
-            if (_value5 != value)
+            if (_value5 == value)
             {
-                _value5 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value5 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -127,11 +137,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value6;
         set
         {
-            if (_value6 != value)
+            if (_value6 == value)
             {
-                _value6 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value6 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -141,11 +153,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value7;
         set
         {
-            if (_value7 != value)
+            if (_value7 == value)
             {
-                _value7 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value7 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -155,11 +169,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value8;
         set
         {
-            if (_value8 != value)
+            if (_value8 == value)
             {
-                _value8 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value8 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -169,11 +185,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value9;
         set
         {
-            if (_value9 != value)
+            if (_value9 == value)
             {
-                _value9 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value9 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -183,11 +201,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value10;
         set
         {
-            if (_value10 != value)
+            if (_value10 == value)
             {
-                _value10 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value10 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -197,11 +217,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value11;
         set
         {
-            if (_value11 != value)
+            if (_value11 == value)
             {
-                _value11 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value11 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -211,11 +233,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value12;
         set
         {
-            if (_value12 != value)
+            if (_value12 == value)
             {
-                _value12 = value;
-                OnPropertyChanged();
+                return;
             }
+
+            _value12 = value;
+            OnPropertyChanged();
         }
     }
 
@@ -224,5 +248,5 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
     /// </summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        PropertyChanged?.Invoke(this, new(propertyName));
 }

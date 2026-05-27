@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Windows.Input;
-
 using ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
@@ -13,6 +12,26 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 /// </summary>
 public class BindCommandTests
 {
+    /// <summary>
+    /// The expression-parameter test item value.
+    /// </summary>
+    private const string TestItem = "TestItem";
+
+    /// <summary>
+    /// The observable command-parameter value.
+    /// </summary>
+    private const string ObsParam = "obs-param";
+
+    /// <summary>
+    /// The updated observable command-parameter value.
+    /// </summary>
+    private const string UpdatedValue = "updated";
+
+    /// <summary>
+    /// The number of clicks performed in the multiple-clicks test.
+    /// </summary>
+    private const int ExpectedClickCount = 3;
+
     /// <summary>
     /// Verifies that clicking the button executes the bound command (command set before binding).
     /// </summary>
@@ -63,7 +82,7 @@ public class BindCommandTests
 
         using var binding = BindCommandScenarios.BasicNoParam(vm, view);
 
-        var action = () => view.SaveButton.PerformClick();
+        var action = view.SaveButton.PerformClick;
         await Assert.That(action).ThrowsNothing();
     }
 
@@ -139,10 +158,7 @@ public class BindCommandTests
     [Test]
     public async Task ExpressionParam_PassesParameterToCommand()
     {
-        var vm = new SharedScenarios.BindCommand.ExpressionParam.MyViewModel
-        {
-            CurrentItem = "TestItem",
-        };
+        var vm = new SharedScenarios.BindCommand.ExpressionParam.MyViewModel { CurrentItem = TestItem };
         var view = new SharedScenarios.BindCommand.ExpressionParam.MyView();
         var command = new TrackingCommand();
         vm.Save = command;
@@ -151,7 +167,7 @@ public class BindCommandTests
         view.SaveButton.PerformClick();
 
         await Assert.That(command.ExecuteCount).IsEqualTo(1);
-        await Assert.That(command.LastParameter).IsEqualTo("TestItem");
+        await Assert.That(command.LastParameter).IsEqualTo(TestItem);
     }
 
     /// <summary>
@@ -162,10 +178,7 @@ public class BindCommandTests
     [Test]
     public async Task ExpressionParam_ParameterCapturedAtCommandBindTime()
     {
-        var vm = new SharedScenarios.BindCommand.ExpressionParam.MyViewModel
-        {
-            CurrentItem = "Initial",
-        };
+        var vm = new SharedScenarios.BindCommand.ExpressionParam.MyViewModel { CurrentItem = "Initial" };
         var view = new SharedScenarios.BindCommand.ExpressionParam.MyView();
         var command = new TrackingCommand();
 
@@ -219,7 +232,7 @@ public class BindCommandTests
         view.SaveButton.PerformClick();
         view.SaveButton.PerformClick();
 
-        await Assert.That(command.ExecuteCount).IsEqualTo(3);
+        await Assert.That(command.ExecuteCount).IsEqualTo(ExpectedClickCount);
     }
 
     /// <summary>
@@ -237,7 +250,7 @@ public class BindCommandTests
         using var binding = BindCommandScenarios.BasicNoParam(vm, view);
 
         vm.Save = null;
-        var action = () => view.SaveButton.PerformClick();
+        var action = view.SaveButton.PerformClick;
         await Assert.That(action).ThrowsNothing();
         await Assert.That(command.ExecuteCount).IsEqualTo(0);
     }
@@ -342,7 +355,7 @@ public class BindCommandTests
         var binding = BindCommandScenarios.BasicNoParam(vm, view);
         binding.Dispose();
 
-        var action = () => binding.Dispose();
+        var action = binding.Dispose;
         await Assert.That(action).ThrowsNothing();
     }
 
@@ -375,8 +388,7 @@ public class BindCommandTests
     {
         var vm = new SharedScenarios.BindCommand.EventEnabled.MyViewModel();
         var view = new SharedScenarios.BindCommand.EventEnabled.MyView();
-        var command = new TrackingCommand { CanExecuteResult = false };
-        vm.Save = command;
+        vm.Save = new TrackingCommand { CanExecuteResult = false };
 
         using var binding = BindCommandScenarios.EventEnabled(vm, view);
 
@@ -445,10 +457,7 @@ public class BindCommandTests
     [Test]
     public async Task EventEnabledExprParam_PassesParameter()
     {
-        var vm = new SharedScenarios.BindCommand.EventEnabledExprParam.MyViewModel
-        {
-            CurrentItem = "TestItem",
-        };
+        var vm = new SharedScenarios.BindCommand.EventEnabledExprParam.MyViewModel { CurrentItem = TestItem };
         var view = new SharedScenarios.BindCommand.EventEnabledExprParam.MyView();
         var command = new TrackingCommand();
         vm.Save = command;
@@ -457,7 +466,7 @@ public class BindCommandTests
         view.SaveButton.PerformClick();
 
         await Assert.That(command.ExecuteCount).IsEqualTo(1);
-        await Assert.That(command.LastParameter).IsEqualTo("TestItem");
+        await Assert.That(command.LastParameter).IsEqualTo(TestItem);
     }
 
     /// <summary>
@@ -470,14 +479,14 @@ public class BindCommandTests
         var vm = new SharedScenarios.BindCommand.EventEnabledObsParam.MyViewModel();
         var view = new SharedScenarios.BindCommand.EventEnabledObsParam.MyView();
         var command = new TrackingCommand();
-        var paramSubject = new System.Reactive.Subjects.BehaviorSubject<string>("obs-param");
+        var paramSubject = new System.Reactive.Subjects.BehaviorSubject<string>(ObsParam);
         vm.Save = command;
 
         using var binding = BindCommandScenarios.EventEnabledObsParam(vm, view, paramSubject);
         view.SaveButton.PerformClick();
 
         await Assert.That(command.ExecuteCount).IsEqualTo(1);
-        await Assert.That(command.LastParameter).IsEqualTo("obs-param");
+        await Assert.That(command.LastParameter).IsEqualTo(ObsParam);
     }
 
     /// <summary>
@@ -495,10 +504,10 @@ public class BindCommandTests
 
         using var binding = BindCommandScenarios.EventEnabledObsParam(vm, view, paramSubject);
 
-        paramSubject.OnNext("updated");
+        paramSubject.OnNext(UpdatedValue);
         view.SaveButton.PerformClick();
 
-        await Assert.That(command.LastParameter).IsEqualTo("updated");
+        await Assert.That(command.LastParameter).IsEqualTo(UpdatedValue);
     }
 
     // ── CommandProperty (Command + CommandParameter, no event) ──────────
@@ -580,10 +589,7 @@ public class BindCommandTests
     [Test]
     public async Task CommandPropertyExprParam_SetsCommandParameter()
     {
-        var vm = new SharedScenarios.BindCommand.CommandPropertyExprParam.MyViewModel
-        {
-            CurrentItem = "TestItem",
-        };
+        var vm = new SharedScenarios.BindCommand.CommandPropertyExprParam.MyViewModel { CurrentItem = TestItem };
         var view = new SharedScenarios.BindCommand.CommandPropertyExprParam.MyView();
         var command = new TrackingCommand();
         vm.Save = command;
@@ -591,7 +597,7 @@ public class BindCommandTests
         using var binding = BindCommandScenarios.CommandPropertyExprParam(vm, view);
 
         await Assert.That(view.SaveButton.Command).IsEqualTo(command);
-        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo("TestItem");
+        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(TestItem);
     }
 
     /// <summary>
@@ -604,13 +610,13 @@ public class BindCommandTests
         var vm = new SharedScenarios.BindCommand.CommandPropertyObsParam.MyViewModel();
         var view = new SharedScenarios.BindCommand.CommandPropertyObsParam.MyView();
         var command = new TrackingCommand();
-        var paramSubject = new System.Reactive.Subjects.BehaviorSubject<string>("obs-param");
+        var paramSubject = new System.Reactive.Subjects.BehaviorSubject<string>(ObsParam);
         vm.Save = command;
 
         using var binding = BindCommandScenarios.CommandPropertyObsParam(vm, view, paramSubject);
 
         await Assert.That(view.SaveButton.Command).IsEqualTo(command);
-        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo("obs-param");
+        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(ObsParam);
     }
 
     /// <summary>
@@ -628,9 +634,9 @@ public class BindCommandTests
 
         using var binding = BindCommandScenarios.CommandPropertyObsParam(vm, view, paramSubject);
 
-        paramSubject.OnNext("updated");
+        paramSubject.OnNext(UpdatedValue);
 
-        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo("updated");
+        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(UpdatedValue);
     }
 
     /// <summary>
@@ -641,8 +647,8 @@ public class BindCommandTests
         /// <inheritdoc/>
         public event EventHandler? CanExecuteChanged
         {
-            add { }
-            remove { }
+            add { /* CanExecute never changes for this command. */ }
+            remove { /* CanExecute never changes for this command. */ }
         }
 
         /// <summary>

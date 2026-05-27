@@ -5,56 +5,59 @@
 using System;
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenAnyObservable.TwoObservablesMerge
+namespace SharedScenarios.WhenAnyObservable.TwoObservablesMerge;
+
+/// <summary>
+/// ViewModel with two observable properties of the same type.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel with two observable properties of the same type.
+    /// The backing field for <see cref="Command1"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private IObservable<string>? _command1;
+
+    /// <summary>
+    /// The backing field for <see cref="Command2"/>.
+    /// </summary>
+    private IObservable<string>? _command2;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the first command observable.
+    /// </summary>
+    public IObservable<string>? Command1
     {
-        /// <summary>
-        /// The backing field for <see cref="Command1"/>.
-        /// </summary>
-        private IObservable<string>? _command1;
-
-        /// <summary>
-        /// The backing field for <see cref="Command2"/>.
-        /// </summary>
-        private IObservable<string>? _command2;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the first command observable.
-        /// </summary>
-        public IObservable<string>? Command1
+        get => _command1;
+        set
         {
-            get => _command1;
-            set
+            if (_command1 == value)
             {
-                if (_command1 != value)
-                {
-                    _command1 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Command1)));
-                }
+                return;
             }
+
+            _command1 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Command1)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the second command observable.
-        /// </summary>
-        public IObservable<string>? Command2
+    /// <summary>
+    /// Gets or sets the second command observable.
+    /// </summary>
+    public IObservable<string>? Command2
+    {
+        get => _command2;
+        set
         {
-            get => _command2;
-            set
+            if (_command2 == value)
             {
-                if (_command2 != value)
-                {
-                    _command2 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Command2)));
-                }
+                return;
             }
+
+            _command2 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Command2)));
         }
     }
 }

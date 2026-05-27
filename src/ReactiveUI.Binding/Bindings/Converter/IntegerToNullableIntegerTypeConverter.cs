@@ -9,6 +9,11 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public sealed class IntegerToNullableIntegerTypeConverter : IBindingTypeConverter<int, int?>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
     public Type FromType => typeof(int);
 
@@ -16,7 +21,7 @@ public sealed class IntegerToNullableIntegerTypeConverter : IBindingTypeConverte
     public Type ToType => typeof(int?);
 
     /// <inheritdoc/>
-    public int GetAffinityForObjects() => 2;
+    public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public bool TryConvert(int from, object? conversionHint, out int? result)

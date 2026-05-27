@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenChanged.SinglePropertyReactiveObject
+namespace SharedScenarios.WhenChanged.SinglePropertyReactiveObject;
+
+/// <summary>
+/// Exercises WhenChanged on a ReactiveObject property.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenChanged on a ReactiveObject property.
+    /// Creates a WhenChanged observable for the Name property.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenChanged observable for the Name property.
-        /// </summary>
-        /// <param name="vm">The view model to observe.</param>
-        /// <returns>An observable of name values.</returns>
-        public static IObservable<string> Execute(MyViewModel vm)
-            => vm.WhenChanged(x => x.Name);
-    }
+    /// <param name="vm">The view model to observe.</param>
+    /// <returns>An observable of name values.</returns>
+    public static IObservable<string> Execute(MyViewModel vm)
+        => vm.WhenChanged(x => x.Name);
 }

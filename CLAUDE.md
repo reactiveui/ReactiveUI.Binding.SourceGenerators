@@ -281,6 +281,24 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 - **Modern C#:** Nullable reference types, pattern matching, records, init setters
 - **netstandard2.0 targets:** Use `IsExternalInit.cs` polyfill for records; avoid APIs not available in netstandard2.0 (e.g., use `if (x is null) throw new System.ArgumentNullException(...)` instead of `ArgumentNullException.ThrowIfNull()`)
 
+## Analyzer Suppression Policy
+
+**NO analyzer suppressions are allowed unless discussed and approved first.** This applies to every form of suppression: `[SuppressMessage]` attributes, `#pragma warning disable`, `.editorconfig` severity downgrades, and `<NoWarn>` in project files. **Fix the underlying issue instead.**
+
+If a rule genuinely cannot be fixed without changing behavior or public API, **STOP and raise it for discussion — do not suppress unilaterally, and do not present a suppression as if it were a fix.**
+
+### Pre-approved suppressions (the ONLY ones allowed without further discussion)
+
+| Rule | Where it may be suppressed | Justification text |
+|------|----------------------------|--------------------|
+| **S107** (too many parameters) | The **offending method only** (never class-level) where the parameter count is inherent — e.g. CombineLatest selector lambdas, CallerInfo dispatch stubs. | parameter count is inherent to the API/overload under test |
+| **S4018** (generic type param not inferable) | **Public / interface-dictated** generic methods whose signature cannot change. Must be **fixed** (refactored) when the method is private/internal and refactorable. | type parameter is dictated by the interface / specified explicitly by the caller |
+| **S100 / S101** (PascalCase naming) | Only for established domain acronyms: **INPC** (INotifyPropertyChanged), **KVO** (Key-Value Observing), **POCO**. | established acronym matching ReactiveUI domain terminology |
+| **S2360** (optional parameters) | Only the CallerInfo dispatch stubs (e.g. `ReactiveSchedulerExtensions`) where converting to overloads would exceed the parameter-count limit (S107). | part of the CallerInfo dispatch contract; overloads would exceed the parameter limit |
+| **CA1040** (empty interfaces) | Only interfaces that are intentional **marker interfaces** (e.g. `IActivatableView`). | intentional marker interface |
+
+Anything **not** in this table — including (non-exhaustively) S103, S2342, S4070, RCS1157, CA1019, CA1508, S6566, S6562 — must be **fixed**, or **discussed and approved before any suppression is added**.
+
 ## Key Architectural Patterns
 
 ### Value-Equatable Models (Critical for Caching)

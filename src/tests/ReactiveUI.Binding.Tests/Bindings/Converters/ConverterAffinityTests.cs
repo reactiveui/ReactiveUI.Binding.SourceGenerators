@@ -10,12 +10,22 @@ namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 public class ConverterAffinityTests
 {
     /// <summary>
+    /// The last-resort affinity reported by the equality converter.
+    /// </summary>
+    private const int LastResortAffinity = 1;
+
+    /// <summary>
+    /// The standard affinity reported by string-based type converters.
+    /// </summary>
+    private const int StringConverterAffinity = 2;
+
+    /// <summary>
     /// Verifies that the EqualityTypeConverter has affinity 1 (last resort).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EqualityConverter_ShouldHaveAffinity1() =>
-        await AssertAffinity(new EqualityTypeConverter(), 1);
+        await AssertAffinity(new EqualityTypeConverter(), LastResortAffinity);
 
     // ===================================================================
     // String identity converter
@@ -27,7 +37,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringConverter(), 2);
+        await AssertAffinity(new StringConverter(), StringConverterAffinity);
 
     // ===================================================================
     // Numeric → String converters
@@ -39,7 +49,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ByteToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new ByteToStringTypeConverter(), 2);
+        await AssertAffinity(new ByteToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableByteToStringTypeConverter has affinity 2.
@@ -47,7 +57,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableByteToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableByteToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableByteToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that ShortToStringTypeConverter has affinity 2.
@@ -55,7 +65,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ShortToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new ShortToStringTypeConverter(), 2);
+        await AssertAffinity(new ShortToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableShortToStringTypeConverter has affinity 2.
@@ -63,7 +73,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableShortToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableShortToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableShortToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that IntegerToStringTypeConverter has affinity 2.
@@ -71,7 +81,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IntegerToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new IntegerToStringTypeConverter(), 2);
+        await AssertAffinity(new IntegerToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableIntegerToStringTypeConverter has affinity 2.
@@ -79,7 +89,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableIntegerToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableIntegerToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableIntegerToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that LongToStringTypeConverter has affinity 2.
@@ -87,7 +97,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task LongToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new LongToStringTypeConverter(), 2);
+        await AssertAffinity(new LongToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableLongToStringTypeConverter has affinity 2.
@@ -95,7 +105,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableLongToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableLongToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableLongToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that SingleToStringTypeConverter has affinity 2.
@@ -103,7 +113,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new SingleToStringTypeConverter(), 2);
+        await AssertAffinity(new SingleToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableSingleToStringTypeConverter has affinity 2.
@@ -111,7 +121,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableSingleToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableSingleToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableSingleToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that DoubleToStringTypeConverter has affinity 2.
@@ -119,7 +129,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DoubleToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new DoubleToStringTypeConverter(), 2);
+        await AssertAffinity(new DoubleToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableDoubleToStringTypeConverter has affinity 2.
@@ -127,7 +137,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDoubleToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableDoubleToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableDoubleToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that DecimalToStringTypeConverter has affinity 2.
@@ -135,7 +145,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DecimalToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new DecimalToStringTypeConverter(), 2);
+        await AssertAffinity(new DecimalToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableDecimalToStringTypeConverter has affinity 2.
@@ -143,7 +153,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDecimalToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableDecimalToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableDecimalToStringTypeConverter(), StringConverterAffinity);
 
     // ===================================================================
     // String → Numeric converters
@@ -155,7 +165,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToByteTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToByteTypeConverter(), 2);
+        await AssertAffinity(new StringToByteTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableByteTypeConverter has affinity 2.
@@ -163,7 +173,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableByteTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableByteTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableByteTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToShortTypeConverter has affinity 2.
@@ -171,7 +181,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToShortTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToShortTypeConverter(), 2);
+        await AssertAffinity(new StringToShortTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableShortTypeConverter has affinity 2.
@@ -179,7 +189,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableShortTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableShortTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableShortTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToIntegerTypeConverter has affinity 2.
@@ -187,7 +197,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToIntegerTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToIntegerTypeConverter(), 2);
+        await AssertAffinity(new StringToIntegerTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableIntegerTypeConverter has affinity 2.
@@ -195,7 +205,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableIntegerTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableIntegerTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableIntegerTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToLongTypeConverter has affinity 2.
@@ -203,7 +213,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToLongTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToLongTypeConverter(), 2);
+        await AssertAffinity(new StringToLongTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableLongTypeConverter has affinity 2.
@@ -211,7 +221,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableLongTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableLongTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableLongTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToSingleTypeConverter has affinity 2.
@@ -219,7 +229,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToSingleTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToSingleTypeConverter(), 2);
+        await AssertAffinity(new StringToSingleTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableSingleTypeConverter has affinity 2.
@@ -227,7 +237,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableSingleTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableSingleTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableSingleTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToDoubleTypeConverter has affinity 2.
@@ -235,7 +245,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToDoubleTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToDoubleTypeConverter(), 2);
+        await AssertAffinity(new StringToDoubleTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableDoubleTypeConverter has affinity 2.
@@ -243,7 +253,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableDoubleTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableDoubleTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableDoubleTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToDecimalTypeConverter has affinity 2.
@@ -251,7 +261,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToDecimalTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToDecimalTypeConverter(), 2);
+        await AssertAffinity(new StringToDecimalTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableDecimalTypeConverter has affinity 2.
@@ -259,7 +269,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableDecimalTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableDecimalTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableDecimalTypeConverter(), StringConverterAffinity);
 
     // ===================================================================
     // Boolean ↔ String converters
@@ -271,7 +281,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BooleanToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new BooleanToStringTypeConverter(), 2);
+        await AssertAffinity(new BooleanToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableBooleanToStringTypeConverter has affinity 2.
@@ -279,7 +289,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableBooleanToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableBooleanToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableBooleanToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToBooleanTypeConverter has affinity 2.
@@ -287,7 +297,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToBooleanTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToBooleanTypeConverter(), 2);
+        await AssertAffinity(new StringToBooleanTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableBooleanTypeConverter has affinity 2.
@@ -295,7 +305,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableBooleanTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableBooleanTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableBooleanTypeConverter(), StringConverterAffinity);
 
     // ===================================================================
     // Guid ↔ String converters
@@ -307,7 +317,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GuidToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new GuidToStringTypeConverter(), 2);
+        await AssertAffinity(new GuidToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableGuidToStringTypeConverter has affinity 2.
@@ -315,7 +325,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableGuidToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableGuidToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableGuidToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToGuidTypeConverter has affinity 2.
@@ -323,7 +333,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToGuidTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToGuidTypeConverter(), 2);
+        await AssertAffinity(new StringToGuidTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableGuidTypeConverter has affinity 2.
@@ -331,7 +341,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableGuidTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableGuidTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableGuidTypeConverter(), StringConverterAffinity);
 
     // ===================================================================
     // DateTime ↔ String converters
@@ -343,7 +353,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DateTimeToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new DateTimeToStringTypeConverter(), 2);
+        await AssertAffinity(new DateTimeToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableDateTimeToStringTypeConverter has affinity 2.
@@ -351,7 +361,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDateTimeToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableDateTimeToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableDateTimeToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToDateTimeTypeConverter has affinity 2.
@@ -359,7 +369,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToDateTimeTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToDateTimeTypeConverter(), 2);
+        await AssertAffinity(new StringToDateTimeTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableDateTimeTypeConverter has affinity 2.
@@ -367,7 +377,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableDateTimeTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableDateTimeTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableDateTimeTypeConverter(), StringConverterAffinity);
 
     // ===================================================================
     // DateTimeOffset ↔ String converters
@@ -379,7 +389,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DateTimeOffsetToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new DateTimeOffsetToStringTypeConverter(), 2);
+        await AssertAffinity(new DateTimeOffsetToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableDateTimeOffsetToStringTypeConverter has affinity 2.
@@ -387,7 +397,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDateTimeOffsetToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableDateTimeOffsetToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableDateTimeOffsetToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToDateTimeOffsetTypeConverter has affinity 2.
@@ -395,7 +405,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToDateTimeOffsetTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToDateTimeOffsetTypeConverter(), 2);
+        await AssertAffinity(new StringToDateTimeOffsetTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableDateTimeOffsetTypeConverter has affinity 2.
@@ -403,7 +413,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableDateTimeOffsetTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableDateTimeOffsetTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableDateTimeOffsetTypeConverter(), StringConverterAffinity);
 
     // ===================================================================
     // TimeSpan ↔ String converters
@@ -415,7 +425,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TimeSpanToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new TimeSpanToStringTypeConverter(), 2);
+        await AssertAffinity(new TimeSpanToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableTimeSpanToStringTypeConverter has affinity 2.
@@ -423,7 +433,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableTimeSpanToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableTimeSpanToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableTimeSpanToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToTimeSpanTypeConverter has affinity 2.
@@ -431,7 +441,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToTimeSpanTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToTimeSpanTypeConverter(), 2);
+        await AssertAffinity(new StringToTimeSpanTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableTimeSpanTypeConverter has affinity 2.
@@ -439,7 +449,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableTimeSpanTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableTimeSpanTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableTimeSpanTypeConverter(), StringConverterAffinity);
 
     // ===================================================================
     // DateOnly ↔ String converters
@@ -451,7 +461,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DateOnlyToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new DateOnlyToStringTypeConverter(), 2);
+        await AssertAffinity(new DateOnlyToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableDateOnlyToStringTypeConverter has affinity 2.
@@ -459,7 +469,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDateOnlyToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableDateOnlyToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableDateOnlyToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToDateOnlyTypeConverter has affinity 2.
@@ -467,7 +477,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToDateOnlyTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToDateOnlyTypeConverter(), 2);
+        await AssertAffinity(new StringToDateOnlyTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableDateOnlyTypeConverter has affinity 2.
@@ -475,7 +485,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableDateOnlyTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableDateOnlyTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableDateOnlyTypeConverter(), StringConverterAffinity);
 
     // ===================================================================
     // TimeOnly ↔ String converters
@@ -487,7 +497,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TimeOnlyToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new TimeOnlyToStringTypeConverter(), 2);
+        await AssertAffinity(new TimeOnlyToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that NullableTimeOnlyToStringTypeConverter has affinity 2.
@@ -495,7 +505,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableTimeOnlyToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new NullableTimeOnlyToStringTypeConverter(), 2);
+        await AssertAffinity(new NullableTimeOnlyToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToTimeOnlyTypeConverter has affinity 2.
@@ -503,7 +513,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToTimeOnlyTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToTimeOnlyTypeConverter(), 2);
+        await AssertAffinity(new StringToTimeOnlyTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToNullableTimeOnlyTypeConverter has affinity 2.
@@ -511,7 +521,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToNullableTimeOnlyTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToNullableTimeOnlyTypeConverter(), 2);
+        await AssertAffinity(new StringToNullableTimeOnlyTypeConverter(), StringConverterAffinity);
 
     // ===================================================================
     // Uri ↔ String converters
@@ -523,7 +533,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task UriToStringTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new UriToStringTypeConverter(), 2);
+        await AssertAffinity(new UriToStringTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Verifies that StringToUriTypeConverter has affinity 2.
@@ -531,7 +541,7 @@ public class ConverterAffinityTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToUriTypeConverter_ShouldHaveAffinity2() =>
-        await AssertAffinity(new StringToUriTypeConverter(), 2);
+        await AssertAffinity(new StringToUriTypeConverter(), StringConverterAffinity);
 
     /// <summary>
     /// Asserts that the specified converter reports the expected affinity value.

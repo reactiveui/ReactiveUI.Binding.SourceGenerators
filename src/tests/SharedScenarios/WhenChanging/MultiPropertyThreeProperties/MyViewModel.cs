@@ -4,83 +4,88 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanging.MultiPropertyThreeProperties
+namespace SharedScenarios.WhenChanging.MultiPropertyThreeProperties;
+
+/// <summary>
+/// ViewModel with three observable properties supporting before-change notifications.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
     /// <summary>
-    /// ViewModel with three observable properties supporting before-change notifications.
+    /// The backing field for <see cref="Name"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+    private string _name = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="Age"/>.
+    /// </summary>
+    private int _age;
+
+    /// <summary>
+    /// The backing field for <see cref="Score"/>.
+    /// </summary>
+    private double _score;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <inheritdoc/>
+    public event PropertyChangingEventHandler? PropertyChanging;
+
+    /// <summary>
+    /// Gets or sets the name.
+    /// </summary>
+    public string Name
     {
-        /// <summary>
-        /// The backing field for <see cref="Name"/>.
-        /// </summary>
-        private string _name = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="Age"/>.
-        /// </summary>
-        private int _age;
-
-        /// <summary>
-        /// The backing field for <see cref="Score"/>.
-        /// </summary>
-        private double _score;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <inheritdoc/>
-        public event PropertyChangingEventHandler? PropertyChanging;
-
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        public string Name
+        get => _name;
+        set
         {
-            get => _name;
-            set
+            if (_name == value)
             {
-                if (_name != value)
-                {
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Name)));
-                    _name = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-                }
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Name)));
+            _name = value;
+            PropertyChanged?.Invoke(this, new(nameof(Name)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the age.
-        /// </summary>
-        public int Age
+    /// <summary>
+    /// Gets or sets the age.
+    /// </summary>
+    public int Age
+    {
+        get => _age;
+        set
         {
-            get => _age;
-            set
+            if (_age == value)
             {
-                if (_age != value)
-                {
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Age)));
-                    _age = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Age)));
-                }
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Age)));
+            _age = value;
+            PropertyChanged?.Invoke(this, new(nameof(Age)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the score.
-        /// </summary>
-        public double Score
+    /// <summary>
+    /// Gets or sets the score.
+    /// </summary>
+    public double Score
+    {
+        get => _score;
+        set
         {
-            get => _score;
-            set
+            if (_score.Equals(value))
             {
-                if (_score != value)
-                {
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Score)));
-                    _score = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Score)));
-                }
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Score)));
+            _score = value;
+            PropertyChanged?.Invoke(this, new(nameof(Score)));
         }
     }
 }

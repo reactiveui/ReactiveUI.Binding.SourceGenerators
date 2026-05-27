@@ -7,6 +7,10 @@ namespace ReactiveUI.Binding;
 /// <summary>
 /// Fluent builder for registering view-to-view-model mappings on a <see cref="DefaultViewLocator"/>.
 /// </summary>
+[SuppressMessage(
+    "Major Code Smell",
+    "S4018:Generic methods should provide type parameter for type inference",
+    Justification = "The type parameter denotes the target type (value/control/view), supplied explicitly by callers; it is not derivable from the arguments. Public API.")]
 public sealed class ViewMappingBuilder
 {
     /// <summary>
@@ -18,19 +22,26 @@ public sealed class ViewMappingBuilder
     /// Initializes a new instance of the <see cref="ViewMappingBuilder"/> class.
     /// </summary>
     /// <param name="locator">The view locator to register mappings on.</param>
-    internal ViewMappingBuilder(DefaultViewLocator locator)
-    {
-        _locator = locator;
-    }
+    internal ViewMappingBuilder(DefaultViewLocator locator) => _locator = locator;
 
     /// <summary>
     /// Maps a view model type to a view type with direct construction.
     /// </summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <typeparam name="TView">The view type. Must have a parameterless constructor.</typeparam>
-    /// <param name="contract">An optional contract string for named registrations.</param>
     /// <returns>This builder for chaining.</returns>
-    public ViewMappingBuilder Map<TViewModel, TView>(string? contract = null)
+    public ViewMappingBuilder Map<TViewModel, TView>()
+        where TViewModel : class
+        where TView : IViewFor, new() => Map<TViewModel, TView>(null);
+
+    /// <summary>
+    /// Maps a view model type to a view type with direct construction.
+    /// </summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <typeparam name="TView">The view type. Must have a parameterless constructor.</typeparam>
+    /// <param name="contract">A contract string for named registrations.</param>
+    /// <returns>This builder for chaining.</returns>
+    public ViewMappingBuilder Map<TViewModel, TView>(string? contract)
         where TViewModel : class
         where TView : IViewFor, new()
     {
@@ -43,9 +54,18 @@ public sealed class ViewMappingBuilder
     /// </summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <param name="factory">A factory function that creates the view.</param>
-    /// <param name="contract">An optional contract string for named registrations.</param>
     /// <returns>This builder for chaining.</returns>
-    public ViewMappingBuilder Map<TViewModel>(Func<IViewFor> factory, string? contract = null)
+    public ViewMappingBuilder Map<TViewModel>(Func<IViewFor> factory)
+        where TViewModel : class => Map<TViewModel>(factory, null);
+
+    /// <summary>
+    /// Maps a view model type to a view using a custom factory function.
+    /// </summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <param name="factory">A factory function that creates the view.</param>
+    /// <param name="contract">A contract string for named registrations.</param>
+    /// <returns>This builder for chaining.</returns>
+    public ViewMappingBuilder Map<TViewModel>(Func<IViewFor> factory, string? contract)
         where TViewModel : class
     {
         _locator.Map<TViewModel>(factory, contract);

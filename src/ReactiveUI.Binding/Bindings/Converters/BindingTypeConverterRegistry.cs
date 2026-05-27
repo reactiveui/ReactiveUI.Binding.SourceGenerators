@@ -66,30 +66,27 @@ public sealed class BindingTypeConverterRegistry
     {
         ArgumentExceptionHelper.ThrowIfNull(converter);
 
+        const int InitialConverterListCapacity = 4;
+
         var key = (converter.FromType, converter.ToType);
 
         lock (_gate)
         {
-            var snap = _snapshot ?? new Snapshot(new Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>>(16));
+            var snap = _snapshot ?? new Snapshot(new(16));
 
             // Copy-on-write update: clone the dictionary shallowly
             var newDict = CloneRegistryShallow(snap.ConvertersByTypePair);
 
-            if (!newDict.TryGetValue(key, out var list))
-            {
-                list = new List<IBindingTypeConverter>(4);
-            }
-            else
-            {
-                // Copy-on-write at the list level: clone before mutating
-                list = [.. list];
-            }
+            List<IBindingTypeConverter>? list =
+                !newDict.TryGetValue(key, out list)
+                    ? new(InitialConverterListCapacity)
+                    : [.. list];
 
             list.Add(converter);
             newDict[key] = list;
 
             // Publish the new snapshot (atomic via reference assignment)
-            _snapshot = new Snapshot(newDict);
+            _snapshot = new(newDict);
         }
     }
 

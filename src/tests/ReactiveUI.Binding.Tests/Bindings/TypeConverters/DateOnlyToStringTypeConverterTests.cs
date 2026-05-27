@@ -11,6 +11,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class DateOnlyToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -19,7 +24,7 @@ public class DateOnlyToStringTypeConverterTests
     {
         var converter = new DateOnlyToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -30,7 +35,7 @@ public class DateOnlyToStringTypeConverterTests
     public async Task TryConvert_DateOnly_Succeeds()
     {
         var converter = new DateOnlyToStringTypeConverter();
-        var value = new DateOnly(2024, 1, 15);
+        var value = new DateOnly(2_024, 1, 15);
 
         var result = converter.TryConvert(value, null, out var output);
 

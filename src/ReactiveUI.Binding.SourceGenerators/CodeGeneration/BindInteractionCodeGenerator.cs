@@ -4,8 +4,9 @@
 
 using System.Collections.Immutable;
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
+
+using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
@@ -19,20 +20,21 @@ internal static class BindInteractionCodeGenerator
     /// </summary>
     /// <param name="invocations">All detected BindInteraction invocations.</param>
     /// <param name="allClasses">All detected class binding info.</param>
-    /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression (C# 10+) is available.</param>
+    /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
     /// <returns>Generated source code string, or null if no invocations.</returns>
     internal static string? Generate(
         ImmutableArray<BindInteractionInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        bool supportsCallerArgExpr)
+        LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        var sb = new StringBuilder(invocations.Length * 1024);
-        CodeGeneratorHelpers.AppendExtensionClassHeader(sb);
+        var sb = new StringBuilder(invocations.Length * 1_024);
+        var supportsCallerArgExpr = features.SupportsCallerArgExpr;
+        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         sb.AppendLine();
 
         var groups = GroupByTypeSignature(invocations);
@@ -49,7 +51,10 @@ internal static class BindInteractionCodeGenerator
                 var inv = group.Invocations[i];
                 var vmClassInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.ViewModelTypeFullName);
                 var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                    inv.ViewTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, inv.ExpressionText);
+                    inv.ViewTypeFullName,
+                    inv.CallerFilePath,
+                    inv.CallerLineNumber,
+                    inv.ExpressionText);
                 GenerateBindInteractionMethod(sb, inv, vmClassInfo, suffix);
             }
         }
@@ -65,7 +70,8 @@ internal static class BindInteractionCodeGenerator
     /// </summary>
     /// <param name="invocations">The BindInteraction invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
-    internal static List<BindInteractionTypeGroup> GroupByTypeSignature(ImmutableArray<BindInteractionInvocationInfo> invocations)
+    internal static List<BindInteractionTypeGroup> GroupByTypeSignature(
+        ImmutableArray<BindInteractionInvocationInfo> invocations)
     {
         var groupMap = new Dictionary<string, List<BindInteractionInvocationInfo>>(invocations.Length);
         var keySb = new StringBuilder(128);
@@ -95,14 +101,14 @@ internal static class BindInteractionCodeGenerator
         foreach (var kvp in groupMap)
         {
             var first = kvp.Value[0];
-            result.Add(new BindInteractionTypeGroup(
+            result.Add(new(
                 first.ViewTypeFullName,
                 first.ViewModelTypeFullName,
                 first.InputTypeFullName,
                 first.OutputTypeFullName,
                 first.IsTaskHandler,
                 first.DontCareTypeFullName,
-                kvp.Value.ToArray()));
+                [.. kvp.Value]));
         }
 
         return result;
@@ -143,44 +149,47 @@ internal static class BindInteractionCodeGenerator
             : $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.IObservable<{group.DontCareTypeFullName}>>";
 
         sb.AppendLine($$"""
-                    /// <summary>
-                    /// Concrete typed overload for BindInteraction on {{group.ViewTypeFullName}}.
-                    /// Uses CallerArgumentExpression for dispatch.
-                    /// </summary>
-                    public static global::System.IDisposable BindInteraction(
-                        this {{group.ViewTypeFullName}} view,
-                        {{group.ViewModelTypeFullName}} viewModel,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{{group.ViewModelTypeFullName}}, global::ReactiveUI.Binding.IInteraction<{{group.InputTypeFullName}}, {{group.OutputTypeFullName}}>>> propertyName,
-                        {{handlerType}} handler,
-                        [global::System.Runtime.CompilerServices.CallerArgumentExpression("propertyName")] string propertyNameExpression = "",
-                        [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                        [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                    {
-                        propertyNameExpression = propertyNameExpression.StartsWith("static ") ? propertyNameExpression.Substring(7) : propertyNameExpression;
+        /// <summary>
+        /// Concrete typed overload for BindInteraction on {{group.ViewTypeFullName}}.
+        /// Uses CallerArgumentExpression for dispatch.
+        /// </summary>
+        public static global::System.IDisposable BindInteraction(
+            this {{group.ViewTypeFullName}} view,
+            {{group.ViewModelTypeFullName}} viewModel,
+            {{Expression}}<{{Func}}<{{group.ViewModelTypeFullName}}, {{IInteraction}}<{{group.InputTypeFullName}}, {{group.OutputTypeFullName}}>>> propertyName,
+            {{handlerType}} handler,
+            [global::System.Runtime.CompilerServices.CallerArgumentExpression("propertyName")] string propertyNameExpression = "",
+            [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
+            [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
+        {
+            propertyNameExpression = propertyNameExpression.StartsWith("static ") ? propertyNameExpression.Substring(7) : propertyNameExpression;
 
-            """);
+""");
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
             var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.ViewTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, inv.ExpressionText);
+                inv.ViewTypeFullName,
+                inv.CallerFilePath,
+                inv.CallerLineNumber,
+                inv.ExpressionText);
             var condition = CodeGeneratorHelpers.ConditionKeyword(i);
             var escapedExpr = CodeGeneratorHelpers.EscapeString(inv.ExpressionText);
 
             sb.AppendLine($$"""
-                            {{condition}} (propertyNameExpression == "{{escapedExpr}}")
-                            {
-                                return __BindInteraction_{{methodSuffix}}(view, viewModel, handler);
-                            }
-                """);
+                                        {{condition}} (propertyNameExpression == "{{escapedExpr}}")
+                                        {
+                                            return __BindInteraction_{{methodSuffix}}(viewModel, handler);
+                                        }
+                            """);
         }
 
         sb.AppendLine("""
-                        throw new global::System.InvalidOperationException(
-                            "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                    }
-            """);
+                                  throw new global::System.InvalidOperationException(
+                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
+                              }
+                      """);
     }
 
     /// <summary>
@@ -197,42 +206,45 @@ internal static class BindInteractionCodeGenerator
             : $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.IObservable<{group.DontCareTypeFullName}>>";
 
         sb.AppendLine($$"""
-                    /// <summary>
-                    /// Concrete typed overload for BindInteraction on {{group.ViewTypeFullName}}.
-                    /// Uses CallerFilePath + CallerLineNumber for dispatch.
-                    /// </summary>
-                    public static global::System.IDisposable BindInteraction(
-                        this {{group.ViewTypeFullName}} view,
-                        {{group.ViewModelTypeFullName}} viewModel,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{{group.ViewModelTypeFullName}}, global::ReactiveUI.Binding.IInteraction<{{group.InputTypeFullName}}, {{group.OutputTypeFullName}}>>> propertyName,
-                        {{handlerType}} handler,
-                        [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                        [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                    {
-            """);
+        /// <summary>
+        /// Concrete typed overload for BindInteraction on {{group.ViewTypeFullName}}.
+        /// Uses CallerFilePath + CallerLineNumber for dispatch.
+        /// </summary>
+        public static global::System.IDisposable BindInteraction(
+            this {{group.ViewTypeFullName}} view,
+            {{group.ViewModelTypeFullName}} viewModel,
+            {{Expression}}<{{Func}}<{{group.ViewModelTypeFullName}}, {{IInteraction}}<{{group.InputTypeFullName}}, {{group.OutputTypeFullName}}>>> propertyName,
+            {{handlerType}} handler,
+            [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
+            [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
+        {
+""");
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
             var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.ViewTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, inv.ExpressionText);
+                inv.ViewTypeFullName,
+                inv.CallerFilePath,
+                inv.CallerLineNumber,
+                inv.ExpressionText);
             var pathSuffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
             var condition = CodeGeneratorHelpers.ConditionKeyword(i);
 
             sb.AppendLine($$"""
-                            {{condition}} (callerLineNumber == {{inv.CallerLineNumber}}
-                                && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(pathSuffix)}}", global::System.StringComparison.OrdinalIgnoreCase))
-                            {
-                                return __BindInteraction_{{methodSuffix}}(view, viewModel, handler);
-                            }
-                """);
+                                        {{condition}} (callerLineNumber == {{inv.CallerLineNumber}}
+                                            && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(pathSuffix)}}", global::System.StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            return __BindInteraction_{{methodSuffix}}(viewModel, handler);
+                                        }
+                            """);
         }
 
         sb.AppendLine("""
-                        throw new global::System.InvalidOperationException(
-                            "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                    }
-            """);
+                                  throw new global::System.InvalidOperationException(
+                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
+                              }
+                      """);
     }
 
     /// <summary>
@@ -252,19 +264,19 @@ internal static class BindInteractionCodeGenerator
             ? $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{inv.InputTypeFullName}, {inv.OutputTypeFullName}>, global::System.Threading.Tasks.Task>"
             : $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{inv.InputTypeFullName}, {inv.OutputTypeFullName}>, global::System.IObservable<{inv.DontCareTypeFullName}>>";
 
-        var interactionType = $"global::ReactiveUI.Binding.IInteraction<{inv.InputTypeFullName}, {inv.OutputTypeFullName}>";
+        var interactionType =
+            $"global::ReactiveUI.Binding.IInteraction<{inv.InputTypeFullName}, {inv.OutputTypeFullName}>";
         var pathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.InteractionPropertyPath);
 
         sb.AppendLine($$"""
-                    private static global::System.IDisposable __BindInteraction_{{suffix}}(
-                        {{inv.ViewTypeFullName}} view,
-                        {{inv.ViewModelTypeFullName}} viewModel,
-                        {{handlerType}} handler)
-                    {
-                        // BindInteraction: {{pathComment}}
-                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+                                private static global::System.IDisposable __BindInteraction_{{suffix}}(
+                                    {{inv.ViewModelTypeFullName}} viewModel,
+                                    {{handlerType}} handler)
+                                {
+                                    // BindInteraction: {{pathComment}}
+                                    var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
 
-            """);
+                        """);
 
         // Emit inline observation of the interaction property on the view model
         // We need to handle the case where viewModel is null
@@ -273,63 +285,61 @@ internal static class BindInteractionCodeGenerator
             var propertyName = inv.InteractionPropertyPath[0].PropertyName;
             var isINPC = ObservationCodeGenerator.IsINPC(vmClassInfo);
 
-            if (isINPC)
-            {
-                sb.AppendLine($$"""
-                        if (viewModel == null)
-                        {
-                            return serial;
-                        }
+            sb.AppendLine(isINPC
+                ? $$"""
+                            if (viewModel == null)
+                            {
+                                return serial;
+                            }
 
-                        var interactionObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<{{interactionType}}>(
-                            viewModel,
-                            "{{propertyName}}",
-                            (global::System.ComponentModel.INotifyPropertyChanged __o) => (({{inv.ViewModelTypeFullName}})__o).{{propertyName}},
-                            true);
-                """);
-            }
-            else
-            {
-                sb.AppendLine($$"""
-                        if (viewModel == null)
-                        {
-                            return serial;
-                        }
+                            var interactionObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<{{interactionType}}>(
+                                viewModel,
+                                "{{propertyName}}",
+                                (global::System.ComponentModel.INotifyPropertyChanged __o) => (({{inv.ViewModelTypeFullName}})__o).{{propertyName}},
+                                true);
+                    """
+                : $$"""
+                            if (viewModel == null)
+                            {
+                                return serial;
+                            }
 
-                        var interactionObs = new global::ReactiveUI.Binding.Observables.ReturnObservable<{{interactionType}}>(viewModel.{{propertyName}});
-                """);
-            }
+                            var interactionObs = new global::ReactiveUI.Binding.Observables.ReturnObservable<{{interactionType}}>(viewModel.{{propertyName}});
+                    """);
         }
         else
         {
             // Deep path — emit full chain observation using ObservationCodeGenerator pattern
             sb.AppendLine("""
-                        if (viewModel == null)
-                        {
-                            return serial;
-                        }
-                """);
+                                  if (viewModel == null)
+                                  {
+                                      return serial;
+                                  }
+                          """);
 
             ObservationCodeGenerator.EmitInlineObservation(
-                sb, "viewModel", inv.InteractionPropertyPath, interactionType, vmClassInfo, "interactionObs");
+                sb,
+                "viewModel",
+                inv.InteractionPropertyPath,
+                interactionType,
+                vmClassInfo,
+                "interactionObs");
         }
 
         // Subscribe to the interaction observable and register the handler
-        var registerCall = inv.IsTaskHandler
-            ? "interaction.RegisterHandler(handler)"
-            : "interaction.RegisterHandler(handler)";
+        const string registerCall = "interaction.RegisterHandler(handler)";
 
         sb.AppendLine($$"""
 
-                        var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(interactionObs, interaction =>
-                        {
-                            serial.Disposable = interaction != null
-                                ? {{registerCall}}
-                                : global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                        });
-                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(sub, serial);
-                    }
-            """)
+                                    var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(interactionObs, interaction =>
+                                    {
+                                        serial.Disposable = interaction != null
+                                            ? {{registerCall}}
+                                            : global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                    });
+                                    return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(sub, serial);
+                                }
+                        """)
             .AppendLine();
     }
 

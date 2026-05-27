@@ -4,25 +4,24 @@
 
 using ReactiveUI;
 
-namespace SharedScenarios.WhenChanged.SinglePropertyReactiveObject
+namespace SharedScenarios.WhenChanged.SinglePropertyReactiveObject;
+
+/// <summary>
+/// ViewModel extending ReactiveObject with a single string property.
+/// </summary>
+public class MyViewModel : ReactiveObject
 {
     /// <summary>
-    /// ViewModel extending ReactiveObject with a single string property.
+    /// The backing field for <see cref="Name"/>.
     /// </summary>
-    public class MyViewModel : ReactiveObject
-    {
-        /// <summary>
-        /// The backing field for <see cref="Name"/>.
-        /// </summary>
-        private string _name = string.Empty;
+    private string _name = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        public string Name
-        {
-            get => _name;
-            set => this.RaiseAndSetIfChanged(ref _name, value);
-        }
+    /// <summary>
+    /// Gets or sets the name.
+    /// </summary>
+    public string Name
+    {
+        get => _name;
+        set => this.RaiseAndSetIfChanged(ref _name, value);
     }
 }

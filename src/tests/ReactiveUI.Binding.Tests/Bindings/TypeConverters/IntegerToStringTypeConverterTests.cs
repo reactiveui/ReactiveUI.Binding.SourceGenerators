@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class IntegerToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class IntegerToStringTypeConverterTests
     {
         var converter = new IntegerToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,7 +34,7 @@ public class IntegerToStringTypeConverterTests
     public async Task TryConvert_IntToString_Succeeds()
     {
         var converter = new IntegerToStringTypeConverter();
-        var value = 123456;
+        const int value = 123_456;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -45,7 +50,7 @@ public class IntegerToStringTypeConverterTests
     public async Task TryConvert_MaxValue_Succeeds()
     {
         var converter = new IntegerToStringTypeConverter();
-        var value = int.MaxValue;
+        const int value = int.MaxValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -61,7 +66,7 @@ public class IntegerToStringTypeConverterTests
     public async Task TryConvert_MinValue_Succeeds()
     {
         var converter = new IntegerToStringTypeConverter();
-        var value = int.MinValue;
+        const int value = int.MinValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -77,7 +82,7 @@ public class IntegerToStringTypeConverterTests
     public async Task TryConvert_NegativeValue_Succeeds()
     {
         var converter = new IntegerToStringTypeConverter();
-        var value = -123456;
+        const int value = -123_456;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -93,7 +98,7 @@ public class IntegerToStringTypeConverterTests
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new IntegerToStringTypeConverter();
-        var value = 42;
+        const int value = 42;
 
         var result = converter.TryConvert(value, 8, out var output);
 
@@ -109,7 +114,7 @@ public class IntegerToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_CustomFormat()
     {
         var converter = new IntegerToStringTypeConverter();
-        var value = 42;
+        const int value = 42;
 
         var result = converter.TryConvert(value, "000", out var output);
 
@@ -125,7 +130,7 @@ public class IntegerToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_HexFormat()
     {
         var converter = new IntegerToStringTypeConverter();
-        var value = 255;
+        const int value = 255;
 
         var result = converter.TryConvert(value, "X", out var output);
 
@@ -141,7 +146,7 @@ public class IntegerToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_HexFormatLowercase()
     {
         var converter = new IntegerToStringTypeConverter();
-        var value = 255;
+        const int value = 255;
 
         var result = converter.TryConvert(value, "x8", out var output);
 
@@ -157,7 +162,7 @@ public class IntegerToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_NumberFormat()
     {
         var converter = new IntegerToStringTypeConverter();
-        var value = 1234567;
+        const int value = 1_234_567;
 
         var result = converter.TryConvert(value, "N0", out var output);
 

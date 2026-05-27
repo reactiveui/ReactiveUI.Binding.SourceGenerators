@@ -20,16 +20,16 @@ namespace ReactiveUI.Binding
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 84
+            if (callerLineNumber == 88
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __BindTwoWay_7FFFEF88F2A77A84(source, target);
+                return __BindTwoWay_7FFFEF88F2A77B00(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_7FFFEF88F2A77A84(global::SharedScenarios.BindTwoWay.SinglePropertyStringToString.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyStringToString.MyView target)
+        private static global::System.IDisposable __BindTwoWay_7FFFEF88F2A77B00(global::SharedScenarios.BindTwoWay.SinglePropertyStringToString.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyStringToString.MyView target)
         {
             // BindTwoWay: Name <-> NameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

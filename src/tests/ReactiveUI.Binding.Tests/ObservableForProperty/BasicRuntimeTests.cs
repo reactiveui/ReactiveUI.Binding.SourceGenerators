@@ -10,29 +10,32 @@ namespace ReactiveUI.Binding.Tests.ObservableForProperty;
 public class BasicRuntimeTests
 {
     /// <summary>
+    /// The expected value used when constructing and asserting an observed change.
+    /// </summary>
+    private const int ExpectedValue = 42;
+
+    /// <summary>
     /// Verifies that ObservedChange can be constructed and its properties accessed.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObservedChange_Properties()
     {
-        var change = new ObservedChange<string, int>("sender", null, 42);
+        var change = new ObservedChange<string, int>("sender", null, ExpectedValue);
 
         await Assert.That(change.Sender).IsEqualTo("sender");
-        await Assert.That(change.Value).IsEqualTo(42);
+        await Assert.That(change.Value).IsEqualTo(ExpectedValue);
         await Assert.That(change.Expression).IsNull();
     }
 
     /// <summary>
-    /// Verifies that BindingDirection enum values exist.
+    /// Verifies that the BindingDirection enum defines the expected members at runtime.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindingDirection_Values()
     {
-        var oneWay = BindingDirection.OneWay;
-        var twoWay = BindingDirection.TwoWay;
-        await Assert.That(oneWay).IsEqualTo(BindingDirection.OneWay);
-        await Assert.That(twoWay).IsEqualTo(BindingDirection.TwoWay);
+        await Assert.That(Enum.IsDefined(BindingDirection.OneWay)).IsTrue();
+        await Assert.That(Enum.IsDefined(BindingDirection.TwoWay)).IsTrue();
     }
 }

@@ -12,7 +12,13 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="PropertyName">The name of the property for this path segment.</param>
 /// <param name="PropertyTypeFullName">The fully qualified type of the property.</param>
 /// <param name="DeclaringTypeFullName">The fully qualified type that declares this property.</param>
+/// <param name="IsReferenceType">
+/// Whether the property's type is a reference type. Used to decide whether the generated
+/// <c>Expression&lt;Func&lt;…, T&gt;&gt;</c> selector parameter may be annotated nullable (<c>T?</c>) so it
+/// accepts selectors of nullable reference-typed properties; value-type leaves stay non-nullable.
+/// </param>
 internal sealed record PropertyPathSegment(
     string PropertyName,
     string PropertyTypeFullName,
-    string DeclaringTypeFullName);
+    string DeclaringTypeFullName,
+    bool IsReferenceType);

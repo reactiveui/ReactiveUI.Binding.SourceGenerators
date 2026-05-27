@@ -19,6 +19,7 @@ public sealed class WpfBindingModule : IModule
     {
         ArgumentExceptionHelper.ThrowIfNull(resolver);
 
-        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(() => new DependencyObjectObservableForProperty());
+        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(() =>
+            new DependencyObjectObservableForProperty());
     }
 }

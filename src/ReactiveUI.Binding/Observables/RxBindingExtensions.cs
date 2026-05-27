@@ -37,7 +37,9 @@ public static class RxBindingExtensions
     /// <param name="source">The source observable.</param>
     /// <param name="selector">The projection function.</param>
     /// <returns>A projected observable.</returns>
-    public static IObservable<TResult> Select<TSource, TResult>(this IObservable<TSource> source, Func<TSource, TResult> selector) => new SelectObservable<TSource, TResult>(source, selector);
+    public static IObservable<TResult> Select<TSource, TResult>(
+        this IObservable<TSource> source,
+        Func<TSource, TResult> selector) => new SelectObservable<TSource, TResult>(source, selector);
 
     /// <summary>
     /// Flattens an observable of observables by subscribing to the most recent inner observable.
@@ -62,7 +64,8 @@ public static class RxBindingExtensions
     /// <typeparam name="T">The element type.</typeparam>
     /// <param name="source">The source observable.</param>
     /// <returns>An observable with distinct consecutive values.</returns>
-    public static IObservable<T> DistinctUntilChanged<T>(this IObservable<T> source) => new DistinctUntilChangedObservable<T>(source);
+    public static IObservable<T> DistinctUntilChanged<T>(this IObservable<T> source) =>
+        new DistinctUntilChangedObservable<T>(source);
 
     /// <summary>
     /// Merges multiple observables into one.

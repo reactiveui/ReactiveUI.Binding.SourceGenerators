@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class DateTimeOffsetToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class DateTimeOffsetToStringTypeConverterTests
     {
         var converter = new DateTimeOffsetToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,7 +34,7 @@ public class DateTimeOffsetToStringTypeConverterTests
     public async Task TryConvert_DateTimeOffset_Succeeds()
     {
         var converter = new DateTimeOffsetToStringTypeConverter();
-        var value = new DateTimeOffset(2024, 1, 15, 10, 30, 45, TimeSpan.FromHours(-5));
+        var value = new DateTimeOffset(2_024, 1, 15, 10, 30, 45, TimeSpan.FromHours(-5));
 
         var result = converter.TryConvert(value, null, out var output);
 

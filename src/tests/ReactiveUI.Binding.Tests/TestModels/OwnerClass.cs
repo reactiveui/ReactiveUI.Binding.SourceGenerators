@@ -43,5 +43,5 @@ public class OwnerClass : INotifyPropertyChanged
     /// </summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        PropertyChanged?.Invoke(this, new(propertyName));
 }

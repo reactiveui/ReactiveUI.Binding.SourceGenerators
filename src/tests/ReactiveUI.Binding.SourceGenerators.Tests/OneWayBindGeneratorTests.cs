@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp;
-
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -21,7 +20,8 @@ public class OneWayBindGeneratorTests
     public async Task SingleProperty_StringToString()
     {
         var source = SharedSourceReader.ReadScenario("OneWayBind/SinglePropertyStringToString");
-        var result = await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,8 @@ public class OneWayBindGeneratorTests
     public async Task MultipleBindings()
     {
         var source = SharedSourceReader.ReadScenario("OneWayBind/MultipleBindings");
-        var result = await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +48,8 @@ public class OneWayBindGeneratorTests
     public async Task SingleProperty_IntToInt()
     {
         var source = SharedSourceReader.ReadScenario("OneWayBind/SinglePropertyIntToInt");
-        var result = await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +62,8 @@ public class OneWayBindGeneratorTests
     public async Task SingleProperty_WithSelector()
     {
         var source = SharedSourceReader.ReadScenario("OneWayBind/SinglePropertyWithSelector");
-        var result = await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -73,7 +76,8 @@ public class OneWayBindGeneratorTests
     public async Task SingleProperty_WithSelectorAndScheduler()
     {
         var source = SharedSourceReader.ReadScenario("OneWayBind/SinglePropertyWithSelectorAndScheduler");
-        var result = await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -89,7 +93,9 @@ public class OneWayBindGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("OneWayBind/SinglePropertyStringToString");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(OneWayBindGeneratorTests),
+            LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -103,7 +109,8 @@ public class OneWayBindGeneratorTests
     public async Task TwoSameTypeBindings_GeneratesElseIf()
     {
         var source = SharedSourceReader.ReadScenario("OneWayBind/TwoSameTypeBindings");
-        var result = await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(OneWayBindGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }

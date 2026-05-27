@@ -83,11 +83,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value1;
         set
         {
-            if (_value1 != value)
+            if (_value1 == value)
             {
-                _value1 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value1)));
+                return;
             }
+
+            _value1 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value1)));
         }
     }
 
@@ -99,11 +101,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value2;
         set
         {
-            if (_value2 != value)
+            if (_value2 == value)
             {
-                _value2 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value2)));
+                return;
             }
+
+            _value2 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value2)));
         }
     }
 
@@ -115,11 +119,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value3;
         set
         {
-            if (_value3 != value)
+            if (_value3 == value)
             {
-                _value3 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value3)));
+                return;
             }
+
+            _value3 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value3)));
         }
     }
 
@@ -131,11 +137,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value4;
         set
         {
-            if (_value4 != value)
+            if (_value4 == value)
             {
-                _value4 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value4)));
+                return;
             }
+
+            _value4 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value4)));
         }
     }
 
@@ -147,11 +155,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value5;
         set
         {
-            if (_value5 != value)
+            if (_value5 == value)
             {
-                _value5 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value5)));
+                return;
             }
+
+            _value5 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value5)));
         }
     }
 
@@ -163,11 +173,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value6;
         set
         {
-            if (_value6 != value)
+            if (_value6 == value)
             {
-                _value6 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value6)));
+                return;
             }
+
+            _value6 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value6)));
         }
     }
 
@@ -179,11 +191,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value7;
         set
         {
-            if (_value7 != value)
+            if (_value7 == value)
             {
-                _value7 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value7)));
+                return;
             }
+
+            _value7 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value7)));
         }
     }
 
@@ -195,11 +209,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value8;
         set
         {
-            if (_value8 != value)
+            if (_value8 == value)
             {
-                _value8 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value8)));
+                return;
             }
+
+            _value8 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value8)));
         }
     }
 
@@ -211,11 +227,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value9;
         set
         {
-            if (_value9 != value)
+            if (_value9 == value)
             {
-                _value9 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value9)));
+                return;
             }
+
+            _value9 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value9)));
         }
     }
 
@@ -227,11 +245,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value10;
         set
         {
-            if (_value10 != value)
+            if (_value10 == value)
             {
-                _value10 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value10)));
+                return;
             }
+
+            _value10 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value10)));
         }
     }
 
@@ -243,11 +263,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value11;
         set
         {
-            if (_value11 != value)
+            if (_value11 == value)
             {
-                _value11 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value11)));
+                return;
             }
+
+            _value11 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value11)));
         }
     }
 
@@ -259,11 +281,13 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
         get => _value12;
         set
         {
-            if (_value12 != value)
+            if (_value12 == value)
             {
-                _value12 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value12)));
+                return;
             }
+
+            _value12 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value12)));
         }
     }
 }

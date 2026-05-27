@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class NullableIntegerToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class NullableIntegerToStringTypeConverterTests
     {
         var converter = new NullableIntegerToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,7 +34,7 @@ public class NullableIntegerToStringTypeConverterTests
     public async Task TryConvert_IntNullableToString_Succeeds()
     {
         var converter = new NullableIntegerToStringTypeConverter();
-        int? value = 123456;
+        int? value = 123_456;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -77,8 +82,7 @@ public class NullableIntegerToStringTypeConverterTests
     public async Task TryConvert_NullValue_ReturnsTrue()
     {
         var converter = new NullableIntegerToStringTypeConverter();
-
-        var result = converter.TryConvert(null, null, out var output);
+        var result = converter.TryConvert(null, null, out _);
 
         await Assert.That(result).IsTrue();
     }

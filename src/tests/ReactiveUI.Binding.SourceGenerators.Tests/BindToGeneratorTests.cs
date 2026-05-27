@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp;
-
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -21,7 +20,8 @@ public class BindToGeneratorTests
     public async Task SameTypeString()
     {
         var source = SharedSourceReader.ReadScenario("BindTo/SameTypeString");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindToGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindToGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,8 @@ public class BindToGeneratorTests
     public async Task DifferingTypes()
     {
         var source = SharedSourceReader.ReadScenario("BindTo/DifferingTypes");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindToGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindToGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +48,8 @@ public class BindToGeneratorTests
     public async Task WithConverterOverride()
     {
         var source = SharedSourceReader.ReadScenario("BindTo/WithConverterOverride");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindToGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindToGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +62,8 @@ public class BindToGeneratorTests
     public async Task WithConversionHint()
     {
         var source = SharedSourceReader.ReadScenario("BindTo/WithConversionHint");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindToGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindToGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -76,7 +79,9 @@ public class BindToGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindTo/SameTypeString");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindToGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(BindToGeneratorTests),
+            LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 }

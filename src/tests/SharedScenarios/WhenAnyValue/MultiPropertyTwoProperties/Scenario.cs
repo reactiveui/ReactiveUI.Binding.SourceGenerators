@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenAnyValue.MultiPropertyTwoProperties
+namespace SharedScenarios.WhenAnyValue.MultiPropertyTwoProperties;
+
+/// <summary>
+/// Exercises WhenAnyValue with two properties returning a tuple.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenAnyValue with two properties returning a tuple.
+    /// Creates a WhenAnyValue observable for Name and Age.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenAnyValue observable for Name and Age.
-        /// </summary>
-        /// <param name="vm">The view model to observe.</param>
-        /// <returns>An observable of (name, age) tuples.</returns>
-        public static IObservable<(string Name, int Age)> Execute(MyViewModel vm)
-            => vm.WhenAnyValue(x => x.Name, x => x.Age);
-    }
+    /// <param name="vm">The view model to observe.</param>
+    /// <returns>An observable of (name, age) tuples.</returns>
+    public static IObservable<(string Name, int Age)> Execute(MyViewModel vm)
+        => vm.WhenAnyValue(x => x.Name, x => x.Age);
 }

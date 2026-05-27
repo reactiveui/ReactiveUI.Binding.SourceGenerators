@@ -3,41 +3,41 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.OneWayBind.SinglePropertyStringToString
+namespace SharedScenarios.OneWayBind.SinglePropertyStringToString;
+
+/// <summary>
+/// Target View implementing IViewFor with a string property.
+/// </summary>
+public class MyView : IViewFor, INotifyPropertyChanged
 {
     /// <summary>
-    /// Target View implementing IViewFor with a string property.
+    /// The backing field for <see cref="NameText"/>.
     /// </summary>
-    public class MyView : IViewFor, INotifyPropertyChanged
+    private string _nameText = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <inheritdoc/>
+    public object? ViewModel { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name text.
+    /// </summary>
+    public string NameText
     {
-        /// <summary>
-        /// The backing field for <see cref="NameText"/>.
-        /// </summary>
-        private string _nameText = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <inheritdoc/>
-        public object? ViewModel { get; set; }
-
-        /// <summary>
-        /// Gets or sets the name text.
-        /// </summary>
-        public string NameText
+        get => _nameText;
+        set
         {
-            get => _nameText;
-            set
+            if (_nameText == value)
             {
-                if (_nameText != value)
-                {
-                    _nameText = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameText)));
-                }
+                return;
             }
+
+            _nameText = value;
+            PropertyChanged?.Invoke(this, new(nameof(NameText)));
         }
     }
 }

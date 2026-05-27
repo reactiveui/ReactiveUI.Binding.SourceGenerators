@@ -11,6 +11,26 @@ namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 public class ConverterRegistryTests
 {
     /// <summary>
+    ///     The number of concurrent read iterations in the thread-safety test.
+    /// </summary>
+    private const int ConcurrentReadIterations = 100;
+
+    /// <summary>
+    ///     The iteration index at which a concurrent write is interleaved.
+    /// </summary>
+    private const int ConcurrentWriteIteration = 50;
+
+    /// <summary>
+    ///     The expected number of converters after registering three.
+    /// </summary>
+    private const int ExpectedThreeConverters = 3;
+
+    /// <summary>
+    ///     The expected number of converters after registering two.
+    /// </summary>
+    private const int ExpectedTwoConverters = 2;
+
+    /// <summary>
     ///     Verifies that the registry supports concurrent reads during registration.
     ///     This tests the lock-free snapshot pattern.
     /// </summary>
@@ -28,13 +48,13 @@ public class ConverterRegistryTests
         var writeTasks = new List<Task>();
 
         // Act - Start concurrent reads and writes
-        for (var i = 0; i < 100; i++)
+        for (var i = 0; i < ConcurrentReadIterations; i++)
         {
             // Concurrent reads
             readTasks.Add(Task.Run(() => registry.TryGetConverter(typeof(int), typeof(string))));
 
             // Concurrent write
-            if (i == 50)
+            if (i == ConcurrentWriteIteration)
             {
                 writeTasks.Add(Task.Run(() => registry.Register(converter2)));
             }
@@ -161,7 +181,7 @@ public class ConverterRegistryTests
         var allConverters = registry.GetAllConverters().ToList();
 
         // Assert
-        await Assert.That(allConverters.Count).IsEqualTo(3);
+        await Assert.That(allConverters.Count).IsEqualTo(ExpectedThreeConverters);
         await Assert.That(allConverters).Contains(converter1);
         await Assert.That(allConverters).Contains(converter2);
         await Assert.That(allConverters).Contains(converter3);
@@ -312,7 +332,7 @@ public class ConverterRegistryTests
         registry.Register(converter2);
 
         var all = registry.GetAllConverters().ToList();
-        await Assert.That(all.Count).IsEqualTo(2);
+        await Assert.That(all.Count).IsEqualTo(ExpectedTwoConverters);
         await Assert.That(all).Contains(converter1);
         await Assert.That(all).Contains(converter2);
     }
@@ -372,13 +392,15 @@ public class ConverterRegistryTests
     {
         /// <inheritdoc/>
         public int GetAffinityForObjects(
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type fromType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+            Type fromType,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
             Type toType) => baseAffinity;
 
         /// <inheritdoc/>
         public bool TryConvert(
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type fromType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+            Type fromType,
             object from,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
             Type toType,

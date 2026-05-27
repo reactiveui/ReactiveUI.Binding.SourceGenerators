@@ -2,9 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Reactive.Linq;
-
 using ReactiveUI.Binding.Expressions;
+using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.ObservableForProperty;
 
@@ -40,7 +39,7 @@ public static class ObservedChangedMixin
 
         if (!item.TryGetValue(out var returnValue))
         {
-            throw new Exception($"One of the properties in the expression '{item.GetPropertyName()}' was null");
+            throw new InvalidOperationException($"One of the properties in the expression '{item.GetPropertyName()}' was null");
         }
 
         return returnValue;
@@ -71,7 +70,7 @@ public static class ObservedChangedMixin
     /// <returns>An Observable representing the stream of current values.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     public static IObservable<TValue> Value<TSender, TValue>(this IObservable<IObservedChange<TSender, TValue>> item) =>
-        item.Select(GetValue);
+        new SelectObservable<IObservedChange<TSender, TValue>, TValue>(item, GetValue);
 
     /// <summary>
     /// Attempts to return the current value of a property given a notification that it has changed.
@@ -82,15 +81,20 @@ public static class ObservedChangedMixin
     /// <param name="changeValue">The value of the property expression.</param>
     /// <returns>True if the entire expression was able to be followed, false otherwise.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
-    internal static bool TryGetValue<TSender, TValue>(this IObservedChange<TSender, TValue> item, out TValue changeValue)
+    internal static bool TryGetValue<TSender, TValue>(
+        this IObservedChange<TSender, TValue> item,
+        out TValue changeValue)
     {
-        if (!Equals(item.Value, default(TValue)))
+        if (Equals(item.Value, default(TValue)))
         {
-            changeValue = item.Value;
-            return true;
+            return Reflection.TryGetValueForPropertyChain(
+                out changeValue,
+                item.Sender,
+                item.Expression!.GetExpressionChain());
         }
 
-        return Reflection.TryGetValueForPropertyChain(out changeValue, item.Sender, item.Expression!.GetExpressionChain());
+        changeValue = item.Value;
+        return true;
     }
 
     /// <summary>
@@ -109,9 +113,14 @@ public static class ObservedChangedMixin
         TTarget target,
         Expression<Func<TTarget, TValue>> property)
     {
-        if (target is not null)
+        if (target is null)
         {
-            Reflection.TrySetValueToPropertyChain(target, Reflection.Rewrite(property.Body).GetExpressionChain(), item.GetValue());
+            return;
         }
+
+        Reflection.TrySetValueToPropertyChain(
+            target,
+            Reflection.Rewrite(property.Body).GetExpressionChain(),
+            item.GetValue());
     }
 }

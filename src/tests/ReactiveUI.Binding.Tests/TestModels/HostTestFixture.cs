@@ -90,12 +90,12 @@ public class HostTestFixture : INotifyPropertyChanged, INotifyPropertyChanging
     /// </summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanging([CallerMemberName] string? propertyName = null) =>
-        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
+        PropertyChanging?.Invoke(this, new(propertyName));
 
     /// <summary>
     /// Raises the PropertyChanged event.
     /// </summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        PropertyChanged?.Invoke(this, new(propertyName));
 }

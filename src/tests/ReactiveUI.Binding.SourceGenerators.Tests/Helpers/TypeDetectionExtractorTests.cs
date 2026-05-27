@@ -4,7 +4,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -23,18 +22,18 @@ public class TypeDetectionExtractorTests
     public async Task ExtractProperties_PublicProperties_ExtractsAll()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                    public int Age { get; set; }
-                }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                      public int Age { get; set; }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyViewModel");
@@ -52,18 +51,18 @@ public class TypeDetectionExtractorTests
     public async Task ExtractProperties_StaticProperty_Skipped()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public static string StaticProp { get; set; } = "";
-                    public string Name { get; set; } = "";
-                }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public static string StaticProp { get; set; } = "";
+                                      public string Name { get; set; } = "";
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyViewModel");
@@ -83,19 +82,19 @@ public class TypeDetectionExtractorTests
     public async Task ExtractProperties_WriteOnlyProperty_Skipped()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    private string _name = "";
-                    public string Name { set { _name = value; } }
-                    public string Title { get; set; } = "";
-                }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      private string _name = "";
+                                      public string Name { set { _name = value; } }
+                                      public string Title { get; set; } = "";
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyViewModel");
@@ -115,18 +114,18 @@ public class TypeDetectionExtractorTests
     public async Task ExtractProperties_Indexer_Included()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string this[int index] => "";
-                    public string Name { get; set; } = "";
-                }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string this[int index] => "";
+                                      public string Name { get; set; } = "";
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyViewModel");
@@ -147,18 +146,18 @@ public class TypeDetectionExtractorTests
     public async Task ExtractProperties_DependencyPropertyHeuristic_DetectsDP()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public static readonly object TitleProperty = new object();
-                    public string Title { get; set; } = "";
-                }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public static readonly object TitleProperty = new object();
+                                      public string Title { get; set; } = "";
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyViewModel");

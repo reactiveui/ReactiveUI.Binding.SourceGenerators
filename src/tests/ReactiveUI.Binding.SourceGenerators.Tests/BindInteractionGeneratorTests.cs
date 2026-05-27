@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp;
-
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -21,7 +20,11 @@ public class BindInteractionGeneratorTests
     public async Task TaskHandler()
     {
         var source = SharedSourceReader.ReadScenario("BindInteraction/TaskHandler");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindInteractionGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(
+                source,
+                typeof(BindInteractionGeneratorTests),
+                LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +37,11 @@ public class BindInteractionGeneratorTests
     public async Task ObservableHandler()
     {
         var source = SharedSourceReader.ReadScenario("BindInteraction/ObservableHandler");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindInteractionGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(
+                source,
+                typeof(BindInteractionGeneratorTests),
+                LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +54,11 @@ public class BindInteractionGeneratorTests
     public async Task DeepPropertyPath()
     {
         var source = SharedSourceReader.ReadScenario("BindInteraction/DeepPropertyPath");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindInteractionGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(
+                source,
+                typeof(BindInteractionGeneratorTests),
+                LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -57,10 +68,18 @@ public class BindInteractionGeneratorTests
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Minor Code Smell",
+        "S100:Methods and properties should be named in PascalCase",
+        Justification = "INPC abbreviates INotifyPropertyChanged, an established acronym matching the ReactiveUI domain terminology.")]
     public async Task NonINPCViewModel()
     {
         var source = SharedSourceReader.ReadScenario("BindInteraction/NonINPCViewModel");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindInteractionGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(
+                source,
+                typeof(BindInteractionGeneratorTests),
+                LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -76,7 +95,9 @@ public class BindInteractionGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindInteraction/TaskHandler");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindInteractionGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(BindInteractionGeneratorTests),
+            LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -90,7 +111,9 @@ public class BindInteractionGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindInteraction/ObservableHandler");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindInteractionGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(BindInteractionGeneratorTests),
+            LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -104,7 +127,9 @@ public class BindInteractionGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindInteraction/DeepPropertyPath");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindInteractionGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(BindInteractionGeneratorTests),
+            LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -118,7 +143,9 @@ public class BindInteractionGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindInteraction/NonINPCViewModel");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindInteractionGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(BindInteractionGeneratorTests),
+            LanguageVersion.CSharp7_3);
         await result.HasNoGeneratorDiagnostics();
     }
 }

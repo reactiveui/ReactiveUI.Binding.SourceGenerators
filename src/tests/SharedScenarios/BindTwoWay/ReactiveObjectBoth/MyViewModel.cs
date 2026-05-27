@@ -4,25 +4,24 @@
 
 using ReactiveUI;
 
-namespace SharedScenarios.BindTwoWay.ReactiveObjectBoth
+namespace SharedScenarios.BindTwoWay.ReactiveObjectBoth;
+
+/// <summary>
+/// Source ViewModel extending ReactiveObject.
+/// </summary>
+public class MyViewModel : ReactiveObject
 {
     /// <summary>
-    /// Source ViewModel extending ReactiveObject.
+    /// The backing field for <see cref="Name"/>.
     /// </summary>
-    public class MyViewModel : ReactiveObject
-    {
-        /// <summary>
-        /// The backing field for <see cref="Name"/>.
-        /// </summary>
-        private string _name = string.Empty;
+    private string _name = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        public string Name
-        {
-            get => _name;
-            set => this.RaiseAndSetIfChanged(ref _name, value);
-        }
+    /// <summary>
+    /// Gets or sets the name.
+    /// </summary>
+    public string Name
+    {
+        get => _name;
+        set => this.RaiseAndSetIfChanged(ref _name, value);
     }
 }

@@ -17,14 +17,14 @@ namespace ReactiveUI.Binding
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 53 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
+            if (callerLineNumber == 55 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __WhenAnyObservable_7FFFCD9779338800(objectToMonitor);
+                return __WhenAnyObservable_7FFFCD977933883E(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
         }
 
-        private static global::System.IObservable<string> __WhenAnyObservable_7FFFCD9779338800(global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel obj)
+        private static global::System.IObservable<string> __WhenAnyObservable_7FFFCD977933883E(global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel obj)
         {
             var __obsProperty = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,

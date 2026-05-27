@@ -4,8 +4,6 @@
 
 using Microsoft.CodeAnalysis.CSharp;
 
-using ReactiveUI.Binding.SourceGenerators;
-
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
 /// <summary>
@@ -20,7 +18,7 @@ public class RoslynHelpersTests
     [Test]
     public async Task GetMemberAccessName_MemberAccessInvocation_ReturnsName()
     {
-        var code = "obj.WhenChanged(x => x.Name)";
+        const string code = "obj.WhenChanged(x => x.Name)";
         var expr = SyntaxFactory.ParseExpression(code);
 
         var result = RoslynHelpers.GetMemberAccessName(expr);
@@ -63,7 +61,7 @@ public class RoslynHelpersTests
     [Test]
     public async Task IsBindSpecificInvocation_BindMethod_ReturnsTrue()
     {
-        var code = "obj.Bind(view, x => x.Name, x => x.Text)";
+        const string code = "obj.Bind(view, x => x.Name, x => x.Text)";
         var node = SyntaxFactory.ParseExpression(code);
 
         var result = RoslynHelpers.IsBindSpecificInvocation(node, CancellationToken.None);
@@ -78,7 +76,7 @@ public class RoslynHelpersTests
     [Test]
     public async Task IsBindSpecificInvocation_BindOneWayMethod_ReturnsFalse()
     {
-        var code = "obj.BindOneWay(view, x => x.Name, x => x.Text)";
+        const string code = "obj.BindOneWay(view, x => x.Name, x => x.Text)";
         var node = SyntaxFactory.ParseExpression(code);
 
         var result = RoslynHelpers.IsBindSpecificInvocation(node, CancellationToken.None);
@@ -93,7 +91,7 @@ public class RoslynHelpersTests
     [Test]
     public async Task IsBindOneWaySpecificInvocation_BindOneWayMethod_ReturnsTrue()
     {
-        var code = "obj.BindOneWay(view, x => x.Name, x => x.Text)";
+        const string code = "obj.BindOneWay(view, x => x.Name, x => x.Text)";
         var node = SyntaxFactory.ParseExpression(code);
 
         var result = RoslynHelpers.IsBindOneWaySpecificInvocation(node, CancellationToken.None);
@@ -108,7 +106,7 @@ public class RoslynHelpersTests
     [Test]
     public async Task IsBindOneWaySpecificInvocation_BindTwoWayMethod_ReturnsFalse()
     {
-        var code = "obj.BindTwoWay(view, x => x.Name, x => x.Text)";
+        const string code = "obj.BindTwoWay(view, x => x.Name, x => x.Text)";
         var node = SyntaxFactory.ParseExpression(code);
 
         var result = RoslynHelpers.IsBindOneWaySpecificInvocation(node, CancellationToken.None);
@@ -123,7 +121,7 @@ public class RoslynHelpersTests
     [Test]
     public async Task IsBindTwoWaySpecificInvocation_BindTwoWayMethod_ReturnsTrue()
     {
-        var code = "obj.BindTwoWay(view, x => x.Name, x => x.Text)";
+        const string code = "obj.BindTwoWay(view, x => x.Name, x => x.Text)";
         var node = SyntaxFactory.ParseExpression(code);
 
         var result = RoslynHelpers.IsBindTwoWaySpecificInvocation(node, CancellationToken.None);
@@ -138,7 +136,7 @@ public class RoslynHelpersTests
     [Test]
     public async Task IsOneWayBindSpecificInvocation_OneWayBindMethod_ReturnsTrue()
     {
-        var code = "obj.OneWayBind(view, x => x.Name, x => x.Text)";
+        const string code = "obj.OneWayBind(view, x => x.Name, x => x.Text)";
         var node = SyntaxFactory.ParseExpression(code);
 
         var result = RoslynHelpers.IsOneWayBindSpecificInvocation(node, CancellationToken.None);
@@ -153,7 +151,7 @@ public class RoslynHelpersTests
     [Test]
     public async Task IsOneWayBindSpecificInvocation_BindMethod_ReturnsFalse()
     {
-        var code = "obj.Bind(view, x => x.Name, x => x.Text)";
+        const string code = "obj.Bind(view, x => x.Name, x => x.Text)";
         var node = SyntaxFactory.ParseExpression(code);
 
         var result = RoslynHelpers.IsOneWayBindSpecificInvocation(node, CancellationToken.None);

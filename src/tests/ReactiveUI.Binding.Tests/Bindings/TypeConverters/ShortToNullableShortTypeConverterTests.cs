@@ -10,6 +10,21 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class ShortToNullableShortTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Sample short value used for conversion round-trips.
+    /// </summary>
+    private const short SampleShort = 1_234;
+
+    /// <summary>
+    /// Smaller short value used for conversion checks.
+    /// </summary>
+    private const short SmallShort = 42;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +33,7 @@ public class ShortToNullableShortTypeConverterTests
     {
         var converter = new ShortToNullableShortTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,12 +44,12 @@ public class ShortToNullableShortTypeConverterTests
     public async Task TryConvert_AlwaysSucceeds()
     {
         var converter = new ShortToNullableShortTypeConverter();
-        short value = 1234;
+        const short value = 1_234;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((short?)1234);
+        await Assert.That(output).IsEqualTo((short?)SampleShort);
     }
 
     /// <summary>
@@ -67,12 +82,12 @@ public class ShortToNullableShortTypeConverterTests
     public async Task TryConvertTyped_WithValidValue_ReturnsTrueAndOutput()
     {
         var converter = new ShortToNullableShortTypeConverter();
-        short value = 42;
+        const short value = 42;
 
         var success = converter.TryConvertTyped(value, null, out var result);
 
         await Assert.That(success).IsTrue();
-        await Assert.That(result).IsEqualTo((short?)42);
+        await Assert.That(result).IsEqualTo((short?)SmallShort);
     }
 
     /// <summary>
@@ -98,7 +113,7 @@ public class ShortToNullableShortTypeConverterTests
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()
     {
         var converter = new ShortToNullableShortTypeConverter();
-        var value = "invalid";
+        const string value = "invalid";
 
         var success = converter.TryConvertTyped(value, null, out var result);
 

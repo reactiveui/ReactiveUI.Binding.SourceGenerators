@@ -15,6 +15,24 @@ namespace ReactiveUI.Binding.Tests.Fallback;
 public class RuntimeObservationFallbackTests
 {
     /// <summary>
+    /// A sample name value used across the multi-property tests.
+    /// </summary>
+    private const string SampleName = "Alice";
+
+    /// <summary>
+    /// A sample age value used across the multi-property tests.
+    /// </summary>
+    private const int SampleAge = 30;
+
+    /// <summary>The sample city value used across the fallback tests.</summary>
+    private const string SampleCity = "Seattle";
+
+    /// <summary>
+    /// The expected number of emissions when an initial value plus one change are observed.
+    /// </summary>
+    private const int ExpectedTwoEmissions = 2;
+
+    /// <summary>
     /// Verifies that WhenChanged emits the initial value and subsequent changes.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -27,13 +45,13 @@ public class RuntimeObservationFallbackTests
         var values = new List<string>();
 
         using var sub = RuntimeObservationFallback.WhenChanged(
-            vm,
-            x => x.Name)
+                vm,
+                x => x.Name)
             .Subscribe(values.Add);
 
         vm.Name = "Changed";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
         await Assert.That(values[0]).IsEqualTo("Initial");
         await Assert.That(values[1]).IsEqualTo("Changed");
     }
@@ -51,8 +69,8 @@ public class RuntimeObservationFallbackTests
         var values = new List<string>();
 
         using var sub = RuntimeObservationFallback.WhenChanging(
-            vm,
-            x => x.Name)
+                vm,
+                x => x.Name)
             .Subscribe(values.Add);
 
         vm.Name = "Changed";
@@ -74,13 +92,13 @@ public class RuntimeObservationFallbackTests
         var values = new List<string>();
 
         using var sub = RuntimeObservationFallback.WhenAnyValue(
-            vm,
-            x => x.Name)
+                vm,
+                x => x.Name)
             .Subscribe(values.Add);
 
         vm.Name = "End";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
         await Assert.That(values[0]).IsEqualTo("Start");
     }
 
@@ -93,18 +111,18 @@ public class RuntimeObservationFallbackTests
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Alice", Age = 30 };
+        var vm = new TestViewModel { Name = SampleName, Age = SampleAge };
         var values = new List<(string Value1, int Value2)>();
 
         using var sub = RuntimeObservationFallback.WhenChanged(
-            vm,
-            x => x.Name,
-            x => x.Age)
+                vm,
+                x => x.Name,
+                x => x.Age)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].Value1).IsEqualTo("Alice");
-        await Assert.That(values[0].Value2).IsEqualTo(30);
+        await Assert.That(values[0].Value1).IsEqualTo(SampleName);
+        await Assert.That(values[0].Value2).IsEqualTo(SampleAge);
     }
 
     /// <summary>
@@ -116,20 +134,20 @@ public class RuntimeObservationFallbackTests
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Alice", Age = 30, Address = new TestAddress { City = "Seattle" } };
+        var vm = new TestViewModel { Name = SampleName, Age = SampleAge, Address = new() { City = SampleCity } };
         var values = new List<(string Value1, int Value2, string? Value3)>();
 
         using var sub = RuntimeObservationFallback.WhenChanged(
-            vm,
-            x => x.Name,
-            x => x.Age,
-            x => x.Address!.City)
+                vm,
+                x => x.Name,
+                x => x.Age,
+                x => x.Address!.City)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].Value1).IsEqualTo("Alice");
-        await Assert.That(values[0].Value2).IsEqualTo(30);
-        await Assert.That(values[0].Value3).IsEqualTo("Seattle");
+        await Assert.That(values[0].Value1).IsEqualTo(SampleName);
+        await Assert.That(values[0].Value2).IsEqualTo(SampleAge);
+        await Assert.That(values[0].Value3).IsEqualTo(SampleCity);
     }
 
     /// <summary>
@@ -141,19 +159,19 @@ public class RuntimeObservationFallbackTests
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Alice", Age = 30, Address = new TestAddress { City = "Seattle" } };
+        var vm = new TestViewModel { Name = SampleName, Age = SampleAge, Address = new() { City = SampleCity } };
         var values = new List<(string Value1, int Value2, string? Value3)>();
 
         using var sub = RuntimeObservationFallback.WhenChanged(
-            vm,
-            x => x.Name,
-            x => x.Age,
-            x => x.Address!.City)
+                vm,
+                x => x.Name,
+                x => x.Age,
+                x => x.Address!.City)
             .Subscribe(values.Add);
 
         vm.Name = "Bob";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
         await Assert.That(values[^1].Value1).IsEqualTo("Bob");
     }
 
@@ -166,13 +184,13 @@ public class RuntimeObservationFallbackTests
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Alice", Age = 30 };
+        var vm = new TestViewModel { Name = SampleName, Age = SampleAge };
         var values = new List<(string Value1, int Value2)>();
 
         using var sub = RuntimeObservationFallback.WhenChanging(
-            vm,
-            x => x.Name,
-            x => x.Age)
+                vm,
+                x => x.Name,
+                x => x.Age)
             .Subscribe(values.Add);
 
         vm.Name = "Bob";
@@ -189,14 +207,14 @@ public class RuntimeObservationFallbackTests
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Alice", Age = 30, Address = new TestAddress { City = "Seattle" } };
+        var vm = new TestViewModel { Name = SampleName, Age = SampleAge, Address = new() { City = SampleCity } };
         var values = new List<(string Value1, int Value2, string? Value3)>();
 
         using var sub = RuntimeObservationFallback.WhenChanging(
-            vm,
-            x => x.Name,
-            x => x.Age,
-            x => x.Address!.City)
+                vm,
+                x => x.Name,
+                x => x.Age,
+                x => x.Address!.City)
             .Subscribe(values.Add);
 
         vm.Name = "Bob";
@@ -213,18 +231,18 @@ public class RuntimeObservationFallbackTests
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Alice", Age = 30 };
+        var vm = new TestViewModel { Name = SampleName, Age = SampleAge };
         var values = new List<(string Value1, int Value2)>();
 
         using var sub = RuntimeObservationFallback.WhenAnyValue(
-            vm,
-            x => x.Name,
-            x => x.Age)
+                vm,
+                x => x.Name,
+                x => x.Age)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].Value1).IsEqualTo("Alice");
-        await Assert.That(values[0].Value2).IsEqualTo(30);
+        await Assert.That(values[0].Value1).IsEqualTo(SampleName);
+        await Assert.That(values[0].Value2).IsEqualTo(SampleAge);
     }
 
     /// <summary>
@@ -236,20 +254,20 @@ public class RuntimeObservationFallbackTests
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Alice", Age = 30, Address = new TestAddress { City = "Seattle" } };
+        var vm = new TestViewModel { Name = SampleName, Age = SampleAge, Address = new() { City = SampleCity } };
         var values = new List<(string Value1, int Value2, string? Value3)>();
 
         using var sub = RuntimeObservationFallback.WhenAnyValue(
-            vm,
-            x => x.Name,
-            x => x.Age,
-            x => x.Address!.City)
+                vm,
+                x => x.Name,
+                x => x.Age,
+                x => x.Address!.City)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].Value1).IsEqualTo("Alice");
-        await Assert.That(values[0].Value2).IsEqualTo(30);
-        await Assert.That(values[0].Value3).IsEqualTo("Seattle");
+        await Assert.That(values[0].Value1).IsEqualTo(SampleName);
+        await Assert.That(values[0].Value2).IsEqualTo(SampleAge);
+        await Assert.That(values[0].Value3).IsEqualTo(SampleCity);
     }
 
     /// <summary>
@@ -261,18 +279,18 @@ public class RuntimeObservationFallbackTests
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Alice", Age = 30 };
+        var vm = new TestViewModel { Name = SampleName, Age = SampleAge };
         var values = new List<(string Value1, int Value2)>();
 
         using var sub = RuntimeObservationFallback.WhenAnyValue(
-            vm,
-            x => x.Name,
-            x => x.Age)
+                vm,
+                x => x.Name,
+                x => x.Age)
             .Subscribe(values.Add);
 
         vm.Name = "Bob";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
         await Assert.That(values[^1].Value1).IsEqualTo("Bob");
     }
 

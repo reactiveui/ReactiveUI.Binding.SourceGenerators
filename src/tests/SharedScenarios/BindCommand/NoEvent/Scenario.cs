@@ -5,20 +5,19 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindCommand.NoEvent
+namespace SharedScenarios.BindCommand.NoEvent;
+
+/// <summary>
+/// Exercises BindCommand with a control that has no default event.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindCommand with a control that has no default event.
+    /// Binds the Save command to a control with no Click event.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Binds the Save command to a control with no Click event.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view)
-            => view.BindCommand(vm, x => x.Save, x => x.Label);
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view)
+        => view.BindCommand(vm, x => x.Save, x => x.Label);
 }

@@ -12,6 +12,16 @@ namespace ReactiveUI.Binding.Tests.Observables;
 public class EventObservableTests
 {
     /// <summary>
+    /// The initial value produced by the event observable's getter.
+    /// </summary>
+    private const string InitialValue = "initial";
+
+    /// <summary>
+    /// The expected number of emitted values when two notifications are produced.
+    /// </summary>
+    private const int ExpectedTwoEmissions = 2;
+
+    /// <summary>
     /// Verifies that constructor throws ArgumentNullException when addHandler is null.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
@@ -84,7 +94,7 @@ public class EventObservableTests
     [Test]
     public async Task Subscribe_EmitsInitialValue()
     {
-        var value = "initial";
+        const string value = InitialValue;
         var results = new List<string>();
 
         var observable = new EventObservable<string>(
@@ -96,7 +106,7 @@ public class EventObservableTests
         observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
 
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo("initial");
+        await Assert.That(results[0]).IsEqualTo(InitialValue);
     }
 
     /// <summary>
@@ -107,7 +117,7 @@ public class EventObservableTests
     public async Task Subscribe_EventFired_EmitsNewValue()
     {
         EventHandler? handler = null;
-        var value = "initial";
+        var value = InitialValue;
         var results = new List<string>();
 
         var observable = new EventObservable<string>(
@@ -121,7 +131,7 @@ public class EventObservableTests
         value = "updated";
         handler?.Invoke(this, EventArgs.Empty);
 
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(results[1]).IsEqualTo("updated");
     }
 
@@ -153,7 +163,7 @@ public class EventObservableTests
         value = "different";
         handler?.Invoke(this, EventArgs.Empty);
 
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(results[1]).IsEqualTo("different");
     }
 
@@ -165,7 +175,7 @@ public class EventObservableTests
     public async Task Subscribe_NoDistinct_EmitsDuplicates()
     {
         EventHandler? handler = null;
-        var value = "same";
+        const string value = "same";
         var results = new List<string>();
 
         var observable = new EventObservable<string>(
@@ -179,7 +189,7 @@ public class EventObservableTests
         // Fire event with same value — should emit
         handler?.Invoke(this, EventArgs.Empty);
 
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
     }
 
     /// <summary>
@@ -190,17 +200,19 @@ public class EventObservableTests
     public async Task Dispose_UnsubscribesHandler()
     {
         EventHandler? handler = null;
-        var value = "initial";
+        const string value = InitialValue;
         var results = new List<string>();
 
         var observable = new EventObservable<string>(
             h => handler = h,
             h =>
             {
-                if (h == handler)
+                if (h != handler)
                 {
-                    handler = null;
+                    return;
                 }
+
+                handler = null;
             },
             () => value,
             false);
@@ -220,7 +232,7 @@ public class EventObservableTests
     public async Task Dispose_EventAfterDispose_Ignored()
     {
         EventHandler? handler = null;
-        var value = "initial";
+        var value = InitialValue;
         var results = new List<string>();
 
         var observable = new EventObservable<string>(

@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenChanged.MultiPropertyThreeProperties
+namespace SharedScenarios.WhenChanged.MultiPropertyThreeProperties;
+
+/// <summary>
+/// Exercises WhenChanged with three properties returning a tuple.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenChanged with three properties returning a tuple.
+    /// Creates a WhenChanged observable for Name, Age, and Score.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenChanged observable for Name, Age, and Score.
-        /// </summary>
-        /// <param name="vm">The view model to observe.</param>
-        /// <returns>An observable of (name, age, score) tuples.</returns>
-        public static IObservable<(string Name, int Age, double Score)> Execute(MyViewModel vm)
-            => vm.WhenChanged(x => x.Name, x => x.Age, x => x.Score);
-    }
+    /// <param name="vm">The view model to observe.</param>
+    /// <returns>An observable of (name, age, score) tuples.</returns>
+    public static IObservable<(string Name, int Age, double Score)> Execute(MyViewModel vm)
+        => vm.WhenChanged(x => x.Name, x => x.Age, x => x.Score);
 }

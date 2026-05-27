@@ -6,11 +6,7 @@
 // https://github.com/SimonCropp/Polyfill
 #if !NET
 
-using System.Diagnostics;
-
 namespace System.Diagnostics.CodeAnalysis;
-
-using Targets = System.AttributeTargets;
 
 /// <summary>
 /// Indicates that certain members on a specified <see cref="Type"/> are accessed dynamically,
@@ -19,15 +15,15 @@ using Targets = System.AttributeTargets;
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
 [AttributeUsage(
-    validOn: Targets.Class |
-             Targets.Field |
-             Targets.GenericParameter |
-             Targets.Interface |
-             Targets.Method |
-             Targets.Parameter |
-             Targets.Property |
-             Targets.ReturnValue |
-             Targets.Struct,
+    validOn: AttributeTargets.Class |
+             AttributeTargets.Field |
+             AttributeTargets.GenericParameter |
+             AttributeTargets.Interface |
+             AttributeTargets.Method |
+             AttributeTargets.Parameter |
+             AttributeTargets.Property |
+             AttributeTargets.ReturnValue |
+             AttributeTargets.Struct,
     Inherited = false)]
 internal sealed class DynamicallyAccessedMembersAttribute : Attribute
 {

@@ -98,13 +98,13 @@ internal static class BindingTypeConverterDispatch
         }
 
         // Fallback converters must still guarantee a non-null result on success.
-        if (result is null)
+        if (result is not null)
         {
-            result = null;
-            return false;
+            return true;
         }
 
-        return true;
+        result = null;
+        return false;
     }
 
     /// <summary>
@@ -140,32 +140,42 @@ internal static class BindingTypeConverterDispatch
     {
         ArgumentExceptionHelper.ThrowIfNull(toType);
 
-        if (converter is null)
+        switch (converter)
         {
-            result = null;
-            return false;
+            case null:
+                {
+                    result = null;
+                    return false;
+                }
+
+            // Dispatch to typed converter
+            case IBindingTypeConverter typedConverter:
+                return TryConvert(typedConverter, from, toType, conversionHint, out result);
+
+            // Dispatch to fallback converter (requires non-null input)
+            case IBindingFallbackConverter fallbackConverter:
+                {
+                    if (from is not null)
+                    {
+                        return TryConvertFallback(
+                            fallbackConverter,
+                            fromType,
+                            from,
+                            toType,
+                            conversionHint,
+                            out result);
+                    }
+
+                    result = null;
+                    return false;
+                }
+
+            default:
+                {
+                    // Unknown converter type
+                    result = null;
+                    return false;
+                }
         }
-
-        // Dispatch to typed converter
-        if (converter is IBindingTypeConverter typedConverter)
-        {
-            return TryConvert(typedConverter, from, toType, conversionHint, out result);
-        }
-
-        // Dispatch to fallback converter (requires non-null input)
-        if (converter is IBindingFallbackConverter fallbackConverter)
-        {
-            if (from is null)
-            {
-                result = null;
-                return false;
-            }
-
-            return TryConvertFallback(fallbackConverter, fromType, from, toType, conversionHint, out result);
-        }
-
-        // Unknown converter type
-        result = null;
-        return false;
     }
 }

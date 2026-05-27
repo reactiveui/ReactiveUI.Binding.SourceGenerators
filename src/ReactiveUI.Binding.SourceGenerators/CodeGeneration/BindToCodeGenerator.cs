@@ -4,8 +4,9 @@
 
 using System.Collections.Immutable;
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
+
+using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
@@ -20,19 +21,20 @@ internal static class BindToCodeGenerator
     /// Generates concrete typed overloads and binding methods for <c>BindTo</c> invocations.
     /// </summary>
     /// <param name="invocations">All detected <c>BindTo</c> invocations.</param>
-    /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression (C# 10+).</param>
+    /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
     /// <returns>Generated source code string, or null if no invocations.</returns>
     internal static string? Generate(
         ImmutableArray<BindToInvocationInfo> invocations,
-        bool supportsCallerArgExpr)
+        LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        var sb = new StringBuilder(invocations.Length * 1024);
-        CodeGeneratorHelpers.AppendExtensionClassHeader(sb);
+        var sb = new StringBuilder(invocations.Length * 1_024);
+        var supportsCallerArgExpr = features.SupportsCallerArgExpr;
+        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         sb.AppendLine();
 
         var groups = GroupByTypeSignature(invocations);
@@ -41,13 +43,17 @@ internal static class BindToCodeGenerator
         {
             var group = groups[g];
 
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr);
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable);
             sb.AppendLine();
 
             for (var i = 0; i < group.Invocations.Length; i++)
             {
                 var inv = group.Invocations[i];
-                var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(inv.TargetTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, inv.TargetExpressionText);
+                var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
+                    inv.TargetTypeFullName,
+                    inv.CallerFilePath,
+                    inv.CallerLineNumber,
+                    inv.TargetExpressionText);
                 GenerateBindToMethod(sb, inv, suffix);
             }
         }
@@ -94,13 +100,13 @@ internal static class BindToCodeGenerator
         foreach (var kvp in groupMap)
         {
             var first = kvp.Value[0];
-            result.Add(new BindToTypeGroup(
+            result.Add(new(
                 first.SourceValueTypeFullName,
                 first.TargetTypeFullName,
                 first.TargetPropertyTypeFullName,
                 first.HasConversionHint,
                 first.HasConverterOverride,
-                kvp.Value.ToArray()));
+                [.. kvp.Value]));
         }
 
         return result;
@@ -113,15 +119,16 @@ internal static class BindToCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group of invocations sharing one overload signature.</param>
     /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is supported.</param>
-    internal static void GenerateConcreteOverload(StringBuilder sb, BindToTypeGroup group, bool supportsCallerArgExpr)
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    internal static void GenerateConcreteOverload(StringBuilder sb, BindToTypeGroup group, bool supportsCallerArgExpr, bool supportsNullable)
     {
         if (supportsCallerArgExpr)
         {
-            GenerateCallerArgExprOverload(sb, group);
+            GenerateCallerArgExprOverload(sb, group, supportsNullable);
         }
         else
         {
-            GenerateCallerFilePathOverload(sb, group);
+            GenerateCallerFilePathOverload(sb, group, supportsNullable);
         }
     }
 
@@ -130,50 +137,56 @@ internal static class BindToCodeGenerator
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group of invocations sharing one overload signature.</param>
-    internal static void GenerateCallerArgExprOverload(StringBuilder sb, BindToTypeGroup group)
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    internal static void GenerateCallerArgExprOverload(StringBuilder sb, BindToTypeGroup group, bool supportsNullable)
     {
+        var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
         sb.AppendLine($"""
-                    /// <summary>
-                    /// Concrete typed overload for BindTo of global::System.IObservable&lt;{group.SourceValueTypeFullName}&gt; to {group.TargetTypeFullName}.
-                    /// Uses CallerArgumentExpression for dispatch.
-                    /// </summary>
-                    public static global::System.IDisposable BindTo(
-                        this global::System.IObservable<{group.SourceValueTypeFullName}> source,
-                        {group.TargetTypeFullName} target,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {group.TargetPropertyTypeFullName}>> property,
-            """);
+                               /// <summary>
+                               /// Concrete typed overload for BindTo of {IObservable}&lt;{group.SourceValueTypeFullName}&gt; to {group.TargetTypeFullName}.
+                               /// Uses CallerArgumentExpression for dispatch.
+                               /// </summary>
+                               public static {GeneratedTypeNames.IDisposable} BindTo(
+                                   this {ObservableOf(group.SourceValueTypeFullName)} source,
+                                   {group.TargetTypeFullName} target,
+                                   {PropertyExpression(group.TargetTypeFullName, targetPropType)} property,
+                       """);
 
         AppendExtraParameters(sb, group);
 
-        sb.AppendLine("""
-                        [global::System.Runtime.CompilerServices.CallerArgumentExpression("property")] string propertyExpression = "",
-                        [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                        [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                    {
-                        propertyExpression = propertyExpression.StartsWith("static ") ? propertyExpression.Substring(7) : propertyExpression;
+        sb.AppendLine($$"""
+                                  [{{CallerArgumentExpression}}("property")] string propertyExpression = "",
+                                  [{{CallerFilePath}}] string callerFilePath = "",
+                                  [{{CallerLineNumber}}] int callerLineNumber = 0)
+                              {
+                                  propertyExpression = propertyExpression.StartsWith("static ") ? propertyExpression.Substring(7) : propertyExpression;
 
-            """);
+                      """);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(inv.TargetTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, inv.TargetExpressionText);
+            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
+                inv.TargetTypeFullName,
+                inv.CallerFilePath,
+                inv.CallerLineNumber,
+                inv.TargetExpressionText);
             var condition = CodeGeneratorHelpers.ConditionKeyword(i);
             var escapedTargetExpr = CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText);
 
             sb.AppendLine($$"""
-                            {{condition}} (propertyExpression == "{{escapedTargetExpr}}")
-                            {
-                                return __BindTo_{{methodSuffix}}(source, target{{FormatExtraArgs(group)}});
-                            }
-                """);
+                                        {{condition}} (propertyExpression == "{{escapedTargetExpr}}")
+                                        {
+                                            return __BindTo_{{methodSuffix}}(source, target{{FormatExtraArgs(group)}});
+                                        }
+                            """);
         }
 
-        sb.AppendLine("""
-                        throw new global::System.InvalidOperationException(
-                            "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                    }
-            """);
+        sb.AppendLine($$"""
+                                  throw new {{GeneratedTypeNames.InvalidOperationException}}(
+                                      "{{NoBindingFoundMessage}}");
+                              }
+                      """);
     }
 
     /// <summary>
@@ -181,48 +194,54 @@ internal static class BindToCodeGenerator
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group of invocations sharing one overload signature.</param>
-    internal static void GenerateCallerFilePathOverload(StringBuilder sb, BindToTypeGroup group)
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    internal static void GenerateCallerFilePathOverload(StringBuilder sb, BindToTypeGroup group, bool supportsNullable)
     {
+        var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
         sb.AppendLine($"""
-                    /// <summary>
-                    /// Concrete typed overload for BindTo of global::System.IObservable&lt;{group.SourceValueTypeFullName}&gt; to {group.TargetTypeFullName}.
-                    /// Uses CallerFilePath + CallerLineNumber for dispatch.
-                    /// </summary>
-                    public static global::System.IDisposable BindTo(
-                        this global::System.IObservable<{group.SourceValueTypeFullName}> source,
-                        {group.TargetTypeFullName} target,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {group.TargetPropertyTypeFullName}>> property,
-            """);
+                               /// <summary>
+                               /// Concrete typed overload for BindTo of {IObservable}&lt;{group.SourceValueTypeFullName}&gt; to {group.TargetTypeFullName}.
+                               /// Uses CallerFilePath + CallerLineNumber for dispatch.
+                               /// </summary>
+                               public static {GeneratedTypeNames.IDisposable} BindTo(
+                                   this {ObservableOf(group.SourceValueTypeFullName)} source,
+                                   {group.TargetTypeFullName} target,
+                                   {PropertyExpression(group.TargetTypeFullName, targetPropType)} property,
+                       """);
 
         AppendExtraParameters(sb, group);
 
-        sb.AppendLine("""
-                        [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                        [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                    {
-            """);
+        sb.AppendLine($$"""
+                                  [{{CallerFilePath}}] string callerFilePath = "",
+                                  [{{CallerLineNumber}}] int callerLineNumber = 0)
+                              {
+                      """);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(inv.TargetTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, inv.TargetExpressionText);
+            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
+                inv.TargetTypeFullName,
+                inv.CallerFilePath,
+                inv.CallerLineNumber,
+                inv.TargetExpressionText);
             var pathSuffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
             var condition = CodeGeneratorHelpers.ConditionKeyword(i);
 
             sb.AppendLine($$"""
-                            {{condition}} (callerLineNumber == {{inv.CallerLineNumber}}
-                                && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(pathSuffix)}}", global::System.StringComparison.OrdinalIgnoreCase))
-                            {
-                                return __BindTo_{{methodSuffix}}(source, target{{FormatExtraArgs(group)}});
-                            }
-                """);
+                                        {{condition}} (callerLineNumber == {{inv.CallerLineNumber}}
+                                            && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(pathSuffix)}}", {{OrdinalIgnoreCase}}))
+                                        {
+                                            return __BindTo_{{methodSuffix}}(source, target{{FormatExtraArgs(group)}});
+                                        }
+                            """);
         }
 
-        sb.AppendLine("""
-                        throw new global::System.InvalidOperationException(
-                            "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                    }
-            """);
+        sb.AppendLine($$"""
+                                  throw new {{GeneratedTypeNames.InvalidOperationException}}(
+                                      "{{NoBindingFoundMessage}}");
+                              }
+                      """);
     }
 
     /// <summary>
@@ -243,20 +262,20 @@ internal static class BindToCodeGenerator
         var directAssign = inv.SourceValueTypeFullName == inv.TargetPropertyTypeFullName && !inv.HasConverterOverride;
 
         sb.AppendLine($$"""
-                    private static global::System.IDisposable __BindTo_{{suffix}}(global::System.IObservable<{{inv.SourceValueTypeFullName}}> source, {{inv.TargetTypeFullName}} target{{extraParams}})
-                    {
-                        // BindTo: observable -> {{targetPathComment}}
-            """);
+        private static {{GeneratedTypeNames.IDisposable}} __BindTo_{{suffix}}({{ObservableOf(inv.SourceValueTypeFullName)}} source, {{inv.TargetTypeFullName}} target{{extraParams}})
+        {
+            // BindTo: observable -> {{targetPathComment}}
+""");
 
         if (directAssign)
         {
             sb.AppendLine($$"""
-                        return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(source, value =>
-                        {
-                            {{targetAccess}} = value;
-                        });
-                    }
-            """)
+                                        return {{RxBindingExtensions}}.Subscribe(source, value =>
+                                        {
+                                            {{targetAccess}} = value;
+                                        });
+                                    }
+                            """)
                 .AppendLine();
         }
         else
@@ -265,15 +284,15 @@ internal static class BindToCodeGenerator
             var converterArg = inv.HasConverterOverride ? "converterOverride" : "null";
 
             sb.AppendLine($$"""
-                        return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(source, value =>
-                        {
-                            if (global::ReactiveUI.Binding.Fallback.RuntimeBindingConverter.TryConvert<{{inv.SourceValueTypeFullName}}, {{inv.TargetPropertyTypeFullName}}>(value, {{hintArg}}, {{converterArg}}, out var __converted))
-                            {
-                                {{targetAccess}} = __converted;
-                            }
-                        });
-                    }
-            """)
+            return {{RxBindingExtensions}}.Subscribe(source, value =>
+            {
+                if ({{RuntimeBindingConverter}}.TryConvert<{{inv.SourceValueTypeFullName}}, {{inv.TargetPropertyTypeFullName}}>(value, {{hintArg}}, {{converterArg}}, out var __converted))
+                {
+                    {{targetAccess}} = __converted;
+                }
+            });
+        }
+""")
                 .AppendLine();
         }
     }
@@ -290,10 +309,12 @@ internal static class BindToCodeGenerator
             sb.AppendLine("            object conversionHint,");
         }
 
-        if (group.HasConverterOverride)
+        if (!group.HasConverterOverride)
         {
-            sb.AppendLine("            global::ReactiveUI.Binding.IBindingTypeConverter converterOverride,");
+            return;
         }
+
+        sb.AppendLine($"            {IBindingTypeConverter} converterOverride,");
     }
 
     /// <summary>
@@ -332,7 +353,7 @@ internal static class BindToCodeGenerator
 
         if (inv.HasConverterOverride)
         {
-            sb.Append(", global::ReactiveUI.Binding.IBindingTypeConverter converterOverride");
+            sb.Append($", {IBindingTypeConverter} converterOverride");
         }
 
         return sb.ToString();

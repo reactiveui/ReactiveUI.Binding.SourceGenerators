@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp;
-
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.RuntimeExecution;
@@ -22,41 +21,41 @@ public class WhenChangedRuntimeTests
     public async Task SingleProperty_GeneratesDispatchAndRegistration()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
 
-                    private string _name = "";
-                    public string Name
-                    {
-                        get => _name;
-                        set
-                        {
-                            if (_name != value)
-                            {
-                                _name = value;
-                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-                            }
-                        }
-                    }
-                }
+                                      private string _name = "";
+                                      public string Name
+                                      {
+                                          get => _name;
+                                          set
+                                          {
+                                              if (_name != value)
+                                              {
+                                                  _name = value;
+                                                  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+                                              }
+                                          }
+                                      }
+                                  }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new MyViewModel();
-                        var obs = vm.WhenChanged(x => x.Name);
-                    }
-                }
-            }
-            """;
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          var vm = new MyViewModel();
+                                          var obs = vm.WhenChanged(x => x.Name);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
@@ -76,29 +75,29 @@ public class WhenChangedRuntimeTests
     public async Task MultiProperty_GeneratesCombineLatest()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                    public int Age { get; set; }
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                      public int Age { get; set; }
+                                  }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new MyViewModel();
-                        var obs = vm.WhenChanged(x => x.Name, x => x.Age);
-                    }
-                }
-            }
-            """;
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          var vm = new MyViewModel();
+                                          var obs = vm.WhenChanged(x => x.Name, x => x.Age);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
@@ -116,34 +115,34 @@ public class WhenChangedRuntimeTests
     public async Task DeepChain_GeneratesSwitchPattern()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class ChildModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class ChildModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
 
-                public class ParentViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public ChildModel Child { get; set; } = new();
-                }
+                                  public class ParentViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public ChildModel Child { get; set; } = new();
+                                  }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new ParentViewModel();
-                        var obs = vm.WhenChanged(x => x.Child.Name);
-                    }
-                }
-            }
-            """;
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          var vm = new ParentViewModel();
+                                          var obs = vm.WhenChanged(x => x.Child.Name);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
@@ -161,29 +160,29 @@ public class WhenChangedRuntimeTests
     public async Task WithSelector_GeneratesSelectorInvocation()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string FirstName { get; set; } = "";
-                    public string LastName { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string FirstName { get; set; } = "";
+                                      public string LastName { get; set; } = "";
+                                  }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new MyViewModel();
-                        var obs = vm.WhenChanged(x => x.FirstName, x => x.LastName, (f, l) => $"{f} {l}");
-                    }
-                }
-            }
-            """;
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          var vm = new MyViewModel();
+                                          var obs = vm.WhenChanged(x => x.FirstName, x => x.LastName, (f, l) => $"{f} {l}");
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 

@@ -10,6 +10,66 @@ namespace ReactiveUI.Binding.Tests.Bindings;
 /// </summary>
 public class BindingTypeConverterTryConvertTypedTests
 {
+    /// <summary>
+    /// Literal used as a deliberately wrong-typed conversion input.
+    /// </summary>
+    private const string WrongTypeInput = "wrong";
+
+    /// <summary>
+    /// Sample byte value used for byte conversion tests.
+    /// </summary>
+    private const byte ByteValue = 42;
+
+    /// <summary>
+    /// Smaller byte value used for byte conversion tests.
+    /// </summary>
+    private const byte SmallByteValue = 7;
+
+    /// <summary>
+    /// Sample integer value used for integer conversion tests.
+    /// </summary>
+    private const int IntValue = 123;
+
+    /// <summary>
+    /// Smaller integer value used for integer conversion tests.
+    /// </summary>
+    private const int SmallIntValue = 42;
+
+    /// <summary>
+    /// Integer value parsed from a string in conversion tests.
+    /// </summary>
+    private const int ParsedIntValue = 456;
+
+    /// <summary>
+    /// Sample double value used for double conversion tests.
+    /// </summary>
+    private const double DoubleValue = 3.14;
+
+    /// <summary>
+    /// Alternate double value used for double conversion tests.
+    /// </summary>
+    private const double EulerDoubleValue = 2.718;
+
+    /// <summary>
+    /// Sample long value used for long conversion tests.
+    /// </summary>
+    private const long LongValue = 9_876_543_210L;
+
+    /// <summary>
+    /// Sample short value used for short conversion tests.
+    /// </summary>
+    private const short ShortValue = 321;
+
+    /// <summary>
+    /// Sample single-precision value used for float conversion tests.
+    /// </summary>
+    private const float SingleValue = 1.5f;
+
+    /// <summary>
+    /// Sample decimal value used for decimal conversion tests.
+    /// </summary>
+    private const decimal DecimalValue = 99.99m;
+
     // ===================================================================
     // Non-nullable to String converters
     // ===================================================================
@@ -20,7 +80,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ByteToString_Success() =>
-        await AssertConverterSuccess(new ByteToStringTypeConverter(), (byte)42, "42");
+        await AssertConverterSuccess(new ByteToStringTypeConverter(), (byte)ByteValue, "42");
 
     /// <summary>
     /// Verifies ByteToStringTypeConverter fails when given a wrong type.
@@ -28,7 +88,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ByteToString_Failure_WrongType() =>
-        await AssertConverterFailure(new ByteToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new ByteToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies ByteToStringTypeConverter fails when given null.
@@ -44,7 +104,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IntegerToString_Success() =>
-        await AssertConverterSuccess(new IntegerToStringTypeConverter(), 123, "123");
+        await AssertConverterSuccess(new IntegerToStringTypeConverter(), IntValue, "123");
 
     /// <summary>
     /// Verifies IntegerToStringTypeConverter fails when given a wrong type.
@@ -52,7 +112,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IntegerToString_Failure_WrongType() =>
-        await AssertConverterFailure(new IntegerToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new IntegerToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies IntegerToStringTypeConverter fails when given null.
@@ -68,7 +128,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringToInteger_Success() =>
-        await AssertConverterSuccess(new StringToIntegerTypeConverter(), "456", 456);
+        await AssertConverterSuccess(new StringToIntegerTypeConverter(), "456", ParsedIntValue);
 
     /// <summary>
     /// Verifies BooleanToStringTypeConverter converts true to "True".
@@ -84,7 +144,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DoubleToString_Success() =>
-        await AssertConverterSuccess(new DoubleToStringTypeConverter(), 3.14, 3.14.ToString());
+        await AssertConverterSuccess(new DoubleToStringTypeConverter(), DoubleValue, DoubleValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
 
     /// <summary>
     /// Verifies DoubleToStringTypeConverter fails when given a wrong type.
@@ -92,7 +152,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DoubleToString_Failure_WrongType() =>
-        await AssertConverterFailure(new DoubleToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new DoubleToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies DoubleToStringTypeConverter fails when given null.
@@ -108,7 +168,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task LongToString_Success() =>
-        await AssertConverterSuccess(new LongToStringTypeConverter(), 9876543210L, "9876543210");
+        await AssertConverterSuccess(new LongToStringTypeConverter(), LongValue, "9876543210");
 
     /// <summary>
     /// Verifies LongToStringTypeConverter fails when given a wrong type.
@@ -116,7 +176,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task LongToString_Failure_WrongType() =>
-        await AssertConverterFailure(new LongToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new LongToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies LongToStringTypeConverter fails when given null.
@@ -132,7 +192,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ShortToString_Success() =>
-        await AssertConverterSuccess(new ShortToStringTypeConverter(), (short)321, "321");
+        await AssertConverterSuccess(new ShortToStringTypeConverter(), (short)ShortValue, "321");
 
     /// <summary>
     /// Verifies ShortToStringTypeConverter fails when given a wrong type.
@@ -140,7 +200,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ShortToString_Failure_WrongType() =>
-        await AssertConverterFailure(new ShortToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new ShortToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies ShortToStringTypeConverter fails when given null.
@@ -156,7 +216,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleToString_Success() =>
-        await AssertConverterSuccess(new SingleToStringTypeConverter(), 1.5f, 1.5f.ToString());
+        await AssertConverterSuccess(new SingleToStringTypeConverter(), SingleValue, SingleValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
 
     /// <summary>
     /// Verifies SingleToStringTypeConverter fails when given a wrong type.
@@ -164,7 +224,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleToString_Failure_WrongType() =>
-        await AssertConverterFailure(new SingleToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new SingleToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies SingleToStringTypeConverter fails when given null.
@@ -184,7 +244,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableByteToString_Success() =>
-        await AssertConverterSuccess(new NullableByteToStringTypeConverter(), (byte)42, "42");
+        await AssertConverterSuccess(new NullableByteToStringTypeConverter(), (byte)ByteValue, "42");
 
     /// <summary>
     /// Verifies NullableByteToStringTypeConverter fails when given a wrong type.
@@ -192,7 +252,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableByteToString_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableByteToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableByteToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableByteToStringTypeConverter succeeds when given null.
@@ -208,7 +268,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDecimalToString_Success() =>
-        await AssertConverterSuccess(new NullableDecimalToStringTypeConverter(), 99.99m, 99.99m.ToString());
+        await AssertConverterSuccess(new NullableDecimalToStringTypeConverter(), DecimalValue, DecimalValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
 
     /// <summary>
     /// Verifies NullableDecimalToStringTypeConverter fails when given a wrong type.
@@ -216,7 +276,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDecimalToString_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableDecimalToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableDecimalToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableDecimalToStringTypeConverter succeeds when given null.
@@ -232,7 +292,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDoubleToString_Success() =>
-        await AssertConverterSuccess(new NullableDoubleToStringTypeConverter(), 2.718, 2.718.ToString());
+        await AssertConverterSuccess(new NullableDoubleToStringTypeConverter(), EulerDoubleValue, EulerDoubleValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
 
     /// <summary>
     /// Verifies NullableDoubleToStringTypeConverter fails when given a wrong type.
@@ -240,7 +300,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDoubleToString_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableDoubleToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableDoubleToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableDoubleToStringTypeConverter succeeds when given null.
@@ -256,7 +316,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableIntegerToString_Success() =>
-        await AssertConverterSuccess(new NullableIntegerToStringTypeConverter(), 123, "123");
+        await AssertConverterSuccess(new NullableIntegerToStringTypeConverter(), IntValue, "123");
 
     /// <summary>
     /// Verifies NullableIntegerToStringTypeConverter fails when given a wrong type.
@@ -264,7 +324,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableIntegerToString_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableIntegerToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableIntegerToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableIntegerToStringTypeConverter succeeds when given null.
@@ -280,7 +340,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableLongToString_Success() =>
-        await AssertConverterSuccess(new NullableLongToStringTypeConverter(), 9876543210L, "9876543210");
+        await AssertConverterSuccess(new NullableLongToStringTypeConverter(), LongValue, "9876543210");
 
     /// <summary>
     /// Verifies NullableLongToStringTypeConverter fails when given a wrong type.
@@ -288,7 +348,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableLongToString_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableLongToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableLongToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableLongToStringTypeConverter succeeds when given null.
@@ -304,7 +364,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableShortToString_Success() =>
-        await AssertConverterSuccess(new NullableShortToStringTypeConverter(), (short)321, "321");
+        await AssertConverterSuccess(new NullableShortToStringTypeConverter(), (short)ShortValue, "321");
 
     /// <summary>
     /// Verifies NullableShortToStringTypeConverter fails when given a wrong type.
@@ -312,7 +372,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableShortToString_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableShortToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableShortToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableShortToStringTypeConverter succeeds when given null.
@@ -328,7 +388,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableSingleToString_Success() =>
-        await AssertConverterSuccess(new NullableSingleToStringTypeConverter(), 1.5f, 1.5f.ToString());
+        await AssertConverterSuccess(new NullableSingleToStringTypeConverter(), SingleValue, SingleValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
 
     /// <summary>
     /// Verifies NullableSingleToStringTypeConverter fails when given a wrong type.
@@ -336,7 +396,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableSingleToString_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableSingleToStringTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableSingleToStringTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableSingleToStringTypeConverter succeeds when given null.
@@ -356,7 +416,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DoubleToNullableDouble_Success() =>
-        await AssertConverterSuccess(new DoubleToNullableDoubleTypeConverter(), 3.14, (double?)3.14);
+        await AssertConverterSuccess(new DoubleToNullableDoubleTypeConverter(), DoubleValue, (double?)DoubleValue);
 
     /// <summary>
     /// Verifies DoubleToNullableDoubleTypeConverter fails when given a wrong type.
@@ -364,7 +424,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DoubleToNullableDouble_Failure_WrongType() =>
-        await AssertConverterFailure(new DoubleToNullableDoubleTypeConverter(), "wrong");
+        await AssertConverterFailure(new DoubleToNullableDoubleTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies DoubleToNullableDoubleTypeConverter fails when given null.
@@ -380,7 +440,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IntegerToNullableInteger_Success() =>
-        await AssertConverterSuccess(new IntegerToNullableIntegerTypeConverter(), 42, (int?)42);
+        await AssertConverterSuccess(new IntegerToNullableIntegerTypeConverter(), SmallIntValue, (int?)SmallIntValue);
 
     /// <summary>
     /// Verifies IntegerToNullableIntegerTypeConverter fails when given a wrong type.
@@ -388,7 +448,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IntegerToNullableInteger_Failure_WrongType() =>
-        await AssertConverterFailure(new IntegerToNullableIntegerTypeConverter(), "wrong");
+        await AssertConverterFailure(new IntegerToNullableIntegerTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies IntegerToNullableIntegerTypeConverter fails when given null.
@@ -404,7 +464,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ByteToNullableByte_Success() =>
-        await AssertConverterSuccess(new ByteToNullableByteTypeConverter(), (byte)7, (byte?)7);
+        await AssertConverterSuccess(new ByteToNullableByteTypeConverter(), (byte)SmallByteValue, (byte?)SmallByteValue);
 
     /// <summary>
     /// Verifies ByteToNullableByteTypeConverter fails when given a wrong type.
@@ -412,7 +472,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ByteToNullableByte_Failure_WrongType() =>
-        await AssertConverterFailure(new ByteToNullableByteTypeConverter(), "wrong");
+        await AssertConverterFailure(new ByteToNullableByteTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies ByteToNullableByteTypeConverter fails when given null.
@@ -428,7 +488,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task LongToNullableLong_Success() =>
-        await AssertConverterSuccess(new LongToNullableLongTypeConverter(), 9876543210L, (long?)9876543210L);
+        await AssertConverterSuccess(new LongToNullableLongTypeConverter(), LongValue, (long?)LongValue);
 
     /// <summary>
     /// Verifies LongToNullableLongTypeConverter fails when given a wrong type.
@@ -436,7 +496,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task LongToNullableLong_Failure_WrongType() =>
-        await AssertConverterFailure(new LongToNullableLongTypeConverter(), "wrong");
+        await AssertConverterFailure(new LongToNullableLongTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies LongToNullableLongTypeConverter fails when given null.
@@ -452,7 +512,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ShortToNullableShort_Success() =>
-        await AssertConverterSuccess(new ShortToNullableShortTypeConverter(), (short)321, (short?)321);
+        await AssertConverterSuccess(new ShortToNullableShortTypeConverter(), (short)ShortValue, (short?)ShortValue);
 
     /// <summary>
     /// Verifies ShortToNullableShortTypeConverter fails when given a wrong type.
@@ -460,7 +520,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ShortToNullableShort_Failure_WrongType() =>
-        await AssertConverterFailure(new ShortToNullableShortTypeConverter(), "wrong");
+        await AssertConverterFailure(new ShortToNullableShortTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies ShortToNullableShortTypeConverter fails when given null.
@@ -476,7 +536,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleToNullableSingle_Success() =>
-        await AssertConverterSuccess(new SingleToNullableSingleTypeConverter(), 1.5f, (float?)1.5f);
+        await AssertConverterSuccess(new SingleToNullableSingleTypeConverter(), SingleValue, (float?)SingleValue);
 
     /// <summary>
     /// Verifies SingleToNullableSingleTypeConverter fails when given a wrong type.
@@ -484,7 +544,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleToNullableSingle_Failure_WrongType() =>
-        await AssertConverterFailure(new SingleToNullableSingleTypeConverter(), "wrong");
+        await AssertConverterFailure(new SingleToNullableSingleTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies SingleToNullableSingleTypeConverter fails when given null.
@@ -500,7 +560,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DecimalToNullableDecimal_Success() =>
-        await AssertConverterSuccess(new DecimalToNullableDecimalTypeConverter(), 99.99m, (decimal?)99.99m);
+        await AssertConverterSuccess(new DecimalToNullableDecimalTypeConverter(), DecimalValue, (decimal?)DecimalValue);
 
     /// <summary>
     /// Verifies DecimalToNullableDecimalTypeConverter fails when given a wrong type.
@@ -508,7 +568,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DecimalToNullableDecimal_Failure_WrongType() =>
-        await AssertConverterFailure(new DecimalToNullableDecimalTypeConverter(), "wrong");
+        await AssertConverterFailure(new DecimalToNullableDecimalTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies DecimalToNullableDecimalTypeConverter fails when given null.
@@ -528,7 +588,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDoubleToDouble_Success() =>
-        await AssertConverterSuccess(new NullableDoubleToDoubleTypeConverter(), 3.14, 3.14);
+        await AssertConverterSuccess(new NullableDoubleToDoubleTypeConverter(), DoubleValue, DoubleValue);
 
     /// <summary>
     /// Verifies NullableDoubleToDoubleTypeConverter fails when given a wrong type.
@@ -536,7 +596,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDoubleToDouble_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableDoubleToDoubleTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableDoubleToDoubleTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableDoubleToDoubleTypeConverter fails when given null.
@@ -552,7 +612,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableIntegerToInteger_Success() =>
-        await AssertConverterSuccess(new NullableIntegerToIntegerTypeConverter(), 42, 42);
+        await AssertConverterSuccess(new NullableIntegerToIntegerTypeConverter(), SmallIntValue, SmallIntValue);
 
     /// <summary>
     /// Verifies NullableIntegerToIntegerTypeConverter fails when given a wrong type.
@@ -560,7 +620,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableIntegerToInteger_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableIntegerToIntegerTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableIntegerToIntegerTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableIntegerToIntegerTypeConverter fails when given null.
@@ -576,7 +636,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableByteToByte_Success() =>
-        await AssertConverterSuccess(new NullableByteToByteTypeConverter(), (byte)7, (byte)7);
+        await AssertConverterSuccess(new NullableByteToByteTypeConverter(), (byte)SmallByteValue, (byte)SmallByteValue);
 
     /// <summary>
     /// Verifies NullableByteToByteTypeConverter fails when given a wrong type.
@@ -584,7 +644,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableByteToByte_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableByteToByteTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableByteToByteTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableByteToByteTypeConverter fails when given null.
@@ -600,7 +660,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableLongToLong_Success() =>
-        await AssertConverterSuccess(new NullableLongToLongTypeConverter(), 9876543210L, 9876543210L);
+        await AssertConverterSuccess(new NullableLongToLongTypeConverter(), LongValue, LongValue);
 
     /// <summary>
     /// Verifies NullableLongToLongTypeConverter fails when given a wrong type.
@@ -608,7 +668,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableLongToLong_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableLongToLongTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableLongToLongTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableLongToLongTypeConverter fails when given null.
@@ -624,7 +684,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableShortToShort_Success() =>
-        await AssertConverterSuccess(new NullableShortToShortTypeConverter(), (short)321, (short)321);
+        await AssertConverterSuccess(new NullableShortToShortTypeConverter(), (short)ShortValue, (short)ShortValue);
 
     /// <summary>
     /// Verifies NullableShortToShortTypeConverter fails when given a wrong type.
@@ -632,7 +692,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableShortToShort_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableShortToShortTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableShortToShortTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableShortToShortTypeConverter fails when given null.
@@ -648,7 +708,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableSingleToSingle_Success() =>
-        await AssertConverterSuccess(new NullableSingleToSingleTypeConverter(), 1.5f, 1.5f);
+        await AssertConverterSuccess(new NullableSingleToSingleTypeConverter(), SingleValue, SingleValue);
 
     /// <summary>
     /// Verifies NullableSingleToSingleTypeConverter fails when given a wrong type.
@@ -656,7 +716,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableSingleToSingle_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableSingleToSingleTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableSingleToSingleTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableSingleToSingleTypeConverter fails when given null.
@@ -672,7 +732,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDecimalToDecimal_Success() =>
-        await AssertConverterSuccess(new NullableDecimalToDecimalTypeConverter(), 99.99m, 99.99m);
+        await AssertConverterSuccess(new NullableDecimalToDecimalTypeConverter(), DecimalValue, DecimalValue);
 
     /// <summary>
     /// Verifies NullableDecimalToDecimalTypeConverter fails when given a wrong type.
@@ -680,7 +740,7 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableDecimalToDecimal_Failure_WrongType() =>
-        await AssertConverterFailure(new NullableDecimalToDecimalTypeConverter(), "wrong");
+        await AssertConverterFailure(new NullableDecimalToDecimalTypeConverter(), WrongTypeInput);
 
     /// <summary>
     /// Verifies NullableDecimalToDecimalTypeConverter fails when given null.
@@ -697,7 +757,10 @@ public class BindingTypeConverterTryConvertTypedTests
     /// <param name="input">The input value to convert.</param>
     /// <param name="expectedOutput">The expected conversion result.</param>
     /// <returns>A task representing the asynchronous test operation.</returns>
-    private static async Task AssertConverterSuccess(IBindingTypeConverter converter, object? input, object? expectedOutput)
+    private static async Task AssertConverterSuccess(
+        IBindingTypeConverter converter,
+        object? input,
+        object? expectedOutput)
     {
         var success = converter.TryConvertTyped(input, null, out var result);
         await Assert.That(success).IsTrue();

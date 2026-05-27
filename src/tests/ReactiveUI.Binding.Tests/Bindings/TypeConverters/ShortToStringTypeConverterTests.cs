@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class ShortToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class ShortToStringTypeConverterTests
     {
         var converter = new ShortToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,7 +34,7 @@ public class ShortToStringTypeConverterTests
     public async Task TryConvert_MaxValue_Succeeds()
     {
         var converter = new ShortToStringTypeConverter();
-        var value = short.MaxValue;
+        const short value = short.MaxValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -45,7 +50,7 @@ public class ShortToStringTypeConverterTests
     public async Task TryConvert_MinValue_Succeeds()
     {
         var converter = new ShortToStringTypeConverter();
-        var value = short.MinValue;
+        const short value = short.MinValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -61,7 +66,7 @@ public class ShortToStringTypeConverterTests
     public async Task TryConvert_ShortToString_Succeeds()
     {
         var converter = new ShortToStringTypeConverter();
-        short value = 12345;
+        const short value = 12_345;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -77,7 +82,7 @@ public class ShortToStringTypeConverterTests
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new ShortToStringTypeConverter();
-        short value = 42;
+        const short value = 42;
 
         var result = converter.TryConvert(value, 5, out var output);
 
@@ -93,7 +98,7 @@ public class ShortToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
     {
         var converter = new ShortToStringTypeConverter();
-        short value = 255;
+        const short value = 255;
 
         var result = converter.TryConvert(value, "X", out var output);
 

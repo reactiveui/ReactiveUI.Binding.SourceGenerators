@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenChanging.DeepPropertyChain
+namespace SharedScenarios.WhenChanging.DeepPropertyChain;
+
+/// <summary>
+/// Exercises WhenChanging with a deep property chain.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenChanging with a deep property chain.
+    /// Creates a WhenChanging observable for Child.Name.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenChanging observable for Child.Name.
-        /// </summary>
-        /// <param name="vm">The parent view model to observe.</param>
-        /// <returns>An observable of name values (before change).</returns>
-        public static IObservable<string> Execute(ParentViewModel vm)
-            => vm.WhenChanging(x => x.Child.Name);
-    }
+    /// <param name="vm">The parent view model to observe.</param>
+    /// <returns>An observable of name values (before change).</returns>
+    public static IObservable<string> Execute(ParentViewModel vm)
+        => vm.WhenChanging(x => x.Child.Name);
 }

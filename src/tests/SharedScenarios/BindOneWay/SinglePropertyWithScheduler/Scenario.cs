@@ -4,24 +4,22 @@
 
 using System;
 using System.Reactive.Concurrency;
-
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindOneWay.SinglePropertyWithScheduler
+namespace SharedScenarios.BindOneWay.SinglePropertyWithScheduler;
+
+/// <summary>
+/// Exercises BindOneWay with a scheduler parameter.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindOneWay with a scheduler parameter.
+    /// Creates a one-way binding from ViewModel.Name to View.NameText with a scheduler.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a one-way binding from ViewModel.Name to View.NameText with a scheduler.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <param name="scheduler">The scheduler to observe on.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view, IScheduler scheduler)
-            => vm.BindOneWay(view, x => x.Name, x => x.NameText, scheduler);
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <param name="scheduler">The scheduler to observe on.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view, IScheduler scheduler)
+        => vm.BindOneWay(view, x => x.Name, x => x.NameText, scheduler);
 }

@@ -89,6 +89,16 @@ internal sealed class CombineLatest4Observable<T1, T2, T3, T4, TResult> : IObser
     private sealed class Subscription : IDisposable
     {
         /// <summary>
+        /// The subscription array index for source 3.
+        /// </summary>
+        private const int Source3Index = 2;
+
+        /// <summary>
+        /// The subscription array index for source 4.
+        /// </summary>
+        private const int Source4Index = 3;
+
+        /// <summary>
         /// The function to combine the latest values from all sources into a result.
         /// </summary>
         private readonly Func<T1, T2, T3, T4, TResult> _resultSelector;
@@ -181,7 +191,7 @@ internal sealed class CombineLatest4Observable<T1, T2, T3, T4, TResult> : IObser
         public void Subscribe3(IObservable<T3> source)
         {
             var sub = source.Subscribe(new Observer3(this));
-            Volatile.Write(ref _subscriptions[2], sub);
+            Volatile.Write(ref _subscriptions[Source3Index], sub);
         }
 
         /// <summary>
@@ -191,18 +201,20 @@ internal sealed class CombineLatest4Observable<T1, T2, T3, T4, TResult> : IObser
         public void Subscribe4(IObservable<T4> source)
         {
             var sub = source.Subscribe(new Observer4(this));
-            Volatile.Write(ref _subscriptions[3], sub);
+            Volatile.Write(ref _subscriptions[Source4Index], sub);
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref _observer, null) != null)
+            if (Interlocked.Exchange(ref _observer, null) == null)
             {
-                for (var i = 0; i < _subscriptions.Length; i++)
-                {
-                    Interlocked.Exchange(ref _subscriptions[i], null)?.Dispose();
-                }
+                return;
+            }
+
+            for (var i = 0; i < _subscriptions.Length; i++)
+            {
+                Interlocked.Exchange(ref _subscriptions[i], null)?.Dispose();
             }
         }
 
@@ -211,10 +223,12 @@ internal sealed class CombineLatest4Observable<T1, T2, T3, T4, TResult> : IObser
         /// </summary>
         private void TryEmit()
         {
-            if (_has1 && _has2 && _has3 && _has4)
+            if (!_has1 || !_has2 || !_has3 || !_has4)
             {
-                _observer?.OnNext(_resultSelector(_value1, _value2, _value3, _value4));
+                return;
             }
+
+            _observer?.OnNext(_resultSelector(_value1, _value2, _value3, _value4));
         }
 
         /// <summary>

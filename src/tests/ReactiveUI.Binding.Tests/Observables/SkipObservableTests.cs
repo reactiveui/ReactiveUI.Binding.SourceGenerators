@@ -12,6 +12,16 @@ namespace ReactiveUI.Binding.Tests.Observables;
 public class SkipObservableTests
 {
     /// <summary>
+    /// The single value produced by the source observable in single-item tests.
+    /// </summary>
+    private const int SingleValue = 42;
+
+    /// <summary>
+    /// The last value emitted after skipping the first items in the multi-item test.
+    /// </summary>
+    private const int LastEmittedValue = 3;
+
+    /// <summary>
     /// Verifies that Skip(0) forwards all items.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
@@ -25,7 +35,7 @@ public class SkipObservableTests
         skip.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
 
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo(42);
+        await Assert.That(results[0]).IsEqualTo(SingleValue);
     }
 
     /// <summary>
@@ -49,7 +59,7 @@ public class SkipObservableTests
         skip.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
 
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo(3);
+        await Assert.That(results[0]).IsEqualTo(LastEmittedValue);
     }
 
     /// <summary>
@@ -78,7 +88,7 @@ public class SkipObservableTests
         var errorThrown = false;
         var source = new AnonymousObservable<int>(observer =>
         {
-            observer.OnError(new Exception("test"));
+            observer.OnError(new InvalidOperationException("test"));
             return EmptyDisposable.Instance;
         });
 

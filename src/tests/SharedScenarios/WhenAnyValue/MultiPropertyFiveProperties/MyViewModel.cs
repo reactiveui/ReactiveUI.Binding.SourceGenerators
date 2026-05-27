@@ -4,119 +4,128 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties
+namespace SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties;
+
+/// <summary>
+/// ViewModel with five observable properties.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel with five observable properties.
+    /// The backing field for <see cref="Prop1"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private string _prop1 = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="Prop2"/>.
+    /// </summary>
+    private int _prop2;
+
+    /// <summary>
+    /// The backing field for <see cref="Prop3"/>.
+    /// </summary>
+    private double _prop3;
+
+    /// <summary>
+    /// The backing field for <see cref="Prop4"/>.
+    /// </summary>
+    private bool _prop4;
+
+    /// <summary>
+    /// The backing field for <see cref="Prop5"/>.
+    /// </summary>
+    private string _prop5 = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets property 1.
+    /// </summary>
+    public string Prop1
     {
-        /// <summary>
-        /// The backing field for <see cref="Prop1"/>.
-        /// </summary>
-        private string _prop1 = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="Prop2"/>.
-        /// </summary>
-        private int _prop2;
-
-        /// <summary>
-        /// The backing field for <see cref="Prop3"/>.
-        /// </summary>
-        private double _prop3;
-
-        /// <summary>
-        /// The backing field for <see cref="Prop4"/>.
-        /// </summary>
-        private bool _prop4;
-
-        /// <summary>
-        /// The backing field for <see cref="Prop5"/>.
-        /// </summary>
-        private string _prop5 = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets property 1.
-        /// </summary>
-        public string Prop1
+        get => _prop1;
+        set
         {
-            get => _prop1;
-            set
+            if (_prop1 == value)
             {
-                if (_prop1 != value)
-                {
-                    _prop1 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Prop1)));
-                }
+                return;
             }
+
+            _prop1 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Prop1)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets property 2.
-        /// </summary>
-        public int Prop2
+    /// <summary>
+    /// Gets or sets property 2.
+    /// </summary>
+    public int Prop2
+    {
+        get => _prop2;
+        set
         {
-            get => _prop2;
-            set
+            if (_prop2 == value)
             {
-                if (_prop2 != value)
-                {
-                    _prop2 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Prop2)));
-                }
+                return;
             }
+
+            _prop2 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Prop2)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets property 3.
-        /// </summary>
-        public double Prop3
+    /// <summary>
+    /// Gets or sets property 3.
+    /// </summary>
+    public double Prop3
+    {
+        get => _prop3;
+        set
         {
-            get => _prop3;
-            set
+            if (_prop3.Equals(value))
             {
-                if (_prop3 != value)
-                {
-                    _prop3 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Prop3)));
-                }
+                return;
             }
+
+            _prop3 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Prop3)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether property 4 is set.
-        /// </summary>
-        public bool Prop4
+    /// <summary>
+    /// Gets or sets a value indicating whether property 4 is set.
+    /// </summary>
+    public bool Prop4
+    {
+        get => _prop4;
+        set
         {
-            get => _prop4;
-            set
+            if (_prop4 == value)
             {
-                if (_prop4 != value)
-                {
-                    _prop4 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Prop4)));
-                }
+                return;
             }
+
+            _prop4 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Prop4)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets property 5.
-        /// </summary>
-        public string Prop5
+    /// <summary>
+    /// Gets or sets property 5.
+    /// </summary>
+    public string Prop5
+    {
+        get => _prop5;
+        set
         {
-            get => _prop5;
-            set
+            if (_prop5 == value)
             {
-                if (_prop5 != value)
-                {
-                    _prop5 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Prop5)));
-                }
+                return;
             }
+
+            _prop5 = value;
+            PropertyChanged?.Invoke(this, new(nameof(Prop5)));
         }
     }
 }

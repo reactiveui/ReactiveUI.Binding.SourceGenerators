@@ -17,6 +17,8 @@ public static class BindCompatScenarios
     /// <param name="view">The target view.</param>
     /// <param name="vm">The source view model.</param>
     /// <returns>A reactive binding representing the binding.</returns>
-    public static IReactiveBinding<TestView, (object? view, bool isViewModel)> StringProperty(TestView view, TestViewModel vm)
+    public static IReactiveBinding<TestView, (object? view, bool isViewModel)> StringProperty(
+        TestView view,
+        TestViewModel vm)
         => view.Bind(vm, x => x.Name, x => x.DisplayName);
 }

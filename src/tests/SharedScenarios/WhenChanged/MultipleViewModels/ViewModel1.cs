@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanged.MultipleViewModels
+namespace SharedScenarios.WhenChanged.MultipleViewModels;
+
+/// <summary>
+/// First ViewModel with a name property.
+/// </summary>
+public class ViewModel1 : INotifyPropertyChanged
 {
     /// <summary>
-    /// First ViewModel with a name property.
+    /// The backing field for <see cref="Name"/>.
     /// </summary>
-    public class ViewModel1 : INotifyPropertyChanged
+    private string _name = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the name.
+    /// </summary>
+    public string Name
     {
-        /// <summary>
-        /// The backing field for <see cref="Name"/>.
-        /// </summary>
-        private string _name = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        public string Name
+        get => _name;
+        set
         {
-            get => _name;
-            set
+            if (_name == value)
             {
-                if (_name != value)
-                {
-                    _name = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-                }
+                return;
             }
+
+            _name = value;
+            PropertyChanged?.Invoke(this, new(nameof(Name)));
         }
     }
 }

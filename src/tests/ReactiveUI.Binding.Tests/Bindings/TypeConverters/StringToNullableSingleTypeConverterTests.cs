@@ -10,6 +10,21 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToNullableSingleTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Single value parsed from a positive numeric string.
+    /// </summary>
+    private const float ParsedSingle = 123.456f;
+
+    /// <summary>
+    /// Tolerance used when comparing parsed single-precision values.
+    /// </summary>
+    private const float SingleTolerance = 0.001f;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +33,7 @@ public class StringToNullableSingleTypeConverterTests
     {
         var converter = new StringToNullableSingleTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,8 +44,7 @@ public class StringToNullableSingleTypeConverterTests
     public async Task TryConvert_EmptyString_ReturnsTrue()
     {
         var converter = new StringToNullableSingleTypeConverter();
-
-        var result = converter.TryConvert(string.Empty, null, out var output);
+        var result = converter.TryConvert(string.Empty, null, out _);
 
         await Assert.That(result).IsTrue();
     }
@@ -43,8 +57,7 @@ public class StringToNullableSingleTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToNullableSingleTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -62,6 +75,6 @@ public class StringToNullableSingleTypeConverterTests
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsNotNull();
-        await Assert.That(output!.Value).IsEqualTo(123.456f).Within(0.001f);
+        await Assert.That(output!.Value).IsEqualTo(ParsedSingle).Within(SingleTolerance);
     }
 }

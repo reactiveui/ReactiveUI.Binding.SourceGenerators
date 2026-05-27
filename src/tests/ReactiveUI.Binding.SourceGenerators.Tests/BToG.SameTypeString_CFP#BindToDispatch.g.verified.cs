@@ -19,16 +19,16 @@ namespace ReactiveUI.Binding
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 54
+            if (callerLineNumber == 56
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __BindTo_000016A7FA446BF2(source, target);
+                return __BindTo_000016A7FA446C30(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTo_000016A7FA446BF2(global::System.IObservable<string> source, global::SharedScenarios.BindTo.SameTypeString.MyView target)
+        private static global::System.IDisposable __BindTo_000016A7FA446C30(global::System.IObservable<string> source, global::SharedScenarios.BindTo.SameTypeString.MyView target)
         {
             // BindTo: observable -> Caption
             return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(source, value =>

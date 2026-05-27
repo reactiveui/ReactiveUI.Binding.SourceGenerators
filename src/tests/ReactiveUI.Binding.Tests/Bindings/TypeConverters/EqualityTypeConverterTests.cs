@@ -66,7 +66,7 @@ public class EqualityTypeConverterTests
     public async Task TryConvertTyped_DifferentIntegers_ReturnsFalse()
     {
         var converter = new EqualityTypeConverter();
-        var obj = 42;
+        const int obj = 42;
 
         var result = converter.TryConvertTyped(obj, 43, out var output);
 
@@ -82,7 +82,7 @@ public class EqualityTypeConverterTests
     public async Task TryConvertTyped_DifferentTypes_ReturnsFalse()
     {
         var converter = new EqualityTypeConverter();
-        var obj = "42";
+        const string obj = "42";
 
         var result = converter.TryConvertTyped(obj, 42, out var output);
 
@@ -98,7 +98,7 @@ public class EqualityTypeConverterTests
     public async Task TryConvertTyped_DifferentValues_ReturnsFalse()
     {
         var converter = new EqualityTypeConverter();
-        var obj = "test";
+        const string obj = "test";
 
         var result = converter.TryConvertTyped(obj, "other", out var output);
 
@@ -114,7 +114,7 @@ public class EqualityTypeConverterTests
     public async Task TryConvertTyped_EqualIntegers_ReturnsTrue()
     {
         var converter = new EqualityTypeConverter();
-        var obj = 42;
+        const int obj = 42;
 
         var result = converter.TryConvertTyped(obj, 42, out var output);
 
@@ -130,7 +130,7 @@ public class EqualityTypeConverterTests
     public async Task TryConvertTyped_EqualStrings_ReturnsTrue()
     {
         var converter = new EqualityTypeConverter();
-        var obj = "hello";
+        const string obj = "hello";
 
         var result = converter.TryConvertTyped(obj, "hello", out var output);
 
@@ -146,7 +146,7 @@ public class EqualityTypeConverterTests
     public async Task TryConvertTyped_EqualValues_ReturnsTrue()
     {
         var converter = new EqualityTypeConverter();
-        var obj = "test";
+        const string obj = "test";
 
         var result = converter.TryConvertTyped(obj, "test", out var output);
 
@@ -162,7 +162,7 @@ public class EqualityTypeConverterTests
     public async Task TryConvertTyped_NoConversionHint_UseNullComparison()
     {
         var converter = new EqualityTypeConverter();
-        var obj = "test";
+        const string obj = "test";
 
         var result = converter.TryConvertTyped(obj, null, out var output);
 

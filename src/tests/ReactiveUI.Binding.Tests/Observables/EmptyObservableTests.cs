@@ -34,7 +34,8 @@ public class EmptyObservableTests
     /// Verifies that EmptyObservable throws ArgumentNullException for null observer.
     /// </summary>
     [Test]
-    public void Subscribe_NullObserver_ThrowsArgumentNullException() => Assert.Throws<ArgumentNullException>(() => EmptyObservable<int>.Instance.Subscribe(null!));
+    public void Subscribe_NullObserver_ThrowsArgumentNullException() =>
+        Assert.Throws<ArgumentNullException>(() => EmptyObservable<int>.Instance.Subscribe(null!));
 
     /// <summary>
     /// Verifies that the singleton instance is reused.

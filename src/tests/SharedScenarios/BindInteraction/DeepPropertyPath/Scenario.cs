@@ -4,27 +4,25 @@
 
 using System;
 using System.Threading.Tasks;
-
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindInteraction.DeepPropertyPath
+namespace SharedScenarios.BindInteraction.DeepPropertyPath;
+
+/// <summary>
+/// Exercises BindInteraction with a deep property path (Child.Confirm).
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindInteraction with a deep property path (Child.Confirm).
+    /// Binds a task handler to the ViewModel's Child.Confirm interaction.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Binds a task handler to the ViewModel's Child.Confirm interaction.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view)
-            => view.BindInteraction(vm, x => x.Child!.Confirm, ctx =>
-            {
-                ctx.SetOutput(true);
-                return Task.CompletedTask;
-            });
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view)
+        => view.BindInteraction(vm, x => x.Child!.Confirm, ctx =>
+        {
+            ctx.SetOutput(true);
+            return Task.CompletedTask;
+        });
 }

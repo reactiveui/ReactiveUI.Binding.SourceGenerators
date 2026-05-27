@@ -135,12 +135,14 @@ internal sealed class CombineLatest2Observable<T1, T2, TResult> : IObservable<TR
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref _observer, null) != null)
+            if (Interlocked.Exchange(ref _observer, null) == null)
             {
-                for (var i = 0; i < _subscriptions.Length; i++)
-                {
-                    Interlocked.Exchange(ref _subscriptions[i], null)?.Dispose();
-                }
+                return;
+            }
+
+            for (var i = 0; i < _subscriptions.Length; i++)
+            {
+                Interlocked.Exchange(ref _subscriptions[i], null)?.Dispose();
             }
         }
 
@@ -149,10 +151,12 @@ internal sealed class CombineLatest2Observable<T1, T2, TResult> : IObservable<TR
         /// </summary>
         private void TryEmit()
         {
-            if (_has1 && _has2)
+            if (!_has1 || !_has2)
             {
-                _observer?.OnNext(_resultSelector(_value1, _value2));
+                return;
             }
+
+            _observer?.OnNext(_resultSelector(_value1, _value2));
         }
 
         /// <summary>
