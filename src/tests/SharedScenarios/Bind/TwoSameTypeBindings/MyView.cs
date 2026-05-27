@@ -3,62 +3,64 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.Bind.TwoSameTypeBindings
+namespace SharedScenarios.Bind.TwoSameTypeBindings;
+
+/// <summary>
+/// Target View with two string properties to test same-type-signature grouping.
+/// </summary>
+public class MyView : IViewFor, INotifyPropertyChanged
 {
     /// <summary>
-    /// Target View with two string properties to test same-type-signature grouping.
+    /// The backing field for <see cref="FirstNameText"/>.
     /// </summary>
-    public class MyView : IViewFor, INotifyPropertyChanged
+    private string _firstNameText = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="LastNameText"/>.
+    /// </summary>
+    private string _lastNameText = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <inheritdoc/>
+    public object? ViewModel { get; set; }
+
+    /// <summary>
+    /// Gets or sets the first name text.
+    /// </summary>
+    public string FirstNameText
     {
-        /// <summary>
-        /// The backing field for <see cref="FirstNameText"/>.
-        /// </summary>
-        private string _firstNameText = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="LastNameText"/>.
-        /// </summary>
-        private string _lastNameText = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <inheritdoc/>
-        public object? ViewModel { get; set; }
-
-        /// <summary>
-        /// Gets or sets the first name text.
-        /// </summary>
-        public string FirstNameText
+        get => _firstNameText;
+        set
         {
-            get => _firstNameText;
-            set
+            if (_firstNameText == value)
             {
-                if (_firstNameText != value)
-                {
-                    _firstNameText = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FirstNameText)));
-                }
+                return;
             }
+
+            _firstNameText = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FirstNameText)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the last name text.
-        /// </summary>
-        public string LastNameText
+    /// <summary>
+    /// Gets or sets the last name text.
+    /// </summary>
+    public string LastNameText
+    {
+        get => _lastNameText;
+        set
         {
-            get => _lastNameText;
-            set
+            if (_lastNameText == value)
             {
-                if (_lastNameText != value)
-                {
-                    _lastNameText = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastNameText)));
-                }
+                return;
             }
+
+            _lastNameText = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastNameText)));
         }
     }
 }

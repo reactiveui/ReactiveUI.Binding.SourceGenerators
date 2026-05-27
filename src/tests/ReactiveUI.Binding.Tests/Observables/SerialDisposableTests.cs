@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using ReactiveUI.Binding.Observables;
-
 using SerialDisposable = ReactiveUI.Binding.Observables.SerialDisposable;
 
 namespace ReactiveUI.Binding.Tests.Observables;

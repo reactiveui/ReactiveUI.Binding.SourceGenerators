@@ -10,6 +10,4 @@ namespace ReactiveUI.Binding.Builder;
 /// Represents a configured ReactiveUI.Binding application instance.
 /// </summary>
 /// <seealso cref="IAppInstance" />
-public interface IReactiveUIBindingInstance : IAppInstance
-{
-}
+public interface IReactiveUIBindingInstance : IAppInstance;

@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -40,8 +39,12 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task GroupByTypeSignature_DifferentSourceTypes_SeparateGroups()
     {
-        var inv1 = ModelFactory.CreateBindingInvocationInfo(sourceTypeFullName: "global::TestApp.ViewModelA", methodName: "Bind");
-        var inv2 = ModelFactory.CreateBindingInvocationInfo(sourceTypeFullName: "global::TestApp.ViewModelB", methodName: "Bind");
+        var inv1 = ModelFactory.CreateBindingInvocationInfo(
+            sourceTypeFullName: "global::TestApp.ViewModelA",
+            methodName: "Bind");
+        var inv2 = ModelFactory.CreateBindingInvocationInfo(
+            sourceTypeFullName: "global::TestApp.ViewModelB",
+            methodName: "Bind");
         var invocations = ImmutableArray.Create(inv1, inv2);
 
         var groups = BindCodeGenerator.GroupByTypeSignature(invocations);
@@ -167,7 +170,7 @@ public class BindCodeGeneratorHelperTests
             false,
             []);
 
-        var result = BindCodeGenerator.FormatReturnType(group);
+        var result = BindCodeGenerator.FormatReturnType(group, false);
 
         await Assert.That(result).Contains("IReactiveBinding");
         await Assert.That(result).Contains("global::TestApp.View");
@@ -182,7 +185,7 @@ public class BindCodeGeneratorHelperTests
     {
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: "Bind");
 
-        var result = BindCodeGenerator.FormatMethodReturnType(inv);
+        var result = BindCodeGenerator.FormatMethodReturnType(inv, false);
 
         await Assert.That(result).Contains("IReactiveBinding");
         await Assert.That(result).Contains("global::TestApp.MyView");
@@ -195,7 +198,10 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraMethodParams_NoConversionNoScheduler_ReturnsEmpty()
     {
-        var inv = ModelFactory.CreateBindingInvocationInfo(hasConversion: false, hasScheduler: false, methodName: "Bind");
+        var inv = ModelFactory.CreateBindingInvocationInfo(
+            hasConversion: false,
+            hasScheduler: false,
+            methodName: "Bind");
 
         var result = BindCodeGenerator.FormatExtraMethodParams(inv);
 
@@ -251,7 +257,7 @@ public class BindCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true);
+        BindCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -276,7 +282,7 @@ public class BindCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false);
+        BindCodeGenerator.GenerateConcreteOverload(sb, group, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerFilePath.EndsWith");
@@ -294,11 +300,11 @@ public class BindCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: "Bind");
         var sourceClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
         var targetClassInfo = ModelFactory.CreateClassBindingInfo(
-            fullyQualifiedName: "global::TestApp.MyView",
-            metadataName: "MyView",
+            "global::TestApp.MyView",
+            "MyView",
             implementsINPC: true);
 
-        BindCodeGenerator.GenerateBindMethod(sb, inv, sourceClassInfo, targetClassInfo, suffix: "TEST00000000TEST");
+        BindCodeGenerator.GenerateBindMethod(sb, inv, sourceClassInfo, targetClassInfo, "TEST00000000TEST", false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__Bind_TEST00000000TEST");

@@ -12,6 +12,16 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class BindingTypeConverterBaseTests
 {
     /// <summary>
+    /// Integer value parsed from the string "42" in conversion tests.
+    /// </summary>
+    private const int ParsedInteger = 42;
+
+    /// <summary>
+    /// Integer value parsed from the string "100" in the boxing test.
+    /// </summary>
+    private const int BoxedInteger = 100;
+
+    /// <summary>
     /// Verifies TryConvertTyped returns false when input is null and TFrom is a non-nullable value type (int).
     /// Exercises lines 61-64 in BindingTypeConverter.cs via a production converter.
     /// </summary>
@@ -72,7 +82,7 @@ public class BindingTypeConverterBaseTests
         var result = converter.TryConvertTyped("42", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(42);
+        await Assert.That(output).IsEqualTo(ParsedInteger);
     }
 
     /// <summary>
@@ -201,7 +211,7 @@ public class BindingTypeConverterBaseTests
 
         await Assert.That(result).IsTrue();
         await Assert.That(output is int).IsTrue();
-        await Assert.That(output).IsEqualTo(100);
+        await Assert.That(output).IsEqualTo(BoxedInteger);
     }
 
     /// <summary>
@@ -257,7 +267,7 @@ public class BindingTypeConverterBaseTests
         var result = converter.TryConvertTyped("42", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(42);
+        await Assert.That(output).IsEqualTo(ParsedInteger);
     }
 
     /// <summary>

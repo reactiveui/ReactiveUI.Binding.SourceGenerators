@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reactive.Concurrency;
-
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 
@@ -23,7 +22,12 @@ public class BindTwoWayBenchmark
     /// <summary>
     /// Represents the number of property change events to be triggered during the benchmark tests.
     /// </summary>
-    private const int PropertyChangeCount = 1000;
+    private const int PropertyChangeCount = 1_000;
+
+    /// <summary>
+    /// The modulus used to alternate updates between the source and the target each iteration.
+    /// </summary>
+    private const int AlternationModulus = 2;
 
     /// <summary>
     /// The source and target view models used for binding benchmarks.
@@ -41,8 +45,8 @@ public class BindTwoWayBenchmark
     [IterationSetup]
     public void Setup()
     {
-        _source = new BenchmarkViewModel { Name = "Initial", Age = 0 };
-        _target = new BenchmarkView();
+        _source = new() { Name = "Initial", Age = 0 };
+        _target = new();
     }
 
     /// <summary>
@@ -83,7 +87,7 @@ public class BindTwoWayBenchmark
 
         for (var i = 0; i < PropertyChangeCount; i++)
         {
-            if (i % 2 == 0)
+            if (i % AlternationModulus == 0)
             {
                 _source.Name = $"FromSource_{i}";
             }

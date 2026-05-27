@@ -15,27 +15,27 @@ namespace ReactiveUI.Binding.Maui;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The conversion supports a <see cref="BooleanToVisibilityHint"/> as the conversion hint parameter:
+/// The conversion supports a <see cref="BooleanToVisibilityHints"/> as the conversion hint parameter:
 /// </para>
 /// <list type="bullet">
-/// <item><description><see cref="BooleanToVisibilityHint.None"/> - Visible maps to True, other values map to False.</description></item>
-/// <item><description><see cref="BooleanToVisibilityHint.Inverse"/> - Inverts the result (Visible maps to False, other maps to True).</description></item>
+/// <item><description><see cref="BooleanToVisibilityHints.None"/> - Visible maps to True, other values map to False.</description></item>
+/// <item><description><see cref="BooleanToVisibilityHints.Inverse"/> - Inverts the result (Visible maps to False, other maps to True).</description></item>
 /// </list>
 /// </remarks>
 public sealed class VisibilityToBooleanTypeConverter : BindingTypeConverter<Visibility, bool>
 {
     /// <inheritdoc/>
-    public override int GetAffinityForObjects() => 2;
+    public override int GetAffinityForObjects() => BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>
     public override bool TryConvert(Visibility from, object? conversionHint, [NotNullWhen(true)] out bool result)
     {
-        var hint = conversionHint is BooleanToVisibilityHint visibilityHint
+        var hint = conversionHint is BooleanToVisibilityHints visibilityHint
             ? visibilityHint
-            : BooleanToVisibilityHint.None;
+            : BooleanToVisibilityHints.None;
 
         var isVisible = from == Visibility.Visible;
-        result = (hint & BooleanToVisibilityHint.Inverse) != 0 ? !isVisible : isVisible;
+        result = (hint & BooleanToVisibilityHints.Inverse) != 0 ? !isVisible : isVisible;
         return true;
     }
 }

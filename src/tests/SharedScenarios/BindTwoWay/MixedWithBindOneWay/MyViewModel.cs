@@ -4,56 +4,59 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.BindTwoWay.MixedWithBindOneWay
+namespace SharedScenarios.BindTwoWay.MixedWithBindOneWay;
+
+/// <summary>
+/// Source ViewModel with properties for mixed binding.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// Source ViewModel with properties for mixed binding.
+    /// The backing field for <see cref="Name"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private string _name = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="ReadOnlyCount"/>.
+    /// </summary>
+    private int _readOnlyCount;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the name.
+    /// </summary>
+    public string Name
     {
-        /// <summary>
-        /// The backing field for <see cref="Name"/>.
-        /// </summary>
-        private string _name = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="ReadOnlyCount"/>.
-        /// </summary>
-        private int _readOnlyCount;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        public string Name
+        get => _name;
+        set
         {
-            get => _name;
-            set
+            if (_name == value)
             {
-                if (_name != value)
-                {
-                    _name = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-                }
+                return;
             }
+
+            _name = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the read-only count.
-        /// </summary>
-        public int ReadOnlyCount
+    /// <summary>
+    /// Gets or sets the read-only count.
+    /// </summary>
+    public int ReadOnlyCount
+    {
+        get => _readOnlyCount;
+        set
         {
-            get => _readOnlyCount;
-            set
+            if (_readOnlyCount == value)
             {
-                if (_readOnlyCount != value)
-                {
-                    _readOnlyCount = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ReadOnlyCount)));
-                }
+                return;
             }
+
+            _readOnlyCount = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ReadOnlyCount)));
         }
     }
 }

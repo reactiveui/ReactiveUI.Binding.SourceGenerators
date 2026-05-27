@@ -5,24 +5,23 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindInteraction.ObservableHandler
+namespace SharedScenarios.BindInteraction.ObservableHandler;
+
+/// <summary>
+/// Exercises BindInteraction with an observable-based handler.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindInteraction with an observable-based handler.
+    /// Binds an observable handler to the ViewModel's Confirm interaction.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Binds an observable handler to the ViewModel's Confirm interaction.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view)
-            => view.BindInteraction(vm, x => x.Confirm, ctx =>
-            {
-                ctx.SetOutput(true);
-                return new ReactiveUI.Binding.Observables.ReturnObservable<int>(0);
-            });
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view)
+        => view.BindInteraction(vm, x => x.Confirm, ctx =>
+        {
+            ctx.SetOutput(true);
+            return new ReactiveUI.Binding.Observables.ReturnObservable<int>(0);
+        });
 }

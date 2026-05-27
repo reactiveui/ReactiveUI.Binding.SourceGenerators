@@ -21,7 +21,7 @@ namespace ReactiveUI.Binding;
 /// are known at compile time.
 /// </para>
 /// </remarks>
-public interface IBindingTypeConverter<TFrom, TTo> : IBindingTypeConverter
+public interface IBindingTypeConverter<in TFrom, TTo> : IBindingTypeConverter
 {
     /// <summary>
     /// Convert a value to the target type in a type-safe manner.

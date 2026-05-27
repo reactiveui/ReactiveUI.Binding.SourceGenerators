@@ -3,20 +3,20 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
-
 using ReactiveUI.Binding.Helpers;
 using ReactiveUI.Binding.SourceGenerators;
 
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
 
 /// <summary>
-/// Analyzes WhenChanged/WhenChanging/BindOneWay/BindTwoWay invocations for common issues.
-/// Reports RXUIBIND001, RXUIBIND003, RXUIBIND004, RXUIBIND005.
+/// Analyzes binding and observation invocations (WhenChanged, WhenChanging, BindOneWay, BindTwoWay,
+/// OneWayBind, Bind, BindTo, BindCommand, BindInteraction) for common issues. The generic lambda checks
+/// (RXUIBIND001/003/006) apply to every recognized extension method; the remaining checks are
+/// method-specific (RXUIBIND004, RXUIBIND005, RXUIBIND007, RXUIBIND008).
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class BindingInvocationAnalyzer : DiagnosticAnalyzer
@@ -25,12 +25,12 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
     [
         DiagnosticWarnings.NonInlineLambda,
-            DiagnosticWarnings.PrivateMember,
-            DiagnosticWarnings.NoBeforeChangeSupport,
-            DiagnosticWarnings.ValidationNotGenerated,
-            DiagnosticWarnings.UnsupportedPathSegment,
-            DiagnosticWarnings.NoBindableEvent,
-            DiagnosticWarnings.InvalidInteractionType
+        DiagnosticWarnings.PrivateMember,
+        DiagnosticWarnings.NoBeforeChangeSupport,
+        DiagnosticWarnings.ValidationNotGenerated,
+        DiagnosticWarnings.UnsupportedPathSegment,
+        DiagnosticWarnings.NoBindableEvent,
+        DiagnosticWarnings.InvalidInteractionType
     ];
 
     /// <inheritdoc/>
@@ -87,10 +87,12 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         }
 
         // Check RXUIBIND007: No bindable event on control
-        if (methodName == Constants.BindCommandMethodName)
+        if (methodName != Constants.BindCommandMethodName)
         {
-            CheckBindableEvent(context, invocationOp);
+            return;
         }
+
+        CheckBindableEvent(context, invocationOp);
     }
 
     /// <summary>
@@ -185,15 +187,21 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         IInvocationOperation invocationOp,
         IMethodSymbol methodSymbol)
     {
-        if (AnalyzerHelpers.LacksBeforeChangeSupport(methodSymbol, context.Compilation, out var receiverType, out var mechanism))
+        if (!AnalyzerHelpers.LacksBeforeChangeSupport(
+            methodSymbol,
+            context.Compilation,
+            out var receiverType,
+            out var mechanism))
         {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    DiagnosticWarnings.NoBeforeChangeSupport,
-                    invocationOp.Syntax.GetLocation(),
-                    receiverType!.Name,
-                    mechanism));
+            return;
         }
+
+        context.ReportDiagnostic(
+            Diagnostic.Create(
+                DiagnosticWarnings.NoBeforeChangeSupport,
+                invocationOp.Syntax.GetLocation(),
+                receiverType!.Name,
+                mechanism));
     }
 
     /// <summary>
@@ -206,15 +214,19 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         OperationAnalysisContext context,
         IInvocationOperation invocationOp)
     {
-        if (AnalyzerHelpers.ImplementsDataErrorInfo(
-                invocationOp.TargetMethod, context.Compilation, out var sourceType))
+        if (!AnalyzerHelpers.ImplementsDataErrorInfo(
+                invocationOp.TargetMethod,
+                context.Compilation,
+                out var sourceType))
         {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    DiagnosticWarnings.ValidationNotGenerated,
-                    invocationOp.Syntax.GetLocation(),
-                    sourceType!.Name));
+            return;
         }
+
+        context.ReportDiagnostic(
+            Diagnostic.Create(
+                DiagnosticWarnings.ValidationNotGenerated,
+                invocationOp.Syntax.GetLocation(),
+                sourceType!.Name));
     }
 
     /// <summary>
@@ -287,24 +299,13 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         OperationAnalysisContext context,
         IInvocationOperation invocationOp)
     {
-        var methodSymbol = invocationOp.TargetMethod;
+        _ = invocationOp.TargetMethod;
         var arguments = invocationOp.Arguments;
 
         // If toEvent is explicitly specified, skip this check
-        for (var i = 0; i < arguments.Length; i++)
+        if (IsToEventSpecified(arguments))
         {
-            var toEventArg = arguments[i];
-            if (toEventArg.Parameter!.Name != "toEvent")
-            {
-                continue;
-            }
-
-            if (!toEventArg.IsImplicit
-                && toEventArg.Value.ConstantValue.HasValue
-                && toEventArg.Value.ConstantValue.Value is string { Length: > 0 })
-            {
-                return;
-            }
+            return;
         }
 
         // Find the controlName argument to get the control type
@@ -322,7 +323,6 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             }
 
             var body = GetLambdaBody(lambda);
-
             if (body == null)
             {
                 break;
@@ -334,28 +334,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
                 break;
             }
 
-            // Check for default events: Click, TouchUpInside, MouseUp, Pressed
-            string[] defaultEvents = ["Click", "TouchUpInside", "MouseUp", "Pressed"];
-            var foundEvent = false;
-            for (var j = 0; j < defaultEvents.Length; j++)
-            {
-                var members = controlType.GetMembers(defaultEvents[j]);
-                for (var k = 0; k < members.Length; k++)
-                {
-                    if (members[k] is IEventSymbol)
-                    {
-                        foundEvent = true;
-                        break;
-                    }
-                }
-
-                if (foundEvent)
-                {
-                    break;
-                }
-            }
-
-            if (!foundEvent)
+            if (!HasDefaultBindableEvent(controlType))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(
@@ -510,5 +489,55 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
 
         var parenthesized = (ParenthesizedLambdaExpressionSyntax)lambda;
         return parenthesized.Body as ExpressionSyntax;
+    }
+
+    /// <summary>
+    /// Determines whether a non-empty constant <c>toEvent</c> argument was explicitly supplied.
+    /// </summary>
+    /// <param name="arguments">The invocation arguments to inspect.</param>
+    /// <returns><c>true</c> if a non-empty <c>toEvent</c> string was specified; otherwise, <c>false</c>.</returns>
+    private static bool IsToEventSpecified(ImmutableArray<IArgumentOperation> arguments)
+    {
+        for (var i = 0; i < arguments.Length; i++)
+        {
+            var toEventArg = arguments[i];
+            if (toEventArg.Parameter!.Name != "toEvent")
+            {
+                continue;
+            }
+
+            if (!toEventArg.IsImplicit
+                && toEventArg.Value.ConstantValue.HasValue
+                && toEventArg.Value.ConstantValue.Value is string { Length: > 0 })
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Determines whether a control type exposes one of the default bindable events
+    /// (Click, TouchUpInside, MouseUp, or Pressed).
+    /// </summary>
+    /// <param name="controlType">The control type to inspect.</param>
+    /// <returns><c>true</c> if a default bindable event is found; otherwise, <c>false</c>.</returns>
+    private static bool HasDefaultBindableEvent(INamedTypeSymbol controlType)
+    {
+        string[] defaultEvents = ["Click", "TouchUpInside", "MouseUp", "Pressed"];
+        for (var j = 0; j < defaultEvents.Length; j++)
+        {
+            var members = controlType.GetMembers(defaultEvents[j]);
+            for (var k = 0; k < members.Length; k++)
+            {
+                if (members[k] is IEventSymbol)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

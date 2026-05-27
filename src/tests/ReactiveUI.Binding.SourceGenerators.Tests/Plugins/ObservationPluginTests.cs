@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
 using ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -29,7 +28,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: false, includeStartWith: true);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyControl", false, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("EventObservable");
@@ -48,7 +47,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: true, includeStartWith: true);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyControl", true, true);
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -64,7 +63,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: false, "__obs0");
+        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyControl", false, "__obs0");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("var __obs0");
@@ -82,7 +81,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: true, "__obs0");
+        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyControl", true, "__obs0");
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -98,7 +97,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: false, "__obs0");
+        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyControl", false, "__obs0");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("EventObservable");
@@ -116,7 +115,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: true, "__obs0");
+        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyControl", true, "__obs0");
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -132,7 +131,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", "string", "global::TestApp.Address");
 
-        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, isBeforeChange: false);
+        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("EventObservable");
@@ -150,7 +149,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", "string", "global::TestApp.Address");
 
-        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, isBeforeChange: true);
+        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, true);
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -229,7 +228,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyTextBox", isBeforeChange: false, "__obs0");
+        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyTextBox", false, "__obs0");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("EventObservable");
@@ -247,7 +246,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyTextBox", isBeforeChange: true, "__obs0");
+        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyTextBox", true, "__obs0");
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -263,7 +262,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyTextBox", isBeforeChange: true, includeStartWith: true);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyTextBox", true, true);
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -279,7 +278,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyTextBox", isBeforeChange: false, "__obs0");
+        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyTextBox", false, "__obs0");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("EventObservable");
@@ -297,7 +296,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyTextBox", isBeforeChange: true, "__obs0");
+        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyTextBox", true, "__obs0");
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -313,7 +312,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string", "global::TestApp.Inner");
 
-        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, isBeforeChange: false);
+        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("EventObservable");
@@ -331,7 +330,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string", "global::TestApp.Inner");
 
-        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, isBeforeChange: true);
+        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, true);
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -382,7 +381,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: true, includeStartWith: true);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyControl", true, true);
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -398,7 +397,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: false, "__obs0");
+        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyControl", false, "__obs0");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__WinUIDPObservable");
@@ -416,7 +415,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: true, "__obs0");
+        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyControl", true, "__obs0");
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -432,7 +431,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: false, "__obs0");
+        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyControl", false, "__obs0");
 
         await Assert.That(sb.ToString()).Contains("__WinUIDPObservable");
     }
@@ -448,7 +447,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: true, "__obs0");
+        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyControl", true, "__obs0");
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -464,7 +463,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string", "global::TestApp.Inner");
 
-        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, isBeforeChange: false);
+        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__WinUIDPObservable");
@@ -482,7 +481,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string", "global::TestApp.Inner");
 
-        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, isBeforeChange: true);
+        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, true);
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -535,7 +534,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyView", isBeforeChange: false, "__obs0");
+        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyView", false, "__obs0");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__KVOObservable");
@@ -553,7 +552,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyView", isBeforeChange: true, "__obs0");
+        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyView", true, "__obs0");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__KVOObservable");
@@ -571,7 +570,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyView", isBeforeChange: false, "__obs0");
+        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyView", false, "__obs0");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__KVOObservable");
@@ -589,7 +588,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyView", isBeforeChange: true, "__obs0");
+        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyView", true, "__obs0");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__KVOObservable");
@@ -607,7 +606,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", "string", "global::TestApp.Address");
 
-        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, isBeforeChange: false);
+        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__KVOObservable");
@@ -625,7 +624,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", "string", "global::TestApp.Address");
 
-        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, isBeforeChange: true);
+        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__KVOObservable");
@@ -661,7 +660,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Enabled", "bool");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyView", isBeforeChange: false, includeStartWith: true);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyView", false, true);
 
         await Assert.That(sb.ToString()).Contains("\"isEnabled\"");
     }
@@ -677,7 +676,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("IsEnabled", "bool");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyView", isBeforeChange: false, includeStartWith: true);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyView", false, true);
 
         await Assert.That(sb.ToString()).Contains("\"isEnabled\"");
     }
@@ -693,7 +692,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment(string.Empty, "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyView", isBeforeChange: false, includeStartWith: true);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyView", false, true);
 
         await Assert.That(sb.ToString()).Contains("\"\"");
     }
@@ -727,7 +726,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyView", isBeforeChange: true, includeStartWith: true);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyView", true, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__KVOObservable");
@@ -747,7 +746,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyAndroidView", isBeforeChange: false, "__obs0");
+        plugin.EmitShallowObservationVariable(sb, "obj", segment, "global::TestApp.MyAndroidView", false, "__obs0");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("ReturnObservable");
@@ -765,7 +764,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyAndroidView", isBeforeChange: false, "__obs0");
+        plugin.EmitDeepChainRootSegment(sb, "obj", segment, "global::TestApp.MyAndroidView", false, "__obs0");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("ReturnObservable");
@@ -783,7 +782,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", "string", "global::TestApp.Address");
 
-        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, isBeforeChange: false);
+        plugin.EmitDeepChainInnerSegment(sb, "__obs0", "__obs1", "__p1", segment, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("ReturnObservable");
@@ -851,7 +850,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Name", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyViewModel", isBeforeChange: false, includeStartWith: false);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyViewModel", false, false);
 
         await Assert.That(sb.ToString()).Contains("false)");
     }
@@ -867,7 +866,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Name", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyViewModel", isBeforeChange: false, includeStartWith: false);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyViewModel", false, false);
 
         await Assert.That(sb.ToString()).Contains("false)");
     }
@@ -883,7 +882,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: false, includeStartWith: false);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyControl", false, false);
 
         await Assert.That(sb.ToString()).Contains("false)");
     }
@@ -899,7 +898,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyTextBox", isBeforeChange: false, includeStartWith: false);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyTextBox", false, false);
 
         await Assert.That(sb.ToString()).Contains("false)");
     }
@@ -915,7 +914,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyControl", isBeforeChange: false, includeStartWith: false);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyControl", false, false);
 
         await Assert.That(sb.ToString()).Contains("false)");
     }
@@ -931,7 +930,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyView", isBeforeChange: false, includeStartWith: false);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyView", false, false);
 
         await Assert.That(sb.ToString()).Contains("false, false)");
     }
@@ -947,7 +946,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", "string");
 
-        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyAndroidView", isBeforeChange: false, includeStartWith: true);
+        plugin.EmitShallowObservation(sb, "obj", segment, "global::TestApp.MyAndroidView", false, true);
 
         await Assert.That(sb.ToString()).Contains("ReturnObservable");
     }
@@ -1017,8 +1016,5 @@ public class ObservationPluginTests
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task Registry_Count_Returns7()
-    {
-        await Assert.That(ObservationPluginRegistry.Count).IsEqualTo(7);
-    }
+    public async Task Registry_Count_Returns7() => await Assert.That(ObservationPluginRegistry.Count).IsEqualTo(7);
 }

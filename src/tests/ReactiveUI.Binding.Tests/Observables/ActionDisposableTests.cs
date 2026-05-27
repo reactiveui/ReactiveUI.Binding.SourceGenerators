@@ -7,7 +7,7 @@ using ReactiveUI.Binding.Observables;
 namespace ReactiveUI.Binding.Tests.Observables;
 
 /// <summary>
-///     Tests for the <see cref="ReactiveUI.Binding.Observables.ActionDisposable"/> class which invokes an action on disposal.
+///     Tests for the <see cref="Binding.Observables.ActionDisposable"/> class which invokes an action on disposal.
 /// </summary>
 public class ActionDisposableTests
 {
@@ -46,5 +46,6 @@ public class ActionDisposableTests
     ///     Verifies that constructor throws ArgumentNullException when action is null.
     /// </summary>
     [Test]
-    public void Constructor_NullAction_ThrowsArgumentNullException() => Assert.Throws<ArgumentNullException>(() => new ActionDisposable(null!));
+    public void Constructor_NullAction_ThrowsArgumentNullException() =>
+        Assert.Throws<ArgumentNullException>(() => _ = new ActionDisposable(null!));
 }

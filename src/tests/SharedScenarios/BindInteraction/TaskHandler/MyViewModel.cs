@@ -3,38 +3,38 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindInteraction.TaskHandler
+namespace SharedScenarios.BindInteraction.TaskHandler;
+
+/// <summary>
+/// ViewModel exposing a string-to-bool interaction.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel exposing a string-to-bool interaction.
+    /// The backing field for <see cref="Confirm"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private Interaction<string, bool> _confirm = new Interaction<string, bool>();
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the confirmation interaction.
+    /// </summary>
+    public Interaction<string, bool> Confirm
     {
-        /// <summary>
-        /// The backing field for <see cref="Confirm"/>.
-        /// </summary>
-        private Interaction<string, bool> _confirm = new Interaction<string, bool>();
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the confirmation interaction.
-        /// </summary>
-        public Interaction<string, bool> Confirm
+        get => _confirm;
+        set
         {
-            get => _confirm;
-            set
+            if (_confirm == value)
             {
-                if (_confirm != value)
-                {
-                    _confirm = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Confirm)));
-                }
+                return;
             }
+
+            _confirm = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Confirm)));
         }
     }
 }

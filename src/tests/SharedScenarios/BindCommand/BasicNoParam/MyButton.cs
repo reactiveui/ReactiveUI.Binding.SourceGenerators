@@ -4,21 +4,20 @@
 
 using System;
 
-namespace SharedScenarios.BindCommand.BasicNoParam
+namespace SharedScenarios.BindCommand.BasicNoParam;
+
+/// <summary>
+/// A simple button control with a Click event.
+/// </summary>
+public class MyButton
 {
     /// <summary>
-    /// A simple button control with a Click event.
+    /// Occurs when the button is clicked.
     /// </summary>
-    public class MyButton
-    {
-        /// <summary>
-        /// Occurs when the button is clicked.
-        /// </summary>
-        public event EventHandler? Click;
+    public event EventHandler? Click;
 
-        /// <summary>
-        /// Simulates a button click.
-        /// </summary>
-        public void PerformClick() => Click?.Invoke(this, EventArgs.Empty);
-    }
+    /// <summary>
+    /// Simulates a button click.
+    /// </summary>
+    public void PerformClick() => Click?.Invoke(this, EventArgs.Empty);
 }

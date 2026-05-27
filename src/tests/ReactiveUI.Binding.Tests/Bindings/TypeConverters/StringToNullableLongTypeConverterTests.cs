@@ -10,6 +10,16 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToNullableLongTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Long value parsed from a positive numeric string.
+    /// </summary>
+    private const long ParsedLong = 123_456_789_012L;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +28,7 @@ public class StringToNullableLongTypeConverterTests
     {
         var converter = new StringToNullableLongTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,8 +39,7 @@ public class StringToNullableLongTypeConverterTests
     public async Task TryConvert_EmptyString_ReturnsTrue()
     {
         var converter = new StringToNullableLongTypeConverter();
-
-        var result = converter.TryConvert(string.Empty, null, out var output);
+        var result = converter.TryConvert(string.Empty, null, out _);
 
         await Assert.That(result).IsTrue();
     }
@@ -43,8 +52,7 @@ public class StringToNullableLongTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToNullableLongTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -57,8 +65,7 @@ public class StringToNullableLongTypeConverterTests
     public async Task TryConvert_OutOfRangeValue_ReturnsFalse()
     {
         var converter = new StringToNullableLongTypeConverter();
-
-        var result = converter.TryConvert("99999999999999999999", null, out var output);
+        var result = converter.TryConvert("99999999999999999999", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -75,6 +82,6 @@ public class StringToNullableLongTypeConverterTests
         var result = converter.TryConvert("123456789012", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(123456789012L);
+        await Assert.That(output).IsEqualTo(ParsedLong);
     }
 }

@@ -15,6 +15,11 @@ namespace ReactiveUI.Binding.Tests.ObservedChanged;
 public class ObservedChangedExtensionTests
 {
     /// <summary>
+    /// The expected number of emissions after the initial value plus one change.
+    /// </summary>
+    private const int ExpectedTwoEmissions = 2;
+
+    /// <summary>
     /// Verifies that the Value extension converts observed changes to values.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -35,7 +40,7 @@ public class ObservedChangedExtensionTests
 
         fixture.IsNotNullString = "End";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
         await Assert.That(values[1]).IsEqualTo("End");
     }
 
@@ -48,7 +53,7 @@ public class ObservedChangedExtensionTests
     {
         Expression<Func<TestFixture, string>> expr = x => x.IsNotNullString;
         var body = Reflection.Rewrite(expr.Body);
-        var change = new ObservedChange<TestFixture, string>(new TestFixture(), body, "value");
+        var change = new ObservedChange<TestFixture, string>(new(), body, "value");
 
         var name = change.GetPropertyName();
         await Assert.That(name).IsEqualTo("IsNotNullString");
@@ -63,7 +68,7 @@ public class ObservedChangedExtensionTests
     {
         Expression<Func<HostTestFixture, string>> expr = x => x.Child!.IsOnlyOneWord;
         var body = Reflection.Rewrite(expr.Body);
-        var change = new ObservedChange<HostTestFixture, string>(new HostTestFixture(), body, "value");
+        var change = new ObservedChange<HostTestFixture, string>(new(), body, "value");
 
         var name = change.GetPropertyName();
         await Assert.That(name).IsEqualTo("Child.IsOnlyOneWord");

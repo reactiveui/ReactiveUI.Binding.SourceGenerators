@@ -3,10 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Windows.Input;
-
 using ReactiveUI.Binding.Fallback;
-
-using Splat;
 
 namespace ReactiveUI.Binding.Tests.Fallback;
 
@@ -114,7 +111,7 @@ public class CommandBindingAffinityCheckerTests
         AppLocator.UnregisterAll<ICreatesCommandBinding>();
         try
         {
-            var plugin = new StubCommandBinding(hasEventAffinity: 20, noEventAffinity: 0);
+            var plugin = new StubCommandBinding(20, 0);
             AppLocator.Register<ICreatesCommandBinding>(() => plugin);
 
             var resultWithEvent = CommandBindingAffinityChecker.HasHigherAffinityPlugin<StubControl>(10, true);
@@ -186,10 +183,12 @@ public class CommandBindingAffinityCheckerTests
     /// <summary>
     /// A stub control type used as a generic type argument in tests.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter for HasHigherAffinityPlugin<T>.")]
-    private sealed class StubControl
-    {
-    }
+    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Used for testing")]
+    [SuppressMessage(
+        "Performance",
+        "CA1812:Avoid uninstantiated internal classes",
+        Justification = "Used only as a generic type argument for affinity-checker metadata dispatch; never constructed by design.")]
+    private sealed class StubControl;
 
     /// <summary>
     /// A stub implementation of <see cref="ICreatesCommandBinding"/> for testing.
@@ -230,6 +229,10 @@ public class CommandBindingAffinityCheckerTests
         }
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public int GetAffinityForObject<T>(bool hasEventTarget) =>
             hasEventTarget ? _hasEventAffinity : _noEventAffinity;
 
@@ -242,6 +245,10 @@ public class CommandBindingAffinityCheckerTests
             throw new NotSupportedException("Not needed for affinity tests.");
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public IDisposable? BindCommandToObject<T, TEventArgs>(
             ICommand? command,
             T? target,

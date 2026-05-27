@@ -80,7 +80,7 @@ public sealed class EventObservable<T> : IObservable<T>
         /// <summary>
         /// The equality comparer used for distinct-until-changed filtering.
         /// </summary>
-        private readonly IEqualityComparer<T> _comparer;
+        private readonly EqualityComparer<T> _comparer;
 
         /// <summary>
         /// The downstream observer. Set to <see langword="null"/> on disposal.
@@ -121,10 +121,12 @@ public sealed class EventObservable<T> : IObservable<T>
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (TrySetDisposed())
+            if (!TrySetDisposed())
             {
-                _parent._removeHandler(OnValueChanged);
+                return;
             }
+
+            _parent._removeHandler(OnValueChanged);
         }
 
         /// <summary>

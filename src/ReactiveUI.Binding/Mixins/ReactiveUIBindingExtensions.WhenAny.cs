@@ -12,7 +12,6 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public static partial class ReactiveUIBindingExtensions
 {
-
 #if NET8_0_OR_GREATER
     /// <summary>
     /// Observes 1 property on the specified sender and applies a selector to the observed changes.
@@ -32,7 +31,8 @@ public static partial class ReactiveUIBindingExtensions
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Func<IObservedChange<TSender, T1>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -64,9 +64,7 @@ public static partial class ReactiveUIBindingExtensions
 
         return sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
+                skipInitial: false)
             .Select(selector);
     }
 
@@ -93,8 +91,10 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
         Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -130,15 +130,11 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
-                property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property1.Body,
+            skipInitial: false);
         var o2 = sender.SubscribeToExpressionChain<TSender, T2>(
-                property2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property2.Body,
+            skipInitial: false);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -172,9 +168,12 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T2>> property2,
         Expression<Func<TSender, T3>> property3,
         Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -214,20 +213,14 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
-                property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property1.Body,
+            skipInitial: false);
         var o2 = sender.SubscribeToExpressionChain<TSender, T2>(
-                property2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property2.Body,
+            skipInitial: false);
         var o3 = sender.SubscribeToExpressionChain<TSender, T3>(
-                property3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property3.Body,
+            skipInitial: false);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -265,11 +258,20 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T2>> property2,
         Expression<Func<TSender, T3>> property3,
         Expression<Func<TSender, T4>> property4,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            TRet> selector,
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -313,25 +315,17 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
-                property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property1.Body,
+            skipInitial: false);
         var o2 = sender.SubscribeToExpressionChain<TSender, T2>(
-                property2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property2.Body,
+            skipInitial: false);
         var o3 = sender.SubscribeToExpressionChain<TSender, T3>(
-                property3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property3.Body,
+            skipInitial: false);
         var o4 = sender.SubscribeToExpressionChain<TSender, T4>(
-                property4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property4.Body,
+            skipInitial: false);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -374,12 +368,23 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T3>> property3,
         Expression<Func<TSender, T4>> property4,
         Expression<Func<TSender, T5>> property5,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            TRet> selector,
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -427,30 +432,20 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
-                property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property1.Body,
+            skipInitial: false);
         var o2 = sender.SubscribeToExpressionChain<TSender, T2>(
-                property2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property2.Body,
+            skipInitial: false);
         var o3 = sender.SubscribeToExpressionChain<TSender, T3>(
-                property3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property3.Body,
+            skipInitial: false);
         var o4 = sender.SubscribeToExpressionChain<TSender, T4>(
-                property4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property4.Body,
+            skipInitial: false);
         var o5 = sender.SubscribeToExpressionChain<TSender, T5>(
-                property5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property5.Body,
+            skipInitial: false);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -498,13 +493,26 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T4>> property4,
         Expression<Func<TSender, T5>> property5,
         Expression<Func<TSender, T6>> property6,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            TRet> selector,
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -540,7 +548,14 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T4>> property4,
         Expression<Func<TSender, T5>> property5,
         Expression<Func<TSender, T6>> property6,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, TRet> selector,
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            TRet> selector,
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -556,35 +571,23 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
-                property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property1.Body,
+            skipInitial: false);
         var o2 = sender.SubscribeToExpressionChain<TSender, T2>(
-                property2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property2.Body,
+            skipInitial: false);
         var o3 = sender.SubscribeToExpressionChain<TSender, T3>(
-                property3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property3.Body,
+            skipInitial: false);
         var o4 = sender.SubscribeToExpressionChain<TSender, T4>(
-                property4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property4.Body,
+            skipInitial: false);
         var o5 = sender.SubscribeToExpressionChain<TSender, T5>(
-                property5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property5.Body,
+            skipInitial: false);
         var o6 = sender.SubscribeToExpressionChain<TSender, T6>(
-                property6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property6.Body,
+            skipInitial: false);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -637,14 +640,29 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T5>> property5,
         Expression<Func<TSender, T6>> property6,
         Expression<Func<TSender, T7>> property7,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            TRet> selector,
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -683,7 +701,15 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T5>> property5,
         Expression<Func<TSender, T6>> property6,
         Expression<Func<TSender, T7>> property7,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, TRet> selector,
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            TRet> selector,
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -700,40 +726,26 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
-                property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property1.Body,
+            skipInitial: false);
         var o2 = sender.SubscribeToExpressionChain<TSender, T2>(
-                property2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property2.Body,
+            skipInitial: false);
         var o3 = sender.SubscribeToExpressionChain<TSender, T3>(
-                property3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property3.Body,
+            skipInitial: false);
         var o4 = sender.SubscribeToExpressionChain<TSender, T4>(
-                property4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property4.Body,
+            skipInitial: false);
         var o5 = sender.SubscribeToExpressionChain<TSender, T5>(
-                property5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property5.Body,
+            skipInitial: false);
         var o6 = sender.SubscribeToExpressionChain<TSender, T6>(
-                property6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property6.Body,
+            skipInitial: false);
         var o7 = sender.SubscribeToExpressionChain<TSender, T7>(
-                property7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property7.Body,
+            skipInitial: false);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -791,15 +803,32 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T6>> property6,
         Expression<Func<TSender, T7>> property7,
         Expression<Func<TSender, T8>> property8,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, IObservedChange<TSender, T8>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            IObservedChange<TSender, T8>,
+            TRet> selector,
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -841,7 +870,16 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T6>> property6,
         Expression<Func<TSender, T7>> property7,
         Expression<Func<TSender, T8>> property8,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, IObservedChange<TSender, T8>, TRet> selector,
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            IObservedChange<TSender, T8>,
+            TRet> selector,
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -859,45 +897,29 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
-                property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property1.Body,
+            skipInitial: false);
         var o2 = sender.SubscribeToExpressionChain<TSender, T2>(
-                property2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property2.Body,
+            skipInitial: false);
         var o3 = sender.SubscribeToExpressionChain<TSender, T3>(
-                property3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property3.Body,
+            skipInitial: false);
         var o4 = sender.SubscribeToExpressionChain<TSender, T4>(
-                property4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property4.Body,
+            skipInitial: false);
         var o5 = sender.SubscribeToExpressionChain<TSender, T5>(
-                property5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property5.Body,
+            skipInitial: false);
         var o6 = sender.SubscribeToExpressionChain<TSender, T6>(
-                property6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property6.Body,
+            skipInitial: false);
         var o7 = sender.SubscribeToExpressionChain<TSender, T7>(
-                property7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property7.Body,
+            skipInitial: false);
         var o8 = sender.SubscribeToExpressionChain<TSender, T8>(
-                property8.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property8.Body,
+            skipInitial: false);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -960,16 +982,35 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T7>> property7,
         Expression<Func<TSender, T8>> property8,
         Expression<Func<TSender, T9>> property9,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, IObservedChange<TSender, T8>, IObservedChange<TSender, T9>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            IObservedChange<TSender, T8>,
+            IObservedChange<TSender, T9>,
+            TRet> selector,
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1014,7 +1055,17 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T7>> property7,
         Expression<Func<TSender, T8>> property8,
         Expression<Func<TSender, T9>> property9,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, IObservedChange<TSender, T8>, IObservedChange<TSender, T9>, TRet> selector,
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            IObservedChange<TSender, T8>,
+            IObservedChange<TSender, T9>,
+            TRet> selector,
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1033,50 +1084,32 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
-                property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property1.Body,
+            skipInitial: false);
         var o2 = sender.SubscribeToExpressionChain<TSender, T2>(
-                property2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property2.Body,
+            skipInitial: false);
         var o3 = sender.SubscribeToExpressionChain<TSender, T3>(
-                property3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property3.Body,
+            skipInitial: false);
         var o4 = sender.SubscribeToExpressionChain<TSender, T4>(
-                property4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property4.Body,
+            skipInitial: false);
         var o5 = sender.SubscribeToExpressionChain<TSender, T5>(
-                property5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property5.Body,
+            skipInitial: false);
         var o6 = sender.SubscribeToExpressionChain<TSender, T6>(
-                property6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property6.Body,
+            skipInitial: false);
         var o7 = sender.SubscribeToExpressionChain<TSender, T7>(
-                property7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property7.Body,
+            skipInitial: false);
         var o8 = sender.SubscribeToExpressionChain<TSender, T8>(
-                property8.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property8.Body,
+            skipInitial: false);
         var o9 = sender.SubscribeToExpressionChain<TSender, T9>(
-                property9.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property9.Body,
+            skipInitial: false);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -1144,17 +1177,38 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T8>> property8,
         Expression<Func<TSender, T9>> property9,
         Expression<Func<TSender, T10>> property10,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, IObservedChange<TSender, T8>, IObservedChange<TSender, T9>, IObservedChange<TSender, T10>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            IObservedChange<TSender, T8>,
+            IObservedChange<TSender, T9>,
+            IObservedChange<TSender, T10>,
+            TRet> selector,
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
+        [CallerArgumentExpression("property10")]
+        string property10Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1202,7 +1256,18 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T8>> property8,
         Expression<Func<TSender, T9>> property9,
         Expression<Func<TSender, T10>> property10,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, IObservedChange<TSender, T8>, IObservedChange<TSender, T9>, IObservedChange<TSender, T10>, TRet> selector,
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            IObservedChange<TSender, T8>,
+            IObservedChange<TSender, T9>,
+            IObservedChange<TSender, T10>,
+            TRet> selector,
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1222,55 +1287,35 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
-                property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property1.Body,
+            skipInitial: false);
         var o2 = sender.SubscribeToExpressionChain<TSender, T2>(
-                property2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property2.Body,
+            skipInitial: false);
         var o3 = sender.SubscribeToExpressionChain<TSender, T3>(
-                property3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property3.Body,
+            skipInitial: false);
         var o4 = sender.SubscribeToExpressionChain<TSender, T4>(
-                property4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property4.Body,
+            skipInitial: false);
         var o5 = sender.SubscribeToExpressionChain<TSender, T5>(
-                property5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property5.Body,
+            skipInitial: false);
         var o6 = sender.SubscribeToExpressionChain<TSender, T6>(
-                property6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property6.Body,
+            skipInitial: false);
         var o7 = sender.SubscribeToExpressionChain<TSender, T7>(
-                property7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property7.Body,
+            skipInitial: false);
         var o8 = sender.SubscribeToExpressionChain<TSender, T8>(
-                property8.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property8.Body,
+            skipInitial: false);
         var o9 = sender.SubscribeToExpressionChain<TSender, T9>(
-                property9.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property9.Body,
+            skipInitial: false);
         var o10 = sender.SubscribeToExpressionChain<TSender, T10>(
-                property10.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property10.Body,
+            skipInitial: false);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -1343,18 +1388,41 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T9>> property9,
         Expression<Func<TSender, T10>> property10,
         Expression<Func<TSender, T11>> property11,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, IObservedChange<TSender, T8>, IObservedChange<TSender, T9>, IObservedChange<TSender, T10>, IObservedChange<TSender, T11>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            IObservedChange<TSender, T8>,
+            IObservedChange<TSender, T9>,
+            IObservedChange<TSender, T10>,
+            IObservedChange<TSender, T11>,
+            TRet> selector,
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
+        [CallerArgumentExpression("property10")]
+        string property10Expression = "",
+        [CallerArgumentExpression("property11")]
+        string property11Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1405,7 +1473,19 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T9>> property9,
         Expression<Func<TSender, T10>> property10,
         Expression<Func<TSender, T11>> property11,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, IObservedChange<TSender, T8>, IObservedChange<TSender, T9>, IObservedChange<TSender, T10>, IObservedChange<TSender, T11>, TRet> selector,
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            IObservedChange<TSender, T8>,
+            IObservedChange<TSender, T9>,
+            IObservedChange<TSender, T10>,
+            IObservedChange<TSender, T11>,
+            TRet> selector,
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1426,60 +1506,38 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
-                property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property1.Body,
+            skipInitial: false);
         var o2 = sender.SubscribeToExpressionChain<TSender, T2>(
-                property2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property2.Body,
+            skipInitial: false);
         var o3 = sender.SubscribeToExpressionChain<TSender, T3>(
-                property3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property3.Body,
+            skipInitial: false);
         var o4 = sender.SubscribeToExpressionChain<TSender, T4>(
-                property4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property4.Body,
+            skipInitial: false);
         var o5 = sender.SubscribeToExpressionChain<TSender, T5>(
-                property5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property5.Body,
+            skipInitial: false);
         var o6 = sender.SubscribeToExpressionChain<TSender, T6>(
-                property6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property6.Body,
+            skipInitial: false);
         var o7 = sender.SubscribeToExpressionChain<TSender, T7>(
-                property7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property7.Body,
+            skipInitial: false);
         var o8 = sender.SubscribeToExpressionChain<TSender, T8>(
-                property8.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property8.Body,
+            skipInitial: false);
         var o9 = sender.SubscribeToExpressionChain<TSender, T9>(
-                property9.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property9.Body,
+            skipInitial: false);
         var o10 = sender.SubscribeToExpressionChain<TSender, T10>(
-                property10.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property10.Body,
+            skipInitial: false);
         var o11 = sender.SubscribeToExpressionChain<TSender, T11>(
-                property11.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property11.Body,
+            skipInitial: false);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -1557,19 +1615,44 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T10>> property10,
         Expression<Func<TSender, T11>> property11,
         Expression<Func<TSender, T12>> property12,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, IObservedChange<TSender, T8>, IObservedChange<TSender, T9>, IObservedChange<TSender, T10>, IObservedChange<TSender, T11>, IObservedChange<TSender, T12>, TRet> selector,
-        [CallerArgumentExpression("property1")] string property1Expression = "",
-        [CallerArgumentExpression("property2")] string property2Expression = "",
-        [CallerArgumentExpression("property3")] string property3Expression = "",
-        [CallerArgumentExpression("property4")] string property4Expression = "",
-        [CallerArgumentExpression("property5")] string property5Expression = "",
-        [CallerArgumentExpression("property6")] string property6Expression = "",
-        [CallerArgumentExpression("property7")] string property7Expression = "",
-        [CallerArgumentExpression("property8")] string property8Expression = "",
-        [CallerArgumentExpression("property9")] string property9Expression = "",
-        [CallerArgumentExpression("property10")] string property10Expression = "",
-        [CallerArgumentExpression("property11")] string property11Expression = "",
-        [CallerArgumentExpression("property12")] string property12Expression = "",
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            IObservedChange<TSender, T8>,
+            IObservedChange<TSender, T9>,
+            IObservedChange<TSender, T10>,
+            IObservedChange<TSender, T11>,
+            IObservedChange<TSender, T12>,
+            TRet> selector,
+        [CallerArgumentExpression("property1")]
+        string property1Expression = "",
+        [CallerArgumentExpression("property2")]
+        string property2Expression = "",
+        [CallerArgumentExpression("property3")]
+        string property3Expression = "",
+        [CallerArgumentExpression("property4")]
+        string property4Expression = "",
+        [CallerArgumentExpression("property5")]
+        string property5Expression = "",
+        [CallerArgumentExpression("property6")]
+        string property6Expression = "",
+        [CallerArgumentExpression("property7")]
+        string property7Expression = "",
+        [CallerArgumentExpression("property8")]
+        string property8Expression = "",
+        [CallerArgumentExpression("property9")]
+        string property9Expression = "",
+        [CallerArgumentExpression("property10")]
+        string property10Expression = "",
+        [CallerArgumentExpression("property11")]
+        string property11Expression = "",
+        [CallerArgumentExpression("property12")]
+        string property12Expression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1623,7 +1706,20 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T10>> property10,
         Expression<Func<TSender, T11>> property11,
         Expression<Func<TSender, T12>> property12,
-        Func<IObservedChange<TSender, T1>, IObservedChange<TSender, T2>, IObservedChange<TSender, T3>, IObservedChange<TSender, T4>, IObservedChange<TSender, T5>, IObservedChange<TSender, T6>, IObservedChange<TSender, T7>, IObservedChange<TSender, T8>, IObservedChange<TSender, T9>, IObservedChange<TSender, T10>, IObservedChange<TSender, T11>, IObservedChange<TSender, T12>, TRet> selector,
+        Func<
+            IObservedChange<TSender, T1>,
+            IObservedChange<TSender, T2>,
+            IObservedChange<TSender, T3>,
+            IObservedChange<TSender, T4>,
+            IObservedChange<TSender, T5>,
+            IObservedChange<TSender, T6>,
+            IObservedChange<TSender, T7>,
+            IObservedChange<TSender, T8>,
+            IObservedChange<TSender, T9>,
+            IObservedChange<TSender, T10>,
+            IObservedChange<TSender, T11>,
+            IObservedChange<TSender, T12>,
+            TRet> selector,
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
@@ -1645,65 +1741,41 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
         var o1 = sender.SubscribeToExpressionChain<TSender, T1>(
-                property1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property1.Body,
+            skipInitial: false);
         var o2 = sender.SubscribeToExpressionChain<TSender, T2>(
-                property2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property2.Body,
+            skipInitial: false);
         var o3 = sender.SubscribeToExpressionChain<TSender, T3>(
-                property3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property3.Body,
+            skipInitial: false);
         var o4 = sender.SubscribeToExpressionChain<TSender, T4>(
-                property4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property4.Body,
+            skipInitial: false);
         var o5 = sender.SubscribeToExpressionChain<TSender, T5>(
-                property5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property5.Body,
+            skipInitial: false);
         var o6 = sender.SubscribeToExpressionChain<TSender, T6>(
-                property6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property6.Body,
+            skipInitial: false);
         var o7 = sender.SubscribeToExpressionChain<TSender, T7>(
-                property7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property7.Body,
+            skipInitial: false);
         var o8 = sender.SubscribeToExpressionChain<TSender, T8>(
-                property8.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property8.Body,
+            skipInitial: false);
         var o9 = sender.SubscribeToExpressionChain<TSender, T9>(
-                property9.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property9.Body,
+            skipInitial: false);
         var o10 = sender.SubscribeToExpressionChain<TSender, T10>(
-                property10.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property10.Body,
+            skipInitial: false);
         var o11 = sender.SubscribeToExpressionChain<TSender, T11>(
-                property11.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property11.Body,
+            skipInitial: false);
         var o12 = sender.SubscribeToExpressionChain<TSender, T12>(
-                property12.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true);
+            property12.Body,
+            skipInitial: false);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -1717,6 +1789,7 @@ public static partial class ReactiveUIBindingExtensions
             o10,
             o11,
             o12,
-            (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) => selector(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12));
+            (c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) =>
+                selector(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12));
     }
 }

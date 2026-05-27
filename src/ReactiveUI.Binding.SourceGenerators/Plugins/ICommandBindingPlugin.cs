@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins;
@@ -43,5 +42,6 @@ internal interface ICommandBindingPlugin
     /// <param name="sb">The string builder.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The control access chain expression.</param>
-    void EmitBinding(StringBuilder sb, BindCommandInvocationInfo inv, string controlAccess);
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+); emits nullable annotations on emitted code.</param>
+    void EmitBinding(StringBuilder sb, BindCommandInvocationInfo inv, string controlAccess, bool supportsNullable);
 }

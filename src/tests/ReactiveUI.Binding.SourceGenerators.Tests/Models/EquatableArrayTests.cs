@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Models;
@@ -46,9 +45,9 @@ public class EquatableArrayTests
     [Test]
     public async Task ComputeHashCode_SameContent_ReturnsSameHash()
     {
-        var seg = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM");
+        var seg = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM", true);
         var arr1 = new[] { seg };
-        var arr2 = new[] { new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM") };
+        var arr2 = new[] { new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM", true) };
 
         var hash1 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr1);
         var hash2 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr2);
@@ -63,8 +62,8 @@ public class EquatableArrayTests
     [Test]
     public async Task ComputeHashCode_DifferentContent_ReturnsDifferentHash()
     {
-        var arr1 = new[] { new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM") };
-        var arr2 = new[] { new PropertyPathSegment("Age", "global::System.Int32", "global::TestApp.VM") };
+        var arr1 = new[] { new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM", true) };
+        var arr2 = new[] { new PropertyPathSegment("Age", "global::System.Int32", "global::TestApp.VM", false) };
 
         var hash1 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr1);
         var hash2 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr2);
@@ -79,7 +78,7 @@ public class EquatableArrayTests
     [Test]
     public async Task Constructor_CachesHashCode_MatchesComputeHashCode()
     {
-        var seg = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM");
+        var seg = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM", true);
         var arr = new[] { seg };
 
         var equatable = new EquatableArray<PropertyPathSegment>(arr);
@@ -108,9 +107,9 @@ public class EquatableArrayTests
     public async Task Equals_SameContent_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM")]);
+            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM")]);
+            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
 
         await Assert.That(arr1.Equals(arr2)).IsTrue();
     }
@@ -123,9 +122,9 @@ public class EquatableArrayTests
     public async Task Equals_DifferentContent_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM")]);
+            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Age", "global::System.Int32", "global::TestApp.VM")]);
+            [new("Age", "global::System.Int32", "global::TestApp.VM", false)]);
 
         await Assert.That(arr1.Equals(arr2)).IsFalse();
     }
@@ -151,8 +150,8 @@ public class EquatableArrayTests
     public async Task Length_MultipleElements_ReturnsCount()
     {
         var arr = new EquatableArray<PropertyPathSegment>([
-            new PropertyPathSegment("A", "global::System.String", "global::T"),
-            new PropertyPathSegment("B", "global::System.Int32", "global::T")
+            new("A", "global::System.String", "global::T", true),
+            new("B", "global::System.Int32", "global::T", false)
         ]);
 
         await Assert.That(arr.Length).IsEqualTo(2);
@@ -178,7 +177,7 @@ public class EquatableArrayTests
     [Test]
     public async Task ComputeHashCode_NullElements_UsesZeroForNullHashCode()
     {
-        var arr = new PropertyPathSegment?[] { null!, new PropertyPathSegment("Name", "global::System.String", "global::T"), null! };
+        var arr = new PropertyPathSegment?[] { null!, new("Name", "global::System.String", "global::T", true), null! };
 
         // The hash should incorporate 0 for null elements and the actual hash for non-null
         var hash = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr!);
@@ -190,9 +189,9 @@ public class EquatableArrayTests
         // Verify it differs from an array with all non-null elements
         var nonNullArr = new[]
         {
-            new PropertyPathSegment("A", "global::System.String", "global::T"),
-            new PropertyPathSegment("Name", "global::System.String", "global::T"),
-            new PropertyPathSegment("B", "global::System.String", "global::T"),
+            new PropertyPathSegment("A", "global::System.String", "global::T", true),
+            new PropertyPathSegment("Name", "global::System.String", "global::T", true),
+            new PropertyPathSegment("B", "global::System.String", "global::T", true)
         };
 
         var nonNullHash = EquatableArray<PropertyPathSegment>.ComputeHashCode(nonNullArr);
@@ -207,9 +206,9 @@ public class EquatableArrayTests
     public async Task OperatorEquals_SameContent_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::T")]);
+            [new("Name", "global::System.String", "global::T", true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::T")]);
+            [new("Name", "global::System.String", "global::T", true)]);
 
         await Assert.That(arr1 == arr2).IsTrue();
     }
@@ -222,9 +221,9 @@ public class EquatableArrayTests
     public async Task OperatorNotEquals_DifferentContent_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::T")]);
+            [new("Name", "global::System.String", "global::T", true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Age", "global::System.Int32", "global::T")]);
+            [new("Age", "global::System.Int32", "global::T", false)]);
 
         await Assert.That(arr1 != arr2).IsTrue();
     }
@@ -236,8 +235,8 @@ public class EquatableArrayTests
     [Test]
     public async Task Indexer_ReturnsCorrectElement()
     {
-        var seg0 = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM");
-        var seg1 = new PropertyPathSegment("Age", "global::System.Int32", "global::TestApp.VM");
+        var seg0 = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM", true);
+        var seg1 = new PropertyPathSegment("Age", "global::System.Int32", "global::TestApp.VM", false);
         var arr = new EquatableArray<PropertyPathSegment>([seg0, seg1]);
 
         await Assert.That(arr[0]).IsEqualTo(seg0);
@@ -252,11 +251,9 @@ public class EquatableArrayTests
     public async Task Equals_ObjectOverload_WithSameType_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM")]);
-        var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM")]);
-
-        object obj = arr2;
+            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+        object obj = new EquatableArray<PropertyPathSegment>(
+            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
 
         await Assert.That(arr1.Equals(obj)).IsTrue();
     }
@@ -269,7 +266,7 @@ public class EquatableArrayTests
     public async Task Equals_ObjectOverload_WithDifferentType_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM")]);
+            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
 
         await Assert.That(arr1.Equals("not an array")).IsFalse();
     }
@@ -282,7 +279,7 @@ public class EquatableArrayTests
     public async Task Equals_ObjectOverload_WithNull_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM")]);
+            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
 
         await Assert.That(arr1.Equals((object?)null)).IsFalse();
     }
@@ -296,7 +293,7 @@ public class EquatableArrayTests
     {
         var defaultArr = default(EquatableArray<PropertyPathSegment>);
         var nonDefaultArr = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM")]);
+            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
 
         await Assert.That(defaultArr.Equals(nonDefaultArr)).IsFalse();
     }
@@ -309,10 +306,10 @@ public class EquatableArrayTests
     public async Task Equals_DifferentLengths_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM")]);
+            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>([
-            new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM"),
-            new PropertyPathSegment("Age", "global::System.Int32", "global::TestApp.VM")
+            new("Name", "global::System.String", "global::TestApp.VM", true),
+            new("Age", "global::System.Int32", "global::TestApp.VM", false)
         ]);
 
         await Assert.That(arr1.Equals(arr2)).IsFalse();
@@ -325,9 +322,9 @@ public class EquatableArrayTests
     [Test]
     public async Task GetEnumerator_IteratesAllElements()
     {
-        var seg0 = new PropertyPathSegment("A", "global::System.String", "global::TestApp.VM");
-        var seg1 = new PropertyPathSegment("B", "global::System.Int32", "global::TestApp.VM");
-        var seg2 = new PropertyPathSegment("C", "global::System.Boolean", "global::TestApp.VM");
+        var seg0 = new PropertyPathSegment("A", "global::System.String", "global::TestApp.VM", true);
+        var seg1 = new PropertyPathSegment("B", "global::System.Int32", "global::TestApp.VM", false);
+        var seg2 = new PropertyPathSegment("C", "global::System.Boolean", "global::TestApp.VM", false);
         var arr = new EquatableArray<PropertyPathSegment>([seg0, seg1, seg2]);
 
         var list = arr.ToList();
@@ -364,8 +361,8 @@ public class EquatableArrayTests
     public async Task NonGenericGetEnumerator_Works()
     {
         var arr = new EquatableArray<PropertyPathSegment>([
-            new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM"),
-            new PropertyPathSegment("Age", "global::System.Int32", "global::TestApp.VM")
+            new("Name", "global::System.String", "global::TestApp.VM", true),
+            new("Age", "global::System.Int32", "global::TestApp.VM", false)
         ]);
 
         var enumerator = ((IEnumerable)arr).GetEnumerator();
@@ -399,9 +396,9 @@ public class EquatableArrayTests
     public async Task OperatorNotEquals_SameContent_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM")]);
+            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM")]);
+            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
 
         await Assert.That(arr1 != arr2).IsFalse();
     }

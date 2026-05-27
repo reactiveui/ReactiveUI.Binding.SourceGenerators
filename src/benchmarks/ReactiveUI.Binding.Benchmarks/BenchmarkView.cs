@@ -38,11 +38,13 @@ public class BenchmarkView : IViewFor<BenchmarkViewModel>, INotifyPropertyChange
         get => _displayName;
         set
         {
-            if (_displayName != value)
+            if (_displayName == value)
             {
-                _displayName = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayName)));
+                return;
             }
+
+            _displayName = value;
+            PropertyChanged?.Invoke(this, new(nameof(DisplayName)));
         }
     }
 
@@ -54,11 +56,13 @@ public class BenchmarkView : IViewFor<BenchmarkViewModel>, INotifyPropertyChange
         get => _displayAge;
         set
         {
-            if (_displayAge != value)
+            if (_displayAge == value)
             {
-                _displayAge = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayAge)));
+                return;
             }
+
+            _displayAge = value;
+            PropertyChanged?.Invoke(this, new(nameof(DisplayAge)));
         }
     }
 
@@ -68,11 +72,13 @@ public class BenchmarkView : IViewFor<BenchmarkViewModel>, INotifyPropertyChange
         get => _viewModel;
         set
         {
-            if (_viewModel != value)
+            if (_viewModel == value)
             {
-                _viewModel = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewModel)));
+                return;
             }
+
+            _viewModel = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewModel)));
         }
     }
 

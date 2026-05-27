@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.BindTwoWay.SinglePropertyWithConverters
+namespace SharedScenarios.BindTwoWay.SinglePropertyWithConverters;
+
+/// <summary>
+/// Target View with a string property.
+/// </summary>
+public class MyView : INotifyPropertyChanged
 {
     /// <summary>
-    /// Target View with a string property.
+    /// The backing field for <see cref="CountText"/>.
     /// </summary>
-    public class MyView : INotifyPropertyChanged
+    private string _countText = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the count text.
+    /// </summary>
+    public string CountText
     {
-        /// <summary>
-        /// The backing field for <see cref="CountText"/>.
-        /// </summary>
-        private string _countText = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the count text.
-        /// </summary>
-        public string CountText
+        get => _countText;
+        set
         {
-            get => _countText;
-            set
+            if (_countText == value)
             {
-                if (_countText != value)
-                {
-                    _countText = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CountText)));
-                }
+                return;
             }
+
+            _countText = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CountText)));
         }
     }
 }

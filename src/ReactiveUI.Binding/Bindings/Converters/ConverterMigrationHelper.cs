@@ -36,7 +36,7 @@ public static class ConverterMigrationHelper
         IList<IBindingTypeConverter> TypedConverters,
         IList<IBindingFallbackConverter> FallbackConverters,
         IList<ISetMethodBindingConverter> SetMethodConverters)
-    ExtractConverters(IReadonlyDependencyResolver resolver)
+        ExtractConverters(IReadonlyDependencyResolver resolver)
     {
         ArgumentExceptionHelper.ThrowIfNull(resolver);
 

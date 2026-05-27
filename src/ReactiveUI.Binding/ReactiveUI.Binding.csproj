@@ -6,25 +6,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="ReactiveUI.Binding.Tests" />
-    <InternalsVisibleTo Include="ReactiveUI.Binding.GeneratedCode.Tests" />
-    <InternalsVisibleTo Include="ReactiveUI.Binding.Wpf" />
-    <InternalsVisibleTo Include="ReactiveUI.Binding.WinForms" />
-    <InternalsVisibleTo Include="ReactiveUI.Binding.Maui" />
-    <InternalsVisibleTo Include="ReactiveUI.Binding.Reactive" />
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Tests"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.GeneratedCode.Tests"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Wpf"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.WinForms"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Maui"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Reactive"/>
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="System.Diagnostics" />
-    <Using Include="System.Diagnostics.CodeAnalysis" />
-    <Using Include="System.Linq.Expressions" />
-    <Using Include="System.Runtime.CompilerServices" />
-    <Using Include="Splat" />
-    <Using Include="ReactiveUI.Binding.Helpers" />
+    <Using Include="System.Diagnostics"/>
+    <Using Include="System.Diagnostics.CodeAnalysis"/>
+    <Using Include="System.Linq.Expressions"/>
+    <Using Include="System.Runtime.CompilerServices"/>
+    <Using Include="Splat"/>
+    <Using Include="ReactiveUI.Binding.Helpers"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Splat" />
-    <PackageReference Include="System.Reactive" />
+    <PackageReference Include="Splat"/>
+    <PackageReference Include="System.Reactive"/>
   </ItemGroup>
 </Project>

@@ -3,27 +3,25 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindCommand.EventEnabled
-{
-    /// <summary>
-    /// View containing a WinForms-like button with Click+Enabled.
-    /// </summary>
+namespace SharedScenarios.BindCommand.EventEnabled;
+
+/// <summary>
+/// View containing a WinForms-like button with Click+Enabled.
+/// </summary>
 #pragma warning disable CS0067 // Event is never used
-    public class MyView : IViewFor, INotifyPropertyChanged
-    {
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
+public class MyView : IViewFor, INotifyPropertyChanged
+{
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-        /// <inheritdoc/>
-        public object? ViewModel { get; set; }
+    /// <inheritdoc/>
+    public object? ViewModel { get; set; }
 
-        /// <summary>
-        /// Gets the save button.
-        /// </summary>
-        public WinFormsLikeButton SaveButton { get; } = new WinFormsLikeButton();
-    }
-#pragma warning restore CS0067
+    /// <summary>
+    /// Gets the save button.
+    /// </summary>
+    public WinFormsLikeButton SaveButton { get; } = new WinFormsLikeButton();
 }
+#pragma warning restore CS0067

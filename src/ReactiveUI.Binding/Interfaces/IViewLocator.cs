@@ -18,7 +18,7 @@ public interface IViewLocator : IEnableLogger
     /// <param name="viewModel">The view model instance to resolve a view for.</param>
     /// <param name="contract">An optional contract string for named registrations.</param>
     /// <returns>The resolved view, or <see langword="null"/> if no view is found.</returns>
-    IViewFor? ResolveView<TViewModel>(TViewModel viewModel, string? contract = null)
+    IViewFor? ResolveView<TViewModel>(TViewModel viewModel, string? contract)
         where TViewModel : class;
 
     /// <summary>
@@ -29,5 +29,5 @@ public interface IViewLocator : IEnableLogger
     /// <param name="viewModel">The view model instance to resolve a view for.</param>
     /// <param name="contract">An optional contract string for named registrations.</param>
     /// <returns>The resolved view, or <see langword="null"/> if no view is found.</returns>
-    IViewFor? ResolveView(object? viewModel, string? contract = null);
+    IViewFor? ResolveView(object? viewModel, string? contract);
 }

@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -22,8 +21,14 @@ public class WhenChangingCodeGeneratorHelperTests
     [Test]
     public async Task GroupByTypeSignature_SameTypes_GroupedTogether()
     {
-        var inv1 = ModelFactory.CreateInvocationInfo(callerLineNumber: 10, isBeforeChange: true, methodName: "WhenChanging");
-        var inv2 = ModelFactory.CreateInvocationInfo(callerLineNumber: 20, isBeforeChange: true, methodName: "WhenChanging");
+        var inv1 = ModelFactory.CreateInvocationInfo(
+            callerLineNumber: 10,
+            isBeforeChange: true,
+            methodName: "WhenChanging");
+        var inv2 = ModelFactory.CreateInvocationInfo(
+            callerLineNumber: 20,
+            isBeforeChange: true,
+            methodName: "WhenChanging");
         var invocations = ImmutableArray.Create(inv1, inv2);
 
         var groups = ObservationCodeGenerator.GroupByTypeSignature(invocations);
@@ -39,8 +44,12 @@ public class WhenChangingCodeGeneratorHelperTests
     [Test]
     public async Task GroupByTypeSignature_DifferentSourceTypes_SeparateGroups()
     {
-        var inv1 = ModelFactory.CreateInvocationInfo(sourceTypeFullName: "global::TestApp.ViewModelA", isBeforeChange: true);
-        var inv2 = ModelFactory.CreateInvocationInfo(sourceTypeFullName: "global::TestApp.ViewModelB", isBeforeChange: true);
+        var inv1 = ModelFactory.CreateInvocationInfo(
+            sourceTypeFullName: "global::TestApp.ViewModelA",
+            isBeforeChange: true);
+        var inv2 = ModelFactory.CreateInvocationInfo(
+            sourceTypeFullName: "global::TestApp.ViewModelB",
+            isBeforeChange: true);
         var invocations = ImmutableArray.Create(inv1, inv2);
 
         var groups = ObservationCodeGenerator.GroupByTypeSignature(invocations);
@@ -59,7 +68,7 @@ public class WhenChangingCodeGeneratorHelperTests
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: "WhenChanging");
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanging");
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, "WhenChanging");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -77,7 +86,7 @@ public class WhenChangingCodeGeneratorHelperTests
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: "WhenChanging");
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false, "WhenChanging");
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, false, "WhenChanging");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerFilePath");
@@ -95,7 +104,7 @@ public class WhenChangingCodeGeneratorHelperTests
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: "WhenChanging");
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true, "WhenChanging");
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, "WhenChanging");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("Expression ==");
@@ -112,13 +121,13 @@ public class WhenChangingCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateInvocationInfo(
-            callerFilePath: "/src/ViewModels/MyViewModel.cs",
-            callerLineNumber: 42,
+            "/src/ViewModels/MyViewModel.cs",
+            42,
             isBeforeChange: true,
             methodName: "WhenChanging");
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false, "WhenChanging");
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, false, "WhenChanging");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerLineNumber == 42");

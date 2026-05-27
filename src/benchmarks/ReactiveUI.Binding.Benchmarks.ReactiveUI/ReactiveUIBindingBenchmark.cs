@@ -20,7 +20,7 @@ public class ReactiveUIBindingBenchmark
     /// <summary>
     /// The number of property changes to fire during each benchmark iteration.
     /// </summary>
-    private const int PropertyChangeCount = 1000;
+    private const int PropertyChangeCount = 1_000;
 
     /// <summary>
     /// The source view model instance used for binding benchmarks.
@@ -44,8 +44,8 @@ public class ReactiveUIBindingBenchmark
     [IterationSetup]
     public void Setup()
     {
-        _source = new BenchmarkViewModel { Name = "Initial", Age = 0 };
-        _target = new BenchmarkView { ViewModel = _source };
+        _source = new() { Name = "Initial", Age = 0 };
+        _target = new() { ViewModel = _source };
     }
 
     /// <summary>

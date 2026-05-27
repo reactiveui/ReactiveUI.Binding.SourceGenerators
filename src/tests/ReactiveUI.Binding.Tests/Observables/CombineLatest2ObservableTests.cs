@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reactive.Subjects;
-
 using ReactiveUI.Binding.Observables;
 using ReactiveUI.Binding.Tests.TestModels;
 
@@ -14,6 +13,27 @@ namespace ReactiveUI.Binding.Tests.Observables;
 /// </summary>
 public class CombineLatest2ObservableTests
 {
+    /// <summary>The value emitted by the first source on the initial round.</summary>
+    private const int FirstValue = 1;
+
+    /// <summary>The value emitted by the second source on the initial round.</summary>
+    private const int SecondValue = 2;
+
+    /// <summary>The value emitted by the first source after the subscription is disposed.</summary>
+    private const int FirstUpdatedValue = 10;
+
+    /// <summary>The value emitted by the second source after the subscription is disposed.</summary>
+    private const int SecondUpdatedValue = 20;
+
+    /// <summary>The expected combined result of the initial source values.</summary>
+    private const int ExpectedSum = 3;
+
+    /// <summary>The expected number of emissions observed by the subscriber.</summary>
+    private const int ExpectedEmissionCount = 1;
+
+    /// <summary>The message used for errors that are expected to be ignored.</summary>
+    private const string IgnoredErrorMessage = "should be ignored";
+
     /// <summary>
     /// Verifies that a null first source throws <see cref="ArgumentNullException"/>.
     /// </summary>
@@ -112,15 +132,15 @@ public class CombineLatest2ObservableTests
         var results = new List<int>();
         var subscription = combined.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
 
-        source1.OnNext(1);
-        source2.OnNext(2);
+        source1.OnNext(FirstValue);
+        source2.OnNext(SecondValue);
         subscription.Dispose();
 
-        source1.OnNext(10);
-        source2.OnNext(20);
+        source1.OnNext(FirstUpdatedValue);
+        source2.OnNext(SecondUpdatedValue);
 
-        await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo(3);
+        await Assert.That(results).Count().IsEqualTo(ExpectedEmissionCount);
+        await Assert.That(results[0]).IsEqualTo(ExpectedSum);
     }
 
     /// <summary>
@@ -144,8 +164,8 @@ public class CombineLatest2ObservableTests
             () => { }));
 
         subscription.Dispose();
-        source1.OnError(new InvalidOperationException("should be ignored"));
-        source2.OnError(new InvalidOperationException("should be ignored"));
+        source1.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        source2.OnError(new InvalidOperationException(IgnoredErrorMessage));
 
         await Assert.That(receivedError).IsNull();
     }
@@ -161,7 +181,9 @@ public class CombineLatest2ObservableTests
         var manual1 = new ManualObservable<int>();
         var manual2 = new ManualObservable<int>();
         var combined = new CombineLatest2Observable<int, int, int>(
-            manual1, manual2, (a, b) => a + b);
+            manual1,
+            manual2,
+            (a, b) => a + b);
 
         Exception? receivedError = null;
         var subscription = combined.Subscribe(new AnonymousObserver<int>(
@@ -170,16 +192,16 @@ public class CombineLatest2ObservableTests
             () => { }));
 
         // Set all has-value flags so TryEmit reaches _observer?.OnNext
-        manual1.Observer!.OnNext(1);
-        manual2.Observer!.OnNext(2);
+        manual1.Observer!.OnNext(FirstValue);
+        manual2.Observer!.OnNext(SecondValue);
 
         subscription.Dispose();
 
         // These reach the observers because ManualObservable retains references
-        manual1.Observer.OnNext(10);
-        manual2.Observer.OnNext(20);
-        manual1.Observer.OnError(new InvalidOperationException("should be ignored"));
-        manual2.Observer.OnError(new InvalidOperationException("should be ignored"));
+        manual1.Observer.OnNext(FirstUpdatedValue);
+        manual2.Observer.OnNext(SecondUpdatedValue);
+        manual1.Observer.OnError(new InvalidOperationException(IgnoredErrorMessage));
+        manual2.Observer.OnError(new InvalidOperationException(IgnoredErrorMessage));
 
         await Assert.That(receivedError).IsNull();
     }
@@ -266,14 +288,14 @@ public class CombineLatest2ObservableTests
             _ => { },
             () => completed = true));
 
-        source1.OnNext(1);
-        source2.OnNext(2);
+        source1.OnNext(FirstValue);
+        source2.OnNext(SecondValue);
 
         source1.OnCompleted();
         source2.OnCompleted();
 
         await Assert.That(completed).IsFalse();
-        await Assert.That(results).Count().IsEqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(ExpectedEmissionCount);
     }
 
     /// <summary>

@@ -5,20 +5,19 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindTwoWay.SinglePropertyStringToString
+namespace SharedScenarios.BindTwoWay.SinglePropertyStringToString;
+
+/// <summary>
+/// Exercises BindTwoWay with string-to-string property binding.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindTwoWay with string-to-string property binding.
+    /// Creates a two-way binding between ViewModel.Name and View.NameText.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a two-way binding between ViewModel.Name and View.NameText.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view)
-            => vm.BindTwoWay(view, x => x.Name, x => x.NameText);
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view)
+        => vm.BindTwoWay(view, x => x.Name, x => x.NameText);
 }

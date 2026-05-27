@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanged.DeepPropertyChain
+namespace SharedScenarios.WhenChanged.DeepPropertyChain;
+
+/// <summary>
+/// Parent ViewModel containing a child model.
+/// </summary>
+public class ParentViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// Parent ViewModel containing a child model.
+    /// The backing field for <see cref="Child"/>.
     /// </summary>
-    public class ParentViewModel : INotifyPropertyChanged
+    private ChildModel _child = new ChildModel();
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the child model.
+    /// </summary>
+    public ChildModel Child
     {
-        /// <summary>
-        /// The backing field for <see cref="Child"/>.
-        /// </summary>
-        private ChildModel _child = new();
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the child model.
-        /// </summary>
-        public ChildModel Child
+        get => _child;
+        set
         {
-            get => _child;
-            set
+            if (_child == value)
             {
-                if (_child != value)
-                {
-                    _child = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Child)));
-                }
+                return;
             }
+
+            _child = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Child)));
         }
     }
 }

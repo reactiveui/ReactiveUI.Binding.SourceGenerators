@@ -24,7 +24,12 @@ namespace ReactiveUI.Binding.Observables;
 /// <typeparam name="TResult">The result element type.</typeparam>
 [EditorBrowsable(EditorBrowsableState.Never)]
 [ExcludeFromCodeCoverage]
-internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> : IObservable<TResult>
+[SuppressMessage(
+    "Major Code Smell",
+    "S107:Methods should not have too many parameters",
+    Justification = "Deliberately large arity intrinsic to the N-argument binding/observable API surface.")]
+internal sealed class
+    CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> : IObservable<TResult>
 {
     /// <summary>
     /// The 1st source observable sequence.
@@ -177,6 +182,56 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
     private sealed class Subscription : IDisposable
     {
         /// <summary>
+        /// The subscription array index for source 3.
+        /// </summary>
+        private const int Source3Index = 2;
+
+        /// <summary>
+        /// The subscription array index for source 4.
+        /// </summary>
+        private const int Source4Index = 3;
+
+        /// <summary>
+        /// The subscription array index for source 5.
+        /// </summary>
+        private const int Source5Index = 4;
+
+        /// <summary>
+        /// The subscription array index for source 6.
+        /// </summary>
+        private const int Source6Index = 5;
+
+        /// <summary>
+        /// The subscription array index for source 7.
+        /// </summary>
+        private const int Source7Index = 6;
+
+        /// <summary>
+        /// The subscription array index for source 8.
+        /// </summary>
+        private const int Source8Index = 7;
+
+        /// <summary>
+        /// The subscription array index for source 9.
+        /// </summary>
+        private const int Source9Index = 8;
+
+        /// <summary>
+        /// The subscription array index for source 10.
+        /// </summary>
+        private const int Source10Index = 9;
+
+        /// <summary>
+        /// The subscription array index for source 11.
+        /// </summary>
+        private const int Source11Index = 10;
+
+        /// <summary>
+        /// The subscription array index for source 12.
+        /// </summary>
+        private const int Source12Index = 11;
+
+        /// <summary>
         /// The function to combine the latest values from all sources into a result.
         /// </summary>
         private readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> _resultSelector;
@@ -252,71 +307,18 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         private T12 _value12 = default!;
 
         /// <summary>
-        /// Whether source 1 has emitted at least one value.
+        /// Bitmask of the sources that have emitted at least one value; compared against the all-ready mask.
         /// </summary>
-        private bool _has1;
-
-        /// <summary>
-        /// Whether source 2 has emitted at least one value.
-        /// </summary>
-        private bool _has2;
-
-        /// <summary>
-        /// Whether source 3 has emitted at least one value.
-        /// </summary>
-        private bool _has3;
-
-        /// <summary>
-        /// Whether source 4 has emitted at least one value.
-        /// </summary>
-        private bool _has4;
-
-        /// <summary>
-        /// Whether source 5 has emitted at least one value.
-        /// </summary>
-        private bool _has5;
-
-        /// <summary>
-        /// Whether source 6 has emitted at least one value.
-        /// </summary>
-        private bool _has6;
-
-        /// <summary>
-        /// Whether source 7 has emitted at least one value.
-        /// </summary>
-        private bool _has7;
-
-        /// <summary>
-        /// Whether source 8 has emitted at least one value.
-        /// </summary>
-        private bool _has8;
-
-        /// <summary>
-        /// Whether source 9 has emitted at least one value.
-        /// </summary>
-        private bool _has9;
-
-        /// <summary>
-        /// Whether source 10 has emitted at least one value.
-        /// </summary>
-        private bool _has10;
-
-        /// <summary>
-        /// Whether source 11 has emitted at least one value.
-        /// </summary>
-        private bool _has11;
-
-        /// <summary>
-        /// Whether source 12 has emitted at least one value.
-        /// </summary>
-        private bool _has12;
+        private int _readyMask;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subscription"/> class.
         /// </summary>
         /// <param name="observer">The downstream observer.</param>
         /// <param name="resultSelector">The function to combine the latest values.</param>
-        public Subscription(IObserver<TResult> observer, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> resultSelector)
+        public Subscription(
+            IObserver<TResult> observer,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> resultSelector)
         {
             _observer = observer;
             _resultSelector = resultSelector;
@@ -349,7 +351,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         public void Subscribe3(IObservable<T3> source)
         {
             var sub = source.Subscribe(new Observer3(this));
-            Volatile.Write(ref _subscriptions[2], sub);
+            Volatile.Write(ref _subscriptions[Source3Index], sub);
         }
 
         /// <summary>
@@ -359,7 +361,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         public void Subscribe4(IObservable<T4> source)
         {
             var sub = source.Subscribe(new Observer4(this));
-            Volatile.Write(ref _subscriptions[3], sub);
+            Volatile.Write(ref _subscriptions[Source4Index], sub);
         }
 
         /// <summary>
@@ -369,7 +371,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         public void Subscribe5(IObservable<T5> source)
         {
             var sub = source.Subscribe(new Observer5(this));
-            Volatile.Write(ref _subscriptions[4], sub);
+            Volatile.Write(ref _subscriptions[Source5Index], sub);
         }
 
         /// <summary>
@@ -379,7 +381,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         public void Subscribe6(IObservable<T6> source)
         {
             var sub = source.Subscribe(new Observer6(this));
-            Volatile.Write(ref _subscriptions[5], sub);
+            Volatile.Write(ref _subscriptions[Source6Index], sub);
         }
 
         /// <summary>
@@ -389,7 +391,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         public void Subscribe7(IObservable<T7> source)
         {
             var sub = source.Subscribe(new Observer7(this));
-            Volatile.Write(ref _subscriptions[6], sub);
+            Volatile.Write(ref _subscriptions[Source7Index], sub);
         }
 
         /// <summary>
@@ -399,7 +401,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         public void Subscribe8(IObservable<T8> source)
         {
             var sub = source.Subscribe(new Observer8(this));
-            Volatile.Write(ref _subscriptions[7], sub);
+            Volatile.Write(ref _subscriptions[Source8Index], sub);
         }
 
         /// <summary>
@@ -409,7 +411,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         public void Subscribe9(IObservable<T9> source)
         {
             var sub = source.Subscribe(new Observer9(this));
-            Volatile.Write(ref _subscriptions[8], sub);
+            Volatile.Write(ref _subscriptions[Source9Index], sub);
         }
 
         /// <summary>
@@ -419,7 +421,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         public void Subscribe10(IObservable<T10> source)
         {
             var sub = source.Subscribe(new Observer10(this));
-            Volatile.Write(ref _subscriptions[9], sub);
+            Volatile.Write(ref _subscriptions[Source10Index], sub);
         }
 
         /// <summary>
@@ -429,7 +431,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         public void Subscribe11(IObservable<T11> source)
         {
             var sub = source.Subscribe(new Observer11(this));
-            Volatile.Write(ref _subscriptions[10], sub);
+            Volatile.Write(ref _subscriptions[Source11Index], sub);
         }
 
         /// <summary>
@@ -439,18 +441,20 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         public void Subscribe12(IObservable<T12> source)
         {
             var sub = source.Subscribe(new Observer12(this));
-            Volatile.Write(ref _subscriptions[11], sub);
+            Volatile.Write(ref _subscriptions[Source12Index], sub);
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref _observer, null) != null)
+            if (Interlocked.Exchange(ref _observer, null) == null)
             {
-                for (var i = 0; i < _subscriptions.Length; i++)
-                {
-                    Interlocked.Exchange(ref _subscriptions[i], null)?.Dispose();
-                }
+                return;
+            }
+
+            for (var i = 0; i < _subscriptions.Length; i++)
+            {
+                Interlocked.Exchange(ref _subscriptions[i], null)?.Dispose();
             }
         }
 
@@ -459,10 +463,12 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
         /// </summary>
         private void TryEmit()
         {
-            if (_has1 && _has2 && _has3 && _has4 && _has5 && _has6 && _has7 && _has8 && _has9 && _has10 && _has11 && _has12)
+            if (_readyMask != (1 << _subscriptions.Length) - 1)
             {
-                _observer?.OnNext(_resultSelector(_value1, _value2, _value3, _value4, _value5, _value6, _value7, _value8, _value9, _value10, _value11, _value12));
+                return;
             }
+
+            _observer?.OnNext(_resultSelector(_value1, _value2, _value3, _value4, _value5, _value6, _value7, _value8, _value9, _value10, _value11, _value12));
         }
 
         /// <summary>
@@ -475,7 +481,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T1 value)
             {
                 parent._value1 = value;
-                parent._has1 = true;
+                parent._readyMask |= 1;
                 parent.TryEmit();
             }
 
@@ -498,7 +504,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T2 value)
             {
                 parent._value2 = value;
-                parent._has2 = true;
+                parent._readyMask |= 1 << 1;
                 parent.TryEmit();
             }
 
@@ -521,7 +527,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T3 value)
             {
                 parent._value3 = value;
-                parent._has3 = true;
+                parent._readyMask |= 1 << Source3Index;
                 parent.TryEmit();
             }
 
@@ -544,7 +550,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T4 value)
             {
                 parent._value4 = value;
-                parent._has4 = true;
+                parent._readyMask |= 1 << Source4Index;
                 parent.TryEmit();
             }
 
@@ -567,7 +573,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T5 value)
             {
                 parent._value5 = value;
-                parent._has5 = true;
+                parent._readyMask |= 1 << Source5Index;
                 parent.TryEmit();
             }
 
@@ -590,7 +596,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T6 value)
             {
                 parent._value6 = value;
-                parent._has6 = true;
+                parent._readyMask |= 1 << Source6Index;
                 parent.TryEmit();
             }
 
@@ -613,7 +619,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T7 value)
             {
                 parent._value7 = value;
-                parent._has7 = true;
+                parent._readyMask |= 1 << Source7Index;
                 parent.TryEmit();
             }
 
@@ -636,7 +642,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T8 value)
             {
                 parent._value8 = value;
-                parent._has8 = true;
+                parent._readyMask |= 1 << Source8Index;
                 parent.TryEmit();
             }
 
@@ -659,7 +665,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T9 value)
             {
                 parent._value9 = value;
-                parent._has9 = true;
+                parent._readyMask |= 1 << Source9Index;
                 parent.TryEmit();
             }
 
@@ -682,7 +688,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T10 value)
             {
                 parent._value10 = value;
-                parent._has10 = true;
+                parent._readyMask |= 1 << Source10Index;
                 parent.TryEmit();
             }
 
@@ -705,7 +711,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T11 value)
             {
                 parent._value11 = value;
-                parent._has11 = true;
+                parent._readyMask |= 1 << Source11Index;
                 parent.TryEmit();
             }
 
@@ -728,7 +734,7 @@ internal sealed class CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, 
             public void OnNext(T12 value)
             {
                 parent._value12 = value;
-                parent._has12 = true;
+                parent._readyMask |= 1 << Source12Index;
                 parent.TryEmit();
             }
 

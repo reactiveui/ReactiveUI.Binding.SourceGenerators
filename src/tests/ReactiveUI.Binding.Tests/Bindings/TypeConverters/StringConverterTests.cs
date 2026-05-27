@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringConverterTests
 {
     /// <summary>
+    ///     The expected affinity reported by the string converter.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies FromType ReturnsStringType.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -29,7 +34,7 @@ public class StringConverterTests
     {
         var converter = new StringConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -67,7 +72,7 @@ public class StringConverterTests
     public async Task TryConvertTyped_IgnoresConversionHint()
     {
         var converter = new StringConverter();
-        var value = "test";
+        const string value = "test";
 
         var result = converter.TryConvertTyped(value, "some hint", out var output);
 
@@ -83,9 +88,8 @@ public class StringConverterTests
     public async Task TryConvertTyped_NonStringValue_ReturnsFalse()
     {
         var converter = new StringConverter();
-        var value = 123;
-
-        var result = converter.TryConvertTyped(value, null, out var output);
+        const int value = 123;
+        var result = converter.TryConvertTyped(value, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -113,7 +117,7 @@ public class StringConverterTests
     public async Task TryConvertTyped_StringToString_Succeeds()
     {
         var converter = new StringConverter();
-        var value = "test";
+        const string value = "test";
 
         var result = converter.TryConvertTyped(value, null, out var output);
 

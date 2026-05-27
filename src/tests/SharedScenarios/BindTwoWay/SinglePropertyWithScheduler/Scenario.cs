@@ -4,24 +4,22 @@
 
 using System;
 using System.Reactive.Concurrency;
-
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindTwoWay.SinglePropertyWithScheduler
+namespace SharedScenarios.BindTwoWay.SinglePropertyWithScheduler;
+
+/// <summary>
+/// Exercises BindTwoWay with a scheduler parameter.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindTwoWay with a scheduler parameter.
+    /// Creates a two-way binding between ViewModel.Name and View.NameText with a scheduler.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a two-way binding between ViewModel.Name and View.NameText with a scheduler.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <param name="scheduler">The scheduler to observe on.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view, IScheduler scheduler)
-            => vm.BindTwoWay(view, x => x.Name, x => x.NameText, scheduler);
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <param name="scheduler">The scheduler to observe on.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view, IScheduler scheduler)
+        => vm.BindTwoWay(view, x => x.Name, x => x.NameText, scheduler);
 }

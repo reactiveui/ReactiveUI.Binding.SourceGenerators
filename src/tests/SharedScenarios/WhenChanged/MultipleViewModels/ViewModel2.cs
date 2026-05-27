@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanged.MultipleViewModels
+namespace SharedScenarios.WhenChanged.MultipleViewModels;
+
+/// <summary>
+/// Second ViewModel with a count property.
+/// </summary>
+public class ViewModel2 : INotifyPropertyChanged
 {
     /// <summary>
-    /// Second ViewModel with a count property.
+    /// The backing field for <see cref="Count"/>.
     /// </summary>
-    public class ViewModel2 : INotifyPropertyChanged
+    private int _count;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the count.
+    /// </summary>
+    public int Count
     {
-        /// <summary>
-        /// The backing field for <see cref="Count"/>.
-        /// </summary>
-        private int _count;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the count.
-        /// </summary>
-        public int Count
+        get => _count;
+        set
         {
-            get => _count;
-            set
+            if (_count == value)
             {
-                if (_count != value)
-                {
-                    _count = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
-                }
+                return;
             }
+
+            _count = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
         }
     }
 }

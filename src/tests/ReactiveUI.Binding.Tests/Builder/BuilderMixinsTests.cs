@@ -5,7 +5,6 @@
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.Mixins;
 using ReactiveUI.Binding.Tests.TestModels;
-
 using Splat.Builder;
 
 namespace ReactiveUI.Binding.Tests.Builder;
@@ -135,7 +134,7 @@ public class BuilderMixinsTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(bool),
-            (from, hint) => (true, true));
+            (_, _) => (true, true));
 
         IAppBuilder appBuilder = builder;
         var result = appBuilder.WithConverter(converter);
@@ -160,7 +159,7 @@ public class BuilderMixinsTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(bool),
-            (from, hint) => (true, true));
+            (_, _) => (true, true));
 
         var action = () => fakeBuilder.WithConverter(converter);
 
@@ -177,8 +176,7 @@ public class BuilderMixinsTests
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        var converter = new StubFallbackConverter(
-            (fromType, from, toType, hint) => (true, "converted"));
+        var converter = new StubFallbackConverter((_, _, _, _) => (true, "converted"));
 
         IAppBuilder appBuilder = builder;
         var result = appBuilder.WithFallbackConverter(converter);
@@ -199,8 +197,7 @@ public class BuilderMixinsTests
     public async Task WithFallbackConverter_WithNonReactiveUIBuilder_ThrowsInvalidOperationException()
     {
         IAppBuilder fakeBuilder = new FakeAppBuilder();
-        var converter = new StubFallbackConverter(
-            (fromType, from, toType, hint) => (true, "converted"));
+        var converter = new StubFallbackConverter((_, _, _, _) => (true, "converted"));
 
         var action = () => fakeBuilder.WithFallbackConverter(converter);
 
@@ -258,9 +255,8 @@ public class BuilderMixinsTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(int),
-            (from, hint) => (true, 42));
-        var fallbackConverter = new StubFallbackConverter(
-            (fromType, from, toType, hint) => (true, "fallback"));
+            (_, _) => (true, 42));
+        var fallbackConverter = new StubFallbackConverter((_, _, _, _) => (true, "fallback"));
         var setConverter = new StubSetMethodBindingConverter();
 
         IAppBuilder appBuilder = builder;
@@ -270,9 +266,12 @@ public class BuilderMixinsTests
             .WithSetMethodConverter(setConverter);
 
         await Assert.That(result).IsNotNull();
-        await Assert.That(builder.ConverterService.TypedConverters.TryGetConverter(typeof(string), typeof(int))).IsNotNull();
-        await Assert.That(builder.ConverterService.FallbackConverters.GetAllConverters().ToList()).Contains(fallbackConverter);
-        await Assert.That(builder.ConverterService.SetMethodConverters.GetAllConverters().ToList()).Contains(setConverter);
+        await Assert.That(builder.ConverterService.TypedConverters.TryGetConverter(typeof(string), typeof(int)))
+            .IsNotNull();
+        await Assert.That(builder.ConverterService.FallbackConverters.GetAllConverters().ToList())
+            .Contains(fallbackConverter);
+        await Assert.That(builder.ConverterService.SetMethodConverters.GetAllConverters().ToList())
+            .Contains(setConverter);
     }
 
     /// <summary>
@@ -284,9 +283,8 @@ public class BuilderMixinsTests
     public async Task ConfigureViewLocator_DelegatesToBuilder()
     {
         RxBindingBuilder.ResetForTesting();
-        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+        var appBuilder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
 
-        IAppBuilder appBuilder = builder;
         appBuilder
             .WithCoreServices()
             .ConfigureViewLocator(mappings =>
@@ -317,9 +315,8 @@ public class BuilderMixinsTests
     /// <summary>
     /// Simple view model for mixin testing.
     /// </summary>
-    private sealed class MixinTestViewModel
-    {
-    }
+    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Used for testing")]
+    private sealed class MixinTestViewModel;
 
     /// <summary>
     /// Simple view for mixin testing.
@@ -341,14 +338,8 @@ public class BuilderMixinsTests
     /// A fake <see cref="IAppBuilder"/> that does NOT implement <see cref="IReactiveUIBindingBuilder"/>
     /// to test the guard clauses in <see cref="BuilderMixins"/>.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required by IAppBuilder interface.")]
     private sealed class FakeAppBuilder : IAppBuilder
     {
-        /// <summary>
-        /// Gets the current dependency resolver.
-        /// </summary>
-        public IReadonlyDependencyResolver? Current => null;
-
         /// <summary>
         /// Registers core services.
         /// </summary>
@@ -381,7 +372,7 @@ public class BuilderMixinsTests
         /// Builds the application instance.
         /// </summary>
         /// <returns>The application instance.</returns>
-        public IAppInstance Build() => throw new NotImplementedException();
+        public IAppInstance Build() => throw new NotSupportedException();
     }
 
     /// <summary>

@@ -4,7 +4,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -31,88 +30,33 @@ internal static class TypeDetectionExtractor
 
         var wellKnown = SymbolHelpers.GetWellKnownSymbols(semanticModel.Compilation);
 
-        var implementsIReactiveObject = false;
-        var implementsINPC = false;
-        var implementsINPChanging = false;
-
         // Walk AllInterfaces (includes inherited interfaces)
-        var allInterfaces = typeSymbol.AllInterfaces;
-        for (var i = 0; i < allInterfaces.Length; i++)
-        {
-            ct.ThrowIfCancellationRequested();
-            var iface = allInterfaces[i];
-
-            if (wellKnown.IReactiveObject != null && SymbolEqualityComparer.Default.Equals(iface, wellKnown.IReactiveObject))
-            {
-                implementsIReactiveObject = true;
-            }
-
-            if (wellKnown.INPC != null && SymbolEqualityComparer.Default.Equals(iface, wellKnown.INPC))
-            {
-                implementsINPC = true;
-            }
-
-            if (wellKnown.INPChanging != null && SymbolEqualityComparer.Default.Equals(iface, wellKnown.INPChanging))
-            {
-                implementsINPChanging = true;
-            }
-        }
+        DetectImplementedInterfaces(
+            typeSymbol,
+            wellKnown,
+            ct,
+            out var implementsIReactiveObject,
+            out var implementsINPC,
+            out var implementsINPChanging);
 
         // Walk base type chain for platform detection
-        var inheritsWpfDependencyObject = false;
-        var inheritsWinUIDependencyObject = false;
-        var inheritsNSObject = false;
-        var inheritsWinFormsComponent = false;
-        var inheritsAndroidView = false;
-
-        var baseType = typeSymbol.BaseType;
-        while (baseType != null)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            if (wellKnown.WpfDependencyObject != null && SymbolEqualityComparer.Default.Equals(baseType, wellKnown.WpfDependencyObject))
-            {
-                inheritsWpfDependencyObject = true;
-            }
-
-            if (wellKnown.WinUIDependencyObject != null && SymbolEqualityComparer.Default.Equals(baseType, wellKnown.WinUIDependencyObject))
-            {
-                inheritsWinUIDependencyObject = true;
-            }
-
-            if (wellKnown.NSObject != null && SymbolEqualityComparer.Default.Equals(baseType, wellKnown.NSObject))
-            {
-                inheritsNSObject = true;
-            }
-
-            if (wellKnown.WinFormsComponent != null && SymbolEqualityComparer.Default.Equals(baseType, wellKnown.WinFormsComponent))
-            {
-                inheritsWinFormsComponent = true;
-            }
-
-            if (wellKnown.AndroidView != null && SymbolEqualityComparer.Default.Equals(baseType, wellKnown.AndroidView))
-            {
-                inheritsAndroidView = true;
-            }
-
-            baseType = baseType.BaseType;
-        }
+        var platform = DetectPlatformBaseTypes(typeSymbol, wellKnown, ct);
 
         // Extract properties
         var properties = ExtractProperties(typeSymbol, ct);
 
-        return new ClassBindingInfo(
-            FullyQualifiedName: typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            MetadataName: typeSymbol.MetadataName,
-            ImplementsIReactiveObject: implementsIReactiveObject,
-            ImplementsINPC: implementsINPC,
-            ImplementsINPChanging: implementsINPChanging,
-            InheritsWpfDependencyObject: inheritsWpfDependencyObject,
-            InheritsWinUIDependencyObject: inheritsWinUIDependencyObject,
-            InheritsNSObject: inheritsNSObject,
-            InheritsWinFormsComponent: inheritsWinFormsComponent,
-            InheritsAndroidView: inheritsAndroidView,
-            Properties: properties);
+        return new(
+            typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            typeSymbol.MetadataName,
+            implementsIReactiveObject,
+            implementsINPC,
+            implementsINPChanging,
+            platform.InheritsWpfDependencyObject,
+            platform.InheritsWinUIDependencyObject,
+            platform.InheritsNSObject,
+            platform.InheritsWinFormsComponent,
+            platform.InheritsAndroidView,
+            properties);
     }
 
     /// <summary>
@@ -122,7 +66,9 @@ internal static class TypeDetectionExtractor
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An array of observable property info.</returns>
     /// <exception cref="OperationCanceledException">If the cancellation token is triggered.</exception>
-    internal static EquatableArray<ObservablePropertyInfo> ExtractProperties(INamedTypeSymbol typeSymbol, CancellationToken ct)
+    internal static EquatableArray<ObservablePropertyInfo> ExtractProperties(
+        INamedTypeSymbol typeSymbol,
+        CancellationToken ct)
     {
         var properties = new List<ObservablePropertyInfo>(16);
         var members = typeSymbol.GetMembers();
@@ -155,14 +101,118 @@ internal static class TypeDetectionExtractor
                 }
             }
 
-            properties.Add(new ObservablePropertyInfo(
-                PropertyName: property.Name,
-                PropertyTypeFullName: property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                HasPublicGetter: hasPublicGetter,
-                IsIndexer: isIndexer,
-                IsDependencyProperty: isDependencyProperty));
+            properties.Add(new(
+                property.Name,
+                property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                hasPublicGetter,
+                isIndexer,
+                isDependencyProperty));
         }
 
-        return new EquatableArray<ObservablePropertyInfo>(properties.ToArray());
+        return new([.. properties]);
     }
+
+    /// <summary>
+    /// Walks <c>AllInterfaces</c> to detect notification interfaces.
+    /// </summary>
+    /// <param name="typeSymbol">The type to inspect.</param>
+    /// <param name="wellKnown">The cached well-known symbols.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <param name="implementsIReactiveObject">Set to true if the type implements IReactiveObject.</param>
+    /// <param name="implementsINPC">Set to true if the type implements INotifyPropertyChanged.</param>
+    /// <param name="implementsINPChanging">Set to true if the type implements INotifyPropertyChanging.</param>
+    private static void DetectImplementedInterfaces(
+        INamedTypeSymbol typeSymbol,
+        SymbolHelpers.WellKnownSymbolsBox wellKnown,
+        CancellationToken ct,
+        out bool implementsIReactiveObject,
+        out bool implementsINPC,
+        out bool implementsINPChanging)
+    {
+        implementsIReactiveObject = false;
+        implementsINPC = false;
+        implementsINPChanging = false;
+
+        var allInterfaces = typeSymbol.AllInterfaces;
+        for (var i = 0; i < allInterfaces.Length; i++)
+        {
+            ct.ThrowIfCancellationRequested();
+            var iface = allInterfaces[i];
+
+            if (wellKnown.IReactiveObject != null &&
+                SymbolEqualityComparer.Default.Equals(iface, wellKnown.IReactiveObject))
+            {
+                implementsIReactiveObject = true;
+            }
+
+            if (wellKnown.INPC != null && SymbolEqualityComparer.Default.Equals(iface, wellKnown.INPC))
+            {
+                implementsINPC = true;
+            }
+
+            if (wellKnown.INPChanging != null && SymbolEqualityComparer.Default.Equals(iface, wellKnown.INPChanging))
+            {
+                implementsINPChanging = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Walks the base type chain to detect platform-specific base types (WPF/WinUI/KVO/WinForms/Android).
+    /// </summary>
+    /// <param name="typeSymbol">The type to inspect.</param>
+    /// <param name="wellKnown">The cached well-known symbols.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The detected platform base-type flags.</returns>
+    private static PlatformBaseTypeFlags DetectPlatformBaseTypes(
+        INamedTypeSymbol typeSymbol,
+        SymbolHelpers.WellKnownSymbolsBox wellKnown,
+        CancellationToken ct)
+    {
+        var wpf = false;
+        var winui = false;
+        var ns = false;
+        var winforms = false;
+        var android = false;
+
+        var baseType = typeSymbol.BaseType;
+        while (baseType != null)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            wpf = wpf || Matches(baseType, wellKnown.WpfDependencyObject);
+            winui = winui || Matches(baseType, wellKnown.WinUIDependencyObject);
+            ns = ns || Matches(baseType, wellKnown.NSObject);
+            winforms = winforms || Matches(baseType, wellKnown.WinFormsComponent);
+            android = android || Matches(baseType, wellKnown.AndroidView);
+
+            baseType = baseType.BaseType;
+        }
+
+        return new(wpf, winui, ns, winforms, android);
+    }
+
+    /// <summary>
+    /// Determines whether <paramref name="symbol"/> equals the (possibly null) candidate symbol.
+    /// </summary>
+    /// <param name="symbol">The symbol to compare.</param>
+    /// <param name="candidate">The candidate symbol; null is treated as no match.</param>
+    /// <returns><c>true</c> if the candidate is non-null and equal; otherwise, <c>false</c>.</returns>
+    private static bool Matches(INamedTypeSymbol symbol, INamedTypeSymbol? candidate) =>
+        candidate != null && SymbolEqualityComparer.Default.Equals(symbol, candidate);
+
+    /// <summary>
+    /// Platform-specific base-type detection flags for a class.
+    /// </summary>
+    /// <param name="InheritsWpfDependencyObject">Whether the type inherits a WPF DependencyObject.</param>
+    /// <param name="InheritsWinUIDependencyObject">Whether the type inherits a WinUI DependencyObject.</param>
+    /// <param name="InheritsNSObject">Whether the type inherits an Apple NSObject.</param>
+    /// <param name="InheritsWinFormsComponent">Whether the type inherits a WinForms Component.</param>
+    /// <param name="InheritsAndroidView">Whether the type inherits an Android View.</param>
+    private readonly record struct PlatformBaseTypeFlags(
+        bool InheritsWpfDependencyObject,
+        bool InheritsWinUIDependencyObject,
+        bool InheritsNSObject,
+        bool InheritsWinFormsComponent,
+        bool InheritsAndroidView);
 }

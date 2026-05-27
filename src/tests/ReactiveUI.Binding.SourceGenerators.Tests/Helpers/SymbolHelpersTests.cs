@@ -5,7 +5,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -24,9 +23,9 @@ public class SymbolHelpersTests
     public async Task GetWellKnownSymbols_ResolvesINPC()
     {
         const string source = """
-            using System.ComponentModel;
-            namespace TestApp { public class Dummy {} }
-            """;
+                              using System.ComponentModel;
+                              namespace TestApp { public class Dummy {} }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
 
@@ -61,12 +60,12 @@ public class SymbolHelpersTests
     public async Task IsIObservable_DirectIObservableType_ReturnsTrue()
     {
         const string source = """
-            using System;
-            namespace TestApp
-            {
-                public class MyVm { public IObservable<string> Obs { get; set; } }
-            }
-            """;
+                              using System;
+                              namespace TestApp
+                              {
+                                  public class MyVm { public IObservable<string> Obs { get; set; } }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
@@ -86,11 +85,11 @@ public class SymbolHelpersTests
     public async Task IsIObservable_NonObservableType_ReturnsFalse()
     {
         const string source = """
-            namespace TestApp
-            {
-                public class MyVm { public string Name { get; set; } = ""; }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class MyVm { public string Name { get; set; } = ""; }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
@@ -110,12 +109,12 @@ public class SymbolHelpersTests
     public async Task IsInteractionType_DirectIInteractionType_ReturnsTrue()
     {
         const string source = """
-            using ReactiveUI.Binding;
-            namespace TestApp
-            {
-                public class MyVm { public IInteraction<string, bool> Confirm { get; set; } }
-            }
-            """;
+                              using ReactiveUI.Binding;
+                              namespace TestApp
+                              {
+                                  public class MyVm { public IInteraction<string, bool> Confirm { get; set; } }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
@@ -135,11 +134,11 @@ public class SymbolHelpersTests
     public async Task IsInteractionType_NonInteractionType_ReturnsFalse()
     {
         const string source = """
-            namespace TestApp
-            {
-                public class MyVm { public string Name { get; set; } = ""; }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class MyVm { public string Name { get; set; } = ""; }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
@@ -160,19 +159,21 @@ public class SymbolHelpersTests
     public async Task ExtractInteractionTypeArguments_DirectIInteractionProperty_ReturnsTrueWithTypes()
     {
         const string source = """
-            using ReactiveUI.Binding;
-            namespace TestApp
-            {
-                public class MyVm { public IInteraction<string, bool> Confirm { get; set; } }
-            }
-            """;
+                              using ReactiveUI.Binding;
+                              namespace TestApp
+                              {
+                                  public class MyVm { public IInteraction<string, bool> Confirm { get; set; } }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
         var prop = typeSymbol.GetMembers("Confirm").OfType<IPropertySymbol>().First();
 
         var result = SymbolHelpers.ExtractInteractionTypeArguments(
-            prop.Type, out var inputType, out var outputType);
+            prop.Type,
+            out var inputType,
+            out var outputType);
 
         await Assert.That(result).IsTrue();
         await Assert.That(inputType).IsEqualTo("string");
@@ -187,18 +188,20 @@ public class SymbolHelpersTests
     public async Task ExtractInteractionTypeArguments_NonInteractionType_ReturnsFalse()
     {
         const string source = """
-            namespace TestApp
-            {
-                public class MyVm { public string Name { get; set; } = ""; }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class MyVm { public string Name { get; set; } = ""; }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
         var prop = typeSymbol.GetMembers("Name").OfType<IPropertySymbol>().First();
 
         var result = SymbolHelpers.ExtractInteractionTypeArguments(
-            prop.Type, out var inputType, out var outputType);
+            prop.Type,
+            out var inputType,
+            out var outputType);
 
         await Assert.That(result).IsFalse();
         await Assert.That(inputType).IsEqualTo(string.Empty);
@@ -214,27 +217,27 @@ public class SymbolHelpersTests
     public async Task ExtractInnerObservableType_ViaInterfaceImplementation_ReturnsInnerType()
     {
         const string source = """
-            using System;
-            using System.Reactive.Subjects;
-            using System.Linq.Expressions;
-            namespace TestApp
-            {
-                public class MyVm { public Subject<int> Count { get; set; } }
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        Expression<Func<MyVm, Subject<int>>> expr = x => x.Count;
-                    }
-                }
-            }
-            """;
+                              using System;
+                              using System.Reactive.Subjects;
+                              using System.Linq.Expressions;
+                              namespace TestApp
+                              {
+                                  public class MyVm { public Subject<int> Count { get; set; } }
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          Expression<Func<MyVm, Subject<int>>> expr = x => x.Count;
+                                      }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
 
-        var lambda = tree.GetRoot().DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
+        var lambda = (await tree.GetRootAsync()).DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
         var path = SyntaxHelpers.ExtractPropertyPathFromLambda(lambda, semanticModel, default);
 
         await Assert.That(path).IsNotNull();
@@ -254,33 +257,33 @@ public class SymbolHelpersTests
     public async Task ExtractInnerObservableType_NonLambdaArg_ReturnsFallbackType()
     {
         const string source = """
-            using System;
-            using System.Linq.Expressions;
-            namespace TestApp
-            {
-                public class MyVm { public IObservable<string> Obs { get; set; } }
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        Expression<Func<MyVm, IObservable<string>>> expr = x => x.Obs;
-                    }
-                }
-            }
-            """;
+                              using System;
+                              using System.Linq.Expressions;
+                              namespace TestApp
+                              {
+                                  public class MyVm { public IObservable<string> Obs { get; set; } }
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          Expression<Func<MyVm, IObservable<string>>> expr = x => x.Obs;
+                                      }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
 
-        var lambda = tree.GetRoot().DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
+        var lambda = (await tree.GetRootAsync()).DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
         var path = SyntaxHelpers.ExtractPropertyPathFromLambda(lambda, semanticModel, default);
 
         await Assert.That(path).IsNotNull();
         var leafSegment = path![0];
 
         // Pass a non-lambda expression as argExpression to hit the fallback return
-        var memberAccess = (ExpressionSyntax)tree.GetRoot()
+        var memberAccess = (ExpressionSyntax)(await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<MemberAccessExpressionSyntax>()
             .First();
@@ -299,20 +302,20 @@ public class SymbolHelpersTests
     public async Task DetectHasConverterOverride_WithIBindingTypeConverterParam_ReturnsTrue()
     {
         const string source = """
-            using ReactiveUI.Binding;
-            namespace TestApp
-            {
-                public static class Ext
-                {
-                    public static void Bind(IBindingTypeConverter converter) { }
-                }
-            }
-            """;
+                              using ReactiveUI.Binding;
+                              namespace TestApp
+                              {
+                                  public static class Ext
+                                  {
+                                      public static void Bind(IBindingTypeConverter converter) { }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
-        var classDecl = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
+        var classDecl = (await tree.GetRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
             .First(c => c.Identifier.Text == "Ext");
         var classSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl)!;
         var methodSymbol = classSymbol.GetMembers("Bind").OfType<IMethodSymbol>().First();
@@ -331,20 +334,20 @@ public class SymbolHelpersTests
     public async Task DetectHasConverterOverride_WithFuncParam_ReturnsFalse()
     {
         const string source = """
-            using System;
-            namespace TestApp
-            {
-                public static class Ext
-                {
-                    public static void Bind(Func<string, int> converter) { }
-                }
-            }
-            """;
+                              using System;
+                              namespace TestApp
+                              {
+                                  public static class Ext
+                                  {
+                                      public static void Bind(Func<string, int> converter) { }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
-        var classDecl = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
+        var classDecl = (await tree.GetRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
             .First(c => c.Identifier.Text == "Ext");
         var classSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl)!;
         var methodSymbol = classSymbol.GetMembers("Bind").OfType<IMethodSymbol>().First();
@@ -363,21 +366,21 @@ public class SymbolHelpersTests
     public async Task ResolveNamedType_BlockBodyLambda_ReturnsNull()
     {
         const string source = """
-            using System;
-            using System.Linq.Expressions;
-            namespace TestApp
-            {
-                public class MyVm { public string Name { get; set; } = ""; }
-                public class Usage
-                {
-                    public string Test(MyVm vm)
-                    {
-                        Func<MyVm, string> fn = (x) => { return x.Name; };
-                        return fn(vm);
-                    }
-                }
-            }
-            """;
+                              using System;
+                              using System.Linq.Expressions;
+                              namespace TestApp
+                              {
+                                  public class MyVm { public string Name { get; set; } = ""; }
+                                  public class Usage
+                                  {
+                                      public string Test(MyVm vm)
+                                      {
+                                          Func<MyVm, string> fn = (x) => { return x.Name; };
+                                          return fn(vm);
+                                      }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var tree = compilation.SyntaxTrees.First();
@@ -385,31 +388,31 @@ public class SymbolHelpersTests
 
         // Get a valid segment from a separate compilation with expression-body lambda
         const string simpleLambdaSource = """
-            using System;
-            using System.Linq.Expressions;
-            namespace TestApp
-            {
-                public class MyVm2 { public string Name { get; set; } = ""; }
-                public class Usage2
-                {
-                    public void Test()
-                    {
-                        Expression<Func<MyVm2, string>> expr = x => x.Name;
-                    }
-                }
-            }
-            """;
+                                          using System;
+                                          using System.Linq.Expressions;
+                                          namespace TestApp
+                                          {
+                                              public class MyVm2 { public string Name { get; set; } = ""; }
+                                              public class Usage2
+                                              {
+                                                  public void Test()
+                                                  {
+                                                      Expression<Func<MyVm2, string>> expr = x => x.Name;
+                                                  }
+                                              }
+                                          }
+                                          """;
 
         var compilation2 = TestHelper.CreateCompilation(simpleLambdaSource, LanguageVersion.CSharp10);
         var tree2 = compilation2.SyntaxTrees.First();
         var semanticModel2 = compilation2.GetSemanticModel(tree2);
-        var refLambda = tree2.GetRoot().DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
+        var refLambda = (await tree2.GetRootAsync()).DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
         var path = SyntaxHelpers.ExtractPropertyPathFromLambda(refLambda, semanticModel2, default);
         await Assert.That(path).IsNotNull();
         var segment = path![0];
 
         // Now get the block-body parenthesized lambda from original source
-        var blockLambda = tree.GetRoot().DescendantNodes()
+        var blockLambda = (await tree.GetRootAsync()).DescendantNodes()
             .OfType<ParenthesizedLambdaExpressionSyntax>()
             .First();
 
@@ -426,26 +429,26 @@ public class SymbolHelpersTests
     public async Task ResolveNamedType_NonLambdaExpression_ReturnsNull()
     {
         const string source = """
-            using System;
-            using System.Linq.Expressions;
-            namespace TestApp
-            {
-                public class MyVm { public string Name { get; set; } = ""; }
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        Expression<Func<MyVm, string>> expr = x => x.Name;
-                    }
-                }
-            }
-            """;
+                              using System;
+                              using System.Linq.Expressions;
+                              namespace TestApp
+                              {
+                                  public class MyVm { public string Name { get; set; } = ""; }
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          Expression<Func<MyVm, string>> expr = x => x.Name;
+                                      }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
 
-        var lambda = tree.GetRoot().DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
+        var lambda = (await tree.GetRootAsync()).DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
         var path = SyntaxHelpers.ExtractPropertyPathFromLambda(lambda, semanticModel, default);
 
         await Assert.That(path).IsNotNull();

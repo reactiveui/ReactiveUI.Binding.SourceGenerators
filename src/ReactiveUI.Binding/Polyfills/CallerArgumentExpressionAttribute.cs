@@ -5,7 +5,6 @@
 // Polyfill implementation adapted from SimonCropp/Polyfill
 // https://github.com/SimonCropp/Polyfill
 #if !NET5_0_OR_GREATER
-
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 

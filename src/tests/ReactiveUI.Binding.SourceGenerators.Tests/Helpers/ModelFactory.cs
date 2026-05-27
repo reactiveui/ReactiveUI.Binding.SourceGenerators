@@ -9,6 +9,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 /// <summary>
 /// Factory methods for creating test model POCOs with sensible defaults.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Major Code Smell",
+    "S107:Methods should not have too many parameters",
+    Justification = "Factory methods build value-equatable pipeline models with one optional parameter per model property; the count mirrors the models under test.")]
 internal static class ModelFactory
 {
     /// <summary>
@@ -17,12 +21,14 @@ internal static class ModelFactory
     /// <param name="name">The property name.</param>
     /// <param name="type">The fully qualified property type.</param>
     /// <param name="declaringType">The fully qualified declaring type.</param>
+    /// <param name="isReferenceType">Whether the property type is a reference type (controls nullable selector annotation).</param>
     /// <returns>A new property path segment.</returns>
     internal static PropertyPathSegment CreatePropertyPathSegment(
         string name = "Name",
         string type = "global::System.String",
-        string declaringType = "global::TestApp.MyViewModel") =>
-        new(name, type, declaringType);
+        string declaringType = "global::TestApp.MyViewModel",
+        bool isReferenceType = true) =>
+        new(name, type, declaringType, isReferenceType);
 
     /// <summary>
     /// Creates an <see cref="InvocationInfo"/> with sensible defaults for a single-property WhenChanged invocation.
@@ -50,12 +56,12 @@ internal static class ModelFactory
     {
         var paths = propertyPaths ?? new EquatableArray<EquatableArray<PropertyPathSegment>>(
         [
-            new EquatableArray<PropertyPathSegment>([CreatePropertyPathSegment()])
+            new([CreatePropertyPathSegment()])
         ]);
 
         var texts = expressionTexts ?? new EquatableArray<string>(["x => x.Name"]);
 
-        return new InvocationInfo(
+        return new(
             callerFilePath,
             callerLineNumber,
             sourceTypeFullName,
@@ -108,7 +114,7 @@ internal static class ModelFactory
         var targetPath = targetPropertyPath ?? new EquatableArray<PropertyPathSegment>(
             [CreatePropertyPathSegment("Text", "global::System.String", targetTypeFullName)]);
 
-        return new BindingInvocationInfo(
+        return new(
             callerFilePath,
             callerLineNumber,
             sourceTypeFullName,
@@ -156,7 +162,7 @@ internal static class ModelFactory
     {
         var props = properties ?? new EquatableArray<ObservablePropertyInfo>([]);
 
-        return new ClassBindingInfo(
+        return new(
             fullyQualifiedName,
             metadataName,
             implementsIReactiveObject,
@@ -184,6 +190,7 @@ internal static class ModelFactory
     /// <param name="hasObservableParameter">Whether the invocation includes an IObservable parameter.</param>
     /// <param name="hasExpressionParameter">Whether the invocation includes an Expression parameter.</param>
     /// <param name="parameterTypeFullName">The parameter type, or null.</param>
+    /// <param name="parameterIsReferenceType">Whether the command parameter type is a reference type.</param>
     /// <param name="parameterPropertyPath">The parameter property path, or null.</param>
     /// <param name="resolvedEventName">The resolved event name, or null.</param>
     /// <param name="resolvedEventArgsTypeFullName">The resolved event args type, or null.</param>
@@ -206,6 +213,7 @@ internal static class ModelFactory
         bool hasObservableParameter = false,
         bool hasExpressionParameter = false,
         string? parameterTypeFullName = null,
+        bool parameterIsReferenceType = false,
         EquatableArray<PropertyPathSegment>? parameterPropertyPath = null,
         string? resolvedEventName = "Click",
         string? resolvedEventArgsTypeFullName = "global::System.EventArgs",
@@ -221,7 +229,7 @@ internal static class ModelFactory
         var ctrlPath = controlPropertyPath ?? new EquatableArray<PropertyPathSegment>(
             [CreatePropertyPathSegment("SaveButton", controlTypeFullName, viewTypeFullName)]);
 
-        return new BindCommandInvocationInfo(
+        return new(
             callerFilePath,
             callerLineNumber,
             viewTypeFullName,
@@ -233,6 +241,7 @@ internal static class ModelFactory
             hasObservableParameter,
             hasExpressionParameter,
             parameterTypeFullName,
+            parameterIsReferenceType,
             parameterPropertyPath,
             resolvedEventName,
             resolvedEventArgsTypeFullName,

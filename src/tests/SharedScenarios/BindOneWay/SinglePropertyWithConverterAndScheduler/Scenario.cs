@@ -4,24 +4,22 @@
 
 using System;
 using System.Reactive.Concurrency;
-
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler
+namespace SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler;
+
+/// <summary>
+/// Exercises BindOneWay with both a conversion function and a scheduler.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindOneWay with both a conversion function and a scheduler.
+    /// Creates a one-way binding from ViewModel.Count to View.CountText with int-to-string conversion and scheduler.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a one-way binding from ViewModel.Count to View.CountText with int-to-string conversion and scheduler.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <param name="scheduler">The scheduler to observe on.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view, IScheduler scheduler)
-            => vm.BindOneWay(view, x => x.Count, x => x.CountText, count => count.ToString(), scheduler);
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <param name="scheduler">The scheduler to observe on.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view, IScheduler scheduler)
+        => vm.BindOneWay(view, x => x.Count, x => x.CountText, count => count.ToString(), scheduler);
 }

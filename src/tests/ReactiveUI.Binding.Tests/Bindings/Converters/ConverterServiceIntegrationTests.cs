@@ -159,7 +159,7 @@ public class ConverterServiceIntegrationTests
         await Assert.That(result).IsEqualTo(converter);
 
         // Cleanup - reset to default
-        BindingConverters.SetService(new ConverterService());
+        BindingConverters.SetService(new());
     }
 
     /// <summary>
@@ -233,13 +233,15 @@ public class ConverterServiceIntegrationTests
     {
         /// <inheritdoc/>
         public int GetAffinityForObjects(
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type fromType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+            Type fromType,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
             Type toType) => baseAffinity;
 
         /// <inheritdoc/>
         public bool TryConvert(
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type fromType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+            Type fromType,
             object from,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
             Type toType,

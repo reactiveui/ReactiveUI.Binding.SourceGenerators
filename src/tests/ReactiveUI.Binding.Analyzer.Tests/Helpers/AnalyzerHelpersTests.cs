@@ -2,13 +2,9 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Collections.Immutable;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-
 using NSubstitute;
-
 using ReactiveUI.Binding.Analyzer.Analyzers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests.Helpers;
@@ -25,21 +21,21 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task ExtractFirstTypeArgument_NoTypeArguments_ReturnsNull()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class MyClass
-                {
-                    public void NonGenericMethod() { }
-                }
-            }
-            """;
+        const string Source = """
+                              namespace TestApp
+                              {
+                                  public class MyClass
+                                  {
+                                      public void NonGenericMethod() { }
+                                  }
+                              }
+                              """;
 
-        var compilation = CreateCompilation(source);
-        var tree = compilation.SyntaxTrees.First();
+        var compilation = CreateCompilation(Source);
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
-        var methodDecl = tree.GetRoot()
+        var methodDecl = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax>()
             .First();
@@ -58,26 +54,26 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task ExtractFirstTypeArgument_WithNamedTypeArgument_ReturnsType()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class MyClass
-                {
-                    public void GenericMethod<T>() { }
+        const string Source = """
+                              namespace TestApp
+                              {
+                                  public class MyClass
+                                  {
+                                      public void GenericMethod<T>() { }
 
-                    public void Usage()
-                    {
-                        GenericMethod<string>();
-                    }
-                }
-            }
-            """;
+                                      public void Usage()
+                                      {
+                                          GenericMethod<string>();
+                                      }
+                                  }
+                              }
+                              """;
 
-        var compilation = CreateCompilation(source);
-        var tree = compilation.SyntaxTrees.First();
+        var compilation = CreateCompilation(Source);
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
-        var invocation = tree.GetRoot()
+        var invocation = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()
             .First();
@@ -114,7 +110,7 @@ public class AnalyzerHelpersTests
     public async Task ExtractFirstTypeArgument_EmptyTypeArguments_ReturnsNull_Substitute()
     {
         var methodSymbol = Substitute.For<IMethodSymbol>();
-        methodSymbol.TypeArguments.Returns(ImmutableArray<ITypeSymbol>.Empty);
+        methodSymbol.TypeArguments.Returns([]);
 
         var result = AnalyzerHelpers.ExtractFirstTypeArgument(methodSymbol);
 
@@ -129,21 +125,21 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task IsBindingExtensionMethod_UnrelatedMethod_ReturnsFalse()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class SomeClass
-                {
-                    public void DoSomething() { }
-                }
-            }
-            """;
+        const string Source = """
+                              namespace TestApp
+                              {
+                                  public class SomeClass
+                                  {
+                                      public void DoSomething() { }
+                                  }
+                              }
+                              """;
 
-        var compilation = CreateCompilation(source);
-        var tree = compilation.SyntaxTrees.First();
+        var compilation = CreateCompilation(Source);
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
-        var methodDecl = tree.GetRoot()
+        var methodDecl = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax>()
             .First();
@@ -162,21 +158,21 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task IsBindingExtensionMethod_GeneratedClass_ReturnsTrue()
     {
-        var source = """
-            namespace ReactiveUI.Binding
-            {
-                public static class __ReactiveUIGeneratedBindings
-                {
-                    public static void WhenChanged() { }
-                }
-            }
-            """;
+        const string Source = """
+                              namespace ReactiveUI.Binding
+                              {
+                                  public static class __ReactiveUIGeneratedBindings
+                                  {
+                                      public static void WhenChanged() { }
+                                  }
+                              }
+                              """;
 
-        var compilation = CreateCompilation(source);
-        var tree = compilation.SyntaxTrees.First();
+        var compilation = CreateCompilation(Source);
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
-        var methodDecl = tree.GetRoot()
+        var methodDecl = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax>()
             .First();
@@ -195,21 +191,21 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task IsBindingExtensionMethod_StubClass_ReturnsTrue()
     {
-        var source = """
-            namespace ReactiveUI.Binding
-            {
-                public static class ReactiveUIBindingExtensions
-                {
-                    public static void WhenChanged() { }
-                }
-            }
-            """;
+        const string Source = """
+                              namespace ReactiveUI.Binding
+                              {
+                                  public static class ReactiveUIBindingExtensions
+                                  {
+                                      public static void WhenChanged() { }
+                                  }
+                              }
+                              """;
 
-        var compilation = CreateCompilation(source);
-        var tree = compilation.SyntaxTrees.First();
+        var compilation = CreateCompilation(Source);
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
-        var methodDecl = tree.GetRoot()
+        var methodDecl = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax>()
             .First();
@@ -267,19 +263,19 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task ImplementsInterface_DoesNotImplement_ReturnsFalse()
     {
-        var source = """
-            using System.ComponentModel;
-            namespace TestApp
-            {
-                public class PlainClass { }
-            }
-            """;
+        const string Source = """
+                              using System.ComponentModel;
+                              namespace TestApp
+                              {
+                                  public class PlainClass { }
+                              }
+                              """;
 
-        var compilation = CreateCompilation(source);
-        var tree = compilation.SyntaxTrees.First();
+        var compilation = CreateCompilation(Source);
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
-        var classDecl = tree.GetRoot()
+        var classDecl = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First();
@@ -299,22 +295,22 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task ImplementsInterface_Implements_ReturnsTrue()
     {
-        var source = """
-            using System.ComponentModel;
-            namespace TestApp
-            {
-                public class ObservableClass : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                }
-            }
-            """;
+        const string Source = """
+                              using System.ComponentModel;
+                              namespace TestApp
+                              {
+                                  public class ObservableClass : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                  }
+                              }
+                              """;
 
-        var compilation = CreateCompilation(source);
-        var tree = compilation.SyntaxTrees.First();
+        var compilation = CreateCompilation(Source);
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
-        var classDecl = tree.GetRoot()
+        var classDecl = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First();
@@ -334,19 +330,19 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task InheritsFrom_DoesNotInherit_ReturnsFalse()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class BaseClass { }
-                public class UnrelatedClass { }
-            }
-            """;
+        const string Source = """
+                              namespace TestApp
+                              {
+                                  public class BaseClass { }
+                                  public class UnrelatedClass { }
+                              }
+                              """;
 
-        var compilation = CreateCompilation(source);
-        var tree = compilation.SyntaxTrees.First();
+        var compilation = CreateCompilation(Source);
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
-        var classDecls = tree.GetRoot()
+        var classDecls = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .ToArray();
@@ -366,19 +362,19 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task InheritsFrom_Inherits_ReturnsTrue()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class BaseClass { }
-                public class DerivedClass : BaseClass { }
-            }
-            """;
+        const string Source = """
+                              namespace TestApp
+                              {
+                                  public class BaseClass { }
+                                  public class DerivedClass : BaseClass { }
+                              }
+                              """;
 
-        var compilation = CreateCompilation(source);
-        var tree = compilation.SyntaxTrees.First();
+        var compilation = CreateCompilation(Source);
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
-        var classDecls = tree.GetRoot()
+        var classDecls = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .ToArray();
@@ -415,24 +411,24 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task LacksObservableMechanism_GenericWithINPC_ReturnsFalse()
     {
-        var source = """
-            using System.ComponentModel;
-            namespace TestApp
-            {
-                public class MyVm : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                }
+        const string Source = """
+                              using System.ComponentModel;
+                              namespace TestApp
+                              {
+                                  public class MyVm : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                  }
 
-                public class Caller
-                {
-                    public void M<T>(T obj) where T : class { }
-                    public void Go() { M<MyVm>(new MyVm()); }
-                }
-            }
-            """;
+                                  public class Caller
+                                  {
+                                      public void M<T>(T obj) where T : class { }
+                                      public void Go() { M<MyVm>(new MyVm()); }
+                                  }
+                              }
+                              """;
 
-        var (methodSymbol, compilation) = GetInvocationMethodSymbol(source);
+        var (methodSymbol, compilation) = GetInvocationMethodSymbol(Source);
 
         var result = AnalyzerHelpers.LacksObservableMechanism(methodSymbol, compilation, out var sourceType);
 
@@ -448,20 +444,20 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task LacksObservableMechanism_GenericWithPlainClass_ReturnsTrue()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class PlainVm { public string Name { get; set; } = ""; }
+        const string Source = """
+                              namespace TestApp
+                              {
+                                  public class PlainVm { public string Name { get; set; } = ""; }
 
-                public class Caller
-                {
-                    public void M<T>(T obj) where T : class { }
-                    public void Go() { M<PlainVm>(new PlainVm()); }
-                }
-            }
-            """;
+                                  public class Caller
+                                  {
+                                      public void M<T>(T obj) where T : class { }
+                                      public void Go() { M<PlainVm>(new PlainVm()); }
+                                  }
+                              }
+                              """;
 
-        var (methodSymbol, compilation) = GetInvocationMethodSymbol(source);
+        var (methodSymbol, compilation) = GetInvocationMethodSymbol(Source);
 
         var result = AnalyzerHelpers.LacksObservableMechanism(methodSymbol, compilation, out var sourceType);
 
@@ -479,7 +475,12 @@ public class AnalyzerHelpersTests
     {
         var (methodSymbol, compilation) = GetNonGenericMethodSymbol();
 
-        var result = AnalyzerHelpers.LacksBeforeChangeSupport(methodSymbol, compilation, out var receiverType, out var mechanism);
+        var result =
+            AnalyzerHelpers.LacksBeforeChangeSupport(
+                methodSymbol,
+                compilation,
+                out var receiverType,
+                out var mechanism);
 
         await Assert.That(result).IsFalse();
         await Assert.That(receiverType).IsNull();
@@ -494,26 +495,31 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task LacksBeforeChangeSupport_GenericINPCOnly_ReturnsTrue()
     {
-        var source = """
-            using System.ComponentModel;
-            namespace TestApp
-            {
-                public class MyVm : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                }
+        const string Source = """
+                              using System.ComponentModel;
+                              namespace TestApp
+                              {
+                                  public class MyVm : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                  }
 
-                public class Caller
-                {
-                    public void M<T>(T obj) where T : class { }
-                    public void Go() { M<MyVm>(new MyVm()); }
-                }
-            }
-            """;
+                                  public class Caller
+                                  {
+                                      public void M<T>(T obj) where T : class { }
+                                      public void Go() { M<MyVm>(new MyVm()); }
+                                  }
+                              }
+                              """;
 
-        var (methodSymbol, compilation) = GetInvocationMethodSymbol(source);
+        var (methodSymbol, compilation) = GetInvocationMethodSymbol(Source);
 
-        var result = AnalyzerHelpers.LacksBeforeChangeSupport(methodSymbol, compilation, out var receiverType, out var mechanism);
+        var result =
+            AnalyzerHelpers.LacksBeforeChangeSupport(
+                methodSymbol,
+                compilation,
+                out var receiverType,
+                out var mechanism);
 
         await Assert.That(result).IsTrue();
         await Assert.That(receiverType!.Name).IsEqualTo("MyVm");
@@ -544,28 +550,28 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task ImplementsDataErrorInfo_GenericWithDataErrorInfo_ReturnsTrue()
     {
-        var source = """
-            using System;
-            using System.Collections;
-            using System.ComponentModel;
-            namespace TestApp
-            {
-                public class MyVm : INotifyDataErrorInfo
-                {
-                    public bool HasErrors { get { return false; } }
-                    public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
-                    public IEnumerable GetErrors(string propertyName) { return new object[0]; }
-                }
+        const string Source = """
+                              using System;
+                              using System.Collections;
+                              using System.ComponentModel;
+                              namespace TestApp
+                              {
+                                  public class MyVm : INotifyDataErrorInfo
+                                  {
+                                      public bool HasErrors { get { return false; } }
+                                      public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
+                                      public IEnumerable GetErrors(string propertyName) { return new object[0]; }
+                                  }
 
-                public class Caller
-                {
-                    public void M<T>(T obj) where T : class { }
-                    public void Go() { M<MyVm>(new MyVm()); }
-                }
-            }
-            """;
+                                  public class Caller
+                                  {
+                                      public void M<T>(T obj) where T : class { }
+                                      public void Go() { M<MyVm>(new MyVm()); }
+                                  }
+                              }
+                              """;
 
-        var (methodSymbol, compilation) = GetInvocationMethodSymbol(source);
+        var (methodSymbol, compilation) = GetInvocationMethodSymbol(Source);
 
         var result = AnalyzerHelpers.ImplementsDataErrorInfo(methodSymbol, compilation, out var sourceType);
 
@@ -581,24 +587,24 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task ImplementsDataErrorInfo_GenericWithoutDataErrorInfo_ReturnsFalse()
     {
-        var source = """
-            using System.ComponentModel;
-            namespace TestApp
-            {
-                public class MyVm : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                }
+        const string Source = """
+                              using System.ComponentModel;
+                              namespace TestApp
+                              {
+                                  public class MyVm : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                  }
 
-                public class Caller
-                {
-                    public void M<T>(T obj) where T : class { }
-                    public void Go() { M<MyVm>(new MyVm()); }
-                }
-            }
-            """;
+                                  public class Caller
+                                  {
+                                      public void M<T>(T obj) where T : class { }
+                                      public void Go() { M<MyVm>(new MyVm()); }
+                                  }
+                              }
+                              """;
 
-        var (methodSymbol, compilation) = GetInvocationMethodSymbol(source);
+        var (methodSymbol, compilation) = GetInvocationMethodSymbol(Source);
 
         var result = AnalyzerHelpers.ImplementsDataErrorInfo(methodSymbol, compilation, out var sourceType);
 
@@ -614,20 +620,20 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task ImplementsDataErrorInfo_TypeNotInCompilation_ReturnsFalse()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class MyVm { public string Name { get; set; } }
+        const string Source = """
+                              namespace TestApp
+                              {
+                                  public class MyVm { public string Name { get; set; } }
 
-                public class Caller
-                {
-                    public void M<T>(T obj) where T : class { }
-                    public void Go() { M<MyVm>(new MyVm()); }
-                }
-            }
-            """;
+                                  public class Caller
+                                  {
+                                      public void M<T>(T obj) where T : class { }
+                                      public void Go() { M<MyVm>(new MyVm()); }
+                                  }
+                              }
+                              """;
 
-        var (methodSymbol, compilation) = GetInvocationMethodSymbolMinimal(source);
+        var (methodSymbol, compilation) = GetInvocationMethodSymbolMinimal(Source);
 
         var result = AnalyzerHelpers.ImplementsDataErrorInfo(methodSymbol, compilation, out var sourceType);
 
@@ -642,21 +648,21 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task HasObservableMechanism_IReactiveObject_ReturnsTrue()
     {
-        var source = """
-            using ReactiveUI;
-            namespace TestApp
-            {
-                public class MyVm : IReactiveObject
-                {
-                    public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-                    public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
-                    public void RaisePropertyChanging(System.ComponentModel.PropertyChangingEventArgs args) { }
-                    public void RaisePropertyChanged(System.ComponentModel.PropertyChangedEventArgs args) { }
-                }
-            }
-            """;
+        const string Source = """
+                              using ReactiveUI;
+                              namespace TestApp
+                              {
+                                  public class MyVm : IReactiveObject
+                                  {
+                                      public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+                                      public event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+                                      public void RaisePropertyChanging(System.ComponentModel.PropertyChangingEventArgs args) { }
+                                      public void RaisePropertyChanged(System.ComponentModel.PropertyChangedEventArgs args) { }
+                                  }
+                              }
+                              """;
 
-        var compilation = CreateCompilation(source);
+        var compilation = CreateCompilation(Source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
 
         var result = TypeAnalyzer.HasObservableMechanism(typeSymbol, compilation);
@@ -694,7 +700,7 @@ public class AnalyzerHelpersTests
         var tree = compilation.SyntaxTrees.First();
         var model = compilation.GetSemanticModel(tree);
 
-        var classDecl = tree.GetRoot()
+        var classDecl = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First(c => c.Identifier.Text == "MyVm");
@@ -714,7 +720,7 @@ public class AnalyzerHelpersTests
     /// <returns>The named type symbol.</returns>
     private static INamedTypeSymbol GetNamedTypeSymbol(CSharpCompilation compilation, string className)
     {
-        var tree = compilation.SyntaxTrees.First();
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
         var classDecl = tree.GetRoot()
@@ -739,18 +745,18 @@ public class AnalyzerHelpersTests
     /// <returns>The method symbol and compilation.</returns>
     private static (IMethodSymbol MethodSymbol, Compilation Compilation) GetNonGenericMethodSymbol()
     {
-        var source = """
-            namespace TestApp
-            {
-                public class MyClass
-                {
-                    public void NonGenericMethod() { }
-                }
-            }
-            """;
+        const string Source = """
+                              namespace TestApp
+                              {
+                                  public class MyClass
+                                  {
+                                      public void NonGenericMethod() { }
+                                  }
+                              }
+                              """;
 
-        var compilation = CreateCompilation(source);
-        var tree = compilation.SyntaxTrees.First();
+        var compilation = CreateCompilation(Source);
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
         var methodDecl = tree.GetRoot()
@@ -769,7 +775,7 @@ public class AnalyzerHelpersTests
     private static (IMethodSymbol MethodSymbol, Compilation Compilation) GetInvocationMethodSymbol(string source)
     {
         var compilation = CreateCompilation(source);
-        var tree = compilation.SyntaxTrees.First();
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
         var invocation = tree.GetRoot()
@@ -796,10 +802,12 @@ public class AnalyzerHelpersTests
 
         void AddReference(System.Reflection.Assembly assembly)
         {
-            if (!assembly.IsDynamic && addedPaths.Add(assembly.Location))
+            if (assembly.IsDynamic || !addedPaths.Add(assembly.Location))
             {
-                references.Add(MetadataReference.CreateFromFile(assembly.Location));
+                return;
             }
+
+            references.Add(MetadataReference.CreateFromFile(assembly.Location));
         }
 
         AddReference(typeof(object).Assembly);
@@ -816,9 +824,9 @@ public class AnalyzerHelpersTests
             "MinimalTestAssembly",
             [syntaxTree],
             references,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            new(OutputKind.DynamicallyLinkedLibrary));
 
-        var tree = compilation.SyntaxTrees.First();
+        var tree = compilation.SyntaxTrees[0];
         var model = compilation.GetSemanticModel(tree);
 
         var invocation = tree.GetRoot()

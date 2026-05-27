@@ -31,12 +31,14 @@ public class HostTestFixture : INotifyPropertyChanged, INotifyPropertyChanging
         get => _child;
         set
         {
-            if (_child != value)
+            if (_child == value)
             {
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Child)));
-                _child = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Child)));
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Child)));
+            _child = value;
+            PropertyChanged?.Invoke(this, new(nameof(Child)));
         }
     }
 }

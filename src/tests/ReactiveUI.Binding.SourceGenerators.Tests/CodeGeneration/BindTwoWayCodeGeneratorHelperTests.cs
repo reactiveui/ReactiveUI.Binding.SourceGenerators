@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -23,8 +22,14 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task GroupByTypeSignature_SameSignature_GroupedTogether()
     {
-        var inv1 = ModelFactory.CreateBindingInvocationInfo(callerLineNumber: 10, isTwoWay: true, methodName: "BindTwoWay");
-        var inv2 = ModelFactory.CreateBindingInvocationInfo(callerLineNumber: 20, isTwoWay: true, methodName: "BindTwoWay");
+        var inv1 = ModelFactory.CreateBindingInvocationInfo(
+            callerLineNumber: 10,
+            isTwoWay: true,
+            methodName: "BindTwoWay");
+        var inv2 = ModelFactory.CreateBindingInvocationInfo(
+            callerLineNumber: 20,
+            isTwoWay: true,
+            methodName: "BindTwoWay");
         var invocations = ImmutableArray.Create(inv1, inv2);
 
         var groups = BindTwoWayCodeGenerator.GroupByTypeSignature(invocations);
@@ -40,8 +45,12 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task GroupByTypeSignature_DifferentTargetTypes_SeparateGroups()
     {
-        var inv1 = ModelFactory.CreateBindingInvocationInfo(targetTypeFullName: "global::TestApp.ViewA", isTwoWay: true);
-        var inv2 = ModelFactory.CreateBindingInvocationInfo(targetTypeFullName: "global::TestApp.ViewB", isTwoWay: true);
+        var inv1 = ModelFactory.CreateBindingInvocationInfo(
+            targetTypeFullName: "global::TestApp.ViewA",
+            isTwoWay: true);
+        var inv2 = ModelFactory.CreateBindingInvocationInfo(
+            targetTypeFullName: "global::TestApp.ViewB",
+            isTwoWay: true);
         var invocations = ImmutableArray.Create(inv1, inv2);
 
         var groups = BindTwoWayCodeGenerator.GroupByTypeSignature(invocations);
@@ -67,7 +76,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true);
+        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -92,7 +101,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false);
+        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerFilePath");
@@ -121,7 +130,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateCallerArgExprOverload(sb, group);
+        BindTwoWayCodeGenerator.GenerateCallerArgExprOverload(sb, group, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("sourcePropertyExpression == ");
@@ -138,8 +147,8 @@ public class BindTwoWayCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(
-            callerFilePath: "/src/Views/MyView.cs",
-            callerLineNumber: 55,
+            "/src/Views/MyView.cs",
+            55,
             isTwoWay: true,
             methodName: "BindTwoWay");
         var group = new BindTwoWayCodeGenerator.BindingTypeGroup(
@@ -151,7 +160,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateCallerFilePathOverload(sb, group);
+        BindTwoWayCodeGenerator.GenerateCallerFilePathOverload(sb, group, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerLineNumber == 55");
@@ -170,11 +179,11 @@ public class BindTwoWayCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true, methodName: "BindTwoWay");
         var sourceClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
         var targetClassInfo = ModelFactory.CreateClassBindingInfo(
-            fullyQualifiedName: "global::TestApp.MyView",
-            metadataName: "MyView",
+            "global::TestApp.MyView",
+            "MyView",
             implementsINPC: true);
 
-        BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, suffix: "TEST00000000TEST");
+        BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, "TEST00000000TEST");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__BindTwoWay_TEST00000000TEST");
@@ -257,7 +266,10 @@ public class BindTwoWayCodeGeneratorHelperTests
     public async Task FormatExtraMethodParams_NoConversionNoScheduler_ReturnsEmpty()
     {
         var inv = ModelFactory.CreateBindingInvocationInfo(
-            hasConversion: false, hasScheduler: false, isTwoWay: true, methodName: "BindTwoWay");
+            hasConversion: false,
+            hasScheduler: false,
+            isTwoWay: true,
+            methodName: "BindTwoWay");
 
         var result = BindTwoWayCodeGenerator.FormatExtraMethodParams(inv);
 
@@ -272,7 +284,9 @@ public class BindTwoWayCodeGeneratorHelperTests
     public async Task FormatExtraMethodParams_WithConversion_IncludesTwoWayFuncParams()
     {
         var inv = ModelFactory.CreateBindingInvocationInfo(
-            hasConversion: true, isTwoWay: true, methodName: "BindTwoWay");
+            hasConversion: true,
+            isTwoWay: true,
+            methodName: "BindTwoWay");
 
         var result = BindTwoWayCodeGenerator.FormatExtraMethodParams(inv);
 
@@ -290,14 +304,16 @@ public class BindTwoWayCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(
-            hasConversion: true, isTwoWay: true, methodName: "BindTwoWay");
+            hasConversion: true,
+            isTwoWay: true,
+            methodName: "BindTwoWay");
         var sourceClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
         var targetClassInfo = ModelFactory.CreateClassBindingInfo(
-            fullyQualifiedName: "global::TestApp.MyView",
-            metadataName: "MyView",
+            "global::TestApp.MyView",
+            "MyView",
             implementsINPC: true);
 
-        BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, suffix: "TEST00000000TEST");
+        BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, "TEST00000000TEST");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("RxBindingExtensions.Select");
@@ -314,14 +330,16 @@ public class BindTwoWayCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(
-            hasScheduler: true, isTwoWay: true, methodName: "BindTwoWay");
+            hasScheduler: true,
+            isTwoWay: true,
+            methodName: "BindTwoWay");
         var sourceClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
         var targetClassInfo = ModelFactory.CreateClassBindingInfo(
-            fullyQualifiedName: "global::TestApp.MyView",
-            metadataName: "MyView",
+            "global::TestApp.MyView",
+            "MyView",
             implementsINPC: true);
 
-        BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, suffix: "TEST00000000TEST");
+        BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, "TEST00000000TEST");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("ObserveOn");
@@ -339,11 +357,11 @@ public class BindTwoWayCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true, methodName: "BindTwoWay");
         var sourceClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
         var targetClassInfo = ModelFactory.CreateClassBindingInfo(
-            fullyQualifiedName: "global::TestApp.MyView",
-            metadataName: "MyView",
+            "global::TestApp.MyView",
+            "MyView",
             implementsINPC: true);
 
-        BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, suffix: "TEST00000000TEST");
+        BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, "TEST00000000TEST");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("Skip");

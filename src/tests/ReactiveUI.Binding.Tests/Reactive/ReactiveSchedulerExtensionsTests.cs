@@ -88,7 +88,7 @@ public class ReactiveSchedulerExtensionsTests
     /// <summary>
     /// A simple test model implementing <see cref="INotifyPropertyChanged"/>.
     /// </summary>
-    private class TestModel : INotifyPropertyChanged
+    private sealed class TestModel : INotifyPropertyChanged
     {
         /// <inheritdoc/>
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -96,13 +96,17 @@ public class ReactiveSchedulerExtensionsTests
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S3459:Unassigned members should be removed",
+            Justification = "Assigned indirectly by the two-way binding under test via the property selector; no literal assignment is visible to the analyzer.")]
         public string? Name { get; set; }
 
         /// <summary>
         /// Raises the <see cref="PropertyChanged"/> event for the specified property.
         /// </summary>
         /// <param name="propertyName">The name of the property that changed.</param>
-        protected virtual void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        public void OnPropertyChanged(string propertyName) =>
+            PropertyChanged?.Invoke(this, new(propertyName));
     }
 }

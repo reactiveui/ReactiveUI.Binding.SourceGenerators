@@ -13,6 +13,10 @@ namespace ReactiveUI.Binding.Fallback;
 /// override source-generated command binding at runtime.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
+[SuppressMessage(
+    "Major Code Smell",
+    "S4018:Generic methods should provide type parameter for type inference",
+    Justification = "The type parameter denotes the target type (value/control/view), supplied explicitly by callers; it is not derivable from the arguments. Public API.")]
 public static class CommandBindingAffinityChecker
 {
     /// <summary>
@@ -24,10 +28,12 @@ public static class CommandBindingAffinityChecker
     /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
     /// <param name="hasEventTarget">Whether the caller specifies a custom event target.</param>
     /// <returns><see langword="true"/> if a user plugin should override the generated binding.</returns>
-    public static bool HasHigherAffinityPlugin<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int generatedAffinity, bool hasEventTarget)
+    public static bool HasHigherAffinityPlugin<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents |
+                                    DynamicallyAccessedMemberTypes.PublicProperties)]
+    T>(int generatedAffinity, bool hasEventTarget)
     {
-        var services = Locator.Current.GetServices<ICreatesCommandBinding>();
-        foreach (var plugin in services)
+        foreach (var plugin in Locator.Current.GetServices<ICreatesCommandBinding>())
         {
             if (plugin.GetAffinityForObject<T>(hasEventTarget) > generatedAffinity)
             {

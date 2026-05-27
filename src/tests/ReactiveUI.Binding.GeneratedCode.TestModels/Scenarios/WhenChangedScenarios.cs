@@ -50,7 +50,8 @@ public static class WhenChangedScenarios
     /// </summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple.</returns>
-    public static IObservable<(string property1, int property2, double property3, bool property4)> FourProperties(BigViewModel vm)
+    public static IObservable<(string property1, int property2, double property3, bool property4)> FourProperties(
+        BigViewModel vm)
         => vm.WhenChanged(x => x.Prop1, x => x.Prop2, x => x.Prop3, x => x.Prop4);
 
     /// <summary>

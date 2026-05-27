@@ -12,6 +12,11 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public sealed class NullableDoubleToDoubleTypeConverter : IBindingTypeConverter<double?, double>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
     public Type FromType => typeof(double?);
 
@@ -19,7 +24,7 @@ public sealed class NullableDoubleToDoubleTypeConverter : IBindingTypeConverter<
     public Type ToType => typeof(double);
 
     /// <inheritdoc/>
-    public int GetAffinityForObjects() => 2;
+    public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public bool TryConvert(double? from, object? conversionHint, [NotNullWhen(true)] out double result)
@@ -37,21 +42,27 @@ public sealed class NullableDoubleToDoubleTypeConverter : IBindingTypeConverter<
     /// <inheritdoc/>
     public bool TryConvertTyped(object? from, object? conversionHint, [NotNullWhen(true)] out object? result)
     {
-        // Handle null by returning false
-        if (from is null)
+        switch (from)
         {
-            result = null;
-            return TryConvert(null, conversionHint, out _);
-        }
+            // Handle null by returning false
+            case null:
+                {
+                    result = null;
+                    return TryConvert(null, conversionHint, out _);
+                }
 
-        // Handle double by converting through strongly-typed method
-        if (from is double value)
-        {
-            result = value;
-            return true;
-        }
+            // Handle double by converting through strongly-typed method
+            case double value:
+                {
+                    result = value;
+                    return true;
+                }
 
-        result = null;
-        return false;
+            default:
+                {
+                    result = null;
+                    return false;
+                }
+        }
     }
 }

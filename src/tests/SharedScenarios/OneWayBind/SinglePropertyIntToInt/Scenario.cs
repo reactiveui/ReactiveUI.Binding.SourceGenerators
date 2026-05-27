@@ -4,20 +4,19 @@
 
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.OneWayBind.SinglePropertyIntToInt
+namespace SharedScenarios.OneWayBind.SinglePropertyIntToInt;
+
+/// <summary>
+/// Exercises OneWayBind (view-first) with int-to-int property binding.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises OneWayBind (view-first) with int-to-int property binding.
+    /// Creates a one-way binding from ViewModel.Count to View.CountValue.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a one-way binding from ViewModel.Count to View.CountValue.
-        /// </summary>
-        /// <param name="view">The target view.</param>
-        /// <param name="vm">The source view model.</param>
-        /// <returns>A reactive binding representing the binding.</returns>
-        public static IReactiveBinding<MyView, int> Execute(MyView view, MyViewModel vm)
-            => view.OneWayBind(vm, x => x.Count, x => x.CountValue);
-    }
+    /// <param name="view">The target view.</param>
+    /// <param name="vm">The source view model.</param>
+    /// <returns>A reactive binding representing the binding.</returns>
+    public static IReactiveBinding<MyView, int> Execute(MyView view, MyViewModel vm)
+        => view.OneWayBind(vm, x => x.Count, x => x.CountValue);
 }

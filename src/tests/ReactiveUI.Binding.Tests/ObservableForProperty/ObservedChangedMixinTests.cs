@@ -14,6 +14,21 @@ namespace ReactiveUI.Binding.Tests.ObservableForProperty;
 public class ObservedChangedMixinTests
 {
     /// <summary>
+    /// A directly-populated change value used across tests.
+    /// </summary>
+    private const string DirectValue = "Direct";
+
+    /// <summary>
+    /// A sample integer value carried by an observed change.
+    /// </summary>
+    private const int SampleIntValue = 99;
+
+    /// <summary>
+    /// The expected number of mapped values from a two-element change stream.
+    /// </summary>
+    private const int ExpectedTwoValues = 2;
+
+    /// <summary>
     /// Verifies that GetPropertyName returns the correct property name from an observed change.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -23,7 +38,7 @@ public class ObservedChangedMixinTests
         Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
 
-        var change = new ObservedChange<TestViewModel, string>(new TestViewModel(), body, "Hello");
+        var change = new ObservedChange<TestViewModel, string>(new(), body, "Hello");
 
         var name = change.GetPropertyName();
 
@@ -40,7 +55,7 @@ public class ObservedChangedMixinTests
         Expression<Func<TestViewModel, string>> expr = x => x.Address!.City;
         var body = Reflection.Rewrite(expr.Body);
 
-        var change = new ObservedChange<TestViewModel, string>(new TestViewModel(), body, "Seattle");
+        var change = new ObservedChange<TestViewModel, string>(new(), body, "Seattle");
 
         var name = change.GetPropertyName();
 
@@ -57,11 +72,11 @@ public class ObservedChangedMixinTests
         Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
 
-        var change = new ObservedChange<TestViewModel, string>(new TestViewModel { Name = "Test" }, body, "Direct");
+        var change = new ObservedChange<TestViewModel, string>(new() { Name = "Test" }, body, DirectValue);
 
         var value = change.GetValue();
 
-        await Assert.That(value).IsEqualTo("Direct");
+        await Assert.That(value).IsEqualTo(DirectValue);
     }
 
     /// <summary>
@@ -150,11 +165,11 @@ public class ObservedChangedMixinTests
         var body = Reflection.Rewrite(expr.Body);
 
         var vm = new TestViewModel { Age = 42 };
-        var change = new ObservedChange<TestViewModel, int>(vm, body, 99);
+        var change = new ObservedChange<TestViewModel, int>(vm, body, SampleIntValue);
 
         var value = change.GetValue();
 
-        await Assert.That(value).IsEqualTo(99);
+        await Assert.That(value).IsEqualTo(SampleIntValue);
     }
 
     /// <summary>
@@ -167,11 +182,11 @@ public class ObservedChangedMixinTests
         Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
 
-        var change = new ObservedChange<TestViewModel, string>(new TestViewModel { Name = "Test" }, body, "Direct");
+        var change = new ObservedChange<TestViewModel, string>(new() { Name = "Test" }, body, DirectValue);
 
         var value = change.GetValueOrDefault();
 
-        await Assert.That(value).IsEqualTo("Direct");
+        await Assert.That(value).IsEqualTo(DirectValue);
     }
 
     /// <summary>
@@ -188,7 +203,7 @@ public class ObservedChangedMixinTests
         var change = new ObservedChange<TestViewModel, string>(vm, body, default!);
 
         await Assert.That(() => change.GetValue())
-            .ThrowsExactly<Exception>();
+            .ThrowsExactly<InvalidOperationException>();
     }
 
     /// <summary>
@@ -201,15 +216,15 @@ public class ObservedChangedMixinTests
         Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
 
-        var change1 = new ObservedChange<TestViewModel, string>(new TestViewModel(), body, "First");
-        var change2 = new ObservedChange<TestViewModel, string>(new TestViewModel(), body, "Second");
+        var change1 = new ObservedChange<TestViewModel, string>(new(), body, "First");
+        var change2 = new ObservedChange<TestViewModel, string>(new(), body, "Second");
 
         var stream = new[] { change1, change2 }.ToObservable();
         var values = new List<string>();
 
         using var sub = stream.Value().Subscribe(values.Add);
 
-        await Assert.That(values).Count().IsEqualTo(2);
+        await Assert.That(values).Count().IsEqualTo(ExpectedTwoValues);
         await Assert.That(values[0]).IsEqualTo("First");
         await Assert.That(values[1]).IsEqualTo("Second");
     }
@@ -224,7 +239,7 @@ public class ObservedChangedMixinTests
         Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
 
-        var change = new ObservedChange<TestViewModel, string>(new TestViewModel(), body, "NewValue");
+        var change = new ObservedChange<TestViewModel, string>(new(), body, "NewValue");
         var target = new TestViewModel { Name = "OldValue" };
 
         change.SetValueToProperty(target, x => x.Name);
@@ -242,7 +257,7 @@ public class ObservedChangedMixinTests
         Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
 
-        var change = new ObservedChange<TestViewModel, string>(new TestViewModel(), body, "NewValue");
+        var change = new ObservedChange<TestViewModel, string>(new(), body, "NewValue");
         TestViewModel? target = null;
 
         // Should not throw

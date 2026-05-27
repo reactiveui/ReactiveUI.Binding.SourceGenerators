@@ -131,6 +131,11 @@ internal static class Constants
     internal const string BindCommandMethodName = "BindCommand";
 
     /// <summary>
+    /// Method name for binding an observable stream to a target property (<c>BindTo</c>).
+    /// </summary>
+    internal const string BindToMethodName = "BindTo";
+
+    /// <summary>
     /// Metadata name for the open generic <c>IViewFor&lt;T&gt;</c> interface used for view resolution.
     /// </summary>
     internal const string IViewForGenericMetadataName = "ReactiveUI.Binding.IViewFor`1";
@@ -138,7 +143,8 @@ internal static class Constants
     /// <summary>
     /// Metadata name for the <c>ExcludeFromViewRegistrationAttribute</c> used to skip view auto-registration.
     /// </summary>
-    internal const string ExcludeFromViewRegistrationAttributeMetadataName = "ReactiveUI.Binding.ExcludeFromViewRegistrationAttribute";
+    internal const string ExcludeFromViewRegistrationAttributeMetadataName =
+        "ReactiveUI.Binding.ExcludeFromViewRegistrationAttribute";
 
     /// <summary>
     /// Metadata name for the <c>SingleInstanceViewAttribute</c> used for singleton view caching.
@@ -178,5 +184,6 @@ internal static class Constants
     /// <summary>
     /// Metadata name for the <c>CallerArgumentExpressionAttribute</c> used in dispatch stubs for C# 10+ projects.
     /// </summary>
-    internal const string CallerArgumentExpressionAttributeMetadataName = "System.Runtime.CompilerServices.CallerArgumentExpressionAttribute";
+    internal const string CallerArgumentExpressionAttributeMetadataName =
+        "System.Runtime.CompilerServices.CallerArgumentExpressionAttribute";
 }

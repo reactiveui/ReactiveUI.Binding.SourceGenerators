@@ -85,7 +85,7 @@ public sealed class ObserveOnObservable<T> : IObservable<T>
         /// <inheritdoc/>
         public void OnCompleted()
         {
-            var d = _scheduler.Schedule(() => _observer.OnCompleted());
+            var d = _scheduler.Schedule(_observer.OnCompleted);
             _disposable.Add(d);
         }
 

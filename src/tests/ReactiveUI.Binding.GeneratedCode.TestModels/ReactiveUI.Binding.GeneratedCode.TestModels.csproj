@@ -12,25 +12,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ReactiveUI" />
-    <PackageReference Include="System.Reactive" />
+    <PackageReference Include="ReactiveUI"/>
+    <PackageReference Include="System.Reactive"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj" />
-    <ProjectReference Include="..\..\ReactiveUI.Binding.Reactive\ReactiveUI.Binding.Reactive.csproj" />
+    <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
+    <ProjectReference Include="..\..\ReactiveUI.Binding.Reactive\ReactiveUI.Binding.Reactive.csproj"/>
     <ProjectReference Include="..\..\ReactiveUI.Binding.SourceGenerators\ReactiveUI.Binding.SourceGenerators.csproj"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false" />
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
     <ProjectReference Include="..\..\ReactiveUI.Binding.Analyzer\ReactiveUI.Binding.Analyzer.csproj"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false" />
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
   </ItemGroup>
 
   <ItemGroup>
     <!-- Include shared scenario files as compiled source (generator runs at build time) -->
     <Compile Include="..\SharedScenarios\**\*.cs"
-             Link="SharedScenarios\%(RecursiveDir)%(Filename)%(Extension)" />
+             Link="SharedScenarios\%(RecursiveDir)%(Filename)%(Extension)"/>
   </ItemGroup>
 
 </Project>

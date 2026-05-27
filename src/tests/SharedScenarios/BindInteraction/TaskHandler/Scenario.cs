@@ -4,27 +4,25 @@
 
 using System;
 using System.Threading.Tasks;
-
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindInteraction.TaskHandler
+namespace SharedScenarios.BindInteraction.TaskHandler;
+
+/// <summary>
+/// Exercises BindInteraction with a task-based handler.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindInteraction with a task-based handler.
+    /// Binds a task handler to the ViewModel's Confirm interaction.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Binds a task handler to the ViewModel's Confirm interaction.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view)
-            => view.BindInteraction(vm, x => x.Confirm, ctx =>
-            {
-                ctx.SetOutput(true);
-                return Task.CompletedTask;
-            });
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view)
+        => view.BindInteraction(vm, x => x.Confirm, ctx =>
+        {
+            ctx.SetOutput(true);
+            return Task.CompletedTask;
+        });
 }

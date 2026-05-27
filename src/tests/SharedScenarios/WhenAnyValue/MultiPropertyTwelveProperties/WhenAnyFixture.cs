@@ -4,266 +4,289 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties
+namespace SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties;
+
+/// <summary>
+/// ViewModel with twelve observable properties (maximum standard overload).
+/// </summary>
+public class WhenAnyFixture : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel with twelve observable properties (maximum standard overload).
+    /// The backing field for <see cref="Value1"/>.
     /// </summary>
-    public class WhenAnyFixture : INotifyPropertyChanged
+    private string _value1 = "1";
+
+    /// <summary>
+    /// The backing field for <see cref="Value2"/>.
+    /// </summary>
+    private string _value2 = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="Value3"/>.
+    /// </summary>
+    private string _value3 = "3";
+
+    /// <summary>
+    /// The backing field for <see cref="Value4"/>.
+    /// </summary>
+    private string _value4 = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="Value5"/>.
+    /// </summary>
+    private string _value5 = "5";
+
+    /// <summary>
+    /// The backing field for <see cref="Value6"/>.
+    /// </summary>
+    private string _value6 = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="Value7"/>.
+    /// </summary>
+    private string _value7 = "7";
+
+    /// <summary>
+    /// The backing field for <see cref="Value8"/>.
+    /// </summary>
+    private string _value8 = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="Value9"/>.
+    /// </summary>
+    private string _value9 = "9";
+
+    /// <summary>
+    /// The backing field for <see cref="Value10"/>.
+    /// </summary>
+    private string _value10 = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="Value11"/>.
+    /// </summary>
+    private string _value11 = "11";
+
+    /// <summary>
+    /// The backing field for <see cref="Value12"/>.
+    /// </summary>
+    private string _value12 = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets value 1.
+    /// </summary>
+    public string Value1
     {
-        /// <summary>
-        /// The backing field for <see cref="Value1"/>.
-        /// </summary>
-        private string _value1 = "1";
-
-        /// <summary>
-        /// The backing field for <see cref="Value2"/>.
-        /// </summary>
-        private string _value2 = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="Value3"/>.
-        /// </summary>
-        private string _value3 = "3";
-
-        /// <summary>
-        /// The backing field for <see cref="Value4"/>.
-        /// </summary>
-        private string _value4 = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="Value5"/>.
-        /// </summary>
-        private string _value5 = "5";
-
-        /// <summary>
-        /// The backing field for <see cref="Value6"/>.
-        /// </summary>
-        private string _value6 = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="Value7"/>.
-        /// </summary>
-        private string _value7 = "7";
-
-        /// <summary>
-        /// The backing field for <see cref="Value8"/>.
-        /// </summary>
-        private string _value8 = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="Value9"/>.
-        /// </summary>
-        private string _value9 = "9";
-
-        /// <summary>
-        /// The backing field for <see cref="Value10"/>.
-        /// </summary>
-        private string _value10 = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="Value11"/>.
-        /// </summary>
-        private string _value11 = "11";
-
-        /// <summary>
-        /// The backing field for <see cref="Value12"/>.
-        /// </summary>
-        private string _value12 = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets value 1.
-        /// </summary>
-        public string Value1
+        get => _value1;
+        set
         {
-            get => _value1;
-            set
+            if (_value1 == value)
             {
-                if (_value1 != value)
-                {
-                    _value1 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value1)));
-                }
+                return;
             }
+
+            _value1 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value1)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets value 2.
-        /// </summary>
-        public string Value2
+    /// <summary>
+    /// Gets or sets value 2.
+    /// </summary>
+    public string Value2
+    {
+        get => _value2;
+        set
         {
-            get => _value2;
-            set
+            if (_value2 == value)
             {
-                if (_value2 != value)
-                {
-                    _value2 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value2)));
-                }
+                return;
             }
+
+            _value2 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value2)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets value 3.
-        /// </summary>
-        public string Value3
+    /// <summary>
+    /// Gets or sets value 3.
+    /// </summary>
+    public string Value3
+    {
+        get => _value3;
+        set
         {
-            get => _value3;
-            set
+            if (_value3 == value)
             {
-                if (_value3 != value)
-                {
-                    _value3 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value3)));
-                }
+                return;
             }
+
+            _value3 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value3)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets value 4.
-        /// </summary>
-        public string Value4
+    /// <summary>
+    /// Gets or sets value 4.
+    /// </summary>
+    public string Value4
+    {
+        get => _value4;
+        set
         {
-            get => _value4;
-            set
+            if (_value4 == value)
             {
-                if (_value4 != value)
-                {
-                    _value4 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value4)));
-                }
+                return;
             }
+
+            _value4 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value4)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets value 5.
-        /// </summary>
-        public string Value5
+    /// <summary>
+    /// Gets or sets value 5.
+    /// </summary>
+    public string Value5
+    {
+        get => _value5;
+        set
         {
-            get => _value5;
-            set
+            if (_value5 == value)
             {
-                if (_value5 != value)
-                {
-                    _value5 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value5)));
-                }
+                return;
             }
+
+            _value5 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value5)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets value 6.
-        /// </summary>
-        public string Value6
+    /// <summary>
+    /// Gets or sets value 6.
+    /// </summary>
+    public string Value6
+    {
+        get => _value6;
+        set
         {
-            get => _value6;
-            set
+            if (_value6 == value)
             {
-                if (_value6 != value)
-                {
-                    _value6 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value6)));
-                }
+                return;
             }
+
+            _value6 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value6)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets value 7.
-        /// </summary>
-        public string Value7
+    /// <summary>
+    /// Gets or sets value 7.
+    /// </summary>
+    public string Value7
+    {
+        get => _value7;
+        set
         {
-            get => _value7;
-            set
+            if (_value7 == value)
             {
-                if (_value7 != value)
-                {
-                    _value7 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value7)));
-                }
+                return;
             }
+
+            _value7 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value7)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets value 8.
-        /// </summary>
-        public string Value8
+    /// <summary>
+    /// Gets or sets value 8.
+    /// </summary>
+    public string Value8
+    {
+        get => _value8;
+        set
         {
-            get => _value8;
-            set
+            if (_value8 == value)
             {
-                if (_value8 != value)
-                {
-                    _value8 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value8)));
-                }
+                return;
             }
+
+            _value8 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value8)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets value 9.
-        /// </summary>
-        public string Value9
+    /// <summary>
+    /// Gets or sets value 9.
+    /// </summary>
+    public string Value9
+    {
+        get => _value9;
+        set
         {
-            get => _value9;
-            set
+            if (_value9 == value)
             {
-                if (_value9 != value)
-                {
-                    _value9 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value9)));
-                }
+                return;
             }
+
+            _value9 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value9)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets value 10.
-        /// </summary>
-        public string Value10
+    /// <summary>
+    /// Gets or sets value 10.
+    /// </summary>
+    public string Value10
+    {
+        get => _value10;
+        set
         {
-            get => _value10;
-            set
+            if (_value10 == value)
             {
-                if (_value10 != value)
-                {
-                    _value10 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value10)));
-                }
+                return;
             }
+
+            _value10 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value10)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets value 11.
-        /// </summary>
-        public string Value11
+    /// <summary>
+    /// Gets or sets value 11.
+    /// </summary>
+    public string Value11
+    {
+        get => _value11;
+        set
         {
-            get => _value11;
-            set
+            if (_value11 == value)
             {
-                if (_value11 != value)
-                {
-                    _value11 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value11)));
-                }
+                return;
             }
+
+            _value11 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value11)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets value 12.
-        /// </summary>
-        public string Value12
+    /// <summary>
+    /// Gets or sets value 12.
+    /// </summary>
+    public string Value12
+    {
+        get => _value12;
+        set
         {
-            get => _value12;
-            set
+            if (_value12 == value)
             {
-                if (_value12 != value)
-                {
-                    _value12 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value12)));
-                }
+                return;
             }
+
+            _value12 = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value12)));
         }
     }
 }

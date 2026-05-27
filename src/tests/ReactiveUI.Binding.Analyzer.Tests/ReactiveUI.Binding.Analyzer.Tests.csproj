@@ -7,18 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NSubstitute" />
-    <PackageReference Include="TUnit" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
-    <PackageReference Include="Basic.Reference.Assemblies.Net100" />
-    <PackageReference Include="Basic.Reference.Assemblies.Net90" />
-    <PackageReference Include="Basic.Reference.Assemblies.Net80" />
-    <PackageReference Include="ReactiveUI" />
+    <PackageReference Include="NSubstitute"/>
+    <PackageReference Include="TUnit"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net100"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net90"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net80"/>
+    <PackageReference Include="ReactiveUI"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ReactiveUI.Binding.Analyzer\ReactiveUI.Binding.Analyzer.csproj" />
+    <ProjectReference Include="..\..\ReactiveUI.Binding.Analyzer\ReactiveUI.Binding.Analyzer.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\TransitiveAssemblyResolver.cs" Link="Shared\TransitiveAssemblyResolver.cs"/>
   </ItemGroup>
 
 </Project>

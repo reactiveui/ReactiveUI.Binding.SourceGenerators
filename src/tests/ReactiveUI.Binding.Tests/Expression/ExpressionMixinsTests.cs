@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reflection;
-
 using ReactiveUI.Binding.Expressions;
 using ReactiveUI.Binding.Tests.TestModels;
 
@@ -14,6 +13,36 @@ namespace ReactiveUI.Binding.Tests.Expression;
 /// </summary>
 public class ExpressionMixinsTests
 {
+    /// <summary>
+    /// The expected number of expressions for a two-member chain.
+    /// </summary>
+    private const int TwoMemberChainCount = 2;
+
+    /// <summary>
+    /// The expected number of expressions for a three-member chain.
+    /// </summary>
+    private const int ThreeMemberChainCount = 3;
+
+    /// <summary>
+    /// The index argument used in indexer expression tests.
+    /// </summary>
+    private const int IndexerArgument = 2;
+
+    /// <summary>
+    /// The first value stored in the test items list.
+    /// </summary>
+    private const int FirstItemValue = 10;
+
+    /// <summary>
+    /// The second value stored in the test items list.
+    /// </summary>
+    private const int SecondItemValue = 20;
+
+    /// <summary>
+    /// The third value stored in the test items list.
+    /// </summary>
+    private const int ThirdItemValue = 30;
+
     /// <summary>
     /// Verifies that GetExpressionChain returns a single member for a simple property access.
     /// </summary>
@@ -41,7 +70,7 @@ public class ExpressionMixinsTests
 
         var chain = body.GetExpressionChain().ToList();
 
-        await Assert.That(chain.Count).IsEqualTo(2);
+        await Assert.That(chain.Count).IsEqualTo(TwoMemberChainCount);
     }
 
     /// <summary>
@@ -56,7 +85,7 @@ public class ExpressionMixinsTests
 
         var chain = body.GetExpressionChain().ToList();
 
-        await Assert.That(chain.Count).IsEqualTo(3);
+        await Assert.That(chain.Count).IsEqualTo(ThreeMemberChainCount);
 
         var firstMember = chain[0].GetMemberInfo();
         var secondMember = chain[1].GetMemberInfo();
@@ -167,7 +196,7 @@ public class ExpressionMixinsTests
     {
         var constant = System.Linq.Expressions.Expression.Constant("hello");
 
-        var ex = Assert.Throws<NotSupportedException>(() => constant.GetExpressionChain().ToList());
+        var ex = Assert.Throws<NotSupportedException>(() => _ = constant.GetExpressionChain().ToList());
         await Assert.That(ex!.Message).Contains("Did you miss the member access prefix");
     }
 
@@ -200,14 +229,14 @@ public class ExpressionMixinsTests
     [Test]
     public async Task GetArgumentsArray_IndexExpression_ReturnsConstantArguments()
     {
-        Expression<Func<IndexTestClass, int>> expr = x => x.Items[2];
+        Expression<Func<IndexTestClass, int>> expr = x => x.Items[IndexerArgument];
         var body = Reflection.Rewrite(expr.Body);
 
         var args = body.GetArgumentsArray();
 
         await Assert.That(args).IsNotNull();
         await Assert.That(args!.Length).IsEqualTo(1);
-        await Assert.That(args[0]).IsEqualTo(2);
+        await Assert.That(args[0]).IsEqualTo(IndexerArgument);
     }
 
     /// <summary>
@@ -222,7 +251,7 @@ public class ExpressionMixinsTests
 
         var chain = body.GetExpressionChain().ToList();
 
-        await Assert.That(chain.Count).IsEqualTo(2);
+        await Assert.That(chain.Count).IsEqualTo(TwoMemberChainCount);
     }
 
     /// <summary>
@@ -275,7 +304,7 @@ public class ExpressionMixinsTests
         var chain = body.GetExpressionChain().ToList();
 
         // Should return 2 expressions: MemberAccess for Items, then Index for [0]
-        await Assert.That(chain.Count).IsEqualTo(2);
+        await Assert.That(chain.Count).IsEqualTo(TwoMemberChainCount);
 
         // First expression should be MemberAccess (Items property)
         await Assert.That(chain[0].NodeType).IsEqualTo(ExpressionType.MemberAccess);
@@ -311,19 +340,25 @@ public class ExpressionMixinsTests
     /// <summary>
     /// Test class with a list property for testing index expression chains.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
+    [SuppressMessage(
+        "Performance",
+        "CA1812:Avoid uninstantiated internal classes",
+        Justification = "Referenced only inside an inspected expression tree (never compiled), so no construction is visible to the analyzer.")]
     private sealed class IndexTestClass
     {
         /// <summary>
         /// Gets a list of integers for testing index expressions.
         /// </summary>
-        public List<int> Items { get; } = [10, 20, 30];
+        public List<int> Items { get; } = [FirstItemValue, SecondItemValue, ThirdItemValue];
     }
 
     /// <summary>
     /// Test class with a direct string indexer for testing index expressions on the parameter itself.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
+    [SuppressMessage(
+        "Performance",
+        "CA1812:Avoid uninstantiated internal classes",
+        Justification = "Referenced only via typeof/reflection metadata for its indexer; never constructed by design.")]
     private sealed class DirectIndexableClass
     {
         /// <summary>
@@ -336,6 +371,7 @@ public class ExpressionMixinsTests
         /// </summary>
         /// <param name="key">The key to look up.</param>
         /// <returns>The value associated with the key, or an empty string if not found.</returns>
+        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Used for testing")]
         public string this[string key]
         {
             get => _data.TryGetValue(key, out var val) ? val : string.Empty;

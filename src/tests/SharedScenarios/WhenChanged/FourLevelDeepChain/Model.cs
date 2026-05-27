@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanged.FourLevelDeepChain
+namespace SharedScenarios.WhenChanged.FourLevelDeepChain;
+
+/// <summary>
+/// Leaf model with a string value.
+/// </summary>
+public class Model : INotifyPropertyChanged
 {
     /// <summary>
-    /// Leaf model with a string value.
+    /// The backing field for <see cref="Value"/>.
     /// </summary>
-    public class Model : INotifyPropertyChanged
+    private string _value = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the value.
+    /// </summary>
+    public string Value
     {
-        /// <summary>
-        /// The backing field for <see cref="Value"/>.
-        /// </summary>
-        private string _value = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the value.
-        /// </summary>
-        public string Value
+        get => _value;
+        set
         {
-            get => _value;
-            set
+            if (_value == value)
             {
-                if (_value != value)
-                {
-                    _value = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
-                }
+                return;
             }
+
+            _value = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
         }
     }
 }

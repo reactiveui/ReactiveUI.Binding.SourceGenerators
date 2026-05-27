@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Wpf;
 /// Enum that hints at the visibility of a UI element.
 /// </summary>
 [Flags]
-public enum BooleanToVisibilityHint
+public enum BooleanToVisibilityHints
 {
     /// <summary>
     /// Do not modify the boolean type conversion from its default action of using Visibility.Collapsed.
@@ -23,5 +23,5 @@ public enum BooleanToVisibilityHint
     /// <summary>
     /// Use Visibility.Hidden rather than Visibility.Collapsed for false values.
     /// </summary>
-    UseHidden = 1 << 2,
+    UseHidden = 1 << 2
 }

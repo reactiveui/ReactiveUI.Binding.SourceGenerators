@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector
+namespace SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector;
+
+/// <summary>
+/// Exercises WhenAnyObservable on two observable properties with different types and a selector (CombineLatest pattern).
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenAnyObservable on two observable properties with different types and a selector (CombineLatest pattern).
+    /// Creates a WhenAnyObservable that combines the two observable properties using a selector.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenAnyObservable that combines the two observable properties using a selector.
-        /// </summary>
-        /// <param name="vm">The view model to observe.</param>
-        /// <returns>An observable that combines values from both observable properties.</returns>
-        public static IObservable<string> Execute(MyViewModel vm)
-            => vm.WhenAnyObservable(x => x.Count, x => x.Message, (count, message) => $"{message}: {count}");
-    }
+    /// <param name="vm">The view model to observe.</param>
+    /// <returns>An observable that combines values from both observable properties.</returns>
+    public static IObservable<string> Execute(MyViewModel vm)
+        => vm.WhenAnyObservable(x => x.Count, x => x.Message, (count, message) => $"{message}: {count}");
 }

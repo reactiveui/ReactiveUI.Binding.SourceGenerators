@@ -4,17 +4,16 @@
 
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindInteraction.NonINPCViewModel
+namespace SharedScenarios.BindInteraction.NonINPCViewModel;
+
+/// <summary>
+/// ViewModel that does NOT implement INotifyPropertyChanged.
+/// The generator should use ReturnObservable fallback for property observation.
+/// </summary>
+public class MyViewModel
 {
     /// <summary>
-    /// ViewModel that does NOT implement INotifyPropertyChanged.
-    /// The generator should use ReturnObservable fallback for property observation.
+    /// Gets the confirmation interaction.
     /// </summary>
-    public class MyViewModel
-    {
-        /// <summary>
-        /// Gets the confirmation interaction.
-        /// </summary>
-        public Interaction<string, bool> Confirm { get; } = new Interaction<string, bool>();
-    }
+    public Interaction<string, bool> Confirm { get; } = new Interaction<string, bool>();
 }

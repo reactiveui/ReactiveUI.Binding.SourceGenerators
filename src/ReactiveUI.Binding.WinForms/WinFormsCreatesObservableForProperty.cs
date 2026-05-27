@@ -11,7 +11,8 @@ namespace ReactiveUI.Binding.WinForms;
 /// Creates observables for WinForms component properties by subscribing to
 /// {PropertyName}Changed events via reflection.
 /// </summary>
-[RequiresUnreferencedCode("Uses reflection to find and subscribe to {PropertyName}Changed events on WinForms components.")]
+[RequiresUnreferencedCode(
+    "Uses reflection to find and subscribe to {PropertyName}Changed events on WinForms components.")]
 public class WinFormsCreatesObservableForProperty : ICreatesObservableForProperty
 {
     /// <summary>
@@ -24,7 +25,7 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
 
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Uses reflection to find {PropertyName}Changed events.")]
-    public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false)
+    public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
     {
         if (beforeChanged)
         {
@@ -36,7 +37,7 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
             return 0;
         }
 
-        return GetEventInfo(type, propertyName) is not null ? 8 : 0;
+        return GetEventInfo(type, propertyName) is not null ? BindingAffinity.WinFormsEvent : 0;
     }
 
     /// <inheritdoc/>
@@ -45,8 +46,8 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
         object sender,
         System.Linq.Expressions.Expression expression,
         string propertyName,
-        bool beforeChanged = false,
-        bool suppressWarnings = false)
+        bool beforeChanged,
+        bool suppressWarnings)
     {
         ArgumentExceptionHelper.ThrowIfNull(sender);
 
@@ -76,5 +77,7 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
     internal static EventInfo? GetEventInfo(Type type, string propertyName) =>
         EventInfoCache.GetOrAdd(
             (type, propertyName),
-            key => key.Type.GetEvent(key.PropertyName + "Changed", BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy));
+            key => key.Type.GetEvent(
+                key.PropertyName + "Changed",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy));
 }

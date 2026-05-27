@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
@@ -20,12 +19,12 @@ internal static class BindTwoWayCodeGenerator
     /// </summary>
     /// <param name="invocations">All detected BindTwoWay invocations.</param>
     /// <param name="allClasses">All detected class binding info.</param>
-    /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression (C# 10+).</param>
+    /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
     /// <returns>Generated source code string, or null if no invocations.</returns>
     internal static string? Generate(
         ImmutableArray<BindingInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        bool supportsCallerArgExpr)
+        LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
@@ -33,7 +32,8 @@ internal static class BindTwoWayCodeGenerator
         }
 
         var sb = new StringBuilder();
-        CodeGeneratorHelpers.AppendExtensionClassHeader(sb);
+        var supportsCallerArgExpr = features.SupportsCallerArgExpr;
+        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         sb.AppendLine();
 
         // Group invocations by (SourceType, TargetType, SourcePropertyType, TargetPropertyType, HasConversion, HasScheduler)
@@ -44,7 +44,7 @@ internal static class BindTwoWayCodeGenerator
             var group = groups[g];
 
             // Generate the concrete typed extension method overload
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr);
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable);
             sb.AppendLine();
 
             // Generate binding methods
@@ -53,7 +53,11 @@ internal static class BindTwoWayCodeGenerator
                 var inv = group.Invocations[i];
                 var sourceClassInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.SourceTypeFullName);
                 var targetClassInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.TargetTypeFullName);
-                var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(inv.SourceTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, inv.SourceExpressionText + "|" + inv.TargetExpressionText);
+                var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
+                    inv.SourceTypeFullName,
+                    inv.CallerFilePath,
+                    inv.CallerLineNumber,
+                    inv.SourceExpressionText + "|" + inv.TargetExpressionText);
                 GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, suffix);
             }
         }
@@ -100,14 +104,14 @@ internal static class BindTwoWayCodeGenerator
         foreach (var kvp in groupMap)
         {
             var first = kvp.Value[0];
-            result.Add(new BindingTypeGroup(
+            result.Add(new(
                 first.SourceTypeFullName,
                 first.TargetTypeFullName,
                 first.SourcePropertyTypeFullName,
                 first.TargetPropertyTypeFullName,
                 first.HasConversion,
                 first.HasScheduler,
-                kvp.Value.ToArray()));
+                [.. kvp.Value]));
         }
 
         return result;
@@ -119,18 +123,20 @@ internal static class BindTwoWayCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
     /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is available.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         BindingTypeGroup group,
-        bool supportsCallerArgExpr)
+        bool supportsCallerArgExpr,
+        bool supportsNullable)
     {
         if (supportsCallerArgExpr)
         {
-            GenerateCallerArgExprOverload(sb, group);
+            GenerateCallerArgExprOverload(sb, group, supportsNullable);
         }
         else
         {
-            GenerateCallerFilePathOverload(sb, group);
+            GenerateCallerFilePathOverload(sb, group, supportsNullable);
         }
     }
 
@@ -139,34 +145,38 @@ internal static class BindTwoWayCodeGenerator
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void GenerateCallerArgExprOverload(
         StringBuilder sb,
-        BindingTypeGroup group)
+        BindingTypeGroup group,
+        bool supportsNullable)
     {
+        var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
+        var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
         sb.AppendLine($"""
-                    /// <summary>
-                    /// Concrete typed overload for BindTwoWay from {group.SourceTypeFullName} to {group.TargetTypeFullName}.
-                    /// Uses CallerArgumentExpression for dispatch.
-                    /// </summary>
-                    public static global::System.IDisposable BindTwoWay(
-                        this {group.SourceTypeFullName} source,
-                        {group.TargetTypeFullName} target,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {group.SourcePropertyTypeFullName}>> sourceProperty,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {group.TargetPropertyTypeFullName}>> targetProperty,
-            """);
+                               /// <summary>
+                               /// Concrete typed overload for BindTwoWay from {group.SourceTypeFullName} to {group.TargetTypeFullName}.
+                               /// Uses CallerArgumentExpression for dispatch.
+                               /// </summary>
+                               public static global::System.IDisposable BindTwoWay(
+                                   this {group.SourceTypeFullName} source,
+                                   {group.TargetTypeFullName} target,
+                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {sourcePropType}>> sourceProperty,
+                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {targetPropType}>> targetProperty,
+                       """);
 
         AppendExtraParameters(sb, group);
 
         sb.AppendLine("""
-                        [global::System.Runtime.CompilerServices.CallerArgumentExpression("sourceProperty")] string sourcePropertyExpression = "",
-                        [global::System.Runtime.CompilerServices.CallerArgumentExpression("targetProperty")] string targetPropertyExpression = "",
-                        [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                        [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                    {
-                        sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ") ? sourcePropertyExpression.Substring(7) : sourcePropertyExpression;
-                        targetPropertyExpression = targetPropertyExpression.StartsWith("static ") ? targetPropertyExpression.Substring(7) : targetPropertyExpression;
+                                  [global::System.Runtime.CompilerServices.CallerArgumentExpression("sourceProperty")] string sourcePropertyExpression = "",
+                                  [global::System.Runtime.CompilerServices.CallerArgumentExpression("targetProperty")] string targetPropertyExpression = "",
+                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
+                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
+                              {
+                                  sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ") ? sourcePropertyExpression.Substring(7) : sourcePropertyExpression;
+                                  targetPropertyExpression = targetPropertyExpression.StartsWith("static ") ? targetPropertyExpression.Substring(7) : targetPropertyExpression;
 
-            """);
+                      """);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -174,22 +184,26 @@ internal static class BindTwoWayCodeGenerator
             var condition = CodeGeneratorHelpers.ConditionKeyword(i);
             var escapedSourceExpr = CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText);
             var escapedTargetExpr = CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText);
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(inv.SourceTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, inv.SourceExpressionText + "|" + inv.TargetExpressionText);
+            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
+                inv.SourceTypeFullName,
+                inv.CallerFilePath,
+                inv.CallerLineNumber,
+                inv.SourceExpressionText + "|" + inv.TargetExpressionText);
 
             sb.AppendLine($$"""
-                            {{condition}} (sourcePropertyExpression == "{{escapedSourceExpr}}"
-                                && targetPropertyExpression == "{{escapedTargetExpr}}")
-                            {
-                                return __BindTwoWay_{{methodSuffix}}(source, target{{FormatExtraArgs(group)}});
-                            }
-                """);
+                                        {{condition}} (sourcePropertyExpression == "{{escapedSourceExpr}}"
+                                            && targetPropertyExpression == "{{escapedTargetExpr}}")
+                                        {
+                                            return __BindTwoWay_{{methodSuffix}}(source, target{{FormatExtraArgs(group)}});
+                                        }
+                            """);
         }
 
         sb.AppendLine("""
-                        throw new global::System.InvalidOperationException(
-                            "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                    }
-            """);
+                                  throw new global::System.InvalidOperationException(
+                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
+                              }
+                      """);
     }
 
     /// <summary>
@@ -197,51 +211,59 @@ internal static class BindTwoWayCodeGenerator
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void GenerateCallerFilePathOverload(
         StringBuilder sb,
-        BindingTypeGroup group)
+        BindingTypeGroup group,
+        bool supportsNullable)
     {
+        var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
+        var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
         sb.AppendLine($"""
-                    /// <summary>
-                    /// Concrete typed overload for BindTwoWay from {group.SourceTypeFullName} to {group.TargetTypeFullName}.
-                    /// Uses CallerFilePath + CallerLineNumber for dispatch.
-                    /// </summary>
-                    public static global::System.IDisposable BindTwoWay(
-                        this {group.SourceTypeFullName} source,
-                        {group.TargetTypeFullName} target,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {group.SourcePropertyTypeFullName}>> sourceProperty,
-                        global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {group.TargetPropertyTypeFullName}>> targetProperty,
-            """);
+                               /// <summary>
+                               /// Concrete typed overload for BindTwoWay from {group.SourceTypeFullName} to {group.TargetTypeFullName}.
+                               /// Uses CallerFilePath + CallerLineNumber for dispatch.
+                               /// </summary>
+                               public static global::System.IDisposable BindTwoWay(
+                                   this {group.SourceTypeFullName} source,
+                                   {group.TargetTypeFullName} target,
+                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {sourcePropType}>> sourceProperty,
+                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {targetPropType}>> targetProperty,
+                       """);
 
         AppendExtraParameters(sb, group);
 
         sb.AppendLine("""
-                        [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                        [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                    {
-            """);
+                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
+                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
+                              {
+                      """);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
             var pathSuffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
             var condition = CodeGeneratorHelpers.ConditionKeyword(i);
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(inv.SourceTypeFullName, inv.CallerFilePath, inv.CallerLineNumber, inv.SourceExpressionText + "|" + inv.TargetExpressionText);
+            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
+                inv.SourceTypeFullName,
+                inv.CallerFilePath,
+                inv.CallerLineNumber,
+                inv.SourceExpressionText + "|" + inv.TargetExpressionText);
 
             sb.AppendLine($$"""
-                            {{condition}} (callerLineNumber == {{inv.CallerLineNumber}}
-                                && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(pathSuffix)}}", global::System.StringComparison.OrdinalIgnoreCase))
-                            {
-                                return __BindTwoWay_{{methodSuffix}}(source, target{{FormatExtraArgs(group)}});
-                            }
-                """);
+                                        {{condition}} (callerLineNumber == {{inv.CallerLineNumber}}
+                                            && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(pathSuffix)}}", global::System.StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            return __BindTwoWay_{{methodSuffix}}(source, target{{FormatExtraArgs(group)}});
+                                        }
+                            """);
         }
 
         sb.AppendLine("""
-                        throw new global::System.InvalidOperationException(
-                            "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                    }
-            """);
+                                  throw new global::System.InvalidOperationException(
+                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
+                              }
+                      """);
     }
 
     /// <summary>
@@ -269,17 +291,27 @@ internal static class BindTwoWayCodeGenerator
         var schedulerComment = inv.HasScheduler ? " (with scheduler)" : string.Empty;
 
         sb.AppendLine($$"""
-                    private static global::System.IDisposable __BindTwoWay_{{suffix}}({{inv.SourceTypeFullName}} source, {{inv.TargetTypeFullName}} target{{extraParams}})
-                    {
-                        // BindTwoWay: {{sourcePathComment}} <-> {{targetPathComment}}{{conversionComment}}{{schedulerComment}}
-            """);
+                                private static global::System.IDisposable __BindTwoWay_{{suffix}}({{inv.SourceTypeFullName}} source, {{inv.TargetTypeFullName}} target{{extraParams}})
+                                {
+                                    // BindTwoWay: {{sourcePathComment}} <-> {{targetPathComment}}{{conversionComment}}{{schedulerComment}}
+                        """);
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
         ObservationCodeGenerator.EmitInlineObservation(
-            sb, "source", inv.SourcePropertyPath, inv.SourcePropertyTypeFullName, sourceClassInfo, "sourceObs");
+            sb,
+            "source",
+            inv.SourcePropertyPath,
+            inv.SourcePropertyTypeFullName,
+            sourceClassInfo,
+            "sourceObs");
 
         ObservationCodeGenerator.EmitInlineObservation(
-            sb, "target", inv.TargetPropertyPath, inv.TargetPropertyTypeFullName, targetClassInfo, "targetObs");
+            sb,
+            "target",
+            inv.TargetPropertyPath,
+            inv.TargetPropertyTypeFullName,
+            targetClassInfo,
+            "targetObs");
 
         if (inv.HasConversion || inv.HasScheduler)
         {
@@ -291,9 +323,9 @@ internal static class BindTwoWayCodeGenerator
                 var srcNext = inv.HasScheduler ? "__srcSelected" : "sourceBind";
                 var tgtNext = inv.HasScheduler ? "__tgtSelected" : "targetBind";
                 sb.AppendLine($"""
-                        var {srcNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({sourceVar}, sourceToTargetConv);
-                        var {tgtNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({targetVar}, targetToSourceConv);
-                """);
+                                       var {srcNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({sourceVar}, sourceToTargetConv);
+                                       var {tgtNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({targetVar}, targetToSourceConv);
+                               """);
                 sourceVar = srcNext;
                 targetVar = tgtNext;
             }
@@ -301,50 +333,18 @@ internal static class BindTwoWayCodeGenerator
             if (inv.HasScheduler)
             {
                 sb.AppendLine($"""
-                        var sourceBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<{inv.TargetPropertyTypeFullName}>({sourceVar}, scheduler);
-                        var targetBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<{inv.SourcePropertyTypeFullName}>({targetVar}, scheduler);
-                """);
+                                       var sourceBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<{inv.TargetPropertyTypeFullName}>({sourceVar}, scheduler);
+                                       var targetBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<{inv.SourcePropertyTypeFullName}>({targetVar}, scheduler);
+                               """);
                 sourceVar = "sourceBind";
                 targetVar = "targetBind";
             }
 
-            sb.AppendLine($$"""
-
-                        var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe({{sourceVar}}, value =>
-                        {
-                            {{targetAccess}} = value;
-                        });
-
-                        var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip({{targetVar}}, 1);
-                        var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
-                        {
-                            {{sourceSetAccess}} = value;
-                        });
-
-                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
-                    }
-            """)
-                .AppendLine();
+            EmitTwoWaySubscription(sb, sourceVar, targetVar, targetAccess, sourceSetAccess);
         }
         else
         {
-            sb.AppendLine($$"""
-
-                        var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceObs, value =>
-                        {
-                            {{targetAccess}} = value;
-                        });
-
-                        var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(targetObs, 1);
-                        var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
-                        {
-                            {{sourceSetAccess}} = value;
-                        });
-
-                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
-                    }
-            """)
-                .AppendLine();
+            EmitTwoWaySubscription(sb, "sourceObs", "targetObs", targetAccess, sourceSetAccess);
         }
     }
 
@@ -358,15 +358,17 @@ internal static class BindTwoWayCodeGenerator
         if (group.HasConversion)
         {
             sb.AppendLine($"""
-                            global::System.Func<{group.SourcePropertyTypeFullName}, {group.TargetPropertyTypeFullName}> sourceToTargetConv,
-                            global::System.Func<{group.TargetPropertyTypeFullName}, {group.SourcePropertyTypeFullName}> targetToSourceConv,
-                """);
+                                       global::System.Func<{group.SourcePropertyTypeFullName}, {group.TargetPropertyTypeFullName}> sourceToTargetConv,
+                                       global::System.Func<{group.TargetPropertyTypeFullName}, {group.SourcePropertyTypeFullName}> targetToSourceConv,
+                           """);
         }
 
-        if (group.HasScheduler)
+        if (!group.HasScheduler)
         {
-            sb.AppendLine("            global::System.Reactive.Concurrency.IScheduler scheduler,");
+            return;
         }
+
+        sb.AppendLine("            global::System.Reactive.Concurrency.IScheduler scheduler,");
     }
 
     /// <summary>
@@ -400,8 +402,10 @@ internal static class BindTwoWayCodeGenerator
         var sb = new StringBuilder();
         if (inv.HasConversion)
         {
-            sb.Append($", global::System.Func<{inv.SourcePropertyTypeFullName}, {inv.TargetPropertyTypeFullName}> sourceToTargetConv")
-                .Append($", global::System.Func<{inv.TargetPropertyTypeFullName}, {inv.SourcePropertyTypeFullName}> targetToSourceConv");
+            sb.Append(
+                    $", global::System.Func<{inv.SourcePropertyTypeFullName}, {inv.TargetPropertyTypeFullName}> sourceToTargetConv")
+                .Append(
+                    $", global::System.Func<{inv.TargetPropertyTypeFullName}, {inv.SourcePropertyTypeFullName}> targetToSourceConv");
         }
 
         if (inv.HasScheduler)
@@ -410,6 +414,40 @@ internal static class BindTwoWayCodeGenerator
         }
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Emits the two-way subscription and <c>CompositeDisposable2</c> return block.
+    /// </summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sourceVar">The source observable variable name to subscribe to.</param>
+    /// <param name="targetVar">The target observable variable name to subscribe to.</param>
+    /// <param name="targetAccess">The target property setter access chain.</param>
+    /// <param name="sourceSetAccess">The source property setter access chain.</param>
+    private static void EmitTwoWaySubscription(
+        StringBuilder sb,
+        string sourceVar,
+        string targetVar,
+        string targetAccess,
+        string sourceSetAccess)
+    {
+        sb.AppendLine($$"""
+
+                                    var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe({{sourceVar}}, value =>
+                                    {
+                                        {{targetAccess}} = value;
+                                    });
+
+                                    var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip({{targetVar}}, 1);
+                                    var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
+                                    {
+                                        {{sourceSetAccess}} = value;
+                                    });
+
+                                    return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
+                                }
+                        """)
+            .AppendLine();
     }
 
     /// <summary>

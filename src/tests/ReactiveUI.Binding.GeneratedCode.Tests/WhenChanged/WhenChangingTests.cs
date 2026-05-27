@@ -14,20 +14,65 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 public class WhenChangingTests
 {
     /// <summary>
+    /// The initial name value used by single-property tests.
+    /// </summary>
+    private const string InitialName = "Initial";
+
+    /// <summary>
+    /// The minimum number of emissions expected after a single change.
+    /// </summary>
+    private const int MinEmissionsAfterChange = 2;
+
+    /// <summary>
+    /// The minimum number of emissions expected after two changes.
+    /// </summary>
+    private const int MinEmissionsAfterTwoChanges = 3;
+
+    /// <summary>
+    /// The index of the third emission.
+    /// </summary>
+    private const int ThirdEmissionIndex = 2;
+
+    /// <summary>
+    /// The two-property test value for the integer property.
+    /// </summary>
+    private const int TwoPropIntValue = 42;
+
+    /// <summary>
+    /// The three-property test value for the integer property.
+    /// </summary>
+    private const int ThreePropIntValue = 10;
+
+    /// <summary>
+    /// The four-property test value for the integer property.
+    /// </summary>
+    private const int FourPropIntValue = 20;
+
+    /// <summary>
+    /// The three-property test value for the double property.
+    /// </summary>
+    private const double ThreePropDoubleValue = 3.14;
+
+    /// <summary>
+    /// The four-property test value for the double property.
+    /// </summary>
+    private const double FourPropDoubleValue = 2.71;
+
+    /// <summary>
     /// Verifies that a single-property WhenChanging emits the initial value.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsInitialValue()
     {
-        var vm = new TestViewModel { Name = "Initial" };
+        var vm = new TestViewModel { Name = InitialName };
         var values = new List<string>();
 
         using var sub = WhenChangingScenarios.SingleProperty_Name(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo("Initial");
+        await Assert.That(values[0]).IsEqualTo(InitialName);
     }
 
     /// <summary>
@@ -48,7 +93,7 @@ public class WhenChangingTests
 
         // WhenChanging emits the value at the time of PropertyChanging event,
         // which is the old value (before the assignment).
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterChange);
         await Assert.That(values[0]).IsEqualTo("Before");
         await Assert.That(values[1]).IsEqualTo("Before");
     }
@@ -70,10 +115,10 @@ public class WhenChangingTests
         vm.Name = "C";
 
         // Initial "A", then "A" before change to "B", then "B" before change to "C"
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(3);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterTwoChanges);
         await Assert.That(values[0]).IsEqualTo("A");
         await Assert.That(values[1]).IsEqualTo("A");
-        await Assert.That(values[2]).IsEqualTo("B");
+        await Assert.That(values[ThirdEmissionIndex]).IsEqualTo("B");
     }
 
     /// <summary>
@@ -83,7 +128,7 @@ public class WhenChangingTests
     [Test]
     public async Task TwoProperties_EmitsInitialTuple()
     {
-        var vm = new BigViewModel { Prop1 = "Hello", Prop2 = 42 };
+        var vm = new BigViewModel { Prop1 = "Hello", Prop2 = TwoPropIntValue };
         var values = new List<(string property1, int property2)>();
 
         using var sub = WhenChangingScenarios.TwoProperties(vm)
@@ -91,7 +136,7 @@ public class WhenChangingTests
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
         await Assert.That(values[0].property1).IsEqualTo("Hello");
-        await Assert.That(values[0].property2).IsEqualTo(42);
+        await Assert.That(values[0].property2).IsEqualTo(TwoPropIntValue);
     }
 
     /// <summary>
@@ -101,7 +146,7 @@ public class WhenChangingTests
     [Test]
     public async Task ThreeProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "X", Prop2 = 10, Prop3 = 3.14 };
+        var vm = new BigViewModel { Prop1 = "X", Prop2 = ThreePropIntValue, Prop3 = ThreePropDoubleValue };
         var values = new List<(string property1, int property2, double property3)>();
 
         using var sub = WhenChangingScenarios.ThreeProperties(vm)
@@ -109,8 +154,8 @@ public class WhenChangingTests
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
         await Assert.That(values[0].property1).IsEqualTo("X");
-        await Assert.That(values[0].property2).IsEqualTo(10);
-        await Assert.That(values[0].property3).IsEqualTo(3.14);
+        await Assert.That(values[0].property2).IsEqualTo(ThreePropIntValue);
+        await Assert.That(values[0].property3).IsEqualTo(ThreePropDoubleValue);
     }
 
     /// <summary>
@@ -120,7 +165,7 @@ public class WhenChangingTests
     [Test]
     public async Task FourProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel { Prop1 = "Y", Prop2 = 20, Prop3 = 2.71, Prop4 = true };
+        var vm = new BigViewModel { Prop1 = "Y", Prop2 = FourPropIntValue, Prop3 = FourPropDoubleValue, Prop4 = true };
         var values = new List<(string property1, int property2, double property3, bool property4)>();
 
         using var sub = WhenChangingScenarios.FourProperties(vm)
@@ -128,8 +173,8 @@ public class WhenChangingTests
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
         await Assert.That(values[0].property1).IsEqualTo("Y");
-        await Assert.That(values[0].property2).IsEqualTo(20);
-        await Assert.That(values[0].property3).IsEqualTo(2.71);
+        await Assert.That(values[0].property2).IsEqualTo(FourPropIntValue);
+        await Assert.That(values[0].property3).IsEqualTo(FourPropDoubleValue);
         await Assert.That(values[0].property4).IsTrue();
     }
 
@@ -140,7 +185,7 @@ public class WhenChangingTests
     [Test]
     public async Task Disposal_StopsListening()
     {
-        var vm = new TestViewModel { Name = "Initial" };
+        var vm = new TestViewModel { Name = InitialName };
         var values = new List<string>();
 
         var sub = WhenChangingScenarios.SingleProperty_Name(vm)
@@ -151,6 +196,6 @@ public class WhenChangingTests
         vm.Name = "AfterDisposal";
 
         await Assert.That(values.Count).IsEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo("Initial");
+        await Assert.That(values[0]).IsEqualTo(InitialName);
     }
 }

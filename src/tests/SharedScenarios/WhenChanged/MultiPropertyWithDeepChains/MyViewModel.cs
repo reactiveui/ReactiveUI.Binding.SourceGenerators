@@ -4,56 +4,59 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanged.MultiPropertyWithDeepChains
+namespace SharedScenarios.WhenChanged.MultiPropertyWithDeepChains;
+
+/// <summary>
+/// ViewModel with a shallow property and a deep property chain.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel with a shallow property and a deep property chain.
+    /// The backing field for <see cref="Name"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private string _name = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="Address"/>.
+    /// </summary>
+    private AddressModel _address = new AddressModel();
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the name.
+    /// </summary>
+    public string Name
     {
-        /// <summary>
-        /// The backing field for <see cref="Name"/>.
-        /// </summary>
-        private string _name = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="Address"/>.
-        /// </summary>
-        private AddressModel _address = new();
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        public string Name
+        get => _name;
+        set
         {
-            get => _name;
-            set
+            if (_name == value)
             {
-                if (_name != value)
-                {
-                    _name = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-                }
+                return;
             }
+
+            _name = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the address.
-        /// </summary>
-        public AddressModel Address
+    /// <summary>
+    /// Gets or sets the address.
+    /// </summary>
+    public AddressModel Address
+    {
+        get => _address;
+        set
         {
-            get => _address;
-            set
+            if (_address == value)
             {
-                if (_address != value)
-                {
-                    _address = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Address)));
-                }
+                return;
             }
+
+            _address = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Address)));
         }
     }
 }

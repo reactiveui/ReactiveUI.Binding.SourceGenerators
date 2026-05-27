@@ -13,6 +13,26 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAnyValue;
 public class WhenAnyValueTests
 {
     /// <summary>
+    /// The expected emission count after an initial value plus one change.
+    /// </summary>
+    private const int ExpectedEmissionCount = 2;
+
+    /// <summary>
+    /// The second emission index.
+    /// </summary>
+    private const int SecondIndex = 2;
+
+    /// <summary>
+    /// The expected emission count after an initial value plus three changes.
+    /// </summary>
+    private const int FourEmissionCount = 4;
+
+    /// <summary>
+    /// The third emission index.
+    /// </summary>
+    private const int ThirdIndex = 3;
+
+    /// <summary>
     /// Verifies that single-property WhenAnyValue emits initial value and subsequent changes.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -30,7 +50,7 @@ public class WhenAnyValueTests
 
         fixture.Value1 = "B";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
         await Assert.That(values).Contains("B");
     }
 
@@ -105,10 +125,10 @@ public class WhenAnyValueTests
         fixture.Value1 = "C";
         fixture.Value1 = "D";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(4);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(FourEmissionCount);
         await Assert.That(values[0]).IsEqualTo("A");
         await Assert.That(values[1]).IsEqualTo("B");
-        await Assert.That(values[2]).IsEqualTo("C");
-        await Assert.That(values[3]).IsEqualTo("D");
+        await Assert.That(values[SecondIndex]).IsEqualTo("C");
+        await Assert.That(values[ThirdIndex]).IsEqualTo("D");
     }
 }

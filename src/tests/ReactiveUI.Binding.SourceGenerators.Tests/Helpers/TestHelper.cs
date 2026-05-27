@@ -5,7 +5,6 @@
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -18,13 +17,34 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 public static class TestHelper
 {
     /// <summary>
+    /// Returns the C# language version used to exercise the <c>CallerFilePath</c> + <c>CallerLineNumber</c>
+    /// dispatch fallback. The version is deliberately kept below C# 10 (where
+    /// <c>CallerArgumentExpression</c> would take over) so the file/line dispatch path is exercised, while
+    /// still being high enough to compile the scenario source. Scenario view models use nullable reference
+    /// type annotations (a C# 8 feature); compiling them under C# 7.3 would raise
+    /// "nullable reference types is not available". When the scenario has no nullable annotations, C# 7.3 is
+    /// used so the generated output is also asserted valid on the minimum supported language version.
+    /// </summary>
+    /// <param name="nullableEnabled">Whether the scenario source uses nullable reference type annotations.</param>
+    /// <returns>C# 8 when the scenario uses nullable annotations; otherwise C# 7.3.</returns>
+    public static LanguageVersion FallbackLanguageVersion(bool nullableEnabled) =>
+        nullableEnabled ? LanguageVersion.CSharp8 : LanguageVersion.CSharp7_3;
+
+    /// <summary>
+    /// Creates a compilation from source code, targeting C# 7.3 to verify generated output compatibility.
+    /// </summary>
+    /// <param name="source">The source code to compile.</param>
+    /// <returns>A compilation ready for testing.</returns>
+    public static Compilation CreateCompilation(string source) => CreateCompilation(source, null);
+
+    /// <summary>
     /// Creates a compilation from source code with appropriate references.
     /// Includes ReactiveUI for IReactiveObject testing.
     /// </summary>
     /// <param name="source">The source code to compile.</param>
-    /// <param name="languageVersion">Optional C# language version to target. Defaults to C# 7.3 to verify generated output compatibility.</param>
+    /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <returns>A compilation ready for testing.</returns>
-    public static Compilation CreateCompilation(string source, LanguageVersion? languageVersion = null)
+    public static Compilation CreateCompilation(string source, LanguageVersion? languageVersion)
     {
         var parseOptions = languageVersion.HasValue
             ? new CSharpParseOptions(languageVersion.Value)
@@ -45,10 +65,8 @@ public static class TestHelper
         // Add ReactiveUI and transitive assembly references
         var seedAssemblies = new[]
         {
-            typeof(IReactiveObject).Assembly,
-            typeof(System.Reactive.Linq.Observable).Assembly,
-            typeof(ReactiveUIBindingExtensions).Assembly,
-            typeof(Reactive.ObserveOnObservable<>).Assembly,
+            typeof(IReactiveObject).Assembly, typeof(System.Reactive.Linq.Observable).Assembly,
+            typeof(ReactiveUIBindingExtensions).Assembly, typeof(Reactive.ObserveOnObservable<>).Assembly
         };
 
         var allReferences = references.Concat(GetTransitiveReferences(seedAssemblies));
@@ -57,7 +75,7 @@ public static class TestHelper
             "TestAssembly",
             [syntaxTree],
             allReferences,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            new(OutputKind.DynamicallyLinkedLibrary));
     }
 
     /// <summary>
@@ -66,11 +84,32 @@ public static class TestHelper
     /// </summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
-    /// <param name="languageVersion">Optional C# language version to target. Defaults to C# 7.3 to verify generated output compatibility.</param>
     /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>A task representing the asynchronous verification operation.</returns>
-    public static Task TestPass(string source, Type callerType, LanguageVersion? languageVersion = null, [CallerFilePath] string file = "", [CallerMemberName] string memberName = "")
+    public static Task TestPass(
+        string source,
+        Type callerType,
+        [CallerFilePath] string file = "",
+        [CallerMemberName] string memberName = "")
+        => TestPass(source, callerType, null, file, memberName);
+
+    /// <summary>
+    /// Tests a source generator scenario that is expected to succeed, targeting a specific language version.
+    /// Verifies the generated output against a snapshot.
+    /// </summary>
+    /// <param name="source">The source code to compile and generate.</param>
+    /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
+    /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
+    /// <param name="file">The source file path of the caller (automatically populated).</param>
+    /// <param name="memberName">The member name of the caller (automatically populated).</param>
+    /// <returns>A task representing the asynchronous verification operation.</returns>
+    public static Task TestPass(
+        string source,
+        Type callerType,
+        LanguageVersion? languageVersion,
+        [CallerFilePath] string file = "",
+        [CallerMemberName] string memberName = "")
     {
         ArgumentNullException.ThrowIfNull(callerType);
         ArgumentNullException.ThrowIfNull(memberName);
@@ -101,11 +140,32 @@ public static class TestHelper
     /// </summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
-    /// <param name="languageVersion">Optional C# language version to target. Defaults to C# 7.3 to verify generated output compatibility.</param>
     /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>The generator test result for additional assertions.</returns>
-    public static async Task<GeneratorTestResult> TestPassWithResult(string source, Type callerType, LanguageVersion? languageVersion = null, [CallerFilePath] string file = "", [CallerMemberName] string memberName = "")
+    public static Task<GeneratorTestResult> TestPassWithResult(
+        string source,
+        Type callerType,
+        [CallerFilePath] string file = "",
+        [CallerMemberName] string memberName = "")
+        => TestPassWithResult(source, callerType, null, file, memberName);
+
+    /// <summary>
+    /// Tests a source generator scenario that is expected to succeed, targeting a specific language version.
+    /// Verifies the generated output against a snapshot and returns the result for further assertions.
+    /// </summary>
+    /// <param name="source">The source code to compile and generate.</param>
+    /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
+    /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
+    /// <param name="file">The source file path of the caller (automatically populated).</param>
+    /// <param name="memberName">The member name of the caller (automatically populated).</param>
+    /// <returns>The generator test result for additional assertions.</returns>
+    public static async Task<GeneratorTestResult> TestPassWithResult(
+        string source,
+        Type callerType,
+        LanguageVersion? languageVersion,
+        [CallerFilePath] string file = "",
+        [CallerMemberName] string memberName = "")
     {
         ArgumentNullException.ThrowIfNull(callerType);
         ArgumentNullException.ThrowIfNull(memberName);
@@ -136,9 +196,16 @@ public static class TestHelper
     /// Runs the source generator on the provided source code and returns the result.
     /// </summary>
     /// <param name="source">The source code to compile and generate.</param>
-    /// <param name="languageVersion">Optional C# language version to target. Defaults to C# 7.3 to verify generated output compatibility.</param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
-    public static GeneratorTestResult RunGenerator(string source, LanguageVersion? languageVersion = null)
+    public static GeneratorTestResult RunGenerator(string source) => RunGenerator(source, null);
+
+    /// <summary>
+    /// Runs the source generator on the provided source code, targeting a specific language version.
+    /// </summary>
+    /// <param name="source">The source code to compile and generate.</param>
+    /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
+    /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
+    public static GeneratorTestResult RunGenerator(string source, LanguageVersion? languageVersion)
     {
         var compilation = CreateCompilation(source, languageVersion);
         var generator = new BindingGenerator();
@@ -149,17 +216,17 @@ public static class TestHelper
             : new CSharpParseOptions(LanguageVersion.CSharp7_3);
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            generators: [sourceGenerator],
-            additionalTexts: null,
-            parseOptions: parseOptions,
-            optionsProvider: null,
-            driverOptions: new GeneratorDriverOptions(
-                disabledOutputs: default,
-                trackIncrementalGeneratorSteps: true));
+            [sourceGenerator],
+            null,
+            parseOptions,
+            null,
+            new(
+                default,
+                true));
 
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
 
-        return new GeneratorTestResult(driver, outputCompilation, diagnostics);
+        return new(driver, outputCompilation, diagnostics);
     }
 
     /// <summary>
@@ -213,8 +280,9 @@ public static class TestHelper
         "PlatformDetectionSnapshotTests" => "PDS",
         "BindInteractionGeneratorTests" => "BIG",
         "BindCommandGeneratorTests" => "BCG",
+        "BindToGeneratorTests" => "BToG",
         "ViewLocatorDispatchGeneratorTests" => "VDG",
-        _ => typeName,
+        _ => typeName
     };
 
     /// <summary>
@@ -224,29 +292,29 @@ public static class TestHelper
     /// <param name="methodName">The test method name.</param>
     /// <returns>An abbreviated method name string.</returns>
     internal static string AbbreviateMethodName(string methodName) => methodName
-        .Replace("MultipleSameTypeBindings", "MSTB")
-        .Replace("TwoSameTypeBindings", "2STB")
-        .Replace("MultipleInvocations", "MI")
-        .Replace("MultipleBindings", "MB")
-        .Replace("SingleProperty", "SP")
-        .Replace("MultiProperty", "MP")
-        .Replace("CallerFilePath", "CFP")
-        .Replace("StringToString", "S2S")
-        .Replace("IntToInt", "I2I")
-        .Replace("WithConverters", "WC")
-        .Replace("WithConverter", "WC")
-        .Replace("WithSelector", "WS")
-        .Replace("AndScheduler", "Sched")
-        .Replace("FourLevelDeepChain", "4LDC")
-        .Replace("DeepPropertyChain", "DPC")
-        .Replace("WithDeepChains", "WDC")
-        .Replace("DeepChain", "DC")
-        .Replace("TwoObservables", "2O")
-        .Replace("ThreeProperties", "3P")
-        .Replace("TwoProperties", "2P")
-        .Replace("CombineLatest", "CL")
-        .Replace("GeneratesElseIf", "GEI")
-        .Replace("SameTypeSignature", "STS");
+        .Replace("MultipleSameTypeBindings", "MSTB", StringComparison.Ordinal)
+        .Replace("TwoSameTypeBindings", "2STB", StringComparison.Ordinal)
+        .Replace("MultipleInvocations", "MI", StringComparison.Ordinal)
+        .Replace("MultipleBindings", "MB", StringComparison.Ordinal)
+        .Replace("SingleProperty", "SP", StringComparison.Ordinal)
+        .Replace("MultiProperty", "MP", StringComparison.Ordinal)
+        .Replace("CallerFilePath", "CFP", StringComparison.Ordinal)
+        .Replace("StringToString", "S2S", StringComparison.Ordinal)
+        .Replace("IntToInt", "I2I", StringComparison.Ordinal)
+        .Replace("WithConverters", "WC", StringComparison.Ordinal)
+        .Replace("WithConverter", "WC", StringComparison.Ordinal)
+        .Replace("WithSelector", "WS", StringComparison.Ordinal)
+        .Replace("AndScheduler", "Sched", StringComparison.Ordinal)
+        .Replace("FourLevelDeepChain", "4LDC", StringComparison.Ordinal)
+        .Replace("DeepPropertyChain", "DPC", StringComparison.Ordinal)
+        .Replace("WithDeepChains", "WDC", StringComparison.Ordinal)
+        .Replace("DeepChain", "DC", StringComparison.Ordinal)
+        .Replace("TwoObservables", "2O", StringComparison.Ordinal)
+        .Replace("ThreeProperties", "3P", StringComparison.Ordinal)
+        .Replace("TwoProperties", "2P", StringComparison.Ordinal)
+        .Replace("CombineLatest", "CL", StringComparison.Ordinal)
+        .Replace("GeneratesElseIf", "GEI", StringComparison.Ordinal)
+        .Replace("SameTypeSignature", "STS", StringComparison.Ordinal);
 
     /// <summary>
     /// Recursively walks assembly references from the seed assemblies to collect

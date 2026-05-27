@@ -4,25 +4,24 @@
 
 using ReactiveUI;
 
-namespace SharedScenarios.WhenChanging.SinglePropertyReactiveObject
+namespace SharedScenarios.WhenChanging.SinglePropertyReactiveObject;
+
+/// <summary>
+/// ViewModel extending ReactiveObject (which implements both INPC and INPChanging).
+/// </summary>
+public class MyViewModel : ReactiveObject
 {
     /// <summary>
-    /// ViewModel extending ReactiveObject (which implements both INPC and INPChanging).
+    /// The backing field for <see cref="Name"/>.
     /// </summary>
-    public class MyViewModel : ReactiveObject
-    {
-        /// <summary>
-        /// The backing field for <see cref="Name"/>.
-        /// </summary>
-        private string _name = string.Empty;
+    private string _name = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        public string Name
-        {
-            get => _name;
-            set => this.RaiseAndSetIfChanged(ref _name, value);
-        }
+    /// <summary>
+    /// Gets or sets the name.
+    /// </summary>
+    public string Name
+    {
+        get => _name;
+        set => this.RaiseAndSetIfChanged(ref _name, value);
     }
 }

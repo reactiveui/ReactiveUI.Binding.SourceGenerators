@@ -9,25 +9,36 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public sealed class LongToStringTypeConverter : BindingTypeConverter<long, string>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
-    public override int GetAffinityForObjects() => 2;
+    public override int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public override bool TryConvert(long from, object? conversionHint, [NotNullWhen(true)] out string? result)
     {
-        if (conversionHint is int width)
+        switch (conversionHint)
         {
-            result = from.ToString($"D{width}");
-            return true;
-        }
+            case int width:
+                {
+                    result = from.ToString($"D{width}");
+                    return true;
+                }
 
-        if (conversionHint is string format)
-        {
-            result = from.ToString(format);
-            return true;
-        }
+            case string format:
+                {
+                    result = from.ToString(format);
+                    return true;
+                }
 
-        result = from.ToString();
-        return true;
+            default:
+                {
+                    result = from.ToString();
+                    return true;
+                }
+        }
     }
 }

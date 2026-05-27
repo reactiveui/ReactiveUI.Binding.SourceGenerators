@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanged.MultiPropertyWithDeepChains
+namespace SharedScenarios.WhenChanged.MultiPropertyWithDeepChains;
+
+/// <summary>
+/// Address model with a city property.
+/// </summary>
+public class AddressModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// Address model with a city property.
+    /// The backing field for <see cref="City"/>.
     /// </summary>
-    public class AddressModel : INotifyPropertyChanged
+    private string _city = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the city.
+    /// </summary>
+    public string City
     {
-        /// <summary>
-        /// The backing field for <see cref="City"/>.
-        /// </summary>
-        private string _city = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the city.
-        /// </summary>
-        public string City
+        get => _city;
+        set
         {
-            get => _city;
-            set
+            if (_city == value)
             {
-                if (_city != value)
-                {
-                    _city = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(City)));
-                }
+                return;
             }
+
+            _city = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(City)));
         }
     }
 }

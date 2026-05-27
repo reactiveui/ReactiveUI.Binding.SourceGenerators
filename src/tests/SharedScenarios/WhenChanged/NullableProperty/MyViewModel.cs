@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanged.NullableProperty
+namespace SharedScenarios.WhenChanged.NullableProperty;
+
+/// <summary>
+/// ViewModel with a nullable string property.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel with a nullable string property.
+    /// The backing field for <see cref="NullableName"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private string? _nullableName;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the nullable name.
+    /// </summary>
+    public string? NullableName
     {
-        /// <summary>
-        /// The backing field for <see cref="NullableName"/>.
-        /// </summary>
-        private string? _nullableName;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the nullable name.
-        /// </summary>
-        public string? NullableName
+        get => _nullableName;
+        set
         {
-            get => _nullableName;
-            set
+            if (_nullableName == value)
             {
-                if (_nullableName != value)
-                {
-                    _nullableName = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NullableName)));
-                }
+                return;
             }
+
+            _nullableName = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NullableName)));
         }
     }
 }

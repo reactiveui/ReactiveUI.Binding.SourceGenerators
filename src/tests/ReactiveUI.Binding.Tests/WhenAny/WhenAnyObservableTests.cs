@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reactive.Subjects;
-
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.Tests.TestModels;
 
@@ -14,6 +13,46 @@ namespace ReactiveUI.Binding.Tests.WhenAny;
 /// </summary>
 public class WhenAnyObservableTests
 {
+    /// <summary>
+    /// A sample value emitted by a single observable.
+    /// </summary>
+    private const int SampleValue = 42;
+
+    /// <summary>
+    /// The second value emitted when merging two observables.
+    /// </summary>
+    private const int SecondValue = 2;
+
+    /// <summary>
+    /// The expected number of merged emissions from two observables.
+    /// </summary>
+    private const int ExpectedTwoEmissions = 2;
+
+    /// <summary>
+    /// The first value emitted in the three-observable combining test.
+    /// </summary>
+    private const int FirstCombineValue = 10;
+
+    /// <summary>
+    /// The second value emitted in the three-observable combining test.
+    /// </summary>
+    private const int SecondCombineValue = 20;
+
+    /// <summary>
+    /// The third value emitted in the three-observable combining test.
+    /// </summary>
+    private const int ThirdCombineValue = 30;
+
+    /// <summary>
+    /// The expected number of emissions when combining three observables.
+    /// </summary>
+    private const int ExpectedThreeEmissions = 3;
+
+    /// <summary>
+    /// A value emitted by a late-assigned observable.
+    /// </summary>
+    private const int LateAssignedValue = 99;
+
     /// <summary>
     /// Verifies that null observables do not cause exceptions.
     /// </summary>
@@ -34,10 +73,10 @@ public class WhenAnyObservableTests
         var subject = new Subject<int>();
         vm.Command1 = subject;
 
-        subject.OnNext(42);
+        subject.OnNext(SampleValue);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo(42);
+        await Assert.That(values[0]).IsEqualTo(SampleValue);
     }
 
     /// <summary>
@@ -51,22 +90,18 @@ public class WhenAnyObservableTests
 
         var subject1 = new Subject<int>();
         var subject2 = new Subject<int>();
-        var vm = new TestWhenAnyObsViewModel
-        {
-            Command1 = subject1,
-            Command2 = subject2
-        };
+        var vm = new TestWhenAnyObsViewModel { Command1 = subject1, Command2 = subject2 };
         var values = new List<int>();
 
         using var sub = vm.WhenAnyObservable(x => x.Command1, x => x.Command2)
             .Subscribe(values.Add);
 
         subject1.OnNext(1);
-        subject2.OnNext(2);
+        subject2.OnNext(SecondValue);
 
-        await Assert.That(values.Count).IsEqualTo(2);
+        await Assert.That(values.Count).IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(values).Contains(1);
-        await Assert.That(values).Contains(2);
+        await Assert.That(values).Contains(SecondValue);
     }
 
     /// <summary>
@@ -81,22 +116,17 @@ public class WhenAnyObservableTests
         var subject1 = new Subject<int>();
         var subject2 = new Subject<int>();
         var subject3 = new Subject<int>();
-        var vm = new TestWhenAnyObsViewModel
-        {
-            Command1 = subject1,
-            Command2 = subject2,
-            Command3 = subject3
-        };
+        var vm = new TestWhenAnyObsViewModel { Command1 = subject1, Command2 = subject2, Command3 = subject3 };
         var values = new List<int>();
 
         using var sub = vm.WhenAnyObservable(x => x.Command1, x => x.Command2, x => x.Command3)
             .Subscribe(values.Add);
 
-        subject1.OnNext(10);
-        subject2.OnNext(20);
-        subject3.OnNext(30);
+        subject1.OnNext(FirstCombineValue);
+        subject2.OnNext(SecondCombineValue);
+        subject3.OnNext(ThirdCombineValue);
 
-        await Assert.That(values.Count).IsEqualTo(3);
+        await Assert.That(values.Count).IsEqualTo(ExpectedThreeEmissions);
     }
 
     /// <summary>
@@ -121,10 +151,10 @@ public class WhenAnyObservableTests
         var subject = new Subject<int>();
         vm.Changes = subject;
 
-        subject.OnNext(99);
+        subject.OnNext(LateAssignedValue);
 
         await Assert.That(values.Count).IsEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo(99);
+        await Assert.That(values[0]).IsEqualTo(LateAssignedValue);
     }
 
     /// <summary>

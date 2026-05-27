@@ -10,6 +10,26 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToDecimalTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Decimal value parsed from a positive numeric string.
+    /// </summary>
+    private const decimal ParsedDecimal = 123.456m;
+
+    /// <summary>
+    /// Decimal value parsed from a negative numeric string.
+    /// </summary>
+    private const decimal NegativeDecimal = -123.456m;
+
+    /// <summary>
+    /// Decimal value parsed in the typed conversion test.
+    /// </summary>
+    private const decimal TypedDecimal = 456.789m;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +38,7 @@ public class StringToDecimalTypeConverterTests
     {
         var converter = new StringToDecimalTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,8 +49,7 @@ public class StringToDecimalTypeConverterTests
     public async Task TryConvert_EmptyString_ReturnsFalse()
     {
         var converter = new StringToDecimalTypeConverter();
-
-        var result = converter.TryConvert(string.Empty, null, out var output);
+        var result = converter.TryConvert(string.Empty, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -43,8 +62,7 @@ public class StringToDecimalTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToDecimalTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -61,7 +79,7 @@ public class StringToDecimalTypeConverterTests
         var result = converter.TryConvert("123.456", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(123.456m);
+        await Assert.That(output).IsEqualTo(ParsedDecimal);
     }
 
     /// <summary>
@@ -106,7 +124,7 @@ public class StringToDecimalTypeConverterTests
         var result = converter.TryConvert("-123.456", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(-123.456m);
+        await Assert.That(output).IsEqualTo(NegativeDecimal);
     }
 
     /// <summary>
@@ -121,7 +139,7 @@ public class StringToDecimalTypeConverterTests
         var result = converter.TryConvertTyped("456.789", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(456.789m);
+        await Assert.That(output).IsEqualTo(TypedDecimal);
     }
 
     /// <summary>

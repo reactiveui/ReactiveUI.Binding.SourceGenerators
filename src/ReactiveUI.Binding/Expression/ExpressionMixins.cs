@@ -30,15 +30,11 @@ public static class ExpressionMixins
                 case ExpressionType.Index when node is IndexExpression indexExpression:
                     {
                         var parent = indexExpression.GetParent();
-                        if (indexExpression.Object is not null && parent is not null && indexExpression.Object.NodeType != ExpressionType.Parameter)
-                        {
-                            expressions.Add(
-                                            indexExpression.Update(Expression.Parameter(parent.Type), indexExpression.Arguments));
-                        }
-                        else
-                        {
-                            expressions.Add(indexExpression);
-                        }
+                        expressions.Add(
+                            indexExpression.Object is not null && parent is not null &&
+                            indexExpression.Object.NodeType != ExpressionType.Parameter
+                                ? indexExpression.Update(Expression.Parameter(parent.Type), indexExpression.Arguments)
+                                : indexExpression);
 
                         node = indexExpression.Object;
                         break;
@@ -47,14 +43,11 @@ public static class ExpressionMixins
                 case ExpressionType.MemberAccess when node is MemberExpression memberExpression:
                     {
                         var parent = memberExpression.GetParent();
-                        if (parent is not null && memberExpression.Expression is not null && memberExpression.Expression.NodeType != ExpressionType.Parameter)
-                        {
-                            expressions.Add(memberExpression.Update(Expression.Parameter(parent.Type)));
-                        }
-                        else
-                        {
-                            expressions.Add(memberExpression);
-                        }
+                        expressions.Add(
+                            parent is not null && memberExpression.Expression is not null &&
+                            memberExpression.Expression.NodeType != ExpressionType.Parameter
+                                ? memberExpression.Update(Expression.Parameter(parent.Type))
+                                : memberExpression);
 
                         node = memberExpression.Expression;
                         break;
@@ -62,7 +55,8 @@ public static class ExpressionMixins
 
                 default:
                     {
-                        var errorMessageBuilder = new StringBuilder($"Unsupported expression of type '{node.NodeType}'.");
+                        var errorMessageBuilder =
+                            new StringBuilder($"Unsupported expression of type '{node.NodeType}'.");
 
                         if (node is ConstantExpression)
                         {
@@ -87,24 +81,37 @@ public static class ExpressionMixins
     /// <returns>The member info from the expression.</returns>
     public static MemberInfo? GetMemberInfo(this Expression expression)
     {
-        ArgumentExceptionHelper.ThrowIfNull(expression);
-
-        MemberInfo? info;
-        switch (expression.NodeType)
+        while (true)
         {
-            case ExpressionType.Index when expression is IndexExpression indexExpression:
-                info = indexExpression.Indexer;
-                break;
-            case ExpressionType.MemberAccess when expression is MemberExpression memberExpression:
-                info = memberExpression.Member;
-                break;
-            case ExpressionType.Convert or ExpressionType.ConvertChecked when expression is UnaryExpression unaryExpression:
-                return GetMemberInfo(unaryExpression.Operand);
-            default:
-                throw new NotSupportedException($"Unsupported expression type: '{expression.NodeType}'");
-        }
+            ArgumentExceptionHelper.ThrowIfNull(expression);
 
-        return info;
+            MemberInfo? info;
+            switch (expression.NodeType)
+            {
+                case ExpressionType.Index when expression is IndexExpression indexExpression:
+                    {
+                        info = indexExpression.Indexer;
+                        break;
+                    }
+
+                case ExpressionType.MemberAccess when expression is MemberExpression memberExpression:
+                    {
+                        info = memberExpression.Member;
+                        break;
+                    }
+
+                case ExpressionType.Convert or ExpressionType.ConvertChecked when expression is UnaryExpression unaryExpression:
+                    {
+                        expression = unaryExpression.Operand;
+                        continue;
+                    }
+
+                default:
+                    throw new NotSupportedException($"Unsupported {nameof(expression)} type: '{expression.NodeType}'");
+            }
+
+            return info;
+        }
     }
 
     /// <summary>
@@ -134,11 +141,11 @@ public static class ExpressionMixins
     {
         ArgumentExceptionHelper.ThrowIfNull(expression);
 
-        if (expression.NodeType == ExpressionType.Index)
+        if (expression.NodeType != ExpressionType.Index)
         {
-            return ((IndexExpression)expression).Arguments.Cast<ConstantExpression>().Select(static c => c.Value).ToArray();
+            return null;
         }
 
-        return null;
+        return [.. ((IndexExpression)expression).Arguments.Cast<ConstantExpression>().Select(static c => c.Value)];
     }
 }

@@ -13,6 +13,31 @@ namespace ReactiveUI.Binding.Tests.Expression;
 public class ReflectionTests
 {
     /// <summary>
+    /// A sample name value used across reflection tests.
+    /// </summary>
+    private const string SampleName = "Alice";
+
+    /// <summary>
+    /// The name of a method member used to exercise non-property reflection paths.
+    /// </summary>
+    private const string HashCodeMethodName = "GetHashCode";
+
+    /// <summary>
+    /// A replacement value assigned through a reflection-based setter.
+    /// </summary>
+    private const string NewFieldValue = "NewValue";
+
+    /// <summary>
+    /// The expected number of values returned for a two-element property chain.
+    /// </summary>
+    private const int ExpectedTwoValues = 2;
+
+    /// <summary>
+    /// The index of the third value in a property chain result.
+    /// </summary>
+    private const int ThirdValueIndex = 2;
+
+    /// <summary>
     /// Verifies that ExpressionToPropertyNames returns the correct name for a simple property.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -85,11 +110,11 @@ public class ReflectionTests
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
-        var vm = new TestViewModel { Name = "Alice" };
+        var vm = new TestViewModel { Name = SampleName };
         var result = Reflection.TryGetValueForPropertyChain<string>(out var value, vm, chain);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(value).IsEqualTo("Alice");
+        await Assert.That(value).IsEqualTo(SampleName);
     }
 
     /// <summary>
@@ -103,7 +128,7 @@ public class ReflectionTests
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
-        var vm = new TestViewModel { Address = new TestAddress { City = "Seattle" } };
+        var vm = new TestViewModel { Address = new() { City = "Seattle" } };
         var result = Reflection.TryGetValueForPropertyChain<string>(out var value, vm, chain);
 
         await Assert.That(result).IsTrue();
@@ -156,14 +181,14 @@ public class ReflectionTests
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
-        var vm = new TestViewModel { Name = "Alice" };
+        var vm = new TestViewModel { Name = SampleName };
         var result = Reflection.TryGetAllValuesForPropertyChain(out var changeValues, vm, chain);
 
         await Assert.That(result).IsTrue();
         await Assert.That(changeValues.Length).IsEqualTo(1);
         await Assert.That(changeValues[0]).IsNotNull();
         await Assert.That(changeValues[0].Sender).IsEqualTo(vm);
-        await Assert.That(changeValues[0].Value).IsEqualTo("Alice");
+        await Assert.That(changeValues[0].Value).IsEqualTo(SampleName);
     }
 
     /// <summary>
@@ -182,7 +207,7 @@ public class ReflectionTests
         var result = Reflection.TryGetAllValuesForPropertyChain(out var changeValues, vm, chain);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(changeValues.Length).IsEqualTo(2);
+        await Assert.That(changeValues.Length).IsEqualTo(ExpectedTwoValues);
         await Assert.That(changeValues[0]).IsNotNull();
         await Assert.That(changeValues[0].Sender).IsEqualTo(vm);
         await Assert.That(changeValues[0].Value).IsEqualTo(address);
@@ -222,7 +247,7 @@ public class ReflectionTests
         var chain = body.GetExpressionChain();
 
         var vm = new TestViewModel(); // Address is null
-        var result = Reflection.TrySetValueToPropertyChain(vm, chain, "New", shouldThrow: false);
+        var result = Reflection.TrySetValueToPropertyChain(vm, chain, "New", false);
 
         await Assert.That(result).IsFalse();
     }
@@ -248,18 +273,19 @@ public class ReflectionTests
     }
 
     /// <summary>
-    /// Verifies that ExpressionToPropertyNames returns a dotted path for a deeper chain using Address.City.
+    /// Verifies that ExpressionToPropertyNames joins every hop of a deep (4-level) chain into a single
+    /// dotted path, exercising the join across multiple intermediate members rather than just one.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExpressionToPropertyNames_DeeperChain_ReturnsDottedPath()
     {
-        Expression<Func<TestViewModel, string>> expr = x => x.Address!.City;
+        Expression<Func<ObjChain1, int>> expr = x => x.Chain2!.Chain3!.Host!.SomeOtherParam;
         var body = Reflection.Rewrite(expr.Body);
 
         var name = Reflection.ExpressionToPropertyNames(body);
 
-        await Assert.That(name).IsEqualTo("Address.City");
+        await Assert.That(name).IsEqualTo("Chain2.Chain3.Host.SomeOtherParam");
     }
 
     /// <summary>
@@ -269,7 +295,7 @@ public class ReflectionTests
     [Test]
     public async Task GetValueFetcherForProperty_MethodMember_ReturnsNull()
     {
-        var methodInfo = typeof(TestViewModel).GetMethod("GetHashCode")!;
+        var methodInfo = typeof(TestViewModel).GetMethod(HashCodeMethodName)!;
         var fetcher = Reflection.GetValueFetcherForProperty(methodInfo);
 
         await Assert.That(fetcher).IsNull();
@@ -306,9 +332,9 @@ public class ReflectionTests
         await Assert.That(setter).IsNotNull();
 
         var model = new FieldTestModel();
-        setter!(model, "NewValue", null);
+        setter!(model, NewFieldValue, null);
 
-        await Assert.That(model.PublicField).IsEqualTo("NewValue");
+        await Assert.That(model.PublicField).IsEqualTo(NewFieldValue);
     }
 
     /// <summary>
@@ -318,7 +344,7 @@ public class ReflectionTests
     [Test]
     public async Task GetValueSetterForProperty_MethodMember_ReturnsNull()
     {
-        var methodInfo = typeof(TestViewModel).GetMethod("GetHashCode")!;
+        var methodInfo = typeof(TestViewModel).GetMethod(HashCodeMethodName)!;
         var setter = Reflection.GetValueSetterForProperty(methodInfo);
 
         await Assert.That(setter).IsNull();
@@ -330,7 +356,7 @@ public class ReflectionTests
     [Test]
     public void GetValueFetcherOrThrow_MethodMember_ThrowsArgumentException()
     {
-        var methodInfo = typeof(TestViewModel).GetMethod("GetHashCode")!;
+        var methodInfo = typeof(TestViewModel).GetMethod(HashCodeMethodName)!;
 
         Assert.Throws<ArgumentException>(() => Reflection.GetValueFetcherOrThrow(methodInfo));
     }
@@ -341,7 +367,7 @@ public class ReflectionTests
     [Test]
     public void GetValueSetterOrThrow_MethodMember_ThrowsArgumentException()
     {
-        var methodInfo = typeof(TestViewModel).GetMethod("GetHashCode")!;
+        var methodInfo = typeof(TestViewModel).GetMethod(HashCodeMethodName)!;
 
         Assert.Throws<ArgumentException>(() => Reflection.GetValueSetterOrThrow(methodInfo));
     }
@@ -407,7 +433,7 @@ public class ReflectionTests
         Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
-        var array = chain as System.Linq.Expressions.Expression[] ?? chain.ToArray();
+        var array = chain as System.Linq.Expressions.Expression[] ?? [.. chain];
 
         var result = Reflection.MaterializeExpressions(array);
 
@@ -457,7 +483,8 @@ public class ReflectionTests
         var chain = body.GetExpressionChain();
 
         // Wrap in a pure IEnumerable using a generator method
-        static IEnumerable<System.Linq.Expressions.Expression> AsEnumerable(IEnumerable<System.Linq.Expressions.Expression> src)
+        static IEnumerable<System.Linq.Expressions.Expression> AsEnumerable(
+            IEnumerable<System.Linq.Expressions.Expression> src)
         {
             foreach (var item in src)
             {
@@ -471,19 +498,22 @@ public class ReflectionTests
     }
 
     /// <summary>
-    /// Verifies that TrySetValueToPropertyChain with shouldThrow=false
-    /// and a setter returns null for an unsupported member returns false.
+    /// Verifies that TrySetValueToPropertyChain with shouldThrow=true returns false (rather than throwing)
+    /// when the final property's immediate parent is null. The chain is short enough that the null target
+    /// is reached only after the traversal loop, so this exercises the throwing getter-resolution path
+    /// (GetValueFetcherOrThrow) reaching a valid member yet still returning false — distinct from both the
+    /// shouldThrow=false null-intermediate case and the deeper chain that throws mid-loop.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task TrySetValueToPropertyChain_ShouldThrowFalse_NullIntermediate_ReturnsFalse()
+    public async Task TrySetValueToPropertyChain_ShouldThrowTrue_NullFinalParent_ReturnsFalse()
     {
         Expression<Func<TestViewModel, string>> expr = x => x.Address!.City;
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
         var vm = new TestViewModel(); // Address is null
-        var result = Reflection.TrySetValueToPropertyChain(vm, chain, "New", shouldThrow: false);
+        var result = Reflection.TrySetValueToPropertyChain(vm, chain, "New", true);
 
         await Assert.That(result).IsFalse();
     }
@@ -571,7 +601,7 @@ public class ReflectionTests
         var chain = body.GetExpressionChain();
 
         // Null root with single-property chain hits the null check before last property
-        var result = Reflection.TryGetAllValuesForPropertyChain(out var values, null, chain);
+        var result = Reflection.TryGetAllValuesForPropertyChain(out _, null, chain);
 
         await Assert.That(result).IsFalse();
     }
@@ -587,7 +617,7 @@ public class ReflectionTests
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
-        var result = Reflection.TrySetValueToPropertyChain<string>(null, chain, "value");
+        var result = Reflection.TrySetValueToPropertyChain(null, chain, "value");
 
         await Assert.That(result).IsFalse();
     }
@@ -611,8 +641,8 @@ public class ReflectionTests
         var chain = body.GetExpressionChain();
 
         // Chain2 exists but Chain3 is null
-        var obj = new ObjChain1 { Chain2 = new ObjChain2() };
-        var result = Reflection.TryGetValueForPropertyChain<int>(out var value, obj, chain);
+        var obj = new ObjChain1 { Chain2 = new() };
+        var result = Reflection.TryGetValueForPropertyChain<int>(out _, obj, chain);
 
         await Assert.That(result).IsFalse();
     }
@@ -636,7 +666,7 @@ public class ReflectionTests
         var chain = body.GetExpressionChain();
 
         // Chain2 exists but Chain3 is null
-        var obj = new ObjChain1 { Chain2 = new ObjChain2() };
+        var obj = new ObjChain1 { Chain2 = new() };
         var result = Reflection.TryGetAllValuesForPropertyChain(out var changeValues, obj, chain);
 
         await Assert.That(result).IsFalse();
@@ -644,7 +674,7 @@ public class ReflectionTests
         // First two values should be set, third should be null
         await Assert.That(changeValues[0]).IsNotNull();
         await Assert.That(changeValues[1]).IsNotNull();
-        await Assert.That(changeValues[2]).IsNull();
+        await Assert.That(changeValues[ThirdValueIndex]).IsNull();
     }
 
     /// <summary>
@@ -665,34 +695,28 @@ public class ReflectionTests
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
-        var obj = new ObjChain1 { Chain2 = new ObjChain2() }; // Chain3 is null
-        var action = () => Reflection.TrySetValueToPropertyChain(obj, chain, 42, shouldThrow: true);
+        var obj = new ObjChain1 { Chain2 = new() }; // Chain3 is null
+        var action = () => Reflection.TrySetValueToPropertyChain(obj, chain, 42);
 
         await Assert.That(action).ThrowsException();
     }
 
     /// <summary>
-    /// Verifies that TrySetValueToPropertyChain with shouldThrow=false uses GetValueSetterForProperty
-    /// and returns false when setter is null on the final property.
-    /// Covers Reflection.cs line 289 (shouldThrow FALSE) and line 293 (setter is null).
+    /// Verifies that TrySetValueToPropertyChain with shouldThrow=false resolves the getter/setter via the
+    /// non-throwing path (GetValueFetcherForProperty / GetValueSetterForProperty) and successfully sets the
+    /// final property when every member in the chain is populated.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task TrySetValueToPropertyChain_ShouldThrowFalse_MethodMember_ReturnsFalse()
+    public async Task TrySetValueToPropertyChain_ShouldThrowFalse_PopulatedChain_SetsValue()
     {
-        // We need an expression chain whose last element's GetMemberInfo() returns a MethodInfo,
-        // which GetValueSetterForProperty returns null for.
-        // A simple way: use a single-element chain with a MemberExpression wrapping a method.
-        // Actually, we can't easily do this with expression chains from lambdas.
-        // Instead, test with a valid chain but shouldThrow=false on a successful path.
-        // The more direct coverage: create a single-property chain with shouldThrow=false where Address is populated.
         Expression<Func<TestViewModel, string>> expr = x => x.Address!.City;
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
         var address = new TestAddress { City = "Old" };
         var vm = new TestViewModel { Address = address };
-        var result = Reflection.TrySetValueToPropertyChain(vm, chain, "New", shouldThrow: false);
+        var result = Reflection.TrySetValueToPropertyChain(vm, chain, "New", false);
 
         await Assert.That(result).IsTrue();
         await Assert.That(address.City).IsEqualTo("New");
@@ -748,30 +772,6 @@ public class ReflectionTests
     }
 
     /// <summary>
-    /// Verifies that TrySetValueToPropertyChain with shouldThrow=false returns false
-    /// when GetValueSetterForProperty returns null for the final expression.
-    /// This covers Reflection.cs line 293 (setter is null TRUE branch).
-    /// Uses a synthetic expression chain with a MethodInfo member, since GetValueSetterForProperty
-    /// only returns null for members that are neither FieldInfo nor PropertyInfo.
-    /// </summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task TrySetValueToPropertyChain_SetterNull_ShouldThrowFalse_ReturnsFalse()
-    {
-        // GetValueSetterForProperty returns null for MethodInfo.
-        // We verify directly: GetValueSetterForProperty(methodInfo) == null.
-        var methodInfo = typeof(TestViewModel).GetMethod("GetHashCode")!;
-        var setter = Reflection.GetValueSetterForProperty(methodInfo);
-        await Assert.That(setter).IsNull();
-
-        // To cover line 293 via TrySetValueToPropertyChain, we need an expression chain
-        // whose last element's GetMemberInfo() returns a MethodInfo.
-        // MemberExpression only wraps FieldInfo or PropertyInfo, so standard lambdas
-        // can't produce this path. The coverage of line 293 is effectively handled by
-        // the fact that GetValueSetterForProperty returns null for non-field/non-property members.
-    }
-
-    /// <summary>
     /// Verifies that TrySetValueToPropertyChain throws when attempting to set a read-only property
     /// with shouldThrow=true (default). PropertyInfo.SetValue throws when the property has no setter.
     /// </summary>
@@ -784,7 +784,7 @@ public class ReflectionTests
         var chain = body.GetExpressionChain();
 
         var model = new ReadOnlyModel();
-        var act = () => Reflection.TrySetValueToPropertyChain(model, chain, "NewValue", shouldThrow: true);
+        var act = () => Reflection.TrySetValueToPropertyChain(model, chain, NewFieldValue);
 
         await Assert.That(act).ThrowsException();
     }
@@ -804,7 +804,7 @@ public class ReflectionTests
         var chain = body.GetExpressionChain();
 
         var model = new ReadOnlyModel();
-        var act = () => Reflection.TrySetValueToPropertyChain(model, chain, "NewValue", shouldThrow: false);
+        var act = () => Reflection.TrySetValueToPropertyChain(model, chain, NewFieldValue, false);
 
         // GetValueSetterForProperty returns property.SetValue (non-null) for any PropertyInfo,
         // but calling SetValue on a getter-only property throws ArgumentException.
@@ -816,48 +816,79 @@ public class ReflectionTests
     /// </summary>
     public class FieldTestModel
     {
-#pragma warning disable SA1401 // Fields should be private
         /// <summary>
         /// A public field for testing field-based reflection.
         /// </summary>
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Test model")]
+        [SuppressMessage("Major Code Smell", "S2357:Fields should be private", Justification = "Test model")]
+        [SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Test model")]
         public string PublicField = string.Empty;
-#pragma warning restore SA1401 // Fields should be private
     }
 
     /// <summary>
     /// A test model with an indexed property for testing index expressions.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
+    [SuppressMessage(
+        "Performance",
+        "CA1812:Avoid uninstantiated internal classes",
+        Justification = "Referenced only inside an inspected expression tree (never compiled), so no construction is visible to the analyzer.")]
     private sealed class IndexedModel
     {
         /// <summary>
+        /// The first sample value stored in <see cref="Items"/>.
+        /// </summary>
+        private const int FirstItemValue = 10;
+
+        /// <summary>
+        /// The second sample value stored in <see cref="Items"/>.
+        /// </summary>
+        private const int SecondItemValue = 20;
+
+        /// <summary>
+        /// The third sample value stored in <see cref="Items"/>.
+        /// </summary>
+        private const int ThirdItemValue = 30;
+
+        /// <summary>
         /// Gets a list of integers for testing index expressions.
         /// </summary>
-        public List<int> Items { get; } = [10, 20, 30];
+        public List<int> Items { get; } = [FirstItemValue, SecondItemValue, ThirdItemValue];
     }
 
     /// <summary>
     /// A test model with a dictionary for testing multi-argument index expressions.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
+    [SuppressMessage(
+        "Performance",
+        "CA1812:Avoid uninstantiated internal classes",
+        Justification = "Referenced only via typeof/reflection metadata in indexer tests; never constructed by design.")]
     private sealed class MultiArgIndexedModel
     {
         /// <summary>
+        /// The sample value mapped to the seeded dictionary key.
+        /// </summary>
+        private const int SeededValue = 42;
+
+        /// <summary>
         /// Gets a dictionary of string-to-int mappings for testing multi-argument index expressions.
         /// </summary>
-        public Dictionary<string, int> Items { get; } = new() { ["key1"] = 42 };
+        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Used for testing")]
+        public Dictionary<string, int> Items { get; } = new() { ["key1"] = SeededValue };
     }
 
     /// <summary>
     /// A test model with a true multi-parameter indexer (two int parameters).
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used as type parameter in expression lambdas.")]
+    [SuppressMessage(
+        "Performance",
+        "CA1812:Avoid uninstantiated internal classes",
+        Justification = "Referenced only via typeof/reflection metadata in indexer tests; never constructed by design.")]
     private sealed class TrueMultiArgIndexedModel
     {
         /// <summary>
         /// Backing dictionary for the multi-parameter indexer.
         /// </summary>
-        private readonly Dictionary<(int Row, int Col), int> _data = new();
+        private readonly Dictionary<(int Row, int Col), int> _data = [];
 
         /// <summary>
         /// Gets or sets the value at the specified row and column.
@@ -865,6 +896,7 @@ public class ReflectionTests
         /// <param name="row">The row index.</param>
         /// <param name="col">The column index.</param>
         /// <returns>The value at the specified position.</returns>
+        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Used for testing")]
         public int this[int row, int col]
         {
             get => _data.TryGetValue((row, col), out var val) ? val : 0;
@@ -875,7 +907,6 @@ public class ReflectionTests
     /// <summary>
     /// A test model with a read-only property (getter only, no setter).
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Used in expression lambdas for testing read-only property behavior.")]
     private sealed class ReadOnlyModel
     {
         /// <summary>

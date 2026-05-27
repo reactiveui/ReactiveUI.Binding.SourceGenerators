@@ -59,13 +59,13 @@ public sealed class SetMethodBindingConverterRegistry
 
         lock (_gate)
         {
-            var snap = _snapshot ?? new Snapshot(new List<ISetMethodBindingConverter>(8));
+            var snap = _snapshot ?? new Snapshot(new(8));
 
             // Copy-on-write update: clone the list
             var newList = new List<ISetMethodBindingConverter>(snap.Converters) { converter };
 
             // Publish the new snapshot (atomic via reference assignment)
-            _snapshot = new Snapshot(newList);
+            _snapshot = new(newList);
         }
     }
 

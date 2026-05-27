@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanged.FourLevelDeepChain
+namespace SharedScenarios.WhenChanged.FourLevelDeepChain;
+
+/// <summary>
+/// Top level in the deep chain.
+/// </summary>
+public class Level1 : INotifyPropertyChanged
 {
     /// <summary>
-    /// Top level in the deep chain.
+    /// The backing field for <see cref="Model"/>.
     /// </summary>
-    public class Level1 : INotifyPropertyChanged
+    private Level2 _model = new Level2();
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the level 2 model.
+    /// </summary>
+    public Level2 Model
     {
-        /// <summary>
-        /// The backing field for <see cref="Model"/>.
-        /// </summary>
-        private Level2 _model = new();
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the level 2 model.
-        /// </summary>
-        public Level2 Model
+        get => _model;
+        set
         {
-            get => _model;
-            set
+            if (_model == value)
             {
-                if (_model != value)
-                {
-                    _model = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Model)));
-                }
+                return;
             }
+
+            _model = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Model)));
         }
     }
 }

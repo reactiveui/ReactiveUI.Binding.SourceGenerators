@@ -12,6 +12,26 @@ namespace ReactiveUI.Binding.Tests.Observables;
 public class DistinctUntilChangedObservableTests
 {
     /// <summary>
+    /// The expected number of distinct values emitted when consecutive duplicates are suppressed.
+    /// </summary>
+    private const int ExpectedDistinctCount = 3;
+
+    /// <summary>
+    /// The second distinct integer value emitted by the source.
+    /// </summary>
+    private const int SecondValue = 2;
+
+    /// <summary>
+    /// The index of the third emitted result.
+    /// </summary>
+    private const int ThirdResultIndex = 2;
+
+    /// <summary>
+    /// The expected number of distinct values emitted when a custom comparer is used.
+    /// </summary>
+    private const int ExpectedCustomComparerCount = 2;
+
+    /// <summary>
     /// Verifies that the first value is always emitted and consecutive duplicates are suppressed.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
@@ -33,10 +53,10 @@ public class DistinctUntilChangedObservableTests
         var distinct = new DistinctUntilChangedObservable<int>(source);
         distinct.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
 
-        await Assert.That(results).Count().IsEqualTo(3);
+        await Assert.That(results).Count().IsEqualTo(ExpectedDistinctCount);
         await Assert.That(results[0]).IsEqualTo(1);
-        await Assert.That(results[1]).IsEqualTo(2);
-        await Assert.That(results[2]).IsEqualTo(1);
+        await Assert.That(results[1]).IsEqualTo(SecondValue);
+        await Assert.That(results[ThirdResultIndex]).IsEqualTo(1);
     }
 
     /// <summary>
@@ -59,7 +79,7 @@ public class DistinctUntilChangedObservableTests
         var distinct = new DistinctUntilChangedObservable<string>(source, StringComparer.OrdinalIgnoreCase);
         distinct.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
 
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedCustomComparerCount);
         await Assert.That(results[0]).IsEqualTo("a");
         await Assert.That(results[1]).IsEqualTo("b");
     }
@@ -74,7 +94,7 @@ public class DistinctUntilChangedObservableTests
         var errorThrown = false;
         var source = new AnonymousObservable<int>(observer =>
         {
-            observer.OnError(new Exception("test"));
+            observer.OnError(new InvalidOperationException("test"));
             return EmptyDisposable.Instance;
         });
 

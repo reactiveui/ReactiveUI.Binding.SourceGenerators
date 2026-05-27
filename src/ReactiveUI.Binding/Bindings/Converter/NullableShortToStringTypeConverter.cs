@@ -9,8 +9,13 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public sealed class NullableShortToStringTypeConverter : BindingTypeConverter<short?, string>
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
-    public override int GetAffinityForObjects() => 2;
+    public override int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public override bool TryConvert(short? from, object? conversionHint, [MaybeNullWhen(true)] out string? result)
@@ -21,19 +26,25 @@ public sealed class NullableShortToStringTypeConverter : BindingTypeConverter<sh
             return true;
         }
 
-        if (conversionHint is int width)
+        switch (conversionHint)
         {
-            result = from.Value.ToString($"D{width}");
-            return true;
-        }
+            case int width:
+                {
+                    result = from.Value.ToString($"D{width}");
+                    return true;
+                }
 
-        if (conversionHint is string format)
-        {
-            result = from.Value.ToString(format);
-            return true;
-        }
+            case string format:
+                {
+                    result = from.Value.ToString(format);
+                    return true;
+                }
 
-        result = from.Value.ToString();
-        return true;
+            default:
+                {
+                    result = from.Value.ToString();
+                    return true;
+                }
+        }
     }
 }

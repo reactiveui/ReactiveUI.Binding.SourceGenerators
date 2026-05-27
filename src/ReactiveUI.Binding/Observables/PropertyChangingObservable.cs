@@ -29,7 +29,7 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
     /// <summary>
     /// A delegate that reads the current property value from the source.
     /// </summary>
-    private readonly Func<INotifyPropertyChanging, T> _getter;
+    private readonly Func<INotifyPropertyChanging, T?> _getter;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PropertyChangingObservable{T}"/> class.
@@ -40,7 +40,7 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
     public PropertyChangingObservable(
         INotifyPropertyChanging source,
         string propertyName,
-        Func<INotifyPropertyChanging, T> getter)
+        Func<INotifyPropertyChanging, T?> getter)
     {
         ArgumentExceptionHelper.ThrowIfNull(source);
         ArgumentExceptionHelper.ThrowIfNull(propertyName);
@@ -61,7 +61,7 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
     /// <summary>
     /// Manages the event subscription for a single observer.
     /// </summary>
-    private sealed class Subscription : IDisposable
+    internal sealed class Subscription : IDisposable
     {
         /// <summary>
         /// The parent observable that owns the source and property metadata.
@@ -89,16 +89,18 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
 
             // Emit initial (StartWith) value
             var initial = parent._getter(parent._source);
-            observer.OnNext(initial);
+            observer.OnNext(initial!);
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (TrySetDisposed())
+            if (!TrySetDisposed())
             {
-                _parent._source.PropertyChanging -= OnPropertyChanging;
+                return;
             }
+
+            _parent._source.PropertyChanging -= OnPropertyChanging;
         }
 
         /// <summary>
@@ -130,7 +132,7 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
             }
 
             var value = _parent._getter(_parent._source);
-            observer.OnNext(value);
+            observer.OnNext(value!);
         }
     }
 }

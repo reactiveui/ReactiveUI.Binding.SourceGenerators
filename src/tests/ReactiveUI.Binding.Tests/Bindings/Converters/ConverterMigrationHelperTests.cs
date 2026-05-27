@@ -11,6 +11,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 public class ConverterMigrationHelperTests
 {
     /// <summary>
+    ///     The expected number of converters extracted when two are registered.
+    /// </summary>
+    private const int ExpectedTwoConverters = 2;
+
+    /// <summary>
     ///     Verifies that ExtractConverters throws when resolver is null.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -56,7 +61,7 @@ public class ConverterMigrationHelperTests
         var (typed, fallback, setMethod) = ConverterMigrationHelper.ExtractConverters(resolver);
 
         // Assert
-        await Assert.That(typed).Count().IsEqualTo(2);
+        await Assert.That(typed).Count().IsEqualTo(ExpectedTwoConverters);
         await Assert.That(typed).Contains(converter1);
         await Assert.That(typed).Contains(converter2);
         await Assert.That(fallback).IsEmpty();
@@ -82,7 +87,7 @@ public class ConverterMigrationHelperTests
 
         // Assert
         await Assert.That(typed).IsEmpty();
-        await Assert.That(fallback).Count().IsEqualTo(2);
+        await Assert.That(fallback).Count().IsEqualTo(ExpectedTwoConverters);
         await Assert.That(fallback).Contains(converter1);
         await Assert.That(fallback).Contains(converter2);
         await Assert.That(setMethod).IsEmpty();
@@ -108,7 +113,7 @@ public class ConverterMigrationHelperTests
         // Assert
         await Assert.That(typed).IsEmpty();
         await Assert.That(fallback).IsEmpty();
-        await Assert.That(setMethod).Count().IsEqualTo(2);
+        await Assert.That(setMethod).Count().IsEqualTo(ExpectedTwoConverters);
         await Assert.That(setMethod).Contains(converter1);
         await Assert.That(setMethod).Contains(converter2);
     }
@@ -155,7 +160,7 @@ public class ConverterMigrationHelperTests
         resolver.RegisterService<IBindingTypeConverter>(null!);
 
         // Act
-        var (typed, fallback, setMethod) = ConverterMigrationHelper.ExtractConverters(resolver);
+        var (typed, _, _) = ConverterMigrationHelper.ExtractConverters(resolver);
 
         // Assert - Should only contain the non-null converter
         await Assert.That(typed).Count().IsEqualTo(1);
@@ -333,21 +338,38 @@ public class ConverterMigrationHelperTests
         public object? GetService(Type? serviceType, string? contract) => _services.FirstOrDefault();
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public T? GetService<T>() => _services.OfType<T>().FirstOrDefault();
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public T? GetService<T>(string? contract) => _services.OfType<T>().FirstOrDefault();
 
         /// <inheritdoc/>
         public IEnumerable<object> GetServices(Type? serviceType) => _services.Where(s => s is not null)!;
 
         /// <inheritdoc/>
-        public IEnumerable<object> GetServices(Type? serviceType, string? contract) => _services.Where(s => s is not null)!;
+        public IEnumerable<object> GetServices(Type? serviceType, string? contract) =>
+            _services.Where(s => s is not null)!;
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public IEnumerable<T> GetServices<T>() => _services.OfType<T>();
 
         /// <inheritdoc/>
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public IEnumerable<T> GetServices<T>(string? contract) => _services.OfType<T>();
     }
 
@@ -378,7 +400,12 @@ public class ConverterMigrationHelperTests
         public int GetAffinityForObjects(Type fromType, Type toType) => affinity;
 
         /// <inheritdoc/>
-        public bool TryConvert(Type fromType, object from, Type toType, object? conversionHint, [NotNullWhen(true)] out object? result)
+        public bool TryConvert(
+            Type fromType,
+            object from,
+            Type toType,
+            object? conversionHint,
+            [NotNullWhen(true)] out object? result)
         {
             result = null;
             return false;

@@ -36,11 +36,13 @@ public class TestView : INotifyPropertyChanged, IViewFor
         get => _displayName;
         set
         {
-            if (_displayName != value)
+            if (_displayName == value)
             {
-                _displayName = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayName)));
+                return;
             }
+
+            _displayName = value;
+            PropertyChanged?.Invoke(this, new(nameof(DisplayName)));
         }
     }
 
@@ -52,11 +54,13 @@ public class TestView : INotifyPropertyChanged, IViewFor
         get => _displayAge;
         set
         {
-            if (_displayAge != value)
+            if (_displayAge == value)
             {
-                _displayAge = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayAge)));
+                return;
             }
+
+            _displayAge = value;
+            PropertyChanged?.Invoke(this, new(nameof(DisplayAge)));
         }
     }
 }

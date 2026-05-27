@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Windows.Input;
-
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.CommandBinding;
 
@@ -72,16 +71,21 @@ public class CommandBinderServiceTests
         await Assert.That(ReferenceEquals(binder, customBinder)).IsTrue();
     }
 
-#pragma warning disable CA1812
     /// <summary>
     /// A mock control with a Click event for testing event-based command binder selection.
     /// </summary>
-    private class ClickableButton
+    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Used for testing")]
+    [SuppressMessage(
+        "Performance",
+        "CA1812:Avoid uninstantiated internal classes",
+        Justification = "Used only as a generic type argument for command-binder metadata dispatch; never constructed by design.")]
+    private sealed class ClickableButton
     {
 #pragma warning disable CS0067
         /// <summary>
         /// Occurs when the button is clicked.
         /// </summary>
+        [SuppressMessage("Major Code Smell", "S3264:Events should be invoked", Justification = "Test model")]
         public event EventHandler? Click;
 #pragma warning restore CS0067
     }
@@ -89,18 +93,29 @@ public class CommandBinderServiceTests
     /// <summary>
     /// A plain object with no events or command properties for testing null binder scenarios.
     /// </summary>
-    private class PlainObject
-    {
-    }
-#pragma warning restore CA1812
+    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Used for testing")]
+    [SuppressMessage(
+        "Performance",
+        "CA1812:Avoid uninstantiated internal classes",
+        Justification = "Used only as a generic type argument for the null-binder dispatch path; never constructed by design.")]
+    private sealed class PlainObject;
 
     /// <summary>
     /// A custom command binder with high affinity (10) for testing binder priority selection.
     /// </summary>
-    private class HighAffinityBinder : ICreatesCommandBinding
+    private sealed class HighAffinityBinder : ICreatesCommandBinding
     {
+        /// <summary>
+        /// The high affinity score reported by this binder.
+        /// </summary>
+        private const int HighAffinity = 10;
+
         /// <inheritdoc/>
-        public int GetAffinityForObject<T>(bool hasEventTarget) => 10;
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        public int GetAffinityForObject<T>(bool hasEventTarget) => HighAffinity;
 
         /// <inheritdoc/>
         [RequiresUnreferencedCode("Test stub")]
@@ -109,11 +124,24 @@ public class CommandBinderServiceTests
 
         /// <inheritdoc/>
         [RequiresUnreferencedCode("Test stub")]
-        public IDisposable? BindCommandToObject<T, TEventArgs>(ICommand? command, T? target, IObservable<object?> commandParameter, string eventName)
+        [SuppressMessage(
+            "Major Code Smell",
+            "S4018:Generic methods should provide type parameter for type inference",
+            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        public IDisposable? BindCommandToObject<T, TEventArgs>(
+            ICommand? command,
+            T? target,
+            IObservable<object?> commandParameter,
+            string eventName)
             where T : class => null;
 
         /// <inheritdoc/>
-        public IDisposable? BindCommandToObject<T, TEventArgs>(ICommand? command, T? target, IObservable<object?> commandParameter, Action<EventHandler<TEventArgs>> addHandler, Action<EventHandler<TEventArgs>> removeHandler)
+        public IDisposable? BindCommandToObject<T, TEventArgs>(
+            ICommand? command,
+            T? target,
+            IObservable<object?> commandParameter,
+            Action<EventHandler<TEventArgs>> addHandler,
+            Action<EventHandler<TEventArgs>> removeHandler)
             where T : class
             where TEventArgs : EventArgs => null;
     }

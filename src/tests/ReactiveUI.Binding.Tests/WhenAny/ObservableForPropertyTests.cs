@@ -14,6 +14,26 @@ namespace ReactiveUI.Binding.Tests.WhenAny;
 public class ObservableForPropertyTests
 {
     /// <summary>
+    /// The name of the property observed by the string-based overload tests.
+    /// </summary>
+    private const string ObservedPropertyName = "IsNotNullString";
+
+    /// <summary>
+    /// The initial property value used across tests.
+    /// </summary>
+    private const string InitialValue = "Initial";
+
+    /// <summary>
+    /// The expected number of emitted changes when two notifications are produced.
+    /// </summary>
+    private const int ExpectedTwoChanges = 2;
+
+    /// <summary>
+    /// The updated leaf value used in deep-chain tests.
+    /// </summary>
+    private const int UpdatedLeafValue = 99;
+
+    /// <summary>
     /// Verifies that a single property emits on change.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -31,7 +51,7 @@ public class ObservableForPropertyTests
         fixture.IsNotNullString = "Bar";
         fixture.IsNotNullString = "Baz";
 
-        await Assert.That(changes.Count).IsEqualTo(2);
+        await Assert.That(changes.Count).IsEqualTo(ExpectedTwoChanges);
         await Assert.That(changes[0].Value).IsEqualTo("Bar");
         await Assert.That(changes[1].Value).IsEqualTo("Baz");
     }
@@ -45,7 +65,7 @@ public class ObservableForPropertyTests
     {
         EnsureInitialized();
 
-        var fixture = new TestFixture { IsNotNullString = "Initial" };
+        var fixture = new TestFixture { IsNotNullString = InitialValue };
         var changes = new List<IObservedChange<TestFixture, string>>();
 
         using var sub = fixture.ObservableForProperty(x => x.IsNotNullString)
@@ -64,14 +84,14 @@ public class ObservableForPropertyTests
     {
         EnsureInitialized();
 
-        var fixture = new TestFixture { IsNotNullString = "Initial" };
+        var fixture = new TestFixture { IsNotNullString = InitialValue };
         var changes = new List<IObservedChange<TestFixture, string>>();
 
         using var sub = fixture.ObservableForProperty(x => x.IsNotNullString, skipInitial: false)
             .Subscribe(changes.Add);
 
         await Assert.That(changes.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(changes[0].Value).IsEqualTo("Initial");
+        await Assert.That(changes[0].Value).IsEqualTo(InitialValue);
     }
 
     /// <summary>
@@ -83,10 +103,7 @@ public class ObservableForPropertyTests
     {
         EnsureInitialized();
 
-        var fixture = new HostTestFixture
-        {
-            Child = new TestFixture { IsOnlyOneWord = "Foo" }
-        };
+        var fixture = new HostTestFixture { Child = new() { IsOnlyOneWord = "Foo" } };
         var changes = new List<IObservedChange<HostTestFixture, string>>();
 
         using var sub = fixture.ObservableForProperty(x => x.Child!.IsOnlyOneWord, skipInitial: false)
@@ -96,7 +113,7 @@ public class ObservableForPropertyTests
 
         fixture.Child.IsOnlyOneWord = "Bar";
 
-        await Assert.That(changes.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(changes.Count).IsGreaterThanOrEqualTo(ExpectedTwoChanges);
     }
 
     /// <summary>
@@ -108,10 +125,7 @@ public class ObservableForPropertyTests
     {
         EnsureInitialized();
 
-        var fixture = new HostTestFixture
-        {
-            Child = new TestFixture { IsOnlyOneWord = "Foo" }
-        };
+        var fixture = new HostTestFixture { Child = new() { IsOnlyOneWord = "Foo" } };
         var changes = new List<IObservedChange<HostTestFixture, string>>();
 
         using var sub = fixture.ObservableForProperty(x => x.Child!.IsOnlyOneWord, skipInitial: false)
@@ -120,7 +134,7 @@ public class ObservableForPropertyTests
         var initialCount = changes.Count;
 
         // Replace the intermediate object entirely
-        fixture.Child = new TestFixture { IsOnlyOneWord = "Baz" };
+        fixture.Child = new() { IsOnlyOneWord = "Baz" };
 
         await Assert.That(changes.Count).IsGreaterThan(initialCount);
     }
@@ -134,10 +148,7 @@ public class ObservableForPropertyTests
     {
         EnsureInitialized();
 
-        var fixture = new HostTestFixture
-        {
-            Child = new TestFixture { IsOnlyOneWord = "Foo" }
-        };
+        var fixture = new HostTestFixture { Child = new() { IsOnlyOneWord = "Foo" } };
         var changes = new List<IObservedChange<HostTestFixture, string>>();
 
         using var sub = fixture.ObservableForProperty(x => x.Child!.IsOnlyOneWord, skipInitial: false)
@@ -149,7 +160,7 @@ public class ObservableForPropertyTests
         fixture.Child = null;
 
         // Restore with a new value
-        fixture.Child = new TestFixture { IsOnlyOneWord = "Bar" };
+        fixture.Child = new() { IsOnlyOneWord = "Bar" };
 
         await Assert.That(changes.Count).IsGreaterThan(countAfterInitial);
     }
@@ -163,45 +174,37 @@ public class ObservableForPropertyTests
     {
         EnsureInitialized();
 
-        var fixture = new ObjChain1
-        {
-            Chain2 = new ObjChain2
-            {
-                Chain3 = new ObjChain3
-                {
-                    Host = new HostTestFixture
-                    {
-                        SomeOtherParam = 42
-                    }
-                }
-            }
-        };
+        var fixture = new ObjChain1 { Chain2 = new() { Chain3 = new() { Host = new() { SomeOtherParam = 42 } } } };
         var values = new List<IObservedChange<ObjChain1, int>>();
 
         using var sub = fixture.ObservableForProperty(
-            x => x.Chain2!.Chain3!.Host!.SomeOtherParam,
-            skipInitial: false)
+                x => x.Chain2!.Chain3!.Host!.SomeOtherParam,
+                skipInitial: false)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
 
         // Change the leaf value
-        fixture.Chain2!.Chain3!.Host!.SomeOtherParam = 99;
+        fixture.Chain2!.Chain3!.Host!.SomeOtherParam = UpdatedLeafValue;
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoChanges);
     }
 
     /// <summary>
     /// Verifies that ObservableForProperty works with plain INPC objects.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
+    [SuppressMessage(
+        "Minor Code Smell",
+        "S100:Methods and properties should be named in PascalCase",
+        Justification = "established acronym matching ReactiveUI domain terminology")]
     [Test]
     public async Task WorksWithINPCObjects()
     {
         EnsureInitialized();
 
-        var obj = new NonReactiveINPCObject();
-        var changes = new List<IObservedChange<NonReactiveINPCObject, string>>();
+        var obj = new NonReactiveINotifyPropertyChangedObject();
+        var changes = new List<IObservedChange<NonReactiveINotifyPropertyChangedObject, string>>();
 
         using var sub = obj.ObservableForProperty(x => x.InpcProperty)
             .Subscribe(changes.Add);
@@ -224,7 +227,7 @@ public class ObservableForPropertyTests
         var fixture = new TestFixture();
         var changes = new List<IObservedChange<TestFixture, string>>();
 
-        using var sub = fixture.ObservableForProperty<TestFixture, string>("IsNotNullString")
+        using var sub = fixture.ObservableForProperty<TestFixture, string>(ObservedPropertyName)
             .Subscribe(changes.Add);
 
         fixture.IsNotNullString = "Test";
@@ -245,7 +248,7 @@ public class ObservableForPropertyTests
         var fixture = new TestFixture { IsNotNullString = "A" };
         var changes = new List<IObservedChange<TestFixture, string>>();
 
-        using var sub = fixture.ObservableForProperty(x => x.IsNotNullString, isDistinct: true)
+        using var sub = fixture.ObservableForProperty(x => x.IsNotNullString)
             .Subscribe(changes.Add);
 
         fixture.IsNotNullString = "B";
@@ -263,14 +266,14 @@ public class ObservableForPropertyTests
     {
         EnsureInitialized();
 
-        var fixture = new TestFixture { IsNotNullString = "Initial" };
+        var fixture = new TestFixture { IsNotNullString = InitialValue };
         var changes = new List<IObservedChange<TestFixture, string>>();
 
-        using var sub = fixture.ObservableForProperty<TestFixture, string>("IsNotNullString", skipInitial: false)
+        using var sub = fixture.ObservableForProperty<TestFixture, string>(ObservedPropertyName, skipInitial: false)
             .Subscribe(changes.Add);
 
         await Assert.That(changes.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(changes[0].Value).IsEqualTo("Initial");
+        await Assert.That(changes[0].Value).IsEqualTo(InitialValue);
     }
 
     /// <summary>
@@ -285,13 +288,13 @@ public class ObservableForPropertyTests
         var fixture = new TestFixture();
         var changes = new List<IObservedChange<TestFixture, string>>();
 
-        using var sub = fixture.ObservableForProperty<TestFixture, string>("IsNotNullString", isDistinct: false)
+        using var sub = fixture.ObservableForProperty<TestFixture, string>(ObservedPropertyName, beforeChange: false, skipInitial: false, isDistinct: false)
             .Subscribe(changes.Add);
 
         fixture.IsNotNullString = "A";
         fixture.IsNotNullString = "B";
 
-        await Assert.That(changes.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(changes.Count).IsGreaterThanOrEqualTo(ExpectedTwoChanges);
     }
 
     /// <summary>
@@ -306,7 +309,7 @@ public class ObservableForPropertyTests
         var fixture = new TestFixture();
         var changes = new List<IObservedChange<TestFixture, string>>();
 
-        using var sub = fixture.ObservableForProperty<TestFixture, string>("IsNotNullString", beforeChange: true)
+        using var sub = fixture.ObservableForProperty<TestFixture, string>(ObservedPropertyName, true)
             .Subscribe(changes.Add);
 
         fixture.IsNotNullString = "Changed";
@@ -326,13 +329,13 @@ public class ObservableForPropertyTests
         var fixture = new TestFixture();
         var changes = new List<IObservedChange<TestFixture, string>>();
 
-        using var sub = fixture.ObservableForProperty(x => x.IsNotNullString, isDistinct: false)
+        using var sub = fixture.ObservableForProperty(x => x.IsNotNullString, beforeChange: false, skipInitial: false, isDistinct: false)
             .Subscribe(changes.Add);
 
         fixture.IsNotNullString = "A";
         fixture.IsNotNullString = "B";
 
-        await Assert.That(changes.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(changes.Count).IsGreaterThanOrEqualTo(ExpectedTwoChanges);
     }
 
     /// <summary>
@@ -347,7 +350,7 @@ public class ObservableForPropertyTests
         var fixture = new TestFixture();
         var changes = new List<IObservedChange<TestFixture, string>>();
 
-        using var sub = fixture.ObservableForProperty(x => x.IsNotNullString, beforeChange: true)
+        using var sub = fixture.ObservableForProperty(x => x.IsNotNullString, true)
             .Subscribe(changes.Add);
 
         fixture.IsNotNullString = "Changed";
@@ -398,8 +401,8 @@ public class ObservableForPropertyTests
         string? receivedValue = null;
         var received = false;
         using var sub = fixture.ObservableForProperty<TestFixture, string?>(
-            "NonExistentProperty",
-            skipInitial: false)
+                "NonExistentProperty",
+                skipInitial: false)
             .Subscribe(x =>
             {
                 receivedValue = x.Value;
@@ -421,17 +424,15 @@ public class ObservableForPropertyTests
     {
         EnsureInitialized();
 
-        var fixture = new HostTestFixture
-        {
-            Child = null
-        };
+        var fixture = new HostTestFixture { Child = null };
 
         var values = new List<IObservedChange<HostTestFixture, TestFixture?>>();
 
         using var sub = fixture.ObservableForProperty(
-            x => x.Child,
-            skipInitial: false,
-            isDistinct: false)
+                x => x.Child,
+                beforeChange: false,
+                skipInitial: false,
+                isDistinct: false)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);

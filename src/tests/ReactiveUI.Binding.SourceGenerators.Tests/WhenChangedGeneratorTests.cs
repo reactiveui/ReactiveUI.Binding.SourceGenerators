@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp;
-
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -21,7 +20,8 @@ public class WhenChangedGeneratorTests
     public async Task SingleProperty_INPC()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/SinglePropertyINPC");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,20 +34,21 @@ public class WhenChangedGeneratorTests
     public async Task NoInvocations()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
+                              using System;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
+                              }
+                              """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +61,8 @@ public class WhenChangedGeneratorTests
     public async Task SingleProperty_ReactiveObject()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/SinglePropertyReactiveObject");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -73,7 +75,8 @@ public class WhenChangedGeneratorTests
     public async Task MultiProperty_TwoProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultiPropertyTwoProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -86,7 +89,8 @@ public class WhenChangedGeneratorTests
     public async Task MultiProperty_ThreeProperties()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultiPropertyThreeProperties");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -99,7 +103,8 @@ public class WhenChangedGeneratorTests
     public async Task MultiProperty_WithSelector()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultiPropertyWithSelector");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -112,7 +117,8 @@ public class WhenChangedGeneratorTests
     public async Task DeepPropertyChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/DeepPropertyChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -125,7 +131,8 @@ public class WhenChangedGeneratorTests
     public async Task NullableProperty()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/NullableProperty");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -138,7 +145,8 @@ public class WhenChangedGeneratorTests
     public async Task MultipleViewModels()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultipleViewModels");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -151,7 +159,8 @@ public class WhenChangedGeneratorTests
     public async Task IntProperty()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/IntProperty");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -164,7 +173,8 @@ public class WhenChangedGeneratorTests
     public async Task FourLevelDeepChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/FourLevelDeepChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -177,7 +187,8 @@ public class WhenChangedGeneratorTests
     public async Task MultipleInvocations_SameViewModel()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultipleInvocationsSameViewModel");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -192,7 +203,8 @@ public class WhenChangedGeneratorTests
     public async Task MultiProperty_WithDeepChains()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/MultiPropertyWithDeepChains");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -207,7 +219,8 @@ public class WhenChangedGeneratorTests
     public async Task NullForgivingDeepChain()
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/NullForgivingDeepChain");
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -221,45 +234,46 @@ public class WhenChangedGeneratorTests
     public async Task WpfDependencyObject_Property()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
+                              using System;
+                              using System.ComponentModel;
 
-            using ReactiveUI.Binding;
+                              using ReactiveUI.Binding;
 
-            namespace System.Windows
-            {
-                public class DependencyObject {}
-            }
+                              namespace System.Windows
+                              {
+                                  public class DependencyObject {}
+                              }
 
-            namespace TestApp
-            {
-                public class MyWpfControl : System.Windows.DependencyObject, INotifyPropertyChanged
-                {
-                    private string _text = string.Empty;
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Text
-                    {
-                        get => _text;
-                        set
-                        {
-                            if (_text != value)
-                            {
-                                _text = value;
-                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Text)));
-                            }
-                        }
-                    }
-                }
+                              namespace TestApp
+                              {
+                                  public class MyWpfControl : System.Windows.DependencyObject, INotifyPropertyChanged
+                                  {
+                                      private string _text = string.Empty;
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Text
+                                      {
+                                          get => _text;
+                                          set
+                                          {
+                                              if (_text != value)
+                                              {
+                                                  _text = value;
+                                                  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Text)));
+                                              }
+                                          }
+                                      }
+                                  }
 
-                public static class Scenario
-                {
-                    public static IObservable<string> Execute(MyWpfControl control)
-                        => control.WhenChanged(x => x.Text);
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static IObservable<string> Execute(MyWpfControl control)
+                                          => control.WhenChanged(x => x.Text);
+                                  }
+                              }
+                              """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -273,42 +287,43 @@ public class WhenChangedGeneratorTests
     public async Task WinFormsComponent_Property()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
+                              using System;
+                              using System.ComponentModel;
 
-            using ReactiveUI.Binding;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyWinFormsControl : System.ComponentModel.Component, INotifyPropertyChanged
-                {
-                    private string _text = string.Empty;
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public event EventHandler? TextChanged;
-                    public string Text
-                    {
-                        get => _text;
-                        set
-                        {
-                            if (_text != value)
-                            {
-                                _text = value;
-                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Text)));
-                                TextChanged?.Invoke(this, EventArgs.Empty);
-                            }
-                        }
-                    }
-                }
+                              namespace TestApp
+                              {
+                                  public class MyWinFormsControl : System.ComponentModel.Component, INotifyPropertyChanged
+                                  {
+                                      private string _text = string.Empty;
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public event EventHandler? TextChanged;
+                                      public string Text
+                                      {
+                                          get => _text;
+                                          set
+                                          {
+                                              if (_text != value)
+                                              {
+                                                  _text = value;
+                                                  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Text)));
+                                                  TextChanged?.Invoke(this, EventArgs.Empty);
+                                              }
+                                          }
+                                      }
+                                  }
 
-                public static class Scenario
-                {
-                    public static IObservable<string> Execute(MyWinFormsControl control)
-                        => control.WhenChanged(x => x.Text);
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static IObservable<string> Execute(MyWinFormsControl control)
+                                          => control.WhenChanged(x => x.Text);
+                                  }
+                              }
+                              """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -322,45 +337,46 @@ public class WhenChangedGeneratorTests
     public async Task AndroidView_Property()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
+                              using System;
+                              using System.ComponentModel;
 
-            using ReactiveUI.Binding;
+                              using ReactiveUI.Binding;
 
-            namespace Android.Views
-            {
-                public class View {}
-            }
+                              namespace Android.Views
+                              {
+                                  public class View {}
+                              }
 
-            namespace TestApp
-            {
-                public class MyAndroidView : Android.Views.View, INotifyPropertyChanged
-                {
-                    private string _text = string.Empty;
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Text
-                    {
-                        get => _text;
-                        set
-                        {
-                            if (_text != value)
-                            {
-                                _text = value;
-                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Text)));
-                            }
-                        }
-                    }
-                }
+                              namespace TestApp
+                              {
+                                  public class MyAndroidView : Android.Views.View, INotifyPropertyChanged
+                                  {
+                                      private string _text = string.Empty;
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Text
+                                      {
+                                          get => _text;
+                                          set
+                                          {
+                                              if (_text != value)
+                                              {
+                                                  _text = value;
+                                                  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Text)));
+                                              }
+                                          }
+                                      }
+                                  }
 
-                public static class Scenario
-                {
-                    public static IObservable<string> Execute(MyAndroidView view)
-                        => view.WhenChanged(x => x.Text);
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static IObservable<string> Execute(MyAndroidView view)
+                                          => view.WhenChanged(x => x.Text);
+                                  }
+                              }
+                              """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -374,58 +390,59 @@ public class WhenChangedGeneratorTests
     public async Task KVO_NSObject_Property()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
+                              using System;
+                              using System.ComponentModel;
 
-            using ReactiveUI.Binding;
+                              using ReactiveUI.Binding;
 
-            namespace Foundation
-            {
-                public class NSString
-                {
-                    private readonly string _value;
-                    public NSString(string value) { _value = value; }
-                    public static explicit operator NSString(string value) => new NSString(value);
-                }
-                public class NSDictionary {}
-                public enum NSKeyValueObservingOptions { New = 1, Old = 2 }
-                public class NSObject
-                {
-                    public virtual void ObserveValue(NSString keyPath, NSObject ofObject, NSDictionary change, IntPtr context) {}
-                    public void AddObserver(NSObject observer, NSString keyPath, NSKeyValueObservingOptions options, IntPtr context) {}
-                    public void RemoveObserver(NSObject observer, NSString keyPath) {}
-                }
-            }
+                              namespace Foundation
+                              {
+                                  public class NSString
+                                  {
+                                      private readonly string _value;
+                                      public NSString(string value) { _value = value; }
+                                      public static explicit operator NSString(string value) => new NSString(value);
+                                  }
+                                  public class NSDictionary {}
+                                  public enum NSKeyValueObservingOptions { New = 1, Old = 2 }
+                                  public class NSObject
+                                  {
+                                      public virtual void ObserveValue(NSString keyPath, NSObject ofObject, NSDictionary change, IntPtr context) {}
+                                      public void AddObserver(NSObject observer, NSString keyPath, NSKeyValueObservingOptions options, IntPtr context) {}
+                                      public void RemoveObserver(NSObject observer, NSString keyPath) {}
+                                  }
+                              }
 
-            namespace TestApp
-            {
-                public class MyAppleView : Foundation.NSObject, INotifyPropertyChanged
-                {
-                    private string _text = string.Empty;
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Text
-                    {
-                        get => _text;
-                        set
-                        {
-                            if (_text != value)
-                            {
-                                _text = value;
-                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Text)));
-                            }
-                        }
-                    }
-                }
+                              namespace TestApp
+                              {
+                                  public class MyAppleView : Foundation.NSObject, INotifyPropertyChanged
+                                  {
+                                      private string _text = string.Empty;
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Text
+                                      {
+                                          get => _text;
+                                          set
+                                          {
+                                              if (_text != value)
+                                              {
+                                                  _text = value;
+                                                  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Text)));
+                                              }
+                                          }
+                                      }
+                                  }
 
-                public static class Scenario
-                {
-                    public static IObservable<string> Execute(MyAppleView view)
-                        => view.WhenChanged(x => x.Text);
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static IObservable<string> Execute(MyAppleView view)
+                                          => view.WhenChanged(x => x.Text);
+                                  }
+                              }
+                              """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -439,52 +456,53 @@ public class WhenChangedGeneratorTests
     public async Task WinUIDependencyObject_Property()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
+                              using System;
+                              using System.ComponentModel;
 
-            using ReactiveUI.Binding;
+                              using ReactiveUI.Binding;
 
-            namespace Microsoft.UI.Xaml
-            {
-                public class DependencyProperty {}
-                public class DependencyObject
-                {
-                    public long RegisterPropertyChangedCallback(DependencyProperty dp, DependencyPropertyChangedCallback callback) => 0;
-                    public void UnregisterPropertyChangedCallback(DependencyProperty dp, long token) {}
-                }
-                public delegate void DependencyPropertyChangedCallback(DependencyObject sender, DependencyProperty dp);
-            }
+                              namespace Microsoft.UI.Xaml
+                              {
+                                  public class DependencyProperty {}
+                                  public class DependencyObject
+                                  {
+                                      public long RegisterPropertyChangedCallback(DependencyProperty dp, DependencyPropertyChangedCallback callback) => 0;
+                                      public void UnregisterPropertyChangedCallback(DependencyProperty dp, long token) {}
+                                  }
+                                  public delegate void DependencyPropertyChangedCallback(DependencyObject sender, DependencyProperty dp);
+                              }
 
-            namespace TestApp
-            {
-                public class MyWinUIControl : Microsoft.UI.Xaml.DependencyObject, INotifyPropertyChanged
-                {
-                    public static readonly Microsoft.UI.Xaml.DependencyProperty TextProperty = new Microsoft.UI.Xaml.DependencyProperty();
-                    private string _text = string.Empty;
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Text
-                    {
-                        get => _text;
-                        set
-                        {
-                            if (_text != value)
-                            {
-                                _text = value;
-                                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Text)));
-                            }
-                        }
-                    }
-                }
+                              namespace TestApp
+                              {
+                                  public class MyWinUIControl : Microsoft.UI.Xaml.DependencyObject, INotifyPropertyChanged
+                                  {
+                                      public static readonly Microsoft.UI.Xaml.DependencyProperty TextProperty = new Microsoft.UI.Xaml.DependencyProperty();
+                                      private string _text = string.Empty;
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Text
+                                      {
+                                          get => _text;
+                                          set
+                                          {
+                                              if (_text != value)
+                                              {
+                                                  _text = value;
+                                                  PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Text)));
+                                              }
+                                          }
+                                      }
+                                  }
 
-                public static class Scenario
-                {
-                    public static IObservable<string> Execute(MyWinUIControl control)
-                        => control.WhenChanged(x => x.Text);
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static IObservable<string> Execute(MyWinUIControl control)
+                                          => control.WhenChanged(x => x.Text);
+                                  }
+                              }
+                              """;
 
-        var result = await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -500,7 +518,9 @@ public class WhenChangedGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("WhenChanged/SinglePropertyINPC");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(WhenChangedGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(WhenChangedGeneratorTests),
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -514,33 +534,33 @@ public class WhenChangedGeneratorTests
     public async Task ExtensionClassNameMismatch_GeneratesNoDispatch()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
+                              using System;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
 
-                public static class CustomExtensions
-                {
-                    public static string WhenChanged<T>(this T obj, Func<T, string> selector)
-                        => selector(obj);
-                }
+                                  public static class CustomExtensions
+                                  {
+                                      public static string WhenChanged<T>(this T obj, Func<T, string> selector)
+                                          => selector(obj);
+                                  }
 
-                public static class Scenario
-                {
-                    public static void Execute(MyViewModel vm)
-                    {
-                        // This calls CustomExtensions.WhenChanged, NOT ReactiveUIBindingExtensions.WhenChanged
-                        var result = vm.WhenChanged(x => x.Name);
-                    }
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyViewModel vm)
+                                      {
+                                          // This calls CustomExtensions.WhenChanged, NOT ReactiveUIBindingExtensions.WhenChanged
+                                          var result = vm.WhenChanged(x => x.Name);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
 
@@ -561,28 +581,28 @@ public class WhenChangedGeneratorTests
     public async Task IdentityLambda_GeneratesNoDispatch()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
 
-                public static class Scenario
-                {
-                    public static void Execute(MyViewModel vm)
-                    {
-                        // Identity lambda — no member access, just x => x
-                        var obs = vm.WhenChanged(x => x);
-                    }
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyViewModel vm)
+                                      {
+                                          // Identity lambda — no member access, just x => x
+                                          var obs = vm.WhenChanged(x => x);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
 
@@ -601,28 +621,28 @@ public class WhenChangedGeneratorTests
     public async Task BlockBodyLambda_GeneratesNoDispatch()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
 
-                public static class Scenario
-                {
-                    public static void Execute(MyViewModel vm)
-                    {
-                        // Block body lambda — has a statement body rather than expression body
-                        var obs = vm.WhenChanged(x => { return x.Name; });
-                    }
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyViewModel vm)
+                                      {
+                                          // Block body lambda — has a statement body rather than expression body
+                                          var obs = vm.WhenChanged(x => { return x.Name; });
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
 
@@ -641,28 +661,28 @@ public class WhenChangedGeneratorTests
     public async Task FieldAccessLambda_GeneratesNoDispatch()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string _name = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string _name = "";
+                                  }
 
-                public static class Scenario
-                {
-                    public static void Execute(MyViewModel vm)
-                    {
-                        // Accessing a public field, not a property
-                        var obs = vm.WhenChanged(x => x._name);
-                    }
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyViewModel vm)
+                                      {
+                                          // Accessing a public field, not a property
+                                          var obs = vm.WhenChanged(x => x._name);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
 
@@ -682,25 +702,25 @@ public class WhenChangedGeneratorTests
     public async Task PrivatePropertyLambda_GeneratesNoDispatch()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    private string SecretName { get; set; } = "";
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      private string SecretName { get; set; } = "";
 
-                    public void DoSomething()
-                    {
-                        // Accessing a private property from within the class
-                        var obs = this.WhenChanged(x => x.SecretName);
-                    }
-                }
-            }
-            """;
+                                      public void DoSomething()
+                                      {
+                                          // Accessing a private property from within the class
+                                          var obs = this.WhenChanged(x => x.SecretName);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
 
@@ -719,25 +739,25 @@ public class WhenChangedGeneratorTests
     public async Task ProtectedPropertyLambda_GeneratesNoDispatch()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    protected string GuardedName { get; set; } = "";
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      protected string GuardedName { get; set; } = "";
 
-                    public void DoSomething()
-                    {
-                        // Accessing a protected property from within the class
-                        var obs = this.WhenChanged(x => x.GuardedName);
-                    }
-                }
-            }
-            """;
+                                      public void DoSomething()
+                                      {
+                                          // Accessing a protected property from within the class
+                                          var obs = this.WhenChanged(x => x.GuardedName);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
 
@@ -756,29 +776,29 @@ public class WhenChangedGeneratorTests
     public async Task MethodAccessLambda_GeneratesNoDispatch()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                    public string GetName() => Name;
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                      public string GetName() => Name;
+                                  }
 
-                public static class Scenario
-                {
-                    public static void Execute(MyViewModel vm)
-                    {
-                        // Calling a method in the lambda, not accessing a property
-                        var obs = vm.WhenChanged(x => x.GetName());
-                    }
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyViewModel vm)
+                                      {
+                                          // Calling a method in the lambda, not accessing a property
+                                          var obs = vm.WhenChanged(x => x.GetName());
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
 

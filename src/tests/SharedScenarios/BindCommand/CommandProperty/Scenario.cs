@@ -5,21 +5,20 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindCommand.CommandProperty
+namespace SharedScenarios.BindCommand.CommandProperty;
+
+/// <summary>
+/// Exercises BindCommand with a control that has Command+CommandParameter properties.
+/// This should route through CommandPropertyBindingPlugin (no parameter variant).
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindCommand with a control that has Command+CommandParameter properties.
-    /// This should route through CommandPropertyBindingPlugin (no parameter variant).
+    /// Binds the Save command to the SaveButton via Command property.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Binds the Save command to the SaveButton via Command property.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view)
-            => view.BindCommand(vm, x => x.Save, x => x.SaveButton);
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view)
+        => view.BindCommand(vm, x => x.Save, x => x.SaveButton);
 }

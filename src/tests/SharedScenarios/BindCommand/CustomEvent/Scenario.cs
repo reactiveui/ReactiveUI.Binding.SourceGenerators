@@ -5,20 +5,19 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindCommand.CustomEvent
+namespace SharedScenarios.BindCommand.CustomEvent;
+
+/// <summary>
+/// Exercises BindCommand with an explicit toEvent parameter.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindCommand with an explicit toEvent parameter.
+    /// Binds the Save command to the SaveButton's MouseUp event via explicit toEvent.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Binds the Save command to the SaveButton's MouseUp event via explicit toEvent.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A disposable representing the binding.</returns>
-        public static IDisposable Execute(MyViewModel vm, MyView view)
-            => view.BindCommand(vm, x => x.Save, x => x.SaveButton, toEvent: "MouseUp");
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A disposable representing the binding.</returns>
+    public static IDisposable Execute(MyViewModel vm, MyView view)
+        => view.BindCommand(vm, x => x.Save, x => x.SaveButton, "MouseUp");
 }

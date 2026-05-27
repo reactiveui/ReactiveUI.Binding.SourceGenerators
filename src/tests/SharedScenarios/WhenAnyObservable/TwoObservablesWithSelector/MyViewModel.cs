@@ -5,56 +5,59 @@
 using System;
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector
+namespace SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector;
+
+/// <summary>
+/// ViewModel with two observable properties of different types.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel with two observable properties of different types.
+    /// The backing field for <see cref="Count"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private IObservable<int>? _count;
+
+    /// <summary>
+    /// The backing field for <see cref="Message"/>.
+    /// </summary>
+    private IObservable<string>? _message;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the count observable.
+    /// </summary>
+    public IObservable<int>? Count
     {
-        /// <summary>
-        /// The backing field for <see cref="Count"/>.
-        /// </summary>
-        private IObservable<int>? _count;
-
-        /// <summary>
-        /// The backing field for <see cref="Message"/>.
-        /// </summary>
-        private IObservable<string>? _message;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the count observable.
-        /// </summary>
-        public IObservable<int>? Count
+        get => _count;
+        set
         {
-            get => _count;
-            set
+            if (_count == value)
             {
-                if (_count != value)
-                {
-                    _count = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
-                }
+                return;
             }
+
+            _count = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Count)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the message observable.
-        /// </summary>
-        public IObservable<string>? Message
+    /// <summary>
+    /// Gets or sets the message observable.
+    /// </summary>
+    public IObservable<string>? Message
+    {
+        get => _message;
+        set
         {
-            get => _message;
-            set
+            if (_message == value)
             {
-                if (_message != value)
-                {
-                    _message = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Message)));
-                }
+                return;
             }
+
+            _message = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Message)));
         }
     }
 }

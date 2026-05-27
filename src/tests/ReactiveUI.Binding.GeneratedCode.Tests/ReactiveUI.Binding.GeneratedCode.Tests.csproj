@@ -7,14 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="TUnit" />
-    <PackageReference Include="Splat" />
-    <PackageReference Include="System.Reactive" />
+    <PackageReference Include="TUnit"/>
+    <PackageReference Include="Splat"/>
+    <PackageReference Include="System.Reactive"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ReactiveUI.Binding.GeneratedCode.TestModels\ReactiveUI.Binding.GeneratedCode.TestModels.csproj" />
-    <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj" />
+    <ProjectReference Include="..\ReactiveUI.Binding.GeneratedCode.TestModels\ReactiveUI.Binding.GeneratedCode.TestModels.csproj"/>
+    <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
   </ItemGroup>
 
 </Project>

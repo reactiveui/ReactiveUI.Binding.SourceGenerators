@@ -4,21 +4,20 @@
 
 using System.Windows.Input;
 
-namespace SharedScenarios.BindCommand.CommandPropertyExprParam
+namespace SharedScenarios.BindCommand.CommandPropertyExprParam;
+
+/// <summary>
+/// A WPF-like button with Command and CommandParameter properties.
+/// </summary>
+public class WpfLikeButton
 {
     /// <summary>
-    /// A WPF-like button with Command and CommandParameter properties.
+    /// Gets or sets the command.
     /// </summary>
-    public class WpfLikeButton
-    {
-        /// <summary>
-        /// Gets or sets the command.
-        /// </summary>
-        public ICommand? Command { get; set; }
+    public ICommand? Command { get; set; }
 
-        /// <summary>
-        /// Gets or sets the command parameter.
-        /// </summary>
-        public object? CommandParameter { get; set; }
-    }
+    /// <summary>
+    /// Gets or sets the command parameter.
+    /// </summary>
+    public object? CommandParameter { get; set; }
 }

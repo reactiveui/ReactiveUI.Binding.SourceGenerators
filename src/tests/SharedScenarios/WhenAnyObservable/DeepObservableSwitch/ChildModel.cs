@@ -5,35 +5,36 @@
 using System;
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenAnyObservable.DeepObservableSwitch
+namespace SharedScenarios.WhenAnyObservable.DeepObservableSwitch;
+
+/// <summary>
+/// Child model with an observable property.
+/// </summary>
+public class ChildModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// Child model with an observable property.
+    /// The backing field for <see cref="MyCommand"/>.
     /// </summary>
-    public class ChildModel : INotifyPropertyChanged
+    private IObservable<string>? _myCommand;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the command observable.
+    /// </summary>
+    public IObservable<string>? MyCommand
     {
-        /// <summary>
-        /// The backing field for <see cref="MyCommand"/>.
-        /// </summary>
-        private IObservable<string>? _myCommand;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the command observable.
-        /// </summary>
-        public IObservable<string>? MyCommand
+        get => _myCommand;
+        set
         {
-            get => _myCommand;
-            set
+            if (_myCommand == value)
             {
-                if (_myCommand != value)
-                {
-                    _myCommand = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MyCommand)));
-                }
+                return;
             }
+
+            _myCommand = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MyCommand)));
         }
     }
 }

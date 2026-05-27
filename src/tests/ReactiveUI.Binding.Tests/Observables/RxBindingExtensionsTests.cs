@@ -8,10 +8,25 @@ using RxBinding = ReactiveUI.Binding.Observables.RxBindingExtensions;
 namespace ReactiveUI.Binding.Tests.Observables;
 
 /// <summary>
-/// Unit tests for <see cref="RxBindingExtensions"/>.
+/// Unit tests for <see cref="RxBinding"/>.
 /// </summary>
 public class RxBindingExtensionsTests
 {
+    /// <summary>
+    /// The value produced by the return observable used across tests.
+    /// </summary>
+    private const int ReturnedValue = 42;
+
+    /// <summary>
+    /// The expected number of emitted values when two notifications are produced.
+    /// </summary>
+    private const int ExpectedTwoEmissions = 2;
+
+    /// <summary>
+    /// The second integer value emitted by a source observable.
+    /// </summary>
+    private const int SecondValue = 2;
+
     /// <summary>
     /// Verifies that Subscribe invokes the action for each value.
     /// </summary>
@@ -20,12 +35,12 @@ public class RxBindingExtensionsTests
     public async Task Subscribe_InvokesAction()
     {
         var results = new List<int>();
-        var source = new ReturnObservable<int>(42);
+        var source = new ReturnObservable<int>(ReturnedValue);
 
         RxBinding.Subscribe(source, results.Add);
 
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo(42);
+        await Assert.That(results[0]).IsEqualTo(ReturnedValue);
     }
 
     /// <summary>
@@ -36,7 +51,7 @@ public class RxBindingExtensionsTests
     public async Task Select_AppliesProjection()
     {
         var results = new List<string>();
-        var source = new ReturnObservable<int>(42);
+        var source = new ReturnObservable<int>(ReturnedValue);
 
         var select = RxBinding.Select(source, x => x.ToString());
         select.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
@@ -64,7 +79,7 @@ public class RxBindingExtensionsTests
         skip.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
 
         await Assert.That(results).Count().IsEqualTo(1);
-        await Assert.That(results[0]).IsEqualTo(2);
+        await Assert.That(results[0]).IsEqualTo(SecondValue);
     }
 
     /// <summary>
@@ -86,9 +101,9 @@ public class RxBindingExtensionsTests
         var distinct = RxBinding.DistinctUntilChanged(source);
         distinct.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
 
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(results[0]).IsEqualTo(1);
-        await Assert.That(results[1]).IsEqualTo(2);
+        await Assert.That(results[1]).IsEqualTo(SecondValue);
     }
 
     /// <summary>
@@ -105,9 +120,9 @@ public class RxBindingExtensionsTests
         var merged = RxBinding.Merge(s1, s2);
         merged.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
 
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(results).Contains(1);
-        await Assert.That(results).Contains(2);
+        await Assert.That(results).Contains(SecondValue);
     }
 
     /// <summary>
@@ -139,9 +154,9 @@ public class RxBindingExtensionsTests
         var switched = RxBinding.Switch(source);
         switched.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
 
-        await Assert.That(results).Count().IsEqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(results[0]).IsEqualTo(1);
-        await Assert.That(results[1]).IsEqualTo(2);
+        await Assert.That(results[1]).IsEqualTo(SecondValue);
     }
 
     /// <summary>
@@ -163,7 +178,7 @@ public class RxBindingExtensionsTests
     [Test]
     public async Task Subscribe_NullOnNext_ThrowsArgumentNullException()
     {
-        var action = () => RxBinding.Subscribe<int>(EmptyObservable<int>.Instance, null!);
+        var action = () => RxBinding.Subscribe(EmptyObservable<int>.Instance, null!);
 
         await Assert.That(action).Throws<ArgumentNullException>().WithParameterName("onNext");
     }

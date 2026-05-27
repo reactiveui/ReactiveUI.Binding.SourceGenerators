@@ -9,11 +9,19 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public sealed class StringToNullableDateTimeOffsetTypeConverter : BindingTypeConverter<string, DateTimeOffset?>
 {
-    /// <inheritdoc/>
-    public override int GetAffinityForObjects() => 2;
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>
-    public override bool TryConvert(string? from, object? conversionHint, [MaybeNullWhen(true)] out DateTimeOffset? result)
+    public override int GetAffinityForObjects() => Affinity;
+
+    /// <inheritdoc/>
+    public override bool TryConvert(
+        string? from,
+        object? conversionHint,
+        [MaybeNullWhen(true)] out DateTimeOffset? result)
     {
         if (string.IsNullOrEmpty(from))
         {

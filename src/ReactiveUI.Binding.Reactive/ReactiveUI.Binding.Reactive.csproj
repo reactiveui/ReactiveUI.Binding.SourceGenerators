@@ -6,19 +6,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Using Include="System.Diagnostics" />
-    <Using Include="System.Diagnostics.CodeAnalysis" />
-    <Using Include="System.Linq.Expressions" />
-    <Using Include="System.Reactive.Concurrency" />
-    <Using Include="System.Runtime.CompilerServices" />
-    <Using Include="ReactiveUI.Binding.Helpers" />
+    <Using Include="System.Diagnostics"/>
+    <Using Include="System.Diagnostics.CodeAnalysis"/>
+    <Using Include="System.Linq.Expressions"/>
+    <Using Include="System.Reactive.Concurrency"/>
+    <Using Include="System.Runtime.CompilerServices"/>
+    <Using Include="ReactiveUI.Binding.Helpers"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ReactiveUI.Binding\ReactiveUI.Binding.csproj" />
+    <ProjectReference Include="..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Reactive" />
+    <PackageReference Include="System.Reactive"/>
   </ItemGroup>
 </Project>

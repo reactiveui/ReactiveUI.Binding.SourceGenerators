@@ -15,30 +15,30 @@ namespace ReactiveUI.Binding.Maui;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The conversion supports a <see cref="BooleanToVisibilityHint"/> as the conversion hint parameter:
+/// The conversion supports a <see cref="BooleanToVisibilityHints"/> as the conversion hint parameter:
 /// </para>
 /// <list type="bullet">
-/// <item><description><see cref="BooleanToVisibilityHint.None"/> - True maps to Visible, False maps to Collapsed.</description></item>
-/// <item><description><see cref="BooleanToVisibilityHint.Inverse"/> - Inverts the boolean before conversion.</description></item>
-/// <item><description><see cref="BooleanToVisibilityHint.UseHidden"/> - Use Hidden instead of Collapsed for false values (MAUI only, ignored on WinUI).</description></item>
+/// <item><description><see cref="BooleanToVisibilityHints.None"/> - True maps to Visible, False maps to Collapsed.</description></item>
+/// <item><description><see cref="BooleanToVisibilityHints.Inverse"/> - Inverts the boolean before conversion.</description></item>
+/// <item><description><see cref="BooleanToVisibilityHints.UseHidden"/> - Use Hidden instead of Collapsed for false values (MAUI only, ignored on WinUI).</description></item>
 /// </list>
 /// </remarks>
 public sealed class BooleanToVisibilityTypeConverter : BindingTypeConverter<bool, Visibility>
 {
     /// <inheritdoc/>
-    public override int GetAffinityForObjects() => 2;
+    public override int GetAffinityForObjects() => BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>
     public override bool TryConvert(bool from, object? conversionHint, [NotNullWhen(true)] out Visibility result)
     {
-        var hint = conversionHint is BooleanToVisibilityHint visibilityHint
+        var hint = conversionHint is BooleanToVisibilityHints visibilityHint
             ? visibilityHint
-            : BooleanToVisibilityHint.None;
+            : BooleanToVisibilityHints.None;
 
-        var value = (hint & BooleanToVisibilityHint.Inverse) != 0 ? !from : from;
+        var value = (hint & BooleanToVisibilityHints.Inverse) != 0 ? !from : from;
 
 #if !WINUI_TARGET
-        var notVisible = (hint & BooleanToVisibilityHint.UseHidden) != 0
+        var notVisible = (hint & BooleanToVisibilityHints.UseHidden) != 0
             ? Visibility.Hidden
             : Visibility.Collapsed;
 #else

@@ -13,6 +13,21 @@ namespace ReactiveUI.Binding.Tests.WhenAny;
 public class WhenAnyValueMultiPropertyTests
 {
     /// <summary>
+    /// The expected number of emissions after three successive value changes.
+    /// </summary>
+    private const int ExpectedThreeEmissions = 3;
+
+    /// <summary>
+    /// The index of the third emitted value.
+    /// </summary>
+    private const int ThirdValueIndex = 2;
+
+    /// <summary>
+    /// The expected number of emissions after a deep-chain value change.
+    /// </summary>
+    private const int ExpectedTwoEmissions = 2;
+
+    /// <summary>
     /// Verifies that WhenAnyValue with 1 property emits values.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -81,20 +96,14 @@ public class WhenAnyValueMultiPropertyTests
     {
         EnsureInitialized();
 
-        var fixture = new WhenAnyTestFixture
-        {
-            Value1 = "A",
-            Value2 = "B",
-            Value3 = "C",
-            Value4 = "D"
-        };
+        var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C", Value4 = "D" };
         var values = new List<(string property1, string property2, string property3, string property4)>();
 
         using var sub = fixture.WhenAnyValue(
-            x => x.Value1,
-            x => x.Value2,
-            x => x.Value3,
-            x => x.Value4)
+                x => x.Value1,
+                x => x.Value2,
+                x => x.Value3,
+                x => x.Value4)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -119,14 +128,15 @@ public class WhenAnyValueMultiPropertyTests
             Value4 = "D",
             Value5 = "E"
         };
-        var values = new List<(string property1, string property2, string property3, string property4, string property5)>();
+        var values =
+            new List<(string property1, string property2, string property3, string property4, string property5)>();
 
         using var sub = fixture.WhenAnyValue(
-            x => x.Value1,
-            x => x.Value2,
-            x => x.Value3,
-            x => x.Value4,
-            x => x.Value5)
+                x => x.Value1,
+                x => x.Value2,
+                x => x.Value3,
+                x => x.Value4,
+                x => x.Value5)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -152,15 +162,17 @@ public class WhenAnyValueMultiPropertyTests
             Value5 = "E",
             Value6 = "F"
         };
-        var values = new List<(string property1, string property2, string property3, string property4, string property5, string property6)>();
+        var values =
+            new List<(string property1, string property2, string property3, string property4, string property5, string
+                property6)>();
 
         using var sub = fixture.WhenAnyValue(
-            x => x.Value1,
-            x => x.Value2,
-            x => x.Value3,
-            x => x.Value4,
-            x => x.Value5,
-            x => x.Value6)
+                x => x.Value1,
+                x => x.Value2,
+                x => x.Value3,
+                x => x.Value4,
+                x => x.Value5,
+                x => x.Value6)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -187,16 +199,18 @@ public class WhenAnyValueMultiPropertyTests
             Value6 = "F",
             Value7 = "G"
         };
-        var values = new List<(string property1, string property2, string property3, string property4, string property5, string property6, string property7)>();
+        var values =
+            new List<(string property1, string property2, string property3, string property4, string property5, string
+                property6, string property7)>();
 
         using var sub = fixture.WhenAnyValue(
-            x => x.Value1,
-            x => x.Value2,
-            x => x.Value3,
-            x => x.Value4,
-            x => x.Value5,
-            x => x.Value6,
-            x => x.Value7)
+                x => x.Value1,
+                x => x.Value2,
+                x => x.Value3,
+                x => x.Value4,
+                x => x.Value5,
+                x => x.Value6,
+                x => x.Value7)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -227,14 +241,14 @@ public class WhenAnyValueMultiPropertyTests
         string? lastItem8 = null;
 
         using var sub = fixture.WhenAnyValue(
-            x => x.Value1,
-            x => x.Value2,
-            x => x.Value3,
-            x => x.Value4,
-            x => x.Value5,
-            x => x.Value6,
-            x => x.Value7,
-            x => x.Value8)
+                x => x.Value1,
+                x => x.Value2,
+                x => x.Value3,
+                x => x.Value4,
+                x => x.Value5,
+                x => x.Value6,
+                x => x.Value7,
+                x => x.Value8)
             .Subscribe(v => lastItem8 = v.property8);
 
         await Assert.That(lastItem8).IsEqualTo("H");
@@ -265,15 +279,15 @@ public class WhenAnyValueMultiPropertyTests
         string? lastItem9 = null;
 
         using var sub = fixture.WhenAnyValue(
-            x => x.Value1,
-            x => x.Value2,
-            x => x.Value3,
-            x => x.Value4,
-            x => x.Value5,
-            x => x.Value6,
-            x => x.Value7,
-            x => x.Value8,
-            x => x.Value9)
+                x => x.Value1,
+                x => x.Value2,
+                x => x.Value3,
+                x => x.Value4,
+                x => x.Value5,
+                x => x.Value6,
+                x => x.Value7,
+                x => x.Value8,
+                x => x.Value9)
             .Subscribe(v => lastItem9 = v.property9);
 
         await Assert.That(lastItem9).IsEqualTo("I");
@@ -305,16 +319,16 @@ public class WhenAnyValueMultiPropertyTests
         string? lastItem10 = null;
 
         using var sub = fixture.WhenAnyValue(
-            x => x.Value1,
-            x => x.Value2,
-            x => x.Value3,
-            x => x.Value4,
-            x => x.Value5,
-            x => x.Value6,
-            x => x.Value7,
-            x => x.Value8,
-            x => x.Value9,
-            x => x.Value10)
+                x => x.Value1,
+                x => x.Value2,
+                x => x.Value3,
+                x => x.Value4,
+                x => x.Value5,
+                x => x.Value6,
+                x => x.Value7,
+                x => x.Value8,
+                x => x.Value9,
+                x => x.Value10)
             .Subscribe(v => lastItem10 = v.property10);
 
         await Assert.That(lastItem10).IsEqualTo("J");
@@ -347,17 +361,17 @@ public class WhenAnyValueMultiPropertyTests
         string? lastItem11 = null;
 
         using var sub = fixture.WhenAnyValue(
-            x => x.Value1,
-            x => x.Value2,
-            x => x.Value3,
-            x => x.Value4,
-            x => x.Value5,
-            x => x.Value6,
-            x => x.Value7,
-            x => x.Value8,
-            x => x.Value9,
-            x => x.Value10,
-            x => x.Value11)
+                x => x.Value1,
+                x => x.Value2,
+                x => x.Value3,
+                x => x.Value4,
+                x => x.Value5,
+                x => x.Value6,
+                x => x.Value7,
+                x => x.Value8,
+                x => x.Value9,
+                x => x.Value10,
+                x => x.Value11)
             .Subscribe(v => lastItem11 = v.property11);
 
         await Assert.That(lastItem11).IsEqualTo("K");
@@ -391,18 +405,18 @@ public class WhenAnyValueMultiPropertyTests
         string? lastItem12 = null;
 
         using var sub = fixture.WhenAnyValue(
-            x => x.Value1,
-            x => x.Value2,
-            x => x.Value3,
-            x => x.Value4,
-            x => x.Value5,
-            x => x.Value6,
-            x => x.Value7,
-            x => x.Value8,
-            x => x.Value9,
-            x => x.Value10,
-            x => x.Value11,
-            x => x.Value12)
+                x => x.Value1,
+                x => x.Value2,
+                x => x.Value3,
+                x => x.Value4,
+                x => x.Value5,
+                x => x.Value6,
+                x => x.Value7,
+                x => x.Value8,
+                x => x.Value9,
+                x => x.Value10,
+                x => x.Value11,
+                x => x.Value12)
             .Subscribe(v => lastItem12 = v.property12);
 
         await Assert.That(lastItem12).IsEqualTo("L");
@@ -426,10 +440,10 @@ public class WhenAnyValueMultiPropertyTests
         fixture.Value1 = "B";
         fixture.Value1 = "C";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(3);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedThreeEmissions);
         await Assert.That(values[0]).IsEqualTo("A");
         await Assert.That(values[1]).IsEqualTo("B");
-        await Assert.That(values[2]).IsEqualTo("C");
+        await Assert.That(values[ThirdValueIndex]).IsEqualTo("C");
     }
 
     /// <summary>
@@ -445,9 +459,9 @@ public class WhenAnyValueMultiPropertyTests
         var values = new List<string>();
 
         using var sub = fixture.WhenAnyValue(
-            x => x.Value1,
-            x => x.Value2,
-            (v1, v2) => $"{v1} {v2}")
+                x => x.Value1,
+                x => x.Value2,
+                (v1, v2) => $"{v1} {v2}")
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -463,10 +477,7 @@ public class WhenAnyValueMultiPropertyTests
     {
         EnsureInitialized();
 
-        var fixture = new HostTestFixture
-        {
-            Child = new TestFixture { IsNotNullString = "Deep" }
-        };
+        var fixture = new HostTestFixture { Child = new() { IsNotNullString = "Deep" } };
         var values = new List<string>();
 
         using var sub = fixture.WhenAnyValue(x => x.Child!.IsNotNullString)
@@ -477,7 +488,7 @@ public class WhenAnyValueMultiPropertyTests
 
         fixture.Child!.IsNotNullString = "Deeper";
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(2);
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
         await Assert.That(values[1]).IsEqualTo("Deeper");
     }
 

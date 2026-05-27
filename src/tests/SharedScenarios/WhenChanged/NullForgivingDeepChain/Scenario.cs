@@ -5,20 +5,19 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenChanged.NullForgivingDeepChain
+namespace SharedScenarios.WhenChanged.NullForgivingDeepChain;
+
+/// <summary>
+/// Exercises WhenChanged with the null-forgiving operator (x => x.Child!.Name).
+/// This is a common pattern when the developer knows Child is set before observation starts.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenChanged with the null-forgiving operator (x => x.Child!.Name).
-    /// This is a common pattern when the developer knows Child is set before observation starts.
+    /// Creates a WhenChanged observable for Child!.Name using the null-forgiving operator.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenChanged observable for Child!.Name using the null-forgiving operator.
-        /// </summary>
-        /// <param name="vm">The parent view model to observe.</param>
-        /// <returns>An observable of name values from the child.</returns>
-        public static IObservable<string> Execute(ParentViewModel vm)
-            => vm.WhenChanged(x => x.Child!.Name);
-    }
+    /// <param name="vm">The parent view model to observe.</param>
+    /// <returns>An observable of name values from the child.</returns>
+    public static IObservable<string> Execute(ParentViewModel vm)
+        => vm.WhenChanged(x => x.Child!.Name);
 }

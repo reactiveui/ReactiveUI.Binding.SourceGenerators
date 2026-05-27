@@ -4,56 +4,59 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.BindTwoWay.MixedWithBindOneWay
+namespace SharedScenarios.BindTwoWay.MixedWithBindOneWay;
+
+/// <summary>
+/// Target View with properties for mixed binding.
+/// </summary>
+public class MyView : INotifyPropertyChanged
 {
     /// <summary>
-    /// Target View with properties for mixed binding.
+    /// The backing field for <see cref="NameText"/>.
     /// </summary>
-    public class MyView : INotifyPropertyChanged
+    private string _nameText = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="CountDisplay"/>.
+    /// </summary>
+    private int _countDisplay;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the name text.
+    /// </summary>
+    public string NameText
     {
-        /// <summary>
-        /// The backing field for <see cref="NameText"/>.
-        /// </summary>
-        private string _nameText = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="CountDisplay"/>.
-        /// </summary>
-        private int _countDisplay;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the name text.
-        /// </summary>
-        public string NameText
+        get => _nameText;
+        set
         {
-            get => _nameText;
-            set
+            if (_nameText == value)
             {
-                if (_nameText != value)
-                {
-                    _nameText = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameText)));
-                }
+                return;
             }
+
+            _nameText = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameText)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the count display.
-        /// </summary>
-        public int CountDisplay
+    /// <summary>
+    /// Gets or sets the count display.
+    /// </summary>
+    public int CountDisplay
+    {
+        get => _countDisplay;
+        set
         {
-            get => _countDisplay;
-            set
+            if (_countDisplay == value)
             {
-                if (_countDisplay != value)
-                {
-                    _countDisplay = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CountDisplay)));
-                }
+                return;
             }
+
+            _countDisplay = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CountDisplay)));
         }
     }
 }

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp;
-
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -21,7 +20,8 @@ public class BindCommandGeneratorTests
     public async Task BasicNoParam()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/BasicNoParam");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,8 @@ public class BindCommandGeneratorTests
     public async Task ObservableParam()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/ObservableParam");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +48,8 @@ public class BindCommandGeneratorTests
     public async Task ExpressionParam()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/ExpressionParam");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +62,8 @@ public class BindCommandGeneratorTests
     public async Task NoEvent()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/NoEvent");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -76,7 +79,9 @@ public class BindCommandGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/BasicNoParam");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(BindCommandGeneratorTests),
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -90,7 +95,9 @@ public class BindCommandGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/ObservableParam");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(BindCommandGeneratorTests),
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -104,7 +111,9 @@ public class BindCommandGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/ExpressionParam");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(BindCommandGeneratorTests),
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -117,7 +126,8 @@ public class BindCommandGeneratorTests
     public async Task DeepCommandPath()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/DeepCommandPath");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -131,7 +141,8 @@ public class BindCommandGeneratorTests
     public async Task CustomEvent()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/CustomEvent");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -145,7 +156,8 @@ public class BindCommandGeneratorTests
     public async Task CommandProperty()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/CommandProperty");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -159,7 +171,8 @@ public class BindCommandGeneratorTests
     public async Task CommandPropertyObsParam()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/CommandPropertyObsParam");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -173,7 +186,8 @@ public class BindCommandGeneratorTests
     public async Task CommandPropertyExprParam()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/CommandPropertyExprParam");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -187,7 +201,8 @@ public class BindCommandGeneratorTests
     public async Task EventEnabled()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/EventEnabled");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -201,7 +216,8 @@ public class BindCommandGeneratorTests
     public async Task EventEnabledObsParam()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/EventEnabledObsParam");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -215,7 +231,8 @@ public class BindCommandGeneratorTests
     public async Task EventEnabledExprParam()
     {
         var source = SharedSourceReader.ReadScenario("BindCommand/EventEnabledExprParam");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindCommandGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }

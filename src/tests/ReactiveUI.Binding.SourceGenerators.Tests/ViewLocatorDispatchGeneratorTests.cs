@@ -21,27 +21,27 @@ public class ViewLocatorDispatchGeneratorTests
     public Task SingleViewForImplementation()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class LoginViewModel : INotifyPropertyChanged
-                {
-                    public string UserName { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class LoginViewModel : INotifyPropertyChanged
+                                  {
+                                      public string UserName { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                public class LoginView : ReactiveUI.Binding.IViewFor<LoginViewModel>
-                {
-                    public LoginViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (LoginViewModel)value;
-                    }
-                }
-            }
-            """;
+                                  public class LoginView : ReactiveUI.Binding.IViewFor<LoginViewModel>
+                                  {
+                                      public LoginViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (LoginViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
@@ -54,43 +54,43 @@ public class ViewLocatorDispatchGeneratorTests
     public Task MultipleViewForImplementations()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class LoginViewModel : INotifyPropertyChanged
-                {
-                    public string UserName { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class LoginViewModel : INotifyPropertyChanged
+                                  {
+                                      public string UserName { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                public class MainViewModel : INotifyPropertyChanged
-                {
-                    public string Title { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                                  public class MainViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Title { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                public class LoginView : ReactiveUI.Binding.IViewFor<LoginViewModel>
-                {
-                    public LoginViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (LoginViewModel)value;
-                    }
-                }
+                                  public class LoginView : ReactiveUI.Binding.IViewFor<LoginViewModel>
+                                  {
+                                      public LoginViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (LoginViewModel)value;
+                                      }
+                                  }
 
-                public class MainView : ReactiveUI.Binding.IViewFor<MainViewModel>
-                {
-                    public MainViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (MainViewModel)value;
-                    }
-                }
-            }
-            """;
+                                  public class MainView : ReactiveUI.Binding.IViewFor<MainViewModel>
+                                  {
+                                      public MainViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (MainViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
@@ -103,34 +103,34 @@ public class ViewLocatorDispatchGeneratorTests
     public Task ViewWithoutParameterlessConstructor()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class SettingsViewModel : INotifyPropertyChanged
-                {
-                    public string Theme { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class SettingsViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Theme { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                public class SettingsView : ReactiveUI.Binding.IViewFor<SettingsViewModel>
-                {
-                    private readonly string _config;
+                                  public class SettingsView : ReactiveUI.Binding.IViewFor<SettingsViewModel>
+                                  {
+                                      private readonly string _config;
 
-                    public SettingsView(string config)
-                    {
-                        _config = config;
-                    }
+                                      public SettingsView(string config)
+                                      {
+                                          _config = config;
+                                      }
 
-                    public SettingsViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (SettingsViewModel)value;
-                    }
-                }
-            }
-            """;
+                                      public SettingsViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (SettingsViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
@@ -143,27 +143,27 @@ public class ViewLocatorDispatchGeneratorTests
     public Task AbstractViewIsExcluded()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class BaseViewModel : INotifyPropertyChanged
-                {
-                    public string Name { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class BaseViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Name { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                public abstract class BaseView : ReactiveUI.Binding.IViewFor<BaseViewModel>
-                {
-                    public BaseViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (BaseViewModel)value;
-                    }
-                }
-            }
-            """;
+                                  public abstract class BaseView : ReactiveUI.Binding.IViewFor<BaseViewModel>
+                                  {
+                                      public BaseViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (BaseViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         // Abstract views should not produce ViewDispatch.g.cs
         var result = TestHelper.RunGenerator(source);
@@ -180,29 +180,29 @@ public class ViewLocatorDispatchGeneratorTests
     public Task ViewWithPrivateConstructor()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class PrivateCtorViewModel : INotifyPropertyChanged
-                {
-                    public string Data { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class PrivateCtorViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Data { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                public class PrivateCtorView : ReactiveUI.Binding.IViewFor<PrivateCtorViewModel>
-                {
-                    private PrivateCtorView() { }
+                                  public class PrivateCtorView : ReactiveUI.Binding.IViewFor<PrivateCtorViewModel>
+                                  {
+                                      private PrivateCtorView() { }
 
-                    public PrivateCtorViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (PrivateCtorViewModel)value;
-                    }
-                }
-            }
-            """;
+                                      public PrivateCtorViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (PrivateCtorViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
@@ -215,17 +215,17 @@ public class ViewLocatorDispatchGeneratorTests
     public Task NonViewForClass_NoDispatch()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class PlainViewModel : INotifyPropertyChanged
-                {
-                    public string Name { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class PlainViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Name { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
         return Verify(result.Driver)
@@ -241,37 +241,37 @@ public class ViewLocatorDispatchGeneratorTests
     public Task DuplicateViewModelsAreDeduplicated()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class SharedViewModel : INotifyPropertyChanged
-                {
-                    public string Data { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class SharedViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Data { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                public class DesktopView : ReactiveUI.Binding.IViewFor<SharedViewModel>
-                {
-                    public SharedViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (SharedViewModel)value;
-                    }
-                }
+                                  public class DesktopView : ReactiveUI.Binding.IViewFor<SharedViewModel>
+                                  {
+                                      public SharedViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (SharedViewModel)value;
+                                      }
+                                  }
 
-                public class MobileView : ReactiveUI.Binding.IViewFor<SharedViewModel>
-                {
-                    public SharedViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (SharedViewModel)value;
-                    }
-                }
-            }
-            """;
+                                  public class MobileView : ReactiveUI.Binding.IViewFor<SharedViewModel>
+                                  {
+                                      public SharedViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (SharedViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
@@ -284,28 +284,28 @@ public class ViewLocatorDispatchGeneratorTests
     public Task ExcludedViewIsSkipped()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class ExcludedViewModel : INotifyPropertyChanged
-                {
-                    public string Name { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class ExcludedViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Name { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                [ReactiveUI.Binding.ExcludeFromViewRegistration]
-                public class ExcludedView : ReactiveUI.Binding.IViewFor<ExcludedViewModel>
-                {
-                    public ExcludedViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (ExcludedViewModel)value;
-                    }
-                }
-            }
-            """;
+                                  [ReactiveUI.Binding.ExcludeFromViewRegistration]
+                                  public class ExcludedView : ReactiveUI.Binding.IViewFor<ExcludedViewModel>
+                                  {
+                                      public ExcludedViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (ExcludedViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         // Excluded views should not produce ViewDispatch.g.cs
         var result = TestHelper.RunGenerator(source);
@@ -322,28 +322,28 @@ public class ViewLocatorDispatchGeneratorTests
     public Task SingleInstanceViewGeneratesSingletonCache()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class SingletonViewModel : INotifyPropertyChanged
-                {
-                    public string Name { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class SingletonViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Name { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                [ReactiveUI.Binding.SingleInstanceView]
-                public class SingletonView : ReactiveUI.Binding.IViewFor<SingletonViewModel>
-                {
-                    public SingletonViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (SingletonViewModel)value;
-                    }
-                }
-            }
-            """;
+                                  [ReactiveUI.Binding.SingleInstanceView]
+                                  public class SingletonView : ReactiveUI.Binding.IViewFor<SingletonViewModel>
+                                  {
+                                      public SingletonViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (SingletonViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
@@ -356,28 +356,28 @@ public class ViewLocatorDispatchGeneratorTests
     public Task ViewContractGeneratesContractDispatch()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class ContractViewModel : INotifyPropertyChanged
-                {
-                    public string Name { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class ContractViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Name { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                [ReactiveUI.Binding.ViewContract("compact")]
-                public class CompactView : ReactiveUI.Binding.IViewFor<ContractViewModel>
-                {
-                    public ContractViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (ContractViewModel)value;
-                    }
-                }
-            }
-            """;
+                                  [ReactiveUI.Binding.ViewContract("compact")]
+                                  public class CompactView : ReactiveUI.Binding.IViewFor<ContractViewModel>
+                                  {
+                                      public ContractViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (ContractViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
@@ -391,38 +391,38 @@ public class ViewLocatorDispatchGeneratorTests
     public Task DefaultAndContractViewsDispatchCorrectly()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class DashboardViewModel : INotifyPropertyChanged
-                {
-                    public string Title { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class DashboardViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Title { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                public class DashboardView : ReactiveUI.Binding.IViewFor<DashboardViewModel>
-                {
-                    public DashboardViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (DashboardViewModel)value;
-                    }
-                }
+                                  public class DashboardView : ReactiveUI.Binding.IViewFor<DashboardViewModel>
+                                  {
+                                      public DashboardViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (DashboardViewModel)value;
+                                      }
+                                  }
 
-                [ReactiveUI.Binding.ViewContract("compact")]
-                public class CompactDashboardView : ReactiveUI.Binding.IViewFor<DashboardViewModel>
-                {
-                    public DashboardViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (DashboardViewModel)value;
-                    }
-                }
-            }
-            """;
+                                  [ReactiveUI.Binding.ViewContract("compact")]
+                                  public class CompactDashboardView : ReactiveUI.Binding.IViewFor<DashboardViewModel>
+                                  {
+                                      public DashboardViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (DashboardViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
@@ -436,39 +436,39 @@ public class ViewLocatorDispatchGeneratorTests
     public Task MultipleContractViewsWithoutDefault()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class ThemeViewModel : INotifyPropertyChanged
-                {
-                    public string Name { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class ThemeViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Name { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                [ReactiveUI.Binding.ViewContract("light")]
-                public class LightThemeView : ReactiveUI.Binding.IViewFor<ThemeViewModel>
-                {
-                    public ThemeViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (ThemeViewModel)value;
-                    }
-                }
+                                  [ReactiveUI.Binding.ViewContract("light")]
+                                  public class LightThemeView : ReactiveUI.Binding.IViewFor<ThemeViewModel>
+                                  {
+                                      public ThemeViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (ThemeViewModel)value;
+                                      }
+                                  }
 
-                [ReactiveUI.Binding.ViewContract("dark")]
-                public class DarkThemeView : ReactiveUI.Binding.IViewFor<ThemeViewModel>
-                {
-                    public ThemeViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (ThemeViewModel)value;
-                    }
-                }
-            }
-            """;
+                                  [ReactiveUI.Binding.ViewContract("dark")]
+                                  public class DarkThemeView : ReactiveUI.Binding.IViewFor<ThemeViewModel>
+                                  {
+                                      public ThemeViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (ThemeViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
@@ -482,31 +482,31 @@ public class ViewLocatorDispatchGeneratorTests
     public Task SingleInstanceViewWithoutParameterlessCtor()
     {
         const string source = """
-            using System.ComponentModel;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class NoCtorSingletonViewModel : INotifyPropertyChanged
-                {
-                    public string Name { get; set; }
-                    public event PropertyChangedEventHandler PropertyChanged;
-                }
+                              namespace TestApp
+                              {
+                                  public class NoCtorSingletonViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Name { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
 
-                [ReactiveUI.Binding.SingleInstanceView]
-                public class NoCtorSingletonView : ReactiveUI.Binding.IViewFor<NoCtorSingletonViewModel>
-                {
-                    private readonly string _cfg;
-                    public NoCtorSingletonView(string cfg) { _cfg = cfg; }
+                                  [ReactiveUI.Binding.SingleInstanceView]
+                                  public class NoCtorSingletonView : ReactiveUI.Binding.IViewFor<NoCtorSingletonViewModel>
+                                  {
+                                      private readonly string _cfg;
+                                      public NoCtorSingletonView(string cfg) { _cfg = cfg; }
 
-                    public NoCtorSingletonViewModel ViewModel { get; set; }
-                    object ReactiveUI.Binding.IViewFor.ViewModel
-                    {
-                        get => ViewModel;
-                        set => ViewModel = (NoCtorSingletonViewModel)value;
-                    }
-                }
-            }
-            """;
+                                      public NoCtorSingletonViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (NoCtorSingletonViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }

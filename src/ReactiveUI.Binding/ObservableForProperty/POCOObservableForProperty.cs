@@ -3,8 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Concurrent;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
+using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.ObservableForProperty;
 
@@ -12,6 +11,10 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 /// Final fallback implementation for observation when no observable mechanism is available.
 /// Emits exactly one value (the current value at subscription time) and then never emits again.
 /// </summary>
+[SuppressMessage(
+    "Minor Code Smell",
+    "S101:Types should be named in PascalCase",
+    Justification = "POCO is an established acronym (Plain Old CLR Object) and matches the ReactiveUI public API name.")]
 public sealed class POCOObservableForProperty : ICreatesObservableForProperty
 {
     /// <summary>
@@ -26,12 +29,17 @@ public sealed class POCOObservableForProperty : ICreatesObservableForProperty
         ArgumentExceptionHelper.ThrowIfNull(type);
         ArgumentExceptionHelper.ThrowIfNull(propertyName);
 
-        return 1;
+        return BindingAffinity.Fallback;
     }
 
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Uses reflection over runtime types which is not trim- or AOT-safe.")]
-    public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(object sender, Expression expression, string propertyName, bool beforeChanged = false, bool suppressWarnings = false)
+    public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(
+        object sender,
+        Expression expression,
+        string propertyName,
+        bool beforeChanged,
+        bool suppressWarnings)
     {
         ArgumentExceptionHelper.ThrowIfNull(sender);
         ArgumentExceptionHelper.ThrowIfNull(expression);
@@ -42,9 +50,10 @@ public sealed class POCOObservableForProperty : ICreatesObservableForProperty
             WarnOnce(sender, propertyName);
         }
 
-        return Observable
-            .Return(new ObservedChange<object, object?>(sender, expression, default), CurrentThreadScheduler.Instance)
-            .Concat(Observable.Never<IObservedChange<object, object?>>());
+        // Emit the current value once, then never complete (so the binding stays alive).
+        return new StartWithObservable<IObservedChange<object, object?>>(
+            NeverObservable<IObservedChange<object, object?>>.Instance,
+            new ObservedChange<object, object?>(sender, expression, default));
     }
 
     /// <summary>

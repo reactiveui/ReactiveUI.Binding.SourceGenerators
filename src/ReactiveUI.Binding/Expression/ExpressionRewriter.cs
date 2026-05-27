@@ -57,18 +57,18 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
     {
         var sb = new StringBuilder(96);
         sb.Append("Unsupported expression of type '")
-          .Append(node.NodeType)
-          .Append("' ")
-          .Append(node)
-          .Append('.');
+            .Append(node.NodeType)
+            .Append("' ")
+            .Append(node)
+            .Append('.');
 
         if (node is BinaryExpression be)
         {
             sb.Append(" Did you meant to use expressions '")
-              .Append(be.Left)
-              .Append("' and '")
-              .Append(be.Right)
-              .Append("'?");
+                .Append(be.Left)
+                .Append("' and '")
+                .Append(be.Right)
+                .Append("'?");
         }
 
         return new NotSupportedException(sb.ToString());
@@ -81,7 +81,8 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
     /// <returns>The <see cref="PropertyInfo"/> for the "Item" indexer property.</returns>
     /// <exception cref="InvalidOperationException">Thrown if no indexer property named "Item" is found.</exception>
     internal static PropertyInfo GetItemProperty(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
+                                    DynamicallyAccessedMemberTypes.NonPublicProperties)]
         Type type)
     {
         var property = type.GetRuntimeProperty("Item");
@@ -95,11 +96,13 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
     /// <returns>The <see cref="PropertyInfo"/> for the "Length" property.</returns>
     /// <exception cref="InvalidOperationException">Thrown if no "Length" property is found.</exception>
     internal static PropertyInfo GetLengthProperty(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
+                                    DynamicallyAccessedMemberTypes.NonPublicProperties)]
         Type type)
     {
         var property = type.GetRuntimeProperty("Length");
-        return property ?? throw new InvalidOperationException("Could not find valid information for the array length operator.");
+        return property ??
+               throw new InvalidOperationException("Could not find valid information for the array length operator.");
     }
 
     /// <summary>
@@ -143,8 +146,8 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
     }
 
     /// <inheritdoc/>
-    [RequiresUnreferencedCode("Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
-    [SuppressMessage("Trimming", "IL2046:'RequiresUnreferencedCodeAttribute' annotations must match across all interface implementations or overrides.", Justification = "Third Party Code")]
+    [RequiresUnreferencedCode(
+        "Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
     protected override Expression VisitBinary(BinaryExpression node)
     {
         if (node.Right is not ConstantExpression)
@@ -161,8 +164,8 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
     }
 
     /// <inheritdoc/>
-    [RequiresUnreferencedCode("Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
-    [SuppressMessage("Trimming", "IL2046:'RequiresUnreferencedCodeAttribute' annotations must match across all interface implementations or overrides.", Justification = "Third Party Code")]
+    [RequiresUnreferencedCode(
+        "Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
     protected override Expression VisitUnary(UnaryExpression node)
     {
         // Visit() only routes Convert and ArrayLength here, so no fallthrough is needed.
@@ -180,8 +183,8 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
     }
 
     /// <inheritdoc/>
-    [RequiresUnreferencedCode("Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
-    [SuppressMessage("Trimming", "IL2046:'RequiresUnreferencedCodeAttribute' annotations must match across all interface implementations or overrides.", Justification = "Third Party Code")]
+    [RequiresUnreferencedCode(
+        "Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
     protected override Expression VisitMethodCall(MethodCallExpression node)
     {
         if (!node.Method.IsSpecialName || !AllConstant(node.Arguments))

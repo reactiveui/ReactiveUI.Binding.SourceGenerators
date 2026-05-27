@@ -4,39 +4,40 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanging.DeepPropertyChain
+namespace SharedScenarios.WhenChanging.DeepPropertyChain;
+
+/// <summary>
+/// Parent ViewModel with before-change notifications.
+/// </summary>
+public class ParentViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
     /// <summary>
-    /// Parent ViewModel with before-change notifications.
+    /// The backing field for <see cref="Child"/>.
     /// </summary>
-    public class ParentViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+    private ChildModel _child = new ChildModel();
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <inheritdoc/>
+    public event PropertyChangingEventHandler? PropertyChanging;
+
+    /// <summary>
+    /// Gets or sets the child model.
+    /// </summary>
+    public ChildModel Child
     {
-        /// <summary>
-        /// The backing field for <see cref="Child"/>.
-        /// </summary>
-        private ChildModel _child = new();
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <inheritdoc/>
-        public event PropertyChangingEventHandler? PropertyChanging;
-
-        /// <summary>
-        /// Gets or sets the child model.
-        /// </summary>
-        public ChildModel Child
+        get => _child;
+        set
         {
-            get => _child;
-            set
+            if (_child == value)
             {
-                if (_child != value)
-                {
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Child)));
-                    _child = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Child)));
-                }
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Child)));
+            _child = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Child)));
         }
     }
 }

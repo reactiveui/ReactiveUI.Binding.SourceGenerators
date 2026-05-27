@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -22,33 +21,33 @@ public class SyntaxHelpersTests
     public async Task ExtractPropertyPathFromLambda_SingleProperty_ExtractsPath()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using System.Linq.Expressions;
+                              using System;
+                              using System.ComponentModel;
+                              using System.Linq.Expressions;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        Expression<Func<MyViewModel, string>> expr = x => x.Name;
-                    }
-                }
-            }
-            """;
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          Expression<Func<MyViewModel, string>> expr = x => x.Name;
+                                      }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
 
-        var lambda = tree.GetRoot().DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
+        var lambda = (await tree.GetRootAsync()).DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
 
         var path = SyntaxHelpers.ExtractPropertyPathFromLambda(lambda, semanticModel, default);
 
@@ -65,38 +64,38 @@ public class SyntaxHelpersTests
     public async Task ExtractPropertyPathFromLambda_ChainedProperty_ExtractsFullPath()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using System.Linq.Expressions;
+                              using System;
+                              using System.ComponentModel;
+                              using System.Linq.Expressions;
 
-            namespace TestApp
-            {
-                public class Address
-                {
-                    public string City { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class Address
+                                  {
+                                      public string City { get; set; } = "";
+                                  }
 
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public Address Address { get; set; } = new();
-                }
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public Address Address { get; set; } = new();
+                                  }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        Expression<Func<MyViewModel, string>> expr = x => x.Address.City;
-                    }
-                }
-            }
-            """;
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          Expression<Func<MyViewModel, string>> expr = x => x.Address.City;
+                                      }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
 
-        var lambda = tree.GetRoot().DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
+        var lambda = (await tree.GetRootAsync()).DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
 
         var path = SyntaxHelpers.ExtractPropertyPathFromLambda(lambda, semanticModel, default);
 
@@ -114,26 +113,26 @@ public class SyntaxHelpersTests
     public async Task ExtractPropertyPathFromLambda_NonLambda_ReturnsNull()
     {
         const string source = """
-            using System;
+                              using System;
 
-            namespace TestApp
-            {
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var x = 42;
-                    }
-                }
-            }
-            """;
+                              namespace TestApp
+                              {
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          var x = 42;
+                                      }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
 
         // Pass a non-lambda expression (the literal 42)
-        var literal = tree.GetRoot().DescendantNodes().OfType<LiteralExpressionSyntax>().First();
+        var literal = (await tree.GetRootAsync()).DescendantNodes().OfType<LiteralExpressionSyntax>().First();
 
         var path = SyntaxHelpers.ExtractPropertyPathFromLambda(literal, semanticModel, default);
 
@@ -148,22 +147,22 @@ public class SyntaxHelpersTests
     public async Task GetLambdaBody_SimpleLambda_ReturnsBody()
     {
         const string source = """
-            using System;
-            namespace TestApp
-            {
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        System.Func<int, int> f = x => x;
-                    }
-                }
-            }
-            """;
+                              using System;
+                              namespace TestApp
+                              {
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          System.Func<int, int> f = x => x;
+                                      }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
-        var lambda = tree.GetRoot().DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
+        var lambda = (await tree.GetRootAsync()).DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
 
         var body = SyntaxHelpers.GetLambdaBody(lambda);
 
@@ -179,22 +178,22 @@ public class SyntaxHelpersTests
     public async Task GetLambdaBody_ParenthesizedLambda_ReturnsBody()
     {
         const string source = """
-            using System;
-            namespace TestApp
-            {
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        System.Func<int, int, int> f = (x, y) => x + y;
-                    }
-                }
-            }
-            """;
+                              using System;
+                              namespace TestApp
+                              {
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          System.Func<int, int, int> f = (x, y) => x + y;
+                                      }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
-        var lambda = tree.GetRoot().DescendantNodes().OfType<ParenthesizedLambdaExpressionSyntax>().First();
+        var lambda = (await tree.GetRootAsync()).DescendantNodes().OfType<ParenthesizedLambdaExpressionSyntax>().First();
 
         var body = SyntaxHelpers.GetLambdaBody(lambda);
 
@@ -210,22 +209,22 @@ public class SyntaxHelpersTests
     public async Task GetLambdaBody_BlockBody_ReturnsNull()
     {
         const string source = """
-            using System;
-            namespace TestApp
-            {
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        System.Func<int, int> f = (x) => { return x; };
-                    }
-                }
-            }
-            """;
+                              using System;
+                              namespace TestApp
+                              {
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          System.Func<int, int> f = (x) => { return x; };
+                                      }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
-        var lambda = tree.GetRoot().DescendantNodes().OfType<ParenthesizedLambdaExpressionSyntax>().First();
+        var lambda = (await tree.GetRootAsync()).DescendantNodes().OfType<ParenthesizedLambdaExpressionSyntax>().First();
 
         var body = SyntaxHelpers.GetLambdaBody(lambda);
 
@@ -240,33 +239,33 @@ public class SyntaxHelpersTests
     public async Task ExtractPropertyPathFromLambda_ParenthesizedLambda_ExtractsPath()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using System.Linq.Expressions;
+                              using System;
+                              using System.ComponentModel;
+                              using System.Linq.Expressions;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        Expression<Func<MyViewModel, string>> expr = (x) => x.Name;
-                    }
-                }
-            }
-            """;
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          Expression<Func<MyViewModel, string>> expr = (x) => x.Name;
+                                      }
+                                  }
+                              }
+                              """;
 
         var compilation = TestHelper.CreateCompilation(source);
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
 
-        var lambda = tree.GetRoot().DescendantNodes().OfType<ParenthesizedLambdaExpressionSyntax>().First();
+        var lambda = (await tree.GetRootAsync()).DescendantNodes().OfType<ParenthesizedLambdaExpressionSyntax>().First();
 
         var path = SyntaxHelpers.ExtractPropertyPathFromLambda(lambda, semanticModel, default);
 

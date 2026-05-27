@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -40,8 +39,12 @@ public class OneWayBindCodeGeneratorHelperTests
     [Test]
     public async Task GroupByTypeSignature_DifferentTargetTypes_SeparateGroups()
     {
-        var inv1 = ModelFactory.CreateBindingInvocationInfo(targetTypeFullName: "global::TestApp.ViewA", methodName: "OneWayBind");
-        var inv2 = ModelFactory.CreateBindingInvocationInfo(targetTypeFullName: "global::TestApp.ViewB", methodName: "OneWayBind");
+        var inv1 = ModelFactory.CreateBindingInvocationInfo(
+            targetTypeFullName: "global::TestApp.ViewA",
+            methodName: "OneWayBind");
+        var inv2 = ModelFactory.CreateBindingInvocationInfo(
+            targetTypeFullName: "global::TestApp.ViewB",
+            methodName: "OneWayBind");
         var invocations = ImmutableArray.Create(inv1, inv2);
 
         var groups = OneWayBindCodeGenerator.GroupByTypeSignature(invocations);
@@ -223,7 +226,7 @@ public class OneWayBindCodeGeneratorHelperTests
             false,
             [inv]);
 
-        OneWayBindCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true);
+        OneWayBindCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -241,7 +244,7 @@ public class OneWayBindCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: "OneWayBind");
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        OneWayBindCodeGenerator.GenerateOneWayBindMethod(sb, inv, classInfo, suffix: "TEST00000000TEST");
+        OneWayBindCodeGenerator.GenerateOneWayBindMethod(sb, inv, classInfo, "TEST00000000TEST");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__OneWayBind_TEST00000000TEST");

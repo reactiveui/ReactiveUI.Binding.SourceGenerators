@@ -21,7 +21,7 @@ public class WhenChangedBenchmark
     /// <summary>
     /// Represents the number of property change events to be triggered during the benchmark tests.
     /// </summary>
-    private const int PropertyChangeCount = 1000;
+    private const int PropertyChangeCount = 1_000;
 
     /// <summary>
     /// The view model instance used for observation benchmarks.
@@ -33,12 +33,7 @@ public class WhenChangedBenchmark
     /// </summary>
     [IterationSetup]
     public void Setup() =>
-        _vm = new BenchmarkViewModel
-        {
-            Name = "Initial",
-            Age = 0,
-            Child = new BenchmarkChildViewModel { Value = "ChildInitial" },
-        };
+        _vm = new() { Name = "Initial", Age = 0, Child = new() { Value = "ChildInitial" } };
 
     /// <summary>
     /// Single property observation: subscribe, fire N changes, dispose.

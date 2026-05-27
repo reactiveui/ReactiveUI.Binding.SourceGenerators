@@ -13,7 +13,6 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public static partial class ReactiveUIBindingExtensions
 {
-
 #if NET8_0_OR_GREATER
     /// <summary>
     /// Observes 1 observable property on the specified sender and switches to the latest observable.
@@ -59,9 +58,7 @@ public static partial class ReactiveUIBindingExtensions
 
         return sender.SubscribeToExpressionChain<TSender, IObservable<TRet>?>(
                 obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
+                skipInitial: false)
             .Select(x => x.Value ?? EmptyObservable<TRet>.Instance)
             .Switch();
     }
@@ -1170,20 +1167,8 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs2);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        var o1 = sender.SubscribeToExpressionChain<TSender, IObservable<T1>?>(
-                obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T1>.Instance)
-            .Switch();
-        var o2 = sender.SubscribeToExpressionChain<TSender, IObservable<T2>?>(
-                obs2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T2>.Instance)
-            .Switch();
+        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
+        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -1258,27 +1243,9 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs3);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        var o1 = sender.SubscribeToExpressionChain<TSender, IObservable<T1>?>(
-                obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T1>.Instance)
-            .Switch();
-        var o2 = sender.SubscribeToExpressionChain<TSender, IObservable<T2>?>(
-                obs2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T2>.Instance)
-            .Switch();
-        var o3 = sender.SubscribeToExpressionChain<TSender, IObservable<T3>?>(
-                obs3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T3>.Instance)
-            .Switch();
+        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
+        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
+        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -1363,34 +1330,10 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs4);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        var o1 = sender.SubscribeToExpressionChain<TSender, IObservable<T1>?>(
-                obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T1>.Instance)
-            .Switch();
-        var o2 = sender.SubscribeToExpressionChain<TSender, IObservable<T2>?>(
-                obs2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T2>.Instance)
-            .Switch();
-        var o3 = sender.SubscribeToExpressionChain<TSender, IObservable<T3>?>(
-                obs3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T3>.Instance)
-            .Switch();
-        var o4 = sender.SubscribeToExpressionChain<TSender, IObservable<T4>?>(
-                obs4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T4>.Instance)
-            .Switch();
+        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
+        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
+        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
+        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -1485,41 +1428,11 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs5);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        var o1 = sender.SubscribeToExpressionChain<TSender, IObservable<T1>?>(
-                obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T1>.Instance)
-            .Switch();
-        var o2 = sender.SubscribeToExpressionChain<TSender, IObservable<T2>?>(
-                obs2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T2>.Instance)
-            .Switch();
-        var o3 = sender.SubscribeToExpressionChain<TSender, IObservable<T3>?>(
-                obs3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T3>.Instance)
-            .Switch();
-        var o4 = sender.SubscribeToExpressionChain<TSender, IObservable<T4>?>(
-                obs4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T4>.Instance)
-            .Switch();
-        var o5 = sender.SubscribeToExpressionChain<TSender, IObservable<T5>?>(
-                obs5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T5>.Instance)
-            .Switch();
+        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
+        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
+        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
+        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
+        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -1624,48 +1537,12 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs6);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        var o1 = sender.SubscribeToExpressionChain<TSender, IObservable<T1>?>(
-                obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T1>.Instance)
-            .Switch();
-        var o2 = sender.SubscribeToExpressionChain<TSender, IObservable<T2>?>(
-                obs2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T2>.Instance)
-            .Switch();
-        var o3 = sender.SubscribeToExpressionChain<TSender, IObservable<T3>?>(
-                obs3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T3>.Instance)
-            .Switch();
-        var o4 = sender.SubscribeToExpressionChain<TSender, IObservable<T4>?>(
-                obs4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T4>.Instance)
-            .Switch();
-        var o5 = sender.SubscribeToExpressionChain<TSender, IObservable<T5>?>(
-                obs5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T5>.Instance)
-            .Switch();
-        var o6 = sender.SubscribeToExpressionChain<TSender, IObservable<T6>?>(
-                obs6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T6>.Instance)
-            .Switch();
+        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
+        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
+        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
+        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
+        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
+        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -1780,55 +1657,13 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs7);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        var o1 = sender.SubscribeToExpressionChain<TSender, IObservable<T1>?>(
-                obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T1>.Instance)
-            .Switch();
-        var o2 = sender.SubscribeToExpressionChain<TSender, IObservable<T2>?>(
-                obs2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T2>.Instance)
-            .Switch();
-        var o3 = sender.SubscribeToExpressionChain<TSender, IObservable<T3>?>(
-                obs3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T3>.Instance)
-            .Switch();
-        var o4 = sender.SubscribeToExpressionChain<TSender, IObservable<T4>?>(
-                obs4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T4>.Instance)
-            .Switch();
-        var o5 = sender.SubscribeToExpressionChain<TSender, IObservable<T5>?>(
-                obs5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T5>.Instance)
-            .Switch();
-        var o6 = sender.SubscribeToExpressionChain<TSender, IObservable<T6>?>(
-                obs6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T6>.Instance)
-            .Switch();
-        var o7 = sender.SubscribeToExpressionChain<TSender, IObservable<T7>?>(
-                obs7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T7>.Instance)
-            .Switch();
+        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
+        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
+        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
+        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
+        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
+        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
+        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -1953,62 +1788,14 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs8);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        var o1 = sender.SubscribeToExpressionChain<TSender, IObservable<T1>?>(
-                obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T1>.Instance)
-            .Switch();
-        var o2 = sender.SubscribeToExpressionChain<TSender, IObservable<T2>?>(
-                obs2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T2>.Instance)
-            .Switch();
-        var o3 = sender.SubscribeToExpressionChain<TSender, IObservable<T3>?>(
-                obs3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T3>.Instance)
-            .Switch();
-        var o4 = sender.SubscribeToExpressionChain<TSender, IObservable<T4>?>(
-                obs4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T4>.Instance)
-            .Switch();
-        var o5 = sender.SubscribeToExpressionChain<TSender, IObservable<T5>?>(
-                obs5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T5>.Instance)
-            .Switch();
-        var o6 = sender.SubscribeToExpressionChain<TSender, IObservable<T6>?>(
-                obs6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T6>.Instance)
-            .Switch();
-        var o7 = sender.SubscribeToExpressionChain<TSender, IObservable<T7>?>(
-                obs7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T7>.Instance)
-            .Switch();
-        var o8 = sender.SubscribeToExpressionChain<TSender, IObservable<T8>?>(
-                obs8.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T8>.Instance)
-            .Switch();
+        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
+        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
+        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
+        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
+        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
+        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
+        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
+        var o8 = ObservableChainHelpers.SwitchLatest(sender, obs8);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -2143,69 +1930,15 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs9);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        var o1 = sender.SubscribeToExpressionChain<TSender, IObservable<T1>?>(
-                obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T1>.Instance)
-            .Switch();
-        var o2 = sender.SubscribeToExpressionChain<TSender, IObservable<T2>?>(
-                obs2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T2>.Instance)
-            .Switch();
-        var o3 = sender.SubscribeToExpressionChain<TSender, IObservable<T3>?>(
-                obs3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T3>.Instance)
-            .Switch();
-        var o4 = sender.SubscribeToExpressionChain<TSender, IObservable<T4>?>(
-                obs4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T4>.Instance)
-            .Switch();
-        var o5 = sender.SubscribeToExpressionChain<TSender, IObservable<T5>?>(
-                obs5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T5>.Instance)
-            .Switch();
-        var o6 = sender.SubscribeToExpressionChain<TSender, IObservable<T6>?>(
-                obs6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T6>.Instance)
-            .Switch();
-        var o7 = sender.SubscribeToExpressionChain<TSender, IObservable<T7>?>(
-                obs7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T7>.Instance)
-            .Switch();
-        var o8 = sender.SubscribeToExpressionChain<TSender, IObservable<T8>?>(
-                obs8.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T8>.Instance)
-            .Switch();
-        var o9 = sender.SubscribeToExpressionChain<TSender, IObservable<T9>?>(
-                obs9.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T9>.Instance)
-            .Switch();
+        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
+        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
+        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
+        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
+        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
+        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
+        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
+        var o8 = ObservableChainHelpers.SwitchLatest(sender, obs8);
+        var o9 = ObservableChainHelpers.SwitchLatest(sender, obs9);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -2350,76 +2083,16 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs10);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        var o1 = sender.SubscribeToExpressionChain<TSender, IObservable<T1>?>(
-                obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T1>.Instance)
-            .Switch();
-        var o2 = sender.SubscribeToExpressionChain<TSender, IObservable<T2>?>(
-                obs2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T2>.Instance)
-            .Switch();
-        var o3 = sender.SubscribeToExpressionChain<TSender, IObservable<T3>?>(
-                obs3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T3>.Instance)
-            .Switch();
-        var o4 = sender.SubscribeToExpressionChain<TSender, IObservable<T4>?>(
-                obs4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T4>.Instance)
-            .Switch();
-        var o5 = sender.SubscribeToExpressionChain<TSender, IObservable<T5>?>(
-                obs5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T5>.Instance)
-            .Switch();
-        var o6 = sender.SubscribeToExpressionChain<TSender, IObservable<T6>?>(
-                obs6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T6>.Instance)
-            .Switch();
-        var o7 = sender.SubscribeToExpressionChain<TSender, IObservable<T7>?>(
-                obs7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T7>.Instance)
-            .Switch();
-        var o8 = sender.SubscribeToExpressionChain<TSender, IObservable<T8>?>(
-                obs8.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T8>.Instance)
-            .Switch();
-        var o9 = sender.SubscribeToExpressionChain<TSender, IObservable<T9>?>(
-                obs9.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T9>.Instance)
-            .Switch();
-        var o10 = sender.SubscribeToExpressionChain<TSender, IObservable<T10>?>(
-                obs10.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T10>.Instance)
-            .Switch();
+        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
+        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
+        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
+        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
+        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
+        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
+        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
+        var o8 = ObservableChainHelpers.SwitchLatest(sender, obs8);
+        var o9 = ObservableChainHelpers.SwitchLatest(sender, obs9);
+        var o10 = ObservableChainHelpers.SwitchLatest(sender, obs10);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -2431,7 +2104,7 @@ public static partial class ReactiveUIBindingExtensions
             o8,
             o9,
             o10,
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10) => selector(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10));
+            selector);
     }
 
 #if NET8_0_OR_GREATER
@@ -2574,83 +2247,17 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs11);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        var o1 = sender.SubscribeToExpressionChain<TSender, IObservable<T1>?>(
-                obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T1>.Instance)
-            .Switch();
-        var o2 = sender.SubscribeToExpressionChain<TSender, IObservable<T2>?>(
-                obs2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T2>.Instance)
-            .Switch();
-        var o3 = sender.SubscribeToExpressionChain<TSender, IObservable<T3>?>(
-                obs3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T3>.Instance)
-            .Switch();
-        var o4 = sender.SubscribeToExpressionChain<TSender, IObservable<T4>?>(
-                obs4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T4>.Instance)
-            .Switch();
-        var o5 = sender.SubscribeToExpressionChain<TSender, IObservable<T5>?>(
-                obs5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T5>.Instance)
-            .Switch();
-        var o6 = sender.SubscribeToExpressionChain<TSender, IObservable<T6>?>(
-                obs6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T6>.Instance)
-            .Switch();
-        var o7 = sender.SubscribeToExpressionChain<TSender, IObservable<T7>?>(
-                obs7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T7>.Instance)
-            .Switch();
-        var o8 = sender.SubscribeToExpressionChain<TSender, IObservable<T8>?>(
-                obs8.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T8>.Instance)
-            .Switch();
-        var o9 = sender.SubscribeToExpressionChain<TSender, IObservable<T9>?>(
-                obs9.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T9>.Instance)
-            .Switch();
-        var o10 = sender.SubscribeToExpressionChain<TSender, IObservable<T10>?>(
-                obs10.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T10>.Instance)
-            .Switch();
-        var o11 = sender.SubscribeToExpressionChain<TSender, IObservable<T11>?>(
-                obs11.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T11>.Instance)
-            .Switch();
+        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
+        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
+        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
+        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
+        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
+        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
+        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
+        var o8 = ObservableChainHelpers.SwitchLatest(sender, obs8);
+        var o9 = ObservableChainHelpers.SwitchLatest(sender, obs9);
+        var o10 = ObservableChainHelpers.SwitchLatest(sender, obs10);
+        var o11 = ObservableChainHelpers.SwitchLatest(sender, obs11);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -2663,7 +2270,7 @@ public static partial class ReactiveUIBindingExtensions
             o9,
             o10,
             o11,
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) => selector(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11));
+            selector);
     }
 
 #if NET8_0_OR_GREATER
@@ -2815,90 +2422,18 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs12);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        var o1 = sender.SubscribeToExpressionChain<TSender, IObservable<T1>?>(
-                obs1.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T1>.Instance)
-            .Switch();
-        var o2 = sender.SubscribeToExpressionChain<TSender, IObservable<T2>?>(
-                obs2.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T2>.Instance)
-            .Switch();
-        var o3 = sender.SubscribeToExpressionChain<TSender, IObservable<T3>?>(
-                obs3.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T3>.Instance)
-            .Switch();
-        var o4 = sender.SubscribeToExpressionChain<TSender, IObservable<T4>?>(
-                obs4.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T4>.Instance)
-            .Switch();
-        var o5 = sender.SubscribeToExpressionChain<TSender, IObservable<T5>?>(
-                obs5.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T5>.Instance)
-            .Switch();
-        var o6 = sender.SubscribeToExpressionChain<TSender, IObservable<T6>?>(
-                obs6.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T6>.Instance)
-            .Switch();
-        var o7 = sender.SubscribeToExpressionChain<TSender, IObservable<T7>?>(
-                obs7.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T7>.Instance)
-            .Switch();
-        var o8 = sender.SubscribeToExpressionChain<TSender, IObservable<T8>?>(
-                obs8.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T8>.Instance)
-            .Switch();
-        var o9 = sender.SubscribeToExpressionChain<TSender, IObservable<T9>?>(
-                obs9.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T9>.Instance)
-            .Switch();
-        var o10 = sender.SubscribeToExpressionChain<TSender, IObservable<T10>?>(
-                obs10.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T10>.Instance)
-            .Switch();
-        var o11 = sender.SubscribeToExpressionChain<TSender, IObservable<T11>?>(
-                obs11.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T11>.Instance)
-            .Switch();
-        var o12 = sender.SubscribeToExpressionChain<TSender, IObservable<T12>?>(
-                obs12.Body,
-                beforeChange: false,
-                skipInitial: false,
-                isDistinct: true)
-            .Select(x => x.Value ?? EmptyObservable<T12>.Instance)
-            .Switch();
+        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
+        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
+        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
+        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
+        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
+        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
+        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
+        var o8 = ObservableChainHelpers.SwitchLatest(sender, obs8);
+        var o9 = ObservableChainHelpers.SwitchLatest(sender, obs9);
+        var o10 = ObservableChainHelpers.SwitchLatest(sender, obs10);
+        var o11 = ObservableChainHelpers.SwitchLatest(sender, obs11);
+        var o12 = ObservableChainHelpers.SwitchLatest(sender, obs12);
         return CombineLatestObservable.Create(
             o1,
             o2,
@@ -2912,6 +2447,6 @@ public static partial class ReactiveUIBindingExtensions
             o10,
             o11,
             o12,
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12) => selector(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12));
+            selector);
     }
 }

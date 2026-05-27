@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -67,7 +66,7 @@ public class BindOneWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: true);
+        BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -92,7 +91,7 @@ public class BindOneWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, supportsCallerArgExpr: false);
+        BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerFilePath");
@@ -119,7 +118,7 @@ public class BindOneWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindOneWayCodeGenerator.GenerateCallerArgExprOverload(sb, group);
+        BindOneWayCodeGenerator.GenerateCallerArgExprOverload(sb, group, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("sourcePropertyExpression == ");
@@ -136,8 +135,8 @@ public class BindOneWayCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(
-            callerFilePath: "/src/Views/MyView.cs",
-            callerLineNumber: 50);
+            "/src/Views/MyView.cs",
+            50);
         var group = new BindOneWayCodeGenerator.BindingTypeGroup(
             "global::TestApp.MyViewModel",
             "global::TestApp.MyView",
@@ -147,7 +146,7 @@ public class BindOneWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindOneWayCodeGenerator.GenerateCallerFilePathOverload(sb, group);
+        BindOneWayCodeGenerator.GenerateCallerFilePathOverload(sb, group, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerLineNumber == 50");
@@ -166,7 +165,7 @@ public class BindOneWayCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindingInvocationInfo();
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindOneWayCodeGenerator.GenerateBindOneWayMethod(sb, inv, classInfo, suffix: "TEST00000000TEST");
+        BindOneWayCodeGenerator.GenerateBindOneWayMethod(sb, inv, classInfo, "TEST00000000TEST");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__BindOneWay_TEST00000000TEST");
@@ -275,7 +274,7 @@ public class BindOneWayCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindingInvocationInfo(hasConversion: true);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindOneWayCodeGenerator.GenerateBindOneWayMethod(sb, inv, classInfo, suffix: "TEST00000000TEST");
+        BindOneWayCodeGenerator.GenerateBindOneWayMethod(sb, inv, classInfo, "TEST00000000TEST");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("RxBindingExtensions.Select");
@@ -293,7 +292,7 @@ public class BindOneWayCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindingInvocationInfo(hasScheduler: true);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindOneWayCodeGenerator.GenerateBindOneWayMethod(sb, inv, classInfo, suffix: "TEST00000000TEST");
+        BindOneWayCodeGenerator.GenerateBindOneWayMethod(sb, inv, classInfo, "TEST00000000TEST");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("ObserveOn");

@@ -2,8 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-
 using Microsoft.CodeAnalysis;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -13,6 +13,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 /// </summary>
 internal static class SymbolHelpers
 {
+    /// <summary>
+    /// The number of type arguments on <c>IInteraction&lt;TInput, TOutput&gt;</c>.
+    /// </summary>
+    private const int InteractionTypeArgumentCount = 2;
+
     /// <summary>
     /// The symbol cache for the compilation.
     /// </summary>
@@ -24,17 +29,19 @@ internal static class SymbolHelpers
     /// <param name="compilation">The compilation.</param>
     /// <returns>The well-known symbols box.</returns>
     internal static WellKnownSymbolsBox GetWellKnownSymbols(Compilation compilation) =>
-        SymbolCache.GetValue(compilation, static c => new WellKnownSymbolsBox
-        {
-            INPC = c.GetTypeByMetadataName(Constants.INotifyPropertyChangedMetadataName),
-            INPChanging = c.GetTypeByMetadataName(Constants.INotifyPropertyChangingMetadataName),
-            IReactiveObject = c.GetTypeByMetadataName(Constants.IReactiveObjectMetadataName),
-            WpfDependencyObject = c.GetTypeByMetadataName(Constants.WpfDependencyObjectMetadataName),
-            WinUIDependencyObject = c.GetTypeByMetadataName(Constants.WinUIDependencyObjectMetadataName),
-            NSObject = c.GetTypeByMetadataName(Constants.NSObjectMetadataName),
-            WinFormsComponent = c.GetTypeByMetadataName(Constants.WinFormsComponentMetadataName),
-            AndroidView = c.GetTypeByMetadataName(Constants.AndroidViewMetadataName),
-        });
+        SymbolCache.GetValue(
+            compilation,
+            static c => new()
+            {
+                INPC = c.GetTypeByMetadataName(Constants.INotifyPropertyChangedMetadataName),
+                INPChanging = c.GetTypeByMetadataName(Constants.INotifyPropertyChangingMetadataName),
+                IReactiveObject = c.GetTypeByMetadataName(Constants.IReactiveObjectMetadataName),
+                WpfDependencyObject = c.GetTypeByMetadataName(Constants.WpfDependencyObjectMetadataName),
+                WinUIDependencyObject = c.GetTypeByMetadataName(Constants.WinUIDependencyObjectMetadataName),
+                NSObject = c.GetTypeByMetadataName(Constants.NSObjectMetadataName),
+                WinFormsComponent = c.GetTypeByMetadataName(Constants.WinFormsComponentMetadataName),
+                AndroidView = c.GetTypeByMetadataName(Constants.AndroidViewMetadataName)
+            });
 
     /// <summary>
     /// Extracts the inner type T from a property whose type is IObservable&lt;T&gt; or IObservable&lt;T&gt;?.
@@ -57,7 +64,6 @@ internal static class SymbolHelpers
         if (argExpression is Microsoft.CodeAnalysis.CSharp.Syntax.LambdaExpressionSyntax lambda)
         {
             var body = SyntaxHelpers.GetLambdaBody(lambda);
-
             if (body != null)
             {
                 body = SyntaxHelpers.UnwrapNullForgiving(body);
@@ -66,19 +72,10 @@ internal static class SymbolHelpers
                     var memberSymbol = semanticModel.GetSymbolInfo(memberAccess, ct).Symbol;
                     if (memberSymbol is IPropertySymbol { Type: INamedTypeSymbol namedType })
                     {
-                        // Check if it's IObservable<T> directly
-                        if (IsIObservable(namedType))
+                        var observableType = TryGetObservableTypeArgument(namedType);
+                        if (observableType != null)
                         {
-                            return namedType.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                        }
-
-                        // Check interfaces for IObservable<T>
-                        for (var j = 0; j < namedType.AllInterfaces.Length; j++)
-                        {
-                            if (IsIObservable(namedType.AllInterfaces[j]))
-                            {
-                                return namedType.AllInterfaces[j].TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                            }
+                            return observableType;
                         }
                     }
                 }
@@ -97,7 +94,8 @@ internal static class SymbolHelpers
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsIObservable(INamedTypeSymbol type) =>
         type is { IsGenericType: true, TypeArguments.Length: 1 }
-        && type.ConstructedFrom.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "global::System.IObservable<T>";
+        && type.ConstructedFrom.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ==
+        "global::System.IObservable<T>";
 
     /// <summary>
     /// Checks if a type is IInteraction&lt;TInput, TOutput&gt;.
@@ -106,7 +104,7 @@ internal static class SymbolHelpers
     /// <returns>A value indicating whether the type is IInteraction&lt;TInput, TOutput&gt;.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsInteractionType(INamedTypeSymbol type) =>
-        type is { IsGenericType: true, TypeArguments.Length: 2, MetadataName: "IInteraction`2" }
+        type is { IsGenericType: true, TypeArguments.Length: InteractionTypeArgumentCount, MetadataName: "IInteraction`2" }
         && type.ContainingNamespace!.ToDisplayString() == "ReactiveUI.Binding";
 
     /// <summary>
@@ -122,25 +120,27 @@ internal static class SymbolHelpers
         outputType = string.Empty;
 
         // Check direct implementation
-        if (type is INamedTypeSymbol namedType)
+        if (type is not INamedTypeSymbol namedType)
         {
-            if (IsInteractionType(namedType))
-            {
-                inputType = namedType.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                outputType = namedType.TypeArguments[1].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                return true;
-            }
+            return false;
+        }
 
-            // Check interfaces
-            for (var i = 0; i < namedType.AllInterfaces.Length; i++)
+        if (IsInteractionType(namedType))
+        {
+            inputType = namedType.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            outputType = namedType.TypeArguments[1].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            return true;
+        }
+
+        // Check interfaces
+        for (var i = 0; i < namedType.AllInterfaces.Length; i++)
+        {
+            var iface = namedType.AllInterfaces[i];
+            if (IsInteractionType(iface))
             {
-                var iface = namedType.AllInterfaces[i];
-                if (IsInteractionType(iface))
-                {
-                    inputType = iface.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                    outputType = iface.TypeArguments[1].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                    return true;
-                }
+                inputType = iface.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                outputType = iface.TypeArguments[1].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return true;
             }
         }
 
@@ -160,7 +160,8 @@ internal static class SymbolHelpers
     internal static bool DetectHasConverterOverride(IParameterSymbol parameter) =>
         parameter.Name is "converter" or "sourceToTargetConverter" or "vmToViewConverter"
         && parameter.Type is INamedTypeSymbol paramType
-        && paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).EndsWith("IBindingTypeConverter", StringComparison.Ordinal);
+        && paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+            .EndsWith("IBindingTypeConverter", StringComparison.Ordinal);
 
     /// <summary>
     /// Resolves a PropertyPathSegment leaf type to its INamedTypeSymbol using the semantic model.
@@ -189,12 +190,41 @@ internal static class SymbolHelpers
         }
 
         body = SyntaxHelpers.UnwrapNullForgiving(body);
-        if (body is Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax memberAccess)
+        if (body is not Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax memberAccess)
         {
-            var memberSymbol = semanticModel.GetSymbolInfo(memberAccess, ct).Symbol;
-            if (memberSymbol is IPropertySymbol { Type: INamedTypeSymbol namedType })
+            return null;
+        }
+
+        var memberSymbol = semanticModel.GetSymbolInfo(memberAccess, ct).Symbol;
+        if (!(memberSymbol is IPropertySymbol { Type: INamedTypeSymbol namedType }))
+        {
+            return null;
+        }
+
+        return namedType;
+    }
+
+    /// <summary>
+    /// Returns the fully qualified <c>T</c> of <c>IObservable&lt;T&gt;</c> for the given type,
+    /// checking the type itself and all implemented interfaces.
+    /// </summary>
+    /// <param name="namedType">The candidate type symbol.</param>
+    /// <returns>The fully qualified observable type argument, or null if the type is not observable.</returns>
+    private static string? TryGetObservableTypeArgument(INamedTypeSymbol namedType)
+    {
+        // Check if it's IObservable<T> directly
+        if (IsIObservable(namedType))
+        {
+            return namedType.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        }
+
+        // Check interfaces for IObservable<T>
+        for (var j = 0; j < namedType.AllInterfaces.Length; j++)
+        {
+            if (IsIObservable(namedType.AllInterfaces[j]))
             {
-                return namedType;
+                return namedType.AllInterfaces[j].TypeArguments[0]
+                    .ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             }
         }
 
@@ -210,11 +240,19 @@ internal static class SymbolHelpers
         /// <summary>
         /// Gets or sets the INPC symbol.
         /// </summary>
+        [SuppressMessage(
+            "Minor Code Smell",
+            "S100:Methods and properties should be named in PascalCase",
+            Justification = "INPC abbreviates INotifyPropertyChanged, an established acronym matching the ReactiveUI domain terminology.")]
         internal INamedTypeSymbol? INPC { get; set; }
 
         /// <summary>
         /// Gets or sets the INPChanging symbol.
         /// </summary>
+        [SuppressMessage(
+            "Minor Code Smell",
+            "S100:Methods and properties should be named in PascalCase",
+            Justification = "INPChanging abbreviates INotifyPropertyChanging, an established acronym matching the ReactiveUI domain terminology.")]
         internal INamedTypeSymbol? INPChanging { get; set; }
 
         /// <summary>

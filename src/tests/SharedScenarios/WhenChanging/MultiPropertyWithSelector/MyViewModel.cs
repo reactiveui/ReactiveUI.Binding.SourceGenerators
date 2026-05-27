@@ -4,61 +4,64 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanging.MultiPropertyWithSelector
+namespace SharedScenarios.WhenChanging.MultiPropertyWithSelector;
+
+/// <summary>
+/// ViewModel with first and last name, supporting before-change notifications.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
     /// <summary>
-    /// ViewModel with first and last name, supporting before-change notifications.
+    /// The backing field for <see cref="FirstName"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+    private string _firstName = string.Empty;
+
+    /// <summary>
+    /// The backing field for <see cref="LastName"/>.
+    /// </summary>
+    private string _lastName = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <inheritdoc/>
+    public event PropertyChangingEventHandler? PropertyChanging;
+
+    /// <summary>
+    /// Gets or sets the first name.
+    /// </summary>
+    public string FirstName
     {
-        /// <summary>
-        /// The backing field for <see cref="FirstName"/>.
-        /// </summary>
-        private string _firstName = string.Empty;
-
-        /// <summary>
-        /// The backing field for <see cref="LastName"/>.
-        /// </summary>
-        private string _lastName = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <inheritdoc/>
-        public event PropertyChangingEventHandler? PropertyChanging;
-
-        /// <summary>
-        /// Gets or sets the first name.
-        /// </summary>
-        public string FirstName
+        get => _firstName;
+        set
         {
-            get => _firstName;
-            set
+            if (_firstName == value)
             {
-                if (_firstName != value)
-                {
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(FirstName)));
-                    _firstName = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FirstName)));
-                }
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(FirstName)));
+            _firstName = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FirstName)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the last name.
-        /// </summary>
-        public string LastName
+    /// <summary>
+    /// Gets or sets the last name.
+    /// </summary>
+    public string LastName
+    {
+        get => _lastName;
+        set
         {
-            get => _lastName;
-            set
+            if (_lastName == value)
             {
-                if (_lastName != value)
-                {
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(LastName)));
-                    _lastName = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastName)));
-                }
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(LastName)));
+            _lastName = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastName)));
         }
     }
 }

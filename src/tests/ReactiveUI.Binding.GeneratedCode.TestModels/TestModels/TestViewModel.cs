@@ -36,12 +36,14 @@ public class TestViewModel : INotifyPropertyChanged, INotifyPropertyChanging
         get => _name;
         set
         {
-            if (_name != value)
+            if (_name == value)
             {
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Name)));
-                _name = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Name)));
+            _name = value;
+            PropertyChanged?.Invoke(this, new(nameof(Name)));
         }
     }
 
@@ -53,12 +55,14 @@ public class TestViewModel : INotifyPropertyChanged, INotifyPropertyChanging
         get => _age;
         set
         {
-            if (_age != value)
+            if (_age == value)
             {
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Age)));
-                _age = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Age)));
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new(nameof(Age)));
+            _age = value;
+            PropertyChanged?.Invoke(this, new(nameof(Age)));
         }
     }
 }

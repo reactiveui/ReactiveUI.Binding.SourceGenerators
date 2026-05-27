@@ -4,56 +4,59 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenAnyValue.NullableProperties
+namespace SharedScenarios.WhenAnyValue.NullableProperties;
+
+/// <summary>
+/// ViewModel with nullable properties.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// ViewModel with nullable properties.
+    /// The backing field for <see cref="NullableName"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged
+    private string? _nullableName;
+
+    /// <summary>
+    /// The backing field for <see cref="NullableAge"/>.
+    /// </summary>
+    private int? _nullableAge;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the nullable name.
+    /// </summary>
+    public string? NullableName
     {
-        /// <summary>
-        /// The backing field for <see cref="NullableName"/>.
-        /// </summary>
-        private string? _nullableName;
-
-        /// <summary>
-        /// The backing field for <see cref="NullableAge"/>.
-        /// </summary>
-        private int? _nullableAge;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the nullable name.
-        /// </summary>
-        public string? NullableName
+        get => _nullableName;
+        set
         {
-            get => _nullableName;
-            set
+            if (_nullableName == value)
             {
-                if (_nullableName != value)
-                {
-                    _nullableName = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NullableName)));
-                }
+                return;
             }
+
+            _nullableName = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NullableName)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the nullable age.
-        /// </summary>
-        public int? NullableAge
+    /// <summary>
+    /// Gets or sets the nullable age.
+    /// </summary>
+    public int? NullableAge
+    {
+        get => _nullableAge;
+        set
         {
-            get => _nullableAge;
-            set
+            if (_nullableAge == value)
             {
-                if (_nullableAge != value)
-                {
-                    _nullableAge = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NullableAge)));
-                }
+                return;
             }
+
+            _nullableAge = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NullableAge)));
         }
     }
 }

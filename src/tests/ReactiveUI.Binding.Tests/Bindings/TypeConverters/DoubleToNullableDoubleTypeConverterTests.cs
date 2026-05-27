@@ -10,6 +10,16 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class DoubleToNullableDoubleTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Sample double value used for precise conversion checks.
+    /// </summary>
+    private const double SampleDouble = 123.456789;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +28,7 @@ public class DoubleToNullableDoubleTypeConverterTests
     {
         var converter = new DoubleToNullableDoubleTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,12 +39,12 @@ public class DoubleToNullableDoubleTypeConverterTests
     public async Task TryConvert_AlwaysSucceeds()
     {
         var converter = new DoubleToNullableDoubleTypeConverter();
-        var value = 123.456789;
+        const double value = 123.456789;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((double?)123.456789);
+        await Assert.That(output).IsEqualTo((double?)SampleDouble);
     }
 
     /// <summary>

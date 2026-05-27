@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
-using System.Reactive.Linq;
-
+using System.Linq;
 using ReactiveUI.Binding.Expressions;
+using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.ObservableForProperty;
 
@@ -18,13 +18,19 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 [EditorBrowsable(EditorBrowsableState.Never)]
 [RequiresUnreferencedCode(
     "Creating Expressions requires unreferenced code because the members being referenced by the Expression may be trimmed.")]
+[SuppressMessage(
+    "Major Code Smell",
+    "S4018:Generic methods should provide type parameter for type inference",
+    Justification = "The type parameter denotes the target type (value/control/view), supplied explicitly by callers; it is not derivable from the arguments. Public API.")]
 public static class ReactiveNotifyPropertyChangedMixin
 {
     /// <summary>
     /// MRU cache that maps (sender type, property name, before-change flag) to the best
     /// <see cref="ICreatesObservableForProperty"/> implementation for that combination.
     /// </summary>
-    private static readonly MemoizingMRUCache<(Type senderType, string propertyName, bool beforeChange), ICreatesObservableForProperty?>
+    private static readonly MemoizingMRUCache<
+        (Type senderType, string propertyName, bool beforeChange),
+        ICreatesObservableForProperty?>
         NotifyFactoryCache =
             new(
                 (t, _) => AppLocator.Current.GetServices<ICreatesObservableForProperty>()
@@ -36,6 +42,38 @@ public static class ReactiveNotifyPropertyChangedMixin
                             return score > acc.score ? (score, x) : acc;
                         }).binding,
                 64);
+
+    /// <summary>
+    /// ObservableForProperty by name, observing after-change, emitting the initial value, with distinct filtering.
+    /// </summary>
+    /// <typeparam name="TSender">The sender type.</typeparam>
+    /// <typeparam name="TValue">The value type.</typeparam>
+    /// <param name="item">The source object to observe properties of.</param>
+    /// <param name="propertyName">The property name to observe.</param>
+    /// <returns>An Observable representing the property change notifications for the given property name.</returns>
+    [RequiresUnreferencedCode(
+        "Creating Expressions requires unreferenced code because the members being referenced by the Expression may be trimmed.")]
+    public static IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TSender, TValue>(
+        this TSender? item,
+        string propertyName) =>
+        ObservableForProperty<TSender, TValue>(item, propertyName, false, true, true);
+
+    /// <summary>
+    /// ObservableForProperty by name, observing after-change with distinct filtering and a configurable initial value.
+    /// </summary>
+    /// <typeparam name="TSender">The sender type.</typeparam>
+    /// <typeparam name="TValue">The value type.</typeparam>
+    /// <param name="item">The source object to observe properties of.</param>
+    /// <param name="propertyName">The property name to observe.</param>
+    /// <param name="skipInitial">If true, the Observable will not notify with the initial value.</param>
+    /// <returns>An Observable representing the property change notifications for the given property name.</returns>
+    [RequiresUnreferencedCode(
+        "Creating Expressions requires unreferenced code because the members being referenced by the Expression may be trimmed.")]
+    public static IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TSender, TValue>(
+        this TSender? item,
+        string propertyName,
+        bool skipInitial) =>
+        ObservableForProperty<TSender, TValue>(item, propertyName, false, skipInitial, true);
 
     /// <summary>
     /// ObservableForProperty returns an Observable representing the
@@ -55,9 +93,9 @@ public static class ReactiveNotifyPropertyChangedMixin
     public static IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TSender, TValue>(
         this TSender? item,
         string propertyName,
-        bool beforeChange = false,
-        bool skipInitial = true,
-        bool isDistinct = true)
+        bool beforeChange,
+        bool skipInitial,
+        bool isDistinct)
     {
         ArgumentExceptionHelper.ThrowIfNull(item);
         ArgumentExceptionHelper.ThrowIfNull(propertyName);
@@ -99,49 +137,47 @@ public static class ReactiveNotifyPropertyChangedMixin
             return val is TValue tv ? tv : (TValue)val;
         }
 
-        var core = Observable.Create<IObservedChange<TSender, TValue>>(obs =>
-        {
-            if (!skipInitial)
-            {
-                try
-                {
-                    var initial = GetCurrentValue(item!, propertyName);
-                    obs.OnNext(new ObservedChange<TSender, TValue>(item!, expr, initial));
-                }
-                catch (Exception ex)
-                {
-                    obs.OnError(ex);
-                }
-            }
-
-            var subscription = factory
-                .GetNotificationForProperty(item!, expr, propertyName, beforeChange, suppressWarnings: false)
-                .Subscribe(
-                    _ =>
-                    {
-                        try
-                        {
-                            var current = GetCurrentValue(item!, propertyName);
-                            obs.OnNext(new ObservedChange<TSender, TValue>(item!, expr, current));
-                        }
-                        catch (Exception ex)
-                        {
-                            obs.OnError(ex);
-                        }
-                    },
-                    obs.OnError,
-                    obs.OnCompleted);
-
-            return subscription;
-        });
-
-        if (isDistinct)
-        {
-            return core.DistinctUntilChanged(x => x.Value);
-        }
-
-        return core;
+        // Single fused sink: emits the initial value (unless skipped), then re-reads and emits on each
+        // notification, applying the distinct gate inline.
+        var notifications = factory.GetNotificationForProperty(item!, expr, propertyName, beforeChange);
+        return new ObservableForPropertySink<TSender, TValue>(
+            item!,
+            expr,
+            notifications,
+            () => GetCurrentValue(item!, propertyName),
+            skipInitial,
+            isDistinct);
     }
+
+    /// <summary>
+    /// ObservableForProperty by expression, observing after-change, emitting the initial value, with distinct filtering.
+    /// </summary>
+    /// <typeparam name="TSender">The sender type.</typeparam>
+    /// <typeparam name="TValue">The value type.</typeparam>
+    /// <param name="item">The source object to observe properties of.</param>
+    /// <param name="property">An Expression representing the property.</param>
+    /// <returns>An Observable representing the property change notifications for the given property.</returns>
+    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+    public static IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TSender, TValue>(
+        this TSender? item,
+        Expression<Func<TSender, TValue>> property) =>
+        ObservableForProperty(item, property, false, true, true);
+
+    /// <summary>
+    /// ObservableForProperty by expression, observing after-change with distinct filtering and a configurable initial value.
+    /// </summary>
+    /// <typeparam name="TSender">The sender type.</typeparam>
+    /// <typeparam name="TValue">The value type.</typeparam>
+    /// <param name="item">The source object to observe properties of.</param>
+    /// <param name="property">An Expression representing the property.</param>
+    /// <param name="skipInitial">If true, the Observable will not notify with the initial value.</param>
+    /// <returns>An Observable representing the property change notifications for the given property.</returns>
+    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+    public static IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TSender, TValue>(
+        this TSender? item,
+        Expression<Func<TSender, TValue>> property,
+        bool skipInitial) =>
+        ObservableForProperty(item, property, false, skipInitial, true);
 
     /// <summary>
     /// ObservableForProperty returns an Observable representing the
@@ -160,9 +196,9 @@ public static class ReactiveNotifyPropertyChangedMixin
     public static IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TSender, TValue>(
         this TSender? item,
         Expression<Func<TSender, TValue>> property,
-        bool beforeChange = false,
-        bool skipInitial = true,
-        bool isDistinct = true)
+        bool beforeChange,
+        bool skipInitial,
+        bool isDistinct)
     {
         ArgumentExceptionHelper.ThrowIfNull(property);
 
@@ -173,6 +209,36 @@ public static class ReactiveNotifyPropertyChangedMixin
             skipInitial,
             isDistinct);
     }
+
+    /// <summary>
+    /// Subscribes to an expression chain, observing after-change, emitting the initial value, with distinct filtering.
+    /// </summary>
+    /// <typeparam name="TSender">The type of the origin of the expression chain.</typeparam>
+    /// <typeparam name="TValue">The end value we want to subscribe to.</typeparam>
+    /// <param name="source">The object where we start the chain.</param>
+    /// <param name="expression">An expression which will point towards the property.</param>
+    /// <returns>An observable which notifies about observed changes.</returns>
+    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+    public static IObservable<IObservedChange<TSender, TValue>> SubscribeToExpressionChain<TSender, TValue>(
+        this TSender? source,
+        Expression? expression) =>
+        SubscribeToExpressionChain<TSender, TValue>(source, expression, false, true, true);
+
+    /// <summary>
+    /// Subscribes to an expression chain, observing after-change with distinct filtering and a configurable initial value.
+    /// </summary>
+    /// <typeparam name="TSender">The type of the origin of the expression chain.</typeparam>
+    /// <typeparam name="TValue">The end value we want to subscribe to.</typeparam>
+    /// <param name="source">The object where we start the chain.</param>
+    /// <param name="expression">An expression which will point towards the property.</param>
+    /// <param name="skipInitial">If we don't want to get a notification about the default value of the property.</param>
+    /// <returns>An observable which notifies about observed changes.</returns>
+    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+    public static IObservable<IObservedChange<TSender, TValue>> SubscribeToExpressionChain<TSender, TValue>(
+        this TSender? source,
+        Expression? expression,
+        bool skipInitial) =>
+        SubscribeToExpressionChain<TSender, TValue>(source, expression, false, skipInitial, true);
 
     /// <summary>
     /// Creates an observable which will subscribe to each property and sub-property
@@ -190,39 +256,15 @@ public static class ReactiveNotifyPropertyChangedMixin
     public static IObservable<IObservedChange<TSender, TValue>> SubscribeToExpressionChain<TSender, TValue>(
         this TSender? source,
         Expression? expression,
-        bool beforeChange = false,
-        bool skipInitial = true,
-        bool isDistinct = true)
+        bool beforeChange,
+        bool skipInitial,
+        bool isDistinct)
     {
-        IObservable<IObservedChange<object?, object?>> notifier =
-            Observable.Return(new ObservedChange<object?, object?>(null, null, source));
-
-        var chain = Reflection.Rewrite(expression).GetExpressionChain();
-        notifier = chain.Aggregate(
-            notifier,
-            (n, expr) => n
-                .Select(y => NestedObservedChanges(expr, y, beforeChange))
-                .Switch());
-
-        if (skipInitial)
-        {
-            notifier = notifier.Skip(1);
-        }
-
-        notifier = notifier.Where(x => x.Sender is not null);
-
-        var r = notifier.Select(x =>
-        {
-            var val = x.GetValueOrDefault();
-            if (val is not null && val is not TValue)
-            {
-                throw new InvalidCastException($"Unable to cast from {val.GetType()} to {typeof(TValue)}.");
-            }
-
-            return new ObservedChange<TSender, TValue>(source!, expression, (TValue)val!);
-        });
-
-        return isDistinct ? r.DistinctUntilChanged(x => x.Value) : r;
+        // Single fused switching engine: one watcher per link, re-subscribing deeper links when an
+        // intermediate value changes, with skip-initial, the non-null-parent filter, the cast to TValue,
+        // and the distinct gate applied inline.
+        var links = Reflection.Rewrite(expression).GetExpressionChain().ToArray();
+        return new ExpressionChainSink<TSender, TValue>(source, expression, links, beforeChange, skipInitial, isDistinct);
     }
 
     /// <summary>
@@ -242,12 +284,14 @@ public static class ReactiveNotifyPropertyChangedMixin
 
         if (sourceChange.Value is null)
         {
-            return Observable.Return(kicker);
+            return new ReturnObservable<IObservedChange<object?, object?>>(kicker);
         }
 
-        return NotifyForProperty(sourceChange.Value, expression, beforeChange)
-            .StartWith(kicker)
-            .Select(static x => new ObservedChange<object?, object?>(x.Sender, x.Expression, x.GetValueOrDefault()));
+        return new SelectObservable<IObservedChange<object?, object?>, IObservedChange<object?, object?>>(
+            new StartWithObservable<IObservedChange<object?, object?>>(
+                NotifyForProperty(sourceChange.Value, expression, beforeChange),
+                kicker),
+            static x => new ObservedChange<object?, object?>(x.Sender, x.Expression, x.GetValueOrDefault()));
     }
 
     /// <summary>
@@ -278,7 +322,7 @@ public static class ReactiveNotifyPropertyChangedMixin
                 $"Could not find a ICreatesObservableForProperty for {sender.GetType()} property {propertyName}. " +
                 "This should never happen, your service locator is probably broken. " +
                 "Please make sure you have registered ICreatesObservableForProperty implementations."),
-            _ => result.GetNotificationForProperty(sender, expression, propertyName, beforeChange, suppressWarnings: false)
+            _ => result.GetNotificationForProperty(sender, expression, propertyName, beforeChange)
         };
     }
 }

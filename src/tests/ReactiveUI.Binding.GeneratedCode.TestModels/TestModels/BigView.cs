@@ -104,11 +104,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp1;
         set
         {
-            if (_viewProp1 != value)
+            if (_viewProp1 == value)
             {
-                _viewProp1 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp1)));
+                return;
             }
+
+            _viewProp1 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp1)));
         }
     }
 
@@ -120,11 +122,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp2;
         set
         {
-            if (_viewProp2 != value)
+            if (_viewProp2 == value)
             {
-                _viewProp2 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp2)));
+                return;
             }
+
+            _viewProp2 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp2)));
         }
     }
 
@@ -136,11 +140,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp3;
         set
         {
-            if (Math.Abs(_viewProp3 - value) > double.Epsilon)
+            if (Math.Abs(_viewProp3 - value) <= double.Epsilon)
             {
-                _viewProp3 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp3)));
+                return;
             }
+
+            _viewProp3 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp3)));
         }
     }
 
@@ -152,11 +158,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp4;
         set
         {
-            if (_viewProp4 != value)
+            if (_viewProp4 == value)
             {
-                _viewProp4 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp4)));
+                return;
             }
+
+            _viewProp4 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp4)));
         }
     }
 
@@ -168,11 +176,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp5;
         set
         {
-            if (_viewProp5 != value)
+            if (_viewProp5 == value)
             {
-                _viewProp5 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp5)));
+                return;
             }
+
+            _viewProp5 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp5)));
         }
     }
 
@@ -184,11 +194,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp6;
         set
         {
-            if (_viewProp6 != value)
+            if (_viewProp6 == value)
             {
-                _viewProp6 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp6)));
+                return;
             }
+
+            _viewProp6 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp6)));
         }
     }
 
@@ -200,11 +212,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp7;
         set
         {
-            if (Math.Abs(_viewProp7 - value) > double.Epsilon)
+            if (Math.Abs(_viewProp7 - value) <= double.Epsilon)
             {
-                _viewProp7 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp7)));
+                return;
             }
+
+            _viewProp7 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp7)));
         }
     }
 
@@ -216,11 +230,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp8;
         set
         {
-            if (_viewProp8 != value)
+            if (_viewProp8 == value)
             {
-                _viewProp8 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp8)));
+                return;
             }
+
+            _viewProp8 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp8)));
         }
     }
 
@@ -232,11 +248,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp9;
         set
         {
-            if (_viewProp9 != value)
+            if (_viewProp9 == value)
             {
-                _viewProp9 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp9)));
+                return;
             }
+
+            _viewProp9 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp9)));
         }
     }
 
@@ -248,11 +266,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp10;
         set
         {
-            if (_viewProp10 != value)
+            if (_viewProp10 == value)
             {
-                _viewProp10 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp10)));
+                return;
             }
+
+            _viewProp10 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp10)));
         }
     }
 
@@ -264,11 +284,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp11;
         set
         {
-            if (Math.Abs(_viewProp11 - value) > double.Epsilon)
+            if (Math.Abs(_viewProp11 - value) <= double.Epsilon)
             {
-                _viewProp11 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp11)));
+                return;
             }
+
+            _viewProp11 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp11)));
         }
     }
 
@@ -280,11 +302,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp12;
         set
         {
-            if (_viewProp12 != value)
+            if (_viewProp12 == value)
             {
-                _viewProp12 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp12)));
+                return;
             }
+
+            _viewProp12 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp12)));
         }
     }
 
@@ -296,11 +320,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp13;
         set
         {
-            if (_viewProp13 != value)
+            if (_viewProp13 == value)
             {
-                _viewProp13 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp13)));
+                return;
             }
+
+            _viewProp13 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp13)));
         }
     }
 
@@ -312,11 +338,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp14;
         set
         {
-            if (_viewProp14 != value)
+            if (_viewProp14 == value)
             {
-                _viewProp14 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp14)));
+                return;
             }
+
+            _viewProp14 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp14)));
         }
     }
 
@@ -328,11 +356,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp15;
         set
         {
-            if (Math.Abs(_viewProp15 - value) > double.Epsilon)
+            if (Math.Abs(_viewProp15 - value) <= double.Epsilon)
             {
-                _viewProp15 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp15)));
+                return;
             }
+
+            _viewProp15 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp15)));
         }
     }
 
@@ -344,11 +374,13 @@ public class BigView : INotifyPropertyChanged
         get => _viewProp16;
         set
         {
-            if (_viewProp16 != value)
+            if (_viewProp16 == value)
             {
-                _viewProp16 = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ViewProp16)));
+                return;
             }
+
+            _viewProp16 = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewProp16)));
         }
     }
 }

@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToNullableBooleanTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class StringToNullableBooleanTypeConverterTests
     {
         var converter = new StringToNullableBooleanTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -119,8 +124,7 @@ public class StringToNullableBooleanTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToNullableBooleanTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }

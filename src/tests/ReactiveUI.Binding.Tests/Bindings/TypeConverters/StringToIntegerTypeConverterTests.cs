@@ -10,6 +10,26 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToIntegerTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Integer value parsed from a positive numeric string.
+    /// </summary>
+    private const int ParsedInteger = 123_456;
+
+    /// <summary>
+    /// Integer value parsed from a negative numeric string.
+    /// </summary>
+    private const int NegativeInteger = -123_456;
+
+    /// <summary>
+    /// Integer value parsed in the typed conversion test.
+    /// </summary>
+    private const int TypedInteger = 789;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +38,7 @@ public class StringToIntegerTypeConverterTests
     {
         var converter = new StringToIntegerTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,8 +49,7 @@ public class StringToIntegerTypeConverterTests
     public async Task TryConvert_EmptyString_ReturnsFalse()
     {
         var converter = new StringToIntegerTypeConverter();
-
-        var result = converter.TryConvert(string.Empty, null, out var output);
+        var result = converter.TryConvert(string.Empty, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -43,8 +62,7 @@ public class StringToIntegerTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToIntegerTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -57,8 +75,7 @@ public class StringToIntegerTypeConverterTests
     public async Task TryConvert_OutOfRangeValue_ReturnsFalse()
     {
         var converter = new StringToIntegerTypeConverter();
-
-        var result = converter.TryConvert("9999999999", null, out var output);
+        var result = converter.TryConvert("9999999999", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -75,7 +92,7 @@ public class StringToIntegerTypeConverterTests
         var result = converter.TryConvert("123456", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(123456);
+        await Assert.That(output).IsEqualTo(ParsedInteger);
     }
 
     /// <summary>
@@ -120,7 +137,7 @@ public class StringToIntegerTypeConverterTests
         var result = converter.TryConvert("-123456", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(-123456);
+        await Assert.That(output).IsEqualTo(NegativeInteger);
     }
 
     /// <summary>
@@ -135,7 +152,7 @@ public class StringToIntegerTypeConverterTests
         var result = converter.TryConvertTyped("789", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(789);
+        await Assert.That(output).IsEqualTo(TypedInteger);
     }
 
     /// <summary>

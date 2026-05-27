@@ -33,7 +33,7 @@ public class TestAddress : INotifyPropertyChanged
             }
 
             _city = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(City)));
+            PropertyChanged?.Invoke(this, new(nameof(City)));
         }
     }
 }

@@ -2,13 +2,21 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Globalization;
+
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
 /// <summary>
 /// Tests for converting DateTime to strings.
 /// </summary>
+[SuppressMessage("Major Code Smell", "S6566:Use \"DateTimeOffset\" instead of \"DateTime\"", Justification = "Tests focused on DateTime.")]
 public class DateTimeToStringTypeConverterTests
 {
+    /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
     /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
@@ -18,7 +26,7 @@ public class DateTimeToStringTypeConverterTests
     {
         var converter = new DateTimeToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,12 +37,12 @@ public class DateTimeToStringTypeConverterTests
     public async Task TryConvert_DateTime_Succeeds()
     {
         var converter = new DateTimeToStringTypeConverter();
-        var value = new DateTime(2024, 1, 15, 10, 30, 45);
+        var value = new DateTime(2_024, 1, 15, 10, 30, 45, DateTimeKind.Utc);
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(value.ToString());
+        await Assert.That(output).IsEqualTo(value.ToString(CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -50,7 +58,7 @@ public class DateTimeToStringTypeConverterTests
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(DateTime.MinValue.ToString());
+        await Assert.That(output).IsEqualTo(DateTime.MinValue.ToString(CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -66,6 +74,6 @@ public class DateTimeToStringTypeConverterTests
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(DateTime.MaxValue.ToString());
+        await Assert.That(output).IsEqualTo(DateTime.MaxValue.ToString(CultureInfo.CurrentCulture));
     }
 }

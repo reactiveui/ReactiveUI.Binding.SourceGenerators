@@ -13,18 +13,43 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 public class BindOneWayTests
 {
     /// <summary>
+    /// The initial string property value used across the binding tests.
+    /// </summary>
+    private const string HelloValue = "Hello";
+
+    /// <summary>
+    /// The initial integer property test value.
+    /// </summary>
+    private const int IntValue = 42;
+
+    /// <summary>
+    /// The updated integer property test value.
+    /// </summary>
+    private const int UpdatedIntValue = 100;
+
+    /// <summary>
+    /// The initial double property test value.
+    /// </summary>
+    private const double DoubleValue = 3.14;
+
+    /// <summary>
+    /// The updated double property test value.
+    /// </summary>
+    private const double UpdatedDoubleValue = 2.71;
+
+    /// <summary>
     /// Verifies that BindOneWay syncs the initial string property value.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringProperty_SyncsInitialValue()
     {
-        var source = new BigViewModel { Prop1 = "Hello" };
+        var source = new BigViewModel { Prop1 = HelloValue };
         var target = new BigView();
 
         using var binding = BindOneWayScenarios.StringProperty(source, target);
 
-        await Assert.That(target.ViewProp1).IsEqualTo("Hello");
+        await Assert.That(target.ViewProp1).IsEqualTo(HelloValue);
     }
 
     /// <summary>
@@ -34,7 +59,7 @@ public class BindOneWayTests
     [Test]
     public async Task StringProperty_SyncsOnSourceChange()
     {
-        var source = new BigViewModel { Prop1 = "Hello" };
+        var source = new BigViewModel { Prop1 = HelloValue };
         var target = new BigView();
 
         using var binding = BindOneWayScenarios.StringProperty(source, target);
@@ -51,16 +76,16 @@ public class BindOneWayTests
     [Test]
     public async Task IntProperty_SyncsValues()
     {
-        var source = new BigViewModel { Prop2 = 42 };
+        var source = new BigViewModel { Prop2 = IntValue };
         var target = new BigView();
 
         using var binding = BindOneWayScenarios.IntProperty(source, target);
 
-        await Assert.That(target.ViewProp2).IsEqualTo(42);
+        await Assert.That(target.ViewProp2).IsEqualTo(IntValue);
 
-        source.Prop2 = 100;
+        source.Prop2 = UpdatedIntValue;
 
-        await Assert.That(target.ViewProp2).IsEqualTo(100);
+        await Assert.That(target.ViewProp2).IsEqualTo(UpdatedIntValue);
     }
 
     /// <summary>
@@ -70,16 +95,16 @@ public class BindOneWayTests
     [Test]
     public async Task DoubleProperty_SyncsValues()
     {
-        var source = new BigViewModel { Prop3 = 3.14 };
+        var source = new BigViewModel { Prop3 = DoubleValue };
         var target = new BigView();
 
         using var binding = BindOneWayScenarios.DoubleProperty(source, target);
 
-        await Assert.That(target.ViewProp3).IsEqualTo(3.14);
+        await Assert.That(target.ViewProp3).IsEqualTo(DoubleValue);
 
-        source.Prop3 = 2.71;
+        source.Prop3 = UpdatedDoubleValue;
 
-        await Assert.That(target.ViewProp3).IsEqualTo(2.71);
+        await Assert.That(target.ViewProp3).IsEqualTo(UpdatedDoubleValue);
     }
 
     /// <summary>
@@ -108,7 +133,7 @@ public class BindOneWayTests
     [Test]
     public async Task Disposal_StopsSyncing()
     {
-        var source = new BigViewModel { Prop1 = "Hello" };
+        var source = new BigViewModel { Prop1 = HelloValue };
         var target = new BigView();
 
         var binding = BindOneWayScenarios.StringProperty(source, target);
@@ -116,6 +141,6 @@ public class BindOneWayTests
 
         source.Prop1 = "AfterDisposal";
 
-        await Assert.That(target.ViewProp1).IsEqualTo("Hello");
+        await Assert.That(target.ViewProp1).IsEqualTo(HelloValue);
     }
 }

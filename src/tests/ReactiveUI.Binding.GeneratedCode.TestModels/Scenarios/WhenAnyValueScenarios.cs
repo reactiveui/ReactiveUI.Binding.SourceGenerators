@@ -34,7 +34,8 @@ public static class WhenAnyValueScenarios
     /// </summary>
     /// <param name="fixture">The fixture to observe.</param>
     /// <returns>An observable of the property value tuple.</returns>
-    public static IObservable<(string property1, string property2, string property3)> ThreeProperties(WhenAnyTestFixture fixture)
+    public static IObservable<(string property1, string property2, string property3)> ThreeProperties(
+        WhenAnyTestFixture fixture)
         => fixture.WhenAnyValue(x => x.Value1, x => x.Value2, x => x.Value3);
 
     /// <summary>

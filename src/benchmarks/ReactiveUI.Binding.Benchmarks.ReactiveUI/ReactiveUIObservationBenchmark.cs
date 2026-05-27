@@ -20,7 +20,7 @@ public class ReactiveUIObservationBenchmark
     /// <summary>
     /// The number of property changes to fire during each benchmark iteration.
     /// </summary>
-    private const int PropertyChangeCount = 1000;
+    private const int PropertyChangeCount = 1_000;
 
     /// <summary>
     /// The view model instance used for observation benchmarks.
@@ -38,12 +38,7 @@ public class ReactiveUIObservationBenchmark
     /// </summary>
     [IterationSetup]
     public void Setup() =>
-        _vm = new BenchmarkViewModel
-        {
-            Name = "Initial",
-            Age = 0,
-            Child = new BenchmarkChildViewModel { Value = "ChildInitial" },
-        };
+        _vm = new() { Name = "Initial", Age = 0, Child = new() { Value = "ChildInitial" } };
 
     /// <summary>
     /// Expression-tree single property observation: subscribe, fire N changes, dispose.

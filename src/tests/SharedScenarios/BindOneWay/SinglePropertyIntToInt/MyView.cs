@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.BindOneWay.SinglePropertyIntToInt
+namespace SharedScenarios.BindOneWay.SinglePropertyIntToInt;
+
+/// <summary>
+/// Target View with an integer property.
+/// </summary>
+public class MyView : INotifyPropertyChanged
 {
     /// <summary>
-    /// Target View with an integer property.
+    /// The backing field for <see cref="DisplayCount"/>.
     /// </summary>
-    public class MyView : INotifyPropertyChanged
+    private int _displayCount;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the display count.
+    /// </summary>
+    public int DisplayCount
     {
-        /// <summary>
-        /// The backing field for <see cref="DisplayCount"/>.
-        /// </summary>
-        private int _displayCount;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the display count.
-        /// </summary>
-        public int DisplayCount
+        get => _displayCount;
+        set
         {
-            get => _displayCount;
-            set
+            if (_displayCount == value)
             {
-                if (_displayCount != value)
-                {
-                    _displayCount = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayCount)));
-                }
+                return;
             }
+
+            _displayCount = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayCount)));
         }
     }
 }

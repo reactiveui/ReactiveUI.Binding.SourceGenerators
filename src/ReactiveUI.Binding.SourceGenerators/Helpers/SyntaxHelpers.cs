@@ -3,11 +3,9 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -60,16 +58,17 @@ internal static class SyntaxHelpers
             }
 
             // Check accessibility — skip private/protected members
-            if (propertySymbol.DeclaredAccessibility != Accessibility.Public
-                && propertySymbol.DeclaredAccessibility != Accessibility.Internal)
+            if (propertySymbol.DeclaredAccessibility is not Accessibility.Public
+                and not Accessibility.Internal)
             {
                 return null;
             }
 
-            segments.Add(new PropertyPathSegment(
-                PropertyName: propertySymbol.Name,
-                PropertyTypeFullName: propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                DeclaringTypeFullName: propertySymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            segments.Add(new(
+                propertySymbol.Name,
+                propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                propertySymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                propertySymbol.Type.IsReferenceType));
 
             current = UnwrapNullForgiving(memberAccess.Expression);
         }
@@ -81,7 +80,7 @@ internal static class SyntaxHelpers
 
         // Reverse so the path goes from root to leaf
         segments.Reverse();
-        return segments.ToArray();
+        return [.. segments];
     }
 
     /// <summary>

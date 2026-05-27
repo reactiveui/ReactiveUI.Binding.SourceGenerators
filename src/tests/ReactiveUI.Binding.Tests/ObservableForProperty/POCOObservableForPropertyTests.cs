@@ -22,7 +22,7 @@ public class POCOObservableForPropertyTests
     {
         var sut = new POCOObservableForProperty();
 
-        var affinity = sut.GetAffinityForObject(typeof(PocoModel), "Value", beforeChanged: false);
+        var affinity = sut.GetAffinityForObject(typeof(PocoModel), "Value");
 
         await Assert.That(affinity).IsEqualTo(1);
     }
@@ -36,7 +36,7 @@ public class POCOObservableForPropertyTests
     {
         var sut = new POCOObservableForProperty();
 
-        var affinity = sut.GetAffinityForObject(typeof(TestViewModel), "Name", beforeChanged: false);
+        var affinity = sut.GetAffinityForObject(typeof(TestViewModel), "Name");
 
         await Assert.That(affinity).IsEqualTo(1);
     }

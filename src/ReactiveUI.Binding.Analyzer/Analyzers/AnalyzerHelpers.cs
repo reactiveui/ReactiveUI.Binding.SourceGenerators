@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -29,8 +28,8 @@ internal static class AnalyzerHelpers
         }
 
         var name = containingType.Name;
-        return name == SourceGenerators.Constants.GeneratedExtensionClassName
-            || name == SourceGenerators.Constants.StubExtensionClassName;
+        return name is SourceGenerators.Constants.GeneratedExtensionClassName
+            or SourceGenerators.Constants.StubExtensionClassName;
     }
 
     /// <summary>
@@ -39,7 +38,8 @@ internal static class AnalyzerHelpers
     /// <param name="expression">The expression to check.</param>
     /// <returns>true if the expression is an inline lambda.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsInlineLambda(ExpressionSyntax expression) => expression is SimpleLambdaExpressionSyntax or ParenthesizedLambdaExpressionSyntax;
+    internal static bool IsInlineLambda(ExpressionSyntax expression) =>
+        expression is SimpleLambdaExpressionSyntax or ParenthesizedLambdaExpressionSyntax;
 
     /// <summary>
     /// Checks if a type supports before-change notifications based on its notification mechanism.
@@ -48,66 +48,59 @@ internal static class AnalyzerHelpers
     /// <param name="compilation">The current compilation for type resolution.</param>
     /// <param name="mechanism">Output: the name of the detected mechanism.</param>
     /// <returns>true if the type supports before-change notifications.</returns>
-    internal static bool HasBeforeChangeSupport(INamedTypeSymbol typeSymbol, Compilation compilation, out string mechanism)
+    internal static bool HasBeforeChangeSupport(
+        INamedTypeSymbol typeSymbol,
+        Compilation compilation,
+        out string mechanism)
     {
-        mechanism = string.Empty;
-
         // IReactiveObject supports before-change via GetChangingObservable()
-        var iro = compilation.GetTypeByMetadataName(SourceGenerators.Constants.IReactiveObjectMetadataName);
-        if (iro != null && ImplementsInterface(typeSymbol, iro))
+        if (Matches(typeSymbol, compilation, SourceGenerators.Constants.IReactiveObjectMetadataName, byInterface: true))
         {
             mechanism = "IReactiveObject";
             return true;
         }
 
         // INotifyPropertyChanging supports before-change
-        var inpChanging = compilation.GetTypeByMetadataName(SourceGenerators.Constants.INotifyPropertyChangingMetadataName);
-        if (inpChanging != null && ImplementsInterface(typeSymbol, inpChanging))
+        if (Matches(typeSymbol, compilation, SourceGenerators.Constants.INotifyPropertyChangingMetadataName, byInterface: true))
         {
             mechanism = "INotifyPropertyChanging";
             return true;
         }
 
-        // Check for platform types that DON'T support before-change
-        var wpfDO = compilation.GetTypeByMetadataName(SourceGenerators.Constants.WpfDependencyObjectMetadataName);
-        if (wpfDO != null && InheritsFrom(typeSymbol, wpfDO))
+        // Platform types that DON'T support before-change
+        if (Matches(typeSymbol, compilation, SourceGenerators.Constants.WpfDependencyObjectMetadataName, byInterface: false))
         {
             mechanism = "WPF DependencyObject";
             return false;
         }
 
-        var winuiDO = compilation.GetTypeByMetadataName(SourceGenerators.Constants.WinUIDependencyObjectMetadataName);
-        if (winuiDO != null && InheritsFrom(typeSymbol, winuiDO))
+        if (Matches(typeSymbol, compilation, SourceGenerators.Constants.WinUIDependencyObjectMetadataName, byInterface: false))
         {
             mechanism = "WinUI DependencyObject";
             return false;
         }
 
-        var winformsComp = compilation.GetTypeByMetadataName(SourceGenerators.Constants.WinFormsComponentMetadataName);
-        if (winformsComp != null && InheritsFrom(typeSymbol, winformsComp))
+        if (Matches(typeSymbol, compilation, SourceGenerators.Constants.WinFormsComponentMetadataName, byInterface: false))
         {
             mechanism = "WinForms Component";
             return false;
         }
 
-        var androidView = compilation.GetTypeByMetadataName(SourceGenerators.Constants.AndroidViewMetadataName);
-        if (androidView != null && InheritsFrom(typeSymbol, androidView))
+        if (Matches(typeSymbol, compilation, SourceGenerators.Constants.AndroidViewMetadataName, byInterface: false))
         {
             mechanism = "Android View";
             return false;
         }
 
         // KVO (NSObject) supports before-change
-        var nsObject = compilation.GetTypeByMetadataName(SourceGenerators.Constants.NSObjectMetadataName);
-        if (nsObject != null && InheritsFrom(typeSymbol, nsObject))
+        if (Matches(typeSymbol, compilation, SourceGenerators.Constants.NSObjectMetadataName, byInterface: false))
         {
             mechanism = "KVO";
             return true;
         }
 
         // INPC without INotifyPropertyChanging
-        var inpc = compilation.GetTypeByMetadataName(SourceGenerators.Constants.INotifyPropertyChangedMetadataName);
-        if (inpc != null && ImplementsInterface(typeSymbol, inpc))
+        if (Matches(typeSymbol, compilation, SourceGenerators.Constants.INotifyPropertyChangedMetadataName, byInterface: true))
         {
             mechanism = "INotifyPropertyChanged (without INotifyPropertyChanging)";
             return false;
@@ -202,7 +195,8 @@ internal static class AnalyzerHelpers
             return false;
         }
 
-        var dataErrorInfo = compilation.GetTypeByMetadataName(SourceGenerators.Constants.INotifyDataErrorInfoMetadataName);
+        var dataErrorInfo =
+            compilation.GetTypeByMetadataName(SourceGenerators.Constants.INotifyDataErrorInfoMetadataName);
         if (dataErrorInfo == null)
         {
             return false;
@@ -251,5 +245,33 @@ internal static class AnalyzerHelpers
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Resolves a well-known type by metadata name and tests whether <paramref name="typeSymbol"/>
+    /// matches it, either by interface implementation or base-type inheritance.
+    /// </summary>
+    /// <param name="typeSymbol">The type to test.</param>
+    /// <param name="compilation">The current compilation for type resolution.</param>
+    /// <param name="metadataName">The metadata name of the well-known type to resolve.</param>
+    /// <param name="byInterface">
+    /// <c>true</c> to test interface implementation; <c>false</c> to test base-type inheritance.
+    /// </param>
+    /// <returns><c>true</c> if the resolved type exists and matches; otherwise, <c>false</c>.</returns>
+    private static bool Matches(
+        INamedTypeSymbol typeSymbol,
+        Compilation compilation,
+        string metadataName,
+        bool byInterface)
+    {
+        var target = compilation.GetTypeByMetadataName(metadataName);
+        if (target == null)
+        {
+            return false;
+        }
+
+        return byInterface
+            ? ImplementsInterface(typeSymbol, target)
+            : InheritsFrom(typeSymbol, target);
     }
 }

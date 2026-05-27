@@ -4,56 +4,59 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenAny.MultiPropertyDeepChain
+namespace SharedScenarios.WhenAny.MultiPropertyDeepChain;
+
+/// <summary>
+/// Parent ViewModel containing a child model and a direct property.
+/// </summary>
+public class ParentViewModel : INotifyPropertyChanged
 {
     /// <summary>
-    /// Parent ViewModel containing a child model and a direct property.
+    /// The backing field for <see cref="Child"/>.
     /// </summary>
-    public class ParentViewModel : INotifyPropertyChanged
+    private ChildModel _child = new ChildModel();
+
+    /// <summary>
+    /// The backing field for <see cref="Title"/>.
+    /// </summary>
+    private string _title = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the child model.
+    /// </summary>
+    public ChildModel Child
     {
-        /// <summary>
-        /// The backing field for <see cref="Child"/>.
-        /// </summary>
-        private ChildModel _child = new();
-
-        /// <summary>
-        /// The backing field for <see cref="Title"/>.
-        /// </summary>
-        private string _title = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the child model.
-        /// </summary>
-        public ChildModel Child
+        get => _child;
+        set
         {
-            get => _child;
-            set
+            if (_child == value)
             {
-                if (_child != value)
-                {
-                    _child = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Child)));
-                }
+                return;
             }
+
+            _child = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Child)));
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the title.
-        /// </summary>
-        public string Title
+    /// <summary>
+    /// Gets or sets the title.
+    /// </summary>
+    public string Title
+    {
+        get => _title;
+        set
         {
-            get => _title;
-            set
+            if (_title == value)
             {
-                if (_title != value)
-                {
-                    _title = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Title)));
-                }
+                return;
             }
+
+            _title = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Title)));
         }
     }
 }

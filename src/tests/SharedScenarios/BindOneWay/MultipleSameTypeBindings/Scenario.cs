@@ -5,20 +5,20 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.BindOneWay.MultipleSameTypeBindings
+namespace SharedScenarios.BindOneWay.MultipleSameTypeBindings;
+
+/// <summary>
+/// Exercises BindOneWay with multiple bindings sharing the same type signature (string to string).
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises BindOneWay with multiple bindings sharing the same type signature (string to string).
+    /// Creates two one-way bindings with the same type signature to test else-if dispatch.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates two one-way bindings with the same type signature to test else-if dispatch.
-        /// </summary>
-        /// <param name="vm">The source view model.</param>
-        /// <param name="view">The target view.</param>
-        /// <returns>A tuple of disposables representing the bindings.</returns>
-        public static (IDisposable FirstBinding, IDisposable LastBinding) Execute(MyViewModel vm, MyView view)
-            => (vm.BindOneWay(view, x => x.FirstName, x => x.FirstNameText), vm.BindOneWay(view, x => x.LastName, x => x.LastNameText));
-    }
+    /// <param name="vm">The source view model.</param>
+    /// <param name="view">The target view.</param>
+    /// <returns>A tuple of disposables representing the bindings.</returns>
+    public static (IDisposable FirstBinding, IDisposable LastBinding) Execute(MyViewModel vm, MyView view)
+        => (vm.BindOneWay(view, x => x.FirstName, x => x.FirstNameText),
+            vm.BindOneWay(view, x => x.LastName, x => x.LastNameText));
 }

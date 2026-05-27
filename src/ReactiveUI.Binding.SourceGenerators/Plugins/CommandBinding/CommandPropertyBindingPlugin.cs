@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Text;
-
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -23,8 +22,13 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 /// </remarks>
 internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
 {
+    /// <summary>
+    /// The affinity score for the Command property binder (highest priority among command binding plugins).
+    /// </summary>
+    private static readonly int CommandPropertyAffinity = BindingAffinity.Explicit;
+
     /// <inheritdoc/>
-    public int Affinity => 5;
+    public int Affinity => CommandPropertyAffinity;
 
     /// <inheritdoc/>
     public bool RequiresCustomBinderFallback => false;
@@ -37,71 +41,73 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
     public void EmitBinding(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
-        string controlAccess)
+        string controlAccess,
+        bool supportsNullable)
     {
         if (inv.HasCommandParameterProperty && inv.HasObservableParameter)
         {
             // Command + CommandParameter + observable parameter variant
             sb.AppendLine($$"""
 
-                        {{inv.ParameterTypeFullName}} __latestParam = default;
-                        var __paramSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(
-                            withParameter, p => System.Threading.Volatile.Write(ref __latestParam, p));
+                                        {{inv.ParameterTypeFullName}}{{(supportsNullable && inv.ParameterIsReferenceType ? "?" : string.Empty)}} __latestParam = default;
+                                        var __paramSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(
+                                            withParameter, p => System.Threading.Volatile.Write(ref __latestParam, p));
 
-                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
-                        {
-                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                            {{controlAccess}}.Command = cmd;
-                            var param = System.Threading.Volatile.Read(ref __latestParam);
-                            {{controlAccess}}.CommandParameter = param;
-                            if (cmd != null)
-                            {
-                                serial.Disposable = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(
-                                    withParameter, p =>
-                                    {
-                                        System.Threading.Volatile.Write(ref __latestParam, p);
-                                        {{controlAccess}}.CommandParameter = p;
-                                    });
-                            }
-                        });
-                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(
-                            new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, __paramSub), serial);
-                    }
-            """);
+                                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+                                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
+                                        {
+                                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                            {{controlAccess}}.Command = cmd;
+                                            var param = System.Threading.Volatile.Read(ref __latestParam);
+                                            {{controlAccess}}.CommandParameter = param;
+                                            if (cmd != null)
+                                            {
+                                                serial.Disposable = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(
+                                                    withParameter, p =>
+                                                    {
+                                                        System.Threading.Volatile.Write(ref __latestParam, p);
+                                                        {{controlAccess}}.CommandParameter = p;
+                                                    });
+                                            }
+                                        });
+                                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(
+                                            new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, __paramSub), serial);
+                                    }
+                            """);
         }
         else if (inv.HasCommandParameterProperty
-            && inv is { HasExpressionParameter: true, ParameterPropertyPath: not null })
+                 && inv is { HasExpressionParameter: true, ParameterPropertyPath: not null })
         {
             // Command + CommandParameter + expression parameter variant
-            var paramAccess = CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value);
+            var paramAccess =
+                CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value);
             sb.AppendLine($$"""
 
-                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
-                        {
-                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                            {{controlAccess}}.Command = cmd;
-                            {{controlAccess}}.CommandParameter = {{paramAccess}};
-                        });
-                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, serial);
-                    }
-            """);
+                                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+                                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
+                                        {
+                                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                            {{controlAccess}}.Command = cmd;
+                                            {{controlAccess}}.CommandParameter = {{paramAccess}};
+                                        });
+                                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, serial);
+                                    }
+                            """);
         }
         else
         {
             // Command only (no parameter, or no CommandParameter property)
             sb.AppendLine($$"""
 
-                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
-                        {
-                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
-                            {{controlAccess}}.Command = cmd;
-                        });
-                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, serial);
-                    }
-            """);
+                                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+                                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
+                                        {
+                                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                            {{controlAccess}}.Command = cmd;
+                                        });
+                                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, serial);
+                                    }
+                            """);
         }
     }
 }

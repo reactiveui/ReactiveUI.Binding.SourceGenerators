@@ -4,26 +4,25 @@
 
 using System;
 
-namespace SharedScenarios.BindCommand.EventEnabled
+namespace SharedScenarios.BindCommand.EventEnabled;
+
+/// <summary>
+/// A WinForms-like button with Click event and Enabled property but no Command property.
+/// </summary>
+public class WinFormsLikeButton
 {
     /// <summary>
-    /// A WinForms-like button with Click event and Enabled property but no Command property.
+    /// Occurs when the button is clicked.
     /// </summary>
-    public class WinFormsLikeButton
-    {
-        /// <summary>
-        /// Occurs when the button is clicked.
-        /// </summary>
-        public event EventHandler? Click;
+    public event EventHandler? Click;
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the button is enabled.
-        /// </summary>
-        public bool Enabled { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether the button is enabled.
+    /// </summary>
+    public bool Enabled { get; set; }
 
-        /// <summary>
-        /// Simulates a button click.
-        /// </summary>
-        public void PerformClick() => Click?.Invoke(this, EventArgs.Empty);
-    }
+    /// <summary>
+    /// Simulates a button click.
+    /// </summary>
+    public void PerformClick() => Click?.Invoke(this, EventArgs.Empty);
 }

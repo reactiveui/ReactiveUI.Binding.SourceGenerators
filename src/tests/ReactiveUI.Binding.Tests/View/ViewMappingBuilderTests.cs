@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using ReactiveUI.Binding.Tests.TestExecutors;
-
 using TUnit.Core.Executors;
 
 namespace ReactiveUI.Binding.Tests.View;
@@ -93,16 +92,14 @@ public class ViewMappingBuilderTests
     /// <summary>
     /// Simple view model for testing.
     /// </summary>
-    private sealed class TestViewModel
-    {
-    }
+    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Used for testing")]
+    private sealed class TestViewModel;
 
     /// <summary>
     /// Another view model for testing multiple mappings.
     /// </summary>
-    private sealed class OtherViewModel
-    {
-    }
+    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Used for testing")]
+    private sealed class OtherViewModel;
 
     /// <summary>
     /// Simple view for testing.

@@ -13,6 +13,11 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public sealed class StringConverter : IBindingTypeConverter
 {
+    /// <summary>
+    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
+    /// </summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
     /// <inheritdoc/>
     public Type FromType => typeof(string);
 
@@ -20,24 +25,30 @@ public sealed class StringConverter : IBindingTypeConverter
     public Type ToType => typeof(string);
 
     /// <inheritdoc/>
-    public int GetAffinityForObjects() => 2;
+    public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>
     public bool TryConvertTyped(object? from, object? conversionHint, [NotNullWhen(true)] out object? result)
     {
-        if (from is null)
+        switch (from)
         {
-            result = null;
-            return false;
-        }
+            case null:
+                {
+                    result = null;
+                    return false;
+                }
 
-        if (from is string s)
-        {
-            result = s;
-            return true;
-        }
+            case string s:
+                {
+                    result = s;
+                    return true;
+                }
 
-        result = null;
-        return false;
+            default:
+                {
+                    result = null;
+                    return false;
+                }
+        }
     }
 }

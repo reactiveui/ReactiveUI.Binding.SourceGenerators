@@ -48,27 +48,33 @@ public static class Reflection
                 sb.Append('.');
             }
 
-            if (exp.NodeType == ExpressionType.Index &&
-                exp is IndexExpression { Indexer: not null } indexExpression)
+            switch (exp.NodeType)
             {
-                sb.Append(indexExpression.Indexer.Name).Append('[');
-
-                var args = indexExpression.Arguments;
-                for (var i = 0; i < args.Count; i++)
-                {
-                    if (i != 0)
+                case ExpressionType.Index when
+                    exp is IndexExpression { Indexer: not null } indexExpression:
                     {
-                        sb.Append(',');
+                        sb.Append(indexExpression.Indexer.Name).Append('[');
+
+                        var args = indexExpression.Arguments;
+                        for (var i = 0; i < args.Count; i++)
+                        {
+                            if (i != 0)
+                            {
+                                sb.Append(',');
+                            }
+
+                            sb.Append(((ConstantExpression)args[i]).Value);
+                        }
+
+                        sb.Append(']');
+                        break;
                     }
 
-                    sb.Append(((ConstantExpression)args[i]).Value);
-                }
-
-                sb.Append(']');
-            }
-            else if (exp.NodeType == ExpressionType.MemberAccess && exp is MemberExpression memberExpression)
-            {
-                sb.Append(memberExpression.Member.Name);
+                case ExpressionType.MemberAccess when exp is MemberExpression memberExpression:
+                    {
+                        sb.Append(memberExpression.Member.Name);
+                        break;
+                    }
             }
 
             firstSegment = false;
@@ -95,12 +101,12 @@ public static class Reflection
             };
         }
 
-        if (member is PropertyInfo property)
+        if (member is not PropertyInfo property)
         {
-            return property.GetValue;
+            return null;
         }
 
-        return null;
+        return property.GetValue;
     }
 
     /// <summary>
@@ -114,7 +120,8 @@ public static class Reflection
         ArgumentExceptionHelper.ThrowIfNull(member);
 
         var ret = GetValueFetcherForProperty(member);
-        return ret ?? throw new ArgumentException($"Type '{member!.DeclaringType}' must have a property '{member.Name}'");
+        return ret ??
+               throw new ArgumentException($"Type '{member!.DeclaringType}' must have a property '{member.Name}'");
     }
 
     /// <summary>
@@ -131,12 +138,12 @@ public static class Reflection
             return (obj, val, _) => field.SetValue(obj, val);
         }
 
-        if (member is PropertyInfo property)
+        if (member is not PropertyInfo property)
         {
-            return property.SetValue;
+            return null;
         }
 
-        return null;
+        return property.SetValue;
     }
 
     /// <summary>
@@ -150,7 +157,8 @@ public static class Reflection
         ArgumentExceptionHelper.ThrowIfNull(member);
 
         var ret = GetValueSetterForProperty(member);
-        return ret ?? throw new ArgumentException($"Type '{member!.DeclaringType}' must have a property '{member.Name}'");
+        return ret ??
+               throw new ArgumentException($"Type '{member!.DeclaringType}' must have a property '{member.Name}'");
     }
 
     /// <summary>
@@ -162,7 +170,10 @@ public static class Reflection
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
     /// <returns>True if the value was successfully retrieved; otherwise false.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
-    public static bool TryGetValueForPropertyChain<TValue>(out TValue changeValue, object? current, IEnumerable<Expression> expressionChain)
+    public static bool TryGetValueForPropertyChain<TValue>(
+        out TValue changeValue,
+        object? current,
+        IEnumerable<Expression> expressionChain)
     {
         var expressions = MaterializeExpressions(expressionChain);
         var count = expressions.Length;
@@ -191,7 +202,10 @@ public static class Reflection
         }
 
         var lastExpression = expressions[count - 1];
-        changeValue = (TValue)GetValueFetcherOrThrow(lastExpression.GetMemberInfo())(current, lastExpression.GetArgumentsArray())!;
+        changeValue =
+            (TValue)GetValueFetcherOrThrow(lastExpression.GetMemberInfo())(
+                current,
+                lastExpression.GetArgumentsArray())!;
         return true;
     }
 
@@ -203,7 +217,10 @@ public static class Reflection
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
     /// <returns>True if all values were successfully retrieved; otherwise false.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
-    public static bool TryGetAllValuesForPropertyChain(out IObservedChange<object, object?>[] changeValues, object? current, IEnumerable<Expression> expressionChain)
+    public static bool TryGetAllValuesForPropertyChain(
+        out IObservedChange<object, object?>[] changeValues,
+        object? current,
+        IEnumerable<Expression> expressionChain)
     {
         var expressions = MaterializeExpressions(expressionChain);
         var count = expressions.Length;
@@ -247,6 +264,22 @@ public static class Reflection
     }
 
     /// <summary>
+    /// Attempts to set the value of the last property in an expression chain, throwing when reflection
+    /// members are missing.
+    /// </summary>
+    /// <typeparam name="TValue">The type of the end value being set.</typeparam>
+    /// <param name="target">The object that starts the property chain.</param>
+    /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
+    /// <param name="value">The value to set on the last property in the chain.</param>
+    /// <returns>True if the value was successfully set; otherwise false.</returns>
+    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+    public static bool TrySetValueToPropertyChain<TValue>(
+        object? target,
+        IEnumerable<Expression> expressionChain,
+        TValue value) =>
+        TrySetValueToPropertyChain(target, expressionChain, value, true);
+
+    /// <summary>
     /// Attempts to set the value of the last property in an expression chain.
     /// </summary>
     /// <typeparam name="TValue">The type of the end value being set.</typeparam>
@@ -256,7 +289,11 @@ public static class Reflection
     /// <param name="shouldThrow">If true, throw when reflection members are missing.</param>
     /// <returns>True if the value was successfully set; otherwise false.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
-    public static bool TrySetValueToPropertyChain<TValue>(object? target, IEnumerable<Expression> expressionChain, TValue value, bool shouldThrow = true)
+    public static bool TrySetValueToPropertyChain<TValue>(
+        object? target,
+        IEnumerable<Expression> expressionChain,
+        TValue value,
+        bool shouldThrow)
     {
         var expressions = MaterializeExpressions(expressionChain);
         var count = expressions.Length;
@@ -274,11 +311,13 @@ public static class Reflection
                 ? GetValueFetcherOrThrow(expression.GetMemberInfo())
                 : GetValueFetcherForProperty(expression.GetMemberInfo());
 
-            if (getter is not null)
+            if (getter is null)
             {
-                ArgumentExceptionHelper.ThrowIfNull(target);
-                target = getter(target, expression.GetArgumentsArray());
+                continue;
             }
+
+            ArgumentExceptionHelper.ThrowIfNull(target);
+            target = getter(target, expression.GetArgumentsArray());
         }
 
         if (target is null)
@@ -305,30 +344,31 @@ public static class Reflection
     {
         ArgumentExceptionHelper.ThrowIfNull(expressionChain);
 
-        if (expressionChain is Expression[] arr)
+        switch (expressionChain)
         {
-            return arr;
+            case Expression[] arr:
+                return arr;
+            case ICollection<Expression> coll:
+                {
+                    if (coll.Count == 0)
+                    {
+                        return [];
+                    }
+
+                    var result = new Expression[coll.Count];
+                    coll.CopyTo(result, 0);
+                    return result;
+                }
+
+            default:
+                return [.. expressionChain];
         }
-
-        if (expressionChain is ICollection<Expression> coll)
-        {
-            if (coll.Count == 0)
-            {
-                return [];
-            }
-
-            var result = new Expression[coll.Count];
-            coll.CopyTo(result, 0);
-            return result;
-        }
-
-        return expressionChain.ToArray();
     }
 
     /// <summary>
     /// Invokes the setter if it is not null. Returns false when the setter is null,
-    /// which occurs when <see cref="GetValueSetterForProperty"/> receives a <see cref="System.Reflection.MemberInfo"/>
-    /// that is neither a <see cref="System.Reflection.FieldInfo"/> nor a <see cref="System.Reflection.PropertyInfo"/>.
+    /// which occurs when <see cref="GetValueSetterForProperty"/> receives a <see cref="MemberInfo"/>
+    /// that is neither a <see cref="FieldInfo"/> nor a <see cref="PropertyInfo"/>.
     /// This is a defensive guard for synthetic expression chains; standard lambda-derived chains
     /// always produce PropertyInfo or FieldInfo members.
     /// </summary>
@@ -338,7 +378,11 @@ public static class Reflection
     /// <param name="arguments">The indexer arguments, if any.</param>
     /// <returns>True if the setter was invoked; false if the setter was null.</returns>
     [ExcludeFromCodeCoverage]
-    private static bool TryInvokeSetter(Action<object?, object?, object?[]?>? setter, object? target, object? value, object?[]? arguments)
+    private static bool TryInvokeSetter(
+        Action<object?, object?, object?[]?>? setter,
+        object? target,
+        object? value,
+        object?[]? arguments)
     {
         if (setter is null)
         {

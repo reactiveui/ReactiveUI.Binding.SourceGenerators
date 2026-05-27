@@ -12,6 +12,11 @@ namespace ReactiveUI.Binding.Tests.Observables;
 public class ReturnObservableTests
 {
     /// <summary>
+    /// The value produced by the return observable under test.
+    /// </summary>
+    private const int ExpectedValue = 42;
+
+    /// <summary>
     /// Verifies that Subscribe emits the single value and then completes.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
@@ -25,10 +30,10 @@ public class ReturnObservableTests
             _ => { },
             () => completed = true);
 
-        var observable = new ReturnObservable<int>(42);
+        var observable = new ReturnObservable<int>(ExpectedValue);
         var disposable = observable.Subscribe(observer);
 
-        await Assert.That(nextValue).IsEqualTo(42);
+        await Assert.That(nextValue).IsEqualTo(ExpectedValue);
         await Assert.That(completed).IsTrue();
         await Assert.That(disposable).IsEqualTo(EmptyDisposable.Instance);
     }

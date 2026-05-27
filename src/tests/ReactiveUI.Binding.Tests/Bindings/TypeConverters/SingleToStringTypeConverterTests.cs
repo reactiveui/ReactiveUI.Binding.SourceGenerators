@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class SingleToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class SingleToStringTypeConverterTests
     {
         var converter = new SingleToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,12 +34,12 @@ public class SingleToStringTypeConverterTests
     public async Task TryConvert_MaxValue_Succeeds()
     {
         var converter = new SingleToStringTypeConverter();
-        var value = float.MaxValue;
+        const float value = float.MaxValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(float.MaxValue.ToString());
+        await Assert.That(output).IsEqualTo(float.MaxValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -45,12 +50,12 @@ public class SingleToStringTypeConverterTests
     public async Task TryConvert_MinValue_Succeeds()
     {
         var converter = new SingleToStringTypeConverter();
-        var value = float.MinValue;
+        const float value = float.MinValue;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(float.MinValue.ToString());
+        await Assert.That(output).IsEqualTo(float.MinValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -61,12 +66,12 @@ public class SingleToStringTypeConverterTests
     public async Task TryConvert_NegativeValue_Succeeds()
     {
         var converter = new SingleToStringTypeConverter();
-        var value = -123.456f;
+        const float value = -123.456f;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(value.ToString());
+        await Assert.That(output).IsEqualTo(value.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -77,12 +82,12 @@ public class SingleToStringTypeConverterTests
     public async Task TryConvert_SingleToString_Succeeds()
     {
         var converter = new SingleToStringTypeConverter();
-        var value = 123.456f;
+        const float value = 123.456f;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(value.ToString());
+        await Assert.That(output).IsEqualTo(value.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
     /// <summary>
@@ -93,7 +98,7 @@ public class SingleToStringTypeConverterTests
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new SingleToStringTypeConverter();
-        var value = 42.5f;
+        const float value = 42.5f;
 
         var result = converter.TryConvert(value, 2, out var output);
 
@@ -109,7 +114,7 @@ public class SingleToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
     {
         var converter = new SingleToStringTypeConverter();
-        var value = 42.5f;
+        const float value = 42.5f;
 
         var result = converter.TryConvert(value, "E2", out var output);
 

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using ReactiveUI.Builder;
-
 using Splat;
 
 namespace ReactiveUI.Binding.Benchmarks;

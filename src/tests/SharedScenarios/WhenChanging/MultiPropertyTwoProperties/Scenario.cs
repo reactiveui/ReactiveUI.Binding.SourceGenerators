@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenChanging.MultiPropertyTwoProperties
+namespace SharedScenarios.WhenChanging.MultiPropertyTwoProperties;
+
+/// <summary>
+/// Exercises WhenChanging with two properties returning a tuple.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenChanging with two properties returning a tuple.
+    /// Creates a WhenChanging observable for Name and Age.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenChanging observable for Name and Age.
-        /// </summary>
-        /// <param name="vm">The view model to observe.</param>
-        /// <returns>An observable of (name, age) tuples (before change).</returns>
-        public static IObservable<(string Name, int Age)> Execute(MyViewModel vm)
-            => vm.WhenChanging(x => x.Name, x => x.Age);
-    }
+    /// <param name="vm">The view model to observe.</param>
+    /// <returns>An observable of (name, age) tuples (before change).</returns>
+    public static IObservable<(string Name, int Age)> Execute(MyViewModel vm)
+        => vm.WhenChanging(x => x.Name, x => x.Age);
 }

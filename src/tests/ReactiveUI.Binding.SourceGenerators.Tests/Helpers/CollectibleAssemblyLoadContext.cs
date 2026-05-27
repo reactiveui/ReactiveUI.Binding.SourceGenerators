@@ -17,7 +17,7 @@ public sealed class CollectibleAssemblyLoadContext : AssemblyLoadContext
     /// Initializes a new instance of the <see cref="CollectibleAssemblyLoadContext"/> class.
     /// </summary>
     public CollectibleAssemblyLoadContext()
-        : base(isCollectible: true)
+        : base(true)
     {
     }
 

@@ -10,6 +10,21 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class NullableIntegerToIntegerTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Sample integer value used for conversion round-trips.
+    /// </summary>
+    private const int SampleInteger = 123_456;
+
+    /// <summary>
+    /// Smaller integer value used for conversion checks.
+    /// </summary>
+    private const int SmallInteger = 42;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +33,7 @@ public class NullableIntegerToIntegerTypeConverterTests
     {
         var converter = new NullableIntegerToIntegerTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,12 +44,12 @@ public class NullableIntegerToIntegerTypeConverterTests
     public async Task TryConvert_WithValue_Succeeds()
     {
         var converter = new NullableIntegerToIntegerTypeConverter();
-        int? value = 123456;
+        int? value = 123_456;
 
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(123456);
+        await Assert.That(output).IsEqualTo(SampleInteger);
     }
 
     /// <summary>
@@ -46,8 +61,7 @@ public class NullableIntegerToIntegerTypeConverterTests
     {
         var converter = new NullableIntegerToIntegerTypeConverter();
         int? value = null;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(value, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -87,7 +101,7 @@ public class NullableIntegerToIntegerTypeConverterTests
         var success = converter.TryConvertTyped(value, null, out var result);
 
         await Assert.That(success).IsTrue();
-        await Assert.That(result).IsEqualTo(42);
+        await Assert.That(result).IsEqualTo(SmallInteger);
     }
 
     /// <summary>
@@ -113,7 +127,7 @@ public class NullableIntegerToIntegerTypeConverterTests
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()
     {
         var converter = new NullableIntegerToIntegerTypeConverter();
-        var value = "invalid";
+        const string value = "invalid";
 
         var success = converter.TryConvertTyped(value, null, out var result);
 

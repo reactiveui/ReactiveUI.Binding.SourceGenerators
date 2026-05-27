@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -69,7 +68,8 @@ internal static class RoslynHelpers
         {
             Expression: MemberAccessExpressionSyntax
             {
-                Name.Identifier.Text: Constants.BindOneWayMethodName or Constants.BindTwoWayMethodName or Constants.OneWayBindMethodName or Constants.BindMethodName
+                Name.Identifier.Text: Constants.BindOneWayMethodName or Constants.BindTwoWayMethodName
+                or Constants.OneWayBindMethodName or Constants.BindMethodName
             }
         };
 
@@ -122,12 +122,12 @@ internal static class RoslynHelpers
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string? GetMemberAccessName(SyntaxNode node)
     {
-        if (node is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax memberAccess })
+        if (node is not InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax memberAccess })
         {
-            return memberAccess.Name.Identifier.Text;
+            return null;
         }
 
-        return null;
+        return memberAccess.Name.Identifier.Text;
     }
 
     /// <summary>
@@ -207,6 +207,22 @@ internal static class RoslynHelpers
             Expression: MemberAccessExpressionSyntax
             {
                 Name.Identifier.Text: Constants.BindCommandMethodName
+            }
+        };
+
+    /// <summary>
+    /// Pipeline B predicate: detects BindTo invocations (observable stream to target property).
+    /// </summary>
+    /// <param name="node">The syntax node to check.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>true if the node is a BindTo invocation; otherwise, false.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsBindToInvocation(SyntaxNode node, CancellationToken ct)
+        => node is InvocationExpressionSyntax
+        {
+            Expression: MemberAccessExpressionSyntax
+            {
+                Name.Identifier.Text: Constants.BindToMethodName
             }
         };
 }

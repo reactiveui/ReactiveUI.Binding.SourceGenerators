@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using ReactiveUI.Binding.Builder;
-
 using Splat.Builder;
 
 namespace ReactiveUI.Binding.Mixins;
@@ -25,6 +24,13 @@ namespace ReactiveUI.Binding.Mixins;
 public static class BuilderMixins
 {
     /// <summary>
+    /// Message used when an <see cref="IAppBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
+    /// </summary>
+    private const string NotBindingBuilderMessage =
+        "The provided IAppBuilder is not an IReactiveUIBindingBuilder. " +
+        "Ensure you are using the ReactiveUI.Binding builder pattern.";
+
+    /// <summary>
     /// Builds the ReactiveUI.Binding application from an <see cref="IAppBuilder"/>.
     /// </summary>
     /// <param name="appBuilder">The app builder instance.</param>
@@ -38,9 +44,7 @@ public static class BuilderMixins
 
         if (appBuilder is not IReactiveUIBindingBuilder reactiveUiBindingBuilder)
         {
-            throw new InvalidOperationException(
-                "The provided IAppBuilder is not an IReactiveUIBindingBuilder. " +
-                "Ensure you are using the ReactiveUI.Binding builder pattern.");
+            throw new InvalidOperationException(NotBindingBuilderMessage);
         }
 
         return reactiveUiBindingBuilder.BuildApp();
@@ -63,9 +67,7 @@ public static class BuilderMixins
 
         if (appBuilder is not IReactiveUIBindingBuilder reactiveUiBindingBuilder)
         {
-            throw new InvalidOperationException(
-                "The provided IAppBuilder is not an IReactiveUIBindingBuilder. " +
-                "Ensure you are using the ReactiveUI.Binding builder pattern.");
+            throw new InvalidOperationException(NotBindingBuilderMessage);
         }
 
         return reactiveUiBindingBuilder.WithPlatformModule(module);
@@ -80,15 +82,15 @@ public static class BuilderMixins
     /// <exception cref="InvalidOperationException">
     /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
     /// </exception>
-    public static IReactiveUIBindingBuilder WithRegistration(this IAppBuilder appBuilder, Action<IMutableDependencyResolver> configureAction)
+    public static IReactiveUIBindingBuilder WithRegistration(
+        this IAppBuilder appBuilder,
+        Action<IMutableDependencyResolver> configureAction)
     {
         ArgumentExceptionHelper.ThrowIfNull(appBuilder);
 
         if (appBuilder is not IReactiveUIBindingBuilder reactiveUiBindingBuilder)
         {
-            throw new InvalidOperationException(
-                "The provided IAppBuilder is not an IReactiveUIBindingBuilder. " +
-                "Ensure you are using the ReactiveUI.Binding builder pattern.");
+            throw new InvalidOperationException(NotBindingBuilderMessage);
         }
 
         return reactiveUiBindingBuilder.WithRegistration(configureAction);
@@ -109,9 +111,7 @@ public static class BuilderMixins
 
         if (appBuilder is not IReactiveUIBindingBuilder reactiveUiBindingBuilder)
         {
-            throw new InvalidOperationException(
-                "The provided IAppBuilder is not an IReactiveUIBindingBuilder. " +
-                "Ensure you are using the ReactiveUI.Binding builder pattern.");
+            throw new InvalidOperationException(NotBindingBuilderMessage);
         }
 
         return reactiveUiBindingBuilder.WithConverter(converter);
@@ -126,15 +126,15 @@ public static class BuilderMixins
     /// <exception cref="InvalidOperationException">
     /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
     /// </exception>
-    public static IReactiveUIBindingBuilder WithFallbackConverter(this IAppBuilder appBuilder, IBindingFallbackConverter converter)
+    public static IReactiveUIBindingBuilder WithFallbackConverter(
+        this IAppBuilder appBuilder,
+        IBindingFallbackConverter converter)
     {
         ArgumentExceptionHelper.ThrowIfNull(appBuilder);
 
         if (appBuilder is not IReactiveUIBindingBuilder reactiveUiBindingBuilder)
         {
-            throw new InvalidOperationException(
-                "The provided IAppBuilder is not an IReactiveUIBindingBuilder. " +
-                "Ensure you are using the ReactiveUI.Binding builder pattern.");
+            throw new InvalidOperationException(NotBindingBuilderMessage);
         }
 
         return reactiveUiBindingBuilder.WithFallbackConverter(converter);
@@ -149,15 +149,15 @@ public static class BuilderMixins
     /// <exception cref="InvalidOperationException">
     /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
     /// </exception>
-    public static IReactiveUIBindingBuilder WithSetMethodConverter(this IAppBuilder appBuilder, ISetMethodBindingConverter converter)
+    public static IReactiveUIBindingBuilder WithSetMethodConverter(
+        this IAppBuilder appBuilder,
+        ISetMethodBindingConverter converter)
     {
         ArgumentExceptionHelper.ThrowIfNull(appBuilder);
 
         if (appBuilder is not IReactiveUIBindingBuilder reactiveUiBindingBuilder)
         {
-            throw new InvalidOperationException(
-                "The provided IAppBuilder is not an IReactiveUIBindingBuilder. " +
-                "Ensure you are using the ReactiveUI.Binding builder pattern.");
+            throw new InvalidOperationException(NotBindingBuilderMessage);
         }
 
         return reactiveUiBindingBuilder.WithSetMethodConverter(converter);
@@ -172,15 +172,15 @@ public static class BuilderMixins
     /// <exception cref="InvalidOperationException">
     /// Thrown if <paramref name="appBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
     /// </exception>
-    public static IReactiveUIBindingBuilder ConfigureViewLocator(this IAppBuilder appBuilder, Action<ViewMappingBuilder> configure)
+    public static IReactiveUIBindingBuilder ConfigureViewLocator(
+        this IAppBuilder appBuilder,
+        Action<ViewMappingBuilder> configure)
     {
         ArgumentExceptionHelper.ThrowIfNull(appBuilder);
 
         if (appBuilder is not IReactiveUIBindingBuilder reactiveUiBindingBuilder)
         {
-            throw new InvalidOperationException(
-                "The provided IAppBuilder is not an IReactiveUIBindingBuilder. " +
-                "Ensure you are using the ReactiveUI.Binding builder pattern.");
+            throw new InvalidOperationException(NotBindingBuilderMessage);
         }
 
         return reactiveUiBindingBuilder.ConfigureViewLocator(configure);

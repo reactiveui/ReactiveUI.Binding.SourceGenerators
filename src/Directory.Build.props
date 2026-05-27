@@ -7,7 +7,7 @@
     <BindingCoreTargets>net8.0;net9.0;net10.0</BindingCoreTargets>
 
     <!-- Legacy .NET Framework targets (Windows only) -->
-    <BindingLegacyTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">net462;net472;net481</BindingLegacyTargets>
+    <BindingLegacyTargets>net462;net472;net481</BindingLegacyTargets>
 
     <!-- Combined core + legacy -->
     <BindingRuntimeTargets>$(BindingCoreTargets)</BindingRuntimeTargets>
@@ -18,16 +18,16 @@
 
     <!-- MAUI targets -->
     <BindingMauiWindowsTargets>net9.0-windows10.0.19041.0;net10.0-windows10.0.19041.0</BindingMauiWindowsTargets>
-    <BindingAndroidTargets>net9.0-android;net10.0-android</BindingAndroidTargets>
+    <BindingAndroidTargets>net10.0-android</BindingAndroidTargets>
     <BindingAppleTargets>net9.0-ios;net9.0-macos;net9.0-maccatalyst;net9.0-tvos;net10.0-ios;net10.0-macos;net10.0-maccatalyst;net10.0-tvos</BindingAppleTargets>
 
-    <BindingMauiTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(BindingMauiWindowsTargets)</BindingMauiTargets>
+    <BindingMauiTargets>$(BindingMauiWindowsTargets)</BindingMauiTargets>
     <BindingMauiTargets>$(BindingMauiTargets);net9.0;net10.0;$(BindingAndroidTargets)</BindingMauiTargets>
     <BindingMauiTargets Condition="$([MSBuild]::IsOsPlatform('Windows')) or $([MSBuild]::IsOsPlatform('OSX'))">$(BindingMauiTargets);$(BindingAppleTargets)</BindingMauiTargets>
 
     <!-- Windows-only targets (Framework + Windows-specific) -->
     <BindingWindowsOnlyTargets>$(BindingWindowsTargets)</BindingWindowsOnlyTargets>
-    <BindingWindowsOnlyTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(BindingLegacyTargets);$(BindingWindowsTargets)</BindingWindowsOnlyTargets>
+    <BindingWindowsOnlyTargets>$(BindingLegacyTargets);$(BindingWindowsTargets)</BindingWindowsOnlyTargets>
 
     <!-- Test targets -->
     <BindingTestTargets>net8.0;net9.0;net10.0</BindingTestTargets>
@@ -73,8 +73,8 @@
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <TUnitImplicitUsings>false</TUnitImplicitUsings>
-    <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
+    <TUnitImplicitUsings>true</TUnitImplicitUsings>
+    <TUnitAssertionsImplicitUsings>true</TUnitAssertionsImplicitUsings>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
@@ -87,17 +87,17 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsTestProject)' != 'true'">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All"/>
   </ItemGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)..\images\logo.png" Pack="true" PackagePath="\" />
-    <None Include="$(MSBuildThisFileDirectory)..\LICENSE" Pack="true" PackagePath="LICENSE" />
-    <None Include="$(MSBuildThisFileDirectory)..\README.md" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)..\images\logo.png" Pack="true" PackagePath="\"/>
+    <None Include="$(MSBuildThisFileDirectory)..\LICENSE" Pack="true" PackagePath="LICENSE"/>
+    <None Include="$(MSBuildThisFileDirectory)..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <!-- MinVer (versioning) — replaces Nerdbank.GitVersioning. Floor at 3.3
@@ -111,11 +111,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MinVer" PrivateAssets="all" />
-    <PackageReference Include="stylecop.analyzers" PrivateAssets="all" />
-    <PackageReference Include="Roslynator.Analyzers" PrivateAssets="All" />
+    <PackageReference Include="MinVer" PrivateAssets="all"/>
+    <PackageReference Include="stylecop.analyzers" PrivateAssets="all"/>
+    <PackageReference Include="Roslynator.Analyzers"/>
+    <PackageReference Include="SonarAnalyzer.CSharp"/>
+    <PackageReference Include="Blazor.Common.Analyzers"/>
   </ItemGroup>
   <ItemGroup>
-    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json"/>
   </ItemGroup>
 </Project>

@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenAnyObservable.DeepObservableMerge
+namespace SharedScenarios.WhenAnyObservable.DeepObservableMerge;
+
+/// <summary>
+/// Exercises WhenAnyObservable with deep property chains in a merge pattern.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenAnyObservable with deep property chains in a merge pattern.
+    /// Creates a WhenAnyObservable that merges two deep observable properties.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenAnyObservable that merges two deep observable properties.
-        /// </summary>
-        /// <param name="vm">The parent view model to observe.</param>
-        /// <returns>An observable that merges values from both deep observable properties.</returns>
-        public static IObservable<string> Execute(ParentViewModel vm)
-            => vm.WhenAnyObservable(x => x.Child.Command1, x => x.Child.Command2);
-    }
+    /// <param name="vm">The parent view model to observe.</param>
+    /// <returns>An observable that merges values from both deep observable properties.</returns>
+    public static IObservable<string> Execute(ParentViewModel vm)
+        => vm.WhenAnyObservable(x => x.Child.Command1, x => x.Child.Command2);
 }

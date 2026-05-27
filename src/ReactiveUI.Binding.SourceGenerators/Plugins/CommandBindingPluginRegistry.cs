@@ -18,9 +18,9 @@ internal static class CommandBindingPluginRegistry
     /// </summary>
     private static readonly ICommandBindingPlugin[] Plugins =
     [
-        new CommandPropertyBindingPlugin(),  // Affinity 5
-        new EventEnabledBindingPlugin(),     // Affinity 4
-        new DefaultEventBindingPlugin(),     // Affinity 3
+        new CommandPropertyBindingPlugin(), // Affinity 5
+        new EventEnabledBindingPlugin(), // Affinity 4
+        new DefaultEventBindingPlugin() // Affinity 3
     ];
 
     /// <summary>

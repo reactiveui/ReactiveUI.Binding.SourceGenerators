@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis.CSharp;
-
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -21,7 +20,8 @@ public class BindOneWayGeneratorTests
     public async Task SingleProperty_StringToString()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyStringToString");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -34,7 +34,8 @@ public class BindOneWayGeneratorTests
     public async Task SingleProperty_IntToInt()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyIntToInt");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -47,7 +48,8 @@ public class BindOneWayGeneratorTests
     public async Task MultipleBindings()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/MultipleBindings");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -60,7 +62,8 @@ public class BindOneWayGeneratorTests
     public async Task ReactiveObject_Source()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/ReactiveObjectSource");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -73,7 +76,8 @@ public class BindOneWayGeneratorTests
     public async Task SingleProperty_WithConverter()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyWithConverter");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -86,7 +90,8 @@ public class BindOneWayGeneratorTests
     public async Task SingleProperty_WithScheduler()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyWithScheduler");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -102,7 +107,9 @@ public class BindOneWayGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyStringToString");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(BindOneWayGeneratorTests),
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -114,7 +121,8 @@ public class BindOneWayGeneratorTests
     public async Task SingleProperty_WithConverterAndScheduler()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/SinglePropertyWithConverterAndScheduler");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -127,7 +135,8 @@ public class BindOneWayGeneratorTests
     public async Task MultipleSameTypeBindings()
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/MultipleSameTypeBindings");
-        var result = await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
     }
@@ -141,7 +150,9 @@ public class BindOneWayGeneratorTests
     {
         var source = SharedSourceReader.ReadScenario("BindOneWay/MultipleSameTypeBindings");
         var result = await TestHelper.TestPassWithResult(
-            source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp7_3);
+            source,
+            typeof(BindOneWayGeneratorTests),
+            TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -155,43 +166,43 @@ public class BindOneWayGeneratorTests
     public async Task ExtensionClassNameMismatch_GeneratesNoDispatch()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
+                              using System;
+                              using System.ComponentModel;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
 
-                public class MyView : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string NameText { get; set; } = "";
-                }
+                                  public class MyView : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string NameText { get; set; } = "";
+                                  }
 
-                public static class CustomBindingExtensions
-                {
-                    public static IDisposable BindOneWay<TSource, TTarget>(
-                        this TSource source,
-                        TTarget target,
-                        Func<TSource, string> sourceProp,
-                        Func<TTarget, string> targetProp)
-                        => null!;
-                }
+                                  public static class CustomBindingExtensions
+                                  {
+                                      public static IDisposable BindOneWay<TSource, TTarget>(
+                                          this TSource source,
+                                          TTarget target,
+                                          Func<TSource, string> sourceProp,
+                                          Func<TTarget, string> targetProp)
+                                          => null!;
+                                  }
 
-                public static class Scenario
-                {
-                    public static void Execute(MyViewModel vm, MyView view)
-                    {
-                        // This calls CustomBindingExtensions.BindOneWay, NOT our extension class
-                        var binding = vm.BindOneWay(view, x => x.Name, x => x.NameText);
-                    }
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyViewModel vm, MyView view)
+                                      {
+                                          // This calls CustomBindingExtensions.BindOneWay, NOT our extension class
+                                          var binding = vm.BindOneWay(view, x => x.Name, x => x.NameText);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
 
@@ -211,34 +222,34 @@ public class BindOneWayGeneratorTests
     public async Task IdentityLambda_Source_GeneratesNoDispatch()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
 
-                public class MyView : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string NameText { get; set; } = "";
-                }
+                                  public class MyView : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string NameText { get; set; } = "";
+                                  }
 
-                public static class Scenario
-                {
-                    public static void Execute(MyViewModel vm, MyView view)
-                    {
-                        // Identity lambda for source property — no member access
-                        var binding = vm.BindOneWay(view, x => x, x => x.NameText);
-                    }
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyViewModel vm, MyView view)
+                                      {
+                                          // Identity lambda for source property — no member access
+                                          var binding = vm.BindOneWay(view, x => x, x => x.NameText);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
 
@@ -257,34 +268,34 @@ public class BindOneWayGeneratorTests
     public async Task BlockBodyLambda_Source_GeneratesNoDispatch()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
 
-                public class MyView : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string NameText { get; set; } = "";
-                }
+                                  public class MyView : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string NameText { get; set; } = "";
+                                  }
 
-                public static class Scenario
-                {
-                    public static void Execute(MyViewModel vm, MyView view)
-                    {
-                        // Block body lambda for source property
-                        var binding = vm.BindOneWay(view, x => { return x.Name; }, x => x.NameText);
-                    }
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyViewModel vm, MyView view)
+                                      {
+                                          // Block body lambda for source property
+                                          var binding = vm.BindOneWay(view, x => { return x.Name; }, x => x.NameText);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
 
@@ -303,34 +314,34 @@ public class BindOneWayGeneratorTests
     public async Task FieldAccessLambda_Source_GeneratesNoDispatch()
     {
         const string source = """
-            using System;
-            using System.ComponentModel;
-            using ReactiveUI.Binding;
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string _name = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string _name = "";
+                                  }
 
-                public class MyView : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string NameText { get; set; } = "";
-                }
+                                  public class MyView : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string NameText { get; set; } = "";
+                                  }
 
-                public static class Scenario
-                {
-                    public static void Execute(MyViewModel vm, MyView view)
-                    {
-                        // Source property is a field, not a property
-                        var binding = vm.BindOneWay(view, x => x._name, x => x.NameText);
-                    }
-                }
-            }
-            """;
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyViewModel vm, MyView view)
+                                      {
+                                          // Source property is a field, not a property
+                                          var binding = vm.BindOneWay(view, x => x._name, x => x.NameText);
+                                      }
+                                  }
+                              }
+                              """;
 
         var result = TestHelper.RunGenerator(source);
 

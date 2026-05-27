@@ -15,22 +15,23 @@ namespace ReactiveUI.Binding.Observables;
 public sealed class ReturnObservable<T> : IObservable<T>
 {
     /// <summary>
-    /// The single value to emit on subscription.
+    /// The single value to emit on subscription. May be <see langword="null"/> for reference types
+    /// (e.g. a default/fallback emission when a property-chain parent is null).
     /// </summary>
-    private readonly T _value;
+    private readonly T? _value;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ReturnObservable{T}"/> class.
     /// </summary>
-    /// <param name="value">The value to emit.</param>
-    public ReturnObservable(T value) => _value = value;
+    /// <param name="value">The value to emit; may be <see langword="null"/> for reference types.</param>
+    public ReturnObservable(T? value) => _value = value;
 
     /// <inheritdoc/>
     public IDisposable Subscribe(IObserver<T> observer)
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);
 
-        observer.OnNext(_value);
+        observer.OnNext(_value!);
         observer.OnCompleted();
         return EmptyDisposable.Instance;
     }

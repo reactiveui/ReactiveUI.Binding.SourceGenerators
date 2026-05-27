@@ -16,22 +16,22 @@ public class TypeAnalyzerTests
     /// Common using directives and the generated stub class that the analyzer recognizes.
     /// </summary>
     private const string Preamble = """
-        using System;
-        using System.ComponentModel;
-        using System.Linq.Expressions;
+                                    using System;
+                                    using System.ComponentModel;
+                                    using System.Linq.Expressions;
 
-        namespace ReactiveUI.Binding
-        {
-            public static class __ReactiveUIGeneratedBindings
-            {
-                public static object WhenChanged<TObj, TReturn>(
-                    this TObj obj,
-                    Expression<Func<TObj, TReturn>> property)
-                    where TObj : class
-                    => throw new NotImplementedException();
-            }
-        }
-        """;
+                                    namespace ReactiveUI.Binding
+                                    {
+                                        public static class __ReactiveUIGeneratedBindings
+                                        {
+                                            public static object WhenChanged<TObj, TReturn>(
+                                                this TObj obj,
+                                                Expression<Func<TObj, TReturn>> property)
+                                                where TObj : class
+                                                => throw new NotImplementedException();
+                                        }
+                                    }
+                                    """;
 
     /// <summary>
     /// Verifies RXUIBIND002 is reported when the source type does not implement any observable mechanism.
@@ -40,27 +40,27 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_NoObservableMechanism_ReportsDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class PlainObject
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class PlainObject
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var obj = new PlainObject();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(obj, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var obj = new PlainObject();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(obj, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(1);
         await Assert.That(diagnostics[0].Id).IsEqualTo("RXUIBIND002");
     }
@@ -72,28 +72,28 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_INPC_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class MyViewModel : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler? PropertyChanged;
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new MyViewModel();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new MyViewModel();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -104,14 +104,14 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_EmptySource_NoDiagnostics()
     {
-        const string source = """
-            namespace TestApp
-            {
-                public class EmptyClass { }
-            }
-            """;
+        const string Source = """
+                              namespace TestApp
+                              {
+                                  public class EmptyClass { }
+                              }
+                              """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -123,29 +123,29 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_INPCWithChanging_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public event PropertyChangingEventHandler? PropertyChanging;
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+                                             {
+                                                 public event PropertyChangedEventHandler? PropertyChanged;
+                                                 public event PropertyChangingEventHandler? PropertyChanging;
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new MyViewModel();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new MyViewModel();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -156,19 +156,19 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_NonMethodInvocation_NoDiagnostics()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class PlainObject
-                {
-                    public string Name { get; set; } = "";
-                    public void DoWork() { }
-                }
-            }
-            """;
+                                         namespace TestApp
+                                         {
+                                             public class PlainObject
+                                             {
+                                                 public string Name { get; set; } = "";
+                                                 public void DoWork() { }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -180,32 +180,32 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_InterfaceInheritance_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class BaseViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                }
+                                         namespace TestApp
+                                         {
+                                             public class BaseViewModel : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler? PropertyChanged;
+                                             }
 
-                public class DerivedViewModel : BaseViewModel
-                {
-                    public string Name { get; set; } = "";
-                }
+                                             public class DerivedViewModel : BaseViewModel
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var derived = new DerivedViewModel();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(derived, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var derived = new DerivedViewModel();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(derived, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -216,27 +216,27 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_IReactiveObject_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class ReactiveViewModel : ReactiveUI.IReactiveObject
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class ReactiveViewModel : ReactiveUI.IReactiveObject
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new ReactiveViewModel();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new ReactiveViewModel();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -247,32 +247,32 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_WpfDependencyObject_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace System.Windows
-            {
-                public class DependencyObject { }
-            }
+                                         namespace System.Windows
+                                         {
+                                             public class DependencyObject { }
+                                         }
 
-            namespace TestApp
-            {
-                public class WpfControl : System.Windows.DependencyObject
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class WpfControl : System.Windows.DependencyObject
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new WpfControl();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new WpfControl();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -283,32 +283,32 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_WinUIDependencyObject_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace Microsoft.UI.Xaml
-            {
-                public class DependencyObject { }
-            }
+                                         namespace Microsoft.UI.Xaml
+                                         {
+                                             public class DependencyObject { }
+                                         }
 
-            namespace TestApp
-            {
-                public class WinUIControl : Microsoft.UI.Xaml.DependencyObject
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class WinUIControl : Microsoft.UI.Xaml.DependencyObject
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new WinUIControl();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new WinUIControl();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -319,32 +319,32 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_KVO_NSObject_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace Foundation
-            {
-                public class NSObject { }
-            }
+                                         namespace Foundation
+                                         {
+                                             public class NSObject { }
+                                         }
 
-            namespace TestApp
-            {
-                public class AppleView : Foundation.NSObject
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class AppleView : Foundation.NSObject
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new AppleView();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new AppleView();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -355,32 +355,32 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_WinFormsComponent_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace System.ComponentModel
-            {
-                public class Component { }
-            }
+                                         namespace System.ComponentModel
+                                         {
+                                             public class Component { }
+                                         }
 
-            namespace TestApp
-            {
-                public class WinFormsControl : System.ComponentModel.Component
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class WinFormsControl : System.ComponentModel.Component
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new WinFormsControl();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new WinFormsControl();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -391,32 +391,32 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_AndroidView_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace Android.Views
-            {
-                public class View { }
-            }
+                                         namespace Android.Views
+                                         {
+                                             public class View { }
+                                         }
 
-            namespace TestApp
-            {
-                public class AndroidControl : Android.Views.View
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class AndroidControl : Android.Views.View
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new AndroidControl();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new AndroidControl();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -429,30 +429,30 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_AbstractClass_WithINPC_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public abstract class AbstractViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public abstract class AbstractViewModel : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler? PropertyChanged;
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class ConcreteViewModel : AbstractViewModel { }
+                                             public class ConcreteViewModel : AbstractViewModel { }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        AbstractViewModel vm = new ConcreteViewModel();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     AbstractViewModel vm = new ConcreteViewModel();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -464,29 +464,29 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_AbstractClass_NoObservableMechanism_ReportsDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public abstract class AbstractPlainObject
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public abstract class AbstractPlainObject
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class ConcreteObject : AbstractPlainObject { }
+                                             public class ConcreteObject : AbstractPlainObject { }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        AbstractPlainObject obj = new ConcreteObject();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(obj, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     AbstractPlainObject obj = new ConcreteObject();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(obj, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(1);
         await Assert.That(diagnostics[0].Id).IsEqualTo("RXUIBIND002");
     }
@@ -499,28 +499,28 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_GenericClass_WithINPC_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class GenericViewModel<T> : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public T Value { get; set; } = default!;
-                }
+                                         namespace TestApp
+                                         {
+                                             public class GenericViewModel<T> : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler? PropertyChanged;
+                                                 public T Value { get; set; } = default!;
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new GenericViewModel<string>();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Value);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new GenericViewModel<string>();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Value);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -532,27 +532,27 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_GenericClass_NoObservableMechanism_ReportsDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class GenericContainer<T>
-                {
-                    public T Value { get; set; } = default!;
-                }
+                                         namespace TestApp
+                                         {
+                                             public class GenericContainer<T>
+                                             {
+                                                 public T Value { get; set; } = default!;
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var container = new GenericContainer<string>();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(container, x => x.Value);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var container = new GenericContainer<string>();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(container, x => x.Value);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(1);
         await Assert.That(diagnostics[0].Id).IsEqualTo("RXUIBIND002");
     }
@@ -565,30 +565,30 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_ClassWithObservableProperties_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string FirstName { get; set; } = "";
-                    public string LastName { get; set; } = "";
-                    public int Age { get; set; }
-                }
+                                         namespace TestApp
+                                         {
+                                             public class MyViewModel : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler? PropertyChanged;
+                                                 public string FirstName { get; set; } = "";
+                                                 public string LastName { get; set; } = "";
+                                                 public int Age { get; set; }
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new MyViewModel();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.FirstName);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new MyViewModel();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.FirstName);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -600,34 +600,34 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_DeepInheritanceChain_WithINPC_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class Level0 : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                }
+                                         namespace TestApp
+                                         {
+                                             public class Level0 : INotifyPropertyChanged
+                                             {
+                                                 public event PropertyChangedEventHandler? PropertyChanged;
+                                             }
 
-                public class Level1 : Level0 { }
+                                             public class Level1 : Level0 { }
 
-                public class Level2 : Level1
-                {
-                    public string Name { get; set; } = "";
-                }
+                                             public class Level2 : Level1
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new Level2();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new Level2();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -639,32 +639,32 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_NonBindingMethodInvocation_NoDiagnostics()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public static class CustomExtensions
-                {
-                    public static string GetName<T>(this T obj) => "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public static class CustomExtensions
+                                             {
+                                                 public static string GetName<T>(this T obj) => "";
+                                             }
 
-                public class PlainObject
-                {
-                    public string Name { get; set; } = "";
-                }
+                                             public class PlainObject
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var obj = new PlainObject();
-                        obj.GetName();
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var obj = new PlainObject();
+                                                     obj.GetName();
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -676,34 +676,34 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_DeepWpfInheritanceChain_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace System.Windows
-            {
-                public class DependencyObject { }
-            }
+                                         namespace System.Windows
+                                         {
+                                             public class DependencyObject { }
+                                         }
 
-            namespace TestApp
-            {
-                public class WpfBase : System.Windows.DependencyObject { }
-                public class WpfMiddle : WpfBase { }
-                public class WpfLeaf : WpfMiddle
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class WpfBase : System.Windows.DependencyObject { }
+                                             public class WpfMiddle : WpfBase { }
+                                             public class WpfLeaf : WpfMiddle
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new WpfLeaf();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new WpfLeaf();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -715,28 +715,28 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_IReactiveObject_WithProperties_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class ReactiveViewModel : ReactiveUI.IReactiveObject
-                {
-                    public string Name { get; set; } = "";
-                    public int Count { get; set; }
-                }
+                                         namespace TestApp
+                                         {
+                                             public class ReactiveViewModel : ReactiveUI.IReactiveObject
+                                             {
+                                                 public string Name { get; set; } = "";
+                                                 public int Count { get; set; }
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new ReactiveViewModel();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new ReactiveViewModel();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -749,34 +749,34 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_DeepKVO_NSObject_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace Foundation
-            {
-                public class NSObject { }
-            }
+                                         namespace Foundation
+                                         {
+                                             public class NSObject { }
+                                         }
 
-            namespace TestApp
-            {
-                public class AppleBase : Foundation.NSObject { }
-                public class AppleMiddle : AppleBase { }
-                public class AppleLeaf : AppleMiddle
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class AppleBase : Foundation.NSObject { }
+                                             public class AppleMiddle : AppleBase { }
+                                             public class AppleLeaf : AppleMiddle
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new AppleLeaf();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new AppleLeaf();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -789,34 +789,34 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_DeepWinFormsComponent_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace System.ComponentModel
-            {
-                public class Component { }
-            }
+                                         namespace System.ComponentModel
+                                         {
+                                             public class Component { }
+                                         }
 
-            namespace TestApp
-            {
-                public class WinFormsBase : System.ComponentModel.Component { }
-                public class WinFormsMiddle : WinFormsBase { }
-                public class WinFormsLeaf : WinFormsMiddle
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class WinFormsBase : System.ComponentModel.Component { }
+                                             public class WinFormsMiddle : WinFormsBase { }
+                                             public class WinFormsLeaf : WinFormsMiddle
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new WinFormsLeaf();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new WinFormsLeaf();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -829,34 +829,34 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_DeepAndroidView_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace Android.Views
-            {
-                public class View { }
-            }
+                                         namespace Android.Views
+                                         {
+                                             public class View { }
+                                         }
 
-            namespace TestApp
-            {
-                public class AndroidBase : Android.Views.View { }
-                public class AndroidMiddle : AndroidBase { }
-                public class AndroidLeaf : AndroidMiddle
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class AndroidBase : Android.Views.View { }
+                                             public class AndroidMiddle : AndroidBase { }
+                                             public class AndroidLeaf : AndroidMiddle
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new AndroidLeaf();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new AndroidLeaf();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -869,34 +869,34 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_DeepWinUIDependencyObject_NoDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace Microsoft.UI.Xaml
-            {
-                public class DependencyObject { }
-            }
+                                         namespace Microsoft.UI.Xaml
+                                         {
+                                             public class DependencyObject { }
+                                         }
 
-            namespace TestApp
-            {
-                public class WinUIBase : Microsoft.UI.Xaml.DependencyObject { }
-                public class WinUIMiddle : WinUIBase { }
-                public class WinUILeaf : WinUIMiddle
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class WinUIBase : Microsoft.UI.Xaml.DependencyObject { }
+                                             public class WinUIMiddle : WinUIBase { }
+                                             public class WinUILeaf : WinUIMiddle
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new WinUILeaf();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new WinUILeaf();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
@@ -909,30 +909,30 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_DeepInheritanceChain_NoObservableMechanism_ReportsDiagnostic()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class Level0 { }
-                public class Level1 : Level0 { }
-                public class Level2 : Level1 { }
-                public class Level3 : Level2
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class Level0 { }
+                                             public class Level1 : Level0 { }
+                                             public class Level2 : Level1 { }
+                                             public class Level3 : Level2
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new Level3();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var vm = new Level3();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(1);
         await Assert.That(diagnostics[0].Id).IsEqualTo("RXUIBIND002");
     }
@@ -945,27 +945,27 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_DiagnosticMessageContainsTypeName()
     {
-        var source = Preamble + """
+        const string Source = Preamble + """
 
-            namespace TestApp
-            {
-                public class UnobservableModel
-                {
-                    public string Name { get; set; } = "";
-                }
+                                         namespace TestApp
+                                         {
+                                             public class UnobservableModel
+                                             {
+                                                 public string Name { get; set; } = "";
+                                             }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var obj = new UnobservableModel();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(obj, x => x.Name);
-                    }
-                }
-            }
-            """;
+                                             public class Usage
+                                             {
+                                                 public void Test()
+                                                 {
+                                                     var obj = new UnobservableModel();
+                                                     ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(obj, x => x.Name);
+                                                 }
+                                             }
+                                         }
+                                         """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(1);
         var message = diagnostics[0].GetMessage();
         await Assert.That(message).Contains("UnobservableModel");
@@ -980,43 +980,43 @@ public class TypeAnalyzerTests
     [Test]
     public async Task RXUIBIND002_NonGenericWhenChanged_NoDiagnostic()
     {
-        const string source = """
-            using System;
-            using System.ComponentModel;
+        const string Source = """
+                              using System;
+                              using System.ComponentModel;
 
-            namespace ReactiveUI.Binding
-            {
-                public static class __ReactiveUIGeneratedBindings
-                {
-                    // Non-generic generated dispatch overload (concrete types)
-                    public static object WhenChanged(
-                        TestApp.MyViewModel obj,
-                        string callerFilePath = "",
-                        int callerLineNumber = 0)
-                        => throw new NotImplementedException();
-                }
-            }
+                              namespace ReactiveUI.Binding
+                              {
+                                  public static class __ReactiveUIGeneratedBindings
+                                  {
+                                      // Non-generic generated dispatch overload (concrete types)
+                                      public static object WhenChanged(
+                                          TestApp.MyViewModel obj,
+                                          string callerFilePath = "",
+                                          int callerLineNumber = 0)
+                                          => throw new NotImplementedException();
+                                  }
+                              }
 
-            namespace TestApp
-            {
-                public class MyViewModel : INotifyPropertyChanged
-                {
-                    public event PropertyChangedEventHandler? PropertyChanged;
-                    public string Name { get; set; } = "";
-                }
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Name { get; set; } = "";
+                                  }
 
-                public class Usage
-                {
-                    public void Test()
-                    {
-                        var vm = new MyViewModel();
-                        ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm);
-                    }
-                }
-            }
-            """;
+                                  public class Usage
+                                  {
+                                      public void Test()
+                                      {
+                                          var vm = new MyViewModel();
+                                          ReactiveUI.Binding.__ReactiveUIGeneratedBindings.WhenChanged(vm);
+                                      }
+                                  }
+                              }
+                              """;
 
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(source);
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 }

@@ -4,39 +4,40 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.WhenChanging.SinglePropertyINPC
+namespace SharedScenarios.WhenChanging.SinglePropertyINPC;
+
+/// <summary>
+/// ViewModel implementing both INPC and INotifyPropertyChanging.
+/// </summary>
+public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
     /// <summary>
-    /// ViewModel implementing both INPC and INotifyPropertyChanging.
+    /// The backing field for <see cref="Name"/>.
     /// </summary>
-    public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+    private string _name = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <inheritdoc/>
+    public event PropertyChangingEventHandler? PropertyChanging;
+
+    /// <summary>
+    /// Gets or sets the name.
+    /// </summary>
+    public string Name
     {
-        /// <summary>
-        /// The backing field for <see cref="Name"/>.
-        /// </summary>
-        private string _name = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <inheritdoc/>
-        public event PropertyChangingEventHandler? PropertyChanging;
-
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        public string Name
+        get => _name;
+        set
         {
-            get => _name;
-            set
+            if (_name == value)
             {
-                if (_name != value)
-                {
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Name)));
-                    _name = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-                }
+                return;
             }
+
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Name)));
+            _name = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
         }
     }
 }

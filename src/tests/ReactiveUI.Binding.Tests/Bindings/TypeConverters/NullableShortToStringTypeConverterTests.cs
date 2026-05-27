@@ -10,6 +10,11 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class NullableShortToStringTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +23,7 @@ public class NullableShortToStringTypeConverterTests
     {
         var converter = new NullableShortToStringTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -61,8 +66,7 @@ public class NullableShortToStringTypeConverterTests
     public async Task TryConvert_NullValue_ReturnsTrue()
     {
         var converter = new NullableShortToStringTypeConverter();
-
-        var result = converter.TryConvert(null, null, out var output);
+        var result = converter.TryConvert(null, null, out _);
 
         await Assert.That(result).IsTrue();
     }
@@ -75,7 +79,7 @@ public class NullableShortToStringTypeConverterTests
     public async Task TryConvert_ShortNullableToString_Succeeds()
     {
         var converter = new NullableShortToStringTypeConverter();
-        short? value = 12345;
+        short? value = 12_345;
 
         var result = converter.TryConvert(value, null, out var output);
 

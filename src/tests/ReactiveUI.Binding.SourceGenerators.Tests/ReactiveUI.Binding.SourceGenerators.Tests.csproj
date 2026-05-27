@@ -7,22 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NSubstitute" />
-    <PackageReference Include="TUnit" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-    <PackageReference Include="Verify.SourceGenerators" />
-    <PackageReference Include="Verify.TUnit" />
-    <PackageReference Include="Basic.Reference.Assemblies.Net100" />
-    <PackageReference Include="Basic.Reference.Assemblies.Net90" />
-    <PackageReference Include="Basic.Reference.Assemblies.Net80" />
-    <PackageReference Include="ReactiveUI" />
+    <PackageReference Include="NSubstitute"/>
+    <PackageReference Include="TUnit"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    <PackageReference Include="Verify.SourceGenerators"/>
+    <PackageReference Include="Verify.TUnit"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net100"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net90"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net80"/>
+    <PackageReference Include="ReactiveUI"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj" />
-    <ProjectReference Include="..\..\ReactiveUI.Binding.Reactive\ReactiveUI.Binding.Reactive.csproj" />
-    <ProjectReference Include="..\..\ReactiveUI.Binding.SourceGenerators\ReactiveUI.Binding.SourceGenerators.csproj" />
+    <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
+    <ProjectReference Include="..\..\ReactiveUI.Binding.Reactive\ReactiveUI.Binding.Reactive.csproj"/>
+    <ProjectReference Include="..\..\ReactiveUI.Binding.SourceGenerators\ReactiveUI.Binding.SourceGenerators.csproj"/>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\TransitiveAssemblyResolver.cs" Link="Shared\TransitiveAssemblyResolver.cs"/>
+  </ItemGroup>
+
   <PropertyGroup>
     <SharedScenariosPath>$(MSBuildProjectDirectory)\..\SharedScenarios\</SharedScenariosPath>
   </PropertyGroup>
@@ -31,23 +35,24 @@
     <!-- Copy shared scenario files to output (read as text, NOT compiled) -->
     <None Include="$(SharedScenariosPath)**\*.cs"
           CopyToOutputDirectory="PreserveNewest"
-          LinkBase="SharedScenarios" />
+          LinkBase="SharedScenarios"/>
   </ItemGroup>
 
   <!-- Verified snapshot files: don't compile, nest under test classes -->
   <ItemGroup>
-    <Compile Remove="**/*.verified.cs" />
-    <None Include="**/*.verified.cs" />
-    <None Update="BG.*.verified.cs" DependentUpon="BindGeneratorTests.cs" />
-    <None Update="BOG.*.verified.cs" DependentUpon="BindOneWayGeneratorTests.cs" />
-    <None Update="BTG.*.verified.cs" DependentUpon="BindTwoWayGeneratorTests.cs" />
-    <None Update="OBG.*.verified.cs" DependentUpon="OneWayBindGeneratorTests.cs" />
-    <None Update="WAG.*.verified.cs" DependentUpon="WhenAnyGeneratorTests.cs" />
-    <None Update="WAOG.*.verified.cs" DependentUpon="WhenAnyObservableGeneratorTests.cs" />
-    <None Update="WAVG.*.verified.cs" DependentUpon="WhenAnyValueGeneratorTests.cs" />
-    <None Update="WCG.*.verified.cs" DependentUpon="WhenChangedGeneratorTests.cs" />
-    <None Update="WCnG.*.verified.cs" DependentUpon="WhenChangingGeneratorTests.cs" />
-    <None Update="PDS.*.verified.cs" DependentUpon="PlatformDetectionSnapshotTests.cs" />
+    <Compile Remove="**/*.verified.cs"/>
+    <None Include="**/*.verified.cs"/>
+    <None Update="BG.*.verified.cs" DependentUpon="BindGeneratorTests.cs"/>
+    <None Update="BOG.*.verified.cs" DependentUpon="BindOneWayGeneratorTests.cs"/>
+    <None Update="BTG.*.verified.cs" DependentUpon="BindTwoWayGeneratorTests.cs"/>
+    <None Update="OBG.*.verified.cs" DependentUpon="OneWayBindGeneratorTests.cs"/>
+    <None Update="WAG.*.verified.cs" DependentUpon="WhenAnyGeneratorTests.cs"/>
+    <None Update="WAOG.*.verified.cs" DependentUpon="WhenAnyObservableGeneratorTests.cs"/>
+    <None Update="WAVG.*.verified.cs" DependentUpon="WhenAnyValueGeneratorTests.cs"/>
+    <None Update="WCG.*.verified.cs" DependentUpon="WhenChangedGeneratorTests.cs"/>
+    <None Update="WCnG.*.verified.cs" DependentUpon="WhenChangingGeneratorTests.cs"/>
+    <None Update="BToG.*.verified.cs" DependentUpon="BindToGeneratorTests.cs"/>
+    <None Update="PDS.*.verified.cs" DependentUpon="PlatformDetectionSnapshotTests.cs"/>
   </ItemGroup>
 
 </Project>

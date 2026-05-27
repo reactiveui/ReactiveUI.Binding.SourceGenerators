@@ -3,11 +3,8 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
-
 using Microsoft.CodeAnalysis;
-
 using NSubstitute;
-
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -220,7 +217,8 @@ public class ExtractorValidationTests
     public async Task FindSelectorReturnType_EmptyParameters_ReturnsNull()
     {
         var result = ExtractorValidation.FindSelectorReturnType(
-            ImmutableArray<IParameterSymbol>.Empty, "selector");
+            [],
+            "selector");
 
         await Assert.That(result).IsNull();
     }
@@ -236,7 +234,7 @@ public class ExtractorValidationTests
         typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns("string");
 
         var funcType = Substitute.For<INamedTypeSymbol>();
-        funcType.TypeArguments.Returns(ImmutableArray.Create(typeArg));
+        funcType.TypeArguments.Returns([typeArg]);
 
         var param = Substitute.For<IParameterSymbol>();
         param.Name.Returns("otherParam");
@@ -260,7 +258,7 @@ public class ExtractorValidationTests
         typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns("string");
 
         var funcType = Substitute.For<INamedTypeSymbol>();
-        funcType.TypeArguments.Returns(ImmutableArray.Create(typeArg));
+        funcType.TypeArguments.Returns([typeArg]);
 
         var param = Substitute.For<IParameterSymbol>();
         param.Name.Returns("selector");
@@ -284,7 +282,7 @@ public class ExtractorValidationTests
         typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns("int");
 
         var funcType = Substitute.For<INamedTypeSymbol>();
-        funcType.TypeArguments.Returns(ImmutableArray.Create(typeArg));
+        funcType.TypeArguments.Returns([typeArg]);
 
         var param = Substitute.For<IParameterSymbol>();
         param.Name.Returns("conversionFunc");
@@ -305,7 +303,7 @@ public class ExtractorValidationTests
     public async Task FindSelectorReturnType_NonGenericType_ReturnsNull()
     {
         var nonGenericType = Substitute.For<INamedTypeSymbol>();
-        nonGenericType.TypeArguments.Returns(ImmutableArray<ITypeSymbol>.Empty);
+        nonGenericType.TypeArguments.Returns([]);
 
         var param = Substitute.For<IParameterSymbol>();
         param.Name.Returns("selector");

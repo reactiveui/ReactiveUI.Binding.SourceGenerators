@@ -10,6 +10,26 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToLongTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Long value parsed from a positive numeric string.
+    /// </summary>
+    private const long ParsedLong = 123_456_789_012L;
+
+    /// <summary>
+    /// Long value parsed from a negative numeric string.
+    /// </summary>
+    private const long NegativeLong = -123_456_789_012L;
+
+    /// <summary>
+    /// Long value parsed in the typed conversion test.
+    /// </summary>
+    private const long TypedLong = 987_654_321_098L;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +38,7 @@ public class StringToLongTypeConverterTests
     {
         var converter = new StringToLongTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,8 +49,7 @@ public class StringToLongTypeConverterTests
     public async Task TryConvert_EmptyString_ReturnsFalse()
     {
         var converter = new StringToLongTypeConverter();
-
-        var result = converter.TryConvert(string.Empty, null, out var output);
+        var result = converter.TryConvert(string.Empty, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -43,8 +62,7 @@ public class StringToLongTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToLongTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -57,8 +75,7 @@ public class StringToLongTypeConverterTests
     public async Task TryConvert_OutOfRangeValue_ReturnsFalse()
     {
         var converter = new StringToLongTypeConverter();
-
-        var result = converter.TryConvert("99999999999999999999", null, out var output);
+        var result = converter.TryConvert("99999999999999999999", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -75,7 +92,7 @@ public class StringToLongTypeConverterTests
         var result = converter.TryConvert("123456789012", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(123456789012L);
+        await Assert.That(output).IsEqualTo(ParsedLong);
     }
 
     /// <summary>
@@ -120,7 +137,7 @@ public class StringToLongTypeConverterTests
         var result = converter.TryConvert("-123456789012", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(-123456789012L);
+        await Assert.That(output).IsEqualTo(NegativeLong);
     }
 
     /// <summary>
@@ -135,7 +152,7 @@ public class StringToLongTypeConverterTests
         var result = converter.TryConvertTyped("987654321098", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(987654321098L);
+        await Assert.That(output).IsEqualTo(TypedLong);
     }
 
     /// <summary>
@@ -147,7 +164,7 @@ public class StringToLongTypeConverterTests
     {
         var converter = new StringToLongTypeConverter();
 
-        var result = converter.TryConvertTyped(123456, null, out var output);
+        var result = converter.TryConvertTyped(123_456, null, out var output);
 
         await Assert.That(result).IsFalse();
         await Assert.That(output).IsNull();

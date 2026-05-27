@@ -4,35 +4,36 @@
 
 using System.ComponentModel;
 
-namespace SharedScenarios.BindTwoWay.SinglePropertyWithScheduler
+namespace SharedScenarios.BindTwoWay.SinglePropertyWithScheduler;
+
+/// <summary>
+/// Target View with a string property.
+/// </summary>
+public class MyView : INotifyPropertyChanged
 {
     /// <summary>
-    /// Target View with a string property.
+    /// The backing field for <see cref="NameText"/>.
     /// </summary>
-    public class MyView : INotifyPropertyChanged
+    private string _nameText = string.Empty;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Gets or sets the name text.
+    /// </summary>
+    public string NameText
     {
-        /// <summary>
-        /// The backing field for <see cref="NameText"/>.
-        /// </summary>
-        private string _nameText = string.Empty;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the name text.
-        /// </summary>
-        public string NameText
+        get => _nameText;
+        set
         {
-            get => _nameText;
-            set
+            if (_nameText == value)
             {
-                if (_nameText != value)
-                {
-                    _nameText = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameText)));
-                }
+                return;
             }
+
+            _nameText = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameText)));
         }
     }
 }

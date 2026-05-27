@@ -4,7 +4,6 @@
 
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.Tests.TestExecutors;
-
 using TUnit.Core.Executors;
 
 namespace ReactiveUI.Binding.Tests.View;

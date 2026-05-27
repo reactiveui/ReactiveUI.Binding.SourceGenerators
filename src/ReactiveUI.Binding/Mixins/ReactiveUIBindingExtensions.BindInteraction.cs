@@ -30,7 +30,8 @@ public static partial class ReactiveUIBindingExtensions
         TViewModel? viewModel,
         Expression<Func<TViewModel, IInteraction<TInput, TOutput>>> propertyName,
         Func<IInteractionContext<TInput, TOutput>, Task> handler,
-        [CallerArgumentExpression("propertyName")] string propertyNameExpression = "",
+        [CallerArgumentExpression("propertyName")]
+        string propertyNameExpression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TViewModel : class
@@ -86,7 +87,8 @@ public static partial class ReactiveUIBindingExtensions
         TViewModel? viewModel,
         Expression<Func<TViewModel, IInteraction<TInput, TOutput>>> propertyName,
         Func<IInteractionContext<TInput, TOutput>, IObservable<TDontCare>> handler,
-        [CallerArgumentExpression("propertyName")] string propertyNameExpression = "",
+        [CallerArgumentExpression("propertyName")]
+        string propertyNameExpression = "",
         [CallerFilePath] string callerFilePath = "",
         [CallerLineNumber] int callerLineNumber = 0)
         where TViewModel : class

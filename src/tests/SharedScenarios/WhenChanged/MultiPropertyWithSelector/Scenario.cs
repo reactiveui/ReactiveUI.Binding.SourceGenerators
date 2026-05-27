@@ -5,19 +5,18 @@
 using System;
 using ReactiveUI.Binding;
 
-namespace SharedScenarios.WhenChanged.MultiPropertyWithSelector
+namespace SharedScenarios.WhenChanged.MultiPropertyWithSelector;
+
+/// <summary>
+/// Exercises WhenChanged with a selector function combining two properties.
+/// </summary>
+public static class Scenario
 {
     /// <summary>
-    /// Exercises WhenChanged with a selector function combining two properties.
+    /// Creates a WhenChanged observable combining FirstName and LastName.
     /// </summary>
-    public static class Scenario
-    {
-        /// <summary>
-        /// Creates a WhenChanged observable combining FirstName and LastName.
-        /// </summary>
-        /// <param name="vm">The view model to observe.</param>
-        /// <returns>An observable of combined name strings.</returns>
-        public static IObservable<string> Execute(MyViewModel vm)
-            => vm.WhenChanged(x => x.FirstName, x => x.LastName, (f, l) => $"{f} {l}");
-    }
+    /// <param name="vm">The view model to observe.</param>
+    /// <returns>An observable of combined name strings.</returns>
+    public static IObservable<string> Execute(MyViewModel vm)
+        => vm.WhenChanged(x => x.FirstName, x => x.LastName, (f, l) => $"{f} {l}");
 }

@@ -11,9 +11,11 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// A plain INPC object that does not extend ReactiveObject.
 /// Used to verify that the runtime fallback works with any INPC implementation.
 /// </summary>
-public class NonReactiveINPCObject : INotifyPropertyChanged
+public class NonReactiveINotifyPropertyChangedObject : INotifyPropertyChanged
 {
-    /// <summary>The backing field for <see cref="InpcProperty"/>.</summary>
+    /// <summary>
+    /// The backing field for <see cref="InpcProperty"/>.
+    /// </summary>
     private string _inpcProperty = string.Empty;
 
     /// <inheritdoc/>
@@ -42,5 +44,5 @@ public class NonReactiveINPCObject : INotifyPropertyChanged
     /// </summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        PropertyChanged?.Invoke(this, new(propertyName));
 }

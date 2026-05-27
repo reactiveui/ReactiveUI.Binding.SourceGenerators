@@ -10,6 +10,21 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class NullableSingleToSingleTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Sample single-precision value used for conversion checks.
+    /// </summary>
+    private const float SampleSingle = 123.45f;
+
+    /// <summary>
+    /// Sample rounded single-precision value used for conversion checks.
+    /// </summary>
+    private const float RoundedSingle = 42.5f;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +33,7 @@ public class NullableSingleToSingleTypeConverterTests
     {
         var converter = new NullableSingleToSingleTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -34,7 +49,7 @@ public class NullableSingleToSingleTypeConverterTests
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(123.45f);
+        await Assert.That(output).IsEqualTo(SampleSingle);
     }
 
     /// <summary>
@@ -46,8 +61,7 @@ public class NullableSingleToSingleTypeConverterTests
     {
         var converter = new NullableSingleToSingleTypeConverter();
         float? value = null;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(value, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -87,7 +101,7 @@ public class NullableSingleToSingleTypeConverterTests
         var success = converter.TryConvertTyped(value, null, out var result);
 
         await Assert.That(success).IsTrue();
-        await Assert.That(result).IsEqualTo(42.5f);
+        await Assert.That(result).IsEqualTo(RoundedSingle);
     }
 
     /// <summary>
@@ -113,7 +127,7 @@ public class NullableSingleToSingleTypeConverterTests
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()
     {
         var converter = new NullableSingleToSingleTypeConverter();
-        var value = "invalid";
+        const string value = "invalid";
 
         var success = converter.TryConvertTyped(value, null, out var result);
 

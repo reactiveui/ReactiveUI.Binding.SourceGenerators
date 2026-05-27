@@ -10,6 +10,26 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 public class StringToByteTypeConverterTests
 {
     /// <summary>
+    /// Expected affinity returned for matched converter type pairs.
+    /// </summary>
+    private const int ExpectedAffinity = 2;
+
+    /// <summary>
+    /// Byte value parsed from a typical numeric string.
+    /// </summary>
+    private const byte ParsedByte = 123;
+
+    /// <summary>
+    /// Byte maximum value parsed from string.
+    /// </summary>
+    private const byte MaxByte = 255;
+
+    /// <summary>
+    /// Byte value parsed in the typed conversion test.
+    /// </summary>
+    private const byte TypedByte = 100;
+
+    /// <summary>
     ///     Verifies GetAffinityForObjects Returns2.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -18,7 +38,7 @@ public class StringToByteTypeConverterTests
     {
         var converter = new StringToByteTypeConverter();
         var affinity = converter.GetAffinityForObjects();
-        await Assert.That(affinity).IsEqualTo(2);
+        await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
     /// <summary>
@@ -29,8 +49,7 @@ public class StringToByteTypeConverterTests
     public async Task TryConvert_EmptyString_ReturnsFalse()
     {
         var converter = new StringToByteTypeConverter();
-
-        var result = converter.TryConvert(string.Empty, null, out var output);
+        var result = converter.TryConvert(string.Empty, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -43,8 +62,7 @@ public class StringToByteTypeConverterTests
     public async Task TryConvert_InvalidString_ReturnsFalse()
     {
         var converter = new StringToByteTypeConverter();
-
-        var result = converter.TryConvert("invalid", null, out var output);
+        var result = converter.TryConvert("invalid", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -57,8 +75,7 @@ public class StringToByteTypeConverterTests
     public async Task TryConvert_NegativeValue_ReturnsFalse()
     {
         var converter = new StringToByteTypeConverter();
-
-        var result = converter.TryConvert("-1", null, out var output);
+        var result = converter.TryConvert("-1", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -71,8 +88,7 @@ public class StringToByteTypeConverterTests
     public async Task TryConvert_OutOfRangeValue_ReturnsFalse()
     {
         var converter = new StringToByteTypeConverter();
-
-        var result = converter.TryConvert("999", null, out var output);
+        var result = converter.TryConvert("999", null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -89,7 +105,7 @@ public class StringToByteTypeConverterTests
         var result = converter.TryConvert("123", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((byte)123);
+        await Assert.That(output).IsEqualTo((byte)ParsedByte);
     }
 
     /// <summary>
@@ -134,7 +150,7 @@ public class StringToByteTypeConverterTests
         var result = converter.TryConvert("255", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((byte)255);
+        await Assert.That(output).IsEqualTo((byte)MaxByte);
     }
 
     /// <summary>
@@ -149,7 +165,7 @@ public class StringToByteTypeConverterTests
         var result = converter.TryConvertTyped("100", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((byte)100);
+        await Assert.That(output).IsEqualTo((byte)TypedByte);
     }
 
     /// <summary>

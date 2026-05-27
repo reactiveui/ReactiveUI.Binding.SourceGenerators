@@ -20,6 +20,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="HasObservableParameter">Whether the invocation includes an IObservable parameter.</param>
 /// <param name="HasExpressionParameter">Whether the invocation includes an Expression parameter for the command parameter.</param>
 /// <param name="ParameterTypeFullName">The fully qualified type of the command parameter, or null.</param>
+/// <param name="ParameterIsReferenceType">Whether the command parameter type is a reference type (affects nullable annotations in generated code).</param>
 /// <param name="ParameterPropertyPath">The property path for the expression parameter variant, or null.</param>
 /// <param name="ResolvedEventName">The event name resolved at compile time (from toEvent literal or default event detection).</param>
 /// <param name="ResolvedEventArgsTypeFullName">The EventArgs type resolved at compile time, or null.</param>
@@ -42,6 +43,7 @@ internal sealed record BindCommandInvocationInfo(
     bool HasObservableParameter,
     bool HasExpressionParameter,
     string? ParameterTypeFullName,
+    bool ParameterIsReferenceType,
     EquatableArray<PropertyPathSegment>? ParameterPropertyPath,
     string? ResolvedEventName,
     string? ResolvedEventArgsTypeFullName,

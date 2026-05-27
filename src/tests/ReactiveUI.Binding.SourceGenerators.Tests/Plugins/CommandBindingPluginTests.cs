@@ -22,8 +22,8 @@ public class CommandBindingPluginTests
     public async Task GetBestPlugin_HasCommandProperty_ReturnsCommandPropertyPlugin()
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            hasCommandProperty: true,
             resolvedEventName: "Click",
+            hasCommandProperty: true,
             hasEnabledProperty: true);
 
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
@@ -41,8 +41,8 @@ public class CommandBindingPluginTests
     public async Task GetBestPlugin_EventAndEnabled_ReturnsEventEnabledPlugin()
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            hasCommandProperty: false,
             resolvedEventName: "Click",
+            hasCommandProperty: false,
             hasEnabledProperty: true);
 
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
@@ -60,8 +60,8 @@ public class CommandBindingPluginTests
     public async Task GetBestPlugin_EventOnly_ReturnsDefaultEventPlugin()
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            hasCommandProperty: false,
             resolvedEventName: "Click",
+            hasCommandProperty: false,
             hasEnabledProperty: false);
 
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
@@ -79,8 +79,8 @@ public class CommandBindingPluginTests
     public async Task GetBestPlugin_NoEventNoCommand_ReturnsNull()
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            hasCommandProperty: false,
             resolvedEventName: null,
+            hasCommandProperty: false,
             hasEnabledProperty: false);
 
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);

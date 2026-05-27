@@ -34,20 +34,24 @@ public sealed class SerialDisposable : IDisposable
         {
             SwapCurrent(value)?.Dispose();
 
-            if (_disposed == 1)
+            if (_disposed != 1)
             {
-                DisposeCurrentIfRace();
+                return;
             }
+
+            DisposeCurrentIfRace();
         }
     }
 
     /// <inheritdoc/>
     public void Dispose()
     {
-        if (TrySetDisposed())
+        if (!TrySetDisposed())
         {
-            TakeCurrent()?.Dispose();
+            return;
         }
+
+        TakeCurrent()?.Dispose();
     }
 
     /// <summary>

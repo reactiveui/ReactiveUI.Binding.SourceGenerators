@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -23,6 +23,7 @@ public static class AnalyzerTestHelper
     /// <typeparam name="TAnalyzer">The type of analyzer to run.</typeparam>
     /// <param name="source">The source code to analyze.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the diagnostics.</returns>
+    [SuppressMessage("Minor Code Smell", "S4018:All type parameters should be used in the parameter list to enable type inference", Justification = "Used to infer the type of the analyzer.")]
     public static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync<TAnalyzer>(string source)
         where TAnalyzer : DiagnosticAnalyzer, new()
     {
@@ -35,7 +36,8 @@ public static class AnalyzerTestHelper
         var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
 
         // Filter to only analyzer diagnostics (exclude compiler errors)
-        return [
+        return
+        [
             ..diagnostics
                 .Where(d => analyzer.SupportedDiagnostics.Any(sd => sd.Id == d.Id))
         ];
@@ -55,10 +57,12 @@ public static class AnalyzerTestHelper
 
         void AddReference(Assembly assembly)
         {
-            if (!assembly.IsDynamic && addedPaths.Add(assembly.Location))
+            if (assembly.IsDynamic || !addedPaths.Add(assembly.Location))
             {
-                references.Add(MetadataReference.CreateFromFile(assembly.Location));
+                return;
             }
+
+            references.Add(MetadataReference.CreateFromFile(assembly.Location));
         }
 
         // Add core framework references via typeof to ensure assemblies are loaded
@@ -76,10 +80,7 @@ public static class AnalyzerTestHelper
         // Add runtime assemblies by name for any that typeof didn't cover
         var assemblyNames = new[]
         {
-            "System.Runtime",
-            "System.ComponentModel.Primitives",
-            "System.ObjectModel",
-            "System.Collections",
+            "System.Runtime", "System.ComponentModel.Primitives", "System.ObjectModel", "System.Collections"
         };
 
         var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -96,7 +97,7 @@ public static class AnalyzerTestHelper
             "TestAssembly",
             [syntaxTree],
             references,
-            new CSharpCompilationOptions(
+            new(
                 OutputKind.DynamicallyLinkedLibrary,
                 nullableContextOptions: NullableContextOptions.Enable));
     }

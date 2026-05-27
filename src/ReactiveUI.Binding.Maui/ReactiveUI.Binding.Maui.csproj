@@ -20,27 +20,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Using Include="System" />
-    <Using Include="System.ComponentModel" />
-    <Using Include="System.Diagnostics" />
-    <Using Include="System.Diagnostics.CodeAnalysis" />
-    <Using Include="System.Reactive" />
-    <Using Include="System.Reactive.Concurrency" />
-    <Using Include="System.Reactive.Disposables" />
-    <Using Include="System.Reactive.Linq" />
-    <Using Include="System.Runtime.CompilerServices" />
-    <Using Include="Splat" />
-    <Using Include="ReactiveUI.Binding.Helpers" />
+    <Using Include="System"/>
+    <Using Include="System.ComponentModel"/>
+    <Using Include="System.Diagnostics"/>
+    <Using Include="System.Diagnostics.CodeAnalysis"/>
+    <Using Include="System.Reactive"/>
+    <Using Include="System.Reactive.Concurrency"/>
+    <Using Include="System.Reactive.Disposables"/>
+    <Using Include="System.Reactive.Linq"/>
+    <Using Include="System.Runtime.CompilerServices"/>
+    <Using Include="Splat"/>
+    <Using Include="ReactiveUI.Binding.Helpers"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ReactiveUI.Binding\ReactiveUI.Binding.csproj" />
-    <PackageReference Include="Microsoft.Maui.Controls" />
-    <PackageReference Include="Microsoft.Maui.Controls.Compatibility" />
-    <PackageReference Include="System.Reactive" />
+    <ProjectReference Include="..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
+    <PackageReference Include="Microsoft.Maui.Controls"/>
+    <PackageReference Include="Microsoft.Maui.Controls.Compatibility"/>
+    <PackageReference Include="System.Reactive"/>
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="ReactiveUI.Binding.Maui.Tests" />
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Maui.Tests"/>
   </ItemGroup>
 </Project>

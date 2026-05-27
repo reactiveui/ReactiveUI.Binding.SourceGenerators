@@ -44,11 +44,13 @@ public sealed class CompositeDisposable2 : IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
-        if (TrySetDisposed())
+        if (!TrySetDisposed())
         {
-            _d1.Dispose();
-            _d2.Dispose();
+            return;
         }
+
+        _d1.Dispose();
+        _d2.Dispose();
     }
 
     /// <summary>

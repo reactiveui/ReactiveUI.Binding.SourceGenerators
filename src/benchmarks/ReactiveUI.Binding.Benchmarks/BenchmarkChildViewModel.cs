@@ -27,11 +27,13 @@ public class BenchmarkChildViewModel : INotifyPropertyChanged
         get => _value;
         set
         {
-            if (_value != value)
+            if (_value == value)
             {
-                _value = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+                return;
             }
+
+            _value = value;
+            PropertyChanged?.Invoke(this, new(nameof(Value)));
         }
     }
 }
