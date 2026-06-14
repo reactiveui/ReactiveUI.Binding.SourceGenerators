@@ -60,6 +60,13 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
         /// <summary>The parent observable that owns the source and property metadata.</summary>
         private readonly PropertyChangingObservable<T> _parent;
 
+        /// <summary>
+        /// Serializes the initial emit in the constructor with concurrent <see cref="OnPropertyChanging"/>
+        /// invocations on other threads, so a racing handler emit and the constructor's initial emit do
+        /// not interleave on the downstream observer.
+        /// </summary>
+        private readonly Lock _gate = new();
+
         /// <summary>The downstream observer. Set to <see langword="null"/> on disposal.</summary>
         private IObserver<T>? _observer;
 
@@ -72,10 +79,7 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
             _observer = observer;
 
             parent._source.PropertyChanging += OnPropertyChanging;
-
-            // Emit initial (StartWith) value
-            var initial = parent._getter(parent._source);
-            observer.OnNext(initial!);
+            EmitCurrent();
         }
 
         /// <inheritdoc/>
@@ -106,14 +110,28 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
                 return;
             }
 
-            var observer = Volatile.Read(ref _observer);
-            if (observer is null)
-            {
-                return;
-            }
+            EmitCurrent();
+        }
 
-            var value = _parent._getter(_parent._source);
-            observer.OnNext(value!);
+        /// <summary>
+        /// Reads the current property value under <see cref="_gate"/> and forwards it to the downstream
+        /// observer. Holding <see cref="_gate"/> across the read-emit pair ensures the constructor's
+        /// initial emit and any concurrent <see cref="OnPropertyChanging"/> invocation cannot
+        /// interleave on the downstream observer.
+        /// </summary>
+        private void EmitCurrent()
+        {
+            lock (_gate)
+            {
+                var observer = Volatile.Read(ref _observer);
+                if (observer is null)
+                {
+                    return;
+                }
+
+                var value = _parent._getter(_parent._source);
+                observer.OnNext(value!);
+            }
         }
     }
 }
