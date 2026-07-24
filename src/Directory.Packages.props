@@ -14,7 +14,7 @@
     <!-- Testing Framework -->
     <PackageVersion Include="NSubstitute" Version="5.3.0"/>
     <PackageVersion Include="TUnit" Version="1.49.0"/>
-    <PackageVersion Include="Verify.TUnit" Version="31.19.0"/>
+    <PackageVersion Include="Verify.TUnit" Version="31.27.0"/>
     <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0"/>
 
     <!--
