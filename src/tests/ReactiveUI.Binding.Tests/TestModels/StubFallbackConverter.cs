@@ -4,24 +4,16 @@
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
-/// <summary>
-/// A stub implementation of <see cref="IBindingFallbackConverter"/> for testing.
-/// </summary>
+/// <summary>A stub implementation of <see cref="IBindingFallbackConverter"/> for testing.</summary>
 public class StubFallbackConverter : IBindingFallbackConverter
 {
-    /// <summary>
-    /// The fixed affinity score returned by this stub converter.
-    /// </summary>
+    /// <summary>The fixed affinity score returned by this stub converter.</summary>
     private const int StubAffinity = 5;
 
-    /// <summary>
-    /// The conversion logic.
-    /// </summary>
+    /// <summary>The conversion logic.</summary>
     private readonly Func<Type, object, Type, object?, (bool success, object? result)> _tryConvert;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="StubFallbackConverter"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="StubFallbackConverter"/> class.</summary>
     /// <param name="tryConvert">The conversion logic.</param>
     public StubFallbackConverter(Func<Type, object, Type, object?, (bool success, object? result)> tryConvert) =>
         _tryConvert = tryConvert;

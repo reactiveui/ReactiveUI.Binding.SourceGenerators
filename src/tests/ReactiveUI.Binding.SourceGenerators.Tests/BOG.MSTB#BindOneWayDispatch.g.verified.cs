@@ -29,18 +29,18 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.FirstName"
                 && targetPropertyExpression == "x => x.FirstNameText")
             {
-                return __BindOneWay_0000177DD18BA19C(source, target);
+                return __BindOneWay_0000177DD18B9EB4(source, target);
             }
             else if (sourcePropertyExpression == "x => x.LastName"
                 && targetPropertyExpression == "x => x.LastNameText")
             {
-                return __BindOneWay_0000177D9FC04813(source, target);
+                return __BindOneWay_0000177D9FC0452B(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindOneWay_0000177DD18BA19C(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
+        private static global::System.IDisposable __BindOneWay_0000177DD18B9EB4(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
         {
             // BindOneWay: FirstName -> FirstNameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -55,7 +55,7 @@ namespace ReactiveUI.Binding
             });
         }
 
-        private static global::System.IDisposable __BindOneWay_0000177D9FC04813(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
+        private static global::System.IDisposable __BindOneWay_0000177D9FC0452B(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
         {
             // BindOneWay: LastName -> LastNameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

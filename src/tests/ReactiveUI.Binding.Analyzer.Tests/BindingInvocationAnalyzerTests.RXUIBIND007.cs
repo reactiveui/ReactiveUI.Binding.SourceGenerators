@@ -7,14 +7,13 @@ using ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
-/// <summary>
-/// Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND007 (BindCommand bindable event).
-/// </summary>
+/// <summary>Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND007 (BindCommand bindable event).</summary>
 public partial class BindingInvocationAnalyzerTests
 {
-    /// <summary>
-    /// Verifies RXUIBIND007 is reported when the control has no default bindable event.
-    /// </summary>
+    /// <summary>The diagnostic id reported when a control has no default bindable event.</summary>
+    private const string NoBindableEventDiagnosticId = "RXUIBIND007";
+
+    /// <summary>Verifies RXUIBIND007 is reported when the control has no default bindable event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND007_NoBindableEvent_ReportsDiagnostic()
@@ -52,13 +51,11 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        var eventDiags = diagnostics.Where(static d => d.Id == NoBindableEventDiagnosticId).ToArray();
         await Assert.That(eventDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND007 is not reported when the control has a Click event.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND007 is not reported when the control has a Click event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND007_ControlWithClickEvent_NoDiagnostic()
@@ -99,13 +96,11 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        var eventDiags = diagnostics.Where(static d => d.Id == NoBindableEventDiagnosticId).ToArray();
         await Assert.That(eventDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND007 is not reported when toEvent is explicitly specified.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND007 is not reported when toEvent is explicitly specified.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND007_WithExplicitToEvent_NoDiagnostic()
@@ -143,7 +138,7 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        var eventDiags = diagnostics.Where(static d => d.Id == NoBindableEventDiagnosticId).ToArray();
         await Assert.That(eventDiags.Length).IsEqualTo(0);
     }
 
@@ -191,13 +186,11 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        var eventDiags = diagnostics.Where(static d => d.Id == NoBindableEventDiagnosticId).ToArray();
         await Assert.That(eventDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND007 is not reported when the control has a TouchUpInside event.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND007 is not reported when the control has a TouchUpInside event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND007_ControlWithTouchUpInsideEvent_NoDiagnostic()
@@ -238,13 +231,11 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        var eventDiags = diagnostics.Where(static d => d.Id == NoBindableEventDiagnosticId).ToArray();
         await Assert.That(eventDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND007 is not reported when the control has a MouseUp event.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND007 is not reported when the control has a MouseUp event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND007_ControlWithMouseUpEvent_NoDiagnostic()
@@ -285,13 +276,11 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        var eventDiags = diagnostics.Where(static d => d.Id == NoBindableEventDiagnosticId).ToArray();
         await Assert.That(eventDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND007 is not reported when the control has a Pressed event.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND007 is not reported when the control has a Pressed event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND007_ControlWithPressedEvent_NoDiagnostic()
@@ -332,7 +321,7 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        var eventDiags = diagnostics.Where(static d => d.Id == NoBindableEventDiagnosticId).ToArray();
         await Assert.That(eventDiags.Length).IsEqualTo(0);
     }
 
@@ -377,7 +366,7 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        var eventDiags = diagnostics.Where(static d => d.Id == NoBindableEventDiagnosticId).ToArray();
         await Assert.That(eventDiags.Length).IsEqualTo(1);
     }
 
@@ -425,7 +414,7 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var eventDiags = diagnostics.Where(d => d.Id == "RXUIBIND007").ToArray();
+        var eventDiags = diagnostics.Where(static d => d.Id == NoBindableEventDiagnosticId).ToArray();
         await Assert.That(eventDiags.Length).IsEqualTo(0);
     }
 }

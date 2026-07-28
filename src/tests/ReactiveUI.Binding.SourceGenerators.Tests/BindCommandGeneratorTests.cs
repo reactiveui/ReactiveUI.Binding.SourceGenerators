@@ -7,14 +7,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for BindCommand invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for BindCommand invocation generation.</summary>
 public class BindCommandGeneratorTests
 {
-    /// <summary>
-    /// Verifies BindCommand with a basic button and no parameter.
-    /// </summary>
+    /// <summary>Verifies BindCommand with a basic button and no parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BasicNoParam()
@@ -26,9 +22,7 @@ public class BindCommandGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindCommand with an IObservable parameter.
-    /// </summary>
+    /// <summary>Verifies BindCommand with an IObservable parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObservableParam()
@@ -40,9 +34,7 @@ public class BindCommandGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindCommand with an expression-based parameter.
-    /// </summary>
+    /// <summary>Verifies BindCommand with an expression-based parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExpressionParam()
@@ -54,9 +46,7 @@ public class BindCommandGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindCommand with a control that has no default event.
-    /// </summary>
+    /// <summary>Verifies BindCommand with a control that has no default event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NoEvent()

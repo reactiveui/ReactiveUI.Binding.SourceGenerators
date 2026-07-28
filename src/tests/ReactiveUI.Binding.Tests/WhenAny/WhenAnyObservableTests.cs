@@ -8,54 +8,34 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.WhenAny;
 
-/// <summary>
-/// Tests for WhenAnyObservable extension methods.
-/// </summary>
+/// <summary>Tests for WhenAnyObservable extension methods.</summary>
 public class WhenAnyObservableTests
 {
-    /// <summary>
-    /// A sample value emitted by a single observable.
-    /// </summary>
+    /// <summary>A sample value emitted by a single observable.</summary>
     private const int SampleValue = 42;
 
-    /// <summary>
-    /// The second value emitted when merging two observables.
-    /// </summary>
+    /// <summary>The second value emitted when merging two observables.</summary>
     private const int SecondValue = 2;
 
-    /// <summary>
-    /// The expected number of merged emissions from two observables.
-    /// </summary>
+    /// <summary>The expected number of merged emissions from two observables.</summary>
     private const int ExpectedTwoEmissions = 2;
 
-    /// <summary>
-    /// The first value emitted in the three-observable combining test.
-    /// </summary>
+    /// <summary>The first value emitted in the three-observable combining test.</summary>
     private const int FirstCombineValue = 10;
 
-    /// <summary>
-    /// The second value emitted in the three-observable combining test.
-    /// </summary>
+    /// <summary>The second value emitted in the three-observable combining test.</summary>
     private const int SecondCombineValue = 20;
 
-    /// <summary>
-    /// The third value emitted in the three-observable combining test.
-    /// </summary>
+    /// <summary>The third value emitted in the three-observable combining test.</summary>
     private const int ThirdCombineValue = 30;
 
-    /// <summary>
-    /// The expected number of emissions when combining three observables.
-    /// </summary>
+    /// <summary>The expected number of emissions when combining three observables.</summary>
     private const int ExpectedThreeEmissions = 3;
 
-    /// <summary>
-    /// A value emitted by a late-assigned observable.
-    /// </summary>
+    /// <summary>A value emitted by a late-assigned observable.</summary>
     private const int LateAssignedValue = 99;
 
-    /// <summary>
-    /// Verifies that null observables do not cause exceptions.
-    /// </summary>
+    /// <summary>Verifies that null observables do not cause exceptions.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullObservablesDoNotCauseExceptions()
@@ -79,9 +59,7 @@ public class WhenAnyObservableTests
         await Assert.That(values[0]).IsEqualTo(SampleValue);
     }
 
-    /// <summary>
-    /// Verifies that merging two observable properties works.
-    /// </summary>
+    /// <summary>Verifies that merging two observable properties works.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SmokeTestMerging()
@@ -104,9 +82,7 @@ public class WhenAnyObservableTests
         await Assert.That(values).Contains(SecondValue);
     }
 
-    /// <summary>
-    /// Verifies that combining three observable properties works.
-    /// </summary>
+    /// <summary>Verifies that combining three observable properties works.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SmokeTestCombining()
@@ -129,9 +105,7 @@ public class WhenAnyObservableTests
         await Assert.That(values.Count).IsEqualTo(ExpectedThreeEmissions);
     }
 
-    /// <summary>
-    /// Verifies that a null object updates when a non-null observable is assigned.
-    /// </summary>
+    /// <summary>Verifies that a null object updates when a non-null observable is assigned.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullObjectUpdatesWhenNotNullAnymore()
@@ -157,14 +131,12 @@ public class WhenAnyObservableTests
         await Assert.That(values[0]).IsEqualTo(LateAssignedValue);
     }
 
-    /// <summary>
-    /// Resets and initializes the ReactiveUI binding infrastructure for testing.
-    /// </summary>
+    /// <summary>Resets and initializes the ReactiveUI binding infrastructure for testing.</summary>
     internal static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
     }
 }

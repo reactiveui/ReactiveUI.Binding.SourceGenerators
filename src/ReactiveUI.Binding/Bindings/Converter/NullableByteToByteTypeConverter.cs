@@ -4,17 +4,13 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="Nullable{Byte}"/> to <see cref="byte"/>.
-/// </summary>
+/// <summary>Converts a nullable <see cref="byte"/> to <see cref="byte"/>.</summary>
 /// <remarks>
 /// When the nullable value is null, the conversion fails and returns false.
 /// </remarks>
 public sealed class NullableByteToByteTypeConverter : IBindingTypeConverter<byte?, byte>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

@@ -2,19 +2,16 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Input;
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Extension methods for binding commands from a view model to controls on a view.
-/// </summary>
+/// <summary>Extension methods for binding commands from a view model to controls on a view.</summary>
 public static partial class ReactiveUIBindingExtensions
 {
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Binds a command from a view model to a control on a view.
-    /// </summary>
+    /// <summary>Binds a command from a view model to a control on a view.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
@@ -29,6 +26,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl>(
         this TView view,
         TViewModel? viewModel,
@@ -44,9 +43,7 @@ public static partial class ReactiveUIBindingExtensions
         where TProp : ICommand
         where TControl : class
 #else
-    /// <summary>
-    /// Binds a command from a view model to a control on a view.
-    /// </summary>
+    /// <summary>Binds a command from a view model to a control on a view.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
@@ -59,6 +56,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo defaults must stay optional; overloads would shadow the generated overloads")]
+    [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl>(
         this TView view,
         TViewModel? viewModel,
@@ -77,9 +76,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Binds a command from a view model to a control on a view with an observable parameter.
-    /// </summary>
+    /// <summary>Binds a command from a view model to a control on a view with an observable parameter.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
@@ -96,6 +93,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl, TParam>(
         this TView view,
         TViewModel? viewModel,
@@ -112,9 +111,7 @@ public static partial class ReactiveUIBindingExtensions
         where TProp : ICommand
         where TControl : class
 #else
-    /// <summary>
-    /// Binds a command from a view model to a control on a view with an observable parameter.
-    /// </summary>
+    /// <summary>Binds a command from a view model to a control on a view with an observable parameter.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
@@ -129,6 +126,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo defaults must stay optional; overloads would shadow the generated overloads")]
+    [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl, TParam>(
         this TView view,
         TViewModel? viewModel,
@@ -148,9 +148,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Binds a command from a view model to a control on a view with a parameter expression.
-    /// </summary>
+    /// <summary>Binds a command from a view model to a control on a view with a parameter expression.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
@@ -168,6 +166,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl, TParam>(
         this TView view,
         TViewModel? viewModel,
@@ -185,9 +185,7 @@ public static partial class ReactiveUIBindingExtensions
         where TProp : ICommand
         where TControl : class
 #else
-    /// <summary>
-    /// Binds a command from a view model to a control on a view with a parameter expression.
-    /// </summary>
+    /// <summary>Binds a command from a view model to a control on a view with a parameter expression.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
@@ -202,6 +200,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo defaults must stay optional; overloads would shadow the generated overloads")]
+    [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl, TParam>(
         this TView view,
         TViewModel? viewModel,

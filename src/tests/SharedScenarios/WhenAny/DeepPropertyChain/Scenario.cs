@@ -7,16 +7,12 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenAny.DeepPropertyChain;
 
-/// <summary>
-/// Exercises WhenAny with a deep property chain (x => x.Child.Name).
-/// </summary>
+/// <summary>Exercises WhenAny with a deep property chain (x => x.Child.Name).</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenAny observable for Child.Name via IObservedChange.
-    /// </summary>
+    /// <summary>Creates a WhenAny observable for Child.Name via IObservedChange.</summary>
     /// <param name="vm">The parent view model to observe.</param>
     /// <returns>An observable of name values from the child.</returns>
-    public static IObservable<string> Execute(ParentViewModel vm)
-        => vm.WhenAny(x => x.Child.Name, c => c.Value);
+    public static IObservable<string> Execute(ParentViewModel vm) =>
+        vm.WhenAny(x => x.Child.Name, c => c.Value);
 }

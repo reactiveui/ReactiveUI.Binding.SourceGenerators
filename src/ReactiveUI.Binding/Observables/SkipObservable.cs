@@ -6,27 +6,18 @@ using System.ComponentModel;
 
 namespace ReactiveUI.Binding.Observables;
 
-/// <summary>
-/// Lightweight Skip operator that suppresses the first N elements.
-/// Replacement for <c>System.Reactive.Linq.Observable.Skip</c>.
-/// </summary>
+/// <summary>Lightweight Skip operator that suppresses the first N elements. Replacement for <c>System.Reactive.Linq.Observable.Skip</c>.</summary>
 /// <typeparam name="T">The element type.</typeparam>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class SkipObservable<T> : IObservable<T>
 {
-    /// <summary>
-    /// The upstream source observable.
-    /// </summary>
+    /// <summary>The upstream source observable.</summary>
     private readonly IObservable<T> _source;
 
-    /// <summary>
-    /// The number of elements to skip.
-    /// </summary>
+    /// <summary>The number of elements to skip.</summary>
     private readonly int _count;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SkipObservable{T}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="SkipObservable{T}"/> class.</summary>
     /// <param name="source">The source observable.</param>
     /// <param name="count">The number of elements to skip.</param>
     public SkipObservable(IObservable<T> source, int count)
@@ -44,31 +35,16 @@ public sealed class SkipObservable<T> : IObservable<T>
         return _source.Subscribe(new SkipObserver(observer, _count));
     }
 
-    /// <summary>
-    /// Observer that skips the first N elements before forwarding to the downstream observer.
-    /// </summary>
-    private sealed class SkipObserver : IObserver<T>
+    /// <summary>Observer that skips the first N elements before forwarding to the downstream observer.</summary>
+    /// <param name="observer">The downstream observer.</param>
+    /// <param name="count">The number of elements to skip.</param>
+    private sealed class SkipObserver(IObserver<T> observer, int count) : IObserver<T>
     {
-        /// <summary>
-        /// The downstream observer.
-        /// </summary>
-        private readonly IObserver<T> _observer;
+        /// <summary>The downstream observer.</summary>
+        private readonly IObserver<T> _observer = observer;
 
-        /// <summary>
-        /// The number of elements still to skip.
-        /// </summary>
-        private int _remaining;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SkipObserver"/> class.
-        /// </summary>
-        /// <param name="observer">The downstream observer.</param>
-        /// <param name="count">The number of elements to skip.</param>
-        public SkipObserver(IObserver<T> observer, int count)
-        {
-            _observer = observer;
-            _remaining = count;
-        }
+        /// <summary>The number of elements still to skip.</summary>
+        private int _remaining = count;
 
         /// <inheritdoc/>
         public void OnNext(T value)

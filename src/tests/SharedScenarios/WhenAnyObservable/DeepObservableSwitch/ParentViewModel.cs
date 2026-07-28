@@ -6,22 +6,16 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenAnyObservable.DeepObservableSwitch;
 
-/// <summary>
-/// Parent ViewModel containing a child model with an observable property.
-/// </summary>
+/// <summary>Parent ViewModel containing a child model with an observable property.</summary>
 public class ParentViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Child"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Child"/>.</summary>
     private ChildModel _child = new ChildModel();
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the child model.
-    /// </summary>
+    /// <summary>Gets or sets the child model.</summary>
     public ChildModel Child
     {
         get => _child;

@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="string"/> to <see cref="long"/> using <see cref="long.TryParse(string?, out long)"/>.
-/// </summary>
+/// <summary>Converts <see cref="string"/> to <see cref="long"/> using <see cref="long.TryParse(string?, out long)"/>.</summary>
 public sealed class StringToLongTypeConverter : BindingTypeConverter<string, long>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

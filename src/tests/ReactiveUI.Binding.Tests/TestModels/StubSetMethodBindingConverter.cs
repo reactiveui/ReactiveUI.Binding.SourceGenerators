@@ -4,33 +4,22 @@
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
-/// <summary>
-/// A stub implementation of <see cref="ISetMethodBindingConverter"/> for testing.
-/// </summary>
+/// <summary>A stub implementation of <see cref="ISetMethodBindingConverter"/> for testing.</summary>
 public class StubSetMethodBindingConverter : ISetMethodBindingConverter
 {
-    /// <summary>
-    /// The default affinity score used when none is supplied.
-    /// </summary>
+    /// <summary>The default affinity score used when none is supplied.</summary>
     private const int DefaultAffinity = 10;
 
-    /// <summary>
-    /// The affinity score to return.
-    /// </summary>
+    /// <summary>The affinity score to return.</summary>
     private readonly int _affinity;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="StubSetMethodBindingConverter"/> class
-    /// using the default affinity score.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="StubSetMethodBindingConverter"/> class using the default affinity score.</summary>
     public StubSetMethodBindingConverter()
         : this(DefaultAffinity)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="StubSetMethodBindingConverter"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="StubSetMethodBindingConverter"/> class.</summary>
     /// <param name="affinity">The affinity score to return.</param>
     public StubSetMethodBindingConverter(int affinity) => _affinity = affinity;
 

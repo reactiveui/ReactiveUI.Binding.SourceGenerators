@@ -6,42 +6,28 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties;
 
-/// <summary>
-/// ViewModel with five observable properties.
-/// </summary>
+/// <summary>ViewModel with five observable properties.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Prop1"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Prop1"/>.</summary>
     private string _prop1 = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="Prop2"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Prop2"/>.</summary>
     private int _prop2;
 
-    /// <summary>
-    /// The backing field for <see cref="Prop3"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Prop3"/>.</summary>
     private double _prop3;
 
-    /// <summary>
-    /// The backing field for <see cref="Prop4"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Prop4"/>.</summary>
     private bool _prop4;
 
-    /// <summary>
-    /// The backing field for <see cref="Prop5"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Prop5"/>.</summary>
     private string _prop5 = string.Empty;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets property 1.
-    /// </summary>
+    /// <summary>Gets or sets property 1.</summary>
     public string Prop1
     {
         get => _prop1;
@@ -57,9 +43,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets property 2.
-    /// </summary>
+    /// <summary>Gets or sets property 2.</summary>
     public int Prop2
     {
         get => _prop2;
@@ -75,9 +59,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets property 3.
-    /// </summary>
+    /// <summary>Gets or sets property 3.</summary>
     public double Prop3
     {
         get => _prop3;
@@ -93,9 +75,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets a value indicating whether property 4 is set.
-    /// </summary>
+    /// <summary>Gets or sets a value indicating whether property 4 is set.</summary>
     public bool Prop4
     {
         get => _prop4;
@@ -111,9 +91,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets property 5.
-    /// </summary>
+    /// <summary>Gets or sets property 5.</summary>
     public string Prop5
     {
         get => _prop5;

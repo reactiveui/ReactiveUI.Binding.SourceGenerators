@@ -9,19 +9,15 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Invocations;
 
-/// <summary>
-/// Detects WhenChanged invocations (after-change) and generates per-invocation observation code.
-/// </summary>
+/// <summary>Detects WhenChanged invocations (after-change) and generates per-invocation observation code.</summary>
 internal static class WhenChangedInvocationGenerator
 {
-    /// <summary>
-    /// Registers the WhenChanged invocation detection pipeline.
-    /// </summary>
+    /// <summary>Registers the WhenChanged invocation detection pipeline.</summary>
     /// <param name="context">The generator initialization context.</param>
     /// <param name="allClasses">The shared type detection pipeline.</param>
     /// <param name="languageFeatures">The consumer compilation's C# language-feature snapshot.</param>
     internal static void Register(
-        IncrementalGeneratorInitializationContext context,
+        in IncrementalGeneratorInitializationContext context,
         IncrementalValuesProvider<ClassBindingInfo> allClasses,
         IncrementalValueProvider<LanguageFeatures> languageFeatures)
     {
@@ -42,7 +38,7 @@ internal static class WhenChangedInvocationGenerator
             {
                 var source =
                     ObservationCodeGenerator.Generate(data.Left.Left, data.Left.Right, data.Right, "WhenChanged");
-                if (source == null)
+                if (source is null)
                 {
                     return;
                 }

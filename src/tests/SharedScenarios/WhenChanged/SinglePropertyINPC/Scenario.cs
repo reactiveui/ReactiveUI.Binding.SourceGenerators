@@ -7,16 +7,12 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenChanged.SinglePropertyINPC;
 
-/// <summary>
-/// Exercises WhenChanged on a single INPC property.
-/// </summary>
+/// <summary>Exercises WhenChanged on a single INPC property.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenChanged observable for the Name property.
-    /// </summary>
+    /// <summary>Creates a WhenChanged observable for the Name property.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of name values.</returns>
-    public static IObservable<string> Execute(MyViewModel vm)
-        => vm.WhenChanged(x => x.Name);
+    public static IObservable<string> Execute(MyViewModel vm) =>
+        vm.WhenChanged(x => x.Name);
 }

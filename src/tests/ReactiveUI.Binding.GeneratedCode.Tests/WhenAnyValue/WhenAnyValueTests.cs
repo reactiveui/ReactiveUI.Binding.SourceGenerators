@@ -7,34 +7,22 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAnyValue;
 
-/// <summary>
-/// Tests that the source-generator-generated WhenAnyValue code works correctly at runtime.
-/// </summary>
+/// <summary>Tests that the source-generator-generated WhenAnyValue code works correctly at runtime.</summary>
 public class WhenAnyValueTests
 {
-    /// <summary>
-    /// The expected emission count after an initial value plus one change.
-    /// </summary>
+    /// <summary>The expected emission count after an initial value plus one change.</summary>
     private const int ExpectedEmissionCount = 2;
 
-    /// <summary>
-    /// The second emission index.
-    /// </summary>
+    /// <summary>The second emission index.</summary>
     private const int SecondIndex = 2;
 
-    /// <summary>
-    /// The expected emission count after an initial value plus three changes.
-    /// </summary>
+    /// <summary>The expected emission count after an initial value plus three changes.</summary>
     private const int FourEmissionCount = 4;
 
-    /// <summary>
-    /// The third emission index.
-    /// </summary>
+    /// <summary>The third emission index.</summary>
     private const int ThirdIndex = 3;
 
-    /// <summary>
-    /// Verifies that single-property WhenAnyValue emits initial value and subsequent changes.
-    /// </summary>
+    /// <summary>Verifies that single-property WhenAnyValue emits initial value and subsequent changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsInitialAndChanges()
@@ -54,9 +42,7 @@ public class WhenAnyValueTests
         await Assert.That(values).Contains("B");
     }
 
-    /// <summary>
-    /// Verifies that two-property WhenAnyValue emits tuples.
-    /// </summary>
+    /// <summary>Verifies that two-property WhenAnyValue emits tuples.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoProperties_EmitsTuples()
@@ -72,9 +58,7 @@ public class WhenAnyValueTests
         await Assert.That(values[0].property2).IsEqualTo("B");
     }
 
-    /// <summary>
-    /// Verifies that three-property WhenAnyValue emits tuples.
-    /// </summary>
+    /// <summary>Verifies that three-property WhenAnyValue emits tuples.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ThreeProperties_EmitsTuples()
@@ -91,9 +75,7 @@ public class WhenAnyValueTests
         await Assert.That(values[0].property3).IsEqualTo("C");
     }
 
-    /// <summary>
-    /// Verifies that WhenAnyValue with a selector projects values correctly.
-    /// </summary>
+    /// <summary>Verifies that WhenAnyValue with a selector projects values correctly.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithSelector_ProjectsValues()
@@ -108,9 +90,7 @@ public class WhenAnyValueTests
         await Assert.That(values[0]).IsEqualTo("Hello_World");
     }
 
-    /// <summary>
-    /// Verifies that WhenAnyValue emits all sequential changes.
-    /// </summary>
+    /// <summary>Verifies that WhenAnyValue emits all sequential changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SequentialChanges_EmitsAll()

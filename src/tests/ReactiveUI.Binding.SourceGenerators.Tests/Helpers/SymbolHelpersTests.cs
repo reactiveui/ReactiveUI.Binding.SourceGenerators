@@ -10,14 +10,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Tests for <see cref="SymbolHelpers"/> methods.
-/// </summary>
+/// <summary>Tests for <see cref="SymbolHelpers"/> methods.</summary>
 public class SymbolHelpersTests
 {
-    /// <summary>
-    /// Verifies GetWellKnownSymbols resolves INPC symbol from a compilation.
-    /// </summary>
+    /// <summary>Verifies GetWellKnownSymbols resolves INPC symbol from a compilation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetWellKnownSymbols_ResolvesINPC()
@@ -35,9 +31,7 @@ public class SymbolHelpersTests
         await Assert.That(symbols.INPC!.Name).IsEqualTo("INotifyPropertyChanged");
     }
 
-    /// <summary>
-    /// Verifies GetWellKnownSymbols returns cached instance for same compilation.
-    /// </summary>
+    /// <summary>Verifies GetWellKnownSymbols returns cached instance for same compilation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetWellKnownSymbols_SameCompilation_ReturnsCachedInstance()
@@ -52,9 +46,7 @@ public class SymbolHelpersTests
         await Assert.That(ReferenceEquals(symbols1, symbols2)).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies IsIObservable returns true for a direct IObservable&lt;T&gt; type.
-    /// </summary>
+    /// <summary>Verifies IsIObservable returns true for a direct IObservable&lt;T&gt; type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsIObservable_DirectIObservableType_ReturnsTrue()
@@ -77,9 +69,7 @@ public class SymbolHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies IsIObservable returns false for a non-observable type.
-    /// </summary>
+    /// <summary>Verifies IsIObservable returns false for a non-observable type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsIObservable_NonObservableType_ReturnsFalse()
@@ -101,9 +91,7 @@ public class SymbolHelpersTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies IsInteractionType returns true for a direct IInteraction&lt;TInput,TOutput&gt; type.
-    /// </summary>
+    /// <summary>Verifies IsInteractionType returns true for a direct IInteraction&lt;TInput,TOutput&gt; type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsInteractionType_DirectIInteractionType_ReturnsTrue()
@@ -126,9 +114,7 @@ public class SymbolHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies IsInteractionType returns false for a non-interaction type.
-    /// </summary>
+    /// <summary>Verifies IsInteractionType returns false for a non-interaction type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsInteractionType_NonInteractionType_ReturnsFalse()
@@ -180,9 +166,7 @@ public class SymbolHelpersTests
         await Assert.That(outputType).IsEqualTo("bool");
     }
 
-    /// <summary>
-    /// Verifies ExtractInteractionTypeArguments returns false when the type is not an interaction type.
-    /// </summary>
+    /// <summary>Verifies ExtractInteractionTypeArguments returns false when the type is not an interaction type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractInteractionTypeArguments_NonInteractionType_ReturnsFalse()
@@ -294,9 +278,7 @@ public class SymbolHelpersTests
         await Assert.That(innerType).IsEqualTo(leafSegment.PropertyTypeFullName);
     }
 
-    /// <summary>
-    /// Verifies DetectHasConverterOverride returns true when a parameter is typed as IBindingTypeConverter.
-    /// </summary>
+    /// <summary>Verifies DetectHasConverterOverride returns true when a parameter is typed as IBindingTypeConverter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DetectHasConverterOverride_WithIBindingTypeConverterParam_ReturnsTrue()
@@ -316,7 +298,7 @@ public class SymbolHelpersTests
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
         var classDecl = (await tree.GetRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
-            .First(c => c.Identifier.Text == "Ext");
+            .First(static c => c.Identifier.Text == "Ext");
         var classSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl)!;
         var methodSymbol = classSymbol.GetMembers("Bind").OfType<IMethodSymbol>().First();
         var converterParam = methodSymbol.Parameters[0];
@@ -326,9 +308,7 @@ public class SymbolHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies DetectHasConverterOverride returns false when a parameter has a Func type.
-    /// </summary>
+    /// <summary>Verifies DetectHasConverterOverride returns false when a parameter has a Func type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DetectHasConverterOverride_WithFuncParam_ReturnsFalse()
@@ -348,7 +328,7 @@ public class SymbolHelpersTests
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
         var classDecl = (await tree.GetRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
-            .First(c => c.Identifier.Text == "Ext");
+            .First(static c => c.Identifier.Text == "Ext");
         var classSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl)!;
         var methodSymbol = classSymbol.GetMembers("Bind").OfType<IMethodSymbol>().First();
         var converterParam = methodSymbol.Parameters[0];
@@ -358,9 +338,7 @@ public class SymbolHelpersTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies ResolveNamedType returns null when the lambda has a block body.
-    /// </summary>
+    /// <summary>Verifies ResolveNamedType returns null when the lambda has a block body.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveNamedType_BlockBodyLambda_ReturnsNull()
@@ -421,9 +399,7 @@ public class SymbolHelpersTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies ResolveNamedType returns null when the expression is not a lambda expression.
-    /// </summary>
+    /// <summary>Verifies ResolveNamedType returns null when the expression is not a lambda expression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveNamedType_NonLambdaExpression_ReturnsNull()
@@ -460,9 +436,7 @@ public class SymbolHelpersTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Gets a named type symbol from a compilation.
-    /// </summary>
+    /// <summary>Gets a named type symbol from a compilation.</summary>
     /// <param name="compilation">The compilation.</param>
     /// <param name="typeName">The type name.</param>
     /// <returns>The named type symbol.</returns>

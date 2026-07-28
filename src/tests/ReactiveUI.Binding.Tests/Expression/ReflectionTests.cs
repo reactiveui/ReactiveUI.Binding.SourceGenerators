@@ -2,44 +2,43 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Reflection;
 using ReactiveUI.Binding.Expressions;
 using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.Expression;
 
-/// <summary>
-/// Tests for the <see cref="Reflection"/> class.
-/// </summary>
+/// <summary>Tests for the <see cref="Reflection"/> class.</summary>
 public class ReflectionTests
 {
-    /// <summary>
-    /// A sample name value used across reflection tests.
-    /// </summary>
+    /// <summary>The name of the public field the reflection tests resolve.</summary>
+    private const string PublicFieldName = "PublicField";
+
+    /// <summary>The first argument of the two-dimensional indexer under test.</summary>
+    private const int FirstIndexArgument = 3;
+
+    /// <summary>A sample value used by these tests.</summary>
+    private const int SampleValue = 42;
+
+    /// <summary>The second argument of the two-dimensional indexer under test.</summary>
+    private const int SecondIndexArgument = 5;
+
+    /// <summary>A sample name value used across reflection tests.</summary>
     private const string SampleName = "Alice";
 
-    /// <summary>
-    /// The name of a method member used to exercise non-property reflection paths.
-    /// </summary>
+    /// <summary>The name of a method member used to exercise non-property reflection paths.</summary>
     private const string HashCodeMethodName = "GetHashCode";
 
-    /// <summary>
-    /// A replacement value assigned through a reflection-based setter.
-    /// </summary>
+    /// <summary>A replacement value assigned through a reflection-based setter.</summary>
     private const string NewFieldValue = "NewValue";
 
-    /// <summary>
-    /// The expected number of values returned for a two-element property chain.
-    /// </summary>
+    /// <summary>The expected number of values returned for a two-element property chain.</summary>
     private const int ExpectedTwoValues = 2;
 
-    /// <summary>
-    /// The index of the third value in a property chain result.
-    /// </summary>
+    /// <summary>The index of the third value in a property chain result.</summary>
     private const int ThirdValueIndex = 2;
 
-    /// <summary>
-    /// Verifies that ExpressionToPropertyNames returns the correct name for a simple property.
-    /// </summary>
+    /// <summary>Verifies that ExpressionToPropertyNames returns the correct name for a simple property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExpressionToPropertyNames_SimpleProperty_ReturnsName()
@@ -52,9 +51,7 @@ public class ReflectionTests
         await Assert.That(name).IsEqualTo("Name");
     }
 
-    /// <summary>
-    /// Verifies that ExpressionToPropertyNames returns a dotted path for nested properties.
-    /// </summary>
+    /// <summary>Verifies that ExpressionToPropertyNames returns a dotted path for nested properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExpressionToPropertyNames_NestedProperty_ReturnsDottedPath()
@@ -67,9 +64,7 @@ public class ReflectionTests
         await Assert.That(name).IsEqualTo("Address.City");
     }
 
-    /// <summary>
-    /// Verifies that GetValueFetcherOrThrow returns a working getter for a property.
-    /// </summary>
+    /// <summary>Verifies that GetValueFetcherOrThrow returns a working getter for a property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueFetcherOrThrow_PropertyMember_ReturnsGetter()
@@ -83,9 +78,7 @@ public class ReflectionTests
         await Assert.That(value).IsEqualTo("Test");
     }
 
-    /// <summary>
-    /// Verifies that GetValueSetterOrThrow returns a working setter for a property.
-    /// </summary>
+    /// <summary>Verifies that GetValueSetterOrThrow returns a working setter for a property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueSetterOrThrow_PropertyMember_ReturnsSetter()
@@ -99,9 +92,7 @@ public class ReflectionTests
         await Assert.That(vm.Name).IsEqualTo("Hello");
     }
 
-    /// <summary>
-    /// Verifies that TryGetValueForPropertyChain returns the correct value for a simple chain.
-    /// </summary>
+    /// <summary>Verifies that TryGetValueForPropertyChain returns the correct value for a simple chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetValueForPropertyChain_SimpleProperty_ReturnsValue()
@@ -117,9 +108,7 @@ public class ReflectionTests
         await Assert.That(value).IsEqualTo(SampleName);
     }
 
-    /// <summary>
-    /// Verifies that TryGetValueForPropertyChain traverses nested properties.
-    /// </summary>
+    /// <summary>Verifies that TryGetValueForPropertyChain traverses nested properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetValueForPropertyChain_NestedProperty_TraversesChain()
@@ -135,9 +124,7 @@ public class ReflectionTests
         await Assert.That(value).IsEqualTo("Seattle");
     }
 
-    /// <summary>
-    /// Verifies that TryGetValueForPropertyChain returns false when a null is in the chain.
-    /// </summary>
+    /// <summary>Verifies that TryGetValueForPropertyChain returns false when a null is in the chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetValueForPropertyChain_NullInChain_ReturnsFalse()
@@ -152,9 +139,7 @@ public class ReflectionTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that TrySetValueToPropertyChain sets a value on a simple property.
-    /// </summary>
+    /// <summary>Verifies that TrySetValueToPropertyChain sets a value on a simple property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TrySetValueToPropertyChain_SimpleProperty_SetsValue()
@@ -170,9 +155,7 @@ public class ReflectionTests
         await Assert.That(vm.Name).IsEqualTo("Bob");
     }
 
-    /// <summary>
-    /// Verifies that TryGetAllValuesForPropertyChain returns intermediate ObservedChange objects for a simple property.
-    /// </summary>
+    /// <summary>Verifies that TryGetAllValuesForPropertyChain returns intermediate ObservedChange objects for a simple property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetAllValuesForPropertyChain_SimpleProperty_ReturnsObservedChanges()
@@ -191,9 +174,7 @@ public class ReflectionTests
         await Assert.That(changeValues[0].Value).IsEqualTo(SampleName);
     }
 
-    /// <summary>
-    /// Verifies that TryGetAllValuesForPropertyChain returns multiple ObservedChange objects for a deep chain.
-    /// </summary>
+    /// <summary>Verifies that TryGetAllValuesForPropertyChain returns multiple ObservedChange objects for a deep chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetAllValuesForPropertyChain_DeepChain_ReturnsMultipleValues()
@@ -216,9 +197,7 @@ public class ReflectionTests
         await Assert.That(changeValues[1].Value).IsEqualTo("Portland");
     }
 
-    /// <summary>
-    /// Verifies that TrySetValueToPropertyChain sets a value through a deep property chain.
-    /// </summary>
+    /// <summary>Verifies that TrySetValueToPropertyChain sets a value through a deep property chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TrySetValueToPropertyChain_DeepChain_SetsValue()
@@ -235,9 +214,7 @@ public class ReflectionTests
         await Assert.That(address.City).IsEqualTo("New");
     }
 
-    /// <summary>
-    /// Verifies that TrySetValueToPropertyChain returns false when a null intermediate is in the chain.
-    /// </summary>
+    /// <summary>Verifies that TrySetValueToPropertyChain returns false when a null intermediate is in the chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TrySetValueToPropertyChain_NullIntermediate_ReturnsFalse()
@@ -288,9 +265,7 @@ public class ReflectionTests
         await Assert.That(name).IsEqualTo("Chain2.Chain3.Host.SomeOtherParam");
     }
 
-    /// <summary>
-    /// Verifies that GetValueFetcherForProperty returns null for a member that is neither a field nor a property.
-    /// </summary>
+    /// <summary>Verifies that GetValueFetcherForProperty returns null for a member that is neither a field nor a property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueFetcherForProperty_MethodMember_ReturnsNull()
@@ -301,14 +276,12 @@ public class ReflectionTests
         await Assert.That(fetcher).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that GetValueFetcherForProperty returns a working getter for a field member.
-    /// </summary>
+    /// <summary>Verifies that GetValueFetcherForProperty returns a working getter for a field member.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueFetcherForProperty_FieldMember_ReturnsGetter()
     {
-        var fieldInfo = typeof(FieldTestModel).GetField("PublicField")!;
+        var fieldInfo = typeof(FieldTestModel).GetField(PublicFieldName)!;
         var getter = Reflection.GetValueFetcherForProperty(fieldInfo);
 
         await Assert.That(getter).IsNotNull();
@@ -319,14 +292,12 @@ public class ReflectionTests
         await Assert.That(value).IsEqualTo("FieldValue");
     }
 
-    /// <summary>
-    /// Verifies that GetValueSetterForProperty returns a working setter for a field member.
-    /// </summary>
+    /// <summary>Verifies that GetValueSetterForProperty returns a working setter for a field member.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueSetterForProperty_FieldMember_ReturnsSetter()
     {
-        var fieldInfo = typeof(FieldTestModel).GetField("PublicField")!;
+        var fieldInfo = typeof(FieldTestModel).GetField(PublicFieldName)!;
         var setter = Reflection.GetValueSetterForProperty(fieldInfo);
 
         await Assert.That(setter).IsNotNull();
@@ -337,9 +308,7 @@ public class ReflectionTests
         await Assert.That(model.PublicField).IsEqualTo(NewFieldValue);
     }
 
-    /// <summary>
-    /// Verifies that GetValueSetterForProperty returns null for a method member.
-    /// </summary>
+    /// <summary>Verifies that GetValueSetterForProperty returns null for a method member.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueSetterForProperty_MethodMember_ReturnsNull()
@@ -350,31 +319,25 @@ public class ReflectionTests
         await Assert.That(setter).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that GetValueFetcherOrThrow throws for a method member.
-    /// </summary>
+    /// <summary>Verifies that GetValueFetcherOrThrow throws for a method member.</summary>
     [Test]
     public void GetValueFetcherOrThrow_MethodMember_ThrowsArgumentException()
     {
         var methodInfo = typeof(TestViewModel).GetMethod(HashCodeMethodName)!;
 
-        Assert.Throws<ArgumentException>(() => Reflection.GetValueFetcherOrThrow(methodInfo));
+        _ = Assert.Throws<ArgumentException>(() => Reflection.GetValueFetcherOrThrow(methodInfo));
     }
 
-    /// <summary>
-    /// Verifies that GetValueSetterOrThrow throws for a method member.
-    /// </summary>
+    /// <summary>Verifies that GetValueSetterOrThrow throws for a method member.</summary>
     [Test]
     public void GetValueSetterOrThrow_MethodMember_ThrowsArgumentException()
     {
         var methodInfo = typeof(TestViewModel).GetMethod(HashCodeMethodName)!;
 
-        Assert.Throws<ArgumentException>(() => Reflection.GetValueSetterOrThrow(methodInfo));
+        _ = Assert.Throws<ArgumentException>(() => Reflection.GetValueSetterOrThrow(methodInfo));
     }
 
-    /// <summary>
-    /// Verifies that TryGetAllValuesForPropertyChain returns false when null is in the chain.
-    /// </summary>
+    /// <summary>Verifies that TryGetAllValuesForPropertyChain returns false when null is in the chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetAllValuesForPropertyChain_NullInChain_ReturnsFalse()
@@ -389,9 +352,7 @@ public class ReflectionTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that ExpressionToPropertyNames handles index expression paths.
-    /// </summary>
+    /// <summary>Verifies that ExpressionToPropertyNames handles index expression paths.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExpressionToPropertyNames_IndexExpression_ReturnsPathWithIndex()
@@ -405,9 +366,7 @@ public class ReflectionTests
         await Assert.That(name).Contains("[0]");
     }
 
-    /// <summary>
-    /// Verifies that GetValueSetterForProperty returns a working setter for a property member.
-    /// </summary>
+    /// <summary>Verifies that GetValueSetterForProperty returns a working setter for a property member.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueSetterForProperty_PropertyMember_ReturnsSetter()
@@ -423,9 +382,7 @@ public class ReflectionTests
         await Assert.That(vm.Name).IsEqualTo("Test");
     }
 
-    /// <summary>
-    /// Verifies that MaterializeExpressions returns the same array when given an array.
-    /// </summary>
+    /// <summary>Verifies that MaterializeExpressions returns the same array when given an array.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MaterializeExpressions_ArrayInput_ReturnsSameArray()
@@ -440,9 +397,7 @@ public class ReflectionTests
         await Assert.That(ReferenceEquals(result, array)).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that MaterializeExpressions returns empty array for an empty ICollection.
-    /// </summary>
+    /// <summary>Verifies that MaterializeExpressions returns empty array for an empty ICollection.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MaterializeExpressions_EmptyCollection_ReturnsEmptyArray()
@@ -454,9 +409,7 @@ public class ReflectionTests
         await Assert.That(result.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that MaterializeExpressions copies from a non-empty ICollection.
-    /// </summary>
+    /// <summary>Verifies that MaterializeExpressions copies from a non-empty ICollection.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MaterializeExpressions_NonEmptyCollection_CopiesElements()
@@ -471,9 +424,7 @@ public class ReflectionTests
         await Assert.That(result.Length).IsEqualTo(list.Count);
     }
 
-    /// <summary>
-    /// Verifies that MaterializeExpressions handles a general IEnumerable (not array or ICollection).
-    /// </summary>
+    /// <summary>Verifies that MaterializeExpressions handles a general IEnumerable (not array or ICollection).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MaterializeExpressions_GeneralEnumerable_MaterializesToArray()
@@ -518,14 +469,12 @@ public class ReflectionTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that GetValueFetcherForProperty for a field throws when the field value is null.
-    /// </summary>
+    /// <summary>Verifies that GetValueFetcherForProperty for a field throws when the field value is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueFetcherForProperty_FieldMember_NullValue_Throws()
     {
-        var fieldInfo = typeof(FieldTestModel).GetField("PublicField")!;
+        var fieldInfo = typeof(FieldTestModel).GetField(PublicFieldName)!;
         var getter = Reflection.GetValueFetcherForProperty(fieldInfo);
 
         await Assert.That(getter).IsNotNull();
@@ -536,45 +485,37 @@ public class ReflectionTests
         await Assert.That(act).ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that TryGetValueForPropertyChain throws for empty expression chain.
-    /// </summary>
+    /// <summary>Verifies that TryGetValueForPropertyChain throws for empty expression chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetValueForPropertyChain_EmptyChain_ThrowsInvalidOperationException()
     {
-        var act = () => Reflection.TryGetValueForPropertyChain<string>(out _, new TestViewModel(), []);
+        var act = static () => Reflection.TryGetValueForPropertyChain<string>(out _, new TestViewModel(), []);
 
         await Assert.That(act).ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that TryGetAllValuesForPropertyChain throws for empty expression chain.
-    /// </summary>
+    /// <summary>Verifies that TryGetAllValuesForPropertyChain throws for empty expression chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetAllValuesForPropertyChain_EmptyChain_ThrowsInvalidOperationException()
     {
-        var act = () => Reflection.TryGetAllValuesForPropertyChain(out _, new TestViewModel(), []);
+        var act = static () => Reflection.TryGetAllValuesForPropertyChain(out _, new TestViewModel(), []);
 
         await Assert.That(act).ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that TrySetValueToPropertyChain throws for empty expression chain.
-    /// </summary>
+    /// <summary>Verifies that TrySetValueToPropertyChain throws for empty expression chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TrySetValueToPropertyChain_EmptyChain_ThrowsInvalidOperationException()
     {
-        var act = () => Reflection.TrySetValueToPropertyChain(new TestViewModel(), [], "value");
+        var act = static () => Reflection.TrySetValueToPropertyChain(new TestViewModel(), [], "value");
 
         await Assert.That(act).ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that TryGetValueForPropertyChain returns false when the root object is null.
-    /// </summary>
+    /// <summary>Verifies that TryGetValueForPropertyChain returns false when the root object is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetValueForPropertyChain_NullRoot_ReturnsFalse()
@@ -589,9 +530,7 @@ public class ReflectionTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that TryGetAllValuesForPropertyChain returns false when the last object in chain is null.
-    /// </summary>
+    /// <summary>Verifies that TryGetAllValuesForPropertyChain returns false when the last object in chain is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetAllValuesForPropertyChain_NullAtLastStep_ReturnsFalse()
@@ -606,9 +545,7 @@ public class ReflectionTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that TrySetValueToPropertyChain returns false when target is null.
-    /// </summary>
+    /// <summary>Verifies that TrySetValueToPropertyChain returns false when target is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TrySetValueToPropertyChain_NullTarget_ReturnsFalse()
@@ -696,7 +633,7 @@ public class ReflectionTests
         var chain = body.GetExpressionChain();
 
         var obj = new ObjChain1 { Chain2 = new() }; // Chain3 is null
-        var action = () => Reflection.TrySetValueToPropertyChain(obj, chain, 42);
+        var action = () => Reflection.TrySetValueToPropertyChain(obj, chain, SampleValue);
 
         await Assert.That(action).ThrowsException();
     }
@@ -757,8 +694,8 @@ public class ReflectionTests
         // Create an IndexExpression with TWO constant arguments to exercise the i != 0 branch
         var parameter = System.Linq.Expressions.Expression.Parameter(typeof(TrueMultiArgIndexedModel), "x");
         var indexer = typeof(TrueMultiArgIndexedModel).GetProperty("Item")!;
-        var arg0 = System.Linq.Expressions.Expression.Constant(3);
-        var arg1 = System.Linq.Expressions.Expression.Constant(5);
+        var arg0 = System.Linq.Expressions.Expression.Constant(FirstIndexArgument);
+        var arg1 = System.Linq.Expressions.Expression.Constant(SecondIndexArgument);
         var indexExpr = System.Linq.Expressions.Expression.MakeIndex(
             parameter,
             indexer,
@@ -811,88 +748,21 @@ public class ReflectionTests
         await Assert.That(act).ThrowsException();
     }
 
-    /// <summary>
-    /// A test model with a public field for testing field-based reflection.
-    /// </summary>
+    /// <summary>A test model with a public field for testing field-based reflection.</summary>
     public class FieldTestModel
     {
-        /// <summary>
-        /// A public field for testing field-based reflection.
-        /// </summary>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Test model")]
-        [SuppressMessage("Major Code Smell", "S2357:Fields should be private", Justification = "Test model")]
-        [SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Test model")]
+        /// <summary>A public field for testing field-based reflection.</summary>
+        [SuppressMessage("Design", "SST1401:Fields should be private", Justification = "A public field is what the field-reflection path under test resolves.")]
         public string PublicField = string.Empty;
     }
 
-    /// <summary>
-    /// A test model with an indexed property for testing index expressions.
-    /// </summary>
-    [SuppressMessage(
-        "Performance",
-        "CA1812:Avoid uninstantiated internal classes",
-        Justification = "Referenced only inside an inspected expression tree (never compiled), so no construction is visible to the analyzer.")]
-    private sealed class IndexedModel
+    /// <summary>A test model with an indexed property for testing index expressions.</summary>
+    public sealed class TrueMultiArgIndexedModel
     {
-        /// <summary>
-        /// The first sample value stored in <see cref="Items"/>.
-        /// </summary>
-        private const int FirstItemValue = 10;
-
-        /// <summary>
-        /// The second sample value stored in <see cref="Items"/>.
-        /// </summary>
-        private const int SecondItemValue = 20;
-
-        /// <summary>
-        /// The third sample value stored in <see cref="Items"/>.
-        /// </summary>
-        private const int ThirdItemValue = 30;
-
-        /// <summary>
-        /// Gets a list of integers for testing index expressions.
-        /// </summary>
-        public List<int> Items { get; } = [FirstItemValue, SecondItemValue, ThirdItemValue];
-    }
-
-    /// <summary>
-    /// A test model with a dictionary for testing multi-argument index expressions.
-    /// </summary>
-    [SuppressMessage(
-        "Performance",
-        "CA1812:Avoid uninstantiated internal classes",
-        Justification = "Referenced only via typeof/reflection metadata in indexer tests; never constructed by design.")]
-    private sealed class MultiArgIndexedModel
-    {
-        /// <summary>
-        /// The sample value mapped to the seeded dictionary key.
-        /// </summary>
-        private const int SeededValue = 42;
-
-        /// <summary>
-        /// Gets a dictionary of string-to-int mappings for testing multi-argument index expressions.
-        /// </summary>
-        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Used for testing")]
-        public Dictionary<string, int> Items { get; } = new() { ["key1"] = SeededValue };
-    }
-
-    /// <summary>
-    /// A test model with a true multi-parameter indexer (two int parameters).
-    /// </summary>
-    [SuppressMessage(
-        "Performance",
-        "CA1812:Avoid uninstantiated internal classes",
-        Justification = "Referenced only via typeof/reflection metadata in indexer tests; never constructed by design.")]
-    private sealed class TrueMultiArgIndexedModel
-    {
-        /// <summary>
-        /// Backing dictionary for the multi-parameter indexer.
-        /// </summary>
+        /// <summary>Backing dictionary for the multi-parameter indexer.</summary>
         private readonly Dictionary<(int Row, int Col), int> _data = [];
 
-        /// <summary>
-        /// Gets or sets the value at the specified row and column.
-        /// </summary>
+        /// <summary>Gets or sets the value at the specified row and column.</summary>
         /// <param name="row">The row index.</param>
         /// <param name="col">The column index.</param>
         /// <returns>The value at the specified position.</returns>
@@ -904,14 +774,38 @@ public class ReflectionTests
         }
     }
 
-    /// <summary>
-    /// A test model with a read-only property (getter only, no setter).
-    /// </summary>
+    /// <summary>A test model with an indexed property for testing index expressions.</summary>
+    private sealed class IndexedModel
+    {
+        /// <summary>The first sample value stored in <see cref="Items"/>.</summary>
+        private const int FirstItemValue = 10;
+
+        /// <summary>The second sample value stored in <see cref="Items"/>.</summary>
+        private const int SecondItemValue = 20;
+
+        /// <summary>The third sample value stored in <see cref="Items"/>.</summary>
+        private const int ThirdItemValue = 30;
+
+        /// <summary>Gets a list of integers for testing index expressions.</summary>
+        public List<int> Items { get; } = [FirstItemValue, SecondItemValue, ThirdItemValue];
+    }
+
+    /// <summary>A test model with a dictionary for testing multi-argument index expressions.</summary>
+    private sealed class MultiArgIndexedModel
+    {
+        /// <summary>The sample value mapped to the seeded dictionary key.</summary>
+        private const int SeededValue = 42;
+
+        /// <summary>Gets a dictionary of string-to-int mappings for testing multi-argument index expressions.</summary>
+        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Used for testing")]
+        public Dictionary<string, int> Items { get; } = new() { ["key1"] = SeededValue };
+    }
+
+    /// <summary>A test model with a true multi-parameter indexer (two int parameters).</summary>
+    /// <summary>A test model with a read-only property (getter only, no setter).</summary>
     private sealed class ReadOnlyModel
     {
-        /// <summary>
-        /// Gets the read-only value. This property has no setter.
-        /// </summary>
+        /// <summary>Gets the read-only value. This property has no setter.</summary>
         public string ReadOnlyValue { get; } = "Immutable";
     }
 }

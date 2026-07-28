@@ -16,23 +16,23 @@ namespace ReactiveUI.Binding
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyView, int> OneWayBind(
             this global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyView view,
             global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyViewModel viewModel,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyViewModel, int>> vmProperty,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyViewModel, int>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyView, int>> viewProperty,
-            [global::System.Runtime.CompilerServices.CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+            [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (vmPropertyExpression == "x => x.Count"
+            if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountValue")
             {
-                return __OneWayBind_0000344EFEEA6530(viewModel, view);
+                return __OneWayBind_0000344EFEEA6340(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyView, int> __OneWayBind_0000344EFEEA6530(global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyView, int> __OneWayBind_0000344EFEEA6340(global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyView view)
         {
             // OneWayBind: Count -> CountValue
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(

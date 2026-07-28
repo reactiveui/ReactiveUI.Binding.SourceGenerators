@@ -4,16 +4,12 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Indicates that an interaction has gone unhandled.
-/// </summary>
+/// <summary>Indicates that an interaction has gone unhandled.</summary>
 /// <typeparam name="TInput">The type of the interaction's input.</typeparam>
 /// <typeparam name="TOutput">The type of the interaction's output.</typeparam>
 public class UnhandledInteractionException<TInput, TOutput> : Exception
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UnhandledInteractionException{TInput, TOutput}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="UnhandledInteractionException{TInput, TOutput}"/> class.</summary>
     /// <param name="interaction">The interaction that doesn't have an input handler.</param>
     /// <param name="input">The input into the interaction.</param>
     public UnhandledInteractionException(Interaction<TInput, TOutput> interaction, TInput input)
@@ -23,25 +19,19 @@ public class UnhandledInteractionException<TInput, TOutput> : Exception
         Input = input;
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UnhandledInteractionException{TInput, TOutput}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="UnhandledInteractionException{TInput, TOutput}"/> class.</summary>
     public UnhandledInteractionException()
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UnhandledInteractionException{TInput, TOutput}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="UnhandledInteractionException{TInput, TOutput}"/> class.</summary>
     /// <param name="message">A message about the exception.</param>
     public UnhandledInteractionException(string message)
         : base(message)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UnhandledInteractionException{TInput, TOutput}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="UnhandledInteractionException{TInput, TOutput}"/> class.</summary>
     /// <param name="message">A message about the exception.</param>
     /// <param name="innerException">Any other exception that caused the issue.</param>
     public UnhandledInteractionException(string message, Exception innerException)
@@ -49,13 +39,9 @@ public class UnhandledInteractionException<TInput, TOutput> : Exception
     {
     }
 
-    /// <summary>
-    /// Gets the interaction that was not handled.
-    /// </summary>
+    /// <summary>Gets the interaction that was not handled.</summary>
     public Interaction<TInput, TOutput>? Interaction { get; }
 
-    /// <summary>
-    /// Gets the input for the interaction that was not handled.
-    /// </summary>
+    /// <summary>Gets the input for the interaction that was not handled.</summary>
     public TInput Input { get; } = default!;
 }

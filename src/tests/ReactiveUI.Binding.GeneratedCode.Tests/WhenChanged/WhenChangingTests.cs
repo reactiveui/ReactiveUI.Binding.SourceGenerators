@@ -13,54 +13,37 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 /// </summary>
 public class WhenChangingTests
 {
-    /// <summary>
-    /// The initial name value used by single-property tests.
-    /// </summary>
+    /// <summary>The initial name value used by single-property tests.</summary>
     private const string InitialName = "Initial";
 
-    /// <summary>
-    /// The minimum number of emissions expected after a single change.
-    /// </summary>
+    /// <summary>The minimum number of emissions expected after a single change.</summary>
     private const int MinEmissionsAfterChange = 2;
 
-    /// <summary>
-    /// The minimum number of emissions expected after two changes.
-    /// </summary>
+    /// <summary>The minimum number of emissions expected after two changes.</summary>
     private const int MinEmissionsAfterTwoChanges = 3;
 
-    /// <summary>
-    /// The index of the third emission.
-    /// </summary>
+    /// <summary>The index of the third emission.</summary>
     private const int ThirdEmissionIndex = 2;
 
-    /// <summary>
-    /// The two-property test value for the integer property.
-    /// </summary>
+    /// <summary>The two-property test value for the integer property.</summary>
     private const int TwoPropIntValue = 42;
 
-    /// <summary>
-    /// The three-property test value for the integer property.
-    /// </summary>
+    /// <summary>The three-property test value for the integer property.</summary>
     private const int ThreePropIntValue = 10;
 
-    /// <summary>
-    /// The four-property test value for the integer property.
-    /// </summary>
+    /// <summary>The four-property test value for the integer property.</summary>
     private const int FourPropIntValue = 20;
 
-    /// <summary>
-    /// The three-property test value for the double property.
-    /// </summary>
+    /// <summary>The three-property test value for the double property.</summary>
     private const double ThreePropDoubleValue = 3.14;
 
-    /// <summary>
-    /// The four-property test value for the double property.
-    /// </summary>
+    /// <summary>The four-property test value for the double property.</summary>
     private const double FourPropDoubleValue = 2.71;
 
-    /// <summary>
-    /// Verifies that a single-property WhenChanging emits the initial value.
-    /// </summary>
+    /// <summary>The value present before the change, which a before-change observation must report.</summary>
+    private const string BeforeValue = "Before";
+
+    /// <summary>Verifies that a single-property WhenChanging emits the initial value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsInitialValue()
@@ -83,7 +66,7 @@ public class WhenChangingTests
     [Test]
     public async Task SingleProperty_EmitsBeforeChange()
     {
-        var vm = new TestViewModel { Name = "Before" };
+        var vm = new TestViewModel { Name = BeforeValue };
         var values = new List<string>();
 
         using var sub = WhenChangingScenarios.SingleProperty_Name(vm)
@@ -94,13 +77,11 @@ public class WhenChangingTests
         // WhenChanging emits the value at the time of PropertyChanging event,
         // which is the old value (before the assignment).
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterChange);
-        await Assert.That(values[0]).IsEqualTo("Before");
-        await Assert.That(values[1]).IsEqualTo("Before");
+        await Assert.That(values[0]).IsEqualTo(BeforeValue);
+        await Assert.That(values[1]).IsEqualTo(BeforeValue);
     }
 
-    /// <summary>
-    /// Verifies that a single-property WhenChanging emits sequential before-change values.
-    /// </summary>
+    /// <summary>Verifies that a single-property WhenChanging emits sequential before-change values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsSequentialBeforeChangeValues()
@@ -121,9 +102,7 @@ public class WhenChangingTests
         await Assert.That(values[ThirdEmissionIndex]).IsEqualTo("B");
     }
 
-    /// <summary>
-    /// Verifies that two-property WhenChanging emits initial values.
-    /// </summary>
+    /// <summary>Verifies that two-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoProperties_EmitsInitialTuple()
@@ -139,9 +118,7 @@ public class WhenChangingTests
         await Assert.That(values[0].property2).IsEqualTo(TwoPropIntValue);
     }
 
-    /// <summary>
-    /// Verifies that three-property WhenChanging emits initial values.
-    /// </summary>
+    /// <summary>Verifies that three-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ThreeProperties_EmitsInitialValues()
@@ -158,9 +135,7 @@ public class WhenChangingTests
         await Assert.That(values[0].property3).IsEqualTo(ThreePropDoubleValue);
     }
 
-    /// <summary>
-    /// Verifies that four-property WhenChanging emits initial values.
-    /// </summary>
+    /// <summary>Verifies that four-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FourProperties_EmitsInitialValues()
@@ -178,9 +153,7 @@ public class WhenChangingTests
         await Assert.That(values[0].property4).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that disposing the subscription stops listening for changes.
-    /// </summary>
+    /// <summary>Verifies that disposing the subscription stops listening for changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Disposal_StopsListening()

@@ -6,9 +6,7 @@ using System.Windows;
 
 namespace ReactiveUI.Binding.Wpf;
 
-/// <summary>
-/// Converts <see cref="Visibility"/> to <see cref="bool"/>.
-/// </summary>
+/// <summary>Converts <see cref="Visibility"/> to <see cref="bool"/>.</summary>
 /// <remarks>
 /// <para>
 /// The conversion supports a <see cref="BooleanToVisibilityHints"/> as the conversion hint parameter:

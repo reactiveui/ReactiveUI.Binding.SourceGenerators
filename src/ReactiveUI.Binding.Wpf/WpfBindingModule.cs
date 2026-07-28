@@ -6,9 +6,7 @@ using Splat.Builder;
 
 namespace ReactiveUI.Binding.Wpf;
 
-/// <summary>
-/// WPF-specific module that registers DependencyObject observation with the dependency resolver.
-/// </summary>
+/// <summary>WPF-specific module that registers DependencyObject observation with the dependency resolver.</summary>
 /// <remarks>
 /// WPF command binding (via Command property) is handled at compile time by the source generator.
 /// </remarks>
@@ -19,7 +17,7 @@ public sealed class WpfBindingModule : IModule
     {
         ArgumentExceptionHelper.ThrowIfNull(resolver);
 
-        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(() =>
+        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(static () =>
             new DependencyObjectObservableForProperty());
     }
 }

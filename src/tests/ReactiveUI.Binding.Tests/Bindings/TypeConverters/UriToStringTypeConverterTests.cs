@@ -4,19 +4,13 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting Uri to strings.
-/// </summary>
+/// <summary>Tests for converting Uri to strings.</summary>
 public class UriToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,9 +20,7 @@ public class UriToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert AbsoluteUri Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert AbsoluteUri Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_AbsoluteUri_Succeeds()
@@ -42,9 +34,7 @@ public class UriToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("https://reactiveui.net/docs");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert RelativeUri Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert RelativeUri Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_RelativeUri_Succeeds()
@@ -58,9 +48,7 @@ public class UriToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("/path/to/resource");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsFalse()

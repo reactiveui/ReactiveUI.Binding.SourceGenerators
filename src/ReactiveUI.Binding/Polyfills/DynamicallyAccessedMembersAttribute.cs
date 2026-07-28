@@ -8,38 +8,29 @@
 
 namespace System.Diagnostics.CodeAnalysis;
 
-/// <summary>
-/// Indicates that certain members on a specified <see cref="Type"/> are accessed dynamically,
-/// for example through <see cref="System.Reflection"/>.
-/// </summary>
+/// <summary>Indicates that certain members on a specified <see cref="Type"/> are accessed dynamically, for example through <see cref="System.Reflection"/>.</summary>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
 [AttributeUsage(
-    validOn: AttributeTargets.Class |
-             AttributeTargets.Field |
-             AttributeTargets.GenericParameter |
-             AttributeTargets.Interface |
-             AttributeTargets.Method |
-             AttributeTargets.Parameter |
-             AttributeTargets.Property |
-             AttributeTargets.ReturnValue |
-             AttributeTargets.Struct,
+    validOn: AttributeTargets.Class
+             | AttributeTargets.Field
+             | AttributeTargets.GenericParameter
+             | AttributeTargets.Interface
+             | AttributeTargets.Method
+             | AttributeTargets.Parameter
+             | AttributeTargets.Property
+             | AttributeTargets.ReturnValue
+             | AttributeTargets.Struct,
     Inherited = false)]
 internal sealed class DynamicallyAccessedMembersAttribute : Attribute
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DynamicallyAccessedMembersAttribute"/> class
-    /// with the specified member types.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="DynamicallyAccessedMembersAttribute"/> class with the specified member types.</summary>
     /// <param name="memberTypes">The types of members dynamically accessed.</param>
     public DynamicallyAccessedMembersAttribute(DynamicallyAccessedMemberTypes memberTypes) =>
         MemberTypes = memberTypes;
 
-    /// <summary>
-    /// Gets the <see cref="DynamicallyAccessedMemberTypes"/> which specifies the type
-    /// of members dynamically accessed.
-    /// </summary>
-    public DynamicallyAccessedMemberTypes MemberTypes { get; }
+    /// <summary>Gets the <see cref="DynamicallyAccessedMemberTypes"/> which specifies the type of members dynamically accessed.</summary>
+    internal DynamicallyAccessedMemberTypes MemberTypes { get; }
 }
 
 #else

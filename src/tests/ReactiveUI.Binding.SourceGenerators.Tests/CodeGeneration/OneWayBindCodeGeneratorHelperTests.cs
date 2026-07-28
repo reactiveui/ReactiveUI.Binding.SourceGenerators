@@ -10,60 +10,72 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.CodeGeneration;
 
-/// <summary>
-/// Tests for <see cref="OneWayBindCodeGenerator"/> helper methods.
-/// </summary>
+/// <summary>Tests for <see cref="OneWayBindCodeGenerator"/> helper methods.</summary>
 public class OneWayBindCodeGeneratorHelperTests
 {
-    /// <summary>
-    /// Verifies GroupByTypeSignature groups invocations with the same type signature.
-    /// </summary>
+    /// <summary>The fully qualified name of the <c>Int32</c> type used by these tests.</summary>
+    private const string Int32TypeName = "global::System.Int32";
+
+    /// <summary>The fully qualified name of the <c>String</c> type used by these tests.</summary>
+    private const string StringTypeName = "global::System.String";
+
+    /// <summary>The fully qualified name of the <c>View</c> type used by these tests.</summary>
+    private const string ViewTypeName = "global::TestApp.View";
+
+    /// <summary>The fully qualified name of the <c>VM</c> type used by these tests.</summary>
+    private const string VMTypeName = "global::TestApp.VM";
+
+    /// <summary>The <c>IReactiveBinding</c> name these tests generate against.</summary>
+    private const string IReactiveBindingName = "IReactiveBinding";
+
+    /// <summary>The <c>OneWayBind</c> name these tests generate against.</summary>
+    private const string OneWayBindName = "OneWayBind";
+
+    /// <summary>Verifies GroupByTypeSignature groups invocations with the same type signature.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GroupByTypeSignature_SameSignature_GroupedTogether()
     {
-        var inv1 = ModelFactory.CreateBindingInvocationInfo(callerLineNumber: 10, methodName: "OneWayBind");
-        var inv2 = ModelFactory.CreateBindingInvocationInfo(callerLineNumber: 20, methodName: "OneWayBind");
+        const int ExpectedInvocationCount = 2;
+        var inv1 = ModelFactory.CreateBindingInvocationInfo(callerLineNumber: 10, methodName: OneWayBindName);
+        var inv2 = ModelFactory.CreateBindingInvocationInfo(callerLineNumber: 20, methodName: OneWayBindName);
         var invocations = ImmutableArray.Create(inv1, inv2);
 
         var groups = OneWayBindCodeGenerator.GroupByTypeSignature(invocations);
 
         await Assert.That(groups.Count).IsEqualTo(1);
-        await Assert.That(groups[0].Invocations.Length).IsEqualTo(2);
+        await Assert.That(groups[0].Invocations.Length).IsEqualTo(ExpectedInvocationCount);
     }
 
-    /// <summary>
-    /// Verifies GroupByTypeSignature separates invocations with different target types.
-    /// </summary>
+    /// <summary>Verifies GroupByTypeSignature separates invocations with different target types.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GroupByTypeSignature_DifferentTargetTypes_SeparateGroups()
     {
+        const int ExpectedGroupCount = 2;
         var inv1 = ModelFactory.CreateBindingInvocationInfo(
             targetTypeFullName: "global::TestApp.ViewA",
-            methodName: "OneWayBind");
+            methodName: OneWayBindName);
         var inv2 = ModelFactory.CreateBindingInvocationInfo(
             targetTypeFullName: "global::TestApp.ViewB",
-            methodName: "OneWayBind");
+            methodName: OneWayBindName);
         var invocations = ImmutableArray.Create(inv1, inv2);
 
         var groups = OneWayBindCodeGenerator.GroupByTypeSignature(invocations);
 
-        await Assert.That(groups.Count).IsEqualTo(2);
+        await Assert.That(groups.Count).IsEqualTo(ExpectedGroupCount);
     }
 
-    /// <summary>
-    /// Verifies FormatExtraArgs returns empty when no conversion or scheduler.
-    /// </summary>
+    /// <summary>Verifies FormatExtraArgs returns empty when no conversion or scheduler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FormatExtraArgs_NoConversionNoScheduler_ReturnsEmpty()
     {
         var group = new OneWayBindCodeGenerator.BindingTypeGroup(
-            "global::TestApp.VM",
-            "global::TestApp.View",
-            "global::System.String",
-            "global::System.String",
+            VMTypeName,
+            ViewTypeName,
+            StringTypeName,
+            StringTypeName,
             false,
             false,
             []);
@@ -73,18 +85,16 @@ public class OneWayBindCodeGeneratorHelperTests
         await Assert.That(result).IsEqualTo(string.Empty);
     }
 
-    /// <summary>
-    /// Verifies FormatExtraArgs includes selector when HasConversion is true.
-    /// </summary>
+    /// <summary>Verifies FormatExtraArgs includes selector when HasConversion is true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FormatExtraArgs_WithConversion_IncludesSelectorArg()
     {
         var group = new OneWayBindCodeGenerator.BindingTypeGroup(
-            "global::TestApp.VM",
-            "global::TestApp.View",
-            "global::System.String",
-            "global::System.String",
+            VMTypeName,
+            ViewTypeName,
+            StringTypeName,
+            StringTypeName,
             true,
             false,
             []);
@@ -94,18 +104,16 @@ public class OneWayBindCodeGeneratorHelperTests
         await Assert.That(result).Contains("selector");
     }
 
-    /// <summary>
-    /// Verifies FormatExtraArgs includes scheduler when HasScheduler is true.
-    /// </summary>
+    /// <summary>Verifies FormatExtraArgs includes scheduler when HasScheduler is true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FormatExtraArgs_WithScheduler_IncludesSchedulerArg()
     {
         var group = new OneWayBindCodeGenerator.BindingTypeGroup(
-            "global::TestApp.VM",
-            "global::TestApp.View",
-            "global::System.String",
-            "global::System.String",
+            VMTypeName,
+            ViewTypeName,
+            StringTypeName,
+            StringTypeName,
             false,
             true,
             []);
@@ -115,70 +123,62 @@ public class OneWayBindCodeGeneratorHelperTests
         await Assert.That(result).Contains("scheduler");
     }
 
-    /// <summary>
-    /// Verifies FormatReturnType without conversion uses source property type.
-    /// </summary>
+    /// <summary>Verifies FormatReturnType without conversion uses source property type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FormatReturnType_NoConversion_UsesSourcePropertyType()
     {
         var group = new OneWayBindCodeGenerator.BindingTypeGroup(
-            "global::TestApp.VM",
-            "global::TestApp.View",
-            "global::System.Int32",
-            "global::System.String",
+            VMTypeName,
+            ViewTypeName,
+            Int32TypeName,
+            StringTypeName,
             false,
             false,
             []);
 
         var result = OneWayBindCodeGenerator.FormatReturnType(group);
 
-        await Assert.That(result).Contains("IReactiveBinding");
-        await Assert.That(result).Contains("global::System.Int32");
+        await Assert.That(result).Contains(IReactiveBindingName);
+        await Assert.That(result).Contains(Int32TypeName);
     }
 
-    /// <summary>
-    /// Verifies FormatReturnType with conversion uses target property type.
-    /// </summary>
+    /// <summary>Verifies FormatReturnType with conversion uses target property type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FormatReturnType_WithConversion_UsesTargetPropertyType()
     {
         var group = new OneWayBindCodeGenerator.BindingTypeGroup(
-            "global::TestApp.VM",
-            "global::TestApp.View",
-            "global::System.Int32",
-            "global::System.String",
+            VMTypeName,
+            ViewTypeName,
+            Int32TypeName,
+            StringTypeName,
             true,
             false,
             []);
 
         var result = OneWayBindCodeGenerator.FormatReturnType(group);
 
-        await Assert.That(result).Contains("IReactiveBinding");
-        await Assert.That(result).Contains("global::System.String");
+        await Assert.That(result).Contains(IReactiveBindingName);
+        await Assert.That(result).Contains(StringTypeName);
     }
 
-    /// <summary>
-    /// Verifies FormatMethodReturnType uses target property type.
-    /// </summary>
+    /// <summary>Verifies FormatMethodReturnType uses target property type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FormatMethodReturnType_ReturnsTargetPropertyType()
     {
         var inv = ModelFactory.CreateBindingInvocationInfo(
-            targetPropertyTypeFullName: "global::System.Int32",
-            methodName: "OneWayBind");
+            targetPropertyTypeFullName: Int32TypeName,
+            methodName: OneWayBindName);
 
         var result = OneWayBindCodeGenerator.FormatMethodReturnType(inv);
 
-        await Assert.That(result).Contains("IReactiveBinding");
-        await Assert.That(result).Contains("global::System.Int32");
+        await Assert.That(result).Contains(IReactiveBindingName);
+        await Assert.That(result).Contains(Int32TypeName);
     }
 
-    /// <summary>
-    /// Verifies FormatExtraMethodParams returns empty when no conversion or scheduler.
-    /// </summary>
+    /// <summary>Verifies FormatExtraMethodParams returns empty when no conversion or scheduler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FormatExtraMethodParams_NoConversionNoScheduler_ReturnsEmpty()
@@ -186,21 +186,19 @@ public class OneWayBindCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindingInvocationInfo(
             hasConversion: false,
             hasScheduler: false,
-            methodName: "OneWayBind");
+            methodName: OneWayBindName);
 
         var result = OneWayBindCodeGenerator.FormatExtraMethodParams(inv);
 
         await Assert.That(result).IsEqualTo(string.Empty);
     }
 
-    /// <summary>
-    /// Verifies FormatExtraMethodParams includes Func selector when HasConversion is true.
-    /// </summary>
+    /// <summary>Verifies FormatExtraMethodParams includes Func selector when HasConversion is true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FormatExtraMethodParams_WithConversion_IncludesFuncSelector()
     {
-        var inv = ModelFactory.CreateBindingInvocationInfo(hasConversion: true, methodName: "OneWayBind");
+        var inv = ModelFactory.CreateBindingInvocationInfo(hasConversion: true, methodName: OneWayBindName);
 
         var result = OneWayBindCodeGenerator.FormatExtraMethodParams(inv);
 
@@ -208,20 +206,18 @@ public class OneWayBindCodeGeneratorHelperTests
         await Assert.That(result).Contains("selector");
     }
 
-    /// <summary>
-    /// Verifies GenerateConcreteOverload with CallerArgExpr generates expression dispatch.
-    /// </summary>
+    /// <summary>Verifies GenerateConcreteOverload with CallerArgExpr generates expression dispatch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateConcreteOverload_CallerArgExpr_GeneratesExpressionDispatch()
     {
         var sb = new StringBuilder();
-        var inv = ModelFactory.CreateBindingInvocationInfo(methodName: "OneWayBind");
+        var inv = ModelFactory.CreateBindingInvocationInfo(methodName: OneWayBindName);
         var group = new OneWayBindCodeGenerator.BindingTypeGroup(
             "global::TestApp.MyViewModel",
             "global::TestApp.MyView",
-            "global::System.String",
-            "global::System.String",
+            StringTypeName,
+            StringTypeName,
             false,
             false,
             [inv]);
@@ -233,15 +229,13 @@ public class OneWayBindCodeGeneratorHelperTests
         await Assert.That(result).Contains("__OneWayBind_");
     }
 
-    /// <summary>
-    /// Verifies GenerateOneWayBindMethod generates PropertyObservable + Subscribe + ReactiveBinding.
-    /// </summary>
+    /// <summary>Verifies GenerateOneWayBindMethod generates PropertyObservable + Subscribe + ReactiveBinding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateOneWayBindMethod_StandardInvocation_GeneratesReactiveBinding()
     {
         var sb = new StringBuilder();
-        var inv = ModelFactory.CreateBindingInvocationInfo(methodName: "OneWayBind");
+        var inv = ModelFactory.CreateBindingInvocationInfo(methodName: OneWayBindName);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         OneWayBindCodeGenerator.GenerateOneWayBindMethod(sb, inv, classInfo, "TEST00000000TEST");

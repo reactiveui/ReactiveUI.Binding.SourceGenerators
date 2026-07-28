@@ -7,14 +7,13 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for BindOneWay (one-way binding) invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for BindOneWay (one-way binding) invocation generation.</summary>
 public class BindOneWayGeneratorTests
 {
-    /// <summary>
-    /// Verifies BindOneWay with same-type string property binding.
-    /// </summary>
+    /// <summary>The <c>BindOneWayDispatch.g.cs</c> name these tests generate against.</summary>
+    private const string BindOneWayDispatchgcsName = "BindOneWayDispatch.g.cs";
+
+    /// <summary>Verifies BindOneWay with same-type string property binding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_StringToString()
@@ -26,9 +25,7 @@ public class BindOneWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindOneWay with int property binding.
-    /// </summary>
+    /// <summary>Verifies BindOneWay with int property binding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_IntToInt()
@@ -40,9 +37,7 @@ public class BindOneWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindOneWay with multiple bindings on the same source/target pair.
-    /// </summary>
+    /// <summary>Verifies BindOneWay with multiple bindings on the same source/target pair.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleBindings()
@@ -54,9 +49,7 @@ public class BindOneWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindOneWay on a ReactiveObject-based ViewModel.
-    /// </summary>
+    /// <summary>Verifies BindOneWay on a ReactiveObject-based ViewModel.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ReactiveObject_Source()
@@ -68,9 +61,7 @@ public class BindOneWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindOneWay with a conversion function from int to string.
-    /// </summary>
+    /// <summary>Verifies BindOneWay with a conversion function from int to string.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_WithConverter()
@@ -82,9 +73,7 @@ public class BindOneWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindOneWay with a scheduler parameter.
-    /// </summary>
+    /// <summary>Verifies BindOneWay with a scheduler parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_WithScheduler()
@@ -113,9 +102,7 @@ public class BindOneWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindOneWay with both a conversion function and a scheduler parameter.
-    /// </summary>
+    /// <summary>Verifies BindOneWay with both a conversion function and a scheduler parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_WithConverterAndScheduler()
@@ -127,9 +114,7 @@ public class BindOneWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindOneWay with multiple bindings sharing the same type signature to cover the else-if dispatch branch.
-    /// </summary>
+    /// <summary>Verifies BindOneWay with multiple bindings sharing the same type signature to cover the else-if dispatch branch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleSameTypeBindings()
@@ -141,9 +126,7 @@ public class BindOneWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies that BindOneWay with multiple same-type bindings generates CallerFilePath dispatch when targeting pre-C# 10.
-    /// </summary>
+    /// <summary>Verifies that BindOneWay with multiple same-type bindings generates CallerFilePath dispatch when targeting pre-C# 10.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleSameTypeBindings_CallerFilePath()
@@ -209,7 +192,7 @@ public class BindOneWayGeneratorTests
         // The generator should not produce any BindOneWay dispatch code
         // because the method belongs to CustomBindingExtensions, not our extension class.
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindOneWayDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindOneWayDispatchgcsName);
     }
 
     /// <summary>
@@ -255,7 +238,7 @@ public class BindOneWayGeneratorTests
 
         // The generator should silently skip the identity lambda and produce no dispatch.
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindOneWayDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindOneWayDispatchgcsName);
     }
 
     /// <summary>
@@ -301,7 +284,7 @@ public class BindOneWayGeneratorTests
 
         // The generator should silently skip block-body lambdas and produce no dispatch.
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindOneWayDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindOneWayDispatchgcsName);
     }
 
     /// <summary>
@@ -347,6 +330,6 @@ public class BindOneWayGeneratorTests
 
         // The generator should silently skip field access lambdas and produce no dispatch.
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindOneWayDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindOneWayDispatchgcsName);
     }
 }

@@ -8,28 +8,25 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.ObservableForProperty;
 
-/// <summary>
-/// Tests for the <see cref="POCOObservableForProperty"/> class.
-/// </summary>
+/// <summary>Tests for the <see cref="POCOObservableForProperty"/> class.</summary>
 public class POCOObservableForPropertyTests
 {
-    /// <summary>
-    /// Verifies affinity is always 1.
-    /// </summary>
+    /// <summary>The name of the property the POCO tests observe.</summary>
+    private const string ValuePropertyName = "Value";
+
+    /// <summary>Verifies affinity is always 1.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetAffinityForObject_AnyType_Returns1()
     {
         var sut = new POCOObservableForProperty();
 
-        var affinity = sut.GetAffinityForObject(typeof(PocoModel), "Value");
+        var affinity = sut.GetAffinityForObject(typeof(PocoModel), ValuePropertyName);
 
         await Assert.That(affinity).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies affinity is 1 even for INPC types (POCO is the fallback).
-    /// </summary>
+    /// <summary>Verifies affinity is 1 even for INPC types (POCO is the fallback).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetAffinityForObject_INPCType_StillReturns1()
@@ -41,9 +38,7 @@ public class POCOObservableForPropertyTests
         await Assert.That(affinity).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that GetNotificationForProperty emits exactly one value on subscription.
-    /// </summary>
+    /// <summary>Verifies that GetNotificationForProperty emits exactly one value on subscription.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetNotificationForProperty_EmitsOneValue()
@@ -55,16 +50,14 @@ public class POCOObservableForPropertyTests
         var body = Reflection.Rewrite(expr.Body);
 
         var count = 0;
-        using var sub = sut.GetNotificationForProperty(model, body, "Value")
+        using var sub = sut.GetNotificationForProperty(model, body, ValuePropertyName)
             .Take(1)
             .Subscribe(_ => count++);
 
         await Assert.That(count).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that GetNotificationForProperty does not emit more than once even when property changes.
-    /// </summary>
+    /// <summary>Verifies that GetNotificationForProperty does not emit more than once even when property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetNotificationForProperty_NoFurtherEmissions()
@@ -76,7 +69,7 @@ public class POCOObservableForPropertyTests
         var body = Reflection.Rewrite(expr.Body);
 
         var values = new List<IObservedChange<object, object?>>();
-        using var sub = sut.GetNotificationForProperty(model, body, "Value")
+        using var sub = sut.GetNotificationForProperty(model, body, ValuePropertyName)
             .Take(1)
             .Subscribe(values.Add);
 

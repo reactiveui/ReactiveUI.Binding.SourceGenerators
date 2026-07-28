@@ -4,13 +4,9 @@
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
-/// <summary>
-/// A plain old CLR object with no change notification support.
-/// </summary>
+/// <summary>A plain old CLR object with no change notification support.</summary>
 public class PocoModel
 {
-    /// <summary>
-    /// Gets or sets the value.
-    /// </summary>
+    /// <summary>Gets or sets the value.</summary>
     public string Value { get; set; } = string.Empty;
 }

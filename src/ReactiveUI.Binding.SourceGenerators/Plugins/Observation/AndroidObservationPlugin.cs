@@ -33,10 +33,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// </remarks>
 internal sealed class AndroidObservationPlugin : IObservationPlugin
 {
-    /// <summary>
-    /// The affinity score for the Android View observation plugin
-    /// (matches ReactiveUI's AndroidObservableForWidgets).
-    /// </summary>
+    /// <summary>The affinity score for the Android View observation plugin (matches ReactiveUI's AndroidObservableForWidgets).</summary>
     private static readonly int AndroidAffinity = BindingAffinity.Explicit;
 
     /// <inheritdoc/>
@@ -94,9 +91,9 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         string castTypeName,
         bool isBeforeChange,
         string obsVarName) =>
-        sb.AppendLine(
-            $"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>" +
-            $")new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
+        sb
+            .Append($"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>")
+            .AppendLine($")new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
 
     /// <inheritdoc/>
     public void EmitDeepChainInnerSegment(
@@ -110,7 +107,7 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         var segType = segment.PropertyTypeFullName;
         var declType = segment.DeclaringTypeFullName;
 
-        sb.AppendLine()
+        _ = sb.AppendLine()
             .AppendLine($"""
                                  var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
                                      global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},

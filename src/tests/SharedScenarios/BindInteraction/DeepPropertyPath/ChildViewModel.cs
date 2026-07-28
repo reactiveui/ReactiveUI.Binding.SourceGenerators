@@ -7,22 +7,16 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindInteraction.DeepPropertyPath;
 
-/// <summary>
-/// Child ViewModel holding the interaction.
-/// </summary>
+/// <summary>Child ViewModel holding the interaction.</summary>
 public class ChildViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Confirm"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Confirm"/>.</summary>
     private Interaction<string, bool> _confirm = new Interaction<string, bool>();
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the confirmation interaction.
-    /// </summary>
+    /// <summary>Gets or sets the confirmation interaction.</summary>
     public Interaction<string, bool> Confirm
     {
         get => _confirm;

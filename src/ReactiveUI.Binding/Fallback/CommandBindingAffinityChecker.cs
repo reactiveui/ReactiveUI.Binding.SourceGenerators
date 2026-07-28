@@ -13,24 +13,17 @@ namespace ReactiveUI.Binding.Fallback;
 /// override source-generated command binding at runtime.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-[SuppressMessage(
-    "Major Code Smell",
-    "S4018:Generic methods should provide type parameter for type inference",
-    Justification = "The type parameter denotes the target type (value/control/view), supplied explicitly by callers; it is not derivable from the arguments. Public API.")]
 public static class CommandBindingAffinityChecker
 {
-    /// <summary>
-    /// Returns <see langword="true"/> if any registered <see cref="ICreatesCommandBinding"/>
-    /// implementation reports a higher affinity than <paramref name="generatedAffinity"/>
-    /// for the given control type.
-    /// </summary>
+    /// <summary>Returns <see langword="true"/> if a registered <see cref="ICreatesCommandBinding"/> outranks <paramref name="generatedAffinity"/>.</summary>
     /// <typeparam name="T">The control type being bound to.</typeparam>
     /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
     /// <param name="hasEventTarget">Whether the caller specifies a custom event target.</param>
     /// <returns><see langword="true"/> if a user plugin should override the generated binding.</returns>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; the interface shape dictates it.")]
     public static bool HasHigherAffinityPlugin<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents |
-                                    DynamicallyAccessedMemberTypes.PublicProperties)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents
+                                    | DynamicallyAccessedMemberTypes.PublicProperties)]
     T>(int generatedAffinity, bool hasEventTarget)
     {
         foreach (var plugin in Locator.Current.GetServices<ICreatesCommandBinding>())

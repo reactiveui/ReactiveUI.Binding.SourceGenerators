@@ -17,39 +17,25 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ObservableForPropertySink<TSender, TValue> : IObservable<IObservedChange<TSender, TValue>>
 {
-    /// <summary>
-    /// The observed object surfaced on the emitted change.
-    /// </summary>
+    /// <summary>The observed object surfaced on the emitted change.</summary>
     private readonly TSender _sender;
 
-    /// <summary>
-    /// The expression surfaced on the emitted change.
-    /// </summary>
+    /// <summary>The expression surfaced on the emitted change.</summary>
     private readonly Expression _expression;
 
-    /// <summary>
-    /// The underlying change-notification source (a notification re-reads the value).
-    /// </summary>
+    /// <summary>The underlying change-notification source (a notification re-reads the value).</summary>
     private readonly IObservable<IObservedChange<object, object?>> _notifications;
 
-    /// <summary>
-    /// Reads the current property value from the sender.
-    /// </summary>
+    /// <summary>Reads the current property value from the sender.</summary>
     private readonly Func<TValue> _readValue;
 
-    /// <summary>
-    /// When <see langword="true"/>, the current value is not emitted on subscribe.
-    /// </summary>
+    /// <summary>When <see langword="true"/>, the current value is not emitted on subscribe.</summary>
     private readonly bool _skipInitial;
 
-    /// <summary>
-    /// When <see langword="true"/>, consecutive equal values are suppressed.
-    /// </summary>
+    /// <summary>When <see langword="true"/>, consecutive equal values are suppressed.</summary>
     private readonly bool _isDistinct;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ObservableForPropertySink{TSender, TValue}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="ObservableForPropertySink{TSender, TValue}"/> class.</summary>
     /// <param name="sender">The observed object surfaced on the emitted change.</param>
     /// <param name="expression">The expression surfaced on the emitted change.</param>
     /// <param name="notifications">The underlying change-notification source.</param>
@@ -84,71 +70,41 @@ public sealed class ObservableForPropertySink<TSender, TValue> : IObservable<IOb
         return sink.Run(_notifications, _skipInitial);
     }
 
-    /// <summary>
-    /// Reads the property value on each notification and forwards it as an observed change.
-    /// </summary>
-    private sealed class Sink : IObserver<IObservedChange<object, object?>>
-    {
-        /// <summary>
-        /// The observer receiving observed changes.
-        /// </summary>
-        private readonly IObserver<IObservedChange<TSender, TValue>> _downstream;
-
-        /// <summary>
-        /// The observed object.
-        /// </summary>
-        private readonly TSender _sender;
-
-        /// <summary>
-        /// The expression surfaced on the observed change.
-        /// </summary>
-        private readonly Expression _expression;
-
-        /// <summary>
-        /// Reads the current property value from the sender.
-        /// </summary>
-        private readonly Func<TValue> _readValue;
-
-        /// <summary>
-        /// Whether consecutive equal values are suppressed.
-        /// </summary>
-        private readonly bool _isDistinct;
-
-        /// <summary>
-        /// The last emitted value, used by the distinct gate.
-        /// </summary>
-        private TValue _last = default!;
-
-        /// <summary>
-        /// Whether <see cref="_last"/> holds a value yet.
-        /// </summary>
-        private bool _hasLast;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Sink"/> class.
-        /// </summary>
-        /// <param name="downstream">The observer receiving observed changes.</param>
-        /// <param name="sender">The observed object.</param>
-        /// <param name="expression">The expression surfaced on the observed change.</param>
-        /// <param name="readValue">Reads the current property value.</param>
-        /// <param name="isDistinct">Whether consecutive equal values are suppressed.</param>
-        public Sink(
+    /// <summary>Reads the property value on each notification and forwards it as an observed change.</summary>
+    /// <param name="downstream">The observer receiving observed changes.</param>
+    /// <param name="sender">The observed object.</param>
+    /// <param name="expression">The expression surfaced on the observed change.</param>
+    /// <param name="readValue">Reads the current property value.</param>
+    /// <param name="isDistinct">Whether consecutive equal values are suppressed.</param>
+    private sealed class Sink(
             IObserver<IObservedChange<TSender, TValue>> downstream,
             TSender sender,
             Expression expression,
             Func<TValue> readValue,
-            bool isDistinct)
-        {
-            _downstream = downstream;
-            _sender = sender;
-            _expression = expression;
-            _readValue = readValue;
-            _isDistinct = isDistinct;
-        }
+            bool isDistinct) : IObserver<IObservedChange<object, object?>>
+    {
+        /// <summary>The observer receiving observed changes.</summary>
+        private readonly IObserver<IObservedChange<TSender, TValue>> _downstream = downstream;
 
-        /// <summary>
-        /// Optionally emits the current value, then subscribes to the notification source.
-        /// </summary>
+        /// <summary>The observed object.</summary>
+        private readonly TSender _sender = sender;
+
+        /// <summary>The expression surfaced on the observed change.</summary>
+        private readonly Expression _expression = expression;
+
+        /// <summary>Reads the current property value from the sender.</summary>
+        private readonly Func<TValue> _readValue = readValue;
+
+        /// <summary>Whether consecutive equal values are suppressed.</summary>
+        private readonly bool _isDistinct = isDistinct;
+
+        /// <summary>The last emitted value, used by the distinct gate.</summary>
+        private TValue _last = default!;
+
+        /// <summary>Whether <see cref="_last"/> holds a value yet.</summary>
+        private bool _hasLast;
+
+        /// <summary>Optionally emits the current value, then subscribes to the notification source.</summary>
         /// <param name="notifications">The change-notification source.</param>
         /// <param name="skipInitial">When <see langword="true"/>, the current value is not emitted on subscribe.</param>
         /// <returns>The notification-source subscription.</returns>
@@ -171,9 +127,7 @@ public sealed class ObservableForPropertySink<TSender, TValue> : IObservable<IOb
         /// <inheritdoc/>
         public void OnCompleted() => _downstream.OnCompleted();
 
-        /// <summary>
-        /// Reads the current property value and forwards it as an observed change, honoring the distinct gate.
-        /// </summary>
+        /// <summary>Reads the current property value and forwards it as an observed change, honoring the distinct gate.</summary>
         private void Emit()
         {
             TValue current;

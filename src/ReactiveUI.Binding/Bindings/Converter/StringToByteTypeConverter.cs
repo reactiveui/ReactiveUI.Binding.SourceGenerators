@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="string"/> to <see cref="byte"/> using <see cref="byte.TryParse(string?, out byte)"/>.
-/// </summary>
+/// <summary>Converts <see cref="string"/> to <see cref="byte"/> using <see cref="byte.TryParse(string?, out byte)"/>.</summary>
 public sealed class StringToByteTypeConverter : BindingTypeConverter<string, byte>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

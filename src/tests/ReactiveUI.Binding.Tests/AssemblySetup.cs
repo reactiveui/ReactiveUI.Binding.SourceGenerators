@@ -8,20 +8,16 @@ using ReactiveUI.Binding.Builder;
 
 namespace ReactiveUI.Binding.Tests;
 
-/// <summary>
-/// Assembly-level setup for the test assembly.
-/// </summary>
+/// <summary>Assembly-level setup for the test assembly.</summary>
 public static class AssemblySetup
 {
-    /// <summary>
-    /// Initializes the test assembly by configuring the service locator.
-    /// </summary>
+    /// <summary>Initializes the test assembly by configuring the service locator.</summary>
     [Before(Assembly)]
     public static void Initialize()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
     }
 }

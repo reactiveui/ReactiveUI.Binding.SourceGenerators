@@ -20,9 +20,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 /// </remarks>
 internal sealed class EventEnabledBindingPlugin : ICommandBindingPlugin
 {
-    /// <summary>
-    /// The affinity score for the event + Enabled binder.
-    /// </summary>
+    /// <summary>The affinity score for the event + Enabled binder.</summary>
     private static readonly int EventEnabledAffinity = BindingAffinity.EventEnabledControl;
 
     /// <inheritdoc/>
@@ -32,17 +30,15 @@ internal sealed class EventEnabledBindingPlugin : ICommandBindingPlugin
     public bool RequiresCustomBinderFallback => true;
 
     /// <inheritdoc/>
-    public bool CanHandle(BindCommandInvocationInfo inv)
-        => inv.ResolvedEventName != null && inv.HasEnabledProperty;
+    public bool CanHandle(BindCommandInvocationInfo inv) =>
+        inv.ResolvedEventName is not null && inv.HasEnabledProperty;
 
     /// <inheritdoc/>
     public void EmitBinding(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
-        bool supportsNullable)
-    {
-        CommandEventBindingEmitter.EmitByParameterKind(
+        bool supportsNullable) => CommandEventBindingEmitter.EmitByParameterKind(
             sb,
             inv,
             controlAccess,
@@ -50,11 +46,8 @@ internal sealed class EventEnabledBindingPlugin : ICommandBindingPlugin
             EmitWithObservableParameter,
             EmitWithExpressionParameter,
             EmitWithNoParameter);
-    }
 
-    /// <summary>
-    /// Emits event + Enabled binding with an observable parameter.
-    /// </summary>
+    /// <summary>Emits event + Enabled binding with an observable parameter.</summary>
     /// <param name="sb">The string builder.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The control access chain.</param>
@@ -109,9 +102,7 @@ internal sealed class EventEnabledBindingPlugin : ICommandBindingPlugin
                                 }
                         """);
 
-    /// <summary>
-    /// Emits event + Enabled binding with an expression parameter.
-    /// </summary>
+    /// <summary>Emits event + Enabled binding with an expression parameter.</summary>
     /// <param name="sb">The string builder.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The control access chain.</param>
@@ -162,9 +153,7 @@ internal sealed class EventEnabledBindingPlugin : ICommandBindingPlugin
                                 }
                         """);
 
-    /// <summary>
-    /// Emits event + Enabled binding with no parameter.
-    /// </summary>
+    /// <summary>Emits event + Enabled binding with no parameter.</summary>
     /// <param name="sb">The string builder.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The control access chain.</param>

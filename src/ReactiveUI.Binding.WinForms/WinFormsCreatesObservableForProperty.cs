@@ -7,10 +7,7 @@ using System.Reflection;
 
 namespace ReactiveUI.Binding.WinForms;
 
-/// <summary>
-/// Creates observables for WinForms component properties by subscribing to
-/// {PropertyName}Changed events via reflection.
-/// </summary>
+/// <summary>Creates observables for WinForms component properties by subscribing to {PropertyName}Changed events via reflection.</summary>
 [RequiresUnreferencedCode(
     "Uses reflection to find and subscribe to {PropertyName}Changed events on WinForms components.")]
 public class WinFormsCreatesObservableForProperty : ICreatesObservableForProperty
@@ -61,14 +58,13 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
                 subj.OnNext(new ObservedChange<object, object?>(sender, expression, default)));
 
             ei.AddEventHandler(sender, handler);
-            return Disposable.Create(() => ei.RemoveEventHandler(sender, handler));
+            return Disposable.Create(
+                (ei, sender, handler),
+                static state => state.ei.RemoveEventHandler(state.sender, state.handler));
         });
     }
 
-    /// <summary>
-    /// Retrieves the <see cref="EventInfo"/> for the specified {PropertyName}Changed event
-    /// on the given type.
-    /// </summary>
+    /// <summary>Retrieves the <see cref="EventInfo"/> for the specified {PropertyName}Changed event on the given type.</summary>
     /// <param name="type">The type to be inspected for the event.</param>
     /// <param name="propertyName">The name of the property whose corresponding event information is to be retrieved.</param>
     /// <returns>
@@ -77,7 +73,7 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
     internal static EventInfo? GetEventInfo(Type type, string propertyName) =>
         EventInfoCache.GetOrAdd(
             (type, propertyName),
-            key => key.Type.GetEvent(
-                key.PropertyName + "Changed",
+            static key => key.Type.GetEvent(
+                $"{key.PropertyName}Changed",
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy));
 }

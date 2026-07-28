@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
-/// <summary>
-/// Utilities for testing analyzers and code fixes.
-/// </summary>
+/// <summary>Utilities for testing analyzers and code fixes.</summary>
 public static class TestUtilities
 {
-    /// <summary>
-    /// Normalizes whitespace and line endings in source code for comparison.
-    /// </summary>
+    /// <summary>Normalizes whitespace and line endings in source code for comparison.</summary>
     /// <param name="source">The source code to normalize.</param>
     /// <returns>Normalized source code suitable for comparison.</returns>
     public static string NormalizeWhitespace(string source)
@@ -20,12 +16,10 @@ public static class TestUtilities
         return string.Join(
             "\n",
             source.Split(["\r\n", "\r", "\n"], StringSplitOptions.None)
-                .Select(line => line.Trim()));
+                .Select(static line => line.Trim()));
     }
 
-    /// <summary>
-    /// Compares two source code strings with whitespace normalization.
-    /// </summary>
+    /// <summary>Compares two source code strings with whitespace normalization.</summary>
     /// <param name="expected">The expected source code.</param>
     /// <param name="actual">The actual source code.</param>
     /// <returns>True if the sources are equivalent after normalization.</returns>
@@ -37,11 +31,10 @@ public static class TestUtilities
 
         if (!result)
         {
-            Console.WriteLine("=== EXPECTED ===");
-            Console.WriteLine(expected);
-            Console.WriteLine();
-            Console.WriteLine("=== ACTUAL ===");
-            Console.WriteLine(actual);
+            // Attach the two sources to the test's own output so a failure is diagnosable from the
+            // test report; TestContext is null when the helper runs outside a test (e.g. a hook).
+            TestContext.Current?.OutputWriter.WriteLine(
+                $"=== EXPECTED ==={Environment.NewLine}{expected}{Environment.NewLine}{Environment.NewLine}=== ACTUAL ==={Environment.NewLine}{actual}");
         }
 
         return result;

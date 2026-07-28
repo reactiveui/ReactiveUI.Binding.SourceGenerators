@@ -4,13 +4,9 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Non-generic interface for views that display a view model.
-/// </summary>
+/// <summary>Non-generic interface for views that display a view model.</summary>
 public interface IViewFor : IActivatableView
 {
-    /// <summary>
-    /// Gets or sets the view model displayed by the view.
-    /// </summary>
+    /// <summary>Gets or sets the view model displayed by the view.</summary>
     object? ViewModel { get; set; }
 }

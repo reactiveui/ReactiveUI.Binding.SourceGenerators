@@ -9,19 +9,13 @@ using System.Diagnostics;
 
 namespace System.Diagnostics.CodeAnalysis;
 
-/// <summary>
-/// Specifies that the method will not return if the associated <see cref="bool"/>
-/// parameter is passed the specified value.
-/// </summary>
+/// <summary>Specifies that the method will not return if the associated <see cref="bool"/> parameter is passed the specified value.</summary>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
 [AttributeUsage(AttributeTargets.Parameter)]
 internal sealed class DoesNotReturnIfAttribute : Attribute
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DoesNotReturnIfAttribute"/>
-    /// class with the specified parameter value.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="DoesNotReturnIfAttribute"/> class with the specified parameter value.</summary>
     /// <param name="parameterValue">
     /// The condition parameter value. Code after the method is considered unreachable
     /// by diagnostics if the argument to the associated parameter matches this value.
@@ -33,7 +27,7 @@ internal sealed class DoesNotReturnIfAttribute : Attribute
     /// Gets a value indicating whether code after the method is considered unreachable
     /// by diagnostics if the argument to the associated parameter matches this value.
     /// </summary>
-    public bool ParameterValue { get; }
+    internal bool ParameterValue { get; }
 }
 #else
 [assembly: TypeForwardedTo(typeof(DoesNotReturnIfAttribute))]

@@ -6,9 +6,7 @@ using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Represents an interaction between collaborating application components.
-/// </summary>
+/// <summary>Represents an interaction between collaborating application components.</summary>
 /// <remarks>
 /// <para>
 /// Interactions allow collaborating components in an application to ask each other questions. Typically,
@@ -29,15 +27,11 @@ namespace ReactiveUI.Binding;
 /// <typeparam name="TOutput">The interaction's output type.</typeparam>
 public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
 {
-    /// <summary>
-    /// The list of registered interaction handlers, invoked in reverse order during <see cref="Handle"/>.
-    /// </summary>
+    /// <summary>The list of registered interaction handlers, invoked in reverse order during <see cref="Handle"/>.</summary>
     private readonly List<Func<IInteractionContext<TInput, TOutput>, Task>> _handlers = [];
 
-    /// <summary>
-    /// Synchronization gate for thread-safe handler registration and removal.
-    /// </summary>
-    private readonly object _sync = new();
+    /// <summary>Synchronization gate for thread-safe handler registration and removal.</summary>
+    private readonly Lock _sync = new();
 
     /// <inheritdoc/>
     public IDisposable RegisterHandler(Action<IInteractionContext<TInput, TOutput>> handler)
@@ -68,8 +62,8 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
 
         Task ContentHandler(IInteractionContext<TInput, TOutput> context)
         {
-            var tcs = new TaskCompletionSource<bool>();
-            handler(context).Subscribe(new ObservableToTaskObserver<TDontCare>(tcs));
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _ = handler(context).Subscribe(new ObservableToTaskObserver<TDontCare>(tcs));
             return tcs.Task;
         }
 
@@ -95,9 +89,7 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
         throw new UnhandledInteractionException<TInput, TOutput>(this, input);
     }
 
-    /// <summary>
-    /// Gets all registered handlers by order of registration.
-    /// </summary>
+    /// <summary>Gets all registered handlers by order of registration.</summary>
     /// <returns>All registered handlers.</returns>
     protected Func<IInteractionContext<TInput, TOutput>, Task>[] GetHandlers()
     {
@@ -107,17 +99,13 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
         }
     }
 
-    /// <summary>
-    /// Gets an interaction context which is used to provide information about the interaction.
-    /// </summary>
+    /// <summary>Gets an interaction context which is used to provide information about the interaction.</summary>
     /// <param name="input">The input that is being passed in.</param>
     /// <returns>The interaction context.</returns>
-    protected virtual IOutputContext<TInput, TOutput> GenerateContext(TInput input)
-        => new InteractionContext<TInput, TOutput>(input);
+    protected virtual IOutputContext<TInput, TOutput> GenerateContext(TInput input) =>
+        new InteractionContext<TInput, TOutput>(input);
 
-    /// <summary>
-    /// Adds a handler to the internal handler list under the synchronization gate.
-    /// </summary>
+    /// <summary>Adds a handler to the internal handler list under the synchronization gate.</summary>
     /// <param name="handler">The handler to add.</param>
     private void AddHandler(Func<IInteractionContext<TInput, TOutput>, Task> handler)
     {
@@ -127,33 +115,24 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
         }
     }
 
-    /// <summary>
-    /// Removes a handler from the internal handler list under the synchronization gate.
-    /// </summary>
+    /// <summary>Removes a handler from the internal handler list under the synchronization gate.</summary>
     /// <param name="handler">The handler to remove.</param>
     private void RemoveHandler(Func<IInteractionContext<TInput, TOutput>, Task> handler)
     {
         lock (_sync)
         {
-            _handlers.Remove(handler);
+            _ = _handlers.Remove(handler);
         }
     }
 
-    /// <summary>
-    /// An observer that bridges an observable sequence to a <see cref="TaskCompletionSource{TResult}"/>,
-    /// completing the task when the observable completes or faults.
-    /// </summary>
+    /// <summary>An observer that bridges an observable sequence to a <see cref="TaskCompletionSource{TResult}"/>, completing the task when the observable completes or faults.</summary>
     /// <typeparam name="T">The element type of the observable sequence.</typeparam>
     private sealed class ObservableToTaskObserver<T> : IObserver<T>
     {
-        /// <summary>
-        /// The task completion source that is signaled when the observable completes or errors.
-        /// </summary>
+        /// <summary>The task completion source that is signaled when the observable completes or errors.</summary>
         private readonly TaskCompletionSource<bool> _tcs;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ObservableToTaskObserver{T}"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="ObservableToTaskObserver{T}"/> class.</summary>
         /// <param name="tcs">The task completion source to signal.</param>
         public ObservableToTaskObserver(TaskCompletionSource<bool> tcs) => _tcs = tcs;
 

@@ -4,49 +4,40 @@
 
 namespace ReactiveUI.Binding.Tests.Interactions;
 
-/// <summary>
-/// Tests for <see cref="Interaction{TInput, TOutput}"/>.
-/// </summary>
+/// <summary>Tests for <see cref="Interaction{TInput, TOutput}"/>.</summary>
 public class InteractionTests
 {
-    /// <summary>
-    /// The expected output of the synchronous handler (the length of "hello").
-    /// </summary>
+    /// <summary>The result the first registered handler produces.</summary>
+    private const string FirstHandlerResult = "first";
+
+    /// <summary>The expected output of the synchronous handler (the length of "hello").</summary>
     private const int HelloLength = 5;
 
-    /// <summary>
-    /// A sample output value set by handlers under test.
-    /// </summary>
+    /// <summary>A sample output value set by handlers under test.</summary>
     private const int SampleOutput = 42;
 
-    /// <summary>
-    /// An alternative output value used by the Action-overload test.
-    /// </summary>
+    /// <summary>An alternative output value used by the Action-overload test.</summary>
     private const int ActionOutput = 99;
 
-    /// <summary>
-    /// Verifies that Handle returns the output set by a synchronous handler.
-    /// </summary>
+    /// <summary>Verifies that Handle returns the output set by a synchronous handler.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Handle_SyncHandler_ReturnsOutput()
     {
         var interaction = new Interaction<string, int>();
-        using var registration = interaction.RegisterHandler(ctx => ctx.SetOutput(ctx.Input.Length));
+        using var registration = interaction.RegisterHandler(static ctx => ctx.SetOutput(ctx.Input.Length));
 
         var result = await interaction.Handle("hello");
         await Assert.That(result).IsEqualTo(HelloLength);
     }
 
-    /// <summary>
-    /// Verifies that Handle returns the output set by an async task handler.
-    /// </summary>
+    /// <summary>Verifies that Handle returns the output set by an async task handler.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Handle_TaskHandler_ReturnsOutput()
     {
         var interaction = new Interaction<string, bool>();
-        using var registration = interaction.RegisterHandler(async ctx =>
+        using var registration = interaction.RegisterHandler(static async ctx =>
         {
             await Task.Yield();
             ctx.SetOutput(true);
@@ -56,15 +47,13 @@ public class InteractionTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that Handle returns the output set by an observable handler.
-    /// </summary>
+    /// <summary>Verifies that Handle returns the output set by an observable handler.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Handle_ObservableHandler_ReturnsOutput()
     {
         var interaction = new Interaction<string, int>();
-        using var registration = interaction.RegisterHandler(ctx =>
+        using var registration = interaction.RegisterHandler(static ctx =>
         {
             ctx.SetOutput(SampleOutput);
             return new Binding.Observables.ReturnObservable<int>(0);
@@ -74,24 +63,20 @@ public class InteractionTests
         await Assert.That(result).IsEqualTo(SampleOutput);
     }
 
-    /// <summary>
-    /// Verifies that handlers are invoked in LIFO order.
-    /// </summary>
+    /// <summary>Verifies that handlers are invoked in LIFO order.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Handle_MultipleHandlers_LIFOOrder()
     {
         var interaction = new Interaction<string, string>();
-        using var first = interaction.RegisterHandler(ctx => ctx.SetOutput("first"));
-        using var second = interaction.RegisterHandler(ctx => ctx.SetOutput("second"));
+        using var first = interaction.RegisterHandler(static ctx => ctx.SetOutput(FirstHandlerResult));
+        using var second = interaction.RegisterHandler(static ctx => ctx.SetOutput("second"));
 
         var result = await interaction.Handle("input");
         await Assert.That(result).IsEqualTo("second");
     }
 
-    /// <summary>
-    /// Verifies that Handle throws UnhandledInteractionException when no handler calls SetOutput.
-    /// </summary>
+    /// <summary>Verifies that Handle throws UnhandledInteractionException when no handler calls SetOutput.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Handle_NoHandlers_ThrowsUnhandledInteractionException()
@@ -101,42 +86,36 @@ public class InteractionTests
             .ThrowsExactly<UnhandledInteractionException<string, int>>();
     }
 
-    /// <summary>
-    /// Verifies that disposing the registration unregisters the handler.
-    /// </summary>
+    /// <summary>Verifies that disposing the registration unregisters the handler.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Dispose_UnregistersHandler()
     {
         var interaction = new Interaction<string, int>();
-        var registration = interaction.RegisterHandler(ctx => ctx.SetOutput(SampleOutput));
+        var registration = interaction.RegisterHandler(static ctx => ctx.SetOutput(SampleOutput));
         registration.Dispose();
 
         await Assert.That(() => interaction.Handle("test"))
             .ThrowsExactly<UnhandledInteractionException<string, int>>();
     }
 
-    /// <summary>
-    /// Verifies that a handler that doesn't call SetOutput is skipped, and the next handler is tried.
-    /// </summary>
+    /// <summary>Verifies that a handler that doesn't call SetOutput is skipped, and the next handler is tried.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Handle_HandlerSkips_FallsToNext()
     {
         var interaction = new Interaction<string, string>();
-        using var first = interaction.RegisterHandler(ctx => ctx.SetOutput("first"));
-        using var second = interaction.RegisterHandler(ctx =>
+        using var first = interaction.RegisterHandler(static ctx => ctx.SetOutput(FirstHandlerResult));
+        using var second = interaction.RegisterHandler(static ctx =>
         {
             // Intentionally don't call SetOutput — skip
         });
 
         var result = await interaction.Handle("input");
-        await Assert.That(result).IsEqualTo("first");
+        await Assert.That(result).IsEqualTo(FirstHandlerResult);
     }
 
-    /// <summary>
-    /// Verifies that RegisterHandler(Action) throws ArgumentNullException when handler is null.
-    /// </summary>
+    /// <summary>Verifies that RegisterHandler(Action) throws ArgumentNullException when handler is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task RegisterHandler_Action_NullHandler_Throws()
@@ -146,9 +125,7 @@ public class InteractionTests
             .ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that RegisterHandler(Func&lt;Task&gt;) throws ArgumentNullException when handler is null.
-    /// </summary>
+    /// <summary>Verifies that RegisterHandler(Func&lt;Task&gt;) throws ArgumentNullException when handler is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task RegisterHandler_TaskHandler_NullHandler_Throws()
@@ -158,9 +135,7 @@ public class InteractionTests
             .ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that RegisterHandler(observable) throws ArgumentNullException when handler is null.
-    /// </summary>
+    /// <summary>Verifies that RegisterHandler(observable) throws ArgumentNullException when handler is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task RegisterHandler_ObservableHandler_NullHandler_Throws()
@@ -180,7 +155,7 @@ public class InteractionTests
     public async Task Handle_ObservableHandler_OnError_PropagatesException()
     {
         var interaction = new Interaction<string, bool>();
-        using var registration = interaction.RegisterHandler(ctx =>
+        using var registration = interaction.RegisterHandler(static ctx =>
         {
             ctx.SetOutput(true);
             return new ErrorObservable<int>(new InvalidOperationException("test error"));
@@ -191,24 +166,21 @@ public class InteractionTests
             .WithMessage("test error", StringComparison.Ordinal);
     }
 
-    /// <summary>
-    /// Verifies that the Action overload of RegisterHandler sets the output correctly.
-    /// </summary>
+    /// <summary>Verifies that the Action overload of RegisterHandler sets the output correctly.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task RegisterHandler_Action_SetsOutput()
     {
         var interaction = new Interaction<string, int>();
-        using var registration = interaction.RegisterHandler(ctx => ctx.SetOutput(ActionOutput));
+        using var registration = interaction.RegisterHandler(static ctx => ctx.SetOutput(ActionOutput));
 
         var result = await interaction.Handle("test");
         await Assert.That(result).IsEqualTo(ActionOutput);
     }
 
-    /// <summary>
-    /// An observable that immediately errors on subscribe. Used to test OnError path.
-    /// </summary>
+    /// <summary>An observable that immediately errors on subscribe. Used to test OnError path.</summary>
     /// <typeparam name="T">The element type.</typeparam>
+    /// <param name="error">The exception this observable faults with on subscription.</param>
     private sealed class ErrorObservable<T>(Exception error) : IObservable<T>
     {
         /// <inheritdoc/>

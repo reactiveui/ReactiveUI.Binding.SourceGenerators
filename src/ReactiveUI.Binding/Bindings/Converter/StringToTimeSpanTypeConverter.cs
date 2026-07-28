@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="string"/> to <see cref="TimeSpan"/> using <see cref="TimeSpan.TryParse(string?, out TimeSpan)"/>.
-/// </summary>
+/// <summary>Converts <see cref="string"/> to <see cref="TimeSpan"/> using <see cref="TimeSpan.TryParse(string?, out TimeSpan)"/>.</summary>
 public sealed class StringToTimeSpanTypeConverter : BindingTypeConverter<string, TimeSpan>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

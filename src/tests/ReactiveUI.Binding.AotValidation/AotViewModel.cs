@@ -6,87 +6,63 @@ using System.ComponentModel;
 
 namespace ReactiveUI.Binding.AotValidation;
 
-/// <summary>
-/// A view model used for AOT validation of source-generated property observation and binding.
-/// </summary>
+/// <summary>A view model used for AOT validation of source-generated property observation and binding.</summary>
 public class AotViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// Backing field for the <see cref="Name"/> property, representing the name associated with the view model.
-    /// </summary>
-    private string _name = string.Empty;
-
-    /// <summary>
-    /// Backing field for the <see cref="Age"/> property, representing the age associated with the view model.
-    /// </summary>
-    private int _age;
-
-    /// <summary>
-    /// Backing field for the <see cref="Child"/> property, representing the associated instance of <see cref="AotChildViewModel"/>
-    /// used for nested view model functionality within the parent <see cref="AotViewModel"/>.
-    /// </summary>
-    private AotChildViewModel _child = new();
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
-        get => _name;
+        get => field;
         set
         {
-            if (_name == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Name)));
-            _name = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Name)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the age.
-    /// </summary>
+    /// <summary>Gets or sets the age.</summary>
     public int Age
     {
-        get => _age;
+        get => field;
         set
         {
-            if (_age == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Age)));
-            _age = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Age)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets the child view model.
-    /// </summary>
+    /// <summary>Gets or sets the child view model.</summary>
     public AotChildViewModel Child
     {
-        get => _child;
+        get => field;
         set
         {
-            if (_child == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Child)));
-            _child = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Child)));
         }
-    }
+    } = new();
 }

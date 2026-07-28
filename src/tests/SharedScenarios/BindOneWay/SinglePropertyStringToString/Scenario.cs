@@ -7,17 +7,13 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindOneWay.SinglePropertyStringToString;
 
-/// <summary>
-/// Exercises BindOneWay with string-to-string property binding.
-/// </summary>
+/// <summary>Exercises BindOneWay with string-to-string property binding.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a one-way binding from ViewModel.Name to View.NameText.
-    /// </summary>
+    /// <summary>Creates a one-way binding from ViewModel.Name to View.NameText.</summary>
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
-    public static IDisposable Execute(MyViewModel vm, MyView view)
-        => vm.BindOneWay(view, x => x.Name, x => x.NameText);
+    public static IDisposable Execute(MyViewModel vm, MyView view) =>
+        vm.BindOneWay(view, x => x.Name, x => x.NameText);
 }

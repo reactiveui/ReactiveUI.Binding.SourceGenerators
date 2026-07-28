@@ -6,86 +6,63 @@ using System.ComponentModel;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
-/// <summary>
-/// A view model used for benchmarking source-generated property observation and binding.
-/// </summary>
+/// <summary>A view model used for benchmarking source-generated property observation and binding.</summary>
 public class BenchmarkViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backing field for the <see cref="Name"/> property.
-    /// </summary>
-    private string _name = string.Empty;
-
-    /// <summary>
-    /// The backing field for the <see cref="Age"/> property.
-    /// </summary>
-    private int _age;
-
-    /// <summary>
-    /// The backing field for the <see cref="Child"/> property.
-    /// </summary>
-    private BenchmarkChildViewModel _child = new();
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
-        get => _name;
+        get => field;
         set
         {
-            if (_name == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Name)));
-            _name = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Name)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the age.
-    /// </summary>
+    /// <summary>Gets or sets the age.</summary>
     public int Age
     {
-        get => _age;
+        get => field;
         set
         {
-            if (_age == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Age)));
-            _age = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Age)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets the child view model.
-    /// </summary>
+    /// <summary>Gets or sets the child view model.</summary>
     public BenchmarkChildViewModel Child
     {
-        get => _child;
+        get => field;
         set
         {
-            if (_child == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Child)));
-            _child = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Child)));
         }
-    }
+    } = new();
 }

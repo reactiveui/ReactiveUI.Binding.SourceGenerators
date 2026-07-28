@@ -24,19 +24,19 @@ internal static class GeneratedTypeNames
     /// <summary><c>System.Linq.Expressions.Expression</c> (open generic; use <see cref="PropertyExpression"/>).</summary>
     internal const string Expression = "global::System.Linq.Expressions.Expression";
 
-    /// <summary><c>System.IDisposable</c>.</summary>
+    /// <summary>The fully qualified name of <c>System.IDisposable</c>.</summary>
     internal const string IDisposable = "global::System.IDisposable";
 
-    /// <summary><c>System.InvalidOperationException</c>.</summary>
+    /// <summary>The fully qualified name of <c>System.InvalidOperationException</c>.</summary>
     internal const string InvalidOperationException = "global::System.InvalidOperationException";
 
-    /// <summary><c>System.StringComparison.OrdinalIgnoreCase</c>.</summary>
+    /// <summary>The fully qualified name of the <c>StringComparison.OrdinalIgnoreCase</c> member.</summary>
     internal const string OrdinalIgnoreCase = "global::System.StringComparison.OrdinalIgnoreCase";
 
-    /// <summary><c>System.ComponentModel.INotifyPropertyChanging</c>.</summary>
+    /// <summary>The fully qualified name of <c>System.ComponentModel.INotifyPropertyChanging</c>.</summary>
     internal const string INotifyPropertyChanging = "global::System.ComponentModel.INotifyPropertyChanging";
 
-    /// <summary><c>System.ComponentModel.INotifyPropertyChanged</c>.</summary>
+    /// <summary>The fully qualified name of <c>System.ComponentModel.INotifyPropertyChanged</c>.</summary>
     internal const string INotifyPropertyChanged = "global::System.ComponentModel.INotifyPropertyChanged";
 
     /// <summary>The <c>[CallerArgumentExpression]</c> attribute type.</summary>
@@ -51,19 +51,19 @@ internal static class GeneratedTypeNames
     /// <summary><c>ReactiveUI.Binding.IInteraction</c> (open generic).</summary>
     internal const string IInteraction = "global::ReactiveUI.Binding.IInteraction";
 
-    /// <summary><c>ReactiveUI.Binding.IBindingTypeConverter</c>.</summary>
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.IBindingTypeConverter</c>.</summary>
     internal const string IBindingTypeConverter = "global::ReactiveUI.Binding.IBindingTypeConverter";
 
     /// <summary>The <c>ReactiveUI.Binding.Observables</c> namespace prefix (no trailing dot).</summary>
     internal const string Observables = "global::ReactiveUI.Binding.Observables";
 
-    /// <summary><c>ReactiveUI.Binding.Observables.RxBindingExtensions</c>.</summary>
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Observables.RxBindingExtensions</c>.</summary>
     internal const string RxBindingExtensions = "global::ReactiveUI.Binding.Observables.RxBindingExtensions";
 
-    /// <summary><c>ReactiveUI.Binding.Fallback.RuntimeBindingConverter</c>.</summary>
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.RuntimeBindingConverter</c>.</summary>
     internal const string RuntimeBindingConverter = "global::ReactiveUI.Binding.Fallback.RuntimeBindingConverter";
 
-    /// <summary><c>ReactiveUI.Binding.Fallback.ObservationAffinityChecker</c>.</summary>
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.ObservationAffinityChecker</c>.</summary>
     internal const string ObservationAffinityChecker = "global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker";
 
     /// <summary>

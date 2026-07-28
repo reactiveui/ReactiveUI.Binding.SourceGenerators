@@ -7,9 +7,7 @@ using Splat.Builder;
 
 namespace ReactiveUI.Binding.Builder;
 
-/// <summary>
-/// Core module that registers the default ReactiveUI.Binding services with the dependency resolver.
-/// </summary>
+/// <summary>Core module that registers the default ReactiveUI.Binding services with the dependency resolver.</summary>
 /// <remarks>
 /// This module registers:
 /// <list type="bullet">
@@ -29,7 +27,7 @@ public sealed class ReactiveUIBindingModule : IModule
         ArgumentExceptionHelper.ThrowIfNull(resolver);
 
         // Register core ICreatesObservableForProperty implementations
-        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(() => new INPCObservableForProperty());
-        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(() => new POCOObservableForProperty());
+        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(static () => new INPCObservableForProperty());
+        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(static () => new POCOObservableForProperty());
     }
 }

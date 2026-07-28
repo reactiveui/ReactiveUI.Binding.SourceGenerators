@@ -4,9 +4,7 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Thread-safe registry for set-method binding converters using a lock-free snapshot pattern.
-/// </summary>
+/// <summary>Thread-safe registry for set-method binding converters using a lock-free snapshot pattern.</summary>
 /// <remarks>
 /// <para>
 /// This registry uses a copy-on-write snapshot pattern optimized for read-heavy workloads:
@@ -34,32 +32,24 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public sealed class SetMethodBindingConverterRegistry
 {
-    /// <summary>
-    /// Synchronization gate for serializing write operations.
-    /// </summary>
-#if NET9_0_OR_GREATER
+    /// <summary>Synchronization gate for serializing write operations.</summary>
     private readonly Lock _gate = new();
-#else
-    private readonly object _gate = new();
-#endif
 
-    /// <summary>
-    /// The current immutable snapshot of registered set-method converters, read via volatile access.
-    /// </summary>
+    /// <summary>The current immutable snapshot of registered set-method converters, read via volatile access.</summary>
     private Snapshot? _snapshot;
 
-    /// <summary>
-    /// Registers a set-method binding converter.
-    /// </summary>
+    /// <summary>Registers a set-method binding converter.</summary>
     /// <param name="converter">The converter to register. Must not be null.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="converter"/> is null.</exception>
     public void Register(ISetMethodBindingConverter converter)
     {
         ArgumentExceptionHelper.ThrowIfNull(converter);
 
+        const int InitialRegistryCapacity = 8;
+
         lock (_gate)
         {
-            var snap = _snapshot ?? new Snapshot(new(8));
+            var snap = _snapshot ?? new Snapshot(new(InitialRegistryCapacity));
 
             // Copy-on-write update: clone the list
             var newList = new List<ISetMethodBindingConverter>(snap.Converters) { converter };
@@ -69,22 +59,16 @@ public sealed class SetMethodBindingConverterRegistry
         }
     }
 
-    /// <summary>
-    /// Attempts to retrieve the best set-method converter for the specified type pair.
-    /// </summary>
+    /// <summary>Attempts to retrieve the best set-method converter for the specified type pair.</summary>
     /// <param name="fromType">The source type to convert from. May be null.</param>
     /// <param name="toType">The target type to convert to. May be null.</param>
     /// <returns>
     /// The converter with the highest affinity for the type pair, or <see langword="null"/> if no converter supports the conversion.
     /// </returns>
     public ISetMethodBindingConverter? TryGetConverter(
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type? fromType,
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type? toType)
     {
         var snap = Volatile.Read(ref _snapshot);
@@ -112,9 +96,7 @@ public sealed class SetMethodBindingConverterRegistry
         return best;
     }
 
-    /// <summary>
-    /// Returns all registered set-method converters.
-    /// </summary>
+    /// <summary>Returns all registered set-method converters.</summary>
     /// <returns>
     /// A sequence of all set-method converters currently registered in the registry.
     /// Returns an empty sequence if no converters are registered.
@@ -122,17 +104,10 @@ public sealed class SetMethodBindingConverterRegistry
     public IEnumerable<ISetMethodBindingConverter> GetAllConverters()
     {
         var snap = Volatile.Read(ref _snapshot);
-        if (snap is null)
-        {
-            return [];
-        }
-
-        return [.. snap.Converters];
+        return snap is null ? [] : [.. snap.Converters];
     }
 
-    /// <summary>
-    /// Immutable snapshot of the registry state for lock-free reads.
-    /// </summary>
+    /// <summary>Immutable snapshot of the registry state for lock-free reads.</summary>
     /// <param name="Converters">The registered set-method converters.</param>
     private sealed record Snapshot(List<ISetMethodBindingConverter> Converters);
 }

@@ -8,20 +8,16 @@ using ReactiveUI.Binding.Builder;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests;
 
-/// <summary>
-/// Assembly-level setup for the generated code test project.
-/// </summary>
+/// <summary>Assembly-level setup for the generated code test project.</summary>
 public static class AssemblySetup
 {
-    /// <summary>
-    /// Initializes the RxBinding builder for generated code tests.
-    /// </summary>
+    /// <summary>Initializes the RxBinding builder for generated code tests.</summary>
     [Before(Assembly)]
     public static void Initialize()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
     }
 }

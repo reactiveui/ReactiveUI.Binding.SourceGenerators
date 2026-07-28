@@ -17,9 +17,7 @@ namespace ReactiveUI.Binding.Fallback;
 [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
 public static class RuntimeObservationFallback
 {
-    /// <summary>
-    /// Runtime fallback for WhenChanged with a single property.
-    /// </summary>
+    /// <summary>Runtime fallback for WhenChanged with a single property.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="TValue">The type of the property value.</typeparam>
     /// <param name="obj">The object to observe.</param>
@@ -34,12 +32,10 @@ public static class RuntimeObservationFallback
 
         return new SelectObservable<IObservedChange<TObj, TValue>, TValue>(
             obj.SubscribeToExpressionChain<TObj, TValue>(property.Body, skipInitial: false),
-            x => x.Value);
+            static x => x.Value);
     }
 
-    /// <summary>
-    /// Runtime fallback for multi-property WhenChanged, returning a tuple of values.
-    /// </summary>
+    /// <summary>Runtime fallback for multi-property WhenChanged, returning a tuple of values.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>
@@ -55,12 +51,10 @@ public static class RuntimeObservationFallback
     {
         var o1 = WhenChanged(obj, property1);
         var o2 = WhenChanged(obj, property2);
-        return CombineLatestObservable.Create(o1, o2, (v1, v2) => (v1, v2));
+        return CombineLatestObservable.Create(o1, o2, static (v1, v2) => (v1, v2));
     }
 
-    /// <summary>
-    /// Runtime fallback for multi-property WhenChanged with 3 properties.
-    /// </summary>
+    /// <summary>Runtime fallback for multi-property WhenChanged with 3 properties.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>
@@ -80,12 +74,10 @@ public static class RuntimeObservationFallback
         var o1 = WhenChanged(obj, property1);
         var o2 = WhenChanged(obj, property2);
         var o3 = WhenChanged(obj, property3);
-        return CombineLatestObservable.Create(o1, o2, o3, (v1, v2, v3) => (v1, v2, v3));
+        return CombineLatestObservable.Create(o1, o2, o3, static (v1, v2, v3) => (v1, v2, v3));
     }
 
-    /// <summary>
-    /// Runtime fallback for WhenChanging with a single property.
-    /// </summary>
+    /// <summary>Runtime fallback for WhenChanging with a single property.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="TValue">The type of the property value.</typeparam>
     /// <param name="obj">The object to observe.</param>
@@ -100,12 +92,10 @@ public static class RuntimeObservationFallback
 
         return new SelectObservable<IObservedChange<TObj, TValue>, TValue>(
             obj.SubscribeToExpressionChain<TObj, TValue>(property.Body, true, false, true),
-            x => x.Value);
+            static x => x.Value);
     }
 
-    /// <summary>
-    /// Runtime fallback for multi-property WhenChanging with 2 properties.
-    /// </summary>
+    /// <summary>Runtime fallback for multi-property WhenChanging with 2 properties.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>
@@ -121,12 +111,10 @@ public static class RuntimeObservationFallback
     {
         var o1 = WhenChanging(obj, property1);
         var o2 = WhenChanging(obj, property2);
-        return CombineLatestObservable.Create(o1, o2, (v1, v2) => (v1, v2));
+        return CombineLatestObservable.Create(o1, o2, static (v1, v2) => (v1, v2));
     }
 
-    /// <summary>
-    /// Runtime fallback for multi-property WhenChanging with 3 properties.
-    /// </summary>
+    /// <summary>Runtime fallback for multi-property WhenChanging with 3 properties.</summary>
     /// <typeparam name="TObj">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>
@@ -146,12 +134,10 @@ public static class RuntimeObservationFallback
         var o1 = WhenChanging(obj, property1);
         var o2 = WhenChanging(obj, property2);
         var o3 = WhenChanging(obj, property3);
-        return CombineLatestObservable.Create(o1, o2, o3, (v1, v2, v3) => (v1, v2, v3));
+        return CombineLatestObservable.Create(o1, o2, o3, static (v1, v2, v3) => (v1, v2, v3));
     }
 
-    /// <summary>
-    /// Runtime fallback for WhenAnyValue with a single property.
-    /// </summary>
+    /// <summary>Runtime fallback for WhenAnyValue with a single property.</summary>
     /// <typeparam name="TSender">The type of object being observed.</typeparam>
     /// <typeparam name="TValue">The type of the property value.</typeparam>
     /// <param name="sender">The object to observe.</param>
@@ -166,12 +152,10 @@ public static class RuntimeObservationFallback
 
         return new SelectObservable<IObservedChange<TSender, TValue>, TValue>(
             sender.SubscribeToExpressionChain<TSender, TValue>(property.Body, skipInitial: false),
-            x => x.Value);
+            static x => x.Value);
     }
 
-    /// <summary>
-    /// Runtime fallback for multi-property WhenAnyValue with 2 properties.
-    /// </summary>
+    /// <summary>Runtime fallback for multi-property WhenAnyValue with 2 properties.</summary>
     /// <typeparam name="TSender">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>
@@ -187,12 +171,10 @@ public static class RuntimeObservationFallback
     {
         var o1 = WhenAnyValue(sender, property1);
         var o2 = WhenAnyValue(sender, property2);
-        return CombineLatestObservable.Create(o1, o2, (v1, v2) => (v1, v2));
+        return CombineLatestObservable.Create(o1, o2, static (v1, v2) => (v1, v2));
     }
 
-    /// <summary>
-    /// Runtime fallback for multi-property WhenAnyValue with 3 properties.
-    /// </summary>
+    /// <summary>Runtime fallback for multi-property WhenAnyValue with 3 properties.</summary>
     /// <typeparam name="TSender">The type of object being observed.</typeparam>
     /// <typeparam name="T1">The type of the first property value.</typeparam>
     /// <typeparam name="T2">The type of the second property value.</typeparam>
@@ -212,6 +194,6 @@ public static class RuntimeObservationFallback
         var o1 = WhenAnyValue(sender, property1);
         var o2 = WhenAnyValue(sender, property2);
         var o3 = WhenAnyValue(sender, property3);
-        return CombineLatestObservable.Create(o1, o2, o3, (v1, v2, v3) => (v1, v2, v3));
+        return CombineLatestObservable.Create(o1, o2, o3, static (v1, v2, v3) => (v1, v2, v3));
     }
 }

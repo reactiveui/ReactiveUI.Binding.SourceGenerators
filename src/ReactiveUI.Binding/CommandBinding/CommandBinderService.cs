@@ -12,21 +12,16 @@ namespace ReactiveUI.Binding.CommandBinding;
 /// property observation via <see cref="ICreatesObservableForProperty"/>.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-[SuppressMessage(
-    "Major Code Smell",
-    "S4018:Generic methods should provide type parameter for type inference",
-    Justification = "The type parameter denotes the target type (value/control/view), supplied explicitly by callers; it is not derivable from the arguments. Public API.")]
 public static class CommandBinderService
 {
-    /// <summary>
-    /// Gets the highest-affinity <see cref="ICreatesCommandBinding"/> registered for the specified control type.
-    /// </summary>
+    /// <summary>Gets the highest-affinity <see cref="ICreatesCommandBinding"/> registered for the specified control type.</summary>
     /// <typeparam name="T">The type of the control.</typeparam>
     /// <param name="hasEventTarget">Whether the caller specifies a custom event target.</param>
     /// <returns>The best binder, or <see langword="null"/> if no registered binder supports the control type.</returns>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; the interface shape dictates it.")]
     public static ICreatesCommandBinding? GetBinder<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents |
-                                    DynamicallyAccessedMemberTypes.PublicProperties)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents
+                                    | DynamicallyAccessedMemberTypes.PublicProperties)]
     T>(bool hasEventTarget)
     {
         var resolver = Locator.Current;

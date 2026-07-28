@@ -34,9 +34,7 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public interface IBindingFallbackConverter : IEnableLogger
 {
-    /// <summary>
-    /// Calculates affinity for the specified runtime type pair.
-    /// </summary>
+    /// <summary>Calculates affinity for the specified runtime type pair.</summary>
     /// <param name="fromType">The runtime source type.</param>
     /// <param name="toType">The target type.</param>
     /// <returns>
@@ -58,18 +56,12 @@ public interface IBindingFallbackConverter : IEnableLogger
     /// </para>
     /// </remarks>
     int GetAffinityForObjects(
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type fromType,
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type toType);
 
-    /// <summary>
-    /// Attempts to convert the value to the target type.
-    /// </summary>
+    /// <summary>Attempts to convert the value to the target type.</summary>
     /// <param name="fromType">The runtime source type (guaranteed non-null).</param>
     /// <param name="from">The value to convert (guaranteed non-null).</param>
     /// <param name="toType">The target type (guaranteed non-null).</param>
@@ -89,14 +81,10 @@ public interface IBindingFallbackConverter : IEnableLogger
     /// </para>
     /// </remarks>
     bool TryConvert(
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type fromType,
         object from,
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type toType,
         object? conversionHint,
         [NotNullWhen(true)] out object? result);

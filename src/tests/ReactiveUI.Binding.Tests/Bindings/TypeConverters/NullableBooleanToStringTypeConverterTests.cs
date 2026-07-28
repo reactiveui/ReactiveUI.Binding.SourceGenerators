@@ -4,19 +4,13 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting nullable booleans to strings.
-/// </summary>
+/// <summary>Tests for converting nullable booleans to strings.</summary>
 public class NullableBooleanToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,9 +20,7 @@ public class NullableBooleanToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert True ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvert True ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_True_ReturnsTrue()
@@ -42,9 +34,7 @@ public class NullableBooleanToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("True");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert False ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert False ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_False_ReturnsFalse()
@@ -58,9 +48,7 @@ public class NullableBooleanToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("False");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsNullString.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsNullString.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsNullString()

@@ -13,6 +13,18 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests;
 /// </summary>
 public class ExtractorEdgeCaseTests
 {
+    /// <summary>The <c>BindCommandDispatch.g.cs</c> name these tests generate against.</summary>
+    private const string BindCommandDispatchgcsName = "BindCommandDispatch.g.cs";
+
+    /// <summary>The <c>BindInteractionDispatch.g.cs</c> name these tests generate against.</summary>
+    private const string BindInteractionDispatchgcsName = "BindInteractionDispatch.g.cs";
+
+    /// <summary>The <c>BindOneWayDispatch.g.cs</c> name these tests generate against.</summary>
+    private const string BindOneWayDispatchgcsName = "BindOneWayDispatch.g.cs";
+
+    /// <summary>The <c>WhenAnyObservableDispatch.g.cs</c> name these tests generate against.</summary>
+    private const string WhenAnyObservableDispatchgcsName = "WhenAnyObservableDispatch.g.cs";
+
     /// <summary>
     /// Verifies that a BindOneWay call on a custom (non-stub) extension class is skipped.
     /// Exercises the ContainingType name guard in BindingExtractor (line 41).
@@ -59,7 +71,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindOneWayDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindOneWayDispatchgcsName);
     }
 
     /// <summary>
@@ -109,7 +121,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindCommandDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindCommandDispatchgcsName);
     }
 
     /// <summary>
@@ -151,7 +163,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("WhenAnyObservableDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(WhenAnyObservableDispatchgcsName);
     }
 
     /// <summary>
@@ -200,7 +212,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindInteractionDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindInteractionDispatchgcsName);
     }
 
     /// <summary>
@@ -245,7 +257,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindOneWayDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindOneWayDispatchgcsName);
     }
 
     /// <summary>
@@ -292,7 +304,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindCommandDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindCommandDispatchgcsName);
     }
 
     /// <summary>
@@ -339,7 +351,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindCommandDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindCommandDispatchgcsName);
     }
 
     /// <summary>
@@ -390,7 +402,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindInteractionDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindInteractionDispatchgcsName);
     }
 
     /// <summary>
@@ -429,7 +441,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("WhenAnyObservableDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(WhenAnyObservableDispatchgcsName);
     }
 
     /// <summary>
@@ -507,7 +519,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("WhenAnyObservableDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(WhenAnyObservableDispatchgcsName);
     }
 
     /// <summary>
@@ -533,7 +545,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindCommandDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindCommandDispatchgcsName);
     }
 
     /// <summary>
@@ -559,7 +571,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindInteractionDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindInteractionDispatchgcsName);
     }
 
     /// <summary>
@@ -585,7 +597,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindOneWayDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindOneWayDispatchgcsName);
     }
 
     /// <summary>
@@ -638,7 +650,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindOneWayDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindOneWayDispatchgcsName);
     }
 
     /// <summary>
@@ -691,7 +703,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindCommandDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindCommandDispatchgcsName);
     }
 
     /// <summary>
@@ -744,7 +756,7 @@ public class ExtractorEdgeCaseTests
 
         var result = TestHelper.RunGenerator(source);
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("BindInteractionDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(BindInteractionDispatchgcsName);
     }
 
     /// <summary>

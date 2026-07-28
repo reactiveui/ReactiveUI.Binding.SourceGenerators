@@ -6,19 +6,13 @@ using ReactiveUI;
 
 namespace SharedScenarios.BindOneWay.ReactiveObjectSource;
 
-/// <summary>
-/// Source ViewModel extending ReactiveObject.
-/// </summary>
+/// <summary>Source ViewModel extending ReactiveObject.</summary>
 public class MyViewModel : ReactiveObject
 {
-    /// <summary>
-    /// The backing field for <see cref="Name"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Name"/>.</summary>
     private string _name = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
         get => _name;

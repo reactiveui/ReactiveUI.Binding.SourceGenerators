@@ -6,27 +6,19 @@ using System.ComponentModel;
 
 namespace SharedScenarios.BindOneWay.MultipleBindings;
 
-/// <summary>
-/// Source ViewModel with multiple properties.
-/// </summary>
+/// <summary>Source ViewModel with multiple properties.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Name"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Name"/>.</summary>
     private string _name = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="Age"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Age"/>.</summary>
     private int _age;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
         get => _name;
@@ -42,9 +34,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the age.
-    /// </summary>
+    /// <summary>Gets or sets the age.</summary>
     public int Age
     {
         get => _age;

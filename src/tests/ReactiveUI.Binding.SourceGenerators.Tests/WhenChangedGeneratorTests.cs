@@ -7,14 +7,13 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for WhenChanged (after-change) invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for WhenChanged (after-change) invocation generation.</summary>
 public class WhenChangedGeneratorTests
 {
-    /// <summary>
-    /// Verifies that a WhenChanged invocation on an INPC class generates PropertyChanged observation.
-    /// </summary>
+    /// <summary>The <c>WhenChangedDispatch.g.cs</c> name these tests generate against.</summary>
+    private const string WhenChangedDispatchgcsName = "WhenChangedDispatch.g.cs";
+
+    /// <summary>Verifies that a WhenChanged invocation on an INPC class generates PropertyChanged observation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_INPC()
@@ -26,9 +25,7 @@ public class WhenChangedGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies that the generator produces correct output when no invocations are present.
-    /// </summary>
+    /// <summary>Verifies that the generator produces correct output when no invocations are present.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NoInvocations()
@@ -53,9 +50,7 @@ public class WhenChangedGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanged on a ReactiveObject-based class.
-    /// </summary>
+    /// <summary>Verifies WhenChanged on a ReactiveObject-based class.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_ReactiveObject()
@@ -67,9 +62,7 @@ public class WhenChangedGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanged with two properties returns a tuple.
-    /// </summary>
+    /// <summary>Verifies WhenChanged with two properties returns a tuple.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_TwoProperties()
@@ -81,9 +74,7 @@ public class WhenChangedGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanged with three properties returns a tuple.
-    /// </summary>
+    /// <summary>Verifies WhenChanged with three properties returns a tuple.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_ThreeProperties()
@@ -95,9 +86,7 @@ public class WhenChangedGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanged with a selector function.
-    /// </summary>
+    /// <summary>Verifies WhenChanged with a selector function.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_WithSelector()
@@ -109,9 +98,7 @@ public class WhenChangedGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanged with a deep property chain like x => x.Child.Name.
-    /// </summary>
+    /// <summary>Verifies WhenChanged with a deep property chain like x => x.Child.Name.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepPropertyChain()
@@ -123,9 +110,7 @@ public class WhenChangedGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanged with a nullable property type.
-    /// </summary>
+    /// <summary>Verifies WhenChanged with a nullable property type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableProperty()
@@ -137,9 +122,7 @@ public class WhenChangedGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanged with multiple ViewModels in the same compilation.
-    /// </summary>
+    /// <summary>Verifies WhenChanged with multiple ViewModels in the same compilation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleViewModels()
@@ -151,9 +134,7 @@ public class WhenChangedGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanged with an integer property type.
-    /// </summary>
+    /// <summary>Verifies WhenChanged with an integer property type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IntProperty()
@@ -165,9 +146,7 @@ public class WhenChangedGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanged with a 4-level deep property chain (ObjChain1 -> ObjChain2 -> ObjChain3 -> Model).
-    /// </summary>
+    /// <summary>Verifies WhenChanged with a 4-level deep property chain (ObjChain1 -> ObjChain2 -> ObjChain3 -> Model).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FourLevelDeepChain()
@@ -179,9 +158,7 @@ public class WhenChangedGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanged with multiple invocations on the same ViewModel.
-    /// </summary>
+    /// <summary>Verifies WhenChanged with multiple invocations on the same ViewModel.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleInvocations_SameViewModel()
@@ -567,7 +544,7 @@ public class WhenChangedGeneratorTests
         // The generator should not produce any WhenChanged dispatch code
         // because the method belongs to CustomExtensions, not our extension class.
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(WhenChangedDispatchgcsName);
     }
 
     /// <summary>
@@ -608,7 +585,7 @@ public class WhenChangedGeneratorTests
 
         // The generator should silently skip the identity lambda and produce no dispatch.
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(WhenChangedDispatchgcsName);
     }
 
     /// <summary>
@@ -648,7 +625,7 @@ public class WhenChangedGeneratorTests
 
         // The generator should silently skip block-body lambdas and produce no dispatch.
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(WhenChangedDispatchgcsName);
     }
 
     /// <summary>
@@ -688,7 +665,7 @@ public class WhenChangedGeneratorTests
 
         // The generator should silently skip field access lambdas and produce no dispatch.
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(WhenChangedDispatchgcsName);
     }
 
     /// <summary>
@@ -726,7 +703,7 @@ public class WhenChangedGeneratorTests
 
         // The generator should silently skip private property access and produce no dispatch.
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(WhenChangedDispatchgcsName);
     }
 
     /// <summary>
@@ -763,7 +740,7 @@ public class WhenChangedGeneratorTests
 
         // The generator should silently skip protected property access and produce no dispatch.
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(WhenChangedDispatchgcsName);
     }
 
     /// <summary>
@@ -804,6 +781,6 @@ public class WhenChangedGeneratorTests
 
         // The generator should silently skip method invocations in the lambda and produce no dispatch.
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource("WhenChangedDispatch.g.cs");
+        await result.DoesNotHaveGeneratedSource(WhenChangedDispatchgcsName);
     }
 }

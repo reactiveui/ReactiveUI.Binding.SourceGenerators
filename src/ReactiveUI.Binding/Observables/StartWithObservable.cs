@@ -14,19 +14,13 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class StartWithObservable<T> : IObservable<T>
 {
-    /// <summary>
-    /// The upstream source observable.
-    /// </summary>
+    /// <summary>The upstream source observable.</summary>
     private readonly IObservable<T> _source;
 
-    /// <summary>
-    /// The value emitted before the source sequence.
-    /// </summary>
+    /// <summary>The value emitted before the source sequence.</summary>
     private readonly T _value;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="StartWithObservable{T}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="StartWithObservable{T}"/> class.</summary>
     /// <param name="source">The source observable.</param>
     /// <param name="value">The value to emit before the source sequence.</param>
     public StartWithObservable(IObservable<T> source, T value)

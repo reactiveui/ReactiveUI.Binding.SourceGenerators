@@ -7,101 +7,77 @@ using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
-/// <summary>
-/// A view model for testing WhenAnyObservable with observable properties.
-/// </summary>
+/// <summary>A view model for testing WhenAnyObservable with observable properties.</summary>
 public class TestWhenAnyObsViewModel : INotifyPropertyChanged
 {
-    /// <summary>The backing field for <see cref="Command1"/>.</summary>
-    private IObservable<int>? _command1;
-
-    /// <summary>The backing field for <see cref="Command2"/>.</summary>
-    private IObservable<int>? _command2;
-
-    /// <summary>The backing field for <see cref="Command3"/>.</summary>
-    private IObservable<int>? _command3;
-
-    /// <summary>The backing field for <see cref="Changes"/>.</summary>
-    private IObservable<int>? _changes;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the first command observable.
-    /// </summary>
+    /// <summary>Gets or sets the first command observable.</summary>
     public IObservable<int>? Command1
     {
-        get => _command1;
+        get => field;
         set
         {
-            if (ReferenceEquals(_command1, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
-            _command1 = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
-    /// <summary>
-    /// Gets or sets the second command observable.
-    /// </summary>
+    /// <summary>Gets or sets the second command observable.</summary>
     public IObservable<int>? Command2
     {
-        get => _command2;
+        get => field;
         set
         {
-            if (ReferenceEquals(_command2, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
-            _command2 = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
-    /// <summary>
-    /// Gets or sets the third command observable.
-    /// </summary>
+    /// <summary>Gets or sets the third command observable.</summary>
     public IObservable<int>? Command3
     {
-        get => _command3;
+        get => field;
         set
         {
-            if (ReferenceEquals(_command3, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
-            _command3 = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
-    /// <summary>
-    /// Gets or sets the changes observable.
-    /// </summary>
+    /// <summary>Gets or sets the changes observable.</summary>
     public IObservable<int>? Changes
     {
-        get => _changes;
+        get => field;
         set
         {
-            if (ReferenceEquals(_changes, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
-            _changes = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
-    /// <summary>
-    /// Raises the PropertyChanged event.
-    /// </summary>
+    /// <summary>Raises the PropertyChanged event.</summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new(propertyName));

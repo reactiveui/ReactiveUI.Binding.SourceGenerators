@@ -4,19 +4,13 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for the <see cref="DecimalToStringTypeConverter"/> type converter.
-/// </summary>
+/// <summary>Tests for the <see cref="DecimalToStringTypeConverter"/> type converter.</summary>
 public class DecimalToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,15 +20,13 @@ public class DecimalToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert DecimalToString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert DecimalToString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_DecimalToString_Succeeds()
     {
         var converter = new DecimalToStringTypeConverter();
-        const decimal value = 123.456m;
+        const decimal value = 123.456M;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -42,9 +34,7 @@ public class DecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("123.456");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MaxValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MaxValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MaxValue_Succeeds()
@@ -58,9 +48,7 @@ public class DecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(decimal.MaxValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MinValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MinValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MinValue_Succeeds()
@@ -74,15 +62,13 @@ public class DecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(decimal.MinValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert NegativeValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert NegativeValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_NegativeValue_Succeeds()
     {
         var converter = new DecimalToStringTypeConverter();
-        const decimal value = -123.456m;
+        const decimal value = -123.456M;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -90,31 +76,27 @@ public class DecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("-123.456");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithConversionHint FormatsCorrectly.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithConversionHint FormatsCorrectly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new DecimalToStringTypeConverter();
-        const decimal value = 42.5m;
+        const decimal value = 42.5M;
 
-        var result = converter.TryConvert(value, 2, out var output);
+        var result = converter.TryConvert(value, ExpectedAffinity, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("42.50");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithStringFormatHint CurrencyFormat.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithStringFormatHint CurrencyFormat.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_CurrencyFormat()
     {
         var converter = new DecimalToStringTypeConverter();
-        const decimal value = 1234.56m;
+        const decimal value = 1234.56M;
 
         var result = converter.TryConvert(value, "C", out var output);
 
@@ -122,15 +104,13 @@ public class DecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString("C"));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithStringFormatHint ExponentialFormat.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithStringFormatHint ExponentialFormat.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_ExponentialFormat()
     {
         var converter = new DecimalToStringTypeConverter();
-        const decimal value = 1234.5678m;
+        const decimal value = 1234.5678M;
 
         var result = converter.TryConvert(value, "E2", out var output);
 
@@ -138,15 +118,13 @@ public class DecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString("E2"));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithStringFormatHint FormatsCorrectly.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithStringFormatHint FormatsCorrectly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
     {
         var converter = new DecimalToStringTypeConverter();
-        const decimal value = 1234.5678m;
+        const decimal value = 1234.5678M;
 
         var result = converter.TryConvert(value, "N2", out var output);
 
@@ -154,15 +132,13 @@ public class DecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString("N2"));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithStringFormatHint PercentFormat.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithStringFormatHint PercentFormat.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_PercentFormat()
     {
         var converter = new DecimalToStringTypeConverter();
-        const decimal value = 0.1234m;
+        const decimal value = 0.1234M;
 
         var result = converter.TryConvert(value, "P2", out var output);
 
@@ -170,15 +146,13 @@ public class DecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString("P2"));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Zero Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert Zero Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Zero_Succeeds()
     {
         var converter = new DecimalToStringTypeConverter();
-        const decimal value = 0m;
+        const decimal value = 0M;
 
         var result = converter.TryConvert(value, null, out var output);
 

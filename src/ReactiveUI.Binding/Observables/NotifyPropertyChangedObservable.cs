@@ -16,29 +16,19 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChange<object, object?>>
 {
-    /// <summary>
-    /// The source object raising the notifications.
-    /// </summary>
+    /// <summary>The source object raising the notifications.</summary>
     private readonly object _sender;
 
-    /// <summary>
-    /// The expression surfaced on the emitted observed change.
-    /// </summary>
+    /// <summary>The expression surfaced on the emitted observed change.</summary>
     private readonly Expression _expression;
 
-    /// <summary>
-    /// The observed property name (with the <c>[]</c> suffix already applied for indexers).
-    /// </summary>
-    private readonly string _expectedName;
+    /// <summary>The observed property name (with the <c>[]</c> suffix already applied for indexers).</summary>
+    private readonly string _observedPropertyName;
 
-    /// <summary>
-    /// Whether to observe before-change (<see cref="INotifyPropertyChanging"/>) notifications.
-    /// </summary>
+    /// <summary>Whether to observe before-change (<see cref="INotifyPropertyChanging"/>) notifications.</summary>
     private readonly bool _beforeChanged;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="NotifyPropertyChangedObservable"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="NotifyPropertyChangedObservable"/> class.</summary>
     /// <param name="sender">The source object raising the notifications.</param>
     /// <param name="expression">The expression surfaced on the emitted observed change.</param>
     /// <param name="expectedName">The observed property name (with the <c>[]</c> suffix already applied for indexers).</param>
@@ -50,7 +40,7 @@ public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChang
         ArgumentExceptionHelper.ThrowIfNull(expectedName);
         _sender = sender;
         _expression = expression;
-        _expectedName = expectedName;
+        _observedPropertyName = expectedName;
         _beforeChanged = beforeChanged;
     }
 
@@ -59,7 +49,7 @@ public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChang
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);
 
-        return new Subscription(_sender, _expression, _expectedName, _beforeChanged, observer);
+        return new Subscription(_sender, _expression, _observedPropertyName, _beforeChanged, observer);
     }
 
     /// <summary>
@@ -68,20 +58,14 @@ public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChang
     /// </summary>
     private sealed class Subscription : IDisposable
     {
-        /// <summary>
-        /// The before-change source, or <see langword="null"/> when observing after-change.
-        /// </summary>
+        /// <summary>The before-change source, or <see langword="null"/> when observing after-change.</summary>
         private readonly INotifyPropertyChanging? _changing;
 
-        /// <summary>
-        /// The after-change source, or <see langword="null"/> when observing before-change.
-        /// </summary>
+        /// <summary>The after-change source, or <see langword="null"/> when observing before-change.</summary>
         private readonly INotifyPropertyChanged? _changed;
 
-        /// <summary>
-        /// The observed property name (an empty notified name means "all properties").
-        /// </summary>
-        private readonly string _expectedName;
+        /// <summary>The observed property name (an empty notified name means "all properties").</summary>
+        private readonly string _observedPropertyName;
 
         /// <summary>
         /// The change forwarded on every matching notification. It is constant for the subscription
@@ -89,14 +73,10 @@ public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChang
         /// </summary>
         private readonly IObservedChange<object, object?> _change;
 
-        /// <summary>
-        /// The downstream observer. Set to <see langword="null"/> on disposal.
-        /// </summary>
+        /// <summary>The downstream observer. Set to <see langword="null"/> on disposal.</summary>
         private IObserver<IObservedChange<object, object?>>? _observer;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Subscription"/> class and wires the change event.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="Subscription"/> class and wires the change event.</summary>
         /// <param name="sender">The source object raising the notifications.</param>
         /// <param name="expression">The expression surfaced on the emitted observed change.</param>
         /// <param name="expectedName">The observed property name.</param>
@@ -109,7 +89,7 @@ public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChang
             bool beforeChanged,
             IObserver<IObservedChange<object, object?>> observer)
         {
-            _expectedName = expectedName;
+            _observedPropertyName = expectedName;
             _observer = observer;
             _change = new ObservedChange<object, object?>(sender, expression, default);
 
@@ -154,31 +134,23 @@ public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChang
         /// <returns><see langword="true"/> if the notification applies to the observed property.</returns>
         private bool Matches(string? notifiedName) =>
             string.IsNullOrEmpty(notifiedName)
-            || string.Equals(notifiedName, _expectedName, StringComparison.InvariantCulture);
+            || string.Equals(notifiedName, _observedPropertyName, StringComparison.InvariantCulture);
 
-        /// <summary>
-        /// Handles <see cref="INotifyPropertyChanged.PropertyChanged"/>, forwarding the change when the name matches.
-        /// </summary>
+        /// <summary>Handles <see cref="INotifyPropertyChanged.PropertyChanged"/>, forwarding the change when the name matches.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The property-changed event arguments.</param>
-        private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (!Matches(e.PropertyName))
-            {
-                return;
-            }
+        private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e) => Forward(e.PropertyName);
 
-            Volatile.Read(ref _observer)?.OnNext(_change);
-        }
-
-        /// <summary>
-        /// Handles <see cref="INotifyPropertyChanging.PropertyChanging"/>, forwarding the change when the name matches.
-        /// </summary>
+        /// <summary>Handles <see cref="INotifyPropertyChanging.PropertyChanging"/>, forwarding the change when the name matches.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The property-changing event arguments.</param>
-        private void OnPropertyChanging(object? sender, PropertyChangingEventArgs e)
+        private void OnPropertyChanging(object? sender, PropertyChangingEventArgs e) => Forward(e.PropertyName);
+
+        /// <summary>Forwards the change to the observer when the notified name matches the observed property.</summary>
+        /// <param name="notifiedName">The property name carried by the notification.</param>
+        private void Forward(string? notifiedName)
         {
-            if (!Matches(e.PropertyName))
+            if (!Matches(notifiedName))
             {
                 return;
             }

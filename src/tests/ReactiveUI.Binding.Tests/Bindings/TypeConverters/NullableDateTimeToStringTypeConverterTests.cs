@@ -4,19 +4,13 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting nullable DateTime to strings.
-/// </summary>
+/// <summary>Tests for converting nullable DateTime to strings.</summary>
 public class NullableDateTimeToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,12 +20,9 @@ public class NullableDateTimeToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert DateTime Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert DateTime Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
-    [SuppressMessage("Major Code Smell", "S6566:Use \"DateTimeOffset\" instead of \"DateTime\"", Justification = "Test data.")]
     public async Task TryConvert_DateTime_Succeeds()
     {
         var converter = new NullableDateTimeToStringTypeConverter();
@@ -43,9 +34,7 @@ public class NullableDateTimeToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.Value.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsNullString.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsNullString.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsNullString()

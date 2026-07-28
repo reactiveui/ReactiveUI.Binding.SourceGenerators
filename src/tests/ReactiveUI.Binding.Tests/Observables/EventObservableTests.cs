@@ -6,80 +6,66 @@ using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-/// Unit tests for <see cref="EventObservable{T}"/>.
-/// </summary>
+/// <summary>Unit tests for <see cref="EventObservable{T}"/>.</summary>
 public class EventObservableTests
 {
-    /// <summary>
-    /// The initial value produced by the event observable's getter.
-    /// </summary>
+    /// <summary>The initial value produced by the event observable's getter.</summary>
     private const string InitialValue = "initial";
 
-    /// <summary>
-    /// The expected number of emitted values when two notifications are produced.
-    /// </summary>
+    /// <summary>The expected number of emitted values when two notifications are produced.</summary>
     private const int ExpectedTwoEmissions = 2;
 
-    /// <summary>
-    /// Verifies that constructor throws ArgumentNullException when addHandler is null.
-    /// </summary>
+    /// <summary>Verifies that constructor throws ArgumentNullException when addHandler is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullAddHandler_ThrowsArgumentNullException()
     {
-        var action = () => new EventObservable<string>(
+        var action = static () => new EventObservable<string>(
             null!,
-            _ => { },
-            () => "test",
+            static _ => { },
+            static () => "test",
             true);
 
         await Assert.That(action).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that constructor throws ArgumentNullException when removeHandler is null.
-    /// </summary>
+    /// <summary>Verifies that constructor throws ArgumentNullException when removeHandler is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullRemoveHandler_ThrowsArgumentNullException()
     {
-        var action = () => new EventObservable<string>(
-            _ => { },
+        var action = static () => new EventObservable<string>(
+            static _ => { },
             null!,
-            () => "test",
+            static () => "test",
             true);
 
         await Assert.That(action).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that constructor throws ArgumentNullException when getter is null.
-    /// </summary>
+    /// <summary>Verifies that constructor throws ArgumentNullException when getter is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullGetter_ThrowsArgumentNullException()
     {
-        var action = () => new EventObservable<string>(
-            _ => { },
-            _ => { },
+        var action = static () => new EventObservable<string>(
+            static _ => { },
+            static _ => { },
             null!,
             true);
 
         await Assert.That(action).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that Subscribe throws ArgumentNullException when observer is null.
-    /// </summary>
+    /// <summary>Verifies that Subscribe throws ArgumentNullException when observer is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_NullObserver_ThrowsArgumentNullException()
     {
         var observable = new EventObservable<string>(
-            _ => { },
-            _ => { },
-            () => "test",
+            static _ => { },
+            static _ => { },
+            static () => "test",
             true);
 
         var action = () => observable.Subscribe(null!);
@@ -87,9 +73,7 @@ public class EventObservableTests
         await Assert.That(action).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that Subscribe emits the current value immediately.
-    /// </summary>
+    /// <summary>Verifies that Subscribe emits the current value immediately.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_EmitsInitialValue()
@@ -98,20 +82,18 @@ public class EventObservableTests
         var results = new List<string>();
 
         var observable = new EventObservable<string>(
-            _ => { },
-            _ => { },
-            () => value,
+            static _ => { },
+            static _ => { },
+            static () => value,
             false);
 
-        observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        _ = observable.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
 
         await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]).IsEqualTo(InitialValue);
     }
 
-    /// <summary>
-    /// Verifies that event handler invocation emits updated values.
-    /// </summary>
+    /// <summary>Verifies that event handler invocation emits updated values.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_EventFired_EmitsNewValue()
@@ -126,7 +108,7 @@ public class EventObservableTests
             () => value,
             false);
 
-        observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        _ = observable.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
 
         value = "updated";
         handler?.Invoke(this, EventArgs.Empty);
@@ -135,9 +117,7 @@ public class EventObservableTests
         await Assert.That(results[1]).IsEqualTo("updated");
     }
 
-    /// <summary>
-    /// Verifies that distinct-until-changed suppresses duplicate values.
-    /// </summary>
+    /// <summary>Verifies that distinct-until-changed suppresses duplicate values.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_DistinctUntilChanged_SuppressesDuplicates()
@@ -152,7 +132,7 @@ public class EventObservableTests
             () => value,
             true);
 
-        observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        _ = observable.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
 
         // Fire event with same value — should be suppressed
         handler?.Invoke(this, EventArgs.Empty);
@@ -167,9 +147,7 @@ public class EventObservableTests
         await Assert.That(results[1]).IsEqualTo("different");
     }
 
-    /// <summary>
-    /// Verifies that without distinct-until-changed, duplicate values are emitted.
-    /// </summary>
+    /// <summary>Verifies that without distinct-until-changed, duplicate values are emitted.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_NoDistinct_EmitsDuplicates()
@@ -181,10 +159,10 @@ public class EventObservableTests
         var observable = new EventObservable<string>(
             h => handler = h,
             h => handler = null,
-            () => value,
+            static () => value,
             false);
 
-        observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        _ = observable.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
 
         // Fire event with same value — should emit
         handler?.Invoke(this, EventArgs.Empty);
@@ -192,9 +170,7 @@ public class EventObservableTests
         await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
     }
 
-    /// <summary>
-    /// Verifies that Dispose unsubscribes the event handler.
-    /// </summary>
+    /// <summary>Verifies that Dispose unsubscribes the event handler.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Dispose_UnsubscribesHandler()
@@ -214,19 +190,17 @@ public class EventObservableTests
 
                 handler = null;
             },
-            () => value,
+            static () => value,
             false);
 
-        var sub = observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        var sub = observable.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
 
         sub.Dispose();
 
         await Assert.That(handler).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that events fired after dispose are ignored.
-    /// </summary>
+    /// <summary>Verifies that events fired after dispose are ignored.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Dispose_EventAfterDispose_Ignored()
@@ -237,11 +211,11 @@ public class EventObservableTests
 
         var observable = new EventObservable<string>(
             h => handler = h,
-            _ => { },
+            static _ => { },
             () => value,
             false);
 
-        var sub = observable.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        var sub = observable.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
 
         // Keep reference before dispose clears it
         var savedHandler = handler;
@@ -253,21 +227,19 @@ public class EventObservableTests
         await Assert.That(results).Count().IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that double dispose is safe.
-    /// </summary>
+    /// <summary>Verifies that double dispose is safe.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Dispose_CalledTwice_IsSafe()
     {
         var removeCount = 0;
         var observable = new EventObservable<string>(
-            _ => { },
+            static _ => { },
             _ => removeCount++,
-            () => "test",
+            static () => "test",
             false);
 
-        var sub = observable.Subscribe(new AnonymousObserver<string>(_ => { }, _ => { }, () => { }));
+        var sub = observable.Subscribe(new AnonymousObserver<string>(static _ => { }, static _ => { }, static () => { }));
 
         sub.Dispose();
         sub.Dispose();
@@ -275,12 +247,12 @@ public class EventObservableTests
         await Assert.That(removeCount).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Anonymous observer for testing.
-    /// </summary>
+    /// <summary>Anonymous observer for testing.</summary>
     /// <typeparam name="T">The element type.</typeparam>
-    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-        : IObserver<T>
+    /// <param name="onNext">Called for each emitted value.</param>
+    /// <param name="onError">Called when the sequence faults.</param>
+    /// <param name="onCompleted">Called when the sequence completes.</param>
+    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted) : IObserver<T>
     {
         /// <inheritdoc/>
         public void OnCompleted() => onCompleted();

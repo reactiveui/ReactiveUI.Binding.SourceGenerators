@@ -10,14 +10,10 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
-/// <summary>
-/// Provides syntax-level helpers for extracting property paths from lambda expressions.
-/// </summary>
+/// <summary>Provides syntax-level helpers for extracting property paths from lambda expressions.</summary>
 internal static class SyntaxHelpers
 {
-    /// <summary>
-    /// Extracts the property path from a lambda expression.
-    /// </summary>
+    /// <summary>Extracts the property path from a lambda expression.</summary>
     /// <param name="expression">The expression syntax.</param>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
@@ -37,14 +33,16 @@ internal static class SyntaxHelpers
         // Get the lambda body (only SimpleLambda and ParenthesizedLambda exist in Roslyn)
         var body = GetLambdaBody(lambda);
 
-        if (body == null)
+        if (body is null)
         {
             return null;
         }
 
         // Decompose member access chain: x.A.B.C → [A, B, C]
         // Also handles null-forgiving operator: x.A!.B!.C → [A, B, C]
-        var segments = new List<PropertyPathSegment>(4);
+        const int TypicalPathDepth = 4;
+
+        var segments = new List<PropertyPathSegment>(TypicalPathDepth);
         var current = UnwrapNullForgiving(body);
 
         while (current is MemberAccessExpressionSyntax memberAccess)
@@ -83,11 +81,8 @@ internal static class SyntaxHelpers
         return [.. segments];
     }
 
-    /// <summary>
-    /// Extracts the body expression from a <see cref="LambdaExpressionSyntax"/>.
-    /// Handles both <see cref="SimpleLambdaExpressionSyntax"/> and
-    /// <see cref="ParenthesizedLambdaExpressionSyntax"/>.
-    /// </summary>
+    /// <summary>Extracts the body expression from a <see cref="LambdaExpressionSyntax"/>.</summary>
+    /// <remarks>Handles both <see cref="SimpleLambdaExpressionSyntax"/> and <see cref="ParenthesizedLambdaExpressionSyntax"/>.</remarks>
     /// <param name="lambda">The lambda expression.</param>
     /// <returns>The body as an <see cref="ExpressionSyntax"/>, or null if the body is a block or unsupported form.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

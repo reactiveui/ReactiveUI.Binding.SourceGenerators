@@ -20,7 +20,7 @@ internal static partial class SharedSourceReader
     /// </summary>
     /// <param name="scenarioPath">The path relative to the SharedScenarios root (e.g. "WhenChanged/SinglePropertyINPC").</param>
     /// <returns>A single merged source text containing all types from the scenario.</returns>
-    public static string ReadScenario(string scenarioPath)
+    internal static string ReadScenario(string scenarioPath)
     {
         var dir = Path.Combine(FindRoot(), scenarioPath);
         var files = Directory.GetFiles(dir, "*.cs");
@@ -42,10 +42,10 @@ internal static partial class SharedSourceReader
         // Copyright header
         foreach (var line in copyrightLines)
         {
-            sb.AppendLine(line);
+            _ = sb.AppendLine(line);
         }
 
-        sb.AppendLine();
+        _ = sb.AppendLine();
 
         // Deduplicated using directives (preserve blank line separators between groups)
         var usingList = usingDirectives.ToList();
@@ -53,46 +53,42 @@ internal static partial class SharedSourceReader
         foreach (var u in usingList)
         {
             var currentPrefix = ExtractUsingPrefix(u);
-            if (prevPrefix != null && currentPrefix != prevPrefix)
+            if (prevPrefix is not null && currentPrefix != prevPrefix)
             {
-                sb.AppendLine();
+                _ = sb.AppendLine();
             }
 
-            sb.AppendLine(u);
+            _ = sb.AppendLine(u);
             prevPrefix = currentPrefix;
         }
 
-        sb.AppendLine();
+        _ = sb.AppendLine();
 
         // Single namespace block with all type blocks
-        sb.AppendLine($"namespace {namespaceName}");
-        sb.AppendLine("{");
+        _ = sb.AppendLine($"namespace {namespaceName}");
+        _ = sb.AppendLine("{");
 
         for (var i = 0; i < typeBlocks.Count; i++)
         {
             if (i > 0)
             {
-                sb.AppendLine();
+                _ = sb.AppendLine();
             }
 
-            sb.AppendLine(typeBlocks[i]);
+            _ = sb.AppendLine(typeBlocks[i]);
         }
 
-        sb.AppendLine("}");
+        _ = sb.AppendLine("}");
 
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Finds the root directory of the SharedScenarios.
-    /// </summary>
+    /// <summary>Finds the root directory of the SharedScenarios.</summary>
     /// <returns>The path to the SharedScenarios directory.</returns>
-    internal static string FindRoot()
-        => Path.Combine(Path.GetDirectoryName(typeof(SharedSourceReader).Assembly.Location)!, "SharedScenarios");
+    internal static string FindRoot() =>
+        Path.Combine(Path.GetDirectoryName(typeof(SharedSourceReader).Assembly.Location)!, "SharedScenarios");
 
-    /// <summary>
-    /// Parses a source file's lines to extract copyright headers, usings, and type blocks.
-    /// </summary>
+    /// <summary>Parses a source file's lines to extract copyright headers, usings, and type blocks.</summary>
     /// <param name="lines">The lines of the file to parse.</param>
     /// <param name="copyrightLines">The list to which copyright lines will be added.</param>
     /// <param name="usingDirectives">The set to which using directives will be added.</param>
@@ -123,7 +119,7 @@ internal static partial class SharedSourceReader
             body = ExtractTypeBlock(lines, ref i);
         }
 
-        if (body == null)
+        if (body is null)
         {
             return;
         }
@@ -131,16 +127,14 @@ internal static partial class SharedSourceReader
         typeBlocks.Add(body);
     }
 
-    /// <summary>
-    /// Collects up to the first three copyright comment lines from the file header.
-    /// </summary>
+    /// <summary>Collects up to the first three copyright comment lines from the file header.</summary>
     /// <param name="lines">The file lines.</param>
     /// <param name="i">The current line index, advanced past the header.</param>
     /// <param name="copyrightLines">The list to which copyright lines are added.</param>
     private static void CollectCopyright(string[] lines, ref int i, List<string> copyrightLines)
     {
-        while (i < lines.Length &&
-               (lines[i].StartsWith("//", StringComparison.Ordinal) || string.IsNullOrWhiteSpace(lines[i])))
+        while (i < lines.Length
+               && (lines[i].StartsWith("//", StringComparison.Ordinal) || string.IsNullOrWhiteSpace(lines[i])))
         {
             if (copyrightLines.Count < 3 && lines[i].StartsWith("//", StringComparison.Ordinal))
             {
@@ -151,9 +145,7 @@ internal static partial class SharedSourceReader
         }
     }
 
-    /// <summary>
-    /// Collects using directives, skipping blank lines, until a non-using, non-blank line is reached.
-    /// </summary>
+    /// <summary>Collects using directives, skipping blank lines, until a non-using, non-blank line is reached.</summary>
     /// <param name="lines">The file lines.</param>
     /// <param name="i">The current line index, advanced past the using block.</param>
     /// <param name="usingDirectives">The set to which using directives are added.</param>
@@ -178,9 +170,7 @@ internal static partial class SharedSourceReader
         }
     }
 
-    /// <summary>
-    /// Reads the namespace declaration if present, capturing the name on first encounter.
-    /// </summary>
+    /// <summary>Reads the namespace declaration if present, capturing the name on first encounter.</summary>
     /// <param name="lines">The file lines.</param>
     /// <param name="i">The current line index, advanced past the namespace line when matched.</param>
     /// <param name="namespaceName">A reference to the shared namespace name.</param>
@@ -192,14 +182,14 @@ internal static partial class SharedSourceReader
             return false;
         }
 
-        var nsMatch = NamespaceRegex().Match(lines[i]);
-        if (!nsMatch.Success)
+        var namespaceMatch = NamespaceRegex().Match(lines[i]);
+        if (!namespaceMatch.Success)
         {
             return false;
         }
 
-        namespaceName ??= nsMatch.Groups[1].Value;
-        var isFileScoped = lines[i].TrimEnd().EndsWith(";", StringComparison.Ordinal);
+        namespaceName ??= namespaceMatch.Groups[1].Value;
+        var isFileScoped = lines[i].TrimEnd().EndsWith(';');
         i++;
         return isFileScoped;
     }
@@ -227,17 +217,10 @@ internal static partial class SharedSourceReader
             bodyEnd--;
         }
 
-        if (bodyStart > bodyEnd)
-        {
-            return null;
-        }
-
-        return string.Join(Environment.NewLine, lines[bodyStart..(bodyEnd + 1)]);
+        return bodyStart > bodyEnd ? null : string.Join(Environment.NewLine, lines[bodyStart..(bodyEnd + 1)]);
     }
 
-    /// <summary>
-    /// Advances past the namespace's opening brace to the first body line.
-    /// </summary>
+    /// <summary>Advances past the namespace's opening brace to the first body line.</summary>
     /// <param name="lines">The file lines.</param>
     /// <param name="i">The current line index, advanced past the opening brace.</param>
     private static void SkipToBodyStart(string[] lines, ref int i)
@@ -282,17 +265,10 @@ internal static partial class SharedSourceReader
             bodyEnd--;
         }
 
-        if (bodyStart > bodyEnd)
-        {
-            return null;
-        }
-
-        return string.Join(Environment.NewLine, lines[bodyStart..(bodyEnd + 1)]);
+        return bodyStart > bodyEnd ? null : string.Join(Environment.NewLine, lines[bodyStart..(bodyEnd + 1)]);
     }
 
-    /// <summary>
-    /// Updates the running brace depth for a single line, stopping at the matching close brace.
-    /// </summary>
+    /// <summary>Updates the running brace depth for a single line, stopping at the matching close brace.</summary>
     /// <param name="line">The line to scan.</param>
     /// <param name="braceDepth">The current brace depth.</param>
     /// <returns>The updated brace depth (zero once the matching close brace is found).</returns>
@@ -317,9 +293,7 @@ internal static partial class SharedSourceReader
         return braceDepth;
     }
 
-    /// <summary>
-    /// Extracts the prefix from a using directive for grouping.
-    /// </summary>
+    /// <summary>Extracts the prefix from a using directive for grouping.</summary>
     /// <param name="usingDirective">The using directive.</param>
     /// <returns>The prefix string.</returns>
     private static string ExtractUsingPrefix(string usingDirective)
@@ -343,26 +317,18 @@ internal static partial class SharedSourceReader
     [GeneratedRegex(@"^using\s+(?:static\s+)?(\w+)")]
     private static partial Regex UsingPrefixRegex();
 
-    /// <summary>
-    /// A set that preserves insertion order while preventing duplicates.
-    /// </summary>
+    /// <summary>A set that preserves insertion order while preventing duplicates.</summary>
     /// <typeparam name="T">The element type.</typeparam>
     private sealed class LinkedHashSet<T> : IEnumerable<T>
         where T : notnull
     {
-        /// <summary>
-        /// The hash set used for O(1) duplicate checks.
-        /// </summary>
+        /// <summary>The hash set used for O(1) duplicate checks.</summary>
         private readonly HashSet<T> _set = [];
 
-        /// <summary>
-        /// The list used for preserving insertion order.
-        /// </summary>
+        /// <summary>The list used for preserving insertion order.</summary>
         private readonly List<T> _list = [];
 
-        /// <summary>
-        /// Adds an item to the set if it's not already present.
-        /// </summary>
+        /// <summary>Adds an item to the set if it's not already present.</summary>
         /// <param name="item">The item to add.</param>
         public void Add(T item)
         {
@@ -374,9 +340,7 @@ internal static partial class SharedSourceReader
             _list.Add(item);
         }
 
-        /// <summary>
-        /// Converts the set to a list.
-        /// </summary>
+        /// <summary>Converts the set to a list.</summary>
         /// <returns>A new list containing the set elements in insertion order.</returns>
         public List<T> ToList() => [.. _list];
 

@@ -8,30 +8,31 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
-/// <summary>
-/// Shared utility methods for code generation: property path building, string escaping,
-/// and class info lookup.
-/// </summary>
+/// <summary>Shared utility methods for code generation: property path building, string escaping, and class info lookup.</summary>
 internal static class CodeGeneratorHelpers
 {
-    /// <summary>
-    /// The initial seed value for the polynomial hash used by <see cref="ComputeStableMethodSuffix"/>.
-    /// </summary>
+    /// <summary>Buffer capacity to reserve per invocation when building a generated source file.</summary>
+    internal const int PerInvocationBufferCapacity = 1_024;
+
+    /// <summary>Buffer capacity for a dispatch key or other short generated fragment.</summary>
+    internal const int FragmentBufferCapacity = 128;
+
+    /// <summary>Buffer capacity to reserve per property-path segment when building an access chain.</summary>
+    private const int PerPathSegmentCapacity = 16;
+
+    /// <summary>Extra buffer capacity for the escaping a string literal adds.</summary>
+    private const int EscapeOverheadCapacity = 4;
+
+    /// <summary>The initial seed value for the polynomial hash used by <see cref="ComputeStableMethodSuffix"/>.</summary>
     private const long HashSeed = 17L;
 
-    /// <summary>
-    /// The multiplier applied at each step of the polynomial hash used by <see cref="ComputeStableMethodSuffix"/>.
-    /// </summary>
+    /// <summary>The multiplier applied at each step of the polynomial hash used by <see cref="ComputeStableMethodSuffix"/>.</summary>
     private const long HashMultiplier = 31L;
 
-    /// <summary>
-    /// The FNV-1a 32-bit offset basis used by <see cref="StableStringHash"/>.
-    /// </summary>
+    /// <summary>The FNV-1a 32-bit offset basis used by <see cref="StableStringHash"/>.</summary>
     private const uint FnvOffsetBasis = 2_166_136_261;
 
-    /// <summary>
-    /// The FNV-1a 32-bit prime used by <see cref="StableStringHash"/>.
-    /// </summary>
+    /// <summary>The FNV-1a 32-bit prime used by <see cref="StableStringHash"/>.</summary>
     private const int FnvPrime = 16_777_619;
 
     /// <summary>
@@ -48,13 +49,11 @@ internal static class CodeGeneratorHelpers
     {
         var leaf = path[path.Length - 1];
         return supportsNullable && leaf.IsReferenceType
-            ? leaf.PropertyTypeFullName + "?"
+            ? $"{leaf.PropertyTypeFullName}?"
             : leaf.PropertyTypeFullName;
     }
 
-    /// <summary>
-    /// Builds a dotted property access chain from a root variable and property path segments.
-    /// </summary>
+    /// <summary>Builds a dotted property access chain from a root variable and property path segments.</summary>
     /// <param name="root">The root variable name (e.g., "obj", "source").</param>
     /// <param name="path">The property path segments.</param>
     /// <returns>A dotted access chain like "obj.Address.City".</returns>
@@ -65,37 +64,31 @@ internal static class CodeGeneratorHelpers
             return root;
         }
 
-        var sb = new StringBuilder(root.Length + (path.Length * 16));
-        sb.Append(root);
+        var sb = new StringBuilder(root.Length + (path.Length * PerPathSegmentCapacity));
+        _ = sb.Append(root);
         for (var i = 0; i < path.Length; i++)
         {
-            sb.Append('.').Append(path[i].PropertyName);
+            _ = sb.Append('.').Append(path[i].PropertyName);
         }
 
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Builds a property access expression for use in a lambda body.
-    /// </summary>
+    /// <summary>Builds a property access expression for use in a lambda body.</summary>
     /// <param name="param">The lambda parameter name.</param>
     /// <param name="path">The property path segments.</param>
     /// <returns>A dotted access chain like "x.Address.City".</returns>
     internal static string BuildPropertyAccessLambda(string param, EquatableArray<PropertyPathSegment> path) =>
         BuildPropertyAccessChain(param, path);
 
-    /// <summary>
-    /// Builds a property setter chain for assignment (e.g., target.Header.Title).
-    /// </summary>
+    /// <summary>Builds a property setter chain for assignment (e.g., target.Header.Title).</summary>
     /// <param name="root">The root variable name.</param>
     /// <param name="path">The property path segments.</param>
     /// <returns>A dotted access chain suitable for the left side of an assignment.</returns>
     internal static string BuildPropertySetterChain(string root, EquatableArray<PropertyPathSegment> path) =>
         BuildPropertyAccessChain(root, path);
 
-    /// <summary>
-    /// Builds a human-readable dotted property path string for comments.
-    /// </summary>
+    /// <summary>Builds a human-readable dotted property path string for comments.</summary>
     /// <param name="path">The property path segments.</param>
     /// <returns>A dotted string like "Address.City".</returns>
     internal static string BuildPropertyPathString(EquatableArray<PropertyPathSegment> path)
@@ -105,15 +98,15 @@ internal static class CodeGeneratorHelpers
             return string.Empty;
         }
 
-        var sb = new StringBuilder(path.Length * 16);
+        var sb = new StringBuilder(path.Length * PerPathSegmentCapacity);
         for (var i = 0; i < path.Length; i++)
         {
             if (i > 0)
             {
-                sb.Append('.');
+                _ = sb.Append('.');
             }
 
-            sb.Append(path[i].PropertyName);
+            _ = sb.Append(path[i].PropertyName);
         }
 
         return sb.ToString();
@@ -146,17 +139,10 @@ internal static class CodeGeneratorHelpers
         }
 
         var secondLastSlash = filePath.LastIndexOf('/', lastSlash - 1);
-        if (secondLastSlash < 0)
-        {
-            return filePath;
-        }
-
-        return filePath.Substring(secondLastSlash + 1);
+        return secondLastSlash < 0 ? filePath : filePath.Substring(secondLastSlash + 1);
     }
 
-    /// <summary>
-    /// Escapes a string for embedding in a C# string literal.
-    /// </summary>
+    /// <summary>Escapes a string for embedding in a C# string literal.</summary>
     /// <param name="value">The string to escape.</param>
     /// <returns>The escaped string.</returns>
     internal static string EscapeString(string value)
@@ -178,21 +164,21 @@ internal static class CodeGeneratorHelpers
             return value;
         }
 
-        var sb = new StringBuilder(value.Length + 4);
+        var sb = new StringBuilder(value.Length + EscapeOverheadCapacity);
         for (var i = 0; i < value.Length; i++)
         {
             var c = value[i];
             if (c == '\\')
             {
-                sb.Append("\\\\");
+                _ = sb.Append("\\\\");
             }
             else if (c == '"')
             {
-                sb.Append("\\\"");
+                _ = sb.Append("\\\"");
             }
             else
             {
-                sb.Append(c);
+                _ = sb.Append(c);
             }
         }
 
@@ -210,19 +196,12 @@ internal static class CodeGeneratorHelpers
     internal static string NormalizeLambdaText(string expressionText)
     {
         const string StaticPrefix = "static ";
-        if (expressionText.Length > StaticPrefix.Length
+        return expressionText.Length > StaticPrefix.Length
             && expressionText[0] == 's'
-            && expressionText.StartsWith(StaticPrefix, StringComparison.Ordinal))
-        {
-            return expressionText.Substring(StaticPrefix.Length);
-        }
-
-        return expressionText;
+            && expressionText.StartsWith(StaticPrefix, StringComparison.Ordinal) ? expressionText.Substring(StaticPrefix.Length) : expressionText;
     }
 
-    /// <summary>
-    /// Appends the standard auto-generated file header and opens the extension partial class.
-    /// </summary>
+    /// <summary>Appends the standard auto-generated file header and opens the extension partial class.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="features">
     /// The consumer compilation's language-feature and generation-option snapshot. Controls whether the
@@ -234,10 +213,10 @@ internal static class CodeGeneratorHelpers
         AppendGeneratedFileMarkers(sb, features.EmitGeneratedCodeMarkers);
         if (features.SupportsNullable)
         {
-            sb.AppendLine("#nullable enable");
+            _ = sb.AppendLine("#nullable enable");
         }
 
-        sb.Append("""
+        _ = sb.Append("""
 
                   using System;
 
@@ -262,13 +241,11 @@ internal static class CodeGeneratorHelpers
             return;
         }
 
-        sb.AppendLine("// <auto-generated/>")
+        _ = sb.AppendLine("// <auto-generated/>")
             .AppendLine("#pragma warning disable");
     }
 
-    /// <summary>
-    /// Appends the closing braces for the extension partial class and namespace.
-    /// </summary>
+    /// <summary>Appends the closing braces for the extension partial class and namespace.</summary>
     /// <param name="sb">The string builder to append to.</param>
     internal static void AppendExtensionClassFooter(StringBuilder sb) =>
         sb.Append("""
@@ -304,9 +281,7 @@ internal static class CodeGeneratorHelpers
         }
     }
 
-    /// <summary>
-    /// Finds a <see cref="ClassBindingInfo"/> by fully qualified type name.
-    /// </summary>
+    /// <summary>Finds a <see cref="ClassBindingInfo"/> by fully qualified type name.</summary>
     /// <param name="allClasses">All detected class binding infos.</param>
     /// <param name="fullyQualifiedName">The fully qualified name to match.</param>
     /// <returns>The matching class info, or null if not found.</returns>
@@ -325,15 +300,12 @@ internal static class CodeGeneratorHelpers
         return null;
     }
 
-    /// <summary>
-    /// Computes a deterministic hash for a string using FNV-1a.
-    /// Unlike <see cref="string.GetHashCode()"/>, this is stable across processes and .NET versions.
-    /// </summary>
+    /// <summary>Computes a deterministic hash for a string using FNV-1a. Unlike <see cref="string.GetHashCode()"/>, this is stable across processes and .NET versions.</summary>
     /// <param name="s">The string to hash.</param>
     /// <returns>A deterministic 32-bit hash code.</returns>
     internal static int StableStringHash(string s)
     {
-        if (s == null)
+        if (s is null)
         {
             return 0;
         }

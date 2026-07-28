@@ -29,14 +29,10 @@ internal static class ObservationPluginRegistry
         new WpfObservationPlugin() // Affinity  4 - WPF DependencyObject
     ];
 
-    /// <summary>
-    /// Gets the total number of registered plugins.
-    /// </summary>
+    /// <summary>Gets the total number of registered plugins.</summary>
     internal static int Count => Plugins.Length;
 
-    /// <summary>
-    /// Gets the highest-affinity plugin that can handle the given type.
-    /// </summary>
+    /// <summary>Gets the highest-affinity plugin that can handle the given type.</summary>
     /// <param name="classInfo">The type-level binding info.</param>
     /// <returns>The best matching plugin, or <see langword="null"/> if no plugin matches.</returns>
     internal static IObservationPlugin? GetBestPlugin(ClassBindingInfo classInfo)
@@ -52,9 +48,7 @@ internal static class ObservationPluginRegistry
         return null;
     }
 
-    /// <summary>
-    /// Gets a plugin by its observation kind identifier.
-    /// </summary>
+    /// <summary>Gets a plugin by its observation kind identifier.</summary>
     /// <param name="observationKind">The observation kind (e.g., "INPC", "WpfDP").</param>
     /// <returns>The matching plugin, or <see langword="null"/> if not found.</returns>
     internal static IObservationPlugin? GetPluginByKind(string observationKind)
@@ -70,9 +64,7 @@ internal static class ObservationPluginRegistry
         return null;
     }
 
-    /// <summary>
-    /// Gets the plugin at the specified index.
-    /// </summary>
+    /// <summary>Gets the plugin at the specified index.</summary>
     /// <param name="index">The zero-based index.</param>
     /// <returns>The plugin at the specified index.</returns>
     internal static IObservationPlugin GetPlugin(int index) => Plugins[index];

@@ -2,20 +2,18 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Diagnostics.CodeAnalysis;
 using ReactiveUI.Binding.ObservableForProperty;
+
 using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Extension methods for observing property changes with IObservedChange context (WhenAny).
-/// </summary>
+/// <summary>Extension methods for observing property changes with IObservedChange context (WhenAny).</summary>
 public static partial class ReactiveUIBindingExtensions
 {
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 1 property on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 1 property on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -37,9 +35,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 1 property on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 1 property on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -69,9 +65,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 2 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 2 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -85,6 +79,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2>(
         this TSender sender,
@@ -99,9 +94,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 2 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 2 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -142,9 +135,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 3 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 3 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -161,6 +152,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3>(
         this TSender sender,
@@ -178,9 +171,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 3 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 3 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -229,9 +220,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 4 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 4 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -251,6 +240,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4>(
         this TSender sender,
@@ -276,9 +267,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 4 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 4 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -294,6 +283,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4>(
         this TSender sender,
@@ -335,9 +325,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 5 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 5 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -360,6 +348,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5>(
         this TSender sender,
@@ -389,9 +379,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 5 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 5 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -409,6 +397,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5>(
         this TSender sender,
@@ -456,9 +445,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 6 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 6 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -484,6 +471,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6>(
         this TSender sender,
@@ -517,9 +506,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 6 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 6 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -539,6 +526,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6>(
         this TSender sender,
@@ -599,9 +587,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 7 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 7 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -630,6 +616,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7>(
         this TSender sender,
@@ -667,9 +655,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 7 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 7 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -691,6 +677,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7>(
         this TSender sender,
@@ -758,9 +746,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 8 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 8 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -792,6 +778,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8>(
         this TSender sender,
@@ -833,9 +821,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 8 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 8 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -859,6 +845,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8>(
         this TSender sender,
@@ -933,9 +921,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 9 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 9 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -970,6 +956,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
         this TSender sender,
@@ -1015,9 +1003,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 9 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 9 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -1043,6 +1029,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
         this TSender sender,
@@ -1124,9 +1112,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 10 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 10 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -1164,6 +1150,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
         this TSender sender,
@@ -1213,9 +1201,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 10 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 10 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -1243,6 +1229,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
         this TSender sender,
@@ -1331,9 +1319,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 11 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 11 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -1374,6 +1360,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
         this TSender sender,
@@ -1427,9 +1415,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 11 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 11 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -1459,6 +1445,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
         this TSender sender,
@@ -1554,9 +1542,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes 12 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 12 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -1600,6 +1586,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
         this TSender sender,
@@ -1657,9 +1645,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>
-    /// Observes 12 properties on the specified sender and applies a selector to the observed changes.
-    /// </summary>
+    /// <summary>Observes 12 properties on the specified sender and applies a selector to the observed changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -1691,6 +1677,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
         this TSender sender,

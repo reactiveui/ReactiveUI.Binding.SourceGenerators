@@ -4,24 +4,16 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting nullable byte to byte.
-/// </summary>
+/// <summary>Tests for converting nullable byte to byte.</summary>
 public class NullableByteToByteTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    /// Sample byte value used for conversion round-trips.
-    /// </summary>
+    /// <summary>Sample byte value used for conversion round-trips.</summary>
     private const byte SampleByte = 42;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -31,9 +23,7 @@ public class NullableByteToByteTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithValue_Succeeds()
@@ -44,12 +34,10 @@ public class NullableByteToByteTypeConverterTests
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((byte)SampleByte);
+        await Assert.That(output).IsEqualTo(SampleByte);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsFalse()
@@ -61,9 +49,7 @@ public class NullableByteToByteTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies FromType ReturnsByteNullable.
-    /// </summary>
+    /// <summary>Verifies FromType ReturnsByteNullable.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task FromType_ReturnsByteNullable()
@@ -72,9 +58,7 @@ public class NullableByteToByteTypeConverterTests
         await Assert.That(converter.FromType).IsEqualTo(typeof(byte?));
     }
 
-    /// <summary>
-    ///     Verifies ToType ReturnsByte.
-    /// </summary>
+    /// <summary>Verifies ToType ReturnsByte.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ToType_ReturnsByte()
@@ -83,9 +67,7 @@ public class NullableByteToByteTypeConverterTests
         await Assert.That(converter.ToType).IsEqualTo(typeof(byte));
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithValidValue ReturnsTrueAndOutput.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithValidValue ReturnsTrueAndOutput.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithValidValue_ReturnsTrueAndOutput()
@@ -96,12 +78,10 @@ public class NullableByteToByteTypeConverterTests
         var success = converter.TryConvertTyped(value, null, out var result);
 
         await Assert.That(success).IsTrue();
-        await Assert.That(result).IsEqualTo((byte)SampleByte);
+        await Assert.That(result).IsEqualTo(SampleByte);
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithNullValue ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithNullValue ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithNullValue_ReturnsFalse()
@@ -114,9 +94,7 @@ public class NullableByteToByteTypeConverterTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithInvalidType ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithInvalidType ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()

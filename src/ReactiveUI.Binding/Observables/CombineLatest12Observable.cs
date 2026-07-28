@@ -6,9 +6,7 @@ using System.ComponentModel;
 
 namespace ReactiveUI.Binding.Observables;
 
-/// <summary>
-/// Lightweight CombineLatest observable that combines the latest values from 12 source observables.
-/// </summary>
+/// <summary>Lightweight CombineLatest observable that combines the latest values from 12 source observables.</summary>
 /// <typeparam name="T1">The type of element 1.</typeparam>
 /// <typeparam name="T2">The type of element 2.</typeparam>
 /// <typeparam name="T3">The type of element 3.</typeparam>
@@ -24,81 +22,49 @@ namespace ReactiveUI.Binding.Observables;
 /// <typeparam name="TResult">The result element type.</typeparam>
 [EditorBrowsable(EditorBrowsableState.Never)]
 [ExcludeFromCodeCoverage]
-[SuppressMessage(
-    "Major Code Smell",
-    "S107:Methods should not have too many parameters",
-    Justification = "Deliberately large arity intrinsic to the N-argument binding/observable API surface.")]
 internal sealed class
     CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> : IObservable<TResult>
 {
-    /// <summary>
-    /// The 1st source observable sequence.
-    /// </summary>
+    /// <summary>The 1st source observable sequence.</summary>
     private readonly IObservable<T1> _source1;
 
-    /// <summary>
-    /// The 2nd source observable sequence.
-    /// </summary>
+    /// <summary>The 2nd source observable sequence.</summary>
     private readonly IObservable<T2> _source2;
 
-    /// <summary>
-    /// The 3rd source observable sequence.
-    /// </summary>
+    /// <summary>The 3rd source observable sequence.</summary>
     private readonly IObservable<T3> _source3;
 
-    /// <summary>
-    /// The 4th source observable sequence.
-    /// </summary>
+    /// <summary>The 4th source observable sequence.</summary>
     private readonly IObservable<T4> _source4;
 
-    /// <summary>
-    /// The 5th source observable sequence.
-    /// </summary>
+    /// <summary>The 5th source observable sequence.</summary>
     private readonly IObservable<T5> _source5;
 
-    /// <summary>
-    /// The 6th source observable sequence.
-    /// </summary>
+    /// <summary>The 6th source observable sequence.</summary>
     private readonly IObservable<T6> _source6;
 
-    /// <summary>
-    /// The 7th source observable sequence.
-    /// </summary>
+    /// <summary>The 7th source observable sequence.</summary>
     private readonly IObservable<T7> _source7;
 
-    /// <summary>
-    /// The 8th source observable sequence.
-    /// </summary>
+    /// <summary>The 8th source observable sequence.</summary>
     private readonly IObservable<T8> _source8;
 
-    /// <summary>
-    /// The 9th source observable sequence.
-    /// </summary>
+    /// <summary>The 9th source observable sequence.</summary>
     private readonly IObservable<T9> _source9;
 
-    /// <summary>
-    /// The 10th source observable sequence.
-    /// </summary>
+    /// <summary>The 10th source observable sequence.</summary>
     private readonly IObservable<T10> _source10;
 
-    /// <summary>
-    /// The 11th source observable sequence.
-    /// </summary>
+    /// <summary>The 11th source observable sequence.</summary>
     private readonly IObservable<T11> _source11;
 
-    /// <summary>
-    /// The 12th source observable sequence.
-    /// </summary>
+    /// <summary>The 12th source observable sequence.</summary>
     private readonly IObservable<T12> _source12;
 
-    /// <summary>
-    /// The function to combine the latest values from all sources into a result.
-    /// </summary>
+    /// <summary>The function to combine the latest values from all sources into a result.</summary>
     private readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> _resultSelector;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CombineLatest12Observable{T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="CombineLatest12Observable{T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult}"/> class.</summary>
     /// <param name="source1">The 1st source observable.</param>
     /// <param name="source2">The 2nd source observable.</param>
     /// <param name="source3">The 3rd source observable.</param>
@@ -112,6 +78,7 @@ internal sealed class
     /// <param name="source11">The 11th source observable.</param>
     /// <param name="source12">The 12th source observable.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
+    [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     public CombineLatest12Observable(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -176,157 +143,92 @@ internal sealed class
         return sub;
     }
 
-    /// <summary>
-    /// Manages the active subscriptions to all twelve source observables and emits combined results.
-    /// </summary>
-    private sealed class Subscription : IDisposable
+    /// <summary>Manages the active subscriptions to all twelve source observables and emits combined results.</summary>
+    /// <param name="observer">The downstream observer.</param>
+    /// <param name="resultSelector">The function to combine the latest values.</param>
+    private sealed class Subscription(
+            IObserver<TResult> observer,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> resultSelector) : IDisposable
     {
-        /// <summary>
-        /// The subscription array index for source 3.
-        /// </summary>
+        /// <summary>The subscription array index for source 3.</summary>
         private const int Source3Index = 2;
 
-        /// <summary>
-        /// The subscription array index for source 4.
-        /// </summary>
+        /// <summary>The subscription array index for source 4.</summary>
         private const int Source4Index = 3;
 
-        /// <summary>
-        /// The subscription array index for source 5.
-        /// </summary>
+        /// <summary>The subscription array index for source 5.</summary>
         private const int Source5Index = 4;
 
-        /// <summary>
-        /// The subscription array index for source 6.
-        /// </summary>
+        /// <summary>The subscription array index for source 6.</summary>
         private const int Source6Index = 5;
 
-        /// <summary>
-        /// The subscription array index for source 7.
-        /// </summary>
+        /// <summary>The subscription array index for source 7.</summary>
         private const int Source7Index = 6;
 
-        /// <summary>
-        /// The subscription array index for source 8.
-        /// </summary>
+        /// <summary>The subscription array index for source 8.</summary>
         private const int Source8Index = 7;
 
-        /// <summary>
-        /// The subscription array index for source 9.
-        /// </summary>
+        /// <summary>The subscription array index for source 9.</summary>
         private const int Source9Index = 8;
 
-        /// <summary>
-        /// The subscription array index for source 10.
-        /// </summary>
+        /// <summary>The subscription array index for source 10.</summary>
         private const int Source10Index = 9;
 
-        /// <summary>
-        /// The subscription array index for source 11.
-        /// </summary>
+        /// <summary>The subscription array index for source 11.</summary>
         private const int Source11Index = 10;
 
-        /// <summary>
-        /// The subscription array index for source 12.
-        /// </summary>
+        /// <summary>The subscription array index for source 12.</summary>
         private const int Source12Index = 11;
 
-        /// <summary>
-        /// The function to combine the latest values from all sources into a result.
-        /// </summary>
-        private readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> _resultSelector;
+        /// <summary>The function to combine the latest values from all sources into a result.</summary>
+        private readonly Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> _resultSelector = resultSelector;
 
-        /// <summary>
-        /// The array of inner source subscriptions.
-        /// </summary>
+        /// <summary>The array of inner source subscriptions.</summary>
         private readonly IDisposable?[] _subscriptions = new IDisposable?[12];
 
-        /// <summary>
-        /// The downstream observer receiving combined results. Set to <see langword="null"/> on disposal.
-        /// </summary>
-        private IObserver<TResult>? _observer;
+        /// <summary>The downstream observer receiving combined results. Set to <see langword="null"/> on disposal.</summary>
+        private IObserver<TResult>? _observer = observer;
 
-        /// <summary>
-        /// The latest value received from source 1.
-        /// </summary>
+        /// <summary>The latest value received from source 1.</summary>
         private T1 _value1 = default!;
 
-        /// <summary>
-        /// The latest value received from source 2.
-        /// </summary>
+        /// <summary>The latest value received from source 2.</summary>
         private T2 _value2 = default!;
 
-        /// <summary>
-        /// The latest value received from source 3.
-        /// </summary>
+        /// <summary>The latest value received from source 3.</summary>
         private T3 _value3 = default!;
 
-        /// <summary>
-        /// The latest value received from source 4.
-        /// </summary>
+        /// <summary>The latest value received from source 4.</summary>
         private T4 _value4 = default!;
 
-        /// <summary>
-        /// The latest value received from source 5.
-        /// </summary>
+        /// <summary>The latest value received from source 5.</summary>
         private T5 _value5 = default!;
 
-        /// <summary>
-        /// The latest value received from source 6.
-        /// </summary>
+        /// <summary>The latest value received from source 6.</summary>
         private T6 _value6 = default!;
 
-        /// <summary>
-        /// The latest value received from source 7.
-        /// </summary>
+        /// <summary>The latest value received from source 7.</summary>
         private T7 _value7 = default!;
 
-        /// <summary>
-        /// The latest value received from source 8.
-        /// </summary>
+        /// <summary>The latest value received from source 8.</summary>
         private T8 _value8 = default!;
 
-        /// <summary>
-        /// The latest value received from source 9.
-        /// </summary>
+        /// <summary>The latest value received from source 9.</summary>
         private T9 _value9 = default!;
 
-        /// <summary>
-        /// The latest value received from source 10.
-        /// </summary>
+        /// <summary>The latest value received from source 10.</summary>
         private T10 _value10 = default!;
 
-        /// <summary>
-        /// The latest value received from source 11.
-        /// </summary>
+        /// <summary>The latest value received from source 11.</summary>
         private T11 _value11 = default!;
 
-        /// <summary>
-        /// The latest value received from source 12.
-        /// </summary>
+        /// <summary>The latest value received from source 12.</summary>
         private T12 _value12 = default!;
 
-        /// <summary>
-        /// Bitmask of the sources that have emitted at least one value; compared against the all-ready mask.
-        /// </summary>
+        /// <summary>Bitmask of the sources that have emitted at least one value; compared against the all-ready mask.</summary>
         private int _readyMask;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Subscription"/> class.
-        /// </summary>
-        /// <param name="observer">The downstream observer.</param>
-        /// <param name="resultSelector">The function to combine the latest values.</param>
-        public Subscription(
-            IObserver<TResult> observer,
-            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> resultSelector)
-        {
-            _observer = observer;
-            _resultSelector = resultSelector;
-        }
-
-        /// <summary>
-        /// Subscribes to the 1st source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 1st source observable.</summary>
         /// <param name="source">The 1st source observable.</param>
         public void Subscribe1(IObservable<T1> source)
         {
@@ -334,9 +236,7 @@ internal sealed class
             Volatile.Write(ref _subscriptions[0], sub);
         }
 
-        /// <summary>
-        /// Subscribes to the 2nd source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 2nd source observable.</summary>
         /// <param name="source">The 2nd source observable.</param>
         public void Subscribe2(IObservable<T2> source)
         {
@@ -344,9 +244,7 @@ internal sealed class
             Volatile.Write(ref _subscriptions[1], sub);
         }
 
-        /// <summary>
-        /// Subscribes to the 3rd source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 3rd source observable.</summary>
         /// <param name="source">The 3rd source observable.</param>
         public void Subscribe3(IObservable<T3> source)
         {
@@ -354,9 +252,7 @@ internal sealed class
             Volatile.Write(ref _subscriptions[Source3Index], sub);
         }
 
-        /// <summary>
-        /// Subscribes to the 4th source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 4th source observable.</summary>
         /// <param name="source">The 4th source observable.</param>
         public void Subscribe4(IObservable<T4> source)
         {
@@ -364,9 +260,7 @@ internal sealed class
             Volatile.Write(ref _subscriptions[Source4Index], sub);
         }
 
-        /// <summary>
-        /// Subscribes to the 5th source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 5th source observable.</summary>
         /// <param name="source">The 5th source observable.</param>
         public void Subscribe5(IObservable<T5> source)
         {
@@ -374,9 +268,7 @@ internal sealed class
             Volatile.Write(ref _subscriptions[Source5Index], sub);
         }
 
-        /// <summary>
-        /// Subscribes to the 6th source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 6th source observable.</summary>
         /// <param name="source">The 6th source observable.</param>
         public void Subscribe6(IObservable<T6> source)
         {
@@ -384,9 +276,7 @@ internal sealed class
             Volatile.Write(ref _subscriptions[Source6Index], sub);
         }
 
-        /// <summary>
-        /// Subscribes to the 7th source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 7th source observable.</summary>
         /// <param name="source">The 7th source observable.</param>
         public void Subscribe7(IObservable<T7> source)
         {
@@ -394,9 +284,7 @@ internal sealed class
             Volatile.Write(ref _subscriptions[Source7Index], sub);
         }
 
-        /// <summary>
-        /// Subscribes to the 8th source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 8th source observable.</summary>
         /// <param name="source">The 8th source observable.</param>
         public void Subscribe8(IObservable<T8> source)
         {
@@ -404,9 +292,7 @@ internal sealed class
             Volatile.Write(ref _subscriptions[Source8Index], sub);
         }
 
-        /// <summary>
-        /// Subscribes to the 9th source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 9th source observable.</summary>
         /// <param name="source">The 9th source observable.</param>
         public void Subscribe9(IObservable<T9> source)
         {
@@ -414,9 +300,7 @@ internal sealed class
             Volatile.Write(ref _subscriptions[Source9Index], sub);
         }
 
-        /// <summary>
-        /// Subscribes to the 10th source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 10th source observable.</summary>
         /// <param name="source">The 10th source observable.</param>
         public void Subscribe10(IObservable<T10> source)
         {
@@ -424,9 +308,7 @@ internal sealed class
             Volatile.Write(ref _subscriptions[Source10Index], sub);
         }
 
-        /// <summary>
-        /// Subscribes to the 11th source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 11th source observable.</summary>
         /// <param name="source">The 11th source observable.</param>
         public void Subscribe11(IObservable<T11> source)
         {
@@ -434,9 +316,7 @@ internal sealed class
             Volatile.Write(ref _subscriptions[Source11Index], sub);
         }
 
-        /// <summary>
-        /// Subscribes to the 12th source observable.
-        /// </summary>
+        /// <summary>Subscribes to the 12th source observable.</summary>
         /// <param name="source">The 12th source observable.</param>
         public void Subscribe12(IObservable<T12> source)
         {
@@ -447,7 +327,7 @@ internal sealed class
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref _observer, null) == null)
+            if (Interlocked.Exchange(ref _observer, null) is null)
             {
                 return;
             }
@@ -458,9 +338,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Emits the combined result if all sources have produced at least one value.
-        /// </summary>
+        /// <summary>Emits the combined result if all sources have produced at least one value.</summary>
         private void TryEmit()
         {
             if (_readyMask != (1 << _subscriptions.Length) - 1)
@@ -468,12 +346,10 @@ internal sealed class
                 return;
             }
 
-            _observer?.OnNext(_resultSelector(_value1, _value2, _value3, _value4, _value5, _value6, _value7, _value8, _value9, _value10, _value11, _value12));
+            Volatile.Read(ref _observer)?.OnNext(_resultSelector(_value1, _value2, _value3, _value4, _value5, _value6, _value7, _value8, _value9, _value10, _value11, _value12));
         }
 
-        /// <summary>
-        /// Observer for the 1st source observable.
-        /// </summary>
+        /// <summary>Observer for the 1st source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer1(Subscription parent) : IObserver<T1>
         {
@@ -494,9 +370,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Observer for the 2nd source observable.
-        /// </summary>
+        /// <summary>Observer for the 2nd source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer2(Subscription parent) : IObserver<T2>
         {
@@ -517,9 +391,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Observer for the 3rd source observable.
-        /// </summary>
+        /// <summary>Observer for the 3rd source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer3(Subscription parent) : IObserver<T3>
         {
@@ -540,9 +412,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Observer for the 4th source observable.
-        /// </summary>
+        /// <summary>Observer for the 4th source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer4(Subscription parent) : IObserver<T4>
         {
@@ -563,9 +433,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Observer for the 5th source observable.
-        /// </summary>
+        /// <summary>Observer for the 5th source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer5(Subscription parent) : IObserver<T5>
         {
@@ -586,9 +454,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Observer for the 6th source observable.
-        /// </summary>
+        /// <summary>Observer for the 6th source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer6(Subscription parent) : IObserver<T6>
         {
@@ -609,9 +475,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Observer for the 7th source observable.
-        /// </summary>
+        /// <summary>Observer for the 7th source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer7(Subscription parent) : IObserver<T7>
         {
@@ -632,9 +496,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Observer for the 8th source observable.
-        /// </summary>
+        /// <summary>Observer for the 8th source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer8(Subscription parent) : IObserver<T8>
         {
@@ -655,9 +517,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Observer for the 9th source observable.
-        /// </summary>
+        /// <summary>Observer for the 9th source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer9(Subscription parent) : IObserver<T9>
         {
@@ -678,9 +538,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Observer for the 10th source observable.
-        /// </summary>
+        /// <summary>Observer for the 10th source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer10(Subscription parent) : IObserver<T10>
         {
@@ -701,9 +559,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Observer for the 11th source observable.
-        /// </summary>
+        /// <summary>Observer for the 11th source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer11(Subscription parent) : IObserver<T11>
         {
@@ -724,9 +580,7 @@ internal sealed class
             }
         }
 
-        /// <summary>
-        /// Observer for the 12th source observable.
-        /// </summary>
+        /// <summary>Observer for the 12th source observable.</summary>
         /// <param name="parent">The parent subscription.</param>
         private sealed class Observer12(Subscription parent) : IObserver<T12>
         {

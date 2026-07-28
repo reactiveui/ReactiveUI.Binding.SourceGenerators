@@ -5,19 +5,19 @@
 #if NET6_0_OR_GREATER
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting strings to TimeOnly.
-/// </summary>
+/// <summary>Tests for converting strings to TimeOnly.</summary>
 public class StringToTimeOnlyTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Hour component of the sample time used across the conversion round-trips.</summary>
+    private const int SampleHour = 10;
+
+    /// <summary>Minute component of the sample time used across the conversion round-trips.</summary>
+    private const int SampleMinute = 30;
+
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -27,15 +27,13 @@ public class StringToTimeOnlyTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert ValidString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert ValidString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_ValidString_Succeeds()
     {
         var converter = new StringToTimeOnlyTypeConverter();
-        var expected = new TimeOnly(10, 30, 0);
+        var expected = new TimeOnly(SampleHour, SampleMinute, 0);
 
         var result = converter.TryConvert(expected.ToString(), null, out var output);
 
@@ -43,9 +41,7 @@ public class StringToTimeOnlyTypeConverterTests
         await Assert.That(output).IsEqualTo(expected);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsFalse()
@@ -56,9 +52,7 @@ public class StringToTimeOnlyTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert EmptyString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert EmptyString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_EmptyString_ReturnsFalse()
@@ -69,9 +63,7 @@ public class StringToTimeOnlyTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert InvalidString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert InvalidString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_InvalidString_ReturnsFalse()

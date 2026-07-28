@@ -6,20 +6,13 @@ using System.Globalization;
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting DateTime to strings.
-/// </summary>
-[SuppressMessage("Major Code Smell", "S6566:Use \"DateTimeOffset\" instead of \"DateTime\"", Justification = "Tests focused on DateTime.")]
+/// <summary>Tests for converting DateTime to strings.</summary>
 public class DateTimeToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -29,9 +22,7 @@ public class DateTimeToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert DateTime Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert DateTime Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_DateTime_Succeeds()
@@ -45,9 +36,7 @@ public class DateTimeToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString(CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MinValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MinValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MinValue_Succeeds()
@@ -61,9 +50,7 @@ public class DateTimeToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(DateTime.MinValue.ToString(CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MaxValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MaxValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MaxValue_Succeeds()

@@ -61,12 +61,12 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
     {
         if (isBeforeChange)
         {
-            sb.Append(
+            _ = sb.Append(
                 $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}))");
             return;
         }
 
-        sb.Append($"new __WinUIDPObservable<{segment.PropertyTypeFullName}>(")
+        _ = sb.Append($"new __WinUIDPObservable<{segment.PropertyTypeFullName}>(")
             .Append($"(global::Microsoft.UI.Xaml.DependencyObject){rootVar}, ")
             .Append($"{castTypeName}.{segment.PropertyName}Property, ")
             .Append(
@@ -86,12 +86,12 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
     {
         if (isBeforeChange)
         {
-            sb.Append(
+            _ = sb.Append(
                 $"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
             return;
         }
 
-        sb.Append($"""
+        _ = sb.Append($"""
                                var {varName} = new __WinUIDPObservable<{segment.PropertyTypeFullName}>(
                                    (global::Microsoft.UI.Xaml.DependencyObject){rootVar},
                                    {castTypeName}.{segment.PropertyName}Property,
@@ -111,13 +111,13 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
     {
         if (isBeforeChange)
         {
-            sb.AppendLine(
-                $"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>" +
-                $")new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
+            _ = sb
+                .Append($"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>")
+                .AppendLine($")new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
             return;
         }
 
-        sb.AppendLine($"""
+        _ = sb.AppendLine($"""
                                    var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new __WinUIDPObservable<{segment.PropertyTypeFullName}>(
                                        (global::Microsoft.UI.Xaml.DependencyObject){rootVar},
                                        {castTypeName}.{segment.PropertyName}Property,
@@ -140,7 +140,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
 
         if (isBeforeChange)
         {
-            sb.AppendLine()
+            _ = sb.AppendLine()
                 .AppendLine($"""
                                      var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
                                          global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
@@ -150,7 +150,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
             return;
         }
 
-        sb.AppendLine()
+        _ = sb.AppendLine()
             .AppendLine($"""
                                  var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
                                      global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
@@ -179,9 +179,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
                                    true);
                        """);
 
-    /// <summary>
-    /// Emits the <c>__WinUIDPObservable&lt;T&gt;</c> class header (fields and constructor).
-    /// </summary>
+    /// <summary>Emits the <c>__WinUIDPObservable&lt;T&gt;</c> class header (fields and constructor).</summary>
     /// <param name="sb">The string builder.</param>
     private static void EmitObservableHeader(StringBuilder sb) =>
         sb.AppendLine("""
@@ -216,7 +214,15 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
     /// for the <c>__WinUIDPObservable&lt;T&gt;</c> observable, closing the outer class.
     /// </summary>
     /// <param name="sb">The string builder.</param>
-    private static void EmitSubscriptionClass(StringBuilder sb) =>
+    private static void EmitSubscriptionClass(StringBuilder sb)
+    {
+        EmitSubscriptionClassHead(sb);
+        EmitSubscriptionClassCallbacks(sb);
+    }
+
+    /// <summary>Emits the Subscribe method plus the subscription's fields and constructor.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    private static void EmitSubscriptionClassHead(StringBuilder sb) =>
         sb.AppendLine("""
 
                               public global::System.IDisposable Subscribe(global::System.IObserver<T> observer)
@@ -246,6 +252,12 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
                                       _hasValue = true;
                                       observer.OnNext(initial);
                                   }
+                      """);
+
+    /// <summary>Emits the subscription's change callback and disposal, closing the observable class.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    private static void EmitSubscriptionClassCallbacks(StringBuilder sb) =>
+        sb.AppendLine("""
 
                                   private void OnPropertyChanged(
                                       global::Microsoft.UI.Xaml.DependencyObject sender,

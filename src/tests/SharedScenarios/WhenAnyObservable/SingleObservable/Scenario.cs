@@ -7,16 +7,12 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenAnyObservable.SingleObservable;
 
-/// <summary>
-/// Exercises WhenAnyObservable on a single observable property.
-/// </summary>
+/// <summary>Exercises WhenAnyObservable on a single observable property.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenAnyObservable that switches to the latest value of MyCommand.
-    /// </summary>
+    /// <summary>Creates a WhenAnyObservable that switches to the latest value of MyCommand.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable that switches to the latest MyCommand observable.</returns>
-    public static IObservable<string> Execute(MyViewModel vm)
-        => vm.WhenAnyObservable(x => x.MyCommand);
+    public static IObservable<string> Execute(MyViewModel vm) =>
+        vm.WhenAnyObservable(x => x.MyCommand);
 }

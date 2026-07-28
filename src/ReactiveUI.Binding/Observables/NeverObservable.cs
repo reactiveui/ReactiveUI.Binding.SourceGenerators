@@ -14,15 +14,10 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class NeverObservable<T> : IObservable<T>
 {
-    /// <summary>
-    /// Gets the singleton instance for this element type.
-    /// </summary>
+    /// <summary>Gets the singleton instance for this element type.</summary>
     public static readonly NeverObservable<T> Instance = new();
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="NeverObservable{T}"/> class.
-    /// Prevents external instantiation. Use <see cref="Instance"/> instead.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="NeverObservable{T}"/> class. Prevents external instantiation. Use <see cref="Instance"/> instead.</summary>
     private NeverObservable()
     {
     }

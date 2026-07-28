@@ -9,18 +9,18 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Tests for <see cref="TypeDetectionExtractor"/> methods.
-/// </summary>
+/// <summary>Tests for <see cref="TypeDetectionExtractor"/> methods.</summary>
 public class TypeDetectionExtractorTests
 {
-    /// <summary>
-    /// Verifies ExtractProperties extracts public properties from a type symbol.
-    /// </summary>
+    /// <summary>The <c>MyViewModel</c> name these tests generate against.</summary>
+    private const string MyViewModelName = "MyViewModel";
+
+    /// <summary>Verifies ExtractProperties extracts public properties from a type symbol.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractProperties_PublicProperties_ExtractsAll()
     {
+        const int ExpectedPropertyCount = 2;
         const string source = """
                               using System.ComponentModel;
 
@@ -36,16 +36,14 @@ public class TypeDetectionExtractorTests
                               """;
 
         var compilation = TestHelper.CreateCompilation(source);
-        var typeSymbol = GetNamedTypeSymbol(compilation, "MyViewModel");
+        var typeSymbol = GetNamedTypeSymbol(compilation, MyViewModelName);
 
         var properties = TypeDetectionExtractor.ExtractProperties(typeSymbol, default);
 
-        await Assert.That(properties.Length).IsEqualTo(2);
+        await Assert.That(properties.Length).IsEqualTo(ExpectedPropertyCount);
     }
 
-    /// <summary>
-    /// Verifies ExtractProperties skips static properties.
-    /// </summary>
+    /// <summary>Verifies ExtractProperties skips static properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractProperties_StaticProperty_Skipped()
@@ -65,7 +63,7 @@ public class TypeDetectionExtractorTests
                               """;
 
         var compilation = TestHelper.CreateCompilation(source);
-        var typeSymbol = GetNamedTypeSymbol(compilation, "MyViewModel");
+        var typeSymbol = GetNamedTypeSymbol(compilation, MyViewModelName);
 
         var properties = TypeDetectionExtractor.ExtractProperties(typeSymbol, default);
 
@@ -74,9 +72,7 @@ public class TypeDetectionExtractorTests
         await Assert.That(properties[0].PropertyName).IsEqualTo("Name");
     }
 
-    /// <summary>
-    /// Verifies ExtractProperties skips write-only properties.
-    /// </summary>
+    /// <summary>Verifies ExtractProperties skips write-only properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractProperties_WriteOnlyProperty_Skipped()
@@ -97,7 +93,7 @@ public class TypeDetectionExtractorTests
                               """;
 
         var compilation = TestHelper.CreateCompilation(source);
-        var typeSymbol = GetNamedTypeSymbol(compilation, "MyViewModel");
+        var typeSymbol = GetNamedTypeSymbol(compilation, MyViewModelName);
 
         var properties = TypeDetectionExtractor.ExtractProperties(typeSymbol, default);
 
@@ -106,13 +102,12 @@ public class TypeDetectionExtractorTests
         await Assert.That(properties[0].PropertyName).IsEqualTo("Title");
     }
 
-    /// <summary>
-    /// Verifies ExtractProperties includes indexer properties with IsIndexer flag.
-    /// </summary>
+    /// <summary>Verifies ExtractProperties includes indexer properties with IsIndexer flag.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractProperties_Indexer_Included()
     {
+        const int ExpectedPropertyCount = 2;
         const string source = """
                               using System.ComponentModel;
 
@@ -128,19 +123,17 @@ public class TypeDetectionExtractorTests
                               """;
 
         var compilation = TestHelper.CreateCompilation(source);
-        var typeSymbol = GetNamedTypeSymbol(compilation, "MyViewModel");
+        var typeSymbol = GetNamedTypeSymbol(compilation, MyViewModelName);
 
         var properties = TypeDetectionExtractor.ExtractProperties(typeSymbol, default);
 
         // Both the indexer and Name are included; the indexer has IsIndexer = true
-        var indexerProp = properties.FirstOrDefault(p => p.IsIndexer);
-        await Assert.That(properties.Length).IsEqualTo(2);
+        var indexerProp = properties.FirstOrDefault(static p => p.IsIndexer);
+        await Assert.That(properties.Length).IsEqualTo(ExpectedPropertyCount);
         await Assert.That(indexerProp).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies ExtractProperties detects dependency properties via companion static field heuristic.
-    /// </summary>
+    /// <summary>Verifies ExtractProperties detects dependency properties via companion static field heuristic.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractProperties_DependencyPropertyHeuristic_DetectsDP()
@@ -160,17 +153,15 @@ public class TypeDetectionExtractorTests
                               """;
 
         var compilation = TestHelper.CreateCompilation(source);
-        var typeSymbol = GetNamedTypeSymbol(compilation, "MyViewModel");
+        var typeSymbol = GetNamedTypeSymbol(compilation, MyViewModelName);
 
         var properties = TypeDetectionExtractor.ExtractProperties(typeSymbol, default);
 
-        var titleProp = properties.First(p => p.PropertyName == "Title");
+        var titleProp = properties.First(static p => p.PropertyName == "Title");
         await Assert.That(titleProp.IsDependencyProperty).IsTrue();
     }
 
-    /// <summary>
-    /// Gets a named type symbol from a compilation.
-    /// </summary>
+    /// <summary>Gets a named type symbol from a compilation.</summary>
     /// <param name="compilation">The compilation.</param>
     /// <param name="typeName">The type name.</param>
     /// <returns>The named type symbol.</returns>

@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="short"/> values to <see cref="string"/>.
-/// </summary>
+/// <summary>Converts <see cref="short"/> values to <see cref="string"/>.</summary>
 public sealed class ShortToStringTypeConverter : BindingTypeConverter<short, string>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

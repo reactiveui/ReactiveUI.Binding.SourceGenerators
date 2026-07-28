@@ -8,19 +8,13 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 
-/// <summary>
-/// Runtime execution tests for generated BindTo bindings.
-/// </summary>
+/// <summary>Runtime execution tests for generated BindTo bindings.</summary>
 public class BindToTests
 {
-    /// <summary>
-    /// The initial observable value used across the binding tests.
-    /// </summary>
+    /// <summary>The initial observable value used across the binding tests.</summary>
     private const string InitialValue = "initial";
 
-    /// <summary>
-    /// Verifies that BindTo applies the observable's current and subsequent values to the target property.
-    /// </summary>
+    /// <summary>Verifies that BindTo applies the observable's current and subsequent values to the target property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindTo_String_PushesValuesToTarget()
@@ -37,9 +31,7 @@ public class BindToTests
         await Assert.That(target.ViewProp1).IsEqualTo("updated");
     }
 
-    /// <summary>
-    /// Verifies that disposing a BindTo binding stops further updates to the target property.
-    /// </summary>
+    /// <summary>Verifies that disposing a BindTo binding stops further updates to the target property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindTo_Disposed_StopsUpdating()

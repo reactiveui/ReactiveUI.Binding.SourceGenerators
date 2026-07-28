@@ -13,9 +13,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 /// </summary>
 public sealed class CollectibleAssemblyLoadContext : AssemblyLoadContext
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CollectibleAssemblyLoadContext"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="CollectibleAssemblyLoadContext"/> class.</summary>
     public CollectibleAssemblyLoadContext()
         : base(true)
     {

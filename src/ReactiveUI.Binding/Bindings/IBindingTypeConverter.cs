@@ -11,14 +11,10 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public interface IBindingTypeConverter : IEnableLogger
 {
-    /// <summary>
-    /// Gets the source type supported by this converter.
-    /// </summary>
+    /// <summary>Gets the source type supported by this converter.</summary>
     Type FromType { get; }
 
-    /// <summary>
-    /// Gets the target type supported by this converter.
-    /// </summary>
+    /// <summary>Gets the target type supported by this converter.</summary>
     Type ToType { get; }
 
     /// <summary>
@@ -32,9 +28,7 @@ public interface IBindingTypeConverter : IEnableLogger
     /// zero or a negative value otherwise.</returns>
     int GetAffinityForObjects();
 
-    /// <summary>
-    /// Attempts to convert using the typed implementation, exposed via an object-based shim.
-    /// </summary>
+    /// <summary>Attempts to convert using the typed implementation, exposed via an object-based shim.</summary>
     /// <param name="from">The source value.</param>
     /// <param name="conversionHint">Implementation-defined hint.</param>
     /// <param name="result">The converted value.</param>

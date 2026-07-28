@@ -10,12 +10,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Runtime.CompilerServices;
 
-/// <summary>
-/// Reserved to be used by the compiler for tracking metadata.
-/// This class should not be used by developers in source code.
-/// </summary>
+/// <summary>Reserved to be used by the compiler for tracking metadata. This class should not be used by developers in source code.</summary>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
+[SuppressMessage("Design", "SST1436:Empty type", Justification = "The compiler requires this exact empty type to emit init accessors on targets that do not ship it.")]
 internal static class IsExternalInit;
 
 #else

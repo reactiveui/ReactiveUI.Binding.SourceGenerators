@@ -9,19 +9,13 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.ObservedChanged;
 
-/// <summary>
-/// Tests for ObservedChangedMixin extension methods (Value, GetPropertyName, GetValue, GetValueOrDefault).
-/// </summary>
+/// <summary>Tests for ObservedChangedMixins extension methods (Value, GetPropertyName, GetValue, GetValueOrDefault).</summary>
 public class ObservedChangedExtensionTests
 {
-    /// <summary>
-    /// The expected number of emissions after the initial value plus one change.
-    /// </summary>
+    /// <summary>The expected number of emissions after the initial value plus one change.</summary>
     private const int ExpectedTwoEmissions = 2;
 
-    /// <summary>
-    /// Verifies that the Value extension converts observed changes to values.
-    /// </summary>
+    /// <summary>Verifies that the Value extension converts observed changes to values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Value_ConvertsObservedChangesToValues()
@@ -44,9 +38,7 @@ public class ObservedChangedExtensionTests
         await Assert.That(values[1]).IsEqualTo("End");
     }
 
-    /// <summary>
-    /// Verifies that GetPropertyName returns the correct property path.
-    /// </summary>
+    /// <summary>Verifies that GetPropertyName returns the correct property path.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetPropertyName_ReturnsCorrectPath()
@@ -59,9 +51,7 @@ public class ObservedChangedExtensionTests
         await Assert.That(name).IsEqualTo("IsNotNullString");
     }
 
-    /// <summary>
-    /// Verifies that GetPropertyName returns a dotted path for nested properties.
-    /// </summary>
+    /// <summary>Verifies that GetPropertyName returns a dotted path for nested properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetPropertyName_Nested_ReturnsDottedPath()
@@ -74,9 +64,7 @@ public class ObservedChangedExtensionTests
         await Assert.That(name).IsEqualTo("Child.IsOnlyOneWord");
     }
 
-    /// <summary>
-    /// Verifies that GetValue evaluates the expression chain to get the current value.
-    /// </summary>
+    /// <summary>Verifies that GetValue evaluates the expression chain to get the current value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValue_EvaluatesExpressionChain()
@@ -92,9 +80,7 @@ public class ObservedChangedExtensionTests
         await Assert.That(value).IsEqualTo("Evaluated");
     }
 
-    /// <summary>
-    /// Verifies that GetValueOrDefault returns default when the chain contains a null.
-    /// </summary>
+    /// <summary>Verifies that GetValueOrDefault returns default when the chain contains a null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueOrDefault_NullChain_ReturnsDefault()
@@ -109,14 +95,12 @@ public class ObservedChangedExtensionTests
         await Assert.That(value).IsNull();
     }
 
-    /// <summary>
-    /// Resets and initializes the ReactiveUI binding infrastructure for testing.
-    /// </summary>
+    /// <summary>Resets and initializes the ReactiveUI binding infrastructure for testing.</summary>
     internal static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
     }
 }

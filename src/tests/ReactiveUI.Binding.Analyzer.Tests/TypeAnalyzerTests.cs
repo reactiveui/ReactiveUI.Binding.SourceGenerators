@@ -7,14 +7,13 @@ using ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
-/// <summary>
-/// Tests for <see cref="TypeAnalyzer"/>.
-/// </summary>
+/// <summary>Tests for <see cref="TypeAnalyzer"/>.</summary>
 public class TypeAnalyzerTests
 {
-    /// <summary>
-    /// Common using directives and the generated stub class that the analyzer recognizes.
-    /// </summary>
+    /// <summary>The diagnostic id reported when a type has no observable properties.</summary>
+    private const string NoObservablePropertiesDiagnosticId = "RXUIBIND002";
+
+    /// <summary>Common using directives and the generated stub class that the analyzer recognizes.</summary>
     private const string Preamble = """
                                     using System;
                                     using System.ComponentModel;
@@ -33,9 +32,7 @@ public class TypeAnalyzerTests
                                     }
                                     """;
 
-    /// <summary>
-    /// Verifies RXUIBIND002 is reported when the source type does not implement any observable mechanism.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 is reported when the source type does not implement any observable mechanism.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_NoObservableMechanism_ReportsDiagnostic()
@@ -62,12 +59,10 @@ public class TypeAnalyzerTests
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(1);
-        await Assert.That(diagnostics[0].Id).IsEqualTo("RXUIBIND002");
+        await Assert.That(diagnostics[0].Id).IsEqualTo(NoObservablePropertiesDiagnosticId);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 is NOT reported when the source type implements INotifyPropertyChanged.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 is NOT reported when the source type implements INotifyPropertyChanged.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_INPC_NoDiagnostic()
@@ -97,9 +92,7 @@ public class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 is NOT reported for empty source code.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 is NOT reported for empty source code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_EmptySource_NoDiagnostics()
@@ -149,9 +142,7 @@ public class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 is NOT reported when the source contains no binding method invocations.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 is NOT reported when the source contains no binding method invocations.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_NonMethodInvocation_NoDiagnostics()
@@ -209,9 +200,7 @@ public class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 is NOT reported when the source type implements IReactiveObject.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 is NOT reported when the source type implements IReactiveObject.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_IReactiveObject_NoDiagnostic()
@@ -240,9 +229,7 @@ public class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 is NOT reported when the source type inherits from WPF DependencyObject.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 is NOT reported when the source type inherits from WPF DependencyObject.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_WpfDependencyObject_NoDiagnostic()
@@ -276,9 +263,7 @@ public class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 is NOT reported when the source type inherits from WinUI DependencyObject.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 is NOT reported when the source type inherits from WinUI DependencyObject.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_WinUIDependencyObject_NoDiagnostic()
@@ -312,9 +297,7 @@ public class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 is NOT reported when the source type inherits from Apple NSObject (KVO).
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 is NOT reported when the source type inherits from Apple NSObject (KVO).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_KVO_NSObject_NoDiagnostic()
@@ -348,9 +331,7 @@ public class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 is NOT reported when the source type inherits from WinForms Component.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 is NOT reported when the source type inherits from WinForms Component.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_WinFormsComponent_NoDiagnostic()
@@ -384,9 +365,7 @@ public class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 is NOT reported when the source type inherits from Android View.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 is NOT reported when the source type inherits from Android View.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_AndroidView_NoDiagnostic()
@@ -456,10 +435,7 @@ public class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 IS reported when the source type is an abstract class
-    /// without any observable mechanism.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 IS reported when the source type is an abstract class without any observable mechanism.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_AbstractClass_NoObservableMechanism_ReportsDiagnostic()
@@ -488,7 +464,7 @@ public class TypeAnalyzerTests
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(1);
-        await Assert.That(diagnostics[0].Id).IsEqualTo("RXUIBIND002");
+        await Assert.That(diagnostics[0].Id).IsEqualTo(NoObservablePropertiesDiagnosticId);
     }
 
     /// <summary>
@@ -524,10 +500,7 @@ public class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 IS reported when a generic class without any observable mechanism
-    /// is used as the source type.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 IS reported when a generic class without any observable mechanism is used as the source type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_GenericClass_NoObservableMechanism_ReportsDiagnostic()
@@ -554,7 +527,7 @@ public class TypeAnalyzerTests
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(1);
-        await Assert.That(diagnostics[0].Id).IsEqualTo("RXUIBIND002");
+        await Assert.That(diagnostics[0].Id).IsEqualTo(NoObservablePropertiesDiagnosticId);
     }
 
     /// <summary>
@@ -592,10 +565,7 @@ public class TypeAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND002 is NOT reported when the source type inherits INPC from a deep
-    /// inheritance chain.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND002 is NOT reported when the source type inherits INPC from a deep inheritance chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND002_DeepInheritanceChain_WithINPC_NoDiagnostic()
@@ -934,7 +904,7 @@ public class TypeAnalyzerTests
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(1);
-        await Assert.That(diagnostics[0].Id).IsEqualTo("RXUIBIND002");
+        await Assert.That(diagnostics[0].Id).IsEqualTo(NoObservablePropertiesDiagnosticId);
     }
 
     /// <summary>

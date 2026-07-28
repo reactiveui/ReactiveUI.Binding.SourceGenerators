@@ -6,27 +6,19 @@ using System.ComponentModel;
 
 namespace SharedScenarios.BindTwoWay.MixedWithBindOneWay;
 
-/// <summary>
-/// Source ViewModel with properties for mixed binding.
-/// </summary>
+/// <summary>Source ViewModel with properties for mixed binding.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Name"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Name"/>.</summary>
     private string _name = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="ReadOnlyCount"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="ReadOnlyCount"/>.</summary>
     private int _readOnlyCount;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
         get => _name;
@@ -42,9 +34,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the read-only count.
-    /// </summary>
+    /// <summary>Gets or sets the read-only count.</summary>
     public int ReadOnlyCount
     {
         get => _readOnlyCount;

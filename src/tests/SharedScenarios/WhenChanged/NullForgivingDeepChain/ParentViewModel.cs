@@ -6,22 +6,16 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanged.NullForgivingDeepChain;
 
-/// <summary>
-/// Parent ViewModel with a nullable child property.
-/// </summary>
+/// <summary>Parent ViewModel with a nullable child property.</summary>
 public class ParentViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Child"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Child"/>.</summary>
     private ChildModel? _child;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the nullable child model.
-    /// </summary>
+    /// <summary>Gets or sets the nullable child model.</summary>
     public ChildModel? Child
     {
         get => _child;

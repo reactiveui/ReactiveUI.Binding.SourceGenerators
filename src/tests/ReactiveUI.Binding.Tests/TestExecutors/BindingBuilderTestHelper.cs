@@ -14,10 +14,7 @@ namespace ReactiveUI.Binding.Tests.TestExecutors;
 /// </summary>
 public sealed class BindingBuilderTestHelper
 {
-    /// <summary>
-    /// Initializes the builder with custom configuration.
-    /// Resets builder state and configures using the provided action.
-    /// </summary>
+    /// <summary>Initializes the builder with custom configuration. Resets builder state and configures using the provided action.</summary>
     /// <param name="configureBuilder">
     /// Action to configure the builder. Should call <c>.WithCoreServices()</c> at minimum.
     /// <c>.BuildApp()</c> is called automatically after the action.
@@ -35,12 +32,10 @@ public sealed class BindingBuilderTestHelper
         configureBuilder(builder);
 
         // Build the app with configured services
-        builder.BuildApp();
+        _ = builder.BuildApp();
     }
 
-    /// <summary>
-    /// Cleans up builder state and restores a clean environment for the next test.
-    /// </summary>
+    /// <summary>Cleans up builder state and restores a clean environment for the next test.</summary>
     public static void CleanUp()
     {
         // Reset generated view dispatch to avoid cross-test contamination
@@ -50,7 +45,7 @@ public sealed class BindingBuilderTestHelper
         RxBindingBuilder.ResetForTesting();
 
         // Rebuild with core services to ensure clean state for next test
-        RxBindingBuilder.CreateReactiveUIBindingBuilder()
+        _ = RxBindingBuilder.CreateReactiveUIBindingBuilder()
             .WithCoreServices()
             .BuildApp();
     }

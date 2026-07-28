@@ -7,14 +7,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for BindInteraction invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for BindInteraction invocation generation.</summary>
 public class BindInteractionGeneratorTests
 {
-    /// <summary>
-    /// Verifies BindInteraction with a task-based handler.
-    /// </summary>
+    /// <summary>Verifies BindInteraction with a task-based handler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TaskHandler()
@@ -29,9 +25,7 @@ public class BindInteractionGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindInteraction with an observable-based handler.
-    /// </summary>
+    /// <summary>Verifies BindInteraction with an observable-based handler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObservableHandler()
@@ -46,9 +40,7 @@ public class BindInteractionGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindInteraction with a deep property path (Child.Confirm).
-    /// </summary>
+    /// <summary>Verifies BindInteraction with a deep property path (Child.Confirm).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepPropertyPath()
@@ -63,15 +55,9 @@ public class BindInteractionGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindInteraction with a ViewModel that does not implement INPC.
-    /// </summary>
+    /// <summary>Verifies BindInteraction with a ViewModel that does not implement INPC.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Minor Code Smell",
-        "S100:Methods and properties should be named in PascalCase",
-        Justification = "INPC abbreviates INotifyPropertyChanged, an established acronym matching the ReactiveUI domain terminology.")]
     public async Task NonINPCViewModel()
     {
         var source = SharedSourceReader.ReadScenario("BindInteraction/NonINPCViewModel");

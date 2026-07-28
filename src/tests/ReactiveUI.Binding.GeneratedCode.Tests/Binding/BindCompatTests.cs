@@ -7,19 +7,13 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 
-/// <summary>
-/// Tests that the Bind compat alias (view-first two-way syntax) works correctly at runtime.
-/// </summary>
+/// <summary>Tests that the Bind compat alias (view-first two-way syntax) works correctly at runtime.</summary>
 public class BindCompatTests
 {
-    /// <summary>
-    /// The initial property value used across the binding tests.
-    /// </summary>
+    /// <summary>The initial property value used across the binding tests.</summary>
     private const string HelloValue = "Hello";
 
-    /// <summary>
-    /// Verifies that Bind syncs the initial value from view model to view.
-    /// </summary>
+    /// <summary>Verifies that Bind syncs the initial value from view model to view.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Bind_SyncsInitialValue()
@@ -32,9 +26,7 @@ public class BindCompatTests
         await Assert.That(view.DisplayName).IsEqualTo(HelloValue);
     }
 
-    /// <summary>
-    /// Verifies that Bind syncs changes from view model to view.
-    /// </summary>
+    /// <summary>Verifies that Bind syncs changes from view model to view.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Bind_SyncsSourceToView()
@@ -49,9 +41,7 @@ public class BindCompatTests
         await Assert.That(view.DisplayName).IsEqualTo("World");
     }
 
-    /// <summary>
-    /// Verifies that Bind syncs changes from view back to view model.
-    /// </summary>
+    /// <summary>Verifies that Bind syncs changes from view back to view model.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Bind_SyncsViewToSource()
@@ -66,9 +56,7 @@ public class BindCompatTests
         await Assert.That(vm.Name).IsEqualTo("FromView");
     }
 
-    /// <summary>
-    /// Verifies that disposing the Bind binding stops syncing.
-    /// </summary>
+    /// <summary>Verifies that disposing the Bind binding stops syncing.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Bind_Disposal_StopsSyncing()

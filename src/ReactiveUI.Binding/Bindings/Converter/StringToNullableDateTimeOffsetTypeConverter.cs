@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="string"/> to nullable <see cref="DateTimeOffset"/> using <see cref="DateTimeOffset.TryParse(string?, out DateTimeOffset)"/>.
-/// </summary>
+/// <summary>Converts <see cref="string"/> to nullable <see cref="DateTimeOffset"/> using <see cref="DateTimeOffset.TryParse(string?, out DateTimeOffset)"/>.</summary>
 public sealed class StringToNullableDateTimeOffsetTypeConverter : BindingTypeConverter<string, DateTimeOffset?>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

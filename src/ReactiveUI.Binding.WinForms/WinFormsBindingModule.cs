@@ -6,9 +6,7 @@ using Splat.Builder;
 
 namespace ReactiveUI.Binding.WinForms;
 
-/// <summary>
-/// WinForms-specific module that registers event-based property observation with the dependency resolver.
-/// </summary>
+/// <summary>WinForms-specific module that registers event-based property observation with the dependency resolver.</summary>
 /// <remarks>
 /// WinForms command binding (event+Enabled) is handled at compile time by the source generator.
 /// </remarks>
@@ -19,6 +17,6 @@ public sealed class WinFormsBindingModule : IModule
     {
         ArgumentExceptionHelper.ThrowIfNull(resolver);
 
-        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(() => new WinFormsCreatesObservableForProperty());
+        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(static () => new WinFormsCreatesObservableForProperty());
     }
 }

@@ -6,9 +6,7 @@ using Splat.Builder;
 
 namespace ReactiveUI.Binding.Maui;
 
-/// <summary>
-/// MAUI-specific module that registers platform services with the dependency resolver.
-/// </summary>
+/// <summary>MAUI-specific module that registers platform services with the dependency resolver.</summary>
 public sealed class MauiBindingModule : IModule
 {
     /// <inheritdoc/>
@@ -17,9 +15,9 @@ public sealed class MauiBindingModule : IModule
         ArgumentExceptionHelper.ThrowIfNull(resolver);
 
 #if WINUI_TARGET
-        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(() => new DependencyObjectObservableForProperty());
+        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(static () => new DependencyObjectObservableForProperty());
 #endif
-        resolver.RegisterLazySingleton<IBindingTypeConverter>(() => new BooleanToVisibilityTypeConverter());
-        resolver.RegisterLazySingleton<IBindingTypeConverter>(() => new VisibilityToBooleanTypeConverter());
+        resolver.RegisterLazySingleton<IBindingTypeConverter>(static () => new BooleanToVisibilityTypeConverter());
+        resolver.RegisterLazySingleton<IBindingTypeConverter>(static () => new VisibilityToBooleanTypeConverter());
     }
 }

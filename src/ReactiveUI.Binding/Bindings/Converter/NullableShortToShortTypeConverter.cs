@@ -4,17 +4,13 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="Nullable{Int16}"/> to <see cref="short"/>.
-/// </summary>
+/// <summary>Converts a nullable <see cref="short"/> to <see cref="short"/>.</summary>
 /// <remarks>
 /// When the nullable value is null, the conversion fails and returns false.
 /// </remarks>
 public sealed class NullableShortToShortTypeConverter : IBindingTypeConverter<short?, short>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

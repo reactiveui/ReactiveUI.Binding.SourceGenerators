@@ -9,18 +9,15 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Plugins;
 
-/// <summary>
-/// Unit tests for the <see cref="CommandBindingPluginRegistry"/> and command binding plugins.
-/// </summary>
+/// <summary>Unit tests for the <see cref="CommandBindingPluginRegistry"/> and command binding plugins.</summary>
 public class CommandBindingPluginTests
 {
-    /// <summary>
-    /// Verifies that GetBestPlugin returns CommandPropertyBindingPlugin when HasCommandProperty is true.
-    /// </summary>
+    /// <summary>Verifies that GetBestPlugin returns CommandPropertyBindingPlugin when HasCommandProperty is true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetBestPlugin_HasCommandProperty_ReturnsCommandPropertyPlugin()
     {
+        const int Expected = 5;
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             resolvedEventName: "Click",
             hasCommandProperty: true,
@@ -30,16 +27,15 @@ public class CommandBindingPluginTests
 
         await Assert.That(plugin).IsNotNull();
         await Assert.That(plugin).IsTypeOf<CommandPropertyBindingPlugin>();
-        await Assert.That(plugin!.Affinity).IsEqualTo(5);
+        await Assert.That(plugin!.Affinity).IsEqualTo(Expected);
     }
 
-    /// <summary>
-    /// Verifies that GetBestPlugin returns EventEnabledBindingPlugin when event and Enabled exist but no Command.
-    /// </summary>
+    /// <summary>Verifies that GetBestPlugin returns EventEnabledBindingPlugin when event and Enabled exist but no Command.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetBestPlugin_EventAndEnabled_ReturnsEventEnabledPlugin()
     {
+        const int Expected = 4;
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             resolvedEventName: "Click",
             hasCommandProperty: false,
@@ -49,48 +45,38 @@ public class CommandBindingPluginTests
 
         await Assert.That(plugin).IsNotNull();
         await Assert.That(plugin).IsTypeOf<EventEnabledBindingPlugin>();
-        await Assert.That(plugin!.Affinity).IsEqualTo(4);
+        await Assert.That(plugin!.Affinity).IsEqualTo(Expected);
     }
 
-    /// <summary>
-    /// Verifies that GetBestPlugin returns DefaultEventBindingPlugin when event exists but no Command or Enabled.
-    /// </summary>
+    /// <summary>Verifies that GetBestPlugin returns DefaultEventBindingPlugin when event exists but no Command or Enabled.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetBestPlugin_EventOnly_ReturnsDefaultEventPlugin()
     {
-        var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            resolvedEventName: "Click",
-            hasCommandProperty: false,
-            hasEnabledProperty: false);
+        const int Expected = 3;
+        var inv = ModelFactory.CreateBindCommandInvocationInfo();
 
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
 
         await Assert.That(plugin).IsNotNull();
         await Assert.That(plugin).IsTypeOf<DefaultEventBindingPlugin>();
-        await Assert.That(plugin!.Affinity).IsEqualTo(3);
+        await Assert.That(plugin!.Affinity).IsEqualTo(Expected);
     }
 
-    /// <summary>
-    /// Verifies that GetBestPlugin returns null when no plugin can handle the invocation.
-    /// </summary>
+    /// <summary>Verifies that GetBestPlugin returns null when no plugin can handle the invocation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetBestPlugin_NoEventNoCommand_ReturnsNull()
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            resolvedEventName: null,
-            hasCommandProperty: false,
-            hasEnabledProperty: false);
+            resolvedEventName: null);
 
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
 
         await Assert.That(plugin).IsNull();
     }
 
-    /// <summary>
-    /// Verifies CommandPropertyBindingPlugin.RequiresCustomBinderFallback is false.
-    /// </summary>
+    /// <summary>Verifies CommandPropertyBindingPlugin.RequiresCustomBinderFallback is false.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CommandPropertyPlugin_RequiresCustomBinderFallback_IsFalse()
@@ -99,9 +85,7 @@ public class CommandBindingPluginTests
         await Assert.That(plugin.RequiresCustomBinderFallback).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies EventEnabledBindingPlugin.RequiresCustomBinderFallback is true.
-    /// </summary>
+    /// <summary>Verifies EventEnabledBindingPlugin.RequiresCustomBinderFallback is true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EventEnabledPlugin_RequiresCustomBinderFallback_IsTrue()
@@ -110,9 +94,7 @@ public class CommandBindingPluginTests
         await Assert.That(plugin.RequiresCustomBinderFallback).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies DefaultEventBindingPlugin.RequiresCustomBinderFallback is true.
-    /// </summary>
+    /// <summary>Verifies DefaultEventBindingPlugin.RequiresCustomBinderFallback is true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DefaultEventPlugin_RequiresCustomBinderFallback_IsTrue()

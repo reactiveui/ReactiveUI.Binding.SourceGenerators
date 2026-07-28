@@ -6,52 +6,40 @@ using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-/// Unit tests for <see cref="DistinctUntilChangedObservable{T}"/>.
-/// </summary>
+/// <summary>Unit tests for <see cref="DistinctUntilChangedObservable{T}"/>.</summary>
 public class DistinctUntilChangedObservableTests
 {
-    /// <summary>
-    /// The expected number of distinct values emitted when consecutive duplicates are suppressed.
-    /// </summary>
+    /// <summary>The expected number of distinct values emitted when consecutive duplicates are suppressed.</summary>
     private const int ExpectedDistinctCount = 3;
 
-    /// <summary>
-    /// The second distinct integer value emitted by the source.
-    /// </summary>
+    /// <summary>The second distinct integer value emitted by the source.</summary>
     private const int SecondValue = 2;
 
-    /// <summary>
-    /// The index of the third emitted result.
-    /// </summary>
+    /// <summary>The index of the third emitted result.</summary>
     private const int ThirdResultIndex = 2;
 
-    /// <summary>
-    /// The expected number of distinct values emitted when a custom comparer is used.
-    /// </summary>
+    /// <summary>The expected number of distinct values emitted when a custom comparer is used.</summary>
     private const int ExpectedCustomComparerCount = 2;
 
-    /// <summary>
-    /// Verifies that the first value is always emitted and consecutive duplicates are suppressed.
-    /// </summary>
+    /// <summary>Verifies that the first value is always emitted and consecutive duplicates are suppressed.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Distinct_SuppressesConsecutiveDuplicates()
     {
         var results = new List<int>();
-        var source = new AnonymousObservable<int>(observer =>
+        var source = new AnonymousObservable<int>(static observer =>
         {
             observer.OnNext(1);
             observer.OnNext(1);
-            observer.OnNext(2);
-            observer.OnNext(2);
+            observer.OnNext(ExpectedCustomComparerCount);
+            observer.OnNext(ExpectedCustomComparerCount);
             observer.OnNext(1);
             observer.OnCompleted();
             return EmptyDisposable.Instance;
         });
 
         var distinct = new DistinctUntilChangedObservable<int>(source);
-        distinct.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
+        _ = distinct.Subscribe(new AnonymousObserver<int>(results.Add, static _ => { }, static () => { }));
 
         await Assert.That(results).Count().IsEqualTo(ExpectedDistinctCount);
         await Assert.That(results[0]).IsEqualTo(1);
@@ -59,15 +47,13 @@ public class DistinctUntilChangedObservableTests
         await Assert.That(results[ThirdResultIndex]).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that a custom IEqualityComparer is respected.
-    /// </summary>
+    /// <summary>Verifies that a custom IEqualityComparer is respected.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Distinct_CustomComparer_IsRespected()
     {
         var results = new List<string>();
-        var source = new AnonymousObservable<string>(observer =>
+        var source = new AnonymousObservable<string>(static observer =>
         {
             observer.OnNext("a");
             observer.OnNext("A");
@@ -77,36 +63,32 @@ public class DistinctUntilChangedObservableTests
         });
 
         var distinct = new DistinctUntilChangedObservable<string>(source, StringComparer.OrdinalIgnoreCase);
-        distinct.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        _ = distinct.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
 
         await Assert.That(results).Count().IsEqualTo(ExpectedCustomComparerCount);
         await Assert.That(results[0]).IsEqualTo("a");
         await Assert.That(results[1]).IsEqualTo("b");
     }
 
-    /// <summary>
-    /// Verifies that errors from the source are forwarded.
-    /// </summary>
+    /// <summary>Verifies that errors from the source are forwarded.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Distinct_ForwardsError()
     {
         var errorThrown = false;
-        var source = new AnonymousObservable<int>(observer =>
+        var source = new AnonymousObservable<int>(static observer =>
         {
             observer.OnError(new InvalidOperationException("test"));
             return EmptyDisposable.Instance;
         });
 
         var distinct = new DistinctUntilChangedObservable<int>(source);
-        distinct.Subscribe(new AnonymousObserver<int>(_ => { }, _ => errorThrown = true, () => { }));
+        _ = distinct.Subscribe(new AnonymousObserver<int>(static _ => { }, _ => errorThrown = true, static () => { }));
 
         await Assert.That(errorThrown).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that completion from the source is forwarded.
-    /// </summary>
+    /// <summary>Verifies that completion from the source is forwarded.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Distinct_ForwardsCompletion()
@@ -115,38 +97,32 @@ public class DistinctUntilChangedObservableTests
         var source = EmptyObservable<int>.Instance;
         var distinct = new DistinctUntilChangedObservable<int>(source);
 
-        distinct.Subscribe(new AnonymousObserver<int>(_ => { }, _ => { }, () => completed = true));
+        _ = distinct.Subscribe(new AnonymousObserver<int>(static _ => { }, static _ => { }, () => completed = true));
 
         await Assert.That(completed).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that the constructor throws <see cref="ArgumentNullException"/> when source is null.
-    /// </summary>
+    /// <summary>Verifies that the constructor throws <see cref="ArgumentNullException"/> when source is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullSource_ThrowsArgumentNullException()
     {
-        var action = () => new DistinctUntilChangedObservable<int>(null!);
+        var action = static () => new DistinctUntilChangedObservable<int>(null!);
 
         await Assert.That(action).Throws<ArgumentNullException>().WithParameterName("source");
     }
 
-    /// <summary>
-    /// Verifies that the constructor throws <see cref="ArgumentNullException"/> when comparer is null.
-    /// </summary>
+    /// <summary>Verifies that the constructor throws <see cref="ArgumentNullException"/> when comparer is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullComparer_ThrowsArgumentNullException()
     {
-        var action = () => new DistinctUntilChangedObservable<int>(EmptyObservable<int>.Instance, null!);
+        var action = static () => new DistinctUntilChangedObservable<int>(EmptyObservable<int>.Instance, null!);
 
         await Assert.That(action).Throws<ArgumentNullException>().WithParameterName("comparer");
     }
 
-    /// <summary>
-    /// Verifies that Subscribe throws <see cref="ArgumentNullException"/> when observer is null.
-    /// </summary>
+    /// <summary>Verifies that Subscribe throws <see cref="ArgumentNullException"/> when observer is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_NullObserver_ThrowsArgumentNullException()
@@ -157,9 +133,7 @@ public class DistinctUntilChangedObservableTests
         await Assert.That(action).Throws<ArgumentNullException>().WithParameterName("observer");
     }
 
-    /// <summary>
-    /// A simple observable that delegates subscription to a provided function.
-    /// </summary>
+    /// <summary>A simple observable that delegates subscription to a provided function.</summary>
     /// <typeparam name="T">The type of elements produced.</typeparam>
     /// <param name="subscribe">The function to invoke when an observer subscribes.</param>
     private sealed class AnonymousObservable<T>(Func<IObserver<T>, IDisposable> subscribe) : IObservable<T>
@@ -168,15 +142,12 @@ public class DistinctUntilChangedObservableTests
         public IDisposable Subscribe(IObserver<T> observer) => subscribe(observer);
     }
 
-    /// <summary>
-    /// A simple observer that delegates to provided actions.
-    /// </summary>
+    /// <summary>A simple observer that delegates to provided actions.</summary>
     /// <typeparam name="T">The type of elements observed.</typeparam>
     /// <param name="onNext">The action to invoke for each element.</param>
     /// <param name="onError">The action to invoke on error.</param>
     /// <param name="onCompleted">The action to invoke on completion.</param>
-    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-        : IObserver<T>
+    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted) : IObserver<T>
     {
         /// <inheritdoc/>
         public void OnCompleted() => onCompleted();

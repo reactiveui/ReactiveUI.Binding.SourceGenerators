@@ -8,9 +8,7 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
-/// <summary>
-/// Extracts BindingInvocationInfo from BindOneWay, BindTwoWay, OneWayBind, and Bind invocations.
-/// </summary>
+/// <summary>Extracts BindingInvocationInfo from BindOneWay, BindTwoWay, OneWayBind, and Bind invocations.</summary>
 internal static class BindingExtractor
 {
     /// <summary>
@@ -19,9 +17,7 @@ internal static class BindingExtractor
     /// </summary>
     private const int MinimumBindingArgumentCount = 3;
 
-    /// <summary>
-    /// Pipeline B transform: extracts BindingInvocationInfo from a BindOneWay/BindTwoWay/OneWayBind/Bind invocation.
-    /// </summary>
+    /// <summary>Pipeline B transform: extracts BindingInvocationInfo from a BindOneWay/BindTwoWay/OneWayBind/Bind invocation.</summary>
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A BindingInvocationInfo POCO, or null if the invocation is not analyzable.</returns>
@@ -33,7 +29,7 @@ internal static class BindingExtractor
 
         var semanticModel = context.SemanticModel;
         var methodSymbol = ExtractorValidation.ExtractMethodSymbol(semanticModel.GetSymbolInfo(invocation, ct));
-        if (methodSymbol == null)
+        if (methodSymbol is null)
         {
             return null;
         }
@@ -58,12 +54,55 @@ internal static class BindingExtractor
         var sourcePropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(sourcePropertyArg, semanticModel, ct);
         var targetPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(targetPropertyArg, semanticModel, ct);
 
-        if (sourcePropertyPath == null || targetPropertyPath == null)
+        if (sourcePropertyPath is null || targetPropertyPath is null)
         {
             return null;
         }
 
-        // Get types
+        var (sourceTypeFullName, targetTypeFullName) =
+            ResolveBindingSides(memberAccess, args, methodName, semanticModel, ct);
+
+        DetectBindingParameters(
+            methodSymbol,
+            out var hasConversion,
+            out var hasScheduler,
+            out var hasConverterOverride);
+
+        return new(
+            invocation.SyntaxTree.FilePath,
+            invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+            sourceTypeFullName,
+            new(sourcePropertyPath),
+            targetTypeFullName,
+            new(targetPropertyPath),
+            sourcePropertyPath[^1].PropertyTypeFullName,
+            targetPropertyPath[^1].PropertyTypeFullName,
+            hasConversion,
+            hasScheduler,
+            isTwoWay,
+            methodName,
+            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(sourcePropertyArg.ToString()),
+            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString()),
+            hasConverterOverride);
+    }
+
+    /// <summary>
+    /// Resolves which side of the binding is the source and which is the target. The view-first
+    /// overloads take the view as the receiver, so the roles are swapped relative to the others.
+    /// </summary>
+    /// <param name="memberAccess">The member access the invocation hangs off.</param>
+    /// <param name="args">The invocation arguments.</param>
+    /// <param name="methodName">The invoked method name.</param>
+    /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The fully qualified source and target type names.</returns>
+    private static (string SourceTypeFullName, string TargetTypeFullName) ResolveBindingSides(
+        MemberAccessExpressionSyntax memberAccess,
+        SeparatedSyntaxList<ArgumentSyntax> args,
+        string methodName,
+        SemanticModel semanticModel,
+        CancellationToken ct)
+    {
         var receiverTypeName = InvalidOperationExceptionHelper.EnsureNotNull(
             ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type),
             "receiver type display name");
@@ -72,42 +111,10 @@ internal static class BindingExtractor
             ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type),
             "first argument type display name");
 
-        var sourcePropertyTypeFullName = sourcePropertyPath[sourcePropertyPath.Length - 1].PropertyTypeFullName;
-        var targetPropertyTypeFullName = targetPropertyPath[targetPropertyPath.Length - 1].PropertyTypeFullName;
-
-        DetectBindingParameters(
-            methodSymbol,
-            out var hasConversion,
-            out var hasScheduler,
-            out var hasConverterOverride);
-
-        var filePath = invocation.SyntaxTree.FilePath;
-        var lineNumber = invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-        var sourceExpressionText =
-            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(sourcePropertyArg.ToString());
-        var targetExpressionText =
-            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString());
-
         var isViewFirst = methodName is Constants.OneWayBindMethodName or Constants.BindMethodName;
-        var sourceTypeFullName = isViewFirst ? firstArgTypeName : receiverTypeName;
-        var targetTypeFullName = isViewFirst ? receiverTypeName : firstArgTypeName;
-
-        return new(
-            filePath,
-            lineNumber,
-            sourceTypeFullName,
-            new(sourcePropertyPath),
-            targetTypeFullName,
-            new(targetPropertyPath),
-            sourcePropertyTypeFullName,
-            targetPropertyTypeFullName,
-            hasConversion,
-            hasScheduler,
-            isTwoWay,
-            methodName,
-            sourceExpressionText,
-            targetExpressionText,
-            hasConverterOverride);
+        return isViewFirst
+            ? (firstArgTypeName, receiverTypeName)
+            : (receiverTypeName, firstArgTypeName);
     }
 
     /// <summary>
@@ -130,7 +137,7 @@ internal static class BindingExtractor
 
         foreach (var parameter in methodSymbol.Parameters)
         {
-            if (parameter.Name is "conversionFunc" or "sourceToTargetConv" or "selector" or "vmToViewConverter")
+            if (parameter.Name is "conversionFunc" or "sourceToTargetConv" or "selector" or "vmToViewConverter" or "viewModelToViewConverter")
             {
                 hasConversion = true;
             }

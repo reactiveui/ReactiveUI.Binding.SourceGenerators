@@ -6,34 +6,25 @@ using System.ComponentModel;
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
-/// <summary>
-/// A nested test model for testing expression chains.
-/// </summary>
+/// <summary>A nested test model for testing expression chains.</summary>
 public class TestAddress : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backer for City.
-    /// </summary>
-    private string _city = string.Empty;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the city.
-    /// </summary>
+    /// <summary>Gets or sets the city.</summary>
     public string City
     {
-        get => _city;
+        get => field;
         set
         {
-            if (_city == value)
+            if (field == value)
             {
                 return;
             }
 
-            _city = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(City)));
         }
-    }
+    } = string.Empty;
 }

@@ -4,13 +4,9 @@
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
-/// <summary>
-/// A POCO with no change notification support, used to test fallback behavior.
-/// </summary>
+/// <summary>A POCO with no change notification support, used to test fallback behavior.</summary>
 public class NonObservableTestFixture
 {
-    /// <summary>
-    /// Gets or sets a property that cannot be observed for changes.
-    /// </summary>
+    /// <summary>Gets or sets a property that cannot be observed for changes.</summary>
     public string NotListeningProperty { get; set; } = string.Empty;
 }

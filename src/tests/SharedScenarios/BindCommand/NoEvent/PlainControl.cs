@@ -4,13 +4,9 @@
 
 namespace SharedScenarios.BindCommand.NoEvent;
 
-/// <summary>
-/// A control with no Click, TouchUpInside, MouseUp, or Pressed event.
-/// </summary>
+/// <summary>A control with no Click, TouchUpInside, MouseUp, or Pressed event.</summary>
 public class PlainControl
 {
-    /// <summary>
-    /// Gets or sets the text content.
-    /// </summary>
+    /// <summary>Gets or sets the text content.</summary>
     public string Text { get; set; } = string.Empty;
 }

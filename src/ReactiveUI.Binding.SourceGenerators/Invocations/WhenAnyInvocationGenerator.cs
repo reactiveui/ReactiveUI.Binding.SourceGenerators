@@ -16,14 +16,12 @@ namespace ReactiveUI.Binding.SourceGenerators.Invocations;
 /// </summary>
 internal static class WhenAnyInvocationGenerator
 {
-    /// <summary>
-    /// Registers the WhenAny invocation detection pipeline.
-    /// </summary>
+    /// <summary>Registers the WhenAny invocation detection pipeline.</summary>
     /// <param name="context">The generator initialization context.</param>
     /// <param name="allClasses">The shared type detection pipeline.</param>
     /// <param name="languageFeatures">The consumer compilation's C# language-feature snapshot.</param>
     internal static void Register(
-        IncrementalGeneratorInitializationContext context,
+        in IncrementalGeneratorInitializationContext context,
         IncrementalValuesProvider<ClassBindingInfo> allClasses,
         IncrementalValueProvider<LanguageFeatures> languageFeatures)
     {
@@ -43,7 +41,7 @@ internal static class WhenAnyInvocationGenerator
             static (ctx, data) =>
             {
                 var source = WhenAnyCodeGenerator.Generate(data.Left.Left, data.Left.Right, data.Right);
-                if (source == null)
+                if (source is null)
                 {
                     return;
                 }

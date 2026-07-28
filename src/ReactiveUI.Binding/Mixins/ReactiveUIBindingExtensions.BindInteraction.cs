@@ -4,15 +4,11 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Extension methods for binding interactions between a view and a view model.
-/// </summary>
+/// <summary>Extension methods for binding interactions between a view and a view model.</summary>
 public static partial class ReactiveUIBindingExtensions
 {
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Binds a task-based handler to an interaction exposed by the view model.
-    /// </summary>
+    /// <summary>Binds a task-based handler to an interaction exposed by the view model.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TInput">The type of the interaction's input.</typeparam>
@@ -37,9 +33,7 @@ public static partial class ReactiveUIBindingExtensions
         where TViewModel : class
         where TView : class, IViewFor
 #else
-    /// <summary>
-    /// Binds a task-based handler to an interaction exposed by the view model.
-    /// </summary>
+    /// <summary>Binds a task-based handler to an interaction exposed by the view model.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TInput">The type of the interaction's input.</typeparam>
@@ -66,9 +60,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Binds an observable-based handler to an interaction exposed by the view model.
-    /// </summary>
+    /// <summary>Binds an observable-based handler to an interaction exposed by the view model.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TInput">The type of the interaction's input.</typeparam>
@@ -94,9 +86,7 @@ public static partial class ReactiveUIBindingExtensions
         where TViewModel : class
         where TView : class, IViewFor
 #else
-    /// <summary>
-    /// Binds an observable-based handler to an interaction exposed by the view model.
-    /// </summary>
+    /// <summary>Binds an observable-based handler to an interaction exposed by the view model.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TInput">The type of the interaction's input.</typeparam>

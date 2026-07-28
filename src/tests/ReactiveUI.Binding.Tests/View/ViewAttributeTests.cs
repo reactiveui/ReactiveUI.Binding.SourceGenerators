@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding.Tests.View;
 
-/// <summary>
-/// Tests for the view registration attribute classes.
-/// </summary>
+/// <summary>Tests for the view registration attribute classes.</summary>
 public class ViewAttributeTests
 {
-    /// <summary>
-    /// Verifies that ViewContractAttribute stores and returns the contract string.
-    /// </summary>
+    /// <summary>Verifies that ViewContractAttribute stores and returns the contract string.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ViewContractAttribute_StoresContract()
@@ -21,9 +17,7 @@ public class ViewAttributeTests
         await Assert.That(attr.Contract).IsEqualTo("compact");
     }
 
-    /// <summary>
-    /// Verifies that ExcludeFromViewRegistrationAttribute can be instantiated.
-    /// </summary>
+    /// <summary>Verifies that ExcludeFromViewRegistrationAttribute can be instantiated.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExcludeFromViewRegistrationAttribute_CanInstantiate()
@@ -33,9 +27,7 @@ public class ViewAttributeTests
         await Assert.That(attr).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that SingleInstanceViewAttribute can be instantiated.
-    /// </summary>
+    /// <summary>Verifies that SingleInstanceViewAttribute can be instantiated.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleInstanceViewAttribute_CanInstantiate()

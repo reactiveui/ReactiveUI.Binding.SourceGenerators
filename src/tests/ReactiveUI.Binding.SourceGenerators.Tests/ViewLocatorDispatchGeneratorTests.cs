@@ -13,9 +13,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests;
 /// </summary>
 public class ViewLocatorDispatchGeneratorTests
 {
-    /// <summary>
-    /// Verifies that a single IViewFor&lt;T&gt; implementation generates correct dispatch code.
-    /// </summary>
+    /// <summary>Verifies that a single IViewFor&lt;T&gt; implementation generates correct dispatch code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task SingleViewForImplementation()
@@ -46,9 +44,7 @@ public class ViewLocatorDispatchGeneratorTests
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
 
-    /// <summary>
-    /// Verifies that multiple IViewFor&lt;T&gt; implementations generate multiple dispatch branches.
-    /// </summary>
+    /// <summary>Verifies that multiple IViewFor&lt;T&gt; implementations generate multiple dispatch branches.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task MultipleViewForImplementations()
@@ -95,9 +91,7 @@ public class ViewLocatorDispatchGeneratorTests
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
 
-    /// <summary>
-    /// Verifies that a view without a parameterless constructor generates service-locator-only dispatch.
-    /// </summary>
+    /// <summary>Verifies that a view without a parameterless constructor generates service-locator-only dispatch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task ViewWithoutParameterlessConstructor()
@@ -135,9 +129,7 @@ public class ViewLocatorDispatchGeneratorTests
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
 
-    /// <summary>
-    /// Verifies that abstract classes implementing IViewFor&lt;T&gt; are excluded from dispatch.
-    /// </summary>
+    /// <summary>Verifies that abstract classes implementing IViewFor&lt;T&gt; are excluded from dispatch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task AbstractViewIsExcluded()
@@ -172,9 +164,7 @@ public class ViewLocatorDispatchGeneratorTests
             .UseMethodName("AbstractExcl");
     }
 
-    /// <summary>
-    /// Verifies that a view with a private constructor generates service-locator-only dispatch (no direct construction).
-    /// </summary>
+    /// <summary>Verifies that a view with a private constructor generates service-locator-only dispatch (no direct construction).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task ViewWithPrivateConstructor()
@@ -207,9 +197,7 @@ public class ViewLocatorDispatchGeneratorTests
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
 
-    /// <summary>
-    /// Verifies that a class not implementing IViewFor produces no ViewDispatch output.
-    /// </summary>
+    /// <summary>Verifies that a class not implementing IViewFor produces no ViewDispatch output.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task NonViewForClass_NoDispatch()
@@ -233,9 +221,7 @@ public class ViewLocatorDispatchGeneratorTests
             .UseMethodName("NoViewFor");
     }
 
-    /// <summary>
-    /// Verifies that duplicate IViewFor&lt;T&gt; implementations for the same view model are deduplicated.
-    /// </summary>
+    /// <summary>Verifies that duplicate IViewFor&lt;T&gt; implementations for the same view model are deduplicated.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task DuplicateViewModelsAreDeduplicated()
@@ -276,9 +262,7 @@ public class ViewLocatorDispatchGeneratorTests
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
 
-    /// <summary>
-    /// Verifies that a view marked with [ExcludeFromViewRegistration] is not included in dispatch.
-    /// </summary>
+    /// <summary>Verifies that a view marked with [ExcludeFromViewRegistration] is not included in dispatch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task ExcludedViewIsSkipped()
@@ -314,9 +298,7 @@ public class ViewLocatorDispatchGeneratorTests
             .UseMethodName("ExclAttr");
     }
 
-    /// <summary>
-    /// Verifies that a view marked with [SingleInstanceView] generates singleton dispatch code.
-    /// </summary>
+    /// <summary>Verifies that a view marked with [SingleInstanceView] generates singleton dispatch code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task SingleInstanceViewGeneratesSingletonCache()
@@ -348,9 +330,7 @@ public class ViewLocatorDispatchGeneratorTests
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
 
-    /// <summary>
-    /// Verifies that a view marked with [ViewContract] generates contract-aware dispatch code.
-    /// </summary>
+    /// <summary>Verifies that a view marked with [ViewContract] generates contract-aware dispatch code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task ViewContractGeneratesContractDispatch()

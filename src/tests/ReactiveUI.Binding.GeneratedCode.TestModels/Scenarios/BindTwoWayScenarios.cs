@@ -13,39 +13,31 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 /// </summary>
 public static class BindTwoWayScenarios
 {
-    /// <summary>
-    /// Two-way binding for a string property.
-    /// </summary>
+    /// <summary>Two-way binding for a string property.</summary>
     /// <param name="source">The source view model.</param>
     /// <param name="target">The target view.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    public static IDisposable StringProperty(BigViewModel source, BigView target)
-        => source.BindTwoWay(target, x => x.Prop1, x => x.ViewProp1);
+    public static IDisposable StringProperty(BigViewModel source, BigView target) =>
+        source.BindTwoWay(target, x => x.Prop1, x => x.ViewProp1);
 
-    /// <summary>
-    /// Two-way binding for an int property.
-    /// </summary>
+    /// <summary>Two-way binding for an int property.</summary>
     /// <param name="source">The source view model.</param>
     /// <param name="target">The target view.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    public static IDisposable IntProperty(BigViewModel source, BigView target)
-        => source.BindTwoWay(target, x => x.Prop2, x => x.ViewProp2);
+    public static IDisposable IntProperty(BigViewModel source, BigView target) =>
+        source.BindTwoWay(target, x => x.Prop2, x => x.ViewProp2);
 
-    /// <summary>
-    /// Two-way binding for a double property.
-    /// </summary>
+    /// <summary>Two-way binding for a double property.</summary>
     /// <param name="source">The source view model.</param>
     /// <param name="target">The target view.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    public static IDisposable DoubleProperty(BigViewModel source, BigView target)
-        => source.BindTwoWay(target, x => x.Prop3, x => x.ViewProp3);
+    public static IDisposable DoubleProperty(BigViewModel source, BigView target) =>
+        source.BindTwoWay(target, x => x.Prop3, x => x.ViewProp3);
 
-    /// <summary>
-    /// Two-way binding for a bool property.
-    /// </summary>
+    /// <summary>Two-way binding for a bool property.</summary>
     /// <param name="source">The source view model.</param>
     /// <param name="target">The target view.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    public static IDisposable BoolProperty(BigViewModel source, BigView target)
-        => source.BindTwoWay(target, x => x.Prop4, x => x.ViewProp4);
+    public static IDisposable BoolProperty(BigViewModel source, BigView target) =>
+        source.BindTwoWay(target, x => x.Prop4, x => x.ViewProp4);
 }

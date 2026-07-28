@@ -7,29 +7,22 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAny;
 
-/// <summary>
-/// Tests that the source-generator-generated WhenAny code (IObservedChange wrapper) works correctly at runtime.
-/// </summary>
+/// <summary>Tests that the source-generator-generated WhenAny code (IObservedChange wrapper) works correctly at runtime.</summary>
 public class WhenAnyTests
 {
-    /// <summary>
-    /// The initial name value used across the WhenAny tests.
-    /// </summary>
+    /// <summary>The initial name value used across the WhenAny tests.</summary>
     private const string InitialName = "Initial";
 
-    /// <summary>
-    /// The expected emission count after an initial value plus one change.
-    /// </summary>
+    /// <summary>The expected emission count after an initial value plus one change.</summary>
     private const int ExpectedEmissionCount = 2;
 
-    /// <summary>
-    /// The updated age value used in change-emission tests.
-    /// </summary>
+    /// <summary>The updated age value used in change-emission tests.</summary>
     private const int AgeValue = 25;
 
-    /// <summary>
-    /// Verifies that a single-property WhenAny with value selector emits the initial value.
-    /// </summary>
+    /// <summary>The age used by the two-property fixtures in these tests.</summary>
+    private const int AdultAge = 30;
+
+    /// <summary>Verifies that a single-property WhenAny with value selector emits the initial value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsInitialValue()
@@ -44,9 +37,7 @@ public class WhenAnyTests
         await Assert.That(values[0]).IsEqualTo(InitialName);
     }
 
-    /// <summary>
-    /// Verifies that a single-property WhenAny emits on property change.
-    /// </summary>
+    /// <summary>Verifies that a single-property WhenAny emits on property change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsOnChange()
@@ -63,9 +54,7 @@ public class WhenAnyTests
         await Assert.That(values).Contains("Changed");
     }
 
-    /// <summary>
-    /// Verifies that the IObservedChange wrapper provides Sender and Value.
-    /// </summary>
+    /// <summary>Verifies that the IObservedChange wrapper provides Sender and Value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_IObservedChange_HasSenderAndValue()
@@ -81,14 +70,12 @@ public class WhenAnyTests
         await Assert.That(changes[0].Sender).IsEqualTo(vm);
     }
 
-    /// <summary>
-    /// Verifies that two-property WhenAny with a selector emits the combined initial value.
-    /// </summary>
+    /// <summary>Verifies that two-property WhenAny with a selector emits the combined initial value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoProperties_EmitsInitialCombinedValue()
     {
-        var vm = new TestViewModel { Name = "Alice", Age = 30 };
+        var vm = new TestViewModel { Name = "Alice", Age = AdultAge };
         var values = new List<string>();
 
         using var sub = WhenAnyScenarios.TwoProperties_NameAge(vm)
@@ -98,14 +85,12 @@ public class WhenAnyTests
         await Assert.That(values[0]).IsEqualTo("Alice_30");
     }
 
-    /// <summary>
-    /// Verifies that two-property WhenAny emits when either property changes.
-    /// </summary>
+    /// <summary>Verifies that two-property WhenAny emits when either property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoProperties_EmitsOnEitherChange()
     {
-        var vm = new TestViewModel { Name = "Alice", Age = 30 };
+        var vm = new TestViewModel { Name = "Alice", Age = AdultAge };
         var values = new List<string>();
 
         using var sub = WhenAnyScenarios.TwoProperties_NameAge(vm)
@@ -120,9 +105,7 @@ public class WhenAnyTests
         await Assert.That(values[^1]).IsEqualTo("Bob_25");
     }
 
-    /// <summary>
-    /// Verifies that disposing the WhenAny subscription stops listening for changes.
-    /// </summary>
+    /// <summary>Verifies that disposing the WhenAny subscription stops listening for changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Disposal_StopsListening()

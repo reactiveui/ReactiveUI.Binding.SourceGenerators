@@ -6,77 +6,49 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties;
 
-/// <summary>
-/// ViewModel with twelve observable properties (maximum standard overload).
-/// </summary>
+/// <summary>ViewModel with twelve observable properties (maximum standard overload).</summary>
 public class WhenAnyFixture : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Value1"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value1"/>.</summary>
     private string _value1 = "1";
 
-    /// <summary>
-    /// The backing field for <see cref="Value2"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value2"/>.</summary>
     private string _value2 = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="Value3"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value3"/>.</summary>
     private string _value3 = "3";
 
-    /// <summary>
-    /// The backing field for <see cref="Value4"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value4"/>.</summary>
     private string _value4 = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="Value5"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value5"/>.</summary>
     private string _value5 = "5";
 
-    /// <summary>
-    /// The backing field for <see cref="Value6"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value6"/>.</summary>
     private string _value6 = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="Value7"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value7"/>.</summary>
     private string _value7 = "7";
 
-    /// <summary>
-    /// The backing field for <see cref="Value8"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value8"/>.</summary>
     private string _value8 = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="Value9"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value9"/>.</summary>
     private string _value9 = "9";
 
-    /// <summary>
-    /// The backing field for <see cref="Value10"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value10"/>.</summary>
     private string _value10 = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="Value11"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value11"/>.</summary>
     private string _value11 = "11";
 
-    /// <summary>
-    /// The backing field for <see cref="Value12"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value12"/>.</summary>
     private string _value12 = string.Empty;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets value 1.
-    /// </summary>
+    /// <summary>Gets or sets value 1.</summary>
     public string Value1
     {
         get => _value1;
@@ -92,9 +64,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets value 2.
-    /// </summary>
+    /// <summary>Gets or sets value 2.</summary>
     public string Value2
     {
         get => _value2;
@@ -110,9 +80,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets value 3.
-    /// </summary>
+    /// <summary>Gets or sets value 3.</summary>
     public string Value3
     {
         get => _value3;
@@ -128,9 +96,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets value 4.
-    /// </summary>
+    /// <summary>Gets or sets value 4.</summary>
     public string Value4
     {
         get => _value4;
@@ -146,9 +112,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets value 5.
-    /// </summary>
+    /// <summary>Gets or sets value 5.</summary>
     public string Value5
     {
         get => _value5;
@@ -164,9 +128,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets value 6.
-    /// </summary>
+    /// <summary>Gets or sets value 6.</summary>
     public string Value6
     {
         get => _value6;
@@ -182,9 +144,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets value 7.
-    /// </summary>
+    /// <summary>Gets or sets value 7.</summary>
     public string Value7
     {
         get => _value7;
@@ -200,9 +160,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets value 8.
-    /// </summary>
+    /// <summary>Gets or sets value 8.</summary>
     public string Value8
     {
         get => _value8;
@@ -218,9 +176,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets value 9.
-    /// </summary>
+    /// <summary>Gets or sets value 9.</summary>
     public string Value9
     {
         get => _value9;
@@ -236,9 +192,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets value 10.
-    /// </summary>
+    /// <summary>Gets or sets value 10.</summary>
     public string Value10
     {
         get => _value10;
@@ -254,9 +208,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets value 11.
-    /// </summary>
+    /// <summary>Gets or sets value 11.</summary>
     public string Value11
     {
         get => _value11;
@@ -272,9 +224,7 @@ public class WhenAnyFixture : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets value 12.
-    /// </summary>
+    /// <summary>Gets or sets value 12.</summary>
     public string Value12
     {
         get => _value12;

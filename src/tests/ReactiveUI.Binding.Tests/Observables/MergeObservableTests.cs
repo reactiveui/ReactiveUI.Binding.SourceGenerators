@@ -7,29 +7,19 @@ using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-/// Unit tests for <see cref="MergeObservable{T}"/> edge cases.
-/// </summary>
+/// <summary>Unit tests for <see cref="MergeObservable{T}"/> edge cases.</summary>
 public class MergeObservableTests
 {
-    /// <summary>
-    /// The value emitted by the second source observable.
-    /// </summary>
+    /// <summary>The value emitted by the second source observable.</summary>
     private const int SecondSourceValue = 2;
 
-    /// <summary>
-    /// The expected number of emitted values when both sources fire once.
-    /// </summary>
+    /// <summary>The expected number of emitted values when both sources fire once.</summary>
     private const int ExpectedMergedCount = 2;
 
-    /// <summary>
-    /// A sentinel value emitted after disposal that must not be observed.
-    /// </summary>
+    /// <summary>A sentinel value emitted after disposal that must not be observed.</summary>
     private const int PostDisposalValue = 99;
 
-    /// <summary>
-    /// Verifies that Subscribe throws ArgumentNullException when observer is null.
-    /// </summary>
+    /// <summary>Verifies that Subscribe throws ArgumentNullException when observer is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_NullObserver_ThrowsArgumentNullException()
@@ -42,21 +32,17 @@ public class MergeObservableTests
         await Assert.That(action).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that constructor throws ArgumentNullException when sources is null.
-    /// </summary>
+    /// <summary>Verifies that constructor throws ArgumentNullException when sources is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullSources_ThrowsArgumentNullException()
     {
-        var action = () => new MergeObservable<int>(null!);
+        var action = static () => new MergeObservable<int>(null!);
 
         await Assert.That(action).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that an error in any source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in any source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task ErrorInAnySource_PropagatedToSubscriber()
@@ -68,10 +54,10 @@ public class MergeObservableTests
         Exception? receivedError = null;
         var results = new List<int>();
 
-        merged.Subscribe(new AnonymousObserver<int>(
+        _ = merged.Subscribe(new AnonymousObserver<int>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         source1.OnNext(1);
         source2.OnNext(SecondSourceValue);
@@ -86,9 +72,7 @@ public class MergeObservableTests
         await Assert.That(receivedError).IsEqualTo(expectedError);
     }
 
-    /// <summary>
-    /// Verifies that disposal stops all emissions from merged sources.
-    /// </summary>
+    /// <summary>Verifies that disposal stops all emissions from merged sources.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Disposal_StopsAllEmissions()
@@ -101,8 +85,8 @@ public class MergeObservableTests
 
         var subscription = merged.Subscribe(new AnonymousObserver<int>(
             results.Add,
-            _ => { },
-            () => { }));
+            static _ => { },
+            static () => { }));
 
         source1.OnNext(1);
         subscription.Dispose();
@@ -113,9 +97,7 @@ public class MergeObservableTests
         await Assert.That(results[0]).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that double disposal does not throw.
-    /// </summary>
+    /// <summary>Verifies that double disposal does not throw.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task DoubleDisposal_DoesNotThrow()
@@ -127,8 +109,8 @@ public class MergeObservableTests
 
         var subscription = merged.Subscribe(new AnonymousObserver<int>(
             results.Add,
-            _ => { },
-            () => { }));
+            static _ => { },
+            static () => { }));
 
         subscription.Dispose();
         subscription.Dispose();
@@ -136,9 +118,7 @@ public class MergeObservableTests
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that error from second source after first emitted is propagated.
-    /// </summary>
+    /// <summary>Verifies that error from second source after first emitted is propagated.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task ErrorInSecondSource_AfterFirstEmitted_PropagatedToSubscriber()
@@ -150,10 +130,10 @@ public class MergeObservableTests
         Exception? receivedError = null;
         var results = new List<int>();
 
-        merged.Subscribe(new AnonymousObserver<int>(
+        _ = merged.Subscribe(new AnonymousObserver<int>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         source1.OnNext(1);
         var expectedError = new InvalidOperationException("source2 error");
@@ -164,15 +144,12 @@ public class MergeObservableTests
         await Assert.That(receivedError).IsEqualTo(expectedError);
     }
 
-    /// <summary>
-    /// A simple observer that delegates to provided actions.
-    /// </summary>
+    /// <summary>A simple observer that delegates to provided actions.</summary>
     /// <typeparam name="T">The type of elements observed.</typeparam>
     /// <param name="onNext">The action to invoke for each element.</param>
     /// <param name="onError">The action to invoke on error.</param>
     /// <param name="onCompleted">The action to invoke on completion.</param>
-    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-        : IObserver<T>
+    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted) : IObserver<T>
     {
         /// <inheritdoc/>
         public void OnCompleted() => onCompleted();

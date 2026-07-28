@@ -5,14 +5,10 @@
 #if NET8_0_OR_GREATER
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="string"/> to <see cref="DateOnly"/> using <see cref="DateOnly.TryParse(string?, out DateOnly)"/>.
-/// </summary>
+/// <summary>Converts <see cref="string"/> to <see cref="DateOnly"/> using <see cref="DateOnly.TryParse(string?, out DateOnly)"/>.</summary>
 public sealed class StringToDateOnlyTypeConverter : BindingTypeConverter<string, DateOnly>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

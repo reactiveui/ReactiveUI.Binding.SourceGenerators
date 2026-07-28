@@ -8,18 +8,10 @@ using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.ObservableForProperty;
 
-/// <summary>
-/// Generates Observables based on observing INotifyPropertyChanged objects.
-/// </summary>
-[SuppressMessage(
-    "Minor Code Smell",
-    "S101:Types should be named in PascalCase",
-    Justification = "INPC is an established acronym for INotifyPropertyChanged and matches the ReactiveUI public API name.")]
+/// <summary>Generates Observables based on observing INotifyPropertyChanged objects.</summary>
 public class INPCObservableForProperty : ICreatesObservableForProperty
 {
-    /// <summary>
-    /// The affinity returned when the target type implements the relevant notification interface.
-    /// </summary>
+    /// <summary>The affinity returned when the target type implements the relevant notification interface.</summary>
     private static readonly int SupportedAffinity = BindingAffinity.Explicit;
 
     /// <inheritdoc/>
@@ -46,7 +38,7 @@ public class INPCObservableForProperty : ICreatesObservableForProperty
         // wires the event, filters by name, and emits the observed change directly.
         if ((beforeChanged && sender is INotifyPropertyChanging) || sender is INotifyPropertyChanged)
         {
-            var expectedName = expression.NodeType == ExpressionType.Index ? propertyName + "[]" : propertyName;
+            var expectedName = expression.NodeType == ExpressionType.Index ? $"{propertyName}[]" : propertyName;
             return new NotifyPropertyChangedObservable(sender, expression, expectedName, beforeChanged);
         }
 

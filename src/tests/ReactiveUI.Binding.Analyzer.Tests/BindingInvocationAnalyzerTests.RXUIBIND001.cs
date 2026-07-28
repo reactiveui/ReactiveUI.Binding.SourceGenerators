@@ -7,14 +7,16 @@ using ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
-/// <summary>
-/// Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND001 (expression must be an inline lambda).
-/// </summary>
+/// <summary>Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND001 (expression must be an inline lambda).</summary>
 public partial class BindingInvocationAnalyzerTests
 {
-    /// <summary>
-    /// Verifies RXUIBIND001 is reported when a non-inline lambda (variable reference) is passed.
-    /// </summary>
+    /// <summary>The diagnostic id reported for a non-inline lambda.</summary>
+    private const string NonInlineLambdaDiagnosticId = "RXUIBIND001";
+
+    /// <summary>Diagnostic count for a call whose source and target selectors are both non-inline.</summary>
+    private const int BothSelectorsNonInlineCount = 2;
+
+    /// <summary>Verifies RXUIBIND001 is reported when a non-inline lambda (variable reference) is passed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND001_NonInlineLambda_Variable_ReportsDiagnostic()
@@ -43,12 +45,10 @@ public partial class BindingInvocationAnalyzerTests
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(1);
-        await Assert.That(diagnostics[0].Id).IsEqualTo("RXUIBIND001");
+        await Assert.That(diagnostics[0].Id).IsEqualTo(NonInlineLambdaDiagnosticId);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND001 is NOT reported when an inline lambda is passed.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND001 is NOT reported when an inline lambda is passed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND001_InlineLambda_NoDiagnostic()
@@ -78,9 +78,7 @@ public partial class BindingInvocationAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND001 is reported for WhenChanging with non-inline lambda.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND001 is reported for WhenChanging with non-inline lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND001_WhenChanging_NonInlineLambda_ReportsDiagnostic()
@@ -110,13 +108,11 @@ public partial class BindingInvocationAnalyzerTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
 
         // Filter to only RXUIBIND001 (WhenChanging on INPC-only also fires RXUIBIND004)
-        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        var nonInlineDiags = diagnostics.Where(static d => d.Id == NonInlineLambdaDiagnosticId).ToArray();
         await Assert.That(nonInlineDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND001 is reported for BindOneWay with non-inline source lambda.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND001 is reported for BindOneWay with non-inline source lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND001_BindOneWay_NonInlineLambda_ReportsDiagnostic()
@@ -151,13 +147,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        var nonInlineDiags = diagnostics.Where(static d => d.Id == NonInlineLambdaDiagnosticId).ToArray();
         await Assert.That(nonInlineDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND001 is reported for BindTwoWay with non-inline target lambda.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND001 is reported for BindTwoWay with non-inline target lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND001_BindTwoWay_NonInlineLambda_ReportsDiagnostic()
@@ -192,7 +186,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        var nonInlineDiags = diagnostics.Where(static d => d.Id == NonInlineLambdaDiagnosticId).ToArray();
         await Assert.That(nonInlineDiags.Length).IsEqualTo(1);
     }
 
@@ -236,15 +230,13 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        var nonInlineDiags = diagnostics.Where(static d => d.Id == NonInlineLambdaDiagnosticId).ToArray();
 
         // Both source and target Expression<Func<>> args are non-inline
-        await Assert.That(nonInlineDiags.Length).IsEqualTo(2);
+        await Assert.That(nonInlineDiags.Length).IsEqualTo(BothSelectorsNonInlineCount);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND001 is reported for non-inline lambda in BindInteraction.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND001 is reported for non-inline lambda in BindInteraction.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND001_BindInteraction_NonInlineLambda_ReportsDiagnostic()
@@ -282,13 +274,11 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        var nonInlineDiags = diagnostics.Where(static d => d.Id == NonInlineLambdaDiagnosticId).ToArray();
         await Assert.That(nonInlineDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND001 is reported for BindTo with a non-inline target lambda.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND001 is reported for BindTo with a non-inline target lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND001_BindTo_NonInlineLambda_ReportsDiagnostic()
@@ -317,7 +307,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        var nonInlineDiags = diagnostics.Where(static d => d.Id == NonInlineLambdaDiagnosticId).ToArray();
         await Assert.That(nonInlineDiags.Length).IsEqualTo(1);
     }
 }

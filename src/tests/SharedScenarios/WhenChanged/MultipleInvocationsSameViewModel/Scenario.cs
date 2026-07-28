@@ -7,17 +7,13 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel;
 
-/// <summary>
-/// Exercises multiple WhenChanged invocations on the same ViewModel.
-/// </summary>
+/// <summary>Exercises multiple WhenChanged invocations on the same ViewModel.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates three separate WhenChanged observables for different properties.
-    /// </summary>
+    /// <summary>Creates three separate WhenChanged observables for different properties.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>A tuple of observables for name, age, and score.</returns>
     public static (IObservable<string> NameObs, IObservable<int> AgeObs, IObservable<double> ScoreObs) Execute(
-        MyViewModel vm)
-        => (vm.WhenChanged(x => x.Name), vm.WhenChanged(x => x.Age), vm.WhenChanged(x => x.Score));
+        MyViewModel vm) =>
+        (vm.WhenChanged(x => x.Name), vm.WhenChanged(x => x.Age), vm.WhenChanged(x => x.Score));
 }

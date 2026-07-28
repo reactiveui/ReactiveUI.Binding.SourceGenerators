@@ -7,9 +7,7 @@ using System.Windows;
 
 namespace ReactiveUI.Binding.Wpf;
 
-/// <summary>
-/// Creates an observable for a property if available that is based on a WPF DependencyProperty.
-/// </summary>
+/// <summary>Creates an observable for a property if available that is based on a WPF DependencyProperty.</summary>
 public class DependencyObjectObservableForProperty : ICreatesObservableForProperty
 {
     /// <inheritdoc/>
@@ -48,7 +46,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
                     $"[ReactiveUI.Binding.Wpf] Error: Couldn't find dependency property {propertyName} on {type.Name}");
             }
 
-            throw new InvalidOperationException("Couldn't find dependency property " + propertyName + " on " + type.Name);
+            throw new InvalidOperationException($"Couldn't find dependency property {propertyName} on {type.Name}");
         }
 
         return Observable.Create<IObservedChange<object, object?>>(subj =>
@@ -57,13 +55,13 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
                 subj.OnNext(new ObservedChange<object, object?>(sender, expression, default)));
 
             dependencyPropertyDescriptor.AddValueChanged(sender, handler);
-            return Disposable.Create(() => dependencyPropertyDescriptor.RemoveValueChanged(sender, handler));
+            return Disposable.Create(
+                (dependencyPropertyDescriptor, sender, handler),
+                static state => state.dependencyPropertyDescriptor.RemoveValueChanged(state.sender, state.handler));
         });
     }
 
-    /// <summary>
-    /// Retrieves the <see cref="DependencyProperty"/> associated with the specified property name on the given type, if available.
-    /// </summary>
+    /// <summary>Retrieves the <see cref="DependencyProperty"/> associated with the specified property name on the given type, if available.</summary>
     /// <param name="type">The type to search for the dependency property.</param>
     /// <param name="propertyName">The name of the property for which the dependency property is sought.</param>
     /// <returns>
@@ -74,7 +72,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
     {
         var fi = Array.Find(
             type.GetTypeInfo().GetFields(BindingFlags.FlattenHierarchy | BindingFlags.Static | BindingFlags.Public),
-            x => x.Name == propertyName + "Property" && x.IsStatic);
+            x => x.Name == $"{propertyName}Property" && x.IsStatic);
 
         return (DependencyProperty?)fi?.GetValue(null);
     }

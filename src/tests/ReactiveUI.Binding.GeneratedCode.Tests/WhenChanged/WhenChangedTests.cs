@@ -7,79 +7,55 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 
-/// <summary>
-/// Tests that the source-generator-generated WhenChanged code works correctly at runtime.
-/// </summary>
+/// <summary>Tests that the source-generator-generated WhenChanged code works correctly at runtime.</summary>
 public class WhenChangedTests
 {
-    /// <summary>
-    /// The initial name value used by single-property tests.
-    /// </summary>
+    /// <summary>The initial name value used by single-property tests.</summary>
     private const string InitialName = "Initial";
 
-    /// <summary>
-    /// The minimum number of emissions expected after a single change.
-    /// </summary>
+    /// <summary>The minimum number of emissions expected after a single change.</summary>
     private const int MinEmissionsAfterChange = 2;
 
-    /// <summary>
-    /// The minimum number of emissions expected after two changes.
-    /// </summary>
+    /// <summary>The minimum number of emissions expected after two changes.</summary>
     private const int MinEmissionsAfterTwoChanges = 3;
 
-    /// <summary>
-    /// The minimum number of emissions expected after three sequential changes.
-    /// </summary>
+    /// <summary>The minimum number of emissions expected after three sequential changes.</summary>
     private const int MinEmissionsAfterThreeChanges = 4;
 
-    /// <summary>
-    /// The index of the second emission.
-    /// </summary>
+    /// <summary>The index of the second emission.</summary>
     private const int SecondEmissionIndex = 1;
 
-    /// <summary>
-    /// The index of the third emission.
-    /// </summary>
+    /// <summary>The index of the third emission.</summary>
     private const int ThirdEmissionIndex = 2;
 
-    /// <summary>
-    /// The index of the fourth emission.
-    /// </summary>
+    /// <summary>The index of the fourth emission.</summary>
     private const int FourthEmissionIndex = 3;
 
-    /// <summary>
-    /// The two-property test value for the integer property.
-    /// </summary>
+    /// <summary>The two-property test value for the integer property.</summary>
     private const int TwoPropIntValue = 42;
 
-    /// <summary>
-    /// The updated value for the integer property in two-property tests.
-    /// </summary>
+    /// <summary>The updated value for the integer property in two-property tests.</summary>
     private const int UpdatedIntValue = 2;
 
-    /// <summary>
-    /// The three-property test value for the integer property.
-    /// </summary>
+    /// <summary>The three-property test value for the integer property.</summary>
     private const int ThreePropIntValue = 10;
 
-    /// <summary>
-    /// The four-property test value for the integer property.
-    /// </summary>
+    /// <summary>The greeting value written to the observed string property.</summary>
+    private const string HelloValue = "Hello";
+
+    /// <summary>The city value written to the nested address in the deep-chain tests.</summary>
+    private const string SeattleCity = "Seattle";
+
+    /// <summary>The four-property test value for the integer property.</summary>
     private const int FourPropIntValue = 20;
 
-    /// <summary>
-    /// The three-property test value for the double property.
-    /// </summary>
+    /// <summary>The three-property test value for the double property.</summary>
     private const double ThreePropDoubleValue = 3.14;
 
-    /// <summary>
-    /// The four-property test value for the double property.
-    /// </summary>
+    /// <summary>The four-property test value for the double property.</summary>
     private const double FourPropDoubleValue = 2.71;
 
-    /// <summary>
-    /// Verifies that a single-property WhenChanged emits the initial value.
-    /// </summary>
+    /// <summary>Verifies that a single-property WhenChanged emits the initial value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsInitialValue()
@@ -94,9 +70,7 @@ public class WhenChangedTests
         await Assert.That(values[0]).IsEqualTo(InitialName);
     }
 
-    /// <summary>
-    /// Verifies that a single-property WhenChanged emits when the property changes.
-    /// </summary>
+    /// <summary>Verifies that a single-property WhenChanged emits when the property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsOnChange()
@@ -113,9 +87,7 @@ public class WhenChangedTests
         await Assert.That(values).Contains("Changed");
     }
 
-    /// <summary>
-    /// Verifies that a single-property WhenChanged emits all sequential changes.
-    /// </summary>
+    /// <summary>Verifies that a single-property WhenChanged emits all sequential changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsSequentialChanges()
@@ -137,27 +109,23 @@ public class WhenChangedTests
         await Assert.That(values[FourthEmissionIndex]).IsEqualTo("D");
     }
 
-    /// <summary>
-    /// Verifies that a two-property WhenChanged emits the initial tuple.
-    /// </summary>
+    /// <summary>Verifies that a two-property WhenChanged emits the initial tuple.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoProperties_EmitsInitialTuple()
     {
-        var vm = new BigViewModel { Prop1 = "Hello", Prop2 = TwoPropIntValue };
+        var vm = new BigViewModel { Prop1 = HelloValue, Prop2 = TwoPropIntValue };
         var values = new List<(string property1, int property2)>();
 
         using var sub = WhenChangedScenarios.TwoProperties(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("Hello");
+        await Assert.That(values[0].property1).IsEqualTo(HelloValue);
         await Assert.That(values[0].property2).IsEqualTo(TwoPropIntValue);
     }
 
-    /// <summary>
-    /// Verifies that a two-property WhenChanged emits when either property changes.
-    /// </summary>
+    /// <summary>Verifies that a two-property WhenChanged emits when either property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoProperties_EmitsOnEitherChange()
@@ -181,9 +149,7 @@ public class WhenChangedTests
         await Assert.That(values[^1].property2).IsEqualTo(UpdatedIntValue);
     }
 
-    /// <summary>
-    /// Verifies that three-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that three-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ThreeProperties_EmitsInitialValues()
@@ -200,9 +166,7 @@ public class WhenChangedTests
         await Assert.That(values[0].property3).IsEqualTo(ThreePropDoubleValue);
     }
 
-    /// <summary>
-    /// Verifies that four-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that four-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FourProperties_EmitsInitialValues()
@@ -220,14 +184,12 @@ public class WhenChangedTests
         await Assert.That(values[0].property4).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that WhenChanged with a selector combines property values.
-    /// </summary>
+    /// <summary>Verifies that WhenChanged with a selector combines property values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithSelector_CombinesValues()
     {
-        var vm = new BigViewModel { Prop1 = "Hello", Prop2 = TwoPropIntValue };
+        var vm = new BigViewModel { Prop1 = HelloValue, Prop2 = TwoPropIntValue };
         var values = new List<string>();
 
         using var sub = WhenChangedScenarios.WithSelector_TwoProperties(vm)
@@ -237,33 +199,29 @@ public class WhenChangedTests
         await Assert.That(values[0]).IsEqualTo("Hello_42");
     }
 
-    /// <summary>
-    /// Verifies that deep chain WhenChanged emits the nested property value.
-    /// </summary>
+    /// <summary>Verifies that deep chain WhenChanged emits the nested property value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_EmitsNestedPropertyValue()
     {
         var vm = new BigViewModel();
-        vm.Address.City = "Seattle";
+        vm.Address.City = SeattleCity;
         var values = new List<string>();
 
         using var sub = WhenChangedScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo("Seattle");
+        await Assert.That(values[0]).IsEqualTo(SeattleCity);
     }
 
-    /// <summary>
-    /// Verifies that deep chain WhenChanged emits when the nested property changes.
-    /// </summary>
+    /// <summary>Verifies that deep chain WhenChanged emits when the nested property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_EmitsOnNestedPropertyChange()
     {
         var vm = new BigViewModel();
-        vm.Address.City = "Seattle";
+        vm.Address.City = SeattleCity;
         var values = new List<string>();
 
         using var sub = WhenChangedScenarios.DeepChain_AddressCity(vm)
@@ -275,9 +233,7 @@ public class WhenChangedTests
         await Assert.That(values).Contains("Portland");
     }
 
-    /// <summary>
-    /// Verifies that disposing the subscription stops listening for changes.
-    /// </summary>
+    /// <summary>Verifies that disposing the subscription stops listening for changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Disposal_StopsListening()

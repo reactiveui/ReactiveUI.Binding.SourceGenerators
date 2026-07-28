@@ -24,9 +24,7 @@ public interface ICreatesObservableForProperty
     /// <returns>The affinity score. Positive means supported.</returns>
     int GetAffinityForObject(Type type, string propertyName, bool beforeChanged);
 
-    /// <summary>
-    /// Creates an observable that fires when the specified property changes.
-    /// </summary>
+    /// <summary>Creates an observable that fires when the specified property changes.</summary>
     /// <param name="sender">The object to observe.</param>
     /// <param name="expression">The expression identifying the property.</param>
     /// <param name="propertyName">The property name.</param>

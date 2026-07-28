@@ -6,6 +6,7 @@
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 
 using Microsoft.UI.Xaml;
 
@@ -13,12 +14,18 @@ using ReactiveUI.Binding.ObservableForProperty;
 
 namespace ReactiveUI.Binding.Maui;
 
-/// <summary>
-/// Creates an observable for a property if available that is based on a WinUI DependencyProperty.
-/// </summary>
+/// <summary>Creates an observable for a property if available that is based on a WinUI DependencyProperty.</summary>
 [RequiresUnreferencedCode("Uses reflection to find DependencyProperty static fields/properties.")]
 public class DependencyObjectObservableForProperty : ICreatesObservableForProperty
 {
+    /// <summary>Message logged when a caller asks for before-change notifications a DependencyProperty cannot provide.</summary>
+    private static readonly CompositeFormat BeforeChangedUnsupportedFormat = CompositeFormat.Parse(
+        "[ReactiveUI.Binding.Maui] Tried to bind DO {0}.{1}, but DPs can't do beforeChanged. Binding as POCO object");
+
+    /// <summary>Message logged when the requested property is not backed by a DependencyProperty.</summary>
+    private static readonly CompositeFormat DependencyPropertyMissingFormat = CompositeFormat.Parse(
+        "[ReactiveUI.Binding.Maui] Tried to bind DO {0}.{1}, but DP doesn't exist. Binding as POCO object");
+
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Uses reflection to find DependencyProperty.")]
     public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
@@ -28,12 +35,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
             return 0;
         }
 
-        if (GetDependencyPropertyFetcher(type, propertyName) is null)
-        {
-            return 0;
-        }
-
-        return BindingAffinity.WinUiDependencyObject;
+        return GetDependencyPropertyFetcher(type, propertyName) is null ? 0 : BindingAffinity.WinUiDependencyObject;
     }
 
     /// <inheritdoc/>
@@ -59,7 +61,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
             Debug.WriteLine(
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    "[ReactiveUI.Binding.Maui] Tried to bind DO {0}.{1}, but DPs can't do beforeChanged. Binding as POCO object",
+                    BeforeChangedUnsupportedFormat,
                     type.FullName,
                     propertyName));
 
@@ -67,13 +69,13 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
             return ret.GetNotificationForProperty(sender, expression, propertyName, beforeChanged, suppressWarnings);
         }
 
-        var dpFetcher = GetDependencyPropertyFetcher(type, propertyName);
-        if (dpFetcher is null)
+        var dependencyPropertyFetcher = GetDependencyPropertyFetcher(type, propertyName);
+        if (dependencyPropertyFetcher is null)
         {
             Debug.WriteLine(
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    "[ReactiveUI.Binding.Maui] Tried to bind DO {0}.{1}, but DP doesn't exist. Binding as POCO object",
+                    DependencyPropertyMissingFormat,
                     type.FullName,
                     propertyName));
 
@@ -86,15 +88,15 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
             var handler = new DependencyPropertyChangedCallback((_, _) =>
                 subj.OnNext(new ObservedChange<object, object?>(sender, expression, default)));
 
-            var dependencyProperty = dpFetcher();
+            var dependencyProperty = dependencyPropertyFetcher();
             var token = depSender.RegisterPropertyChangedCallback(dependencyProperty, handler);
-            return Disposable.Create(() => depSender.UnregisterPropertyChangedCallback(dependencyProperty, token));
+            return Disposable.Create(
+                (depSender, dependencyProperty, token),
+                static state => state.depSender.UnregisterPropertyChangedCallback(state.dependencyProperty, state.token));
         });
     }
 
-    /// <summary>
-    /// Walks the type hierarchy to find a static property with the given name.
-    /// </summary>
+    /// <summary>Walks the type hierarchy to find a static property with the given name.</summary>
     /// <param name="typeInfo">The type info to search.</param>
     /// <param name="propertyName">The property name to find.</param>
     /// <returns>The property info if found; otherwise, null.</returns>
@@ -116,9 +118,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         return null;
     }
 
-    /// <summary>
-    /// Walks the type hierarchy to find a static field with the given name.
-    /// </summary>
+    /// <summary>Walks the type hierarchy to find a static field with the given name.</summary>
     /// <param name="typeInfo">The type info to search.</param>
     /// <param name="propertyName">The field name to find.</param>
     /// <returns>The field info if found; otherwise, null.</returns>
@@ -140,9 +140,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         return null;
     }
 
-    /// <summary>
-    /// Gets a function that returns the DependencyProperty for the given property name.
-    /// </summary>
+    /// <summary>Gets a function that returns the DependencyProperty for the given property name.</summary>
     /// <param name="type">The type to search for the DependencyProperty.</param>
     /// <param name="propertyName">The property name whose DependencyProperty to find.</param>
     /// <returns>A function returning the DependencyProperty, or null if not found.</returns>
@@ -152,30 +150,20 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         var typeInfo = type.GetTypeInfo();
 
         // Look for the DependencyProperty attached to this property name
-        var pi = ActuallyGetProperty(typeInfo, propertyName + "Property");
+        var pi = ActuallyGetProperty(typeInfo, $"{propertyName}Property");
         if (pi is not null)
         {
             var value = pi.GetValue(null);
 
-            if (value is null)
-            {
-                return null;
-            }
-
-            return () => (DependencyProperty)value;
+            return value is null ? null : () => (DependencyProperty)value;
         }
 
-        var fi = ActuallyGetField(typeInfo, propertyName + "Property");
+        var fi = ActuallyGetField(typeInfo, $"{propertyName}Property");
         if (fi is not null)
         {
             var value = fi.GetValue(null);
 
-            if (value is null)
-            {
-                return null;
-            }
-
-            return () => (DependencyProperty)value;
+            return value is null ? null : () => (DependencyProperty)value;
         }
 
         return null;

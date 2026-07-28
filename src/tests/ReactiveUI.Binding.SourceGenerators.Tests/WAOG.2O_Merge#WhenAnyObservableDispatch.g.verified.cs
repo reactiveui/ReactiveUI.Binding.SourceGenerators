@@ -26,12 +26,12 @@ namespace ReactiveUI.Binding
 
             if (obs1Expression == "x => x.Command1" && obs2Expression == "x => x.Command2")
             {
-                return __WhenAnyObservable_000004E8406EC233(objectToMonitor);
+                return __WhenAnyObservable_000004E8406EC081(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
         }
 
-        private static global::System.IObservable<string> __WhenAnyObservable_000004E8406EC233(global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel obj)
+        private static global::System.IObservable<string> __WhenAnyObservable_000004E8406EC081(global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel obj)
         {
             var __obsProperty0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,

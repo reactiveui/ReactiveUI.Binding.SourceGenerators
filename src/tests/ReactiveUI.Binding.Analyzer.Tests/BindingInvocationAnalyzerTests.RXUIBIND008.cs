@@ -7,11 +7,12 @@ using ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
-/// <summary>
-/// Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND008 (interaction type).
-/// </summary>
+/// <summary>Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND008 (interaction type).</summary>
 public partial class BindingInvocationAnalyzerTests
 {
+    /// <summary>The diagnostic id reported for an invalid interaction type.</summary>
+    private const string InvalidInteractionTypeDiagnosticId = "RXUIBIND008";
+
     /// <summary>
     /// Verifies RXUIBIND008 is reported when the interaction property type does not implement IInteraction.
     /// Uses the unconstrained BindInteraction overload so the call compiles despite the wrong property type.
@@ -50,13 +51,11 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var interactionDiags = diagnostics.Where(d => d.Id == "RXUIBIND008").ToArray();
+        var interactionDiags = diagnostics.Where(static d => d.Id == InvalidInteractionTypeDiagnosticId).ToArray();
         await Assert.That(interactionDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND008 is not reported when the property is a valid IInteraction type.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND008 is not reported when the property is a valid IInteraction type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND008_ValidInteractionType_NoDiagnostic()
@@ -93,7 +92,7 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var interactionDiags = diagnostics.Where(d => d.Id == "RXUIBIND008").ToArray();
+        var interactionDiags = diagnostics.Where(static d => d.Id == InvalidInteractionTypeDiagnosticId).ToArray();
         await Assert.That(interactionDiags.Length).IsEqualTo(0);
     }
 
@@ -135,13 +134,11 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var interactionDiags = diagnostics.Where(d => d.Id == "RXUIBIND008").ToArray();
+        var interactionDiags = diagnostics.Where(static d => d.Id == InvalidInteractionTypeDiagnosticId).ToArray();
         await Assert.That(interactionDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND008 check uses parenthesized lambda for BindInteraction property path.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND008 check uses parenthesized lambda for BindInteraction property path.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND008_ParenthesizedLambda_ValidInteraction_NoDiagnostic()
@@ -178,7 +175,7 @@ public partial class BindingInvocationAnalyzerTests
                                                            """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var interactionDiags = diagnostics.Where(d => d.Id == "RXUIBIND008").ToArray();
+        var interactionDiags = diagnostics.Where(static d => d.Id == InvalidInteractionTypeDiagnosticId).ToArray();
         await Assert.That(interactionDiags.Length).IsEqualTo(0);
     }
 }

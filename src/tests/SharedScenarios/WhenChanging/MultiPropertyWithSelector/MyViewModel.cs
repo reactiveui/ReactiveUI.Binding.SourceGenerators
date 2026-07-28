@@ -6,19 +6,13 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanging.MultiPropertyWithSelector;
 
-/// <summary>
-/// ViewModel with first and last name, supporting before-change notifications.
-/// </summary>
+/// <summary>ViewModel with first and last name, supporting before-change notifications.</summary>
 public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backing field for <see cref="FirstName"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="FirstName"/>.</summary>
     private string _firstName = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="LastName"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="LastName"/>.</summary>
     private string _lastName = string.Empty;
 
     /// <inheritdoc/>
@@ -27,9 +21,7 @@ public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the first name.
-    /// </summary>
+    /// <summary>Gets or sets the first name.</summary>
     public string FirstName
     {
         get => _firstName;
@@ -46,9 +38,7 @@ public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
         }
     }
 
-    /// <summary>
-    /// Gets or sets the last name.
-    /// </summary>
+    /// <summary>Gets or sets the last name.</summary>
     public string LastName
     {
         get => _lastName;

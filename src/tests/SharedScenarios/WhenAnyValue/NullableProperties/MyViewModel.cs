@@ -6,27 +6,19 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenAnyValue.NullableProperties;
 
-/// <summary>
-/// ViewModel with nullable properties.
-/// </summary>
+/// <summary>ViewModel with nullable properties.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="NullableName"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="NullableName"/>.</summary>
     private string? _nullableName;
 
-    /// <summary>
-    /// The backing field for <see cref="NullableAge"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="NullableAge"/>.</summary>
     private int? _nullableAge;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the nullable name.
-    /// </summary>
+    /// <summary>Gets or sets the nullable name.</summary>
     public string? NullableName
     {
         get => _nullableName;
@@ -42,9 +34,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the nullable age.
-    /// </summary>
+    /// <summary>Gets or sets the nullable age.</summary>
     public int? NullableAge
     {
         get => _nullableAge;

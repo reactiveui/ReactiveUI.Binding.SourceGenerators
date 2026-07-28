@@ -14,9 +14,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 /// </summary>
 internal static class ExtractorValidation
 {
-    /// <summary>
-    /// The number of parameters on a standard .NET event handler delegate (sender, event args).
-    /// </summary>
+    /// <summary>The number of parameters on a standard .NET event handler delegate (sender, event args).</summary>
     private const int StandardEventHandlerParameterCount = 2;
 
     /// <summary>
@@ -31,9 +29,7 @@ internal static class ExtractorValidation
             or Constants.SchedulerExtensionClassName
             or Constants.GeneratedExtensionClassName;
 
-    /// <summary>
-    /// Checks whether an invocation has at least the required number of arguments.
-    /// </summary>
+    /// <summary>Checks whether an invocation has at least the required number of arguments.</summary>
     /// <param name="argumentCount">The actual argument count.</param>
     /// <param name="minimumRequired">The minimum required argument count.</param>
     /// <returns><see langword="true"/> if there are enough arguments; otherwise <see langword="false"/>.</returns>
@@ -52,20 +48,14 @@ internal static class ExtractorValidation
     internal static bool HasItems<T>(ImmutableArray<T> items) =>
         !items.IsDefaultOrEmpty;
 
-    /// <summary>
-    /// Extracts an <see cref="IMethodSymbol"/> from a <see cref="SymbolInfo"/>,
-    /// returning null if the resolved symbol is not a method.
-    /// </summary>
+    /// <summary>Extracts an <see cref="IMethodSymbol"/> from a <see cref="SymbolInfo"/>, returning null if the resolved symbol is not a method.</summary>
     /// <param name="symbolInfo">The symbol info from GetSymbolInfo.</param>
     /// <returns>The method symbol, or null.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IMethodSymbol? ExtractMethodSymbol(SymbolInfo symbolInfo) =>
         symbolInfo.Symbol as IMethodSymbol;
 
-    /// <summary>
-    /// Gets the fully qualified display name of a type symbol,
-    /// returning null if the symbol is null.
-    /// </summary>
+    /// <summary>Gets the fully qualified display name of a type symbol, returning null if the symbol is null.</summary>
     /// <param name="type">The type symbol, which may be null.</param>
     /// <returns>The fully qualified type name, or null.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -117,11 +107,8 @@ internal static class ExtractorValidation
         }
 
         var invokeMethod = namedDelegateType.DelegateInvokeMethod;
-        if (invokeMethod is { Parameters.Length: StandardEventHandlerParameterCount })
-        {
-            return invokeMethod.Parameters[1].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        }
-
-        return "global::System.EventArgs";
+        return invokeMethod is { Parameters.Length: StandardEventHandlerParameterCount }
+            ? invokeMethod.Parameters[1].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+            : "global::System.EventArgs";
     }
 }

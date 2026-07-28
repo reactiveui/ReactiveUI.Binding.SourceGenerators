@@ -7,14 +7,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for WhenAnyValue (ReactiveUI-compatible) invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for WhenAnyValue (ReactiveUI-compatible) invocation generation.</summary>
 public class WhenAnyValueGeneratorTests
 {
-    /// <summary>
-    /// Verifies WhenAnyValue with a single property on an INPC class.
-    /// </summary>
+    /// <summary>Verifies WhenAnyValue with a single property on an INPC class.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_INPC()
@@ -26,9 +22,7 @@ public class WhenAnyValueGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyValue on a ReactiveObject-based class.
-    /// </summary>
+    /// <summary>Verifies WhenAnyValue on a ReactiveObject-based class.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_ReactiveObject()
@@ -40,9 +34,7 @@ public class WhenAnyValueGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyValue with two properties returns a tuple.
-    /// </summary>
+    /// <summary>Verifies WhenAnyValue with two properties returns a tuple.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_TwoProperties()
@@ -54,9 +46,7 @@ public class WhenAnyValueGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyValue with three properties returns a tuple.
-    /// </summary>
+    /// <summary>Verifies WhenAnyValue with three properties returns a tuple.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_ThreeProperties()
@@ -68,9 +58,7 @@ public class WhenAnyValueGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyValue with a selector function combining two properties.
-    /// </summary>
+    /// <summary>Verifies WhenAnyValue with a selector function combining two properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_WithSelector()
@@ -82,9 +70,7 @@ public class WhenAnyValueGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyValue with five properties.
-    /// </summary>
+    /// <summary>Verifies WhenAnyValue with five properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_FiveProperties()
@@ -96,9 +82,7 @@ public class WhenAnyValueGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyValue with a deep property chain.
-    /// </summary>
+    /// <summary>Verifies WhenAnyValue with a deep property chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepPropertyChain()
@@ -110,9 +94,7 @@ public class WhenAnyValueGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyValue with nullable property types.
-    /// </summary>
+    /// <summary>Verifies WhenAnyValue with nullable property types.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullableProperties()
@@ -124,9 +106,7 @@ public class WhenAnyValueGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyValue with twelve properties (maximum standard overload).
-    /// </summary>
+    /// <summary>Verifies WhenAnyValue with twelve properties (maximum standard overload).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_TwelveProperties()

@@ -43,9 +43,7 @@ internal static class TransitiveAssemblyResolver
         AssemblyLoadContext.Default.Resolving += ResolveByName;
     }
 
-    /// <summary>
-    /// Resolves an assembly by its simple name when the default, version-strict load fails.
-    /// </summary>
+    /// <summary>Resolves an assembly by its simple name when the default, version-strict load fails.</summary>
     /// <param name="context">The load context raising the resolve request.</param>
     /// <param name="name">The requested assembly name, including the version that could not be found.</param>
     /// <returns>A matching assembly resolved by simple name, or <see langword="null"/> if none is available.</returns>
@@ -68,7 +66,7 @@ internal static class TransitiveAssemblyResolver
 
         // Otherwise load the deployed copy from the test output directory, ignoring the
         // requested version (which may be higher than what the package actually shipped).
-        var candidate = Path.Combine(AppContext.BaseDirectory, name.Name + ".dll");
+        var candidate = Path.Combine(AppContext.BaseDirectory, $"{name.Name}.dll");
         return File.Exists(candidate) ? context.LoadFromAssemblyPath(candidate) : null;
     }
 }

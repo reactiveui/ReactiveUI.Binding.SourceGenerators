@@ -13,19 +13,15 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 /// </summary>
 public static class WhenAnyObservableScenarios
 {
-    /// <summary>
-    /// Single observable property observation using Switch pattern.
-    /// </summary>
+    /// <summary>Single observable property observation using Switch pattern.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable that switches to the latest MyCommand observable.</returns>
-    public static IObservable<string> SingleObservable_Switch(ObservablePropertyViewModel vm)
-        => vm.WhenAnyObservable(x => x.MyCommand);
+    public static IObservable<string> SingleObservable_Switch(ObservablePropertyViewModel vm) =>
+        vm.WhenAnyObservable(x => x.MyCommand);
 
-    /// <summary>
-    /// Two observable properties of the same type using Merge pattern.
-    /// </summary>
+    /// <summary>Two observable properties of the same type using Merge pattern.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable that merges both command observables.</returns>
-    public static IObservable<string> TwoObservables_Merge(ObservablePropertyViewModel vm)
-        => vm.WhenAnyObservable(x => x.MyCommand, x => x.OtherCommand);
+    public static IObservable<string> TwoObservables_Merge(ObservablePropertyViewModel vm) =>
+        vm.WhenAnyObservable(x => x.MyCommand, x => x.OtherCommand);
 }

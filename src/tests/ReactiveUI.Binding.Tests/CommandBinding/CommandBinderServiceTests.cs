@@ -8,9 +8,7 @@ using ReactiveUI.Binding.CommandBinding;
 
 namespace ReactiveUI.Binding.Tests.CommandBinding;
 
-/// <summary>
-/// Tests for the <see cref="CommandBinderService"/> class.
-/// </summary>
+/// <summary>Tests for the <see cref="CommandBinderService"/> class.</summary>
 public class CommandBinderServiceTests
 {
     /// <summary>
@@ -23,8 +21,8 @@ public class CommandBinderServiceTests
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
 
         var binder = CommandBinderService.GetBinder<ClickableButton>(false);
 
@@ -41,8 +39,8 @@ public class CommandBinderServiceTests
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
 
         // PlainObject has no default events and no Command/CommandParameter properties
         var binder = CommandBinderService.GetBinder<PlainObject>(false);
@@ -50,20 +48,18 @@ public class CommandBinderServiceTests
         await Assert.That(binder).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that GetBinder prefers higher affinity when custom binder is registered.
-    /// </summary>
+    /// <summary>Verifies that GetBinder prefers higher affinity when custom binder is registered.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetBinder_CustomBinder_PrefersHigherAffinity()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
+        _ = builder.WithCoreServices();
 
         var customBinder = new HighAffinityBinder();
-        builder.WithCommandBinder(customBinder);
-        builder.BuildApp();
+        _ = builder.WithCommandBinder(customBinder);
+        _ = builder.BuildApp();
 
         var binder = CommandBinderService.GetBinder<ClickableButton>(false);
 
@@ -71,50 +67,28 @@ public class CommandBinderServiceTests
         await Assert.That(ReferenceEquals(binder, customBinder)).IsTrue();
     }
 
-    /// <summary>
-    /// A mock control with a Click event for testing event-based command binder selection.
-    /// </summary>
-    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Used for testing")]
-    [SuppressMessage(
-        "Performance",
-        "CA1812:Avoid uninstantiated internal classes",
-        Justification = "Used only as a generic type argument for command-binder metadata dispatch; never constructed by design.")]
+    /// <summary>A mock control with a Click event for testing event-based command binder selection.</summary>
     private sealed class ClickableButton
     {
 #pragma warning disable CS0067
-        /// <summary>
-        /// Occurs when the button is clicked.
-        /// </summary>
-        [SuppressMessage("Major Code Smell", "S3264:Events should be invoked", Justification = "Test model")]
-        public event EventHandler? Click;
+        /// <summary>Occurs when the button is clicked.</summary>
+        [SuppressMessage("Design", "SST2407:Event is never raised", Justification = "The binder only needs the event to exist; the test never raises it.")]
+        private event EventHandler? Click;
 #pragma warning restore CS0067
     }
 
-    /// <summary>
-    /// A plain object with no events or command properties for testing null binder scenarios.
-    /// </summary>
-    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Used for testing")]
-    [SuppressMessage(
-        "Performance",
-        "CA1812:Avoid uninstantiated internal classes",
-        Justification = "Used only as a generic type argument for the null-binder dispatch path; never constructed by design.")]
+    /// <summary>A plain object with no events or command properties for testing null binder scenarios.</summary>
+    [SuppressMessage("Design", "SST1436:Empty type", Justification = "Having no members is the condition under test.")]
     private sealed class PlainObject;
 
-    /// <summary>
-    /// A custom command binder with high affinity (10) for testing binder priority selection.
-    /// </summary>
+    /// <summary>A custom command binder with high affinity (10) for testing binder priority selection.</summary>
     private sealed class HighAffinityBinder : ICreatesCommandBinding
     {
-        /// <summary>
-        /// The high affinity score reported by this binder.
-        /// </summary>
+        /// <summary>The high affinity score reported by this binder.</summary>
         private const int HighAffinity = 10;
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public int GetAffinityForObject<T>(bool hasEventTarget) => HighAffinity;
 
         /// <inheritdoc/>
@@ -123,11 +97,8 @@ public class CommandBinderServiceTests
             where T : class => null;
 
         /// <inheritdoc/>
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         [RequiresUnreferencedCode("Test stub")]
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public IDisposable? BindCommandToObject<T, TEventArgs>(
             ICommand? command,
             T? target,

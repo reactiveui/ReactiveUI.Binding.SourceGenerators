@@ -4,9 +4,7 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Provides unified access to all converter registries in ReactiveUI.Binding.
-/// </summary>
+/// <summary>Provides unified access to all converter registries in ReactiveUI.Binding.</summary>
 /// <remarks>
 /// <para>
 /// This service manages three types of converters:
@@ -44,9 +42,7 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public sealed class ConverterService
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ConverterService"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="ConverterService"/> class.</summary>
     public ConverterService()
     {
         TypedConverters = new();
@@ -54,33 +50,25 @@ public sealed class ConverterService
         SetMethodConverters = new();
     }
 
-    /// <summary>
-    /// Gets the registry for typed binding converters.
-    /// </summary>
+    /// <summary>Gets the registry for typed binding converters.</summary>
     /// <value>
     /// The typed converter registry for exact type-pair conversions.
     /// </value>
     public BindingTypeConverterRegistry TypedConverters { get; }
 
-    /// <summary>
-    /// Gets the registry for fallback binding converters.
-    /// </summary>
+    /// <summary>Gets the registry for fallback binding converters.</summary>
     /// <value>
     /// The fallback converter registry for runtime type conversions.
     /// </value>
     public BindingFallbackConverterRegistry FallbackConverters { get; }
 
-    /// <summary>
-    /// Gets the registry for set-method binding converters.
-    /// </summary>
+    /// <summary>Gets the registry for set-method binding converters.</summary>
     /// <value>
     /// The set-method converter registry for specialized set operations.
     /// </value>
     public SetMethodBindingConverterRegistry SetMethodConverters { get; }
 
-    /// <summary>
-    /// Resolves the best converter for the specified type pair.
-    /// </summary>
+    /// <summary>Resolves the best converter for the specified type pair.</summary>
     /// <param name="fromType">The source type to convert from.</param>
     /// <param name="toType">The target type to convert to.</param>
     /// <returns>
@@ -90,13 +78,9 @@ public sealed class ConverterService
     /// Thrown if <paramref name="fromType"/> or <paramref name="toType"/> is null.
     /// </exception>
     public object? ResolveConverter(
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type fromType,
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type toType)
     {
         ArgumentExceptionHelper.ThrowIfNull(fromType);
@@ -104,33 +88,18 @@ public sealed class ConverterService
 
         // Phase 1: Try exact type-pair match (typed converters)
         var typed = TypedConverters.TryGetConverter(fromType, toType);
-        if (typed is not null)
-        {
-            return typed;
-        }
-
-        // Phase 2: Try fallback converters (runtime type checking)
-        return FallbackConverters.TryGetConverter(fromType, toType);
+        return typed is not null ? typed : FallbackConverters.TryGetConverter(fromType, toType);
     }
 
-    /// <summary>
-    /// Resolves the best set-method converter for the specified type pair.
-    /// </summary>
+    /// <summary>Resolves the best set-method converter for the specified type pair.</summary>
     /// <param name="fromType">The source type to convert from. May be null.</param>
     /// <param name="toType">The target type to convert to. May be null.</param>
     /// <returns>
     /// The best set-method converter for the type pair, or <see langword="null"/> if no converter is available.
     /// </returns>
     public ISetMethodBindingConverter? ResolveSetMethodConverter(
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type? fromType,
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
-        Type? toType)
-    {
-        return SetMethodConverters.TryGetConverter(fromType, toType);
-    }
+        Type? toType) => SetMethodConverters.TryGetConverter(fromType, toType);
 }

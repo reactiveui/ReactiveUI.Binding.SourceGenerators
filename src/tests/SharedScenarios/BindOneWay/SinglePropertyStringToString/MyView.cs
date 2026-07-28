@@ -6,22 +6,16 @@ using System.ComponentModel;
 
 namespace SharedScenarios.BindOneWay.SinglePropertyStringToString;
 
-/// <summary>
-/// Target View with a string property.
-/// </summary>
+/// <summary>Target View with a string property.</summary>
 public class MyView : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="NameText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="NameText"/>.</summary>
     private string _nameText = string.Empty;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the name text.
-    /// </summary>
+    /// <summary>Gets or sets the name text.</summary>
     public string NameText
     {
         get => _nameText;

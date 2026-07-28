@@ -13,132 +13,103 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class TestFixture : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>The backing field for <see cref="IsNotNullString"/>.</summary>
-    private string _isNotNullString = "Foo";
-
-    /// <summary>The backing field for <see cref="IsOnlyOneWord"/>.</summary>
-    private string _isOnlyOneWord = "Baz";
-
-    /// <summary>The backing field for <see cref="PocoProperty"/>.</summary>
-    private string _pocoProperty = string.Empty;
-
-    /// <summary>The backing field for <see cref="NullableInt"/>.</summary>
-    private int? _nullableInt;
-
-    /// <summary>The backing field for <see cref="UsesExprRaiseSet"/>.</summary>
-    private string _usesExprRaiseSet = string.Empty;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets a non-null string property.
-    /// </summary>
+    /// <summary>Gets or sets a non-null string property.</summary>
     public string IsNotNullString
     {
-        get => _isNotNullString;
+        get => field;
         set
         {
-            if (_isNotNullString == value)
+            if (field == value)
             {
                 return;
             }
 
             OnPropertyChanging();
-            _isNotNullString = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = "Foo";
 
-    /// <summary>
-    /// Gets or sets a single-word string property.
-    /// </summary>
+    /// <summary>Gets or sets a single-word string property.</summary>
     public string IsOnlyOneWord
     {
-        get => _isOnlyOneWord;
+        get => field;
         set
         {
-            if (_isOnlyOneWord == value)
+            if (field == value)
             {
                 return;
             }
 
             OnPropertyChanging();
-            _isOnlyOneWord = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = "Baz";
 
-    /// <summary>
-    /// Gets or sets a property without change notification behavior.
-    /// </summary>
+    /// <summary>Gets or sets a property without change notification behavior.</summary>
     public string PocoProperty
     {
-        get => _pocoProperty;
+        get => field;
         set
         {
-            if (_pocoProperty == value)
+            if (field == value)
             {
                 return;
             }
 
             OnPropertyChanging();
-            _pocoProperty = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets a nullable integer property.
-    /// </summary>
+    /// <summary>Gets or sets a nullable integer property.</summary>
     public int? NullableInt
     {
-        get => _nullableInt;
+        get => field;
         set
         {
-            if (_nullableInt == value)
+            if (field == value)
             {
                 return;
             }
 
             OnPropertyChanging();
-            _nullableInt = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
-    /// <summary>
-    /// Gets or sets a property that uses expression-based raise and set.
-    /// </summary>
+    /// <summary>Gets or sets a property that uses expression-based raise and set.</summary>
     public string UsesExprRaiseSet
     {
-        get => _usesExprRaiseSet;
+        get => field;
         set
         {
-            if (_usesExprRaiseSet == value)
+            if (field == value)
             {
                 return;
             }
 
             OnPropertyChanging();
-            _usesExprRaiseSet = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Raises the PropertyChanging event.
-    /// </summary>
+    /// <summary>Raises the PropertyChanging event.</summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanging([CallerMemberName] string? propertyName = null) =>
         PropertyChanging?.Invoke(this, new(propertyName));
 
-    /// <summary>
-    /// Raises the PropertyChanged event.
-    /// </summary>
+    /// <summary>Raises the PropertyChanged event.</summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new(propertyName));

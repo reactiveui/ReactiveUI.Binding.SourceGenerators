@@ -16,25 +16,25 @@ namespace ReactiveUI.Binding
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, (object? view, bool isViewModel)> Bind(
             this global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView view,
             global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel viewModel,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel, int>> vmProperty,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel, int>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, string?>> viewProperty,
-            global::System.Func<int, string> vmToViewConverter,
-            global::System.Func<string, int> viewToVmConverter,
-            [global::System.Runtime.CompilerServices.CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+            global::System.Func<int, string> viewModelToViewConverter,
+            global::System.Func<string, int> viewToViewModelConverter,
+            [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (vmPropertyExpression == "x => x.Count"
+            if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountText")
             {
-                return __Bind_0000102A67853E4B(viewModel, view, vmToViewConverter, viewToVmConverter);
+                return __Bind_0000102A67853C5B(viewModel, view, viewModelToViewConverter, viewToViewModelConverter);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, (object? view, bool isViewModel)> __Bind_0000102A67853E4B(global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView view, global::System.Func<int, string> vmToViewConverter, global::System.Func<string, int> viewToVmConverter)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, (object? view, bool isViewModel)> __Bind_0000102A67853C5B(global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView view, global::System.Func<int, string> viewModelToViewConverter, global::System.Func<string, int> viewToViewModelConverter)
         {
             // Bind: Count <-> CountText (with conversion)
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
@@ -47,8 +47,8 @@ namespace ReactiveUI.Binding
             "CountText",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView)__o).CountText,
             true);
-        var vmBind = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmObs, vmToViewConverter);
-        var viewBind = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(viewObs, viewToVmConverter);
+        var vmBind = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmObs, viewModelToViewConverter);
+        var viewBind = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(viewObs, viewToViewModelConverter);
 
             var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(vmBind, value =>
             {

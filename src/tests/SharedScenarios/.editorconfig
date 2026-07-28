@@ -1,0 +1,13 @@
+[*.cs]
+
+###################
+# Shared scenario fixtures
+#
+# These files are not only compiled by their own project - the runtime-execution tests read them as
+# text and compile them at C# 7.3 and C# 10 to prove the generated output works on the minimum
+# supported language version. A rule whose fix needs a newer language feature would make the
+# fixture stop compiling in exactly the test that matters, so those rules are off here.
+###################
+dotnet_diagnostic.SST2200.severity = none # 'field' is an ordinary identifier before C# 14
+dotnet_diagnostic.SST2202.severity = none # target-typed 'new' is C# 9
+dotnet_diagnostic.PSH1000.severity = none # 'static' lambdas are C# 9

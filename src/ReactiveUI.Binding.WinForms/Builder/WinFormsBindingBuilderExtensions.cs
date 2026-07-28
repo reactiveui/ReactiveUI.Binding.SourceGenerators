@@ -7,30 +7,36 @@ using Splat.Builder;
 
 namespace ReactiveUI.Binding.WinForms.Builder;
 
-/// <summary>
-/// WinForms-specific extensions for the ReactiveUI.Binding builder.
-/// </summary>
+/// <summary>WinForms-specific extensions for the ReactiveUI.Binding builder.</summary>
 public static class WinFormsBindingBuilderExtensions
 {
-    /// <summary>
-    /// Configures ReactiveUI.Binding for WinForms platform, registering event-based
-    /// property observation for WinForms components.
-    /// </summary>
+    /// <summary>Provides WithWinForms extension members for <paramref name="builder"/>.</summary>
     /// <param name="builder">The builder instance.</param>
-    /// <returns>The builder instance for chaining.</returns>
-    public static IReactiveUIBindingBuilder WithWinForms(this IReactiveUIBindingBuilder builder)
+    extension(IAppBuilder builder)
     {
-        ArgumentExceptionHelper.ThrowIfNull(builder);
-
-        return builder.WithPlatformModule(new WinFormsBindingModule());
+        /// <summary>
+        /// Configures ReactiveUI.Binding for WinForms platform, registering event-based
+        /// property observation for WinForms components.
+        /// </summary>
+        /// <returns>The builder instance for chaining.</returns>
+        public IReactiveUIBindingBuilder WithWinForms() =>
+            ((IReactiveUIBindingBuilder)builder).WithWinForms();
     }
 
-    /// <summary>
-    /// Configures ReactiveUI.Binding for WinForms platform, registering event-based
-    /// property observation for WinForms components.
-    /// </summary>
+    /// <summary>Provides WithWinForms extension members for <paramref name="builder"/>.</summary>
     /// <param name="builder">The builder instance.</param>
-    /// <returns>The builder instance for chaining.</returns>
-    public static IReactiveUIBindingBuilder WithWinForms(this IAppBuilder builder) =>
-        ((IReactiveUIBindingBuilder)builder).WithWinForms();
+    extension(IReactiveUIBindingBuilder builder)
+    {
+        /// <summary>
+        /// Configures ReactiveUI.Binding for WinForms platform, registering event-based
+        /// property observation for WinForms components.
+        /// </summary>
+        /// <returns>The builder instance for chaining.</returns>
+        public IReactiveUIBindingBuilder WithWinForms()
+        {
+            ArgumentExceptionHelper.ThrowIfNull(builder);
+
+            return builder.WithPlatformModule(new WinFormsBindingModule());
+        }
+    }
 }

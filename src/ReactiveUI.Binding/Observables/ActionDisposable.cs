@@ -13,14 +13,10 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ActionDisposable : IDisposable
 {
-    /// <summary>
-    /// The action to invoke on disposal. Set to <see langword="null"/> after first invocation.
-    /// </summary>
+    /// <summary>The action to invoke on disposal. Set to <see langword="null"/> after first invocation.</summary>
     private Action? _action;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ActionDisposable"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="ActionDisposable"/> class.</summary>
     /// <param name="action">The action to invoke on disposal.</param>
     public ActionDisposable(Action action)
     {
@@ -35,9 +31,7 @@ public sealed class ActionDisposable : IDisposable
         action?.Invoke();
     }
 
-    /// <summary>
-    /// Atomically takes the action, returning it exactly once. Subsequent calls return <see langword="null"/>.
-    /// </summary>
+    /// <summary>Atomically takes the action, returning it exactly once. Subsequent calls return <see langword="null"/>.</summary>
     /// <returns>The action if this is the first call; otherwise <see langword="null"/>.</returns>
     [ExcludeFromCodeCoverage]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

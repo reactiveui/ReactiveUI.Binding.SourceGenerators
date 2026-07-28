@@ -28,61 +28,44 @@ public interface IReactiveUIBindingBuilder : IAppBuilder
     /// <returns>The builder instance for chaining.</returns>
     new IReactiveUIBindingBuilder WithCoreServices();
 
-    /// <summary>
-    /// Registers a platform-specific module with the builder.
-    /// </summary>
+    /// <summary>Registers a platform-specific module with the builder.</summary>
     /// <typeparam name="T">The type of the platform module. Must implement <see cref="IModule"/>.</typeparam>
     /// <param name="module">The platform module instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
     IReactiveUIBindingBuilder WithPlatformModule<T>(T module)
         where T : IModule;
 
-    /// <summary>
-    /// Registers a custom action to be executed during the build phase.
-    /// </summary>
+    /// <summary>Registers a custom action to be executed during the build phase.</summary>
     /// <param name="configureAction">An action that receives the mutable dependency resolver.</param>
     /// <returns>The builder instance for chaining.</returns>
     IReactiveUIBindingBuilder WithRegistration(Action<IMutableDependencyResolver> configureAction);
 
-    /// <summary>
-    /// Registers a typed binding converter.
-    /// </summary>
+    /// <summary>Registers a typed binding converter.</summary>
     /// <param name="converter">The converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
     IReactiveUIBindingBuilder WithConverter(IBindingTypeConverter converter);
 
-    /// <summary>
-    /// Registers a fallback binding converter.
-    /// </summary>
+    /// <summary>Registers a fallback binding converter.</summary>
     /// <param name="converter">The fallback converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
     IReactiveUIBindingBuilder WithFallbackConverter(IBindingFallbackConverter converter);
 
-    /// <summary>
-    /// Registers a set-method binding converter.
-    /// </summary>
+    /// <summary>Registers a set-method binding converter.</summary>
     /// <param name="converter">The set-method converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
     IReactiveUIBindingBuilder WithSetMethodConverter(ISetMethodBindingConverter converter);
 
-    /// <summary>
-    /// Registers a custom command binder for binding <see cref="System.Windows.Input.ICommand"/>
-    /// instances to UI controls.
-    /// </summary>
+    /// <summary>Registers a custom command binder for binding <see cref="System.Windows.Input.ICommand"/> instances to UI controls.</summary>
     /// <param name="binder">The command binder instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
     IReactiveUIBindingBuilder WithCommandBinder(ICreatesCommandBinding binder);
 
-    /// <summary>
-    /// Configures the default view locator with explicit view-to-view-model mappings.
-    /// </summary>
+    /// <summary>Configures the default view locator with explicit view-to-view-model mappings.</summary>
     /// <param name="configure">An action that receives a <see cref="ViewMappingBuilder"/> for registering mappings.</param>
     /// <returns>The builder instance for chaining.</returns>
     IReactiveUIBindingBuilder ConfigureViewLocator(Action<ViewMappingBuilder> configure);
 
-    /// <summary>
-    /// Builds the application and returns the configured instance.
-    /// </summary>
+    /// <summary>Builds the application and returns the configured instance.</summary>
     /// <returns>The configured application instance.</returns>
     IReactiveUIBindingInstance BuildApp();
 }

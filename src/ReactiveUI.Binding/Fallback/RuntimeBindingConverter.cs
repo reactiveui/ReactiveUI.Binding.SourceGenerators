@@ -19,10 +19,7 @@ namespace ReactiveUI.Binding.Fallback;
 /// </remarks>
 public static class RuntimeBindingConverter
 {
-    /// <summary>
-    /// Attempts to convert <paramref name="value"/> from <typeparamref name="TFrom"/> to
-    /// <typeparamref name="TTo"/> for a generated <c>BindTo</c> assignment.
-    /// </summary>
+    /// <summary>Attempts to convert <paramref name="value"/> from <typeparamref name="TFrom"/> to <typeparamref name="TTo"/> for a generated <c>BindTo</c> assignment.</summary>
     /// <typeparam name="TFrom">The declared source value type.</typeparam>
     /// <typeparam name="TTo">The target property type.</typeparam>
     /// <param name="value">The value produced by the source observable.</param>

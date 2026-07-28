@@ -7,40 +7,26 @@ using BenchmarkDotNet.Jobs;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
-/// <summary>
-/// ReactiveUI expression-tree binding benchmarks for comparison.
-/// </summary>
-////[SimpleJob(RuntimeMoniker.Net462)]
+/// <summary>ReactiveUI expression-tree binding benchmarks for comparison.</summary>
 [SimpleJob(RuntimeMoniker.Net80)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [MemoryDiagnoser]
 [MarkdownExporterAttribute.GitHub]
 public class ReactiveUIBindingBenchmark
 {
-    /// <summary>
-    /// The number of property changes to fire during each benchmark iteration.
-    /// </summary>
+    /// <summary>The number of property changes to fire during each benchmark iteration.</summary>
     private const int PropertyChangeCount = 1_000;
 
-    /// <summary>
-    /// The source view model instance used for binding benchmarks.
-    /// </summary>
+    /// <summary>The source view model instance used for binding benchmarks.</summary>
     private BenchmarkViewModel _source = null!;
 
-    /// <summary>
-    /// The target view instance used for binding benchmarks.
-    /// </summary>
+    /// <summary>The target view instance used for binding benchmarks.</summary>
     private BenchmarkView _target = null!;
 
-    /// <summary>
-    /// Initializes static members of the <see cref="ReactiveUIBindingBenchmark"/> class.
-    /// Ensures ReactiveUI is configured before any benchmarks run.
-    /// </summary>
+    /// <summary>Initializes static members of the <see cref="ReactiveUIBindingBenchmark"/> class. Ensures ReactiveUI is configured before any benchmarks run.</summary>
     static ReactiveUIBindingBenchmark() => ModuleInitializer.EnsureInitialized();
 
-    /// <summary>
-    /// Sets up fresh source and target objects before each benchmark iteration.
-    /// </summary>
+    /// <summary>Sets up fresh source and target objects before each benchmark iteration.</summary>
     [IterationSetup]
     public void Setup()
     {
@@ -48,9 +34,7 @@ public class ReactiveUIBindingBenchmark
         _target = new() { ViewModel = _source };
     }
 
-    /// <summary>
-    /// Expression-tree one-way binding: setup, fire N changes, dispose.
-    /// </summary>
+    /// <summary>Expression-tree one-way binding: setup, fire N changes, dispose.</summary>
     [Benchmark(Description = "OneWayBind")]
     public void OneWayBind()
     {
@@ -62,9 +46,7 @@ public class ReactiveUIBindingBenchmark
         }
     }
 
-    /// <summary>
-    /// Expression-tree two-way binding: setup, fire N source changes, dispose.
-    /// </summary>
+    /// <summary>Expression-tree two-way binding: setup, fire N source changes, dispose.</summary>
     [Benchmark(Description = "Bind")]
     public void Bind()
     {
@@ -76,18 +58,14 @@ public class ReactiveUIBindingBenchmark
         }
     }
 
-    /// <summary>
-    /// Cold start: create one-way binding, dispose immediately.
-    /// </summary>
+    /// <summary>Cold start: create one-way binding, dispose immediately.</summary>
     [Benchmark(Description = "First OneWayBind")]
     public void FirstOneWayBind()
     {
         using var binding = _target.OneWayBind(_source, x => x.Name, x => x.DisplayName);
     }
 
-    /// <summary>
-    /// Cold start: create two-way binding, dispose immediately.
-    /// </summary>
+    /// <summary>Cold start: create two-way binding, dispose immediately.</summary>
     [Benchmark(Description = "First Bind")]
     public void FirstBind()
     {

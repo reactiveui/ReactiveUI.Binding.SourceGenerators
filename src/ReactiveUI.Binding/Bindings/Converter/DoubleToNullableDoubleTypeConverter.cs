@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="double"/> to <see cref="Nullable{Double}"/>.
-/// </summary>
+/// <summary>Converts <see cref="double"/> to a nullable <see cref="double"/>.</summary>
 public sealed class DoubleToNullableDoubleTypeConverter : IBindingTypeConverter<double, double?>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

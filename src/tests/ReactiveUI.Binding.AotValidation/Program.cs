@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 
 namespace ReactiveUI.Binding.AotValidation;
 
@@ -27,17 +28,24 @@ internal static class Program
     /// <summary>The updated age value used to assert change propagation.</summary>
     private const int UpdatedAge = 31;
 
+    /// <summary>The value set before the binding is disposed, which must survive the disposal.</summary>
+    private const string BeforeDisposal = "Before";
+
+    /// <summary>
+    /// Sink for scenario results. This validation harness runs standalone under Native AOT with no host
+    /// or logging infrastructure, so its report goes straight to the process output stream.
+    /// </summary>
+    private static readonly TextWriter _output = Console.Out;
+
     /// <summary>The number of scenarios that have passed.</summary>
     private static int _passed;
 
     /// <summary>The number of scenarios that have failed.</summary>
     private static int _failed;
 
-    /// <summary>
-    /// Runs every AOT binding validation scenario and reports the aggregate result.
-    /// </summary>
+    /// <summary>Runs every AOT binding validation scenario and reports the aggregate result.</summary>
     /// <returns>Zero if every scenario passed; otherwise, one.</returns>
-    private static int Main()
+    internal static int Main()
     {
         ValidateWhenChangedSingleProperty();
         ValidateWhenChangedDeepChain();
@@ -47,14 +55,12 @@ internal static class Program
         ValidateBindTwoWay();
         ValidateBindOneWayDisposal();
 
-        Console.WriteLine();
-        Console.WriteLine($"AOT Validation: {_passed} passed, {_failed} failed");
+        Report(string.Empty);
+        Report($"AOT Validation: {_passed} passed, {_failed} failed");
         return _failed > 0 ? 1 : 0;
     }
 
-    /// <summary>
-    /// WhenChanged on a single property emits the initial value and subsequent changes.
-    /// </summary>
+    /// <summary>WhenChanged on a single property emits the initial value and subsequent changes.</summary>
     private static void ValidateWhenChangedSingleProperty()
     {
         var vm = new AotViewModel { Name = Alice };
@@ -65,9 +71,7 @@ internal static class Program
         AssertEqual("WhenChanged after set", "Bob", last);
     }
 
-    /// <summary>
-    /// WhenChanged across a deep property chain tracks changes to the leaf value.
-    /// </summary>
+    /// <summary>WhenChanged across a deep property chain tracks changes to the leaf value.</summary>
     private static void ValidateWhenChangedDeepChain()
     {
         var vm = new AotViewModel();
@@ -79,9 +83,7 @@ internal static class Program
         AssertEqual("WhenChanged deep after set", "Deeper", last);
     }
 
-    /// <summary>
-    /// WhenChanged on two properties emits a tuple and updates when either changes.
-    /// </summary>
+    /// <summary>WhenChanged on two properties emits a tuple and updates when either changes.</summary>
     private static void ValidateWhenChangedTwoProperties()
     {
         var vm = new AotViewModel { Name = Alice, Age = InitialAge };
@@ -93,9 +95,7 @@ internal static class Program
         AssertEqual("WhenChanged two-prop age update", UpdatedAge, last.age);
     }
 
-    /// <summary>
-    /// WhenChanged on the view type produces a dispatch entry required by BindTwoWay.
-    /// </summary>
+    /// <summary>WhenChanged on the view type produces a dispatch entry required by BindTwoWay.</summary>
     private static void ValidateWhenChangedOnViewType()
     {
         var view = new AotView { DisplayName = "ViewVal" };
@@ -106,9 +106,7 @@ internal static class Program
         AssertEqual("WhenChanged on view after set", UpdatedName, last);
     }
 
-    /// <summary>
-    /// BindOneWay propagates source changes to the target property.
-    /// </summary>
+    /// <summary>BindOneWay propagates source changes to the target property.</summary>
     private static void ValidateBindOneWay()
     {
         var source = new AotViewModel { Name = SourceName };
@@ -119,9 +117,7 @@ internal static class Program
         AssertEqual("BindOneWay after set", UpdatedName, target.DisplayName);
     }
 
-    /// <summary>
-    /// BindTwoWay propagates changes in both directions between source and target.
-    /// </summary>
+    /// <summary>BindTwoWay propagates changes in both directions between source and target.</summary>
     private static void ValidateBindTwoWay()
     {
         var source = new AotViewModel { Name = SourceName };
@@ -134,38 +130,38 @@ internal static class Program
         AssertEqual("BindTwoWay target→source", "FromTarget", source.Name);
     }
 
-    /// <summary>
-    /// BindOneWay stops propagating once the binding is disposed.
-    /// </summary>
+    /// <summary>BindOneWay stops propagating once the binding is disposed.</summary>
     private static void ValidateBindOneWayDisposal()
     {
-        var source = new AotViewModel { Name = "Before" };
+        var source = new AotViewModel { Name = BeforeDisposal };
         var target = new AotView();
         var binding = source.BindOneWay(target, x => x.Name, x => x.DisplayName);
-        AssertEqual("BindOneWay pre-dispose", "Before", target.DisplayName);
+        AssertEqual("BindOneWay pre-dispose", BeforeDisposal, target.DisplayName);
         binding.Dispose();
         source.Name = "After";
-        AssertEqual("BindOneWay post-dispose unchanged", "Before", target.DisplayName);
+        AssertEqual("BindOneWay post-dispose unchanged", BeforeDisposal, target.DisplayName);
     }
 
-    /// <summary>
-    /// Compares an expected and actual value, recording a pass or failure to the console.
-    /// </summary>
+    /// <summary>Compares an expected and actual value, recording a pass or failure to the console.</summary>
     /// <typeparam name="T">The value type being compared.</typeparam>
     /// <param name="label">A human-readable label for the scenario.</param>
     /// <param name="expected">The expected value.</param>
     /// <param name="actual">The actual value produced by the binding.</param>
     private static void AssertEqual<T>(string label, T expected, T? actual)
     {
-        if (Equals(expected, actual))
+        if (EqualityComparer<T>.Default.Equals(expected, actual))
         {
-            Console.WriteLine($"  PASS: {label}");
+            Report($"  PASS: {label}");
             _passed++;
         }
         else
         {
-            Console.WriteLine($"  FAIL: {label} — expected '{expected}', got '{actual}'");
+            Report($"  FAIL: {label} - expected '{expected}', got '{actual}'");
             _failed++;
         }
     }
+
+    /// <summary>Writes a single line of the validation report to the process output stream.</summary>
+    /// <param name="message">The line to write.</param>
+    private static void Report(string message) => _output.WriteLine(message);
 }

@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings;
 
-/// <summary>
-///     Unit tests for standard binding type converters verifying basic conversion correctness.
-/// </summary>
+/// <summary>Unit tests for standard binding type converters verifying basic conversion correctness.</summary>
 public class BindingTypeConvertersUnitTests
 {
-    /// <summary>
-    ///     Verifies that ByteToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that ByteToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ByteToStringTypeConverter_Converts_Correctly()
@@ -25,24 +21,20 @@ public class BindingTypeConvertersUnitTests
         await Assert.That(output).IsEqualTo("123");
     }
 
-    /// <summary>
-    ///     Verifies that DecimalToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that DecimalToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task DecimalToStringTypeConverter_Converts_Correctly()
     {
         var converter = new DecimalToStringTypeConverter();
-        const decimal val = 123.456m;
+        const decimal val = 123.456M;
 
         var result = converter.TryConvert(val, null, out var output);
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo(val.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies that DoubleToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that DoubleToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task DoubleToStringTypeConverter_Converts_Correctly()
@@ -55,9 +47,7 @@ public class BindingTypeConvertersUnitTests
         await Assert.That(output).IsEqualTo(val.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies that IntegerToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that IntegerToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task IntegerToStringTypeConverter_Converts_Correctly()
@@ -70,9 +60,7 @@ public class BindingTypeConvertersUnitTests
         await Assert.That(output).IsEqualTo("123456789");
     }
 
-    /// <summary>
-    ///     Verifies that LongToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that LongToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task LongToStringTypeConverter_Converts_Correctly()
@@ -85,9 +73,7 @@ public class BindingTypeConvertersUnitTests
         await Assert.That(output).IsEqualTo("1234567890123456789");
     }
 
-    /// <summary>
-    ///     Verifies that NullableByteToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that NullableByteToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task NullableByteToStringTypeConverter_Converts_Correctly()
@@ -101,24 +87,20 @@ public class BindingTypeConvertersUnitTests
         await Assert.That(output).IsEqualTo("123");
     }
 
-    /// <summary>
-    ///     Verifies that NullableDecimalToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that NullableDecimalToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task NullableDecimalToStringTypeConverter_Converts_Correctly()
     {
         var converter = new NullableDecimalToStringTypeConverter();
-        decimal? val = 123.456m;
+        decimal? val = 123.456M;
 
         var result = converter.TryConvert(val, null, out var output);
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo(val.ToString());
     }
 
-    /// <summary>
-    ///     Verifies that NullableDoubleToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that NullableDoubleToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task NullableDoubleToStringTypeConverter_Converts_Correctly()
@@ -131,9 +113,7 @@ public class BindingTypeConvertersUnitTests
         await Assert.That(output).IsEqualTo(val.ToString());
     }
 
-    /// <summary>
-    ///     Verifies that NullableIntegerToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that NullableIntegerToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task NullableIntegerToStringTypeConverter_Converts_Correctly()
@@ -146,9 +126,7 @@ public class BindingTypeConvertersUnitTests
         await Assert.That(output).IsEqualTo("123456789");
     }
 
-    /// <summary>
-    ///     Verifies that NullableLongToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that NullableLongToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task NullableLongToStringTypeConverter_Converts_Correctly()
@@ -161,9 +139,7 @@ public class BindingTypeConvertersUnitTests
         await Assert.That(output).IsEqualTo("1234567890123456789");
     }
 
-    /// <summary>
-    ///     Verifies that NullableShortToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that NullableShortToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task NullableShortToStringTypeConverter_Converts_Correctly()
@@ -176,24 +152,20 @@ public class BindingTypeConvertersUnitTests
         await Assert.That(output).IsEqualTo("12345");
     }
 
-    /// <summary>
-    ///     Verifies that NullableSingleToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that NullableSingleToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task NullableSingleToStringTypeConverter_Converts_Correctly()
     {
         var converter = new NullableSingleToStringTypeConverter();
-        float? val = 123.45f;
+        float? val = 123.45F;
 
         var result = converter.TryConvert(val, null, out var output);
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo(val.ToString());
     }
 
-    /// <summary>
-    ///     Verifies that ShortToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that ShortToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ShortToStringTypeConverter_Converts_Correctly()
@@ -206,15 +178,13 @@ public class BindingTypeConvertersUnitTests
         await Assert.That(output).IsEqualTo("12345");
     }
 
-    /// <summary>
-    ///     Verifies that SingleToStringTypeConverter converts correctly.
-    /// </summary>
+    /// <summary>Verifies that SingleToStringTypeConverter converts correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task SingleToStringTypeConverter_Converts_Correctly()
     {
         var converter = new SingleToStringTypeConverter();
-        const float val = 123.45f;
+        const float val = 123.45F;
 
         var result = converter.TryConvert(val, null, out var output);
         await Assert.That(result).IsTrue();

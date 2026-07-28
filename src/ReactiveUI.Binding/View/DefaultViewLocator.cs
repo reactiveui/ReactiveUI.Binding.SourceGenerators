@@ -11,10 +11,6 @@ namespace ReactiveUI.Binding;
 /// using a three-tier resolution strategy: source-generated AOT-safe dispatch, explicit runtime
 /// mappings, and service locator fallback.
 /// </summary>
-[SuppressMessage(
-    "Major Code Smell",
-    "S4018:Generic methods should provide type parameter for type inference",
-    Justification = "The type parameter denotes the target type (value/control/view), supplied explicitly by callers; it is not derivable from the arguments. Public API.")]
 public sealed class DefaultViewLocator : IViewLocator
 {
     /// <summary>
@@ -23,14 +19,8 @@ public sealed class DefaultViewLocator : IViewLocator
     /// </summary>
     private static Func<object, string, IViewFor?>? _generatedDispatch;
 
-    /// <summary>
-    /// Synchronization lock for thread-safe access to this instance's mappings.
-    /// </summary>
-#if NET9_0_OR_GREATER
+    /// <summary>Synchronization lock for thread-safe access to this instance's mappings.</summary>
     private readonly Lock _lock = new();
-#else
-    private readonly object _lock = new();
-#endif
 
     /// <summary>
     /// Runtime explicit mappings from (viewModelType, contract) to view factory.
@@ -50,21 +40,19 @@ public sealed class DefaultViewLocator : IViewLocator
         _generatedDispatch = dispatch;
     }
 
-    /// <summary>
-    /// Registers an explicit view mapping for a view model type.
-    /// </summary>
+    /// <summary>Registers an explicit view mapping for a view model type.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <typeparam name="TView">The view type. Must implement <see cref="IViewFor"/>.</typeparam>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
     public void Map<TViewModel, TView>()
         where TViewModel : class
         where TView : IViewFor, new() => Map<TViewModel, TView>(null);
 
-    /// <summary>
-    /// Registers an explicit view mapping for a view model type.
-    /// </summary>
+    /// <summary>Registers an explicit view mapping for a view model type.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <typeparam name="TView">The view type. Must implement <see cref="IViewFor"/>.</typeparam>
     /// <param name="contract">A contract string for named registrations.</param>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
     public void Map<TViewModel, TView>(string? contract)
         where TViewModel : class
         where TView : IViewFor, new()
@@ -76,20 +64,18 @@ public sealed class DefaultViewLocator : IViewLocator
         }
     }
 
-    /// <summary>
-    /// Registers an explicit view mapping with a custom factory for a view model type.
-    /// </summary>
+    /// <summary>Registers an explicit view mapping with a custom factory for a view model type.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <param name="factory">A factory function that creates the view.</param>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
     public void Map<TViewModel>(Func<IViewFor> factory)
         where TViewModel : class => Map<TViewModel>(factory, null);
 
-    /// <summary>
-    /// Registers an explicit view mapping with a custom factory for a view model type.
-    /// </summary>
+    /// <summary>Registers an explicit view mapping with a custom factory for a view model type.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <param name="factory">A factory function that creates the view.</param>
     /// <param name="contract">A contract string for named registrations.</param>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
     public void Map<TViewModel>(Func<IViewFor> factory, string? contract)
         where TViewModel : class
     {
@@ -102,20 +88,18 @@ public sealed class DefaultViewLocator : IViewLocator
         }
     }
 
-    /// <summary>
-    /// Removes an explicit view mapping for a view model type.
-    /// </summary>
+    /// <summary>Removes an explicit view mapping for a view model type.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <returns><see langword="true"/> if the mapping was removed; otherwise, <see langword="false"/>.</returns>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
     public bool Unmap<TViewModel>()
         where TViewModel : class => Unmap<TViewModel>(null);
 
-    /// <summary>
-    /// Removes an explicit view mapping for a view model type.
-    /// </summary>
+    /// <summary>Removes an explicit view mapping for a view model type.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <param name="contract">A contract string for named registrations.</param>
     /// <returns><see langword="true"/> if the mapping was removed; otherwise, <see langword="false"/>.</returns>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
     public bool Unmap<TViewModel>(string? contract)
         where TViewModel : class
     {
@@ -206,28 +190,20 @@ public sealed class DefaultViewLocator : IViewLocator
         return TryResolveViaReflection(viewModel, normalizedContract);
     }
 
-    /// <summary>
-    /// Creates a new <see cref="ViewMappingBuilder"/> for fluent registration of view-to-view-model mappings.
-    /// </summary>
+    /// <summary>Creates a new <see cref="ViewMappingBuilder"/> for fluent registration of view-to-view-model mappings.</summary>
     /// <returns>A new <see cref="ViewMappingBuilder"/> targeting this locator instance.</returns>
     public ViewMappingBuilder CreateMappingBuilder() => new(this);
 
-    /// <summary>
-    /// Resets the generated view dispatch for testing purposes.
-    /// </summary>
+    /// <summary>Resets the generated view dispatch for testing purposes.</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal static void ResetGeneratedViewDispatchForTesting() => _generatedDispatch = null;
 
-    /// <summary>
-    /// Sets the view model on the resolved view.
-    /// </summary>
+    /// <summary>Sets the view model on the resolved view.</summary>
     /// <param name="view">The view to set the view model on.</param>
     /// <param name="viewModel">The view model instance.</param>
     private static void SetViewModelOnView(IViewFor view, object viewModel) => view.ViewModel = viewModel;
 
-    /// <summary>
-    /// Fallback resolution using MakeGenericType. Not AOT-safe but provides backward compatibility.
-    /// </summary>
+    /// <summary>Fallback resolution using MakeGenericType. Not AOT-safe but provides backward compatibility.</summary>
     /// <param name="viewModel">The view model instance.</param>
     /// <param name="contract">The normalized contract string.</param>
     /// <returns>The resolved view, or <see langword="null"/>.</returns>
@@ -236,8 +212,8 @@ public sealed class DefaultViewLocator : IViewLocator
     {
         try
         {
-            var vmType = viewModel.GetType();
-            var viewForType = typeof(IViewFor<>).MakeGenericType(vmType);
+            var viewModelType = viewModel.GetType();
+            var viewForType = typeof(IViewFor<>).MakeGenericType(viewModelType);
             var svcContract = contract.Length == 0 ? null : contract;
             var view = AppLocator.Current.GetService(viewForType, svcContract) as IViewFor;
             if (view is not null)
@@ -246,28 +222,22 @@ public sealed class DefaultViewLocator : IViewLocator
                 return view;
             }
         }
-        catch
+        catch (Exception ex) when (ex is InvalidOperationException or NotSupportedException or TypeLoadException or ArgumentException)
         {
-            // MakeGenericType can fail on AOT platforms — this is expected
+            // MakeGenericType cannot build the closed IViewFor<> on AOT platforms where the
+            // instantiation was trimmed; the caller falls back to the other resolution tiers.
         }
 
         return null;
     }
 
-    /// <summary>
-    /// Tries to resolve a view from the explicit runtime mappings dictionary.
-    /// </summary>
+    /// <summary>Tries to resolve a view from the explicit runtime mappings dictionary.</summary>
     /// <param name="viewModelType">The type of the view model.</param>
     /// <param name="contract">The normalized contract string.</param>
     /// <returns>The resolved view, or <see langword="null"/>.</returns>
     private IViewFor? TryResolveFromMappings(Type viewModelType, string contract)
     {
         var mappings = _mappings;
-        if (!mappings.TryGetValue((viewModelType, contract), out var factory))
-        {
-            return null;
-        }
-
-        return factory();
+        return !mappings.TryGetValue((viewModelType, contract), out var factory) ? null : factory();
     }
 }

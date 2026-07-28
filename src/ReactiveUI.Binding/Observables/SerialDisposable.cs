@@ -13,14 +13,10 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class SerialDisposable : IDisposable
 {
-    /// <summary>
-    /// The current inner disposable. Swapped atomically when a new value is assigned.
-    /// </summary>
+    /// <summary>The current inner disposable. Swapped atomically when a new value is assigned.</summary>
     private IDisposable? _current;
 
-    /// <summary>
-    /// Guard flag to ensure disposal occurs exactly once (0 = not disposed, 1 = disposed).
-    /// </summary>
+    /// <summary>Guard flag to ensure disposal occurs exactly once (0 = not disposed, 1 = disposed).</summary>
     private int _disposed;
 
     /// <summary>
@@ -34,7 +30,7 @@ public sealed class SerialDisposable : IDisposable
         {
             SwapCurrent(value)?.Dispose();
 
-            if (_disposed != 1)
+            if (Volatile.Read(ref _disposed) != 1)
             {
                 return;
             }
@@ -54,26 +50,20 @@ public sealed class SerialDisposable : IDisposable
         TakeCurrent()?.Dispose();
     }
 
-    /// <summary>
-    /// Atomically marks this instance as disposed.
-    /// </summary>
+    /// <summary>Atomically marks this instance as disposed.</summary>
     /// <returns><see langword="true"/> if this is the first disposal; otherwise <see langword="false"/>.</returns>
     [ExcludeFromCodeCoverage]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool TrySetDisposed() => Interlocked.Exchange(ref _disposed, 1) == 0;
 
-    /// <summary>
-    /// Atomically swaps the current disposable with the given value.
-    /// </summary>
+    /// <summary>Atomically swaps the current disposable with the given value.</summary>
     /// <param name="value">The new disposable.</param>
     /// <returns>The previous disposable, or <see langword="null"/>.</returns>
     [ExcludeFromCodeCoverage]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal IDisposable? SwapCurrent(IDisposable? value) => Interlocked.Exchange(ref _current, value);
 
-    /// <summary>
-    /// Atomically takes the current disposable, returning it exactly once.
-    /// </summary>
+    /// <summary>Atomically takes the current disposable, returning it exactly once.</summary>
     /// <returns>The current disposable if present; otherwise <see langword="null"/>.</returns>
     [ExcludeFromCodeCoverage]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

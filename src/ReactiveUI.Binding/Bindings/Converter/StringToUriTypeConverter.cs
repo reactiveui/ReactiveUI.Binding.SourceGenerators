@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="string"/> to <see cref="Uri"/> using <see cref="Uri.TryCreate(string?, UriKind, out Uri?)"/>.
-/// </summary>
+/// <summary>Converts <see cref="string"/> to <see cref="Uri"/> using <see cref="Uri.TryCreate(string?, UriKind, out Uri?)"/>.</summary>
 public sealed class StringToUriTypeConverter : BindingTypeConverter<string, Uri>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

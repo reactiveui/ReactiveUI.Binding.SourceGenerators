@@ -4,9 +4,7 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Provides static access to the ReactiveUI.Binding converter service.
-/// </summary>
+/// <summary>Provides static access to the ReactiveUI.Binding converter service.</summary>
 /// <remarks>
 /// <para>
 /// This class provides a global access point to the <see cref="ConverterService"/> instance
@@ -15,9 +13,7 @@ namespace ReactiveUI.Binding;
 /// <para>
 /// <strong>Custom Converter Registration:</strong>
 /// </para>
-/// <code>
-/// BindingConverters.Current.TypedConverters.Register(new MyCustomConverter());
-/// </code>
+/// <c>BindingConverters.Current.TypedConverters.Register(new MyCustomConverter());</c>
 /// </remarks>
 /// <example>
 /// <para>
@@ -36,22 +32,16 @@ namespace ReactiveUI.Binding;
 /// </example>
 public static class BindingConverters
 {
-    /// <summary>
-    /// The backing field for the current converter service instance.
-    /// </summary>
+    /// <summary>The backing field for the current converter service instance.</summary>
     private static ConverterService _current = new();
 
-    /// <summary>
-    /// Gets the current converter service instance.
-    /// </summary>
+    /// <summary>Gets the current converter service instance.</summary>
     /// <value>
     /// The <see cref="ConverterService"/> instance used by ReactiveUI.Binding.
     /// </value>
     public static ConverterService Current => _current;
 
-    /// <summary>
-    /// Sets the converter service instance.
-    /// </summary>
+    /// <summary>Sets the converter service instance.</summary>
     /// <param name="service">The converter service to use. Must not be null.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="service"/> is null.</exception>
     /// <remarks>

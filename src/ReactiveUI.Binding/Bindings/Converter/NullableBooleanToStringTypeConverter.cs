@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts nullable <see cref="bool"/> to <see cref="string"/>.
-/// </summary>
+/// <summary>Converts nullable <see cref="bool"/> to <see cref="string"/>.</summary>
 public sealed class NullableBooleanToStringTypeConverter : BindingTypeConverter<bool?, string>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

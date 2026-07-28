@@ -9,19 +9,15 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Invocations;
 
-/// <summary>
-/// Detects BindCommand invocations and generates per-invocation command binding code.
-/// </summary>
+/// <summary>Detects BindCommand invocations and generates per-invocation command binding code.</summary>
 internal static class BindCommandInvocationGenerator
 {
-    /// <summary>
-    /// Registers the BindCommand invocation detection pipeline.
-    /// </summary>
+    /// <summary>Registers the BindCommand invocation detection pipeline.</summary>
     /// <param name="context">The generator initialization context.</param>
     /// <param name="allClasses">The shared type detection pipeline.</param>
     /// <param name="languageFeatures">The consumer compilation's C# language-feature snapshot.</param>
     internal static void Register(
-        IncrementalGeneratorInitializationContext context,
+        in IncrementalGeneratorInitializationContext context,
         IncrementalValuesProvider<ClassBindingInfo> allClasses,
         IncrementalValueProvider<LanguageFeatures> languageFeatures)
     {
@@ -41,7 +37,7 @@ internal static class BindCommandInvocationGenerator
             static (ctx, data) =>
             {
                 var source = BindCommandCodeGenerator.Generate(data.Left.Left, data.Left.Right, data.Right);
-                if (source == null)
+                if (source is null)
                 {
                     return;
                 }

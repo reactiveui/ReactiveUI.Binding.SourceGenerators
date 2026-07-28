@@ -13,24 +13,16 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class CompositeDisposable2 : IDisposable
 {
-    /// <summary>
-    /// The first disposable resource.
-    /// </summary>
+    /// <summary>The first disposable resource.</summary>
     private readonly IDisposable _d1;
 
-    /// <summary>
-    /// The second disposable resource.
-    /// </summary>
+    /// <summary>The second disposable resource.</summary>
     private readonly IDisposable _d2;
 
-    /// <summary>
-    /// Guard flag to ensure disposal occurs exactly once (0 = not disposed, 1 = disposed).
-    /// </summary>
+    /// <summary>Guard flag to ensure disposal occurs exactly once (0 = not disposed, 1 = disposed).</summary>
     private int _disposed;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CompositeDisposable2"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="CompositeDisposable2"/> class.</summary>
     /// <param name="d1">The first disposable.</param>
     /// <param name="d2">The second disposable.</param>
     public CompositeDisposable2(IDisposable d1, IDisposable d2)
@@ -53,9 +45,7 @@ public sealed class CompositeDisposable2 : IDisposable
         _d2.Dispose();
     }
 
-    /// <summary>
-    /// Atomically marks this instance as disposed.
-    /// </summary>
+    /// <summary>Atomically marks this instance as disposed.</summary>
     /// <returns><see langword="true"/> if this is the first disposal; otherwise <see langword="false"/>.</returns>
     [ExcludeFromCodeCoverage]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

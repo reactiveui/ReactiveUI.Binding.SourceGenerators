@@ -7,30 +7,36 @@ using Splat.Builder;
 
 namespace ReactiveUI.Binding.Wpf.Builder;
 
-/// <summary>
-/// WPF-specific extensions for the ReactiveUI.Binding builder.
-/// </summary>
+/// <summary>WPF-specific extensions for the ReactiveUI.Binding builder.</summary>
 public static class WpfBindingBuilderExtensions
 {
-    /// <summary>
-    /// Configures ReactiveUI.Binding for WPF platform, registering DependencyObject observation
-    /// and WPF-specific Visibility converters.
-    /// </summary>
+    /// <summary>Provides WithWpf extension members for <paramref name="builder"/>.</summary>
     /// <param name="builder">The builder instance.</param>
-    /// <returns>The builder instance for chaining.</returns>
-    public static IReactiveUIBindingBuilder WithWpf(this IReactiveUIBindingBuilder builder)
+    extension(IAppBuilder builder)
     {
-        ArgumentExceptionHelper.ThrowIfNull(builder);
-
-        return builder.WithPlatformModule(new WpfBindingModule());
+        /// <summary>
+        /// Configures ReactiveUI.Binding for WPF platform, registering DependencyObject observation
+        /// and WPF-specific Visibility converters.
+        /// </summary>
+        /// <returns>The builder instance for chaining.</returns>
+        public IReactiveUIBindingBuilder WithWpf() =>
+            ((IReactiveUIBindingBuilder)builder).WithWpf();
     }
 
-    /// <summary>
-    /// Configures ReactiveUI.Binding for WPF platform, registering DependencyObject observation
-    /// and WPF-specific Visibility converters.
-    /// </summary>
+    /// <summary>Provides WithWpf extension members for <paramref name="builder"/>.</summary>
     /// <param name="builder">The builder instance.</param>
-    /// <returns>The builder instance for chaining.</returns>
-    public static IReactiveUIBindingBuilder WithWpf(this IAppBuilder builder) =>
-        ((IReactiveUIBindingBuilder)builder).WithWpf();
+    extension(IReactiveUIBindingBuilder builder)
+    {
+        /// <summary>
+        /// Configures ReactiveUI.Binding for WPF platform, registering DependencyObject observation
+        /// and WPF-specific Visibility converters.
+        /// </summary>
+        /// <returns>The builder instance for chaining.</returns>
+        public IReactiveUIBindingBuilder WithWpf()
+        {
+            ArgumentExceptionHelper.ThrowIfNull(builder);
+
+            return builder.WithPlatformModule(new WpfBindingModule());
+        }
+    }
 }

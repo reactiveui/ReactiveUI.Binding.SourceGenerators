@@ -6,22 +6,16 @@ using System.ComponentModel;
 
 namespace SharedScenarios.BindOneWay.SinglePropertyIntToInt;
 
-/// <summary>
-/// Target View with an integer property.
-/// </summary>
+/// <summary>Target View with an integer property.</summary>
 public class MyView : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="DisplayCount"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="DisplayCount"/>.</summary>
     private int _displayCount;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the display count.
-    /// </summary>
+    /// <summary>Gets or sets the display count.</summary>
     public int DisplayCount
     {
         get => _displayCount;

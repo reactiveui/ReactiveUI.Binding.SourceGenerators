@@ -12,15 +12,9 @@ namespace ReactiveUI.Binding.Observables;
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 [ExcludeFromCodeCoverage]
-[SuppressMessage(
-    "Major Code Smell",
-    "S107:Methods should not have too many parameters",
-    Justification = "Deliberately large arity intrinsic to the N-argument binding/observable API surface.")]
 public static class CombineLatestObservable
 {
-    /// <summary>
-    /// Combines the latest values from two observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from two observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="TResult">The result element type.</typeparam>
@@ -34,9 +28,7 @@ public static class CombineLatestObservable
         Func<T1, T2, TResult> resultSelector) =>
         new CombineLatest2Observable<T1, T2, TResult>(source1, source2, resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from three observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from three observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -53,9 +45,7 @@ public static class CombineLatestObservable
         Func<T1, T2, T3, TResult> resultSelector) =>
         new CombineLatest3Observable<T1, T2, T3, TResult>(source1, source2, source3, resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from four observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from four observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -75,9 +65,7 @@ public static class CombineLatestObservable
         Func<T1, T2, T3, T4, TResult> resultSelector) =>
         new CombineLatest4Observable<T1, T2, T3, T4, TResult>(source1, source2, source3, source4, resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from five observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from five observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -106,9 +94,7 @@ public static class CombineLatestObservable
             source5,
             resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from six observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from six observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -141,9 +127,7 @@ public static class CombineLatestObservable
             source6,
             resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from seven observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from seven observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -161,6 +145,7 @@ public static class CombineLatestObservable
     /// <param name="source7">Source observable 7.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -180,9 +165,7 @@ public static class CombineLatestObservable
             source7,
             resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from eight observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from eight observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -202,6 +185,7 @@ public static class CombineLatestObservable
     /// <param name="source8">Source observable 8.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -223,9 +207,7 @@ public static class CombineLatestObservable
             source8,
             resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from nine observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from nine observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -247,6 +229,7 @@ public static class CombineLatestObservable
     /// <param name="source9">Source observable 9.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -270,9 +253,7 @@ public static class CombineLatestObservable
             source9,
             resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from ten observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from ten observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -296,6 +277,7 @@ public static class CombineLatestObservable
     /// <param name="source10">Source observable 10.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -321,9 +303,7 @@ public static class CombineLatestObservable
             source10,
             resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from eleven observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from eleven observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -349,6 +329,7 @@ public static class CombineLatestObservable
     /// <param name="source11">Source observable 11.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -376,9 +357,7 @@ public static class CombineLatestObservable
             source11,
             resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from twelve observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from twelve observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -406,6 +385,7 @@ public static class CombineLatestObservable
     /// <param name="source12">Source observable 12.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -435,9 +415,7 @@ public static class CombineLatestObservable
             source12,
             resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from thirteen observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from thirteen observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -467,6 +445,7 @@ public static class CombineLatestObservable
     /// <param name="source13">Source observable 13.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -498,9 +477,7 @@ public static class CombineLatestObservable
             source13,
             resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from fourteen observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from fourteen observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -532,6 +509,7 @@ public static class CombineLatestObservable
     /// <param name="source14">Source observable 14.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -565,9 +543,7 @@ public static class CombineLatestObservable
             source14,
             resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from fifteen observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from fifteen observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -601,6 +577,7 @@ public static class CombineLatestObservable
     /// <param name="source15">Source observable 15.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     public static IObservable<TResult> Create<
         T1,
         T2,
@@ -652,9 +629,7 @@ public static class CombineLatestObservable
             source15,
             resultSelector);
 
-    /// <summary>
-    /// Combines the latest values from sixteen observables using a result selector.
-    /// </summary>
+    /// <summary>Combines the latest values from sixteen observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
     /// <typeparam name="T2">Source element type 2.</typeparam>
     /// <typeparam name="T3">Source element type 3.</typeparam>
@@ -690,6 +665,7 @@ public static class CombineLatestObservable
     /// <param name="source16">Source observable 16.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     public static IObservable<TResult> Create<
         T1,
         T2,

@@ -6,14 +6,10 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanging.FourLevelDeepChain;
 
-/// <summary>
-/// Leaf model with a string value and before-change notifications.
-/// </summary>
+/// <summary>Leaf model with a string value and before-change notifications.</summary>
 public class Model : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backing field for <see cref="Value"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value"/>.</summary>
     private string _value = string.Empty;
 
     /// <inheritdoc/>
@@ -22,9 +18,7 @@ public class Model : INotifyPropertyChanged, INotifyPropertyChanging
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the value.
-    /// </summary>
+    /// <summary>Gets or sets the value.</summary>
     public string Value
     {
         get => _value;

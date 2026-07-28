@@ -7,18 +7,14 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler;
 
-/// <summary>
-/// Exercises OneWayBind (view-first) with a conversion function and scheduler.
-/// </summary>
+/// <summary>Exercises OneWayBind (view-first) with a conversion function and scheduler.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a one-way binding from ViewModel.Count to View.CountText with int-to-string conversion and scheduler.
-    /// </summary>
+    /// <summary>Creates a one-way binding from ViewModel.Count to View.CountText with int-to-string conversion and scheduler.</summary>
     /// <param name="view">The target view.</param>
     /// <param name="vm">The source view model.</param>
     /// <param name="scheduler">The scheduler to observe on.</param>
     /// <returns>A reactive binding representing the binding.</returns>
-    public static IReactiveBinding<MyView, string> Execute(MyView view, MyViewModel vm, IScheduler scheduler)
-        => view.OneWayBind(vm, x => x.Count, x => x.CountText, count => count.ToString(), scheduler);
+    public static IReactiveBinding<MyView, string> Execute(MyView view, MyViewModel vm, IScheduler scheduler) =>
+        view.OneWayBind(vm, x => x.Count, x => x.CountText, count => count.ToString(), scheduler);
 }

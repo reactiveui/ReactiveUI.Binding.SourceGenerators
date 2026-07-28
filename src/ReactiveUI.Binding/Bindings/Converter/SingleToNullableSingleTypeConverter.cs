@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="float"/> to <see cref="Nullable{Single}"/>.
-/// </summary>
+/// <summary>Converts <see cref="float"/> to a nullable <see cref="float"/>.</summary>
 public sealed class SingleToNullableSingleTypeConverter : IBindingTypeConverter<float, float?>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

@@ -14,19 +14,13 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class WhereObservable<T> : IObservable<T>
 {
-    /// <summary>
-    /// The upstream source observable.
-    /// </summary>
+    /// <summary>The upstream source observable.</summary>
     private readonly IObservable<T> _source;
 
-    /// <summary>
-    /// The predicate that determines which values are forwarded.
-    /// </summary>
+    /// <summary>The predicate that determines which values are forwarded.</summary>
     private readonly Func<T, bool> _predicate;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="WhereObservable{T}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="WhereObservable{T}"/> class.</summary>
     /// <param name="source">The source observable.</param>
     /// <param name="predicate">The predicate that determines which values are forwarded.</param>
     public WhereObservable(IObservable<T> source, Func<T, bool> predicate)
@@ -45,31 +39,16 @@ public sealed class WhereObservable<T> : IObservable<T>
         return _source.Subscribe(new WhereObserver(observer, _predicate));
     }
 
-    /// <summary>
-    /// Observer that forwards only values matching the predicate.
-    /// </summary>
-    private sealed class WhereObserver : IObserver<T>
+    /// <summary>Observer that forwards only values matching the predicate.</summary>
+    /// <param name="observer">The downstream observer.</param>
+    /// <param name="predicate">The predicate that determines which values are forwarded.</param>
+    private sealed class WhereObserver(IObserver<T> observer, Func<T, bool> predicate) : IObserver<T>
     {
-        /// <summary>
-        /// The downstream observer.
-        /// </summary>
-        private readonly IObserver<T> _observer;
+        /// <summary>The downstream observer.</summary>
+        private readonly IObserver<T> _observer = observer;
 
-        /// <summary>
-        /// The predicate that determines which values are forwarded.
-        /// </summary>
-        private readonly Func<T, bool> _predicate;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WhereObserver"/> class.
-        /// </summary>
-        /// <param name="observer">The downstream observer.</param>
-        /// <param name="predicate">The predicate that determines which values are forwarded.</param>
-        public WhereObserver(IObserver<T> observer, Func<T, bool> predicate)
-        {
-            _observer = observer;
-            _predicate = predicate;
-        }
+        /// <summary>The predicate that determines which values are forwarded.</summary>
+        private readonly Func<T, bool> _predicate = predicate;
 
         /// <inheritdoc/>
         public void OnNext(T value)

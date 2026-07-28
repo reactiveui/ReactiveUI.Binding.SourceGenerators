@@ -29,13 +29,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Name"
                 && targetPropertyExpression == "x => x.NameText")
             {
-                return __BindOneWay_0000160B29D0A06A(source, target);
+                return __BindOneWay_0000160B29D09D82(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindOneWay_0000160B29D0A06A(global::SharedScenarios.BindOneWay.MultipleBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleBindings.MyView target)
+        private static global::System.IDisposable __BindOneWay_0000160B29D09D82(global::SharedScenarios.BindOneWay.MultipleBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleBindings.MyView target)
         {
             // BindOneWay: Name -> NameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -70,13 +70,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Age"
                 && targetPropertyExpression == "x => x.AgeDisplay")
             {
-                return __BindOneWay_0000160B1B58B4C9(source, target);
+                return __BindOneWay_0000160B1B58B1E1(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindOneWay_0000160B1B58B4C9(global::SharedScenarios.BindOneWay.MultipleBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleBindings.MyView target)
+        private static global::System.IDisposable __BindOneWay_0000160B1B58B1E1(global::SharedScenarios.BindOneWay.MultipleBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleBindings.MyView target)
         {
             // BindOneWay: Age -> AgeDisplay
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(

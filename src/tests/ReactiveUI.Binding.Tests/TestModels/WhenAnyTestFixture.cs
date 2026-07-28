@@ -7,245 +7,205 @@ using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
-/// <summary>
-/// A test fixture with 12 value properties for multi-property WhenAnyValue testing.
-/// </summary>
+/// <summary>A test fixture with 12 value properties for multi-property WhenAnyValue testing.</summary>
 public class WhenAnyTestFixture : INotifyPropertyChanged
 {
-    /// <summary>The backing field for <see cref="Value1"/>.</summary>
-    private string _value1 = string.Empty;
-
-    /// <summary>The backing field for <see cref="Value2"/>.</summary>
-    private string _value2 = string.Empty;
-
-    /// <summary>The backing field for <see cref="Value3"/>.</summary>
-    private string _value3 = string.Empty;
-
-    /// <summary>The backing field for <see cref="Value4"/>.</summary>
-    private string _value4 = string.Empty;
-
-    /// <summary>The backing field for <see cref="Value5"/>.</summary>
-    private string _value5 = string.Empty;
-
-    /// <summary>The backing field for <see cref="Value6"/>.</summary>
-    private string _value6 = string.Empty;
-
-    /// <summary>The backing field for <see cref="Value7"/>.</summary>
-    private string _value7 = string.Empty;
-
-    /// <summary>The backing field for <see cref="Value8"/>.</summary>
-    private string _value8 = string.Empty;
-
-    /// <summary>The backing field for <see cref="Value9"/>.</summary>
-    private string _value9 = string.Empty;
-
-    /// <summary>The backing field for <see cref="Value10"/>.</summary>
-    private string _value10 = string.Empty;
-
-    /// <summary>The backing field for <see cref="Value11"/>.</summary>
-    private string _value11 = string.Empty;
-
-    /// <summary>The backing field for <see cref="Value12"/>.</summary>
-    private string _value12 = string.Empty;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>Gets or sets value 1.</summary>
     public string Value1
     {
-        get => _value1;
+        get => field;
         set
         {
-            if (_value1 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value1 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     /// <summary>Gets or sets value 2.</summary>
     public string Value2
     {
-        get => _value2;
+        get => field;
         set
         {
-            if (_value2 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value2 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     /// <summary>Gets or sets value 3.</summary>
     public string Value3
     {
-        get => _value3;
+        get => field;
         set
         {
-            if (_value3 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value3 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     /// <summary>Gets or sets value 4.</summary>
     public string Value4
     {
-        get => _value4;
+        get => field;
         set
         {
-            if (_value4 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value4 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     /// <summary>Gets or sets value 5.</summary>
     public string Value5
     {
-        get => _value5;
+        get => field;
         set
         {
-            if (_value5 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value5 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     /// <summary>Gets or sets value 6.</summary>
     public string Value6
     {
-        get => _value6;
+        get => field;
         set
         {
-            if (_value6 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value6 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     /// <summary>Gets or sets value 7.</summary>
     public string Value7
     {
-        get => _value7;
+        get => field;
         set
         {
-            if (_value7 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value7 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     /// <summary>Gets or sets value 8.</summary>
     public string Value8
     {
-        get => _value8;
+        get => field;
         set
         {
-            if (_value8 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value8 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     /// <summary>Gets or sets value 9.</summary>
     public string Value9
     {
-        get => _value9;
+        get => field;
         set
         {
-            if (_value9 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value9 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     /// <summary>Gets or sets value 10.</summary>
     public string Value10
     {
-        get => _value10;
+        get => field;
         set
         {
-            if (_value10 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value10 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     /// <summary>Gets or sets value 11.</summary>
     public string Value11
     {
-        get => _value11;
+        get => field;
         set
         {
-            if (_value11 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value11 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
     /// <summary>Gets or sets value 12.</summary>
     public string Value12
     {
-        get => _value12;
+        get => field;
         set
         {
-            if (_value12 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value12 = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Raises the PropertyChanged event.
-    /// </summary>
+    /// <summary>Raises the PropertyChanged event.</summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new(propertyName));

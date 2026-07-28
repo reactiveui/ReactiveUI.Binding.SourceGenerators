@@ -16,24 +16,16 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class PropertyChangingObservable<T> : IObservable<T>
 {
-    /// <summary>
-    /// The source object implementing <see cref="INotifyPropertyChanging"/>.
-    /// </summary>
+    /// <summary>The source object implementing <see cref="INotifyPropertyChanging"/>.</summary>
     private readonly INotifyPropertyChanging _source;
 
-    /// <summary>
-    /// The name of the property to observe.
-    /// </summary>
+    /// <summary>The name of the property to observe.</summary>
     private readonly string _propertyName;
 
-    /// <summary>
-    /// A delegate that reads the current property value from the source.
-    /// </summary>
+    /// <summary>A delegate that reads the current property value from the source.</summary>
     private readonly Func<INotifyPropertyChanging, T?> _getter;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PropertyChangingObservable{T}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="PropertyChangingObservable{T}"/> class.</summary>
     /// <param name="source">The object implementing <see cref="INotifyPropertyChanging"/>.</param>
     /// <param name="propertyName">The property name to observe.</param>
     /// <param name="getter">A delegate that reads the property value from the source.</param>
@@ -58,26 +50,16 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
         return new Subscription(this, observer);
     }
 
-    /// <summary>
-    /// Manages the event subscription for a single observer.
-    /// </summary>
+    /// <summary>Manages the event subscription for a single observer.</summary>
     internal sealed class Subscription : IDisposable
     {
-        /// <summary>
-        /// The parent observable that owns the source and property metadata.
-        /// </summary>
+        /// <summary>The parent observable that owns the source and property metadata.</summary>
         private readonly PropertyChangingObservable<T> _parent;
 
-        /// <summary>
-        /// The downstream observer. Set to <see langword="null"/> on disposal.
-        /// </summary>
+        /// <summary>The downstream observer. Set to <see langword="null"/> on disposal.</summary>
         private IObserver<T>? _observer;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Subscription"/> class.
-        /// Subscribes to the <see cref="INotifyPropertyChanging.PropertyChanging"/> event
-        /// and emits the initial property value.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="Subscription"/> class, subscribing and emitting the initial value.</summary>
         /// <param name="parent">The parent observable.</param>
         /// <param name="observer">The downstream observer.</param>
         public Subscription(PropertyChangingObservable<T> parent, IObserver<T> observer)
@@ -103,18 +85,13 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
             _parent._source.PropertyChanging -= OnPropertyChanging;
         }
 
-        /// <summary>
-        /// Atomically nulls the observer, returning whether it was previously non-null.
-        /// </summary>
+        /// <summary>Atomically nulls the observer, returning whether it was previously non-null.</summary>
         /// <returns><see langword="true"/> if this is the first disposal; otherwise <see langword="false"/>.</returns>
         [ExcludeFromCodeCoverage]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool TrySetDisposed() => Interlocked.Exchange(ref _observer, null) != null;
+        internal bool TrySetDisposed() => Interlocked.Exchange(ref _observer, null) is not null;
 
-        /// <summary>
-        /// Handles the <see cref="INotifyPropertyChanging.PropertyChanging"/> event
-        /// and forwards the current property value to the observer.
-        /// </summary>
+        /// <summary>Handles the <see cref="INotifyPropertyChanging.PropertyChanging"/> event and forwards the current property value to the observer.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments containing the property name.</param>
         private void OnPropertyChanging(object? sender, PropertyChangingEventArgs e)

@@ -15,30 +15,19 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class PropertyObservable<T> : IObservable<T>
 {
-    /// <summary>
-    /// The source object implementing <see cref="INotifyPropertyChanged"/>.
-    /// </summary>
+    /// <summary>The source object implementing <see cref="INotifyPropertyChanged"/>.</summary>
     private readonly INotifyPropertyChanged _source;
 
-    /// <summary>
-    /// The name of the property to observe.
-    /// </summary>
+    /// <summary>The name of the property to observe.</summary>
     private readonly string _propertyName;
 
-    /// <summary>
-    /// A delegate that reads the current property value from the source. The value may be
-    /// <see langword="null"/> for reference-typed properties.
-    /// </summary>
+    /// <summary>A delegate that reads the current property value from the source. The value may be <see langword="null"/> for reference-typed properties.</summary>
     private readonly Func<INotifyPropertyChanged, T?> _getter;
 
-    /// <summary>
-    /// Whether to suppress duplicate consecutive values.
-    /// </summary>
+    /// <summary>Whether to suppress duplicate consecutive values.</summary>
     private readonly bool _distinctUntilChanged;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PropertyObservable{T}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="PropertyObservable{T}"/> class.</summary>
     /// <param name="source">The object implementing <see cref="INotifyPropertyChanged"/>.</param>
     /// <param name="propertyName">The property name to observe.</param>
     /// <param name="getter">A delegate that reads the property value from the source.</param>
@@ -66,24 +55,16 @@ public sealed class PropertyObservable<T> : IObservable<T>
         return new Subscription(this, observer);
     }
 
-    /// <summary>
-    /// Manages the event subscription for a single observer, with optional distinct-until-changed filtering.
-    /// </summary>
+    /// <summary>Manages the event subscription for a single observer, with optional distinct-until-changed filtering.</summary>
     internal sealed class Subscription : IDisposable
     {
-        /// <summary>
-        /// The parent observable that owns the source and property metadata.
-        /// </summary>
+        /// <summary>The parent observable that owns the source and property metadata.</summary>
         private readonly PropertyObservable<T> _parent;
 
-        /// <summary>
-        /// The equality comparer used for distinct-until-changed filtering.
-        /// </summary>
+        /// <summary>The equality comparer used for distinct-until-changed filtering.</summary>
         private readonly EqualityComparer<T> _comparer;
 
-        /// <summary>
-        /// The downstream observer. Set to <see langword="null"/> on disposal.
-        /// </summary>
+        /// <summary>The downstream observer. Set to <see langword="null"/> on disposal.</summary>
         private IObserver<T>? _observer;
 
         /// <summary>
@@ -92,16 +73,10 @@ public sealed class PropertyObservable<T> : IObservable<T>
         /// </summary>
         private T? _lastValue;
 
-        /// <summary>
-        /// Whether at least one value has been emitted.
-        /// </summary>
+        /// <summary>Whether at least one value has been emitted.</summary>
         private bool _hasValue;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Subscription"/> class.
-        /// Subscribes to the <see cref="INotifyPropertyChanged.PropertyChanged"/> event
-        /// and emits the initial property value.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="Subscription"/> class, subscribing and emitting the initial value.</summary>
         /// <param name="parent">The parent observable.</param>
         /// <param name="observer">The downstream observer.</param>
         public Subscription(PropertyObservable<T> parent, IObserver<T> observer)
@@ -130,13 +105,11 @@ public sealed class PropertyObservable<T> : IObservable<T>
             _parent._source.PropertyChanged -= OnPropertyChanged;
         }
 
-        /// <summary>
-        /// Atomically nulls the observer, returning whether it was previously non-null.
-        /// </summary>
+        /// <summary>Atomically nulls the observer, returning whether it was previously non-null.</summary>
         /// <returns><see langword="true"/> if this is the first disposal; otherwise <see langword="false"/>.</returns>
         [ExcludeFromCodeCoverage]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool TrySetDisposed() => Interlocked.Exchange(ref _observer, null) != null;
+        internal bool TrySetDisposed() => Interlocked.Exchange(ref _observer, null) is not null;
 
         /// <summary>
         /// Handles the <see cref="INotifyPropertyChanged.PropertyChanged"/> event

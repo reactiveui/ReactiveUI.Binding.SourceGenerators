@@ -26,13 +26,13 @@ namespace ReactiveUI.Binding
 
             if (propertyExpression == "x => x.Caption")
             {
-                return __BindTo_7FFFC579FC79786E(source, target, conversionHint);
+                return __BindTo_7FFFC579FC797738(source, target, conversionHint);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTo_7FFFC579FC79786E(global::System.IObservable<int> source, global::SharedScenarios.BindTo.WithConversionHint.MyView target, object conversionHint)
+        private static global::System.IDisposable __BindTo_7FFFC579FC797738(global::System.IObservable<int> source, global::SharedScenarios.BindTo.WithConversionHint.MyView target, object conversionHint)
         {
             // BindTo: observable -> Caption
             return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(source, value =>

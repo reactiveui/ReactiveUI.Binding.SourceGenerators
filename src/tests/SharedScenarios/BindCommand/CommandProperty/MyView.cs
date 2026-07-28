@@ -7,9 +7,7 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindCommand.CommandProperty;
 
-/// <summary>
-/// View containing a WPF-like button with Command property.
-/// </summary>
+/// <summary>View containing a WPF-like button with Command property.</summary>
 #pragma warning disable CS0067 // Event is never used
 public class MyView : IViewFor, INotifyPropertyChanged
 {
@@ -19,9 +17,7 @@ public class MyView : IViewFor, INotifyPropertyChanged
     /// <inheritdoc/>
     public object? ViewModel { get; set; }
 
-    /// <summary>
-    /// Gets the save button.
-    /// </summary>
+    /// <summary>Gets the save button.</summary>
     public WpfLikeButton SaveButton { get; } = new WpfLikeButton();
 }
 #pragma warning restore CS0067

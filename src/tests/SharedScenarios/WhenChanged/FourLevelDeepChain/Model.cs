@@ -6,22 +6,16 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanged.FourLevelDeepChain;
 
-/// <summary>
-/// Leaf model with a string value.
-/// </summary>
+/// <summary>Leaf model with a string value.</summary>
 public class Model : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Value"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Value"/>.</summary>
     private string _value = string.Empty;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the value.
-    /// </summary>
+    /// <summary>Gets or sets the value.</summary>
     public string Value
     {
         get => _value;

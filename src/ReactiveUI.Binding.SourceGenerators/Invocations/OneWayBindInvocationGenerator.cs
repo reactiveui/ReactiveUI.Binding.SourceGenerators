@@ -9,25 +9,21 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Invocations;
 
-/// <summary>
-/// Detects OneWayBind (view-first one-way binding) invocations and generates per-invocation binding code.
-/// </summary>
+/// <summary>Detects OneWayBind (view-first one-way binding) invocations and generates per-invocation binding code.</summary>
 internal static class OneWayBindInvocationGenerator
 {
-    /// <summary>
-    /// Registers the OneWayBind invocation detection pipeline.
-    /// </summary>
+    /// <summary>Registers the OneWayBind invocation detection pipeline.</summary>
     /// <param name="context">The generator initialization context.</param>
     /// <param name="allClasses">The shared type detection pipeline.</param>
     /// <param name="languageFeatures">The consumer compilation's C# language-feature snapshot.</param>
     internal static void Register(
-        IncrementalGeneratorInitializationContext context,
+        in IncrementalGeneratorInitializationContext context,
         IncrementalValuesProvider<ClassBindingInfo> allClasses,
         IncrementalValueProvider<LanguageFeatures> languageFeatures)
     {
         var invocations = context.SyntaxProvider
             .CreateSyntaxProvider(
-                static (node, ct) => RoslynHelpers.IsOneWayBindSpecificInvocation(node, ct),
+                RoslynHelpers.IsOneWayBindSpecificInvocation,
                 BindingExtractor.ExtractBindInvocation)
             .Where(static x => x is not null)
             .Select(static (x, _) => x!);
@@ -41,7 +37,7 @@ internal static class OneWayBindInvocationGenerator
             static (ctx, data) =>
             {
                 var source = OneWayBindCodeGenerator.Generate(data.Left.Left, data.Left.Right, data.Right);
-                if (source == null)
+                if (source is null)
                 {
                     return;
                 }

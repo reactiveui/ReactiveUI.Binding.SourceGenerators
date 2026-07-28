@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="int"/> to <see cref="Nullable{Int32}"/>.
-/// </summary>
+/// <summary>Converts <see cref="int"/> to a nullable <see cref="int"/>.</summary>
 public sealed class IntegerToNullableIntegerTypeConverter : IBindingTypeConverter<int, int?>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

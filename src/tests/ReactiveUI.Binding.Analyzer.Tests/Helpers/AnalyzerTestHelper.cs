@@ -12,18 +12,14 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
-/// <summary>
-/// Helper for testing Roslyn analyzers.
-/// </summary>
+/// <summary>Helper for testing Roslyn analyzers.</summary>
 public static class AnalyzerTestHelper
 {
-    /// <summary>
-    /// Runs an analyzer on the provided source code and returns diagnostics.
-    /// </summary>
+    /// <summary>Runs an analyzer on the provided source code and returns diagnostics.</summary>
     /// <typeparam name="TAnalyzer">The type of analyzer to run.</typeparam>
     /// <param name="source">The source code to analyze.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the diagnostics.</returns>
-    [SuppressMessage("Minor Code Smell", "S4018:All type parameters should be used in the parameter list to enable type inference", Justification = "Used to infer the type of the analyzer.")]
+    [SuppressMessage("Design", "SST2307:Type parameter is not inferable", Justification = "the analyzer under test is specified explicitly by the caller")]
     public static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync<TAnalyzer>(string source)
         where TAnalyzer : DiagnosticAnalyzer, new()
     {
@@ -43,9 +39,7 @@ public static class AnalyzerTestHelper
         ];
     }
 
-    /// <summary>
-    /// Creates a CSharpCompilation from the specified source code with required assembly references.
-    /// </summary>
+    /// <summary>Creates a CSharpCompilation from the specified source code with required assembly references.</summary>
     /// <param name="source">The source code to compile into a CSharpCompilation.</param>
     /// <returns>A CSharpCompilation object representing the compiled source code.</returns>
     internal static CSharpCompilation CreateCompilation(string source)
@@ -86,8 +80,8 @@ public static class AnalyzerTestHelper
         var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
         foreach (var name in assemblyNames)
         {
-            var asm = loadedAssemblies.FirstOrDefault(a => a.GetName().Name == name);
-            if (asm != null)
+            var asm = System.Array.Find(loadedAssemblies, a => a.GetName().Name == name);
+            if (asm is not null)
             {
                 AddReference(asm);
             }

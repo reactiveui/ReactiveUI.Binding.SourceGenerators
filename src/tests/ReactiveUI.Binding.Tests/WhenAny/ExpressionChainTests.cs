@@ -8,19 +8,13 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.WhenAny;
 
-/// <summary>
-/// Tests for SubscribeToExpressionChain with various options.
-/// </summary>
+/// <summary>Tests for SubscribeToExpressionChain with various options.</summary>
 public class ExpressionChainTests
 {
-    /// <summary>
-    /// The expected number of emitted values when two notifications are produced.
-    /// </summary>
+    /// <summary>The expected number of emitted values when two notifications are produced.</summary>
     private const int ExpectedTwoEmissions = 2;
 
-    /// <summary>
-    /// Verifies basic usage notifies on change.
-    /// </summary>
+    /// <summary>Verifies basic usage notifies on change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BasicUsage_NotifiesOnChange()
@@ -36,7 +30,7 @@ public class ExpressionChainTests
                 false,
                 false,
                 true)
-            .Select(x => x.Value)
+            .Select(static x => x.Value)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -48,9 +42,7 @@ public class ExpressionChainTests
         await Assert.That(values[1]).IsEqualTo("End");
     }
 
-    /// <summary>
-    /// Verifies that before-change notification works via expression chain.
-    /// </summary>
+    /// <summary>Verifies that before-change notification works via expression chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithBeforeChange_NotifiesBeforeChange()
@@ -66,7 +58,7 @@ public class ExpressionChainTests
                 true,
                 false,
                 false)
-            .Select(x => x.Value)
+            .Select(static x => x.Value)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -77,9 +69,7 @@ public class ExpressionChainTests
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
 
-    /// <summary>
-    /// Verifies that skipInitial skips the first emission.
-    /// </summary>
+    /// <summary>Verifies that skipInitial skips the first emission.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithSkipInitial_SkipsFirstEmission()
@@ -92,7 +82,7 @@ public class ExpressionChainTests
 
         using var sub = fixture.SubscribeToExpressionChain<TestFixture, string>(
                 expr.Body)
-            .Select(x => x.Value)
+            .Select(static x => x.Value)
             .Subscribe(values.Add);
 
         // Should NOT have emitted the initial value
@@ -104,9 +94,7 @@ public class ExpressionChainTests
         await Assert.That(values[0]).IsEqualTo("Changed");
     }
 
-    /// <summary>
-    /// Verifies that isDistinct deduplicates same values.
-    /// </summary>
+    /// <summary>Verifies that isDistinct deduplicates same values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithIsDistinct_DeduplicatesSameValues()
@@ -119,7 +107,7 @@ public class ExpressionChainTests
 
         using var sub = fixture.SubscribeToExpressionChain<TestFixture, string>(
                 expr.Body)
-            .Select(x => x.Value)
+            .Select(static x => x.Value)
             .Subscribe(values.Add);
 
         fixture.IsNotNullString = "A";
@@ -131,9 +119,7 @@ public class ExpressionChainTests
         await Assert.That(values[1]).IsEqualTo("B");
     }
 
-    /// <summary>
-    /// Verifies that null in a chain propagates correctly.
-    /// </summary>
+    /// <summary>Verifies that null in a chain propagates correctly.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NullInChain_PropagatesCorrectly()
@@ -158,14 +144,12 @@ public class ExpressionChainTests
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
     }
 
-    /// <summary>
-    /// Resets and initializes the ReactiveUI binding infrastructure for testing.
-    /// </summary>
+    /// <summary>Resets and initializes the ReactiveUI binding infrastructure for testing.</summary>
     internal static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
     }
 }

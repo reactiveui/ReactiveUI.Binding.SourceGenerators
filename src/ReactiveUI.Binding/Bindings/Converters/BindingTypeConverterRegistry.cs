@@ -4,9 +4,7 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Thread-safe registry for typed binding converters using a lock-free snapshot pattern.
-/// </summary>
+/// <summary>Thread-safe registry for typed binding converters using a lock-free snapshot pattern.</summary>
 /// <remarks>
 /// <para>
 /// This registry uses a copy-on-write snapshot pattern optimized for read-heavy workloads:
@@ -32,23 +30,13 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public sealed class BindingTypeConverterRegistry
 {
-    /// <summary>
-    /// Synchronization gate for serializing write operations.
-    /// </summary>
-#if NET9_0_OR_GREATER
+    /// <summary>Synchronization gate for serializing write operations.</summary>
     private readonly Lock _gate = new();
-#else
-    private readonly object _gate = new();
-#endif
 
-    /// <summary>
-    /// The current immutable snapshot of registered typed converters, read via volatile access.
-    /// </summary>
+    /// <summary>The current immutable snapshot of registered typed converters, read via volatile access.</summary>
     private Snapshot? _snapshot;
 
-    /// <summary>
-    /// Registers a typed binding converter.
-    /// </summary>
+    /// <summary>Registers a typed binding converter.</summary>
     /// <param name="converter">The converter to register. Must not be null.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="converter"/> is null.</exception>
     /// <remarks>
@@ -67,12 +55,13 @@ public sealed class BindingTypeConverterRegistry
         ArgumentExceptionHelper.ThrowIfNull(converter);
 
         const int InitialConverterListCapacity = 4;
+        const int InitialRegistryCapacity = 16;
 
         var key = (converter.FromType, converter.ToType);
 
         lock (_gate)
         {
-            var snap = _snapshot ?? new Snapshot(new(16));
+            var snap = _snapshot ?? new Snapshot(new(InitialRegistryCapacity));
 
             // Copy-on-write update: clone the dictionary shallowly
             var newDict = CloneRegistryShallow(snap.ConvertersByTypePair);
@@ -90,9 +79,7 @@ public sealed class BindingTypeConverterRegistry
         }
     }
 
-    /// <summary>
-    /// Attempts to retrieve the best converter for the specified type pair.
-    /// </summary>
+    /// <summary>Attempts to retrieve the best converter for the specified type pair.</summary>
     /// <param name="fromType">The source type to convert from.</param>
     /// <param name="toType">The target type to convert to.</param>
     /// <returns>
@@ -141,9 +128,7 @@ public sealed class BindingTypeConverterRegistry
         return best;
     }
 
-    /// <summary>
-    /// Returns all registered converters.
-    /// </summary>
+    /// <summary>Returns all registered converters.</summary>
     /// <returns>
     /// A sequence of all converters currently registered in the registry.
     /// Returns an empty sequence if no converters are registered.
@@ -169,9 +154,7 @@ public sealed class BindingTypeConverterRegistry
         return result;
     }
 
-    /// <summary>
-    /// Creates a shallow clone of the converter dictionary, preserving list references without deep-copying them.
-    /// </summary>
+    /// <summary>Creates a shallow clone of the converter dictionary, preserving list references without deep-copying them.</summary>
     /// <param name="source">The source dictionary to clone.</param>
     /// <returns>A new dictionary with the same entries as <paramref name="source"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -189,9 +172,7 @@ public sealed class BindingTypeConverterRegistry
         return clone;
     }
 
-    /// <summary>
-    /// Immutable snapshot of the registry state for lock-free reads.
-    /// </summary>
+    /// <summary>Immutable snapshot of the registry state for lock-free reads.</summary>
     /// <param name="ConvertersByTypePair">The converters indexed by source and target type pair.</param>
     private sealed record Snapshot(
         Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>> ConvertersByTypePair);

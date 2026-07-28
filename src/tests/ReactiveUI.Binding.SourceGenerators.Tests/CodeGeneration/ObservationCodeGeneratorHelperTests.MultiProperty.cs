@@ -9,14 +9,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.CodeGeneration;
 
-/// <summary>
-/// Tests for <see cref="ObservationCodeGenerator"/> — multi-property observation.
-/// </summary>
+/// <summary>Tests for <see cref="ObservationCodeGenerator"/> — multi-property observation.</summary>
 public partial class ObservationCodeGeneratorHelperTests
 {
-    /// <summary>
-    /// Verifies GenerateMultiPropertyObservation produces CombineLatest with multiple paths.
-    /// </summary>
+    /// <summary>Verifies GenerateMultiPropertyObservation produces CombineLatest with multiple paths.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateMultiPropertyObservation_MultiplePaths_GeneratesCombineLatest()
@@ -24,30 +20,28 @@ public partial class ObservationCodeGeneratorHelperTests
         var sb = new StringBuilder();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
-                ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+                ModelFactory.CreatePropertyPathSegment()
             ]),
             new([
-                ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+                ModelFactory.CreatePropertyPathSegment("Age", Int32TypeName)
             ])
         ]);
 
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
-            returnTypeFullName: "global::System.String",
+            returnTypeFullName: StringTypeName,
             hasSelector: true,
-            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
+            expressionTexts: new EquatableArray<string>([NameSelector, AgeSelector]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("CombineLatest");
+        await Assert.That(result).Contains(CombineLatestName);
         await Assert.That(result).Contains("selector");
     }
 
-    /// <summary>
-    /// Verifies GenerateMultiPropertyObservation with a mix of shallow and deep chain paths generates both variable styles.
-    /// </summary>
+    /// <summary>Verifies GenerateMultiPropertyObservation with a mix of shallow and deep chain paths generates both variable styles.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateMultiPropertyObservation_WithDeepChainPath_GeneratesDeepChainVariables()
@@ -55,19 +49,19 @@ public partial class ObservationCodeGeneratorHelperTests
         var sb = new StringBuilder();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
-                ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+                ModelFactory.CreatePropertyPathSegment()
             ]),
             new([
-                ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+                ModelFactory.CreatePropertyPathSegment("Address", AddressTypeName),
+                ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName)
             ])
         ]);
 
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
-            returnTypeFullName: "global::System.String",
+            returnTypeFullName: StringTypeName,
             hasSelector: true,
-            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Address.City"]));
+            expressionTexts: new EquatableArray<string>([NameSelector, "x => x.Address.City"]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, false);
@@ -76,12 +70,10 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("__propObs0");
         await Assert.That(result).Contains("__propObs1");
         await Assert.That(result).Contains("RxBindingExtensions.Switch(");
-        await Assert.That(result).Contains("CombineLatest");
+        await Assert.That(result).Contains(CombineLatestName);
     }
 
-    /// <summary>
-    /// Verifies GenerateMultiPropertyObservation with isBeforeChange=true generates PropertyChanging code.
-    /// </summary>
+    /// <summary>Verifies GenerateMultiPropertyObservation with isBeforeChange=true generates PropertyChanging code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateMultiPropertyObservation_BeforeChange_GeneratesPropertyChangingCode()
@@ -89,25 +81,25 @@ public partial class ObservationCodeGeneratorHelperTests
         var sb = new StringBuilder();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
-                ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+                ModelFactory.CreatePropertyPathSegment()
             ]),
             new([
-                ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+                ModelFactory.CreatePropertyPathSegment("Age", Int32TypeName)
             ])
         ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
-            returnTypeFullName: "global::System.String",
+            returnTypeFullName: StringTypeName,
             isBeforeChange: true,
             hasSelector: true,
-            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
+            expressionTexts: new EquatableArray<string>([NameSelector, AgeSelector]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("PropertyChanging");
-        await Assert.That(result).Contains("CombineLatest");
+        await Assert.That(result).Contains(CombineLatestName);
     }
 
     /// <summary>
@@ -120,19 +112,19 @@ public partial class ObservationCodeGeneratorHelperTests
         var sb = new StringBuilder();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
-                ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+                ModelFactory.CreatePropertyPathSegment()
             ]),
             new([
-                ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-                ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
+                ModelFactory.CreatePropertyPathSegment("Address", AddressTypeName),
+                ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName)
             ])
         ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
-            returnTypeFullName: "global::System.String",
+            returnTypeFullName: StringTypeName,
             isBeforeChange: true,
             hasSelector: true,
-            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Address.City"]));
+            expressionTexts: new EquatableArray<string>([NameSelector, "x => x.Address.City"]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, true);
@@ -140,12 +132,10 @@ public partial class ObservationCodeGeneratorHelperTests
         var result = sb.ToString();
         await Assert.That(result).Contains("PropertyChanging");
         await Assert.That(result).Contains("__propObs1_s0");
-        await Assert.That(result).Contains("CombineLatest");
+        await Assert.That(result).Contains(CombineLatestName);
     }
 
-    /// <summary>
-    /// Verifies GenerateMultiPropertyObservation with IReactiveObject after-change.
-    /// </summary>
+    /// <summary>Verifies GenerateMultiPropertyObservation with IReactiveObject after-change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateMultiPropertyObservation_ReactiveObjectAfterChange_GeneratesPropertyObservable()
@@ -153,29 +143,27 @@ public partial class ObservationCodeGeneratorHelperTests
         var sb = new StringBuilder();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
-                ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+                ModelFactory.CreatePropertyPathSegment()
             ]),
             new([
-                ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+                ModelFactory.CreatePropertyPathSegment("Age", Int32TypeName)
             ])
         ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
-            returnTypeFullName: "global::System.String",
+            returnTypeFullName: StringTypeName,
             hasSelector: true,
-            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
+            expressionTexts: new EquatableArray<string>([NameSelector, AgeSelector]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("PropertyObservable");
-        await Assert.That(result).Contains("CombineLatest");
+        await Assert.That(result).Contains(CombineLatestName);
     }
 
-    /// <summary>
-    /// Verifies GenerateMultiPropertyObservation with null classInfo generates code.
-    /// </summary>
+    /// <summary>Verifies GenerateMultiPropertyObservation with null classInfo generates code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateMultiPropertyObservation_NullClassInfo_GeneratesReturnObservable()
@@ -183,27 +171,25 @@ public partial class ObservationCodeGeneratorHelperTests
         var sb = new StringBuilder();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
-                ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+                ModelFactory.CreatePropertyPathSegment()
             ]),
             new([
-                ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+                ModelFactory.CreatePropertyPathSegment("Age", Int32TypeName)
             ])
         ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
-            returnTypeFullName: "global::System.String",
+            returnTypeFullName: StringTypeName,
             hasSelector: true,
-            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
+            expressionTexts: new EquatableArray<string>([NameSelector, AgeSelector]));
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, null, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("CombineLatest");
+        await Assert.That(result).Contains(CombineLatestName);
     }
 
-    /// <summary>
-    /// Verifies GenerateMultiPropertyObservation with no selector generates tuple lambda.
-    /// </summary>
+    /// <summary>Verifies GenerateMultiPropertyObservation with no selector generates tuple lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateMultiPropertyObservation_NoSelector_GeneratesTupleResult()
@@ -211,23 +197,23 @@ public partial class ObservationCodeGeneratorHelperTests
         var sb = new StringBuilder();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
-                ModelFactory.CreatePropertyPathSegment("Name", "global::System.String")
+                ModelFactory.CreatePropertyPathSegment()
             ]),
             new([
-                ModelFactory.CreatePropertyPathSegment("Age", "global::System.Int32")
+                ModelFactory.CreatePropertyPathSegment("Age", Int32TypeName)
             ])
         ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
             returnTypeFullName: "(global::System.String property1, global::System.Int32 property2)",
             hasSelector: false,
-            expressionTexts: new EquatableArray<string>(["x => x.Name", "x => x.Age"]));
+            expressionTexts: new EquatableArray<string>([NameSelector, AgeSelector]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateMultiPropertyObservation(sb, inv, classInfo, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("CombineLatest");
+        await Assert.That(result).Contains(CombineLatestName);
         await Assert.That(result).Contains("property1: p1");
         await Assert.That(result).Contains("property2: p2");
     }

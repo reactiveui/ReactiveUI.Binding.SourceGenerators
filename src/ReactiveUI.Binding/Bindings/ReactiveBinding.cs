@@ -4,27 +4,19 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Default implementation of <see cref="IReactiveBinding{TView, TValue}"/> used by generated view-first bindings.
-/// </summary>
+/// <summary>Default implementation of <see cref="IReactiveBinding{TView, TValue}"/> used by generated view-first bindings.</summary>
 /// <typeparam name="TView">The type of the view.</typeparam>
 /// <typeparam name="TValue">The type of the bound value.</typeparam>
 public sealed class ReactiveBinding<TView, TValue> : IReactiveBinding<TView, TValue>
     where TView : IViewFor
 {
-    /// <summary>
-    /// The underlying subscription that is disposed when this binding is disposed.
-    /// </summary>
+    /// <summary>The underlying subscription that is disposed when this binding is disposed.</summary>
     private readonly IDisposable _subscription;
 
-    /// <summary>
-    /// Tracks whether this instance has been disposed (0 = not disposed, 1 = disposed).
-    /// </summary>
+    /// <summary>Tracks whether this instance has been disposed (0 = not disposed, 1 = disposed).</summary>
     private int _disposed;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ReactiveBinding{TView, TValue}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="ReactiveBinding{TView, TValue}"/> class.</summary>
     /// <param name="view">The view that is bound.</param>
     /// <param name="changed">An observable that signals when the binding value changes.</param>
     /// <param name="direction">The direction of the binding.</param>
@@ -67,9 +59,7 @@ public sealed class ReactiveBinding<TView, TValue> : IReactiveBinding<TView, TVa
         _subscription.Dispose();
     }
 
-    /// <summary>
-    /// Atomically marks this instance as disposed.
-    /// </summary>
+    /// <summary>Atomically marks this instance as disposed.</summary>
     /// <returns><see langword="true"/> if this is the first disposal; otherwise <see langword="false"/>.</returns>
     [ExcludeFromCodeCoverage]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

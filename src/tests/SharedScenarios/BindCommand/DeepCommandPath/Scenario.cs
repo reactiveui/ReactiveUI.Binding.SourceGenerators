@@ -7,17 +7,13 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindCommand.DeepCommandPath;
 
-/// <summary>
-/// Exercises BindCommand with a nested command property path.
-/// </summary>
+/// <summary>Exercises BindCommand with a nested command property path.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Binds the Child.SaveCommand to the SaveButton's Click event.
-    /// </summary>
+    /// <summary>Binds the Child.SaveCommand to the SaveButton's Click event.</summary>
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
-    public static IDisposable Execute(MyViewModel vm, MyView view)
-        => view.BindCommand(vm, x => x.Child!.SaveCommand, x => x.SaveButton);
+    public static IDisposable Execute(MyViewModel vm, MyView view) =>
+        view.BindCommand(vm, x => x.Child!.SaveCommand, x => x.SaveButton);
 }

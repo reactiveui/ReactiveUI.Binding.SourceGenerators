@@ -7,35 +7,22 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 
-/// <summary>
-/// Edge case tests for WhenChanging covering deep chains, multi-property change emission,
-/// and disposal scenarios.
-/// </summary>
+/// <summary>Edge case tests for WhenChanging covering deep chains, multi-property change emission, and disposal scenarios.</summary>
 public class WhenChangingEdgeCaseTests
 {
-    /// <summary>
-    /// The initial city value used by deep-chain tests.
-    /// </summary>
+    /// <summary>The initial city value used by deep-chain tests.</summary>
     private const string Seattle = "Seattle";
 
-    /// <summary>
-    /// The minimum number of emissions expected after a single change.
-    /// </summary>
+    /// <summary>The minimum number of emissions expected after a single change.</summary>
     private const int MinEmissionsAfterChange = 2;
 
-    /// <summary>
-    /// The minimum number of emissions expected after two changes.
-    /// </summary>
+    /// <summary>The minimum number of emissions expected after two changes.</summary>
     private const int MinEmissionsAfterTwoChanges = 3;
 
-    /// <summary>
-    /// The updated value for the integer property in two-property tests.
-    /// </summary>
+    /// <summary>The updated value for the integer property in two-property tests.</summary>
     private const int UpdatedIntValue = 2;
 
-    /// <summary>
-    /// Verifies that deep chain WhenChanging emits the initial nested property value.
-    /// </summary>
+    /// <summary>Verifies that deep chain WhenChanging emits the initial nested property value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_EmitsInitialValue()
@@ -74,9 +61,7 @@ public class WhenChangingEdgeCaseTests
         await Assert.That(values[1]).IsEqualTo(Seattle);
     }
 
-    /// <summary>
-    /// Verifies that WhenChanging two-property emits when either property is about to change.
-    /// </summary>
+    /// <summary>Verifies that WhenChanging two-property emits when either property is about to change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoProperties_EmitsOnEitherChange()
@@ -102,9 +87,7 @@ public class WhenChangingEdgeCaseTests
         await Assert.That(values[1].property2).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that disposing the WhenChanging deep chain subscription stops listening.
-    /// </summary>
+    /// <summary>Verifies that disposing the WhenChanging deep chain subscription stops listening.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_Disposal_StopsListening()
@@ -124,9 +107,7 @@ public class WhenChangingEdgeCaseTests
         await Assert.That(values[0]).IsEqualTo(Seattle);
     }
 
-    /// <summary>
-    /// Verifies that WhenChanging multi-property emits sequential before-change values.
-    /// </summary>
+    /// <summary>Verifies that WhenChanging multi-property emits sequential before-change values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoProperties_SequentialChanges()

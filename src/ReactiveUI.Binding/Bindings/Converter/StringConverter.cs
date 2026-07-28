@@ -4,18 +4,14 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="string"/> to <see cref="string"/> (identity converter).
-/// </summary>
+/// <summary>Converts <see cref="string"/> to <see cref="string"/> (identity converter).</summary>
 /// <remarks>
 /// This converter provides a fast path for string-to-string bindings without
 /// requiring reflection or TypeDescriptor.
 /// </remarks>
 public sealed class StringConverter : IBindingTypeConverter
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

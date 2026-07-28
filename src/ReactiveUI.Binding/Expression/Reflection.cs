@@ -7,26 +7,21 @@ using System.Text;
 
 namespace ReactiveUI.Binding.Expressions;
 
-/// <summary>
-/// Helper class for handling reflection and expression-tree related operations.
-/// </summary>
+/// <summary>Helper class for handling reflection and expression-tree related operations.</summary>
 public static class Reflection
 {
-    /// <summary>
-    /// Singleton instance of the <see cref="ExpressionRewriter"/> used for rewriting expression trees.
-    /// </summary>
+    /// <summary>Singleton instance of the <see cref="ExpressionRewriter"/> used for rewriting expression trees.</summary>
+    private const string EmptyExpressionChainMessage = "Expression chain must contain at least one element.";
+
+    /// <summary>The shared rewriter instance used to simplify expressions before inspection.</summary>
     private static readonly ExpressionRewriter ExpressionRewriterInstance = new();
 
-    /// <summary>
-    /// Uses the expression re-writer to simplify the expression down to its simplest expression.
-    /// </summary>
+    /// <summary>Uses the expression re-writer to simplify the expression down to its simplest expression.</summary>
     /// <param name="expression">The expression to rewrite.</param>
     /// <returns>The rewritten expression.</returns>
     public static Expression Rewrite(Expression? expression) => ExpressionRewriterInstance.Visit(expression);
 
-    /// <summary>
-    /// Converts an expression that points to a property chain into a dotted path string.
-    /// </summary>
+    /// <summary>Converts an expression that points to a property chain into a dotted path string.</summary>
     /// <param name="expression">The expression to generate the property names from.</param>
     /// <returns>A string representation for the property chain the expression points to.</returns>
     public static string ExpressionToPropertyNames(Expression? expression)
@@ -45,36 +40,30 @@ public static class Reflection
 
             if (!firstSegment)
             {
-                sb.Append('.');
+                _ = sb.Append('.');
             }
 
-            switch (exp.NodeType)
+            // Anything other than an indexer or member access contributes no name segment.
+            if (exp is IndexExpression { Indexer: not null } indexExpression)
             {
-                case ExpressionType.Index when
-                    exp is IndexExpression { Indexer: not null } indexExpression:
+                _ = sb.Append(indexExpression.Indexer.Name).Append('[');
+
+                var args = indexExpression.Arguments;
+                for (var i = 0; i < args.Count; i++)
+                {
+                    if (i != 0)
                     {
-                        sb.Append(indexExpression.Indexer.Name).Append('[');
-
-                        var args = indexExpression.Arguments;
-                        for (var i = 0; i < args.Count; i++)
-                        {
-                            if (i != 0)
-                            {
-                                sb.Append(',');
-                            }
-
-                            sb.Append(((ConstantExpression)args[i]).Value);
-                        }
-
-                        sb.Append(']');
-                        break;
+                        _ = sb.Append(',');
                     }
 
-                case ExpressionType.MemberAccess when exp is MemberExpression memberExpression:
-                    {
-                        sb.Append(memberExpression.Member.Name);
-                        break;
-                    }
+                    _ = sb.Append(((ConstantExpression)args[i]).Value);
+                }
+
+                _ = sb.Append(']');
+            }
+            else if (exp is MemberExpression memberExpression)
+            {
+                _ = sb.Append(memberExpression.Member.Name);
             }
 
             firstSegment = false;
@@ -83,9 +72,7 @@ public static class Reflection
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Converts a <see cref="MemberInfo"/> into a delegate which fetches the value for the member.
-    /// </summary>
+    /// <summary>Converts a <see cref="MemberInfo"/> into a delegate which fetches the value for the member.</summary>
     /// <param name="member">The member info to convert.</param>
     /// <returns>A delegate that fetches the value, or null if unsupported.</returns>
     public static Func<object?, object?[]?, object?>? GetValueFetcherForProperty(MemberInfo? member)
@@ -101,18 +88,10 @@ public static class Reflection
             };
         }
 
-        if (member is not PropertyInfo property)
-        {
-            return null;
-        }
-
-        return property.GetValue;
+        return member is not PropertyInfo property ? null : property.GetValue;
     }
 
-    /// <summary>
-    /// Converts a <see cref="MemberInfo"/> into a delegate which fetches the value for the member.
-    /// Throws if the member is not a field or property.
-    /// </summary>
+    /// <summary>Converts a <see cref="MemberInfo"/> into a delegate which fetches the value for the member. Throws if the member is not a field or property.</summary>
     /// <param name="member">The member info to convert.</param>
     /// <returns>A delegate that fetches the value.</returns>
     public static Func<object?, object?[]?, object?> GetValueFetcherOrThrow(MemberInfo? member)
@@ -120,13 +99,11 @@ public static class Reflection
         ArgumentExceptionHelper.ThrowIfNull(member);
 
         var ret = GetValueFetcherForProperty(member);
-        return ret ??
-               throw new ArgumentException($"Type '{member!.DeclaringType}' must have a property '{member.Name}'");
+        return ret
+               ?? throw new ArgumentException($"Type '{member!.DeclaringType}' must have a property '{member.Name}'");
     }
 
-    /// <summary>
-    /// Converts a <see cref="MemberInfo"/> into a delegate which sets the value for the member.
-    /// </summary>
+    /// <summary>Converts a <see cref="MemberInfo"/> into a delegate which sets the value for the member.</summary>
     /// <param name="member">The member info to convert.</param>
     /// <returns>A delegate that sets the value, or null if unsupported.</returns>
     public static Action<object?, object?, object?[]?>? GetValueSetterForProperty(MemberInfo? member)
@@ -138,18 +115,10 @@ public static class Reflection
             return (obj, val, _) => field.SetValue(obj, val);
         }
 
-        if (member is not PropertyInfo property)
-        {
-            return null;
-        }
-
-        return property.SetValue;
+        return member is not PropertyInfo property ? null : property.SetValue;
     }
 
-    /// <summary>
-    /// Converts a <see cref="MemberInfo"/> into a delegate which sets the value for the member.
-    /// Throws if the member is not a field or property.
-    /// </summary>
+    /// <summary>Converts a <see cref="MemberInfo"/> into a delegate which sets the value for the member. Throws if the member is not a field or property.</summary>
     /// <param name="member">The member info to convert.</param>
     /// <returns>A delegate that sets the value.</returns>
     public static Action<object?, object?, object?[]?> GetValueSetterOrThrow(MemberInfo? member)
@@ -157,13 +126,11 @@ public static class Reflection
         ArgumentExceptionHelper.ThrowIfNull(member);
 
         var ret = GetValueSetterForProperty(member);
-        return ret ??
-               throw new ArgumentException($"Type '{member!.DeclaringType}' must have a property '{member.Name}'");
+        return ret
+               ?? throw new ArgumentException($"Type '{member!.DeclaringType}' must have a property '{member.Name}'");
     }
 
-    /// <summary>
-    /// Attempts to get the value of the last property in an expression chain.
-    /// </summary>
+    /// <summary>Attempts to get the value of the last property in an expression chain.</summary>
     /// <typeparam name="TValue">The expected type of the final value.</typeparam>
     /// <param name="changeValue">Receives the value if the chain can be evaluated.</param>
     /// <param name="current">The object that starts the property chain.</param>
@@ -180,7 +147,7 @@ public static class Reflection
 
         if (count == 0)
         {
-            throw new InvalidOperationException("Expression chain must contain at least one element.");
+            throw new InvalidOperationException(EmptyExpressionChainMessage);
         }
 
         for (var i = 0; i < count - 1; i++)
@@ -209,9 +176,7 @@ public static class Reflection
         return true;
     }
 
-    /// <summary>
-    /// Attempts to get all intermediate values in a property chain as observed changes.
-    /// </summary>
+    /// <summary>Attempts to get all intermediate values in a property chain as observed changes.</summary>
     /// <param name="changeValues">Receives an array with one entry per expression in the chain.</param>
     /// <param name="current">The object that starts the property chain.</param>
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
@@ -229,7 +194,7 @@ public static class Reflection
 
         if (count == 0)
         {
-            throw new InvalidOperationException("Expression chain must contain at least one element.");
+            throw new InvalidOperationException(EmptyExpressionChainMessage);
         }
 
         var currentIndex = 0;
@@ -263,10 +228,7 @@ public static class Reflection
         return true;
     }
 
-    /// <summary>
-    /// Attempts to set the value of the last property in an expression chain, throwing when reflection
-    /// members are missing.
-    /// </summary>
+    /// <summary>Attempts to set the value of the last property in an expression chain, throwing when reflection members are missing.</summary>
     /// <typeparam name="TValue">The type of the end value being set.</typeparam>
     /// <param name="target">The object that starts the property chain.</param>
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
@@ -279,9 +241,7 @@ public static class Reflection
         TValue value) =>
         TrySetValueToPropertyChain(target, expressionChain, value, true);
 
-    /// <summary>
-    /// Attempts to set the value of the last property in an expression chain.
-    /// </summary>
+    /// <summary>Attempts to set the value of the last property in an expression chain.</summary>
     /// <typeparam name="TValue">The type of the end value being set.</typeparam>
     /// <param name="target">The object that starts the property chain.</param>
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
@@ -300,7 +260,7 @@ public static class Reflection
 
         if (count == 0)
         {
-            throw new InvalidOperationException("Expression chain must contain at least one element.");
+            throw new InvalidOperationException(EmptyExpressionChainMessage);
         }
 
         for (var i = 0; i < count - 1; i++)
@@ -334,9 +294,7 @@ public static class Reflection
         return TryInvokeSetter(setter, target, value, lastExpression.GetArgumentsArray());
     }
 
-    /// <summary>
-    /// Materializes an expression chain into an array for indexed access, reusing the backing array when possible.
-    /// </summary>
+    /// <summary>Materializes an expression chain into an array for indexed access, reusing the backing array when possible.</summary>
     /// <param name="expressionChain">The expression chain to materialize.</param>
     /// <returns>An array of expressions representing the chain.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

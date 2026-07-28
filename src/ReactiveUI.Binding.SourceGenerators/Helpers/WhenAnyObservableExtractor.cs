@@ -8,9 +8,7 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
-/// <summary>
-/// Extracts WhenAnyObservableInvocationInfo from WhenAnyObservable invocations.
-/// </summary>
+/// <summary>Extracts WhenAnyObservableInvocationInfo from WhenAnyObservable invocations.</summary>
 internal static class WhenAnyObservableExtractor
 {
     /// <summary>
@@ -31,7 +29,7 @@ internal static class WhenAnyObservableExtractor
 
         var semanticModel = context.SemanticModel;
         var methodSymbol = ExtractorValidation.ExtractMethodSymbol(semanticModel.GetSymbolInfo(invocation, ct));
-        if (methodSymbol == null)
+        if (methodSymbol is null)
         {
             return null;
         }
@@ -43,38 +41,8 @@ internal static class WhenAnyObservableExtractor
         }
 
         var args = invocation.ArgumentList.Arguments;
-        var propertyPaths = new List<EquatableArray<PropertyPathSegment>>(args.Count);
-        var expressionTexts = new List<string>(args.Count);
-        var innerObservableTypes = new List<string>(args.Count);
-        var hasSelector = false;
-
-        // Loop over parameters to identify expression parameters and selector
-        for (var i = 0; i < methodSymbol.Parameters.Length; i++)
-        {
-            var parameter = methodSymbol.Parameters[i];
-
-            // Check if parameter type is Expression<Func<TSender, IObservable<T>?>>
-            if (parameter.Type is INamedTypeSymbol { Name: "Expression" })
-            {
-                var path = SyntaxHelpers.ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
-                if (path != null)
-                {
-                    propertyPaths.Add(new(path));
-                    expressionTexts.Add(
-                        CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
-
-                    // Extract the inner type T from the leaf property type IObservable<T>?
-                    var leafSegment = path[path.Length - 1];
-                    var innerType =
-                        SymbolHelpers.ExtractInnerObservableType(leafSegment, semanticModel, args[i].Expression, ct);
-                    innerObservableTypes.Add(innerType);
-                }
-            }
-            else if (parameter.Name == "selector")
-            {
-                hasSelector = true;
-            }
-        }
+        var (propertyPaths, expressionTexts, innerObservableTypes, hasSelector) =
+            CollectObservableArguments(methodSymbol, args, semanticModel, ct);
 
         if (propertyPaths.Count == 0)
         {
@@ -107,5 +75,59 @@ internal static class WhenAnyObservableExtractor
             returnTypeFullName,
             hasSelector,
             new([.. expressionTexts]));
+    }
+
+    /// <summary>
+    /// Walks the invocation's parameters, collecting one property path, expression text and inner
+    /// observable type per <c>Expression&lt;Func&lt;TSender, IObservable&lt;T&gt;&gt;&gt;</c> argument.
+    /// </summary>
+    /// <param name="methodSymbol">The resolved method.</param>
+    /// <param name="args">The invocation arguments.</param>
+    /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The observed paths, their expression texts, their inner types, and whether a selector was supplied.</returns>
+    private static (List<EquatableArray<PropertyPathSegment>> PropertyPaths, List<string> ExpressionTexts, List<string> InnerObservableTypes, bool HasSelector)
+        CollectObservableArguments(
+            IMethodSymbol methodSymbol,
+            SeparatedSyntaxList<ArgumentSyntax> args,
+            SemanticModel semanticModel,
+            CancellationToken ct)
+    {
+        var propertyPaths = new List<EquatableArray<PropertyPathSegment>>(args.Count);
+        var expressionTexts = new List<string>(args.Count);
+        var innerObservableTypes = new List<string>(args.Count);
+        var hasSelector = false;
+
+        for (var i = 0; i < methodSymbol.Parameters.Length; i++)
+        {
+            var parameter = methodSymbol.Parameters[i];
+
+            if (parameter.Name == "selector")
+            {
+                hasSelector = true;
+                continue;
+            }
+
+            if (parameter.Type is not INamedTypeSymbol { Name: "Expression" })
+            {
+                continue;
+            }
+
+            var path = SyntaxHelpers.ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
+            if (path is null)
+            {
+                continue;
+            }
+
+            propertyPaths.Add(new(path));
+            expressionTexts.Add(
+                CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
+
+            // The leaf property type is IObservable<T>; the generated code needs T.
+            innerObservableTypes.Add(
+                SymbolHelpers.ExtractInnerObservableType(path[^1], semanticModel, args[i].Expression, ct));
+        }
+
+        return (propertyPaths, expressionTexts, innerObservableTypes, hasSelector);
     }
 }

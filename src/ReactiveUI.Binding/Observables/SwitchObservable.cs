@@ -15,14 +15,10 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class SwitchObservable<T> : IObservable<T>
 {
-    /// <summary>
-    /// The outer observable of inner observables.
-    /// </summary>
+    /// <summary>The outer observable of inner observables.</summary>
     private readonly IObservable<IObservable<T>> _source;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SwitchObservable{T}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="SwitchObservable{T}"/> class.</summary>
     /// <param name="source">The outer observable of inner observables.</param>
     public SwitchObservable(IObservable<IObservable<T>> source)
     {
@@ -40,35 +36,23 @@ public sealed class SwitchObservable<T> : IObservable<T>
         return subscription;
     }
 
-    /// <summary>
-    /// Manages the outer subscription and switches inner subscriptions as new inner observables arrive.
-    /// </summary>
+    /// <summary>Manages the outer subscription and switches inner subscriptions as new inner observables arrive.</summary>
     private sealed class SwitchSubscription : IObserver<IObservable<T>>, IDisposable
     {
-        /// <summary>
-        /// The downstream observer receiving values from the current inner observable.
-        /// </summary>
+        /// <summary>The downstream observer receiving values from the current inner observable.</summary>
         private readonly IObserver<T> _observer;
 
-        /// <summary>
-        /// The current inner subscription. Disposed and replaced when a new inner observable arrives.
-        /// </summary>
+        /// <summary>The current inner subscription. Disposed and replaced when a new inner observable arrives.</summary>
         private IDisposable? _innerSubscription;
 
-        /// <summary>
-        /// Guard flag to ensure disposal occurs exactly once (0 = not disposed, 1 = disposed).
-        /// </summary>
+        /// <summary>Guard flag to ensure disposal occurs exactly once (0 = not disposed, 1 = disposed).</summary>
         private int _disposed;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SwitchSubscription"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="SwitchSubscription"/> class.</summary>
         /// <param name="observer">The downstream observer.</param>
         public SwitchSubscription(IObserver<T> observer) => _observer = observer;
 
-        /// <summary>
-        /// Gets or sets the outer subscription. Set after construction to avoid passing through the constructor.
-        /// </summary>
+        /// <summary>Gets or sets the outer subscription. Set after construction to avoid passing through the constructor.</summary>
         public IDisposable? OuterSubscription { get; set; }
 
         /// <inheritdoc/>
@@ -122,31 +106,25 @@ public sealed class SwitchObservable<T> : IObservable<T>
             DisposeSubscriptions();
         }
 
-        /// <summary>
-        /// Atomically marks this instance as disposed.
-        /// </summary>
+        /// <summary>Atomically marks this instance as disposed.</summary>
         /// <returns><see langword="true"/> if this is the first disposal; otherwise <see langword="false"/>.</returns>
         [ExcludeFromCodeCoverage]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool TrySetDisposed() => Interlocked.Exchange(ref _disposed, 1) == 0;
+        private bool TrySetDisposed() => Interlocked.Exchange(ref _disposed, 1) == 0;
 
-        /// <summary>
-        /// Atomically takes the inner subscription, returning it exactly once.
-        /// </summary>
+        /// <summary>Atomically takes the inner subscription, returning it exactly once.</summary>
         /// <returns>The inner subscription if present; otherwise <see langword="null"/>.</returns>
         [ExcludeFromCodeCoverage]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal IDisposable? TakeInnerSubscription() => Interlocked.Exchange(ref _innerSubscription, null);
+        private IDisposable? TakeInnerSubscription() => Interlocked.Exchange(ref _innerSubscription, null);
 
-        /// <summary>
-        /// Atomically sets the inner subscription if the slot is currently empty.
-        /// </summary>
+        /// <summary>Atomically sets the inner subscription if the slot is currently empty.</summary>
         /// <param name="subscription">The subscription to store.</param>
         /// <returns><see langword="true"/> if the slot was empty and the value was stored; otherwise <see langword="false"/>.</returns>
         [ExcludeFromCodeCoverage]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool TrySetInnerSubscription(IDisposable subscription) =>
-            Interlocked.CompareExchange(ref _innerSubscription, subscription, null) == null;
+        private bool TrySetInnerSubscription(IDisposable subscription) =>
+            Interlocked.CompareExchange(ref _innerSubscription, subscription, null) is null;
 
         /// <summary>
         /// Disposes a newly created subscription if a concurrent OnNext or Dispose has already
@@ -178,19 +156,13 @@ public sealed class SwitchObservable<T> : IObservable<T>
             TakeInnerSubscription()?.Dispose();
         }
 
-        /// <summary>
-        /// Observer for the current inner observable that forwards values to the downstream observer.
-        /// </summary>
+        /// <summary>Observer for the current inner observable that forwards values to the downstream observer.</summary>
         private sealed class InnerObserver : IObserver<T>
         {
-            /// <summary>
-            /// The parent switch subscription.
-            /// </summary>
+            /// <summary>The parent switch subscription.</summary>
             private readonly SwitchSubscription _parent;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="InnerObserver"/> class.
-            /// </summary>
+            /// <summary>Initializes a new instance of the <see cref="InnerObserver"/> class.</summary>
             /// <param name="parent">The parent switch subscription.</param>
             public InnerObserver(SwitchSubscription parent) => _parent = parent;
 

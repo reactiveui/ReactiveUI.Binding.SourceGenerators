@@ -14,14 +14,10 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class MergeObservable<T> : IObservable<T>
 {
-    /// <summary>
-    /// The array of source observables to merge.
-    /// </summary>
+    /// <summary>The array of source observables to merge.</summary>
     private readonly IObservable<T>[] _sources;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MergeObservable{T}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="MergeObservable{T}"/> class.</summary>
     /// <param name="sources">The source observables to merge.</param>
     public MergeObservable(params IObservable<T>[] sources)
     {
@@ -45,19 +41,13 @@ public sealed class MergeObservable<T> : IObservable<T>
         return new MergeSubscription(subscriptions);
     }
 
-    /// <summary>
-    /// Observer that forwards all values from any source to the downstream observer.
-    /// </summary>
+    /// <summary>Observer that forwards all values from any source to the downstream observer.</summary>
     private sealed class MergeObserver : IObserver<T>
     {
-        /// <summary>
-        /// The downstream observer.
-        /// </summary>
+        /// <summary>The downstream observer.</summary>
         private readonly IObserver<T> _observer;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MergeObserver"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="MergeObserver"/> class.</summary>
         /// <param name="observer">The downstream observer.</param>
         public MergeObserver(IObserver<T> observer) => _observer = observer;
 
@@ -76,19 +66,13 @@ public sealed class MergeObservable<T> : IObservable<T>
         }
     }
 
-    /// <summary>
-    /// Manages the lifetime of all source subscriptions.
-    /// </summary>
+    /// <summary>Manages the lifetime of all source subscriptions.</summary>
     private sealed class MergeSubscription : IDisposable
     {
-        /// <summary>
-        /// The array of source subscriptions. Set to <see langword="null"/> on disposal.
-        /// </summary>
+        /// <summary>The array of source subscriptions. Set to <see langword="null"/> on disposal.</summary>
         private IDisposable[]? _subscriptions;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MergeSubscription"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="MergeSubscription"/> class.</summary>
         /// <param name="subscriptions">The source subscriptions to manage.</param>
         public MergeSubscription(IDisposable[] subscriptions) => _subscriptions = subscriptions;
 
@@ -107,12 +91,10 @@ public sealed class MergeObservable<T> : IObservable<T>
             }
         }
 
-        /// <summary>
-        /// Atomically takes the subscriptions array, returning it exactly once.
-        /// </summary>
+        /// <summary>Atomically takes the subscriptions array, returning it exactly once.</summary>
         /// <returns>The subscriptions if this is the first call; otherwise <see langword="null"/>.</returns>
         [ExcludeFromCodeCoverage]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal IDisposable[]? TryTakeSubscriptions() => Interlocked.Exchange(ref _subscriptions, null);
+        private IDisposable[]? TryTakeSubscriptions() => Interlocked.Exchange(ref _subscriptions, null);
     }
 }

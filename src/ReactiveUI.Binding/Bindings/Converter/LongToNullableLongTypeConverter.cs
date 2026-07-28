@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="long"/> to <see cref="Nullable{Int64}"/>.
-/// </summary>
+/// <summary>Converts <see cref="long"/> to a nullable <see cref="long"/>.</summary>
 public sealed class LongToNullableLongTypeConverter : IBindingTypeConverter<long, long?>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

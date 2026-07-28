@@ -4,9 +4,7 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Base class for type-pair binding converters.
-/// </summary>
+/// <summary>Base class for type-pair binding converters.</summary>
 /// <typeparam name="TFrom">The source type to convert from.</typeparam>
 /// <typeparam name="TTo">The target type to convert to.</typeparam>
 /// <remarks>
@@ -22,9 +20,7 @@ public abstract class BindingTypeConverter<TFrom, TTo> : IBindingTypeConverter<T
     /// <inheritdoc/>
     public Type ToType => typeof(TTo);
 
-    /// <summary>
-    /// Returns the affinity score for this converter.
-    /// </summary>
+    /// <summary>Returns the affinity score for this converter.</summary>
     /// <returns>
     /// A positive integer indicating converter priority. Higher values win when multiple converters match.
     /// Return 0 if the converter cannot handle the type pair.

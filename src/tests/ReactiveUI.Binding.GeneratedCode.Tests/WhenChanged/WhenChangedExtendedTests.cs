@@ -13,21 +13,12 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 /// </summary>
 public class WhenChangedExtendedTests
 {
-    /// <summary>
-    /// Verifies that five-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that five-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FiveProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e"
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.FiveProperties(vm)
@@ -36,22 +27,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that six-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that six-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SixProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.SixProperties(vm)
@@ -60,23 +41,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that seven-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that seven-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SevenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6,
-            Prop7 = 7.0
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.SevenProperties(vm)
@@ -85,24 +55,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that eight-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that eight-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EightProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6,
-            Prop7 = 7.0,
-            Prop8 = false
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.EightProperties(vm)
@@ -111,25 +69,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that nine-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that nine-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NineProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6,
-            Prop7 = 7.0,
-            Prop8 = false,
-            Prop9 = "i"
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.NineProperties(vm)
@@ -138,26 +83,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that ten-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that ten-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6,
-            Prop7 = 7.0,
-            Prop8 = false,
-            Prop9 = "i",
-            Prop10 = 10
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.TenProperties(vm)
@@ -166,27 +97,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that eleven-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that eleven-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ElevenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6,
-            Prop7 = 7.0,
-            Prop8 = false,
-            Prop9 = "i",
-            Prop10 = 10,
-            Prop11 = 11.0
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.ElevenProperties(vm)
@@ -195,28 +111,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that twelve-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that twelve-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwelveProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6,
-            Prop7 = 7.0,
-            Prop8 = false,
-            Prop9 = "i",
-            Prop10 = 10,
-            Prop11 = 11.0,
-            Prop12 = true
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.TwelveProperties(vm)
@@ -225,29 +125,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that thirteen-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that thirteen-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ThirteenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6,
-            Prop7 = 7.0,
-            Prop8 = false,
-            Prop9 = "i",
-            Prop10 = 10,
-            Prop11 = 11.0,
-            Prop12 = true,
-            Prop13 = "m"
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.ThirteenProperties(vm)
@@ -256,30 +139,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that fourteen-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that fourteen-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FourteenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6,
-            Prop7 = 7.0,
-            Prop8 = false,
-            Prop9 = "i",
-            Prop10 = 10,
-            Prop11 = 11.0,
-            Prop12 = true,
-            Prop13 = "m",
-            Prop14 = 14
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.FourteenProperties(vm)
@@ -288,31 +153,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that fifteen-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that fifteen-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FifteenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6,
-            Prop7 = 7.0,
-            Prop8 = false,
-            Prop9 = "i",
-            Prop10 = 10,
-            Prop11 = 11.0,
-            Prop12 = true,
-            Prop13 = "m",
-            Prop14 = 14,
-            Prop15 = 15.0
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.FifteenProperties(vm)
@@ -321,32 +167,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that sixteen-property WhenChanged emits initial values.
-    /// </summary>
+    /// <summary>Verifies that sixteen-property WhenChanged emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SixteenProperties_EmitsInitialValues()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6,
-            Prop7 = 7.0,
-            Prop8 = false,
-            Prop9 = "i",
-            Prop10 = 10,
-            Prop11 = 11.0,
-            Prop12 = true,
-            Prop13 = "m",
-            Prop14 = 14,
-            Prop15 = 15.0,
-            Prop16 = false
-        };
+        var vm = BigViewModel.CreatePopulated();
         var received = false;
 
         using var sub = WhenChangedExtendedScenarios.SixteenProperties(vm)
@@ -355,32 +181,12 @@ public class WhenChangedExtendedTests
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that sixteen-property WhenChanged with a selector correctly combines all property values.
-    /// </summary>
+    /// <summary>Verifies that sixteen-property WhenChanged with a selector correctly combines all property values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithSelector_SixteenProperties()
     {
-        var vm = new BigViewModel
-        {
-            Prop1 = "a",
-            Prop2 = 2,
-            Prop3 = 3.0,
-            Prop4 = true,
-            Prop5 = "e",
-            Prop6 = 6,
-            Prop7 = 7.0,
-            Prop8 = false,
-            Prop9 = "i",
-            Prop10 = 10,
-            Prop11 = 11.0,
-            Prop12 = true,
-            Prop13 = "m",
-            Prop14 = 14,
-            Prop15 = 15.0,
-            Prop16 = false
-        };
+        var vm = BigViewModel.CreatePopulated();
         var values = new List<string>();
 
         using var sub = WhenChangedExtendedScenarios.WithSelector_SixteenProperties(vm)

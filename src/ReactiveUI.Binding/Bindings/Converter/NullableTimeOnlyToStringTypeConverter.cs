@@ -5,14 +5,10 @@
 #if NET8_0_OR_GREATER
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts nullable <see cref="TimeOnly"/> to <see cref="string"/>.
-/// </summary>
+/// <summary>Converts nullable <see cref="TimeOnly"/> to <see cref="string"/>.</summary>
 public sealed class NullableTimeOnlyToStringTypeConverter : BindingTypeConverter<TimeOnly?, string>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

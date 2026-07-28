@@ -6,14 +6,10 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanging.DeepPropertyChain;
 
-/// <summary>
-/// Parent ViewModel with before-change notifications.
-/// </summary>
+/// <summary>Parent ViewModel with before-change notifications.</summary>
 public class ParentViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backing field for <see cref="Child"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Child"/>.</summary>
     private ChildModel _child = new ChildModel();
 
     /// <inheritdoc/>
@@ -22,9 +18,7 @@ public class ParentViewModel : INotifyPropertyChanged, INotifyPropertyChanging
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the child model.
-    /// </summary>
+    /// <summary>Gets or sets the child model.</summary>
     public ChildModel Child
     {
         get => _child;

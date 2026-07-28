@@ -4,23 +4,15 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Specifies the direction of a property binding.
-/// </summary>
+/// <summary>Specifies the direction of a property binding.</summary>
 public enum BindingDirection
 {
-    /// <summary>
-    /// One-way binding from source to target.
-    /// </summary>
+    /// <summary>One-way binding from source to target.</summary>
     OneWay,
 
-    /// <summary>
-    /// Two-way binding between source and target.
-    /// </summary>
+    /// <summary>Two-way binding between source and target.</summary>
     TwoWay,
 
-    /// <summary>
-    /// One-way asynchronous binding from source to target.
-    /// </summary>
+    /// <summary>One-way asynchronous binding from source to target.</summary>
     AsyncOneWay
 }

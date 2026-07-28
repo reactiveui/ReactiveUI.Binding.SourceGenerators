@@ -10,37 +10,28 @@ using Targets = System.AttributeTargets;
 
 namespace System.Diagnostics.CodeAnalysis;
 
-/// <summary>
-/// Specifies that the method or property will ensure that the listed field and property members have
-/// not-<see langword="null"/> values.
-/// </summary>
+/// <summary>Specifies that the method or property will ensure that the listed field and property members have not-<see langword="null"/> values.</summary>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
 [AttributeUsage(
-    validOn: Targets.Method |
-             Targets.Property,
+    validOn: Targets.Method
+             | Targets.Property,
     Inherited = false,
     AllowMultiple = true)]
 internal sealed class MemberNotNullAttribute : Attribute
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MemberNotNullAttribute"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="MemberNotNullAttribute"/> class.</summary>
     /// <param name="member">Field or property member name.</param>
-    public MemberNotNullAttribute([SuppressMessage("Design", "CA1019:Define accessors for attribute arguments", Justification = "For polyfill")] string member) =>
+    public MemberNotNullAttribute(string member) =>
         Members = [member];
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MemberNotNullAttribute"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="MemberNotNullAttribute"/> class.</summary>
     /// <param name="members">Field or property member names.</param>
     public MemberNotNullAttribute(params string[] members) =>
         Members = members;
 
-    /// <summary>
-    /// Gets field or property member names.
-    /// </summary>
-    public string[] Members { get; }
+    /// <summary>Gets field or property member names.</summary>
+    internal string[] Members { get; }
 }
 
 #else

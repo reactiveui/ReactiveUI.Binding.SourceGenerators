@@ -6,27 +6,19 @@ using System.ComponentModel;
 
 namespace SharedScenarios.BindTwoWay.MixedWithBindOneWay;
 
-/// <summary>
-/// Target View with properties for mixed binding.
-/// </summary>
+/// <summary>Target View with properties for mixed binding.</summary>
 public class MyView : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="NameText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="NameText"/>.</summary>
     private string _nameText = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="CountDisplay"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="CountDisplay"/>.</summary>
     private int _countDisplay;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the name text.
-    /// </summary>
+    /// <summary>Gets or sets the name text.</summary>
     public string NameText
     {
         get => _nameText;
@@ -42,9 +34,7 @@ public class MyView : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the count display.
-    /// </summary>
+    /// <summary>Gets or sets the count display.</summary>
     public int CountDisplay
     {
         get => _countDisplay;

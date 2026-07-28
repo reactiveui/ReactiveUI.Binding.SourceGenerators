@@ -16,24 +16,24 @@ namespace ReactiveUI.Binding
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView, string> OneWayBind(
             this global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView view,
             global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyViewModel viewModel,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyViewModel, int>> vmProperty,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyViewModel, int>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView, string?>> viewProperty,
             global::System.Func<int, string> selector,
-            [global::System.Runtime.CompilerServices.CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+            [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (vmPropertyExpression == "x => x.Count"
+            if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountText")
             {
-                return __OneWayBind_0000321BF9FDED00(viewModel, view, selector);
+                return __OneWayBind_0000321BF9FDEB10(viewModel, view, selector);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView, string> __OneWayBind_0000321BF9FDED00(global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView view, global::System.Func<int, string> selector)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView, string> __OneWayBind_0000321BF9FDEB10(global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView view, global::System.Func<int, string> selector)
         {
             // OneWayBind: Count -> CountText (with conversion)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(

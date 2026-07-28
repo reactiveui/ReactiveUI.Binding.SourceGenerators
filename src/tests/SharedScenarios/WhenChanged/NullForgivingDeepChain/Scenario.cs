@@ -13,11 +13,9 @@ namespace SharedScenarios.WhenChanged.NullForgivingDeepChain;
 /// </summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenChanged observable for Child!.Name using the null-forgiving operator.
-    /// </summary>
+    /// <summary>Creates a WhenChanged observable for Child!.Name using the null-forgiving operator.</summary>
     /// <param name="vm">The parent view model to observe.</param>
     /// <returns>An observable of name values from the child.</returns>
-    public static IObservable<string> Execute(ParentViewModel vm)
-        => vm.WhenChanged(x => x.Child!.Name);
+    public static IObservable<string> Execute(ParentViewModel vm) =>
+        vm.WhenChanged(x => x.Child!.Name);
 }

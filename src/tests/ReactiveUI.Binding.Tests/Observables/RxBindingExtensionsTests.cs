@@ -7,29 +7,19 @@ using RxBinding = ReactiveUI.Binding.Observables.RxBindingExtensions;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-/// Unit tests for <see cref="RxBinding"/>.
-/// </summary>
+/// <summary>Unit tests for <see cref="RxBinding"/>.</summary>
 public class RxBindingExtensionsTests
 {
-    /// <summary>
-    /// The value produced by the return observable used across tests.
-    /// </summary>
+    /// <summary>The value produced by the return observable used across tests.</summary>
     private const int ReturnedValue = 42;
 
-    /// <summary>
-    /// The expected number of emitted values when two notifications are produced.
-    /// </summary>
+    /// <summary>The expected number of emitted values when two notifications are produced.</summary>
     private const int ExpectedTwoEmissions = 2;
 
-    /// <summary>
-    /// The second integer value emitted by a source observable.
-    /// </summary>
+    /// <summary>The second integer value emitted by a source observable.</summary>
     private const int SecondValue = 2;
 
-    /// <summary>
-    /// Verifies that Subscribe invokes the action for each value.
-    /// </summary>
+    /// <summary>Verifies that Subscribe invokes the action for each value.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_InvokesAction()
@@ -37,15 +27,13 @@ public class RxBindingExtensionsTests
         var results = new List<int>();
         var source = new ReturnObservable<int>(ReturnedValue);
 
-        RxBinding.Subscribe(source, results.Add);
+        _ = RxBinding.Subscribe(source, results.Add);
 
         await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]).IsEqualTo(ReturnedValue);
     }
 
-    /// <summary>
-    /// Verifies that Select applies the projection correctly.
-    /// </summary>
+    /// <summary>Verifies that Select applies the projection correctly.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Select_AppliesProjection()
@@ -53,94 +41,86 @@ public class RxBindingExtensionsTests
         var results = new List<string>();
         var source = new ReturnObservable<int>(ReturnedValue);
 
-        var select = RxBinding.Select(source, x => x.ToString());
-        select.Subscribe(new AnonymousObserver<string>(results.Add, _ => { }, () => { }));
+        var select = RxBinding.Select(source, static x => x.ToString());
+        _ = select.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
 
         await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]).IsEqualTo("42");
     }
 
-    /// <summary>
-    /// Verifies that Skip delegates to SkipObservable.
-    /// </summary>
+    /// <summary>Verifies that Skip delegates to SkipObservable.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Skip_DelegatesToSkipObservable()
     {
         var results = new List<int>();
-        var source = new AnonymousObservable<int>(observer =>
+        var source = new AnonymousObservable<int>(static observer =>
         {
             observer.OnNext(1);
-            observer.OnNext(2);
+            observer.OnNext(SecondValue);
             return EmptyDisposable.Instance;
         });
 
         var skip = RxBinding.Skip(source, 1);
-        skip.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
+        _ = skip.Subscribe(new AnonymousObserver<int>(results.Add, static _ => { }, static () => { }));
 
         await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]).IsEqualTo(SecondValue);
     }
 
-    /// <summary>
-    /// Verifies that DistinctUntilChanged delegates to DistinctUntilChangedObservable.
-    /// </summary>
+    /// <summary>Verifies that DistinctUntilChanged delegates to DistinctUntilChangedObservable.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task DistinctUntilChanged_DelegatesToDistinctUntilChangedObservable()
     {
         var results = new List<int>();
-        var source = new AnonymousObservable<int>(observer =>
+        var source = new AnonymousObservable<int>(static observer =>
         {
             observer.OnNext(1);
             observer.OnNext(1);
-            observer.OnNext(2);
+            observer.OnNext(SecondValue);
             return EmptyDisposable.Instance;
         });
 
         var distinct = RxBinding.DistinctUntilChanged(source);
-        distinct.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
+        _ = distinct.Subscribe(new AnonymousObserver<int>(results.Add, static _ => { }, static () => { }));
 
         await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(results[0]).IsEqualTo(1);
         await Assert.That(results[1]).IsEqualTo(SecondValue);
     }
 
-    /// <summary>
-    /// Verifies that Merge merges multiple observables.
-    /// </summary>
+    /// <summary>Verifies that Merge merges multiple observables.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Merge_MergesMultipleObservables()
     {
         var results = new List<int>();
         var s1 = new ReturnObservable<int>(1);
-        var s2 = new ReturnObservable<int>(2);
+        var s2 = new ReturnObservable<int>(SecondValue);
 
         var merged = RxBinding.Merge(s1, s2);
-        merged.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
+        _ = merged.Subscribe(new AnonymousObserver<int>(results.Add, static _ => { }, static () => { }));
 
         await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(results).Contains(1);
         await Assert.That(results).Contains(SecondValue);
     }
 
-    /// <summary>
-    /// Verifies that Switch switches to the newest inner observable.
-    /// </summary>
+    /// <summary>Verifies that Switch switches to the newest inner observable.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Switch_SwitchesToNewestObservable()
     {
         var results = new List<int>();
-        var inner1 = new AnonymousObservable<int>(observer =>
+        var inner1 = new AnonymousObservable<int>(static observer =>
         {
             observer.OnNext(1);
             return EmptyDisposable.Instance;
         });
-        var inner2 = new AnonymousObservable<int>(observer =>
+        var inner2 = new AnonymousObservable<int>(static observer =>
         {
-            observer.OnNext(2);
+            observer.OnNext(SecondValue);
             return EmptyDisposable.Instance;
         });
 
@@ -152,40 +132,34 @@ public class RxBindingExtensionsTests
         });
 
         var switched = RxBinding.Switch(source);
-        switched.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
+        _ = switched.Subscribe(new AnonymousObserver<int>(results.Add, static _ => { }, static () => { }));
 
         await Assert.That(results).Count().IsEqualTo(ExpectedTwoEmissions);
         await Assert.That(results[0]).IsEqualTo(1);
         await Assert.That(results[1]).IsEqualTo(SecondValue);
     }
 
-    /// <summary>
-    /// Verifies that Subscribe throws ArgumentNullException when source is null.
-    /// </summary>
+    /// <summary>Verifies that Subscribe throws ArgumentNullException when source is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_NullSource_ThrowsArgumentNullException()
     {
-        var action = () => RxBinding.Subscribe<int>(null!, _ => { });
+        var action = static () => RxBinding.Subscribe<int>(null!, static _ => { });
 
         await Assert.That(action).Throws<ArgumentNullException>().WithParameterName("source");
     }
 
-    /// <summary>
-    /// Verifies that Subscribe throws ArgumentNullException when onNext is null.
-    /// </summary>
+    /// <summary>Verifies that Subscribe throws ArgumentNullException when onNext is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_NullOnNext_ThrowsArgumentNullException()
     {
-        var action = () => RxBinding.Subscribe(EmptyObservable<int>.Instance, null!);
+        var action = static () => RxBinding.Subscribe(EmptyObservable<int>.Instance, null!);
 
         await Assert.That(action).Throws<ArgumentNullException>().WithParameterName("onNext");
     }
 
-    /// <summary>
-    /// A simple observable that delegates subscription to a provided function.
-    /// </summary>
+    /// <summary>A simple observable that delegates subscription to a provided function.</summary>
     /// <typeparam name="T">The type of elements produced.</typeparam>
     /// <param name="subscribe">The function to invoke when an observer subscribes.</param>
     private sealed class AnonymousObservable<T>(Func<IObserver<T>, IDisposable> subscribe) : IObservable<T>
@@ -194,15 +168,12 @@ public class RxBindingExtensionsTests
         public IDisposable Subscribe(IObserver<T> observer) => subscribe(observer);
     }
 
-    /// <summary>
-    /// A simple observer that delegates to provided actions.
-    /// </summary>
+    /// <summary>A simple observer that delegates to provided actions.</summary>
     /// <typeparam name="T">The type of elements observed.</typeparam>
     /// <param name="onNext">The action to invoke for each element.</param>
     /// <param name="onError">The action to invoke on error.</param>
     /// <param name="onCompleted">The action to invoke on completion.</param>
-    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-        : IObserver<T>
+    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted) : IObserver<T>
     {
         /// <inheritdoc/>
         public void OnCompleted() => onCompleted();

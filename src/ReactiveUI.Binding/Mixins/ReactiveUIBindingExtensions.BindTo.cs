@@ -12,10 +12,7 @@ namespace ReactiveUI.Binding;
 public static partial class ReactiveUIBindingExtensions
 {
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Applies an observable stream to a target property. Conceptually similar to
-    /// <c>source.Subscribe(x =&gt; target.property = x)</c>.
-    /// </summary>
+    /// <summary>Applies an observable stream to a target property. Conceptually similar to <c>source.Subscribe(x =&gt; target.property = x)</c>.</summary>
     /// <typeparam name="TValue">The type of the value produced by the source observable.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
     /// <typeparam name="TTargetValue">The type of the property on the target object.</typeparam>
@@ -35,10 +32,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TTarget : class
 #else
-    /// <summary>
-    /// Applies an observable stream to a target property. Conceptually similar to
-    /// <c>source.Subscribe(x =&gt; target.property = x)</c>.
-    /// </summary>
+    /// <summary>Applies an observable stream to a target property. Conceptually similar to <c>source.Subscribe(x =&gt; target.property = x)</c>.</summary>
     /// <typeparam name="TValue">The type of the value produced by the source observable.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
     /// <typeparam name="TTargetValue">The type of the property on the target object.</typeparam>
@@ -183,6 +177,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
         TTarget? target,

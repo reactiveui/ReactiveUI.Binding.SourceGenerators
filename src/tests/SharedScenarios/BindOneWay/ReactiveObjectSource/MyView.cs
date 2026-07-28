@@ -6,22 +6,16 @@ using System.ComponentModel;
 
 namespace SharedScenarios.BindOneWay.ReactiveObjectSource;
 
-/// <summary>
-/// Target View implementing INPC.
-/// </summary>
+/// <summary>Target View implementing INPC.</summary>
 public class MyView : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="NameText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="NameText"/>.</summary>
     private string _nameText = string.Empty;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the name text.
-    /// </summary>
+    /// <summary>Gets or sets the name text.</summary>
     public string NameText
     {
         get => _nameText;

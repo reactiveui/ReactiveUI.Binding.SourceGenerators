@@ -16,25 +16,25 @@ namespace ReactiveUI.Binding
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView, string> OneWayBind(
             this global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView view,
             global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel viewModel,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel, int>> vmProperty,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel, int>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView, string?>> viewProperty,
             global::System.Func<int, string> selector,
             global::System.Reactive.Concurrency.IScheduler scheduler,
-            [global::System.Runtime.CompilerServices.CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+            [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (vmPropertyExpression == "x => x.Count"
+            if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountText")
             {
-                return __OneWayBind_7FFFFAB8DECC397F(viewModel, view, selector, scheduler);
+                return __OneWayBind_7FFFFAB8DECC378F(viewModel, view, selector, scheduler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView, string> __OneWayBind_7FFFFAB8DECC397F(global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView view, global::System.Func<int, string> selector, global::System.Reactive.Concurrency.IScheduler scheduler)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView, string> __OneWayBind_7FFFFAB8DECC378F(global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView view, global::System.Func<int, string> selector, global::System.Reactive.Concurrency.IScheduler scheduler)
         {
             // OneWayBind: Count -> CountText (with conversion) (with scheduler)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(

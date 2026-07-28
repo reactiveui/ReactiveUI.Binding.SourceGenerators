@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts nullable <see cref="Guid"/> to <see cref="string"/> using the "D" format (standard hyphenated format).
-/// </summary>
+/// <summary>Converts nullable <see cref="Guid"/> to <see cref="string"/> using the "D" format (standard hyphenated format).</summary>
 public sealed class NullableGuidToStringTypeConverter : BindingTypeConverter<Guid?, string>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

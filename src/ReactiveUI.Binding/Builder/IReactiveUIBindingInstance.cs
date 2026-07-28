@@ -6,8 +6,6 @@ using Splat.Builder;
 
 namespace ReactiveUI.Binding.Builder;
 
-/// <summary>
-/// Represents a configured ReactiveUI.Binding application instance.
-/// </summary>
+/// <summary>Represents a configured ReactiveUI.Binding application instance.</summary>
 /// <seealso cref="IAppInstance" />
 public interface IReactiveUIBindingInstance : IAppInstance;

@@ -16,28 +16,28 @@ namespace ReactiveUI.Binding
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string> OneWayBind(
             this global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView view,
             global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel viewModel,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel, string?>> vmProperty,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel, string?>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string?>> viewProperty,
-            [global::System.Runtime.CompilerServices.CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+            [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (vmPropertyExpression == "x => x.FirstName"
+            if (viewModelPropertyExpression == "x => x.FirstName"
                 && viewPropertyExpression == "x => x.FirstNameText")
             {
-                return __OneWayBind_7FFFC92F35E57534(viewModel, view);
+                return __OneWayBind_7FFFC92F35E572C8(viewModel, view);
             }
-            else if (vmPropertyExpression == "x => x.LastName"
+            else if (viewModelPropertyExpression == "x => x.LastName"
                 && viewPropertyExpression == "x => x.LastNameText")
             {
-                return __OneWayBind_7FFFC92F041A1BAB(viewModel, view);
+                return __OneWayBind_7FFFC92F041A193F(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string> __OneWayBind_7FFFC92F35E57534(global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string> __OneWayBind_7FFFC92F35E572C8(global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView view)
         {
             // OneWayBind: FirstName -> FirstNameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -58,7 +58,7 @@ namespace ReactiveUI.Binding
                 sub);
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string> __OneWayBind_7FFFC92F041A1BAB(global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string> __OneWayBind_7FFFC92F041A193F(global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView view)
         {
             // OneWayBind: LastName -> LastNameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

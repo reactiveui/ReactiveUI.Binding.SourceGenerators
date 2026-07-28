@@ -13,15 +13,10 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class EmptyDisposable : IDisposable
 {
-    /// <summary>
-    /// Gets the singleton instance.
-    /// </summary>
+    /// <summary>Gets the singleton instance.</summary>
     public static readonly EmptyDisposable Instance = new();
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="EmptyDisposable"/> class.
-    /// Prevents external instantiation. Use <see cref="Instance"/> instead.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="EmptyDisposable"/> class. Prevents external instantiation. Use <see cref="Instance"/> instead.</summary>
     private EmptyDisposable()
     {
     }

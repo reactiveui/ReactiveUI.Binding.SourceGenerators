@@ -4,19 +4,16 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting strings to TimeSpan.
-/// </summary>
+/// <summary>Tests for converting strings to TimeSpan.</summary>
 public class StringToTimeSpanTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>The number of hours in the sample duration under test.</summary>
+    private const double SampleHours = 2.5;
+
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,15 +23,13 @@ public class StringToTimeSpanTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert ValidString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert ValidString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_ValidString_Succeeds()
     {
         var converter = new StringToTimeSpanTypeConverter();
-        var expected = TimeSpan.FromHours(2.5);
+        var expected = TimeSpan.FromHours(SampleHours);
 
         var result = converter.TryConvert(expected.ToString(), null, out var output);
 
@@ -42,9 +37,7 @@ public class StringToTimeSpanTypeConverterTests
         await Assert.That(output).IsEqualTo(expected);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert ZeroTimeSpan Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert ZeroTimeSpan Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_ZeroTimeSpan_Succeeds()
@@ -57,9 +50,7 @@ public class StringToTimeSpanTypeConverterTests
         await Assert.That(output).IsEqualTo(TimeSpan.Zero);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsFalse()
@@ -70,9 +61,7 @@ public class StringToTimeSpanTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert EmptyString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert EmptyString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_EmptyString_ReturnsFalse()
@@ -83,9 +72,7 @@ public class StringToTimeSpanTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert InvalidString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert InvalidString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_InvalidString_ReturnsFalse()

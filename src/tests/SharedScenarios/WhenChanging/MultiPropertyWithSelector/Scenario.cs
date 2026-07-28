@@ -7,16 +7,12 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenChanging.MultiPropertyWithSelector;
 
-/// <summary>
-/// Exercises WhenChanging with a selector function combining two properties.
-/// </summary>
+/// <summary>Exercises WhenChanging with a selector function combining two properties.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenChanging observable combining FirstName and LastName.
-    /// </summary>
+    /// <summary>Creates a WhenChanging observable combining FirstName and LastName.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of combined name strings (before change).</returns>
-    public static IObservable<string> Execute(MyViewModel vm)
-        => vm.WhenChanging(x => x.FirstName, x => x.LastName, (f, l) => $"{f} {l}");
+    public static IObservable<string> Execute(MyViewModel vm) =>
+        vm.WhenChanging(x => x.FirstName, x => x.LastName, (f, l) => $"{f} {l}");
 }

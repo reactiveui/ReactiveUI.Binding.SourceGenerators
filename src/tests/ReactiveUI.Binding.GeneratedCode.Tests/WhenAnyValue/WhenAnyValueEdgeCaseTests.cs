@@ -7,50 +7,34 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAnyValue;
 
-/// <summary>
-/// Edge case tests for WhenAnyValue covering disposal, deep chains, and multi-property
-/// change emission scenarios.
-/// </summary>
+/// <summary>Edge case tests for WhenAnyValue covering disposal, deep chains, and multi-property change emission scenarios.</summary>
 public class WhenAnyValueEdgeCaseTests
 {
-    /// <summary>
-    /// The initial fixture value used in disposal and subscription tests.
-    /// </summary>
+    /// <summary>The initial fixture value used in disposal and subscription tests.</summary>
     private const string InitialValue = "Initial";
 
-    /// <summary>
-    /// The initial nested city value used in deep-chain tests.
-    /// </summary>
+    /// <summary>The initial nested city value used in deep-chain tests.</summary>
     private const string Seattle = "Seattle";
 
-    /// <summary>
-    /// The updated nested city value used in deep-chain tests.
-    /// </summary>
+    /// <summary>The updated nested city value used in deep-chain tests.</summary>
     private const string Portland = "Portland";
 
-    /// <summary>
-    /// The expected emission count after an initial value plus one change.
-    /// </summary>
+    /// <summary>The expected emission count after an initial value plus one change.</summary>
     private const int ExpectedEmissionCount = 2;
 
-    /// <summary>
-    /// The number of property changes applied in the rapid-change test.
-    /// </summary>
+    /// <summary>The number of property changes applied in the rapid-change test.</summary>
     private const int ChangeCount = 100;
 
-    /// <summary>
-    /// The expected emission count after the initial value plus 100 changes.
-    /// </summary>
+    /// <summary>The expected emission count after the initial value plus 100 changes.</summary>
     private const int ExpectedRapidEmissionCount = 101;
 
-    /// <summary>
-    /// The expected emission count after the initial value plus 12 property changes.
-    /// </summary>
+    /// <summary>The expected emission count after the initial value plus 12 property changes.</summary>
     private const int ExpectedTwelvePropertyCount = 13;
 
-    /// <summary>
-    /// Verifies that disposing the WhenAnyValue subscription stops listening for changes.
-    /// </summary>
+    /// <summary>The value written to a property to trigger a change notification.</summary>
+    private const string ChangedValue = "Changed";
+
+    /// <summary>Verifies that disposing the WhenAnyValue subscription stops listening for changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Disposal_StopsListening()
@@ -69,9 +53,7 @@ public class WhenAnyValueEdgeCaseTests
         await Assert.That(values[0]).IsEqualTo(InitialValue);
     }
 
-    /// <summary>
-    /// Verifies that multi-property WhenAnyValue emits when either property changes.
-    /// </summary>
+    /// <summary>Verifies that multi-property WhenAnyValue emits when either property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoProperties_EmitsOnEitherChange()
@@ -95,9 +77,7 @@ public class WhenAnyValueEdgeCaseTests
         await Assert.That(values[^1].property2).IsEqualTo("D");
     }
 
-    /// <summary>
-    /// Verifies that deep chain WhenAnyValue emits the nested property value.
-    /// </summary>
+    /// <summary>Verifies that deep chain WhenAnyValue emits the nested property value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_EmitsNestedPropertyValue()
@@ -113,9 +93,7 @@ public class WhenAnyValueEdgeCaseTests
         await Assert.That(values[0]).IsEqualTo(Seattle);
     }
 
-    /// <summary>
-    /// Verifies that deep chain WhenAnyValue emits on nested property change.
-    /// </summary>
+    /// <summary>Verifies that deep chain WhenAnyValue emits on nested property change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_EmitsOnNestedPropertyChange()
@@ -133,9 +111,7 @@ public class WhenAnyValueEdgeCaseTests
         await Assert.That(values).Contains(Portland);
     }
 
-    /// <summary>
-    /// Verifies that deep chain WhenAnyValue re-subscribes on intermediate object replacement.
-    /// </summary>
+    /// <summary>Verifies that deep chain WhenAnyValue re-subscribes on intermediate object replacement.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_IntermediateObjectReplacement()
@@ -158,9 +134,7 @@ public class WhenAnyValueEdgeCaseTests
         await Assert.That(values).Contains("Eugene");
     }
 
-    /// <summary>
-    /// Verifies that WhenAnyValue with selector re-emits when properties change.
-    /// </summary>
+    /// <summary>Verifies that WhenAnyValue with selector re-emits when properties change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithSelector_EmitsOnChange()
@@ -178,9 +152,7 @@ public class WhenAnyValueEdgeCaseTests
         await Assert.That(values[^1]).IsEqualTo("Goodbye_World");
     }
 
-    /// <summary>
-    /// Verifies that rapid sequential property changes are all captured by WhenAnyValue.
-    /// </summary>
+    /// <summary>Verifies that rapid sequential property changes are all captured by WhenAnyValue.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RapidSequentialChanges_AllCaptured()
@@ -201,10 +173,7 @@ public class WhenAnyValueEdgeCaseTests
         await Assert.That(values[^1]).IsEqualTo("Value_99");
     }
 
-    /// <summary>
-    /// Verifies that multiple subscriptions to the same WhenAnyValue observable
-    /// each receive independent emissions.
-    /// </summary>
+    /// <summary>Verifies that multiple subscriptions to the same WhenAnyValue observable each receive independent emissions.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleSubscriptions_ReceiveIndependentEmissions()
@@ -218,12 +187,12 @@ public class WhenAnyValueEdgeCaseTests
         using var sub1 = obs.Subscribe(values1.Add);
         using var sub2 = obs.Subscribe(values2.Add);
 
-        fixture.Value1 = "Changed";
+        fixture.Value1 = ChangedValue;
 
         await Assert.That(values1.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
         await Assert.That(values2.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
-        await Assert.That(values1).Contains("Changed");
-        await Assert.That(values2).Contains("Changed");
+        await Assert.That(values1).Contains(ChangedValue);
+        await Assert.That(values2).Contains(ChangedValue);
     }
 
     /// <summary>

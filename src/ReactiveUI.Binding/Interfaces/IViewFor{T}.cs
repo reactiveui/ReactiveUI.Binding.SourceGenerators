@@ -4,15 +4,11 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Generic interface for views that display a specific view model type.
-/// </summary>
+/// <summary>Generic interface for views that display a specific view model type.</summary>
 /// <typeparam name="T">The type of the view model.</typeparam>
 public interface IViewFor<T> : IViewFor
     where T : class
 {
-    /// <summary>
-    /// Gets or sets the view model displayed by the view.
-    /// </summary>
+    /// <summary>Gets or sets the view model displayed by the view.</summary>
     new T? ViewModel { get; set; }
 }

@@ -7,27 +7,19 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenAnyObservable.DeepObservableCombineLatest;
 
-/// <summary>
-/// Child model with two observable properties of different types.
-/// </summary>
+/// <summary>Child model with two observable properties of different types.</summary>
 public class ChildModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Count"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Count"/>.</summary>
     private IObservable<int>? _count;
 
-    /// <summary>
-    /// The backing field for <see cref="Message"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Message"/>.</summary>
     private IObservable<string>? _message;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the count observable.
-    /// </summary>
+    /// <summary>Gets or sets the count observable.</summary>
     public IObservable<int>? Count
     {
         get => _count;
@@ -43,9 +35,7 @@ public class ChildModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the message observable.
-    /// </summary>
+    /// <summary>Gets or sets the message observable.</summary>
     public IObservable<string>? Message
     {
         get => _message;

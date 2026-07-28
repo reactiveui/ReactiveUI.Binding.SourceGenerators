@@ -29,13 +29,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.DisplayCount")
             {
-                return __BindTwoWay_000002183E7190F5(source, target);
+                return __BindTwoWay_000002183E718F05(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_000002183E7190F5(global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyView target)
+        private static global::System.IDisposable __BindTwoWay_000002183E718F05(global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyView target)
         {
             // BindTwoWay: Count <-> DisplayCount
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(

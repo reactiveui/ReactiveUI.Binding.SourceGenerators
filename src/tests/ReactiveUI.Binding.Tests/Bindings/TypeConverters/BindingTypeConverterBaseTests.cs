@@ -11,14 +11,16 @@ namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 /// </summary>
 public class BindingTypeConverterBaseTests
 {
-    /// <summary>
-    /// Integer value parsed from the string "42" in conversion tests.
-    /// </summary>
+    /// <summary>The conversion hint passed to the converter, which selects the output format.</summary>
+    private const int ConversionHint = 3;
+
+    /// <summary>The value fed into the converter under test.</summary>
+    private const int SourceValue = 5;
+
+    /// <summary>Integer value parsed from the string "42" in conversion tests.</summary>
     private const int ParsedInteger = 42;
 
-    /// <summary>
-    /// Integer value parsed from the string "100" in the boxing test.
-    /// </summary>
+    /// <summary>Integer value parsed from the string "100" in the boxing test.</summary>
     private const int BoxedInteger = 100;
 
     /// <summary>
@@ -47,7 +49,7 @@ public class BindingTypeConverterBaseTests
     {
         var converter = new StringToIntegerTypeConverter();
 
-        var result = converter.TryConvertTyped(42, null, out var output);
+        var result = converter.TryConvertTyped(ParsedInteger, null, out var output);
 
         await Assert.That(result).IsFalse();
         await Assert.That(output).IsNull();
@@ -85,16 +87,14 @@ public class BindingTypeConverterBaseTests
         await Assert.That(output).IsEqualTo(ParsedInteger);
     }
 
-    /// <summary>
-    /// Verifies TryConvertTyped succeeds when converting from a value type to a reference type.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped succeeds when converting from a value type to a reference type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryConvertTyped_ValueTypeToReferenceType_Succeeds()
     {
         var converter = new IntegerToStringTypeConverter();
 
-        var result = converter.TryConvertTyped(42, null, out var output);
+        var result = converter.TryConvertTyped(ParsedInteger, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("42");
@@ -183,24 +183,20 @@ public class BindingTypeConverterBaseTests
         await Assert.That(output).IsNull();
     }
 
-    /// <summary>
-    /// Verifies TryConvertTyped passes conversionHint through to TryConvert.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped passes conversionHint through to TryConvert.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithConversionHint_PassesThroughToTryConvert()
     {
         var converter = new IntegerToStringTypeConverter();
 
-        var result = converter.TryConvertTyped(5, 3, out var output);
+        var result = converter.TryConvertTyped(SourceValue, ConversionHint, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("005");
     }
 
-    /// <summary>
-    /// Verifies TryConvertTyped correctly boxes value type results.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped correctly boxes value type results.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryConvertTyped_ValueTypeResult_IsBoxedCorrectly()
@@ -214,9 +210,7 @@ public class BindingTypeConverterBaseTests
         await Assert.That(output).IsEqualTo(BoxedInteger);
     }
 
-    /// <summary>
-    /// Verifies that FromType returns the correct type for a generic converter.
-    /// </summary>
+    /// <summary>Verifies that FromType returns the correct type for a generic converter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FromType_ReturnsCorrectGenericType()
@@ -226,9 +220,7 @@ public class BindingTypeConverterBaseTests
         await Assert.That(converter.FromType).IsEqualTo(typeof(string));
     }
 
-    /// <summary>
-    /// Verifies that ToType returns the correct type for a generic converter.
-    /// </summary>
+    /// <summary>Verifies that ToType returns the correct type for a generic converter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ToType_ReturnsCorrectGenericType()
@@ -405,9 +397,7 @@ public class BindingTypeConverterBaseTests
         }
     }
 
-    /// <summary>
-    /// A converter from string to string that accepts null input and converts it to "(null)".
-    /// </summary>
+    /// <summary>A converter from string to string that accepts null input and converts it to "(null)".</summary>
     private sealed class NullAcceptingStringToStringConverter : BindingTypeConverter<string, string>
     {
         /// <inheritdoc/>
@@ -421,9 +411,7 @@ public class BindingTypeConverterBaseTests
         }
     }
 
-    /// <summary>
-    /// A converter from string to string that returns null for null input (for nullable TTo).
-    /// </summary>
+    /// <summary>A converter from string to string that returns null for null input (for nullable TTo).</summary>
     private sealed class NullToNullStringConverter : BindingTypeConverter<string, string>
     {
         /// <inheritdoc/>

@@ -7,27 +7,19 @@ using System.Windows.Input;
 
 namespace SharedScenarios.BindCommand.ExpressionParam;
 
-/// <summary>
-/// ViewModel exposing an ICommand property and a string parameter property.
-/// </summary>
+/// <summary>ViewModel exposing an ICommand property and a string parameter property.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Save"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Save"/>.</summary>
     private ICommand? _save;
 
-    /// <summary>
-    /// The backing field for <see cref="CurrentItem"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="CurrentItem"/>.</summary>
     private string? _currentItem;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the save command.
-    /// </summary>
+    /// <summary>Gets or sets the save command.</summary>
     public ICommand? Save
     {
         get => _save;
@@ -43,9 +35,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the current item used as command parameter.
-    /// </summary>
+    /// <summary>Gets or sets the current item used as command parameter.</summary>
     public string? CurrentItem
     {
         get => _currentItem;

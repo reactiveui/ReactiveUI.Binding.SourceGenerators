@@ -4,15 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Dispatches conversions using a type-only fast-path, avoiding reflection.
-/// </summary>
+/// <summary>Dispatches conversions using a type-only fast-path, avoiding reflection.</summary>
 internal static class BindingTypeConverterDispatch
 {
-    /// <summary>
-    /// Attempts conversion via the converter's type-only metadata (<see cref="IBindingTypeConverter.FromType"/> and
-    /// <see cref="IBindingTypeConverter.ToType"/>) and object shim (<see cref="IBindingTypeConverter.TryConvertTyped"/>).
-    /// </summary>
+    /// <summary>Attempts conversion via the converter's type-only metadata and its object shim.</summary>
     /// <param name="converter">The converter.</param>
     /// <param name="from">The source value.</param>
     /// <param name="toType">The target type requested by the caller.</param>
@@ -52,8 +47,8 @@ internal static class BindingTypeConverterDispatch
 
         // Exact pair match keeps dispatch predictable and avoids assignability ambiguity,
         // but allow nullable<T> converters to accept boxed T values.
-        if (converterFromType != runtimeType &&
-            Nullable.GetUnderlyingType(converterFromType) != runtimeType)
+        if (converterFromType != runtimeType
+            && Nullable.GetUnderlyingType(converterFromType) != runtimeType)
         {
             result = null;
             return false;
@@ -62,9 +57,7 @@ internal static class BindingTypeConverterDispatch
         return converter.TryConvertTyped(from, conversionHint, out result);
     }
 
-    /// <summary>
-    /// Attempts conversion using a fallback converter.
-    /// </summary>
+    /// <summary>Attempts conversion using a fallback converter.</summary>
     /// <param name="converter">The fallback converter.</param>
     /// <param name="fromType">The source runtime type.</param>
     /// <param name="from">The source value (guaranteed non-null by caller).</param>
@@ -74,14 +67,10 @@ internal static class BindingTypeConverterDispatch
     /// <returns><see langword="true"/> if conversion succeeded; otherwise, <see langword="false"/>.</returns>
     internal static bool TryConvertFallback(
         IBindingFallbackConverter converter,
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type fromType,
         object from,
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type toType,
         object? conversionHint,
         out object? result)
@@ -107,9 +96,7 @@ internal static class BindingTypeConverterDispatch
         return false;
     }
 
-    /// <summary>
-    /// Unified dispatch method that handles both typed and fallback converters.
-    /// </summary>
+    /// <summary>Unified dispatch method that handles both typed and fallback converters.</summary>
     /// <param name="converter">The converter (either <see cref="IBindingTypeConverter"/> or <see cref="IBindingFallbackConverter"/>).</param>
     /// <param name="fromType">The source runtime type.</param>
     /// <param name="from">The source value.</param>
@@ -126,14 +113,10 @@ internal static class BindingTypeConverterDispatch
     /// </remarks>
     internal static bool TryConvertAny(
         object? converter,
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type fromType,
         object? from,
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type toType,
         object? conversionHint,
         out object? result)

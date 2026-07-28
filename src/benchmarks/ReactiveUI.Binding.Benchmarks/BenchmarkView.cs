@@ -6,62 +6,40 @@ using System.ComponentModel;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
-/// <summary>
-/// A view used for binding benchmarks.
-/// Implements <see cref="IViewFor{T}"/> to support ReactiveUI's expression-tree-based binding APIs.
-/// </summary>
+/// <summary>A view used for binding benchmarks. Implements <see cref="IViewFor{T}"/> to support ReactiveUI's expression-tree-based binding APIs.</summary>
 public class BenchmarkView : IViewFor<BenchmarkViewModel>, INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for the <see cref="DisplayName"/> property.
-    /// </summary>
-    private string _displayName = string.Empty;
-
-    /// <summary>
-    /// The backing field for the <see cref="DisplayAge"/> property.
-    /// </summary>
-    private int _displayAge;
-
-    /// <summary>
-    /// The backing field for the <see cref="ViewModel"/> property.
-    /// </summary>
-    private BenchmarkViewModel? _viewModel;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the display name.
-    /// </summary>
+    /// <summary>Gets or sets the display name.</summary>
     public string DisplayName
     {
-        get => _displayName;
+        get => field;
         set
         {
-            if (_displayName == value)
+            if (field == value)
             {
                 return;
             }
 
-            _displayName = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(DisplayName)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the display age.
-    /// </summary>
+    /// <summary>Gets or sets the display age.</summary>
     public int DisplayAge
     {
-        get => _displayAge;
+        get => field;
         set
         {
-            if (_displayAge == value)
+            if (field == value)
             {
                 return;
             }
 
-            _displayAge = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(DisplayAge)));
         }
     }
@@ -69,15 +47,15 @@ public class BenchmarkView : IViewFor<BenchmarkViewModel>, INotifyPropertyChange
     /// <inheritdoc/>
     public BenchmarkViewModel? ViewModel
     {
-        get => _viewModel;
+        get => field;
         set
         {
-            if (_viewModel == value)
+            if (field == value)
             {
                 return;
             }
 
-            _viewModel = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(ViewModel)));
         }
     }

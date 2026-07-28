@@ -4,18 +4,14 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Registers all built-in type converters with a <see cref="ConverterService"/>.
-/// </summary>
+/// <summary>Registers all built-in type converters with a <see cref="ConverterService"/>.</summary>
 /// <remarks>
 /// This class is public to allow external packages (e.g., ReactiveUI) to register
 /// the default set of binding converters provided by ReactiveUI.Binding.
 /// </remarks>
 public static class DefaultConverterRegistration
 {
-    /// <summary>
-    /// Registers all default built-in converters with the specified <paramref name="service"/>.
-    /// </summary>
+    /// <summary>Registers all default built-in converters with the specified <paramref name="service"/>.</summary>
     /// <param name="service">The converter service to register defaults into.</param>
     /// <remarks>
     /// Call this method during application initialization to populate the converter service
@@ -27,12 +23,42 @@ public static class DefaultConverterRegistration
 
         var registry = service.TypedConverters;
 
+        RegisterCoreConverters(registry);
+        RegisterNumericConverters(registry);
+        RegisterTemporalConverters(registry);
+    }
+
+    /// <summary>Registers the identity, equality, boolean, guid and uri converters.</summary>
+    /// <param name="registry">The registry to populate.</param>
+    private static void RegisterCoreConverters(BindingTypeConverterRegistry registry)
+    {
         // String identity converter
         registry.Register(new StringConverter());
 
         // Equality converter (last resort, affinity 1)
         registry.Register(new EqualityTypeConverter());
 
+        // Boolean converters
+        registry.Register(new BooleanToStringTypeConverter());
+        registry.Register(new StringToBooleanTypeConverter());
+        registry.Register(new NullableBooleanToStringTypeConverter());
+        registry.Register(new StringToNullableBooleanTypeConverter());
+
+        // Guid converters
+        registry.Register(new GuidToStringTypeConverter());
+        registry.Register(new StringToGuidTypeConverter());
+        registry.Register(new NullableGuidToStringTypeConverter());
+        registry.Register(new StringToNullableGuidTypeConverter());
+
+        // Uri converters
+        registry.Register(new UriToStringTypeConverter());
+        registry.Register(new StringToUriTypeConverter());
+    }
+
+    /// <summary>Registers the converters for the numeric primitives and their nullable forms.</summary>
+    /// <param name="registry">The registry to populate.</param>
+    private static void RegisterNumericConverters(BindingTypeConverterRegistry registry)
+    {
         // Integer converters
         registry.Register(new IntegerToStringTypeConverter());
         registry.Register(new StringToIntegerTypeConverter());
@@ -88,13 +114,12 @@ public static class DefaultConverterRegistration
         registry.Register(new ByteToNullableByteTypeConverter());
         registry.Register(new NullableByteToStringTypeConverter());
         registry.Register(new StringToNullableByteTypeConverter());
+    }
 
-        // Boolean converters
-        registry.Register(new BooleanToStringTypeConverter());
-        registry.Register(new StringToBooleanTypeConverter());
-        registry.Register(new NullableBooleanToStringTypeConverter());
-        registry.Register(new StringToNullableBooleanTypeConverter());
-
+    /// <summary>Registers the date, time and duration converters.</summary>
+    /// <param name="registry">The registry to populate.</param>
+    private static void RegisterTemporalConverters(BindingTypeConverterRegistry registry)
+    {
         // DateTime converters
         registry.Register(new DateTimeToStringTypeConverter());
         registry.Register(new StringToDateTimeTypeConverter());
@@ -112,16 +137,6 @@ public static class DefaultConverterRegistration
         registry.Register(new StringToTimeSpanTypeConverter());
         registry.Register(new NullableTimeSpanToStringTypeConverter());
         registry.Register(new StringToNullableTimeSpanTypeConverter());
-
-        // Guid converters
-        registry.Register(new GuidToStringTypeConverter());
-        registry.Register(new StringToGuidTypeConverter());
-        registry.Register(new NullableGuidToStringTypeConverter());
-        registry.Register(new StringToNullableGuidTypeConverter());
-
-        // Uri converters
-        registry.Register(new UriToStringTypeConverter());
-        registry.Register(new StringToUriTypeConverter());
 
 #if NET8_0_OR_GREATER
         // DateOnly converters (NET8+ only)

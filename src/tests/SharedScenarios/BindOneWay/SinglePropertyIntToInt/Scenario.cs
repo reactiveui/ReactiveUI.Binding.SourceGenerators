@@ -7,17 +7,13 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindOneWay.SinglePropertyIntToInt;
 
-/// <summary>
-/// Exercises BindOneWay with int-to-int property binding.
-/// </summary>
+/// <summary>Exercises BindOneWay with int-to-int property binding.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a one-way binding from ViewModel.Count to View.DisplayCount.
-    /// </summary>
+    /// <summary>Creates a one-way binding from ViewModel.Count to View.DisplayCount.</summary>
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
-    public static IDisposable Execute(MyViewModel vm, MyView view)
-        => vm.BindOneWay(view, x => x.Count, x => x.DisplayCount);
+    public static IDisposable Execute(MyViewModel vm, MyView view) =>
+        vm.BindOneWay(view, x => x.Count, x => x.DisplayCount);
 }

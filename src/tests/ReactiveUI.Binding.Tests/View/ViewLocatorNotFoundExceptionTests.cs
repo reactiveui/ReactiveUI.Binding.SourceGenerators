@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding.Tests.View;
 
-/// <summary>
-/// Tests for the <see cref="ViewLocatorNotFoundException"/> class.
-/// </summary>
+/// <summary>Tests for the <see cref="ViewLocatorNotFoundException"/> class.</summary>
 public class ViewLocatorNotFoundExceptionTests
 {
-    /// <summary>
-    /// Verifies that the default constructor creates an exception with a default message.
-    /// </summary>
+    /// <summary>Verifies that the default constructor creates an exception with a default message.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DefaultConstructor_HasMessage()
@@ -22,9 +18,7 @@ public class ViewLocatorNotFoundExceptionTests
         await Assert.That(ex.Message).Contains("IViewLocator");
     }
 
-    /// <summary>
-    /// Verifies that the message constructor preserves the message.
-    /// </summary>
+    /// <summary>Verifies that the message constructor preserves the message.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MessageConstructor_PreservesMessage()
@@ -34,9 +28,7 @@ public class ViewLocatorNotFoundExceptionTests
         await Assert.That(ex.Message).IsEqualTo("custom message");
     }
 
-    /// <summary>
-    /// Verifies that the message+inner constructor preserves both.
-    /// </summary>
+    /// <summary>Verifies that the message+inner constructor preserves both.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MessageAndInnerConstructor_PreservesBoth()

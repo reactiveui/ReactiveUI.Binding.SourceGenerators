@@ -7,10 +7,7 @@ using Splat.Builder;
 
 namespace ReactiveUI.Binding.Mixins;
 
-/// <summary>
-/// Extension methods that bridge <see cref="IAppBuilder"/> to <see cref="IReactiveUIBindingBuilder"/>
-/// for fluent chaining.
-/// </summary>
+/// <summary>Extension methods that bridge <see cref="IAppBuilder"/> to <see cref="IReactiveUIBindingBuilder"/> for fluent chaining.</summary>
 /// <remarks>
 /// These methods allow fluent chains such as:
 /// <code>
@@ -23,16 +20,12 @@ namespace ReactiveUI.Binding.Mixins;
 /// </remarks>
 public static class BuilderMixins
 {
-    /// <summary>
-    /// Message used when an <see cref="IAppBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
-    /// </summary>
+    /// <summary>Message used when an <see cref="IAppBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.</summary>
     private const string NotBindingBuilderMessage =
-        "The provided IAppBuilder is not an IReactiveUIBindingBuilder. " +
-        "Ensure you are using the ReactiveUI.Binding builder pattern.";
+        "The provided IAppBuilder is not an IReactiveUIBindingBuilder. "
+        + "Ensure you are using the ReactiveUI.Binding builder pattern.";
 
-    /// <summary>
-    /// Builds the ReactiveUI.Binding application from an <see cref="IAppBuilder"/>.
-    /// </summary>
+    /// <summary>Builds the ReactiveUI.Binding application from an <see cref="IAppBuilder"/>.</summary>
     /// <param name="appBuilder">The app builder instance.</param>
     /// <returns>The configured application instance.</returns>
     /// <exception cref="InvalidOperationException">
@@ -50,9 +43,7 @@ public static class BuilderMixins
         return reactiveUiBindingBuilder.BuildApp();
     }
 
-    /// <summary>
-    /// Registers a platform-specific module from an <see cref="IAppBuilder"/>.
-    /// </summary>
+    /// <summary>Registers a platform-specific module from an <see cref="IAppBuilder"/>.</summary>
     /// <typeparam name="T">The type of the platform module.</typeparam>
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="module">The platform module instance to register.</param>
@@ -73,9 +64,7 @@ public static class BuilderMixins
         return reactiveUiBindingBuilder.WithPlatformModule(module);
     }
 
-    /// <summary>
-    /// Adds a custom registration action from an <see cref="IAppBuilder"/>.
-    /// </summary>
+    /// <summary>Adds a custom registration action from an <see cref="IAppBuilder"/>.</summary>
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="configureAction">An action that receives the mutable dependency resolver.</param>
     /// <returns>The builder instance for chaining.</returns>
@@ -96,9 +85,7 @@ public static class BuilderMixins
         return reactiveUiBindingBuilder.WithRegistration(configureAction);
     }
 
-    /// <summary>
-    /// Registers a typed binding converter from an <see cref="IAppBuilder"/>.
-    /// </summary>
+    /// <summary>Registers a typed binding converter from an <see cref="IAppBuilder"/>.</summary>
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="converter">The converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
@@ -117,9 +104,7 @@ public static class BuilderMixins
         return reactiveUiBindingBuilder.WithConverter(converter);
     }
 
-    /// <summary>
-    /// Registers a fallback binding converter from an <see cref="IAppBuilder"/>.
-    /// </summary>
+    /// <summary>Registers a fallback binding converter from an <see cref="IAppBuilder"/>.</summary>
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="converter">The fallback converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
@@ -140,9 +125,7 @@ public static class BuilderMixins
         return reactiveUiBindingBuilder.WithFallbackConverter(converter);
     }
 
-    /// <summary>
-    /// Registers a set-method binding converter from an <see cref="IAppBuilder"/>.
-    /// </summary>
+    /// <summary>Registers a set-method binding converter from an <see cref="IAppBuilder"/>.</summary>
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="converter">The set-method converter instance to register.</param>
     /// <returns>The builder instance for chaining.</returns>
@@ -163,9 +146,7 @@ public static class BuilderMixins
         return reactiveUiBindingBuilder.WithSetMethodConverter(converter);
     }
 
-    /// <summary>
-    /// Configures the default view locator with explicit view-to-view-model mappings from an <see cref="IAppBuilder"/>.
-    /// </summary>
+    /// <summary>Configures the default view locator with explicit view-to-view-model mappings from an <see cref="IAppBuilder"/>.</summary>
     /// <param name="appBuilder">The app builder instance.</param>
     /// <param name="configure">An action that receives a <see cref="ViewMappingBuilder"/> for registering mappings.</param>
     /// <returns>The builder instance for chaining.</returns>

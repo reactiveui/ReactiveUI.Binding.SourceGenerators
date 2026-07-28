@@ -22,39 +22,25 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
 public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObservedChange<TSender, TValue>>
 {
-    /// <summary>
-    /// The root object of the chain.
-    /// </summary>
+    /// <summary>The root object of the chain.</summary>
     private readonly TSender? _source;
 
-    /// <summary>
-    /// The full expression surfaced on the emitted change.
-    /// </summary>
+    /// <summary>The full expression surfaced on the emitted change.</summary>
     private readonly Expression? _expression;
 
-    /// <summary>
-    /// The member-access links of the chain, in order.
-    /// </summary>
+    /// <summary>The member-access links of the chain, in order.</summary>
     private readonly Expression[] _links;
 
-    /// <summary>
-    /// Whether values are observed before they change.
-    /// </summary>
+    /// <summary>Whether values are observed before they change.</summary>
     private readonly bool _beforeChange;
 
-    /// <summary>
-    /// Whether the initial value is suppressed.
-    /// </summary>
+    /// <summary>Whether the initial value is suppressed.</summary>
     private readonly bool _skipInitial;
 
-    /// <summary>
-    /// Whether consecutive equal leaf values are suppressed.
-    /// </summary>
+    /// <summary>Whether consecutive equal leaf values are suppressed.</summary>
     private readonly bool _isDistinct;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ExpressionChainSink{TSender, TValue}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="ExpressionChainSink{TSender, TValue}"/> class.</summary>
     /// <param name="source">The root object of the chain.</param>
     /// <param name="expression">The full expression surfaced on the emitted change.</param>
     /// <param name="links">The member-access links of the chain, in order.</param>
@@ -88,75 +74,47 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
         return sink;
     }
 
-    /// <summary>
-    /// The running state of one chain subscription.
-    /// </summary>
+    /// <summary>The running state of one chain subscription.</summary>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     private sealed class Sink : IDisposable
     {
-        /// <summary>
-        /// Serializes chain mutations and emission.
-        /// </summary>
-        private readonly object _gate = new();
+        /// <summary>Serializes chain mutations and emission.</summary>
+        private readonly Lock _gate = new();
 
-        /// <summary>
-        /// The observer receiving the leaf observed changes.
-        /// </summary>
+        /// <summary>The observer receiving the leaf observed changes.</summary>
         private readonly IObserver<IObservedChange<TSender, TValue>> _downstream;
 
-        /// <summary>
-        /// The root object of the chain.
-        /// </summary>
+        /// <summary>The root object of the chain.</summary>
         private readonly TSender? _source;
 
-        /// <summary>
-        /// The full expression surfaced on the emitted change.
-        /// </summary>
+        /// <summary>The full expression surfaced on the emitted change.</summary>
         private readonly Expression? _expression;
 
-        /// <summary>
-        /// The member-access links of the chain, in order.
-        /// </summary>
+        /// <summary>The member-access links of the chain, in order.</summary>
         private readonly Expression[] _links;
 
-        /// <summary>
-        /// Whether values are observed before they change.
-        /// </summary>
+        /// <summary>Whether values are observed before they change.</summary>
         private readonly bool _beforeChange;
 
-        /// <summary>
-        /// Whether consecutive equal leaf values are suppressed.
-        /// </summary>
+        /// <summary>Whether consecutive equal leaf values are suppressed.</summary>
         private readonly bool _isDistinct;
 
-        /// <summary>
-        /// The per-link watchers.
-        /// </summary>
+        /// <summary>The per-link watchers.</summary>
         private readonly Level[] _levels;
 
-        /// <summary>
-        /// Whether the next raw emission should be skipped (skip-initial).
-        /// </summary>
+        /// <summary>Whether the next raw emission should be skipped (skip-initial).</summary>
         private bool _skipNext;
 
-        /// <summary>
-        /// The last emitted leaf value, used by the distinct gate.
-        /// </summary>
+        /// <summary>The last emitted leaf value, used by the distinct gate.</summary>
         private TValue _last = default!;
 
-        /// <summary>
-        /// Whether <see cref="_last"/> holds a value yet.
-        /// </summary>
+        /// <summary>Whether <see cref="_last"/> holds a value yet.</summary>
         private bool _hasLast;
 
-        /// <summary>
-        /// Latched once this chain subscription has been disposed.
-        /// </summary>
+        /// <summary>Latched once this chain subscription has been disposed.</summary>
         private bool _disposed;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Sink"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="Sink"/> class.</summary>
         /// <param name="downstream">The observer receiving the leaf observed changes.</param>
         /// <param name="source">The root object of the chain.</param>
         /// <param name="expression">The full expression surfaced on the emitted change.</param>
@@ -181,19 +139,22 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
             _isDistinct = isDistinct;
             _skipNext = skipInitial;
             _levels = new Level[links.Length];
-            for (var i = 0; i < links.Length; i++)
-            {
-                _levels[i] = new Level(this, i, i == links.Length - 1);
-            }
         }
 
-        /// <summary>
-        /// Establishes the chain from the root value.
-        /// </summary>
+        /// <summary>Establishes the chain from the root value.</summary>
+        /// <remarks>
+        /// The levels are built here rather than in the constructor: each one captures the sink,
+        /// and handing out <see langword="this"/> mid-construction would expose a half-built object.
+        /// </remarks>
         public void Run()
         {
             lock (_gate)
             {
+                for (var i = 0; i < _levels.Length; i++)
+                {
+                    _levels[i] = new(this, i, i == _levels.Length - 1);
+                }
+
                 if (_links.Length == 0)
                 {
                     return;
@@ -211,21 +172,18 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
                 _disposed = true;
                 for (var i = 0; i < _levels.Length; i++)
                 {
-                    _levels[i].Dispose();
+                    // Null when disposed before Run built the chain.
+                    _levels[i]?.Dispose();
                 }
             }
         }
 
-        /// <summary>
-        /// Sets the parent value of the level after <paramref name="level"/>.
-        /// </summary>
+        /// <summary>Sets the parent value of the level after <paramref name="level"/>.</summary>
         /// <param name="level">The level index that produced the value.</param>
         /// <param name="value">The value the link produced (the parent for the next level).</param>
         private void SetNextParent(int level, object? value) => _levels[level + 1].SetParent(value);
 
-        /// <summary>
-        /// Handles a leaf raw emission: applies skip-initial, the non-null-parent filter, the cast and the distinct gate.
-        /// </summary>
+        /// <summary>Handles a leaf raw emission: applies skip-initial, the non-null-parent filter, the cast and the distinct gate.</summary>
         /// <param name="parentMissing">Whether the leaf's parent was null.</param>
         /// <param name="value">The leaf value when the parent is present.</param>
         private void Emit(bool parentMissing, object? value)
@@ -266,45 +224,29 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
             _downstream.OnNext(new ObservedChange<TSender, TValue>(_source!, _expression, typed));
         }
 
-        /// <summary>
-        /// A single chain link's watcher: re-subscribes on parent change and reads the link's value.
-        /// </summary>
+        /// <summary>A single chain link's watcher: re-subscribes on parent change and reads the link's value.</summary>
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
         private sealed class Level : IDisposable
         {
-            /// <summary>
-            /// The owning chain sink.
-            /// </summary>
+            /// <summary>The owning chain sink.</summary>
             private readonly Sink _sink;
 
-            /// <summary>
-            /// This watcher's position in the chain.
-            /// </summary>
+            /// <summary>This watcher's position in the chain.</summary>
             private readonly int _index;
 
-            /// <summary>
-            /// Whether this is the final link in the chain.
-            /// </summary>
+            /// <summary>Whether this is the final link in the chain.</summary>
             private readonly bool _isLeaf;
 
-            /// <summary>
-            /// The current link-notification subscription; swapped on each re-parent.
-            /// </summary>
+            /// <summary>The current link-notification subscription; swapped on each re-parent.</summary>
             private readonly SerialDisposable _subscription = new();
 
-            /// <summary>
-            /// This link's value fetcher, compiled once, or <see langword="null"/> for an unsupported member.
-            /// </summary>
+            /// <summary>This link's value fetcher, compiled once, or <see langword="null"/> for an unsupported member.</summary>
             private readonly Func<object?, object?[]?, object?>? _getter;
 
-            /// <summary>
-            /// This link's index/argument array (non-null only for indexer links), cached once.
-            /// </summary>
+            /// <summary>This link's index/argument array (non-null only for indexer links), cached once.</summary>
             private readonly object?[]? _arguments;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Level"/> class.
-            /// </summary>
+            /// <summary>Initializes a new instance of the <see cref="Level"/> class.</summary>
             /// <param name="sink">The owning chain sink.</param>
             /// <param name="index">This watcher's position in the chain.</param>
             /// <param name="isLeaf">Whether this is the final link in the chain.</param>
@@ -318,9 +260,7 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
                 _arguments = sink._links[index].GetArgumentsArray();
             }
 
-            /// <summary>
-            /// Re-establishes this watcher on a new parent value and propagates the current value downward.
-            /// </summary>
+            /// <summary>Re-establishes this watcher on a new parent value and propagates the current value downward.</summary>
             /// <param name="parent">The object this link is read from.</param>
             public void SetParent(object? parent)
             {
@@ -343,7 +283,7 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
 
                 // Kicker: propagate the current value immediately, then subscribe for updates.
                 Push(ReadValue(parent));
-                _subscription.Disposable = ReactiveNotifyPropertyChangedMixin
+                _subscription.Disposable = ReactiveNotifyPropertyChangedMixins
                     .NotifyForProperty(parent, link, _sink._beforeChange)
                     .Subscribe(new Observer(this));
             }
@@ -351,11 +291,9 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
             /// <inheritdoc/>
             public void Dispose() => _subscription.Dispose();
 
-            /// <summary>
-            /// Handles a notification for this link by re-reading the value and propagating it.
-            /// </summary>
+            /// <summary>Handles a notification for this link by re-reading the value and propagating it.</summary>
             /// <param name="change">The notification (its value is read via reflection).</param>
-            public void OnNotification(IObservedChange<object?, object?> change)
+            private void OnNotification(IObservedChange<object?, object?> change)
             {
                 lock (_sink._gate)
                 {
@@ -368,15 +306,11 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
                 }
             }
 
-            /// <summary>
-            /// Forwards a link-subscription error to the downstream observer.
-            /// </summary>
+            /// <summary>Forwards a link-subscription error to the downstream observer.</summary>
             /// <param name="error">The error to forward.</param>
-            public void ForwardError(Exception error) => _sink._downstream.OnError(error);
+            private void ForwardError(Exception error) => _sink._downstream.OnError(error);
 
-            /// <summary>
-            /// Reads the current value of this link from a parent using the cached fetcher.
-            /// </summary>
+            /// <summary>Reads the current value of this link from a parent using the cached fetcher.</summary>
             /// <param name="parent">The object the link is read from.</param>
             /// <returns>The link's current value, or the default when the parent is null.</returns>
             private object? ReadValue(object? parent)
@@ -391,9 +325,7 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
                     : new ObservedChange<object?, object?>(parent, _sink._links[_index], null).GetValueOrDefault();
             }
 
-            /// <summary>
-            /// Forwards this link's value to the next level, or emits it at the leaf.
-            /// </summary>
+            /// <summary>Forwards this link's value to the next level, or emits it at the leaf.</summary>
             /// <param name="value">The value this link produced.</param>
             private void Push(object? value)
             {
@@ -407,19 +339,13 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
                 }
             }
 
-            /// <summary>
-            /// Forwards a link's notifications back into the level.
-            /// </summary>
+            /// <summary>Forwards a link's notifications back into the level.</summary>
             private sealed class Observer : IObserver<IObservedChange<object?, object?>>
             {
-                /// <summary>
-                /// The owning level.
-                /// </summary>
+                /// <summary>The owning level.</summary>
                 private readonly Level _level;
 
-                /// <summary>
-                /// Initializes a new instance of the <see cref="Observer"/> class.
-                /// </summary>
+                /// <summary>Initializes a new instance of the <see cref="Observer"/> class.</summary>
                 /// <param name="level">The owning level.</param>
                 public Observer(Level level) => _level = level;
 

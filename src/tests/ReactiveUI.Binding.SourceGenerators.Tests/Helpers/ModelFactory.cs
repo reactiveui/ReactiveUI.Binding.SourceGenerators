@@ -2,22 +2,21 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Diagnostics.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
-/// <summary>
-/// Factory methods for creating test model POCOs with sensible defaults.
-/// </summary>
-[System.Diagnostics.CodeAnalysis.SuppressMessage(
-    "Major Code Smell",
-    "S107:Methods should not have too many parameters",
-    Justification = "Factory methods build value-equatable pipeline models with one optional parameter per model property; the count mirrors the models under test.")]
+/// <summary>Factory methods for creating test model POCOs with sensible defaults.</summary>
 internal static class ModelFactory
 {
-    /// <summary>
-    /// Creates a <see cref="PropertyPathSegment"/> with sensible defaults.
-    /// </summary>
+    /// <summary>The fully qualified name of the <c>String</c> type used by these tests.</summary>
+    private const string StringTypeName = "global::System.String";
+
+    /// <summary>The fully qualified name of the <c>MyViewModel</c> type used by these tests.</summary>
+    private const string MyViewModelTypeName = "global::TestApp.MyViewModel";
+
+    /// <summary>Creates a <see cref="PropertyPathSegment"/> with sensible defaults.</summary>
     /// <param name="name">The property name.</param>
     /// <param name="type">The fully qualified property type.</param>
     /// <param name="declaringType">The fully qualified declaring type.</param>
@@ -25,14 +24,12 @@ internal static class ModelFactory
     /// <returns>A new property path segment.</returns>
     internal static PropertyPathSegment CreatePropertyPathSegment(
         string name = "Name",
-        string type = "global::System.String",
-        string declaringType = "global::TestApp.MyViewModel",
+        string type = StringTypeName,
+        string declaringType = MyViewModelTypeName,
         bool isReferenceType = true) =>
         new(name, type, declaringType, isReferenceType);
 
-    /// <summary>
-    /// Creates an <see cref="InvocationInfo"/> with sensible defaults for a single-property WhenChanged invocation.
-    /// </summary>
+    /// <summary>Creates an <see cref="InvocationInfo"/> with sensible defaults for a single-property WhenChanged invocation.</summary>
     /// <param name="callerFilePath">The caller file path.</param>
     /// <param name="callerLineNumber">The caller line number.</param>
     /// <param name="sourceTypeFullName">The fully qualified source type.</param>
@@ -43,12 +40,13 @@ internal static class ModelFactory
     /// <param name="methodName">The method name.</param>
     /// <param name="expressionTexts">The expression texts. If null, defaults based on property paths.</param>
     /// <returns>A new invocation info.</returns>
+    [SuppressMessage("Design", "SST1472:Too many parameters", Justification = "parameter count is inherent to the model record this factory mirrors")]
     internal static InvocationInfo CreateInvocationInfo(
         string callerFilePath = "/src/ViewModels/MyViewModel.cs",
         int callerLineNumber = 42,
-        string sourceTypeFullName = "global::TestApp.MyViewModel",
+        string sourceTypeFullName = MyViewModelTypeName,
         EquatableArray<EquatableArray<PropertyPathSegment>>? propertyPaths = null,
-        string returnTypeFullName = "global::System.String",
+        string returnTypeFullName = StringTypeName,
         bool isBeforeChange = false,
         bool hasSelector = false,
         string methodName = "WhenChanged",
@@ -73,9 +71,7 @@ internal static class ModelFactory
             texts);
     }
 
-    /// <summary>
-    /// Creates a <see cref="BindingInvocationInfo"/> with sensible defaults.
-    /// </summary>
+    /// <summary>Creates a <see cref="BindingInvocationInfo"/> with sensible defaults.</summary>
     /// <param name="callerFilePath">The caller file path.</param>
     /// <param name="callerLineNumber">The caller line number.</param>
     /// <param name="sourceTypeFullName">The fully qualified source type.</param>
@@ -92,15 +88,16 @@ internal static class ModelFactory
     /// <param name="targetExpressionText">The target expression text.</param>
     /// <param name="hasConverterOverride">Whether a converter override is present.</param>
     /// <returns>A new binding invocation info.</returns>
+    [SuppressMessage("Design", "SST1472:Too many parameters", Justification = "parameter count is inherent to the model record this factory mirrors")]
     internal static BindingInvocationInfo CreateBindingInvocationInfo(
         string callerFilePath = "/src/Views/MyView.cs",
         int callerLineNumber = 50,
-        string sourceTypeFullName = "global::TestApp.MyViewModel",
+        string sourceTypeFullName = MyViewModelTypeName,
         EquatableArray<PropertyPathSegment>? sourcePropertyPath = null,
         string targetTypeFullName = "global::TestApp.MyView",
         EquatableArray<PropertyPathSegment>? targetPropertyPath = null,
-        string sourcePropertyTypeFullName = "global::System.String",
-        string targetPropertyTypeFullName = "global::System.String",
+        string sourcePropertyTypeFullName = StringTypeName,
+        string targetPropertyTypeFullName = StringTypeName,
         bool hasConversion = false,
         bool hasScheduler = false,
         bool isTwoWay = false,
@@ -110,9 +107,9 @@ internal static class ModelFactory
         bool hasConverterOverride = false)
     {
         var sourcePath = sourcePropertyPath ?? new EquatableArray<PropertyPathSegment>(
-            [CreatePropertyPathSegment("Name", "global::System.String", sourceTypeFullName)]);
+            [CreatePropertyPathSegment("Name", StringTypeName, sourceTypeFullName)]);
         var targetPath = targetPropertyPath ?? new EquatableArray<PropertyPathSegment>(
-            [CreatePropertyPathSegment("Text", "global::System.String", targetTypeFullName)]);
+            [CreatePropertyPathSegment("Text", StringTypeName, targetTypeFullName)]);
 
         return new(
             callerFilePath,
@@ -132,9 +129,7 @@ internal static class ModelFactory
             hasConverterOverride);
     }
 
-    /// <summary>
-    /// Creates a <see cref="ClassBindingInfo"/> with sensible defaults.
-    /// </summary>
+    /// <summary>Creates a <see cref="ClassBindingInfo"/> with sensible defaults.</summary>
     /// <param name="fullyQualifiedName">The fully qualified type name.</param>
     /// <param name="metadataName">The metadata name.</param>
     /// <param name="implementsIReactiveObject">Whether IReactiveObject is implemented.</param>
@@ -147,8 +142,9 @@ internal static class ModelFactory
     /// <param name="inheritsAndroidView">Whether Android View is inherited.</param>
     /// <param name="properties">The observable properties. If null, an empty array is created.</param>
     /// <returns>A new class binding info.</returns>
+    [SuppressMessage("Design", "SST1472:Too many parameters", Justification = "parameter count is inherent to the model record this factory mirrors")]
     internal static ClassBindingInfo CreateClassBindingInfo(
-        string fullyQualifiedName = "global::TestApp.MyViewModel",
+        string fullyQualifiedName = MyViewModelTypeName,
         string metadataName = "MyViewModel",
         bool implementsIReactiveObject = false,
         bool implementsINPC = false,
@@ -176,9 +172,7 @@ internal static class ModelFactory
             props);
     }
 
-    /// <summary>
-    /// Creates a <see cref="BindCommandInvocationInfo"/> with sensible defaults.
-    /// </summary>
+    /// <summary>Creates a <see cref="BindCommandInvocationInfo"/> with sensible defaults.</summary>
     /// <param name="callerFilePath">The caller file path.</param>
     /// <param name="callerLineNumber">The caller line number.</param>
     /// <param name="viewTypeFullName">The fully qualified view type.</param>
@@ -201,11 +195,12 @@ internal static class ModelFactory
     /// <param name="hasCommandParameterProperty">Whether the control has a CommandParameter property.</param>
     /// <param name="hasEnabledProperty">Whether the control has an Enabled property.</param>
     /// <returns>A new BindCommand invocation info.</returns>
+    [SuppressMessage("Design", "SST1472:Too many parameters", Justification = "parameter count is inherent to the model record this factory mirrors")]
     internal static BindCommandInvocationInfo CreateBindCommandInvocationInfo(
         string callerFilePath = "/src/Views/MyView.cs",
         int callerLineNumber = 50,
         string viewTypeFullName = "global::TestApp.MyView",
-        string viewModelTypeFullName = "global::TestApp.MyViewModel",
+        string viewModelTypeFullName = MyViewModelTypeName,
         EquatableArray<PropertyPathSegment>? commandPropertyPath = null,
         EquatableArray<PropertyPathSegment>? controlPropertyPath = null,
         string commandTypeFullName = "global::System.Windows.Input.ICommand",
@@ -254,9 +249,7 @@ internal static class ModelFactory
             hasEnabledProperty);
     }
 
-    /// <summary>
-    /// Creates an <see cref="ObservablePropertyInfo"/> with sensible defaults.
-    /// </summary>
+    /// <summary>Creates an <see cref="ObservablePropertyInfo"/> with sensible defaults.</summary>
     /// <param name="propertyName">The property name.</param>
     /// <param name="propertyTypeFullName">The fully qualified property type.</param>
     /// <param name="hasPublicGetter">Whether the property has a public getter.</param>
@@ -265,7 +258,7 @@ internal static class ModelFactory
     /// <returns>A new observable property info.</returns>
     internal static ObservablePropertyInfo CreateObservablePropertyInfo(
         string propertyName = "Name",
-        string propertyTypeFullName = "global::System.String",
+        string propertyTypeFullName = StringTypeName,
         bool hasPublicGetter = true,
         bool isIndexer = false,
         bool isDependencyProperty = false) =>

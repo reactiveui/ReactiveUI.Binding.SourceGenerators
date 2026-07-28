@@ -14,8 +14,6 @@ namespace ReactiveUI.Binding;
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class ViewContractAttribute(string contract) : Attribute
 {
-    /// <summary>
-    /// Gets the contract to use when resolving the view.
-    /// </summary>
+    /// <summary>Gets the contract to use when resolving the view.</summary>
     public string Contract { get; } = contract;
 }

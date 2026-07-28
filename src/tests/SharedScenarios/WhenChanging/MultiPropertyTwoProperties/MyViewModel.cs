@@ -6,19 +6,13 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanging.MultiPropertyTwoProperties;
 
-/// <summary>
-/// ViewModel with two observable properties supporting before-change notifications.
-/// </summary>
+/// <summary>ViewModel with two observable properties supporting before-change notifications.</summary>
 public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backing field for <see cref="Name"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Name"/>.</summary>
     private string _name = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="Age"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Age"/>.</summary>
     private int _age;
 
     /// <inheritdoc/>
@@ -27,9 +21,7 @@ public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
         get => _name;
@@ -46,9 +38,7 @@ public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
         }
     }
 
-    /// <summary>
-    /// Gets or sets the age.
-    /// </summary>
+    /// <summary>Gets or sets the age.</summary>
     public int Age
     {
         get => _age;

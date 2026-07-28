@@ -10,9 +10,7 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public interface IPropertyBindingHook
 {
-    /// <summary>
-    /// Called when any binding is set up.
-    /// </summary>
+    /// <summary>Called when any binding is set up.</summary>
     /// <returns>If false, the binding is cancelled.</returns>
     /// <param name="source">The source ViewModel.</param>
     /// <param name="target">The target View (not the actual control).</param>

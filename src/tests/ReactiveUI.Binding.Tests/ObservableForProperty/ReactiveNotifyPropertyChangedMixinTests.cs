@@ -10,30 +10,27 @@ using ReactiveUI.Binding.Tests.TestModels;
 namespace ReactiveUI.Binding.Tests.ObservableForProperty;
 
 /// <summary>
-/// Tests for <see cref="ReactiveNotifyPropertyChangedMixin"/> covering remaining branch gaps
+/// Tests for <see cref="ReactiveNotifyPropertyChangedMixins"/> covering remaining branch gaps
 /// including NestedObservedChanges, NotifyForProperty, and SubscribeToExpressionChain paths.
 /// </summary>
 public class ReactiveNotifyPropertyChangedMixinTests
 {
-    /// <summary>
-    /// A changed property value used across notification tests.
-    /// </summary>
+    /// <summary>The value the view model starts with.</summary>
+    private const string InitialValue = "Initial";
+
+    /// <summary>A changed property value used across notification tests.</summary>
     private const string ChangedValue = "Changed";
 
-    /// <summary>
-    /// The expected number of emissions after a single change (kicker plus one change).
-    /// </summary>
+    /// <summary>The expected number of emissions after a single change (kicker plus one change).</summary>
     private const int ExpectedTwoEmissions = 2;
 
-    /// <summary>
-    /// The expected number of emissions after two successive changes (kicker plus two changes).
-    /// </summary>
+    /// <summary>The expected number of emissions after two successive changes (kicker plus two changes).</summary>
     private const int ExpectedThreeEmissions = 3;
 
     /// <summary>
     /// Verifies that NestedObservedChanges returns a single-element observable with default value
     /// when the sourceChange value is null.
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 230-232 (sourceChange.Value is null branch).
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 230-232 (sourceChange.Value is null branch).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -47,7 +44,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         var sourceChange = new ObservedChange<object?, object?>(null, body, null);
 
         var results = new List<IObservedChange<object?, object?>>();
-        using var sub = ReactiveNotifyPropertyChangedMixin.NestedObservedChanges(body, sourceChange, false)
+        using var sub = ReactiveNotifyPropertyChangedMixins.NestedObservedChanges(body, sourceChange, false)
             .Subscribe(results.Add);
 
         await Assert.That(results.Count).IsEqualTo(1);
@@ -57,7 +54,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
     /// <summary>
     /// Verifies that NestedObservedChanges emits a kicker followed by property notifications
     /// when the sourceChange value is non-null.
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 235-237 (sourceChange.Value is not null branch).
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 235-237 (sourceChange.Value is not null branch).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -65,7 +62,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Initial" };
+        var vm = new TestViewModel { Name = InitialValue };
 
         Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
@@ -73,7 +70,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         var sourceChange = new ObservedChange<object?, object?>(null, body, vm);
 
         var results = new List<IObservedChange<object?, object?>>();
-        using var sub = ReactiveNotifyPropertyChangedMixin.NestedObservedChanges(body, sourceChange, false)
+        using var sub = ReactiveNotifyPropertyChangedMixins.NestedObservedChanges(body, sourceChange, false)
             .Subscribe(results.Add);
 
         // Should have the kicker (StartWith)
@@ -87,7 +84,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
 
     /// <summary>
     /// Verifies that NotifyForProperty throws ArgumentException when the expression has no valid member info.
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 248 (memberInfo null branch).
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 248 (memberInfo null branch).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -100,7 +97,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         // A ParameterExpression has no member info, so GetMemberInfo will throw
         var paramExpr = System.Linq.Expressions.Expression.Parameter(typeof(TestViewModel), "x");
 
-        var action = () => ReactiveNotifyPropertyChangedMixin.NotifyForProperty(vm, paramExpr, false);
+        var action = () => ReactiveNotifyPropertyChangedMixins.NotifyForProperty(vm, paramExpr, false);
 
         await Assert.That(action).ThrowsException();
     }
@@ -108,7 +105,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
     /// <summary>
     /// Verifies that SubscribeToExpressionChain with isDistinct=false does not deduplicate values
     /// when the same value is emitted multiple times.
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 219 (isDistinct false branch in expression chain overload).
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 219 (isDistinct false branch in expression chain overload).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -137,7 +134,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
 
     /// <summary>
     /// Verifies that SubscribeToExpressionChain with isDistinct=true deduplicates by value.
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 219 (isDistinct true branch in expression chain overload).
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 219 (isDistinct true branch in expression chain overload).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -167,7 +164,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
 
     /// <summary>
     /// Verifies that SubscribeToExpressionChain with skipInitial=true skips the first value.
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 201-203 (skipInitial true path).
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 201-203 (skipInitial true path).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -175,7 +172,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
     {
         EnsureInitialized();
 
-        var fixture = new TestFixture { IsNotNullString = "Initial" };
+        var fixture = new TestFixture { IsNotNullString = InitialValue };
 
         Expression<Func<TestFixture, string>> expr = x => x.IsNotNullString;
 
@@ -198,7 +195,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
 
     /// <summary>
     /// Verifies that SubscribeToExpressionChain filters out null senders from the chain.
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 206 (Where x.Sender is not null filter).
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 206 (Where x.Sender is not null filter).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -230,7 +227,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
 
     /// <summary>
     /// Verifies that ObservableForProperty by name with beforeChange=true emits before-change notifications.
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 111-129 (factory subscription path with beforeChange).
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 111-129 (factory subscription path with beforeChange).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -273,7 +270,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
     /// <summary>
     /// Verifies that NestedObservedChanges with beforeChange=true routes through
     /// the PropertyChanging event path.
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 235 with beforeChange true.
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 235 with beforeChange true.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -281,7 +278,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Initial" };
+        var vm = new TestViewModel { Name = InitialValue };
 
         Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
@@ -289,7 +286,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         var sourceChange = new ObservedChange<object?, object?>(null, body, vm);
 
         var results = new List<IObservedChange<object?, object?>>();
-        using var sub = ReactiveNotifyPropertyChangedMixin.NestedObservedChanges(body, sourceChange, true)
+        using var sub = ReactiveNotifyPropertyChangedMixins.NestedObservedChanges(body, sourceChange, true)
             .Subscribe(results.Add);
 
         // Should have the kicker from StartWith
@@ -304,7 +301,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
     /// <summary>
     /// Verifies that the val cast path in SubscribeToExpressionChain line 93 is exercised
     /// when val is TValue (the normal case).
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 93 (val is TValue cast).
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 93 (val is TValue cast).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -321,14 +318,12 @@ public class ReactiveNotifyPropertyChangedMixinTests
         await Assert.That(receivedValue).IsEqualTo("Test");
     }
 
-    /// <summary>
-    /// Resets and initializes the ReactiveUI binding infrastructure for testing.
-    /// </summary>
+    /// <summary>Resets and initializes the ReactiveUI binding infrastructure for testing.</summary>
     private static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
     }
 }

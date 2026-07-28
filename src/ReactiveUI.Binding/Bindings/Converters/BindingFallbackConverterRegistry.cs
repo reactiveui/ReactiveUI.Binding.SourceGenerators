@@ -4,9 +4,7 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Thread-safe registry for fallback binding converters using a lock-free snapshot pattern.
-/// </summary>
+/// <summary>Thread-safe registry for fallback binding converters using a lock-free snapshot pattern.</summary>
 /// <remarks>
 /// <para>
 /// This registry uses a copy-on-write snapshot pattern optimized for read-heavy workloads:
@@ -34,23 +32,13 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public sealed class BindingFallbackConverterRegistry
 {
-    /// <summary>
-    /// Synchronization gate for serializing write operations.
-    /// </summary>
-#if NET9_0_OR_GREATER
+    /// <summary>Synchronization gate for serializing write operations.</summary>
     private readonly Lock _gate = new();
-#else
-    private readonly object _gate = new();
-#endif
 
-    /// <summary>
-    /// The current immutable snapshot of registered fallback converters, read via volatile access.
-    /// </summary>
+    /// <summary>The current immutable snapshot of registered fallback converters, read via volatile access.</summary>
     private Snapshot? _snapshot;
 
-    /// <summary>
-    /// Registers a fallback binding converter.
-    /// </summary>
+    /// <summary>Registers a fallback binding converter.</summary>
     /// <param name="converter">The converter to register. Must not be null.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="converter"/> is null.</exception>
     /// <remarks>
@@ -64,9 +52,11 @@ public sealed class BindingFallbackConverterRegistry
     {
         ArgumentExceptionHelper.ThrowIfNull(converter);
 
+        const int InitialRegistryCapacity = 8;
+
         lock (_gate)
         {
-            var snap = _snapshot ?? new Snapshot(new(8));
+            var snap = _snapshot ?? new Snapshot(new(InitialRegistryCapacity));
 
             // Copy-on-write update: clone the list
             var newList = new List<IBindingFallbackConverter>(snap.Converters) { converter };
@@ -76,9 +66,7 @@ public sealed class BindingFallbackConverterRegistry
         }
     }
 
-    /// <summary>
-    /// Attempts to retrieve the best fallback converter for the specified type pair.
-    /// </summary>
+    /// <summary>Attempts to retrieve the best fallback converter for the specified type pair.</summary>
     /// <param name="fromType">The source type to convert from.</param>
     /// <param name="toType">The target type to convert to.</param>
     /// <returns>
@@ -88,13 +76,9 @@ public sealed class BindingFallbackConverterRegistry
     /// Thrown if <paramref name="fromType"/> or <paramref name="toType"/> is null.
     /// </exception>
     public IBindingFallbackConverter? TryGetConverter(
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type fromType,
-#if NET
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-#endif
         Type toType)
     {
         ArgumentExceptionHelper.ThrowIfNull(fromType);
@@ -125,9 +109,7 @@ public sealed class BindingFallbackConverterRegistry
         return best;
     }
 
-    /// <summary>
-    /// Returns all registered fallback converters.
-    /// </summary>
+    /// <summary>Returns all registered fallback converters.</summary>
     /// <returns>
     /// A sequence of all fallback converters currently registered in the registry.
     /// Returns an empty sequence if no converters are registered.
@@ -135,17 +117,10 @@ public sealed class BindingFallbackConverterRegistry
     public IEnumerable<IBindingFallbackConverter> GetAllConverters()
     {
         var snap = Volatile.Read(ref _snapshot);
-        if (snap is null)
-        {
-            return [];
-        }
-
-        return [.. snap.Converters];
+        return snap is null ? [] : [.. snap.Converters];
     }
 
-    /// <summary>
-    /// Immutable snapshot of the registry state for lock-free reads.
-    /// </summary>
+    /// <summary>Immutable snapshot of the registry state for lock-free reads.</summary>
     /// <param name="Converters">The registered fallback converters.</param>
     private sealed record Snapshot(List<IBindingFallbackConverter> Converters);
 }

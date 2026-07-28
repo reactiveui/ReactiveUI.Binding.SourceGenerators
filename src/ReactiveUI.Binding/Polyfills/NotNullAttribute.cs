@@ -9,16 +9,13 @@ using System.Diagnostics;
 
 namespace System.Diagnostics.CodeAnalysis;
 
-/// <summary>
-/// Specifies that an output is not <see langword="null"/> even if the
-/// corresponding type allows it.
-/// </summary>
+/// <summary>Specifies that an output is not <see langword="null"/> even if the corresponding type allows it.</summary>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
 [AttributeUsage(
-    validOn: AttributeTargets.Field |
-             AttributeTargets.Parameter |
-             AttributeTargets.Property |
-             AttributeTargets.ReturnValue)]
+    validOn: AttributeTargets.Field
+             | AttributeTargets.Parameter
+             | AttributeTargets.Property
+             | AttributeTargets.ReturnValue)]
 internal sealed class NotNullAttribute : Attribute;
 #endif

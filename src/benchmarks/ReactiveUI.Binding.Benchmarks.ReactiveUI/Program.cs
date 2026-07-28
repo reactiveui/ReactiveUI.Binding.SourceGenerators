@@ -4,4 +4,13 @@
 
 using BenchmarkDotNet.Running;
 
-BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+namespace ReactiveUI.Binding.Benchmarks.ReactiveUI;
+
+/// <summary>Entry point for the ReactiveUI comparison benchmarks.</summary>
+internal static class Program
+{
+    /// <summary>Runs the benchmarks selected by <paramref name="args"/>.</summary>
+    /// <param name="args">The command line arguments passed to the benchmark switcher.</param>
+    internal static void Main(string[] args) =>
+        _ = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+}

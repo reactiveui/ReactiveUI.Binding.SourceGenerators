@@ -4,9 +4,7 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Represents an interaction between collaborating application components.
-/// </summary>
+/// <summary>Represents an interaction between collaborating application components.</summary>
 /// <remarks>
 /// <para>
 /// Interactions allow collaborating components in an application to ask each other questions. Typically,
@@ -23,31 +21,23 @@ namespace ReactiveUI.Binding;
 /// <typeparam name="TOutput">The interaction's output type.</typeparam>
 public interface IInteraction<TInput, TOutput>
 {
-    /// <summary>
-    /// Registers a synchronous interaction handler.
-    /// </summary>
+    /// <summary>Registers a synchronous interaction handler.</summary>
     /// <param name="handler">The handler.</param>
     /// <returns>A disposable which, when disposed, will unregister the handler.</returns>
     IDisposable RegisterHandler(Action<IInteractionContext<TInput, TOutput>> handler);
 
-    /// <summary>
-    /// Registers a task-based asynchronous interaction handler.
-    /// </summary>
+    /// <summary>Registers a task-based asynchronous interaction handler.</summary>
     /// <param name="handler">The handler.</param>
     /// <returns>A disposable which, when disposed, will unregister the handler.</returns>
     IDisposable RegisterHandler(Func<IInteractionContext<TInput, TOutput>, Task> handler);
 
-    /// <summary>
-    /// Registers an observable-based asynchronous interaction handler.
-    /// </summary>
+    /// <summary>Registers an observable-based asynchronous interaction handler.</summary>
     /// <typeparam name="TDontCare">The signal type.</typeparam>
     /// <param name="handler">The handler.</param>
     /// <returns>A disposable which, when disposed, will unregister the handler.</returns>
     IDisposable RegisterHandler<TDontCare>(Func<IInteractionContext<TInput, TOutput>, IObservable<TDontCare>> handler);
 
-    /// <summary>
-    /// Handles an interaction and asynchronously returns the result.
-    /// </summary>
+    /// <summary>Handles an interaction and asynchronously returns the result.</summary>
     /// <param name="input">The input for the interaction.</param>
     /// <returns>A task that completes with the output when the interaction is handled.</returns>
     Task<TOutput> Handle(TInput input);

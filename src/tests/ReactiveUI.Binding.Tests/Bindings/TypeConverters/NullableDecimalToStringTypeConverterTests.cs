@@ -4,19 +4,13 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for the <see cref="NullableDecimalToStringTypeConverter"/> type converter.
-/// </summary>
+/// <summary>Tests for the <see cref="NullableDecimalToStringTypeConverter"/> type converter.</summary>
 public class NullableDecimalToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,15 +20,13 @@ public class NullableDecimalToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert DecimalNullableToString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert DecimalNullableToString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_DecimalNullableToString_Succeeds()
     {
         var converter = new NullableDecimalToStringTypeConverter();
-        decimal? value = 123.456m;
+        decimal? value = 123.456M;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -42,9 +34,7 @@ public class NullableDecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("123.456");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MaxValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MaxValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MaxValue_Succeeds()
@@ -58,9 +48,7 @@ public class NullableDecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(decimal.MaxValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MinValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MinValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MinValue_Succeeds()
@@ -74,15 +62,13 @@ public class NullableDecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(decimal.MinValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert NegativeValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert NegativeValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_NegativeValue_Succeeds()
     {
         var converter = new NullableDecimalToStringTypeConverter();
-        decimal? value = -123.456m;
+        decimal? value = -123.456M;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -90,9 +76,7 @@ public class NullableDecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("-123.456");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert NullValue ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvert NullValue ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_NullValue_ReturnsTrue()
@@ -103,31 +87,27 @@ public class NullableDecimalToStringTypeConverterTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithConversionHint FormatsCorrectly.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithConversionHint FormatsCorrectly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new NullableDecimalToStringTypeConverter();
-        decimal? value = 42.5m;
+        decimal? value = 42.5M;
 
-        var result = converter.TryConvert(value, 2, out var output);
+        var result = converter.TryConvert(value, ExpectedAffinity, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("42.50");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Zero Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert Zero Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Zero_Succeeds()
     {
         var converter = new NullableDecimalToStringTypeConverter();
-        decimal? value = 0m;
+        decimal? value = 0M;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -135,15 +115,13 @@ public class NullableDecimalToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("0");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert with a string format hint formats correctly.
-    /// </summary>
+    /// <summary>Verifies TryConvert with a string format hint formats correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
     {
         var converter = new NullableDecimalToStringTypeConverter();
-        decimal? value = 42.5m;
+        decimal? value = 42.5M;
 
         var result = converter.TryConvert(value, "F4", out var output);
 

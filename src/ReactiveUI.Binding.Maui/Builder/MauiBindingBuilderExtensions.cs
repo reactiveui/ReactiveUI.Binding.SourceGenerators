@@ -7,30 +7,36 @@ using Splat.Builder;
 
 namespace ReactiveUI.Binding.Maui.Builder;
 
-/// <summary>
-/// MAUI-specific extensions for the ReactiveUI.Binding builder.
-/// </summary>
+/// <summary>MAUI-specific extensions for the ReactiveUI.Binding builder.</summary>
 public static class MauiBindingBuilderExtensions
 {
-    /// <summary>
-    /// Configures ReactiveUI.Binding for MAUI platform, registering WinUI DependencyProperty
-    /// observation (on Windows) and Visibility converters.
-    /// </summary>
+    /// <summary>Provides WithMaui extension members for <paramref name="builder"/>.</summary>
     /// <param name="builder">The builder instance.</param>
-    /// <returns>The builder instance for chaining.</returns>
-    public static IReactiveUIBindingBuilder WithMaui(this IReactiveUIBindingBuilder builder)
+    extension(IAppBuilder builder)
     {
-        ArgumentExceptionHelper.ThrowIfNull(builder);
-
-        return builder.WithPlatformModule(new MauiBindingModule());
+        /// <summary>
+        /// Configures ReactiveUI.Binding for MAUI platform, registering WinUI DependencyProperty
+        /// observation (on Windows) and Visibility converters.
+        /// </summary>
+        /// <returns>The builder instance for chaining.</returns>
+        public IReactiveUIBindingBuilder WithMaui() =>
+            ((IReactiveUIBindingBuilder)builder).WithMaui();
     }
 
-    /// <summary>
-    /// Configures ReactiveUI.Binding for MAUI platform, registering WinUI DependencyProperty
-    /// observation (on Windows) and Visibility converters.
-    /// </summary>
+    /// <summary>Provides WithMaui extension members for <paramref name="builder"/>.</summary>
     /// <param name="builder">The builder instance.</param>
-    /// <returns>The builder instance for chaining.</returns>
-    public static IReactiveUIBindingBuilder WithMaui(this IAppBuilder builder) =>
-        ((IReactiveUIBindingBuilder)builder).WithMaui();
+    extension(IReactiveUIBindingBuilder builder)
+    {
+        /// <summary>
+        /// Configures ReactiveUI.Binding for MAUI platform, registering WinUI DependencyProperty
+        /// observation (on Windows) and Visibility converters.
+        /// </summary>
+        /// <returns>The builder instance for chaining.</returns>
+        public IReactiveUIBindingBuilder WithMaui()
+        {
+            ArgumentExceptionHelper.ThrowIfNull(builder);
+
+            return builder.WithPlatformModule(new MauiBindingModule());
+        }
+    }
 }

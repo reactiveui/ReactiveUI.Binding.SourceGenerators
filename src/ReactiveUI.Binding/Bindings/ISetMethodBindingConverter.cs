@@ -4,9 +4,7 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// This converter will allow users to change the way the set functionality is performed in ReactiveUI property binding.
-/// </summary>
+/// <summary>This converter will allow users to change the way the set functionality is performed in ReactiveUI property binding.</summary>
 public interface ISetMethodBindingConverter : IEnableLogger
 {
     /// <summary>
@@ -22,9 +20,7 @@ public interface ISetMethodBindingConverter : IEnableLogger
     /// zero or a negative value otherwise.</returns>
     int GetAffinityForObjects(Type? fromType, Type? toType);
 
-    /// <summary>
-    /// Convert a given object to the specified type.
-    /// </summary>
+    /// <summary>Convert a given object to the specified type.</summary>
     /// <param name="toTarget">The target object we are setting to.</param>
     /// <param name="newValue">The value to set on the new object.</param>
     /// <param name="arguments">The arguments required. Used for indexer based values.</param>

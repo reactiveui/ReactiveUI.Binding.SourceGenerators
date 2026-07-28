@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="string"/> to <see cref="float"/> using <see cref="float.TryParse(string?, out float)"/>.
-/// </summary>
+/// <summary>Converts <see cref="string"/> to <see cref="float"/> using <see cref="float.TryParse(string?, out float)"/>.</summary>
 public sealed class StringToSingleTypeConverter : BindingTypeConverter<string, float>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

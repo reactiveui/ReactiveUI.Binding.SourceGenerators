@@ -6,14 +6,10 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanging.SinglePropertyINPC;
 
-/// <summary>
-/// ViewModel implementing both INPC and INotifyPropertyChanging.
-/// </summary>
+/// <summary>ViewModel implementing both INPC and INotifyPropertyChanging.</summary>
 public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backing field for <see cref="Name"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Name"/>.</summary>
     private string _name = string.Empty;
 
     /// <inheritdoc/>
@@ -22,9 +18,7 @@ public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
         get => _name;

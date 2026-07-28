@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="string"/> to <see cref="DateTime"/> using <see cref="DateTime.TryParse(string?, out DateTime)"/>.
-/// </summary>
+/// <summary>Converts <see cref="string"/> to <see cref="DateTime"/> using <see cref="DateTime.TryParse(string?, out DateTime)"/>.</summary>
 public sealed class StringToDateTimeTypeConverter : BindingTypeConverter<string, DateTime>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

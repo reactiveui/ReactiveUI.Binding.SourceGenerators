@@ -12,8 +12,6 @@ namespace SharedScenarios.BindInteraction.NonINPCViewModel;
 /// </summary>
 public class MyViewModel
 {
-    /// <summary>
-    /// Gets the confirmation interaction.
-    /// </summary>
+    /// <summary>Gets the confirmation interaction.</summary>
     public Interaction<string, bool> Confirm { get; } = new Interaction<string, bool>();
 }

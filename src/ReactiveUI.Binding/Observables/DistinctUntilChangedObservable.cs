@@ -14,28 +14,20 @@ namespace ReactiveUI.Binding.Observables;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class DistinctUntilChangedObservable<T> : IObservable<T>
 {
-    /// <summary>
-    /// The upstream source observable.
-    /// </summary>
+    /// <summary>The upstream source observable.</summary>
     private readonly IObservable<T> _source;
 
-    /// <summary>
-    /// The equality comparer used to detect duplicate consecutive values.
-    /// </summary>
+    /// <summary>The equality comparer used to detect duplicate consecutive values.</summary>
     private readonly IEqualityComparer<T> _comparer;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DistinctUntilChangedObservable{T}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="DistinctUntilChangedObservable{T}"/> class.</summary>
     /// <param name="source">The source observable.</param>
     public DistinctUntilChangedObservable(IObservable<T> source)
         : this(source, EqualityComparer<T>.Default)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DistinctUntilChangedObservable{T}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="DistinctUntilChangedObservable{T}"/> class.</summary>
     /// <param name="source">The source observable.</param>
     /// <param name="comparer">The equality comparer to use.</param>
     public DistinctUntilChangedObservable(IObservable<T> source, IEqualityComparer<T> comparer)
@@ -54,41 +46,22 @@ public sealed class DistinctUntilChangedObservable<T> : IObservable<T>
         return _source.Subscribe(new DistinctObserver(observer, _comparer));
     }
 
-    /// <summary>
-    /// Observer that suppresses consecutive duplicate values.
-    /// </summary>
-    private sealed class DistinctObserver : IObserver<T>
+    /// <summary>Observer that suppresses consecutive duplicate values.</summary>
+    /// <param name="observer">The downstream observer.</param>
+    /// <param name="comparer">The equality comparer.</param>
+    private sealed class DistinctObserver(IObserver<T> observer, IEqualityComparer<T> comparer) : IObserver<T>
     {
-        /// <summary>
-        /// The downstream observer.
-        /// </summary>
-        private readonly IObserver<T> _observer;
+        /// <summary>The downstream observer.</summary>
+        private readonly IObserver<T> _observer = observer;
 
-        /// <summary>
-        /// The equality comparer used to detect duplicates.
-        /// </summary>
-        private readonly IEqualityComparer<T> _comparer;
+        /// <summary>The equality comparer used to detect duplicates.</summary>
+        private readonly IEqualityComparer<T> _comparer = comparer;
 
-        /// <summary>
-        /// The most recently emitted value.
-        /// </summary>
+        /// <summary>The most recently emitted value.</summary>
         private T _lastValue = default!;
 
-        /// <summary>
-        /// Whether at least one value has been emitted.
-        /// </summary>
+        /// <summary>Whether at least one value has been emitted.</summary>
         private bool _hasValue;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DistinctObserver"/> class.
-        /// </summary>
-        /// <param name="observer">The downstream observer.</param>
-        /// <param name="comparer">The equality comparer.</param>
-        public DistinctObserver(IObserver<T> observer, IEqualityComparer<T> comparer)
-        {
-            _observer = observer;
-            _comparer = comparer;
-        }
 
         /// <inheritdoc/>
         public void OnNext(T value)

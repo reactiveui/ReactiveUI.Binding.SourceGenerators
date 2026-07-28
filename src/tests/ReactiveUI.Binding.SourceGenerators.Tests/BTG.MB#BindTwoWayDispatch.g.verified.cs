@@ -29,13 +29,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Name"
                 && targetPropertyExpression == "x => x.NameText")
             {
-                return __BindTwoWay_00002294527D5234(source, target);
+                return __BindTwoWay_00002294527D4F4C(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_00002294527D5234(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleBindings.MyView target)
+        private static global::System.IDisposable __BindTwoWay_00002294527D4F4C(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleBindings.MyView target)
         {
             // BindTwoWay: Name <-> NameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -83,13 +83,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Age"
                 && targetPropertyExpression == "x => x.AgeDisplay")
             {
-                return __BindTwoWay_0000229444056693(source, target);
+                return __BindTwoWay_00002294440563AB(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_0000229444056693(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleBindings.MyView target)
+        private static global::System.IDisposable __BindTwoWay_00002294440563AB(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleBindings.MyView target)
         {
             // BindTwoWay: Age <-> AgeDisplay
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(

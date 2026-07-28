@@ -6,24 +6,19 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.Bindings;
 
-/// <summary>
-/// Unit tests for <see cref="BindingTypeConverterDispatch"/>.
-/// </summary>
+/// <summary>Unit tests for <see cref="BindingTypeConverterDispatch"/>.</summary>
 public class BindingTypeConverterDispatchTests
 {
-    /// <summary>
-    /// Integer value produced by the stub converter in dispatch tests.
-    /// </summary>
+    /// <summary>The value the stub fallback converter returns.</summary>
+    private const string FallbackResult = "fallback";
+
+    /// <summary>Integer value produced by the stub converter in dispatch tests.</summary>
     private const int ConvertedInteger = 42;
 
-    /// <summary>
-    /// Double value produced by the stub converter in dispatch tests.
-    /// </summary>
+    /// <summary>Double value produced by the stub converter in dispatch tests.</summary>
     private const double ConvertedDouble = 3.14;
 
-    /// <summary>
-    /// Verifies that TryConvert returns true for an exact type match.
-    /// </summary>
+    /// <summary>Verifies that TryConvert returns true for an exact type match.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvert_ExactTypeMatch_ReturnsTrue()
@@ -31,7 +26,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(int),
-            (from, _) => (true, int.Parse((string)from!)));
+            static (from, _) => (true, int.Parse((string)from!)));
 
         var success = BindingTypeConverterDispatch.TryConvert(converter, "42", typeof(int), null, out var result);
 
@@ -39,9 +34,7 @@ public class BindingTypeConverterDispatchTests
         await Assert.That(result).IsEqualTo(ConvertedInteger);
     }
 
-    /// <summary>
-    /// Verifies that TryConvert returns false when the source type does not match.
-    /// </summary>
+    /// <summary>Verifies that TryConvert returns false when the source type does not match.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvert_SourceTypeMismatch_ReturnsFalse()
@@ -49,7 +42,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(int),
-            (_, _) => (true, 42));
+            static (_, _) => (true, ConvertedInteger));
 
         var success = BindingTypeConverterDispatch.TryConvert(converter, true, typeof(int), null, out var result);
 
@@ -57,9 +50,7 @@ public class BindingTypeConverterDispatchTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that TryConvert returns false when the target type does not match.
-    /// </summary>
+    /// <summary>Verifies that TryConvert returns false when the target type does not match.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvert_TargetTypeMismatch_ReturnsFalse()
@@ -67,7 +58,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(int),
-            (_, _) => (true, 42));
+            static (_, _) => (true, ConvertedInteger));
 
         var success = BindingTypeConverterDispatch.TryConvert(converter, "42", typeof(bool), null, out var result);
 
@@ -75,9 +66,7 @@ public class BindingTypeConverterDispatchTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that TryConvert handles nullable target types correctly.
-    /// </summary>
+    /// <summary>Verifies that TryConvert handles nullable target types correctly.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvert_NullableTargetType_ReturnsTrue()
@@ -85,17 +74,15 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(double),
             typeof(double?),
-            (from, _) => (true, (double?)from));
+            static (from, _) => (true, (double?)from));
 
-        var success = BindingTypeConverterDispatch.TryConvert(converter, 3.14, typeof(double?), null, out var result);
+        var success = BindingTypeConverterDispatch.TryConvert(converter, ConvertedDouble, typeof(double?), null, out var result);
 
         await Assert.That(success).IsTrue();
         await Assert.That(result).IsEqualTo(ConvertedDouble);
     }
 
-    /// <summary>
-    /// Verifies that TryConvert allows boxed non-nullable to nullable converter.
-    /// </summary>
+    /// <summary>Verifies that TryConvert allows boxed non-nullable to nullable converter.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvert_BoxedNonNullableToNullableConverter_ReturnsTrue()
@@ -103,17 +90,15 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(int?),
             typeof(string),
-            (from, _) => (true, from?.ToString() ?? "null"));
+            static (from, _) => (true, from?.ToString() ?? "null"));
 
-        var success = BindingTypeConverterDispatch.TryConvert(converter, 42, typeof(string), null, out var result);
+        var success = BindingTypeConverterDispatch.TryConvert(converter, ConvertedInteger, typeof(string), null, out var result);
 
         await Assert.That(success).IsTrue();
         await Assert.That(result).IsEqualTo("42");
     }
 
-    /// <summary>
-    /// Verifies that TryConvert returns false for null input with non-nullable FromType.
-    /// </summary>
+    /// <summary>Verifies that TryConvert returns false for null input with non-nullable FromType.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvert_NullInputWithNonNullableFromType_ReturnsFalse()
@@ -121,7 +106,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(string),
-            (_, _) => (true, "42"));
+            static (_, _) => (true, "42"));
 
         var success = BindingTypeConverterDispatch.TryConvert(converter, null, typeof(string), null, out var result);
 
@@ -129,9 +114,7 @@ public class BindingTypeConverterDispatchTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that TryConvert passes the conversion hint correctly.
-    /// </summary>
+    /// <summary>Verifies that TryConvert passes the conversion hint correctly.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvert_PassesConversionHint()
@@ -140,7 +123,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(string),
-            (_, hint) => (true, hint));
+            static (_, hint) => (true, hint));
 
         var success =
             BindingTypeConverterDispatch.TryConvert(converter, "input", typeof(string), hintValue, out var result);
@@ -149,20 +132,18 @@ public class BindingTypeConverterDispatchTests
         await Assert.That(result).IsEqualTo(hintValue);
     }
 
-    /// <summary>
-    /// Verifies that TryConvertFallback succeeds.
-    /// </summary>
+    /// <summary>Verifies that TryConvertFallback succeeds.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvertFallback_Success_ReturnsTrue()
     {
-        var converter = new StubFallbackConverter((_, _, _, _) => (true, "fallback-result"));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, "fallback-result"));
 
         var success =
             BindingTypeConverterDispatch.TryConvertFallback(
                 converter,
                 typeof(int),
-                42,
+                ConvertedInteger,
                 typeof(string),
                 null,
                 out var result);
@@ -171,20 +152,18 @@ public class BindingTypeConverterDispatchTests
         await Assert.That(result).IsEqualTo("fallback-result");
     }
 
-    /// <summary>
-    /// Verifies that TryConvertFallback returns false when the result is null.
-    /// </summary>
+    /// <summary>Verifies that TryConvertFallback returns false when the result is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvertFallback_NullResult_ReturnsFalse()
     {
-        var converter = new StubFallbackConverter((_, _, _, _) => (true, null));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, null));
 
         var success =
             BindingTypeConverterDispatch.TryConvertFallback(
                 converter,
                 typeof(int),
-                42,
+                ConvertedInteger,
                 typeof(string),
                 null,
                 out var result);
@@ -193,20 +172,18 @@ public class BindingTypeConverterDispatchTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that TryConvertFallback returns false when the converter fails.
-    /// </summary>
+    /// <summary>Verifies that TryConvertFallback returns false when the converter fails.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvertFallback_ConverterFails_ReturnsFalse()
     {
-        var converter = new StubFallbackConverter((_, _, _, _) => (false, null));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => (false, null));
 
         var success =
             BindingTypeConverterDispatch.TryConvertFallback(
                 converter,
                 typeof(int),
-                42,
+                ConvertedInteger,
                 typeof(string),
                 null,
                 out var result);
@@ -215,9 +192,7 @@ public class BindingTypeConverterDispatchTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that TryConvertAny routes to TryConvert for IBindingTypeConverter.
-    /// </summary>
+    /// <summary>Verifies that TryConvertAny routes to TryConvert for IBindingTypeConverter.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvertAny_RoutesToTypedConverter()
@@ -225,7 +200,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(int),
-            (_, _) => (true, 42));
+            static (_, _) => (true, ConvertedInteger));
 
         var success =
             BindingTypeConverterDispatch.TryConvertAny(
@@ -240,36 +215,32 @@ public class BindingTypeConverterDispatchTests
         await Assert.That(result).IsEqualTo(ConvertedInteger);
     }
 
-    /// <summary>
-    /// Verifies that TryConvertAny routes to TryConvertFallback for IBindingFallbackConverter.
-    /// </summary>
+    /// <summary>Verifies that TryConvertAny routes to TryConvertFallback for IBindingFallbackConverter.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvertAny_RoutesToFallbackConverter()
     {
-        var converter = new StubFallbackConverter((_, _, _, _) => (true, "fallback"));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, FallbackResult));
 
         var success =
             BindingTypeConverterDispatch.TryConvertAny(
                 converter,
                 typeof(int),
-                42,
+                ConvertedInteger,
                 typeof(string),
                 null,
                 out var result);
 
         await Assert.That(success).IsTrue();
-        await Assert.That(result).IsEqualTo("fallback");
+        await Assert.That(result).IsEqualTo(FallbackResult);
     }
 
-    /// <summary>
-    /// Verifies that TryConvertAny returns false for null input with fallback converter.
-    /// </summary>
+    /// <summary>Verifies that TryConvertAny returns false for null input with fallback converter.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvertAny_NullInputWithFallback_ReturnsFalse()
     {
-        var converter = new StubFallbackConverter((_, _, _, _) => (true, "fallback"));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, FallbackResult));
 
         var success =
             BindingTypeConverterDispatch.TryConvertAny(
@@ -284,29 +255,25 @@ public class BindingTypeConverterDispatchTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that TryConvertAny returns false for unknown converter type.
-    /// </summary>
+    /// <summary>Verifies that TryConvertAny returns false for unknown converter type.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvertAny_UnknownConverterType_ReturnsFalse()
     {
         var success =
-            BindingTypeConverterDispatch.TryConvertAny(new(), typeof(int), 42, typeof(string), null, out var result);
+            BindingTypeConverterDispatch.TryConvertAny(new(), typeof(int), ConvertedInteger, typeof(string), null, out var result);
 
         await Assert.That(success).IsFalse();
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that TryConvertAny returns false for null converter.
-    /// </summary>
+    /// <summary>Verifies that TryConvertAny returns false for null converter.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task TryConvertAny_NullConverter_ReturnsFalse()
     {
         var success =
-            BindingTypeConverterDispatch.TryConvertAny(null, typeof(int), 42, typeof(string), null, out var result);
+            BindingTypeConverterDispatch.TryConvertAny(null, typeof(int), ConvertedInteger, typeof(string), null, out var result);
 
         await Assert.That(success).IsFalse();
         await Assert.That(result).IsNull();
@@ -324,7 +291,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(int?),
             typeof(string),
-            (from, _) => (true, from?.ToString() ?? "null"));
+            static (from, _) => (true, from?.ToString() ?? "null"));
 
         // Pass null as `from` value. Since FromType (int?) is a nullable value type,
         // Nullable.GetUnderlyingType returns typeof(int), so the null check allows it through.

@@ -6,39 +6,37 @@ using ReactiveUI.Binding.Expressions;
 
 namespace ReactiveUI.Binding.Tests.Expression;
 
-/// <summary>
-///     Tests for the expression rewriter which normalizes expression trees for property path extraction.
-/// </summary>
+/// <summary>Tests for the expression rewriter which normalizes expression trees for property path extraction.</summary>
 public class ExpressionRewriterTests
 {
-    /// <summary>
-    ///     The name of the property used across rewriter tests.
-    /// </summary>
+    /// <summary>The hint the rewriter adds when a constant is used where a member access was expected.</summary>
+    private const string ExpressionHintMessage = "Did you meant to use expressions";
+
+    /// <summary>The name of the property used in the rewriter tests.</summary>
+    private const string LengthPropertyName = "Length";
+
+    /// <summary>The right-hand operand of the comparison in the expression under test.</summary>
+    private const int ComparisonThreshold = 5;
+
+    /// <summary>The constant value embedded in the expression under test.</summary>
+    private const int SampleConstant = 42;
+
+    /// <summary>The name of the property used across rewriter tests.</summary>
     private const string PropertyName = "Property";
 
-    /// <summary>
-    ///     The expected number of rewritten arguments in the argument-list test.
-    /// </summary>
+    /// <summary>The expected number of rewritten arguments in the argument-list test.</summary>
     private const int ExpectedArgumentCount = 3;
 
-    /// <summary>
-    ///     The index of the third rewritten argument.
-    /// </summary>
+    /// <summary>The index of the third rewritten argument.</summary>
     private const int ThirdArgumentIndex = 2;
 
-    /// <summary>
-    ///     The second constant value used in the argument-list test.
-    /// </summary>
+    /// <summary>The second constant value used in the argument-list test.</summary>
     private const int SecondConstant = 2;
 
-    /// <summary>
-    ///     The third constant value used in the argument-list test.
-    /// </summary>
+    /// <summary>The third constant value used in the argument-list test.</summary>
     private const int ThirdConstant = 3;
 
-    /// <summary>
-    ///     Verifies that array index expressions are rewritten to index expressions.
-    /// </summary>
+    /// <summary>Verifies that array index expressions are rewritten to index expressions.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithArrayIndex_ReturnsIndexExpression()
@@ -50,9 +48,7 @@ public class ExpressionRewriterTests
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.Index);
     }
 
-    /// <summary>
-    ///     Verifies that array index with non-constant index throws.
-    /// </summary>
+    /// <summary>Verifies that array index with non-constant index throws.</summary>
     /// <param name="index">A non-constant index, supplied as a parameter so it is captured as a
     ///     non-constant closure reference (a <c>const</c> or literal would be inlined into the tree).</param>
     [Test]
@@ -61,12 +57,10 @@ public class ExpressionRewriterTests
     {
         Expression<Func<TestClass, int>> expr = x => x.Array[index];
 
-        Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(expr.Body));
+        _ = Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(expr.Body));
     }
 
-    /// <summary>
-    ///     Verifies that array length is rewritten to member access.
-    /// </summary>
+    /// <summary>Verifies that array length is rewritten to member access.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithArrayLength_ReturnsMemberAccess()
@@ -78,12 +72,10 @@ public class ExpressionRewriterTests
         // ArrayLength should be rewritten to MemberAccess of Length property
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.MemberAccess);
         var memberExpr = (MemberExpression)result;
-        await Assert.That(memberExpr.Member.Name).IsEqualTo("Length");
+        await Assert.That(memberExpr.Member.Name).IsEqualTo(LengthPropertyName);
     }
 
-    /// <summary>
-    ///     Verifies that constant expressions pass through unchanged.
-    /// </summary>
+    /// <summary>Verifies that constant expressions pass through unchanged.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithConstant_ReturnsConstantExpression()
@@ -95,9 +87,7 @@ public class ExpressionRewriterTests
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.Constant);
     }
 
-    /// <summary>
-    ///     Verifies that convert expressions are unwrapped.
-    /// </summary>
+    /// <summary>Verifies that convert expressions are unwrapped.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithConvert_ReturnsUnderlyingExpression()
@@ -110,9 +100,7 @@ public class ExpressionRewriterTests
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.MemberAccess);
     }
 
-    /// <summary>
-    ///     Verifies that index expression with constant arguments are validated.
-    /// </summary>
+    /// <summary>Verifies that index expression with constant arguments are validated.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithIndexExpression_ValidatesConstantArguments()
@@ -124,9 +112,7 @@ public class ExpressionRewriterTests
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.Index);
     }
 
-    /// <summary>
-    ///     Verifies that index expression with non-constant arguments throws.
-    /// </summary>
+    /// <summary>Verifies that index expression with non-constant arguments throws.</summary>
     [Test]
     public void Rewrite_WithIndexExpressionNonConstantArguments_Throws()
     {
@@ -137,12 +123,10 @@ public class ExpressionRewriterTests
         var nonConstantArg = System.Linq.Expressions.Expression.Parameter(typeof(int), "index");
         var indexExpr = System.Linq.Expressions.Expression.MakeIndex(listProperty, indexer, [nonConstantArg]);
 
-        Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(indexExpr));
+        _ = Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(indexExpr));
     }
 
-    /// <summary>
-    ///     Verifies that list indexer expressions are rewritten to index expressions.
-    /// </summary>
+    /// <summary>Verifies that list indexer expressions are rewritten to index expressions.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithListIndexer_ReturnsIndexExpression()
@@ -154,9 +138,7 @@ public class ExpressionRewriterTests
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.Index);
     }
 
-    /// <summary>
-    ///     Verifies that list indexer with non-constant index throws.
-    /// </summary>
+    /// <summary>Verifies that list indexer with non-constant index throws.</summary>
     /// <param name="index">A non-constant index, supplied as a parameter so it is captured as a
     ///     non-constant closure reference (a <c>const</c> or literal would be inlined into the tree).</param>
     [Test]
@@ -165,12 +147,10 @@ public class ExpressionRewriterTests
     {
         Expression<Func<TestClass, int>> expr = x => x.List[index];
 
-        Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(expr.Body));
+        _ = Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(expr.Body));
     }
 
-    /// <summary>
-    ///     Verifies that member access expressions pass through unchanged.
-    /// </summary>
+    /// <summary>Verifies that member access expressions pass through unchanged.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithMemberAccess_ReturnsMemberExpression()
@@ -182,20 +162,16 @@ public class ExpressionRewriterTests
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.MemberAccess);
     }
 
-    /// <summary>
-    ///     Verifies that non-special method calls throw.
-    /// </summary>
+    /// <summary>Verifies that non-special method calls throw.</summary>
     [Test]
     public void Rewrite_WithMethodCallNonSpecialName_Throws()
     {
         Expression<Func<TestClass, string?>> expr = x => x.GetValue();
 
-        Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(expr.Body));
+        _ = Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(expr.Body));
     }
 
-    /// <summary>
-    ///     Verifies that nested member access expressions pass through unchanged.
-    /// </summary>
+    /// <summary>Verifies that nested member access expressions pass through unchanged.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithNestedMemberAccess_ReturnsMemberExpression()
@@ -207,16 +183,12 @@ public class ExpressionRewriterTests
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.MemberAccess);
     }
 
-    /// <summary>
-    ///     Verifies that null expression throws.
-    /// </summary>
+    /// <summary>Verifies that null expression throws.</summary>
     [Test]
     public void Rewrite_WithNullExpression_Throws() =>
-        Assert.Throws<ArgumentNullException>(() => Reflection.Rewrite(null));
+        Assert.Throws<ArgumentNullException>(static () => Reflection.Rewrite(null));
 
-    /// <summary>
-    ///     Verifies that parameter expressions pass through unchanged.
-    /// </summary>
+    /// <summary>Verifies that parameter expressions pass through unchanged.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithParameterExpression_ReturnsParameterExpression()
@@ -228,9 +200,7 @@ public class ExpressionRewriterTests
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.Parameter);
     }
 
-    /// <summary>
-    ///     Verifies that unsupported unary expressions throw.
-    /// </summary>
+    /// <summary>Verifies that unsupported unary expressions throw.</summary>
     [Test]
     public void Rewrite_WithUnaryExpressionNotArrayLengthOrConvert_Throws()
     {
@@ -239,25 +209,21 @@ public class ExpressionRewriterTests
         var parameter = System.Linq.Expressions.Expression.Parameter(typeof(bool), "x");
         var notExpr = System.Linq.Expressions.Expression.Not(parameter);
 
-        Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(notExpr));
+        _ = Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(notExpr));
     }
 
-    /// <summary>
-    ///     Verifies that unsupported binary expressions throw with helpful message.
-    /// </summary>
+    /// <summary>Verifies that unsupported binary expressions throw with helpful message.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithUnsupportedBinaryExpression_ThrowsWithHelpfulMessage()
     {
-        Expression<Func<int, bool>> expr = x => x > 5;
+        Expression<Func<int, bool>> expr = x => x > ComparisonThreshold;
 
         var ex = Assert.Throws<NotSupportedException>(() => Reflection.Rewrite(expr.Body));
-        await Assert.That(ex!.Message).Contains("Did you meant to use expressions");
+        await Assert.That(ex!.Message).Contains(ExpressionHintMessage);
     }
 
-    /// <summary>
-    ///     Verifies that unsupported expressions throw with node type in message.
-    /// </summary>
+    /// <summary>Verifies that unsupported expressions throw with node type in message.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithUnsupportedExpression_Throws()
@@ -269,9 +235,7 @@ public class ExpressionRewriterTests
         await Assert.That(ex.Message).Contains("Add");
     }
 
-    /// <summary>
-    ///     Verifies that Convert expression wrapping a member access is unwrapped to the inner member access.
-    /// </summary>
+    /// <summary>Verifies that Convert expression wrapping a member access is unwrapped to the inner member access.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithConvertWrappingMemberAccess_UnwrapsToMemberAccess()
@@ -287,9 +251,7 @@ public class ExpressionRewriterTests
         await Assert.That(memberExpr.Member.Name).IsEqualTo(PropertyName);
     }
 
-    /// <summary>
-    ///     Verifies that a static method call (non-special-name) throws NotSupportedException.
-    /// </summary>
+    /// <summary>Verifies that a static method call (non-special-name) throws NotSupportedException.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Rewrite_WithStaticMethodCall_ThrowsNotSupportedException()
@@ -310,7 +272,7 @@ public class ExpressionRewriterTests
     [Test]
     public async Task GetItemProperty_TypeWithoutIndexer_ThrowsInvalidOperationException()
     {
-        var action = () => ExpressionRewriter.GetItemProperty(typeof(string));
+        var action = static () => ExpressionRewriter.GetItemProperty(typeof(string));
 
         await Assert.That(action).ThrowsExactly<InvalidOperationException>();
     }
@@ -323,7 +285,7 @@ public class ExpressionRewriterTests
     [Test]
     public async Task GetLengthProperty_TypeWithoutLength_ThrowsInvalidOperationException()
     {
-        var action = () => ExpressionRewriter.GetLengthProperty(typeof(int));
+        var action = static () => ExpressionRewriter.GetLengthProperty(typeof(int));
 
         await Assert.That(action).ThrowsExactly<InvalidOperationException>();
     }
@@ -365,7 +327,7 @@ public class ExpressionRewriterTests
 
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.MemberAccess);
         var memberExpr = (MemberExpression)result;
-        await Assert.That(memberExpr.Member.Name).IsEqualTo("Length");
+        await Assert.That(memberExpr.Member.Name).IsEqualTo(LengthPropertyName);
         await Assert.That(memberExpr.Expression!.Type).IsEqualTo(typeof(int[]));
     }
 
@@ -397,16 +359,14 @@ public class ExpressionRewriterTests
     public async Task AllConstant_EmptyCollection_ReturnsTrue()
     {
         var emptyList = new System.Collections.ObjectModel.ReadOnlyCollection<System.Linq.Expressions.Expression>(
-            Array.Empty<System.Linq.Expressions.Expression>());
+            []);
 
         var result = ExpressionRewriter.AllConstant(emptyList);
 
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that AllConstant returns false when a non-constant expression is present.
-    /// </summary>
+    /// <summary>Verifies that AllConstant returns false when a non-constant expression is present.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task AllConstant_WithNonConstant_ReturnsFalse()
@@ -422,9 +382,7 @@ public class ExpressionRewriterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that AllConstant returns true when all expressions are constants.
-    /// </summary>
+    /// <summary>Verifies that AllConstant returns true when all expressions are constants.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task AllConstant_WithAllConstants_ReturnsTrue()
@@ -432,7 +390,7 @@ public class ExpressionRewriterTests
         var list = new System.Collections.ObjectModel.ReadOnlyCollection<System.Linq.Expressions.Expression>(
         [
             System.Linq.Expressions.Expression.Constant(1),
-            System.Linq.Expressions.Expression.Constant(2)
+            System.Linq.Expressions.Expression.Constant(SecondConstant)
         ]);
 
         var result = ExpressionRewriter.AllConstant(list);
@@ -450,7 +408,7 @@ public class ExpressionRewriterTests
     {
         var rewriter = new ExpressionRewriter();
         var emptyArgs = new System.Collections.ObjectModel.ReadOnlyCollection<System.Linq.Expressions.Expression>(
-            Array.Empty<System.Linq.Expressions.Expression>());
+            []);
 
         var result = rewriter.VisitArgumentList(emptyArgs);
 
@@ -491,13 +449,13 @@ public class ExpressionRewriterTests
     [Test]
     public async Task CreateUnsupportedNodeException_NonBinaryExpression_DoesNotContainBinaryHint()
     {
-        var constant = System.Linq.Expressions.Expression.Constant(42);
+        var constant = System.Linq.Expressions.Expression.Constant(SampleConstant);
 
         var exception = ExpressionRewriter.CreateUnsupportedNodeException(constant);
 
         await Assert.That(exception).IsNotNull();
         await Assert.That(exception.Message).Contains("Unsupported expression of type 'Constant'");
-        await Assert.That(exception.Message).DoesNotContain("Did you meant to use expressions");
+        await Assert.That(exception.Message).DoesNotContain(ExpressionHintMessage);
     }
 
     /// <summary>
@@ -509,13 +467,13 @@ public class ExpressionRewriterTests
     public async Task CreateUnsupportedNodeException_BinaryExpression_ContainsBinaryHint()
     {
         var left = System.Linq.Expressions.Expression.Constant(1);
-        var right = System.Linq.Expressions.Expression.Constant(2);
+        var right = System.Linq.Expressions.Expression.Constant(SecondConstant);
         var binary = System.Linq.Expressions.Expression.Add(left, right);
 
         var exception = ExpressionRewriter.CreateUnsupportedNodeException(binary);
 
         await Assert.That(exception).IsNotNull();
-        await Assert.That(exception.Message).Contains("Did you meant to use expressions");
+        await Assert.That(exception.Message).Contains(ExpressionHintMessage);
         await Assert.That(exception.Message).Contains("1");
         await Assert.That(exception.Message).Contains("2");
     }
@@ -628,74 +586,40 @@ public class ExpressionRewriterTests
         var property = ExpressionRewriter.GetLengthProperty(typeof(int[]));
 
         await Assert.That(property).IsNotNull();
-        await Assert.That(property.Name).IsEqualTo("Length");
+        await Assert.That(property.Name).IsEqualTo(LengthPropertyName);
     }
 
-    /// <summary>
-    /// Test class used as a type parameter in expression lambdas for rewriter tests.
-    /// </summary>
-    [SuppressMessage(
-        "Performance",
-        "CA1812:Avoid uninstantiated internal classes",
-        Justification = "Referenced only inside inspected expression-lambda trees (never compiled), so no construction is visible to the analyzer.")]
+    /// <summary>Test class used as a type parameter in expression lambdas for rewriter tests.</summary>
     private sealed class TestClass
     {
-        /// <summary>
-        /// The second sample value stored in <see cref="Array"/>.
-        /// </summary>
+        /// <summary>The second sample value stored in <see cref="Array"/>.</summary>
         private const int ArraySecondValue = 2;
 
-        /// <summary>
-        /// The third sample value stored in <see cref="Array"/>.
-        /// </summary>
+        /// <summary>The third sample value stored in <see cref="Array"/>.</summary>
         private const int ArrayThirdValue = 3;
 
-        /// <summary>
-        /// The first sample value stored in <see cref="List"/>.
-        /// </summary>
+        /// <summary>The first sample value stored in <see cref="List"/>.</summary>
         private const int ListFirstValue = 4;
 
-        /// <summary>
-        /// The second sample value stored in <see cref="List"/>.
-        /// </summary>
+        /// <summary>The second sample value stored in <see cref="List"/>.</summary>
         private const int ListSecondValue = 5;
 
-        /// <summary>
-        /// The third sample value stored in <see cref="List"/>.
-        /// </summary>
+        /// <summary>The third sample value stored in <see cref="List"/>.</summary>
         private const int ListThirdValue = 6;
 
-        /// <summary>
-        /// Gets an integer array for testing array index and length expressions.
-        /// </summary>
+        /// <summary>Gets an integer array for testing array index and length expressions.</summary>
         public int[] Array { get; } = [1, ArraySecondValue, ArrayThirdValue];
 
-        /// <summary>
-        /// Gets a list of integers for testing list indexer expressions.
-        /// </summary>
+        /// <summary>Gets a list of integers for testing list indexer expressions.</summary>
         public List<int> List { get; } = [ListFirstValue, ListSecondValue, ListThirdValue];
 
-        /// <summary>
-        /// Gets or sets a nested instance for testing nested member access expressions.
-        /// </summary>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S3459:Unassigned members should be removed",
-            Justification = "Referenced only as expression-tree metadata in rewriter tests; never assigned at runtime.")]
+        /// <summary>Gets or sets a nested instance for testing nested member access expressions.</summary>
         public TestClass? Nested { get; set; }
 
-        /// <summary>
-        /// Gets or sets a string property for testing simple member access expressions.
-        /// </summary>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S3459:Unassigned members should be removed",
-            Justification = "Referenced only via expression-tree lambdas (and GetValue) in rewriter tests; never assigned at runtime.")]
+        /// <summary>Gets or sets a string property for testing simple member access expressions.</summary>
         public string? Property { get; set; }
 
-        /// <summary>
-        /// Gets the value of <see cref="Property"/>. Used to test non-special-name method call rewriting.
-        /// </summary>
+        /// <summary>Gets the value of <see cref="Property"/>. Used to test non-special-name method call rewriting.</summary>
         /// <returns>The current value of the <see cref="Property"/>.</returns>
         public string? GetValue() => Property;
     }

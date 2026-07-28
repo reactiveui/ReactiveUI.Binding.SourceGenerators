@@ -30,13 +30,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Name"
                 && targetPropertyExpression == "x => x.NameText")
             {
-                return __BindTwoWay_7FFFF863C3AFAEBC(source, target, scheduler);
+                return __BindTwoWay_7FFFF863C3AFACCC(source, target, scheduler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_7FFFF863C3AFAEBC(global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyView target, global::System.Reactive.Concurrency.IScheduler scheduler)
+        private static global::System.IDisposable __BindTwoWay_7FFFF863C3AFACCC(global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyView target, global::System.Reactive.Concurrency.IScheduler scheduler)
         {
             // BindTwoWay: Name <-> NameText (with scheduler)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

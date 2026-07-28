@@ -14,90 +14,29 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class BigViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backer for Prop1.
-    /// </summary>
-    private string _prop1 = string.Empty;
+    /// <summary>Seed for <see cref="Prop2"/>; each seed is the property's own ordinal so no two values collide.</summary>
+    private const int Prop2Seed = 2;
 
-    /// <summary>
-    /// The backer for Prop2.
-    /// </summary>
-    private int _prop2;
+    /// <summary>Seed for <see cref="Prop3"/>.</summary>
+    private const double Prop3Seed = 3.0;
 
-    /// <summary>
-    /// The backer for Prop3.
-    /// </summary>
-    private double _prop3;
+    /// <summary>Seed for <see cref="Prop6"/>.</summary>
+    private const int Prop6Seed = 6;
 
-    /// <summary>
-    /// The backer for Prop4.
-    /// </summary>
-    private bool _prop4;
+    /// <summary>Seed for <see cref="Prop7"/>.</summary>
+    private const double Prop7Seed = 7.0;
 
-    /// <summary>
-    /// The backer for Prop5.
-    /// </summary>
-    private string _prop5 = string.Empty;
+    /// <summary>Seed for <see cref="Prop10"/>.</summary>
+    private const int Prop10Seed = 10;
 
-    /// <summary>
-    /// The backer for Prop6.
-    /// </summary>
-    private int _prop6;
+    /// <summary>Seed for <see cref="Prop11"/>.</summary>
+    private const double Prop11Seed = 11.0;
 
-    /// <summary>
-    /// The backer for Prop7.
-    /// </summary>
-    private double _prop7;
+    /// <summary>Seed for <see cref="Prop14"/>.</summary>
+    private const int Prop14Seed = 14;
 
-    /// <summary>
-    /// The backer for Prop8.
-    /// </summary>
-    private bool _prop8;
-
-    /// <summary>
-    /// The backer for Prop9.
-    /// </summary>
-    private string _prop9 = string.Empty;
-
-    /// <summary>
-    /// The backer for Prop10.
-    /// </summary>
-    private int _prop10;
-
-    /// <summary>
-    /// The backer for Prop11.
-    /// </summary>
-    private double _prop11;
-
-    /// <summary>
-    /// The backer for Prop12.
-    /// </summary>
-    private bool _prop12;
-
-    /// <summary>
-    /// The backer for Prop13.
-    /// </summary>
-    private string _prop13 = string.Empty;
-
-    /// <summary>
-    /// The backer for Prop14.
-    /// </summary>
-    private int _prop14;
-
-    /// <summary>
-    /// The backer for Prop15.
-    /// </summary>
-    private double _prop15;
-
-    /// <summary>
-    /// The backer for Prop16.
-    /// </summary>
-    private bool _prop16;
-
-    /// <summary>
-    /// The backer for Address.
-    /// </summary>
-    private Address _address = new();
+    /// <summary>Seed for <see cref="Prop15"/>.</summary>
+    private const double Prop15Seed = 15.0;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -105,326 +44,317 @@ public class BigViewModel : INotifyPropertyChanged, INotifyPropertyChanging
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets prop1 (string).
-    /// </summary>
+    /// <summary>Gets or sets prop1 (string).</summary>
     public string Prop1
     {
-        get => _prop1;
+        get => field;
         set
         {
-            if (_prop1 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop1)));
-            _prop1 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop1)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets prop2 (int).
-    /// </summary>
+    /// <summary>Gets or sets prop2 (int).</summary>
     public int Prop2
     {
-        get => _prop2;
+        get => field;
         set
         {
-            if (_prop2 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop2)));
-            _prop2 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop2)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets prop3 (double).
-    /// </summary>
+    /// <summary>Gets or sets prop3 (double).</summary>
     public double Prop3
     {
-        get => _prop3;
+        get => field;
         set
         {
-            if (Math.Abs(_prop3 - value) <= double.Epsilon)
+            if (Math.Abs(field - value) <= double.Epsilon)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop3)));
-            _prop3 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop3)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets a value indicating whether prop4 is true.
-    /// </summary>
+    /// <summary>Gets or sets a value indicating whether prop4 is true.</summary>
     public bool Prop4
     {
-        get => _prop4;
+        get => field;
         set
         {
-            if (_prop4 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop4)));
-            _prop4 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop4)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets prop5 (string).
-    /// </summary>
+    /// <summary>Gets or sets prop5 (string).</summary>
     public string Prop5
     {
-        get => _prop5;
+        get => field;
         set
         {
-            if (_prop5 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop5)));
-            _prop5 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop5)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets prop6 (int).
-    /// </summary>
+    /// <summary>Gets or sets prop6 (int).</summary>
     public int Prop6
     {
-        get => _prop6;
+        get => field;
         set
         {
-            if (_prop6 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop6)));
-            _prop6 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop6)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets prop7 (double).
-    /// </summary>
+    /// <summary>Gets or sets prop7 (double).</summary>
     public double Prop7
     {
-        get => _prop7;
+        get => field;
         set
         {
-            if (Math.Abs(_prop7 - value) <= double.Epsilon)
+            if (Math.Abs(field - value) <= double.Epsilon)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop7)));
-            _prop7 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop7)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets a value indicating whether prop8 is true.
-    /// </summary>
+    /// <summary>Gets or sets a value indicating whether prop8 is true.</summary>
     public bool Prop8
     {
-        get => _prop8;
+        get => field;
         set
         {
-            if (_prop8 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop8)));
-            _prop8 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop8)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets prop9 (string).
-    /// </summary>
+    /// <summary>Gets or sets prop9 (string).</summary>
     public string Prop9
     {
-        get => _prop9;
+        get => field;
         set
         {
-            if (_prop9 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop9)));
-            _prop9 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop9)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets prop10 (int).
-    /// </summary>
+    /// <summary>Gets or sets prop10 (int).</summary>
     public int Prop10
     {
-        get => _prop10;
+        get => field;
         set
         {
-            if (_prop10 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop10)));
-            _prop10 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop10)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets prop11 (double).
-    /// </summary>
+    /// <summary>Gets or sets prop11 (double).</summary>
     public double Prop11
     {
-        get => _prop11;
+        get => field;
         set
         {
-            if (Math.Abs(_prop11 - value) <= double.Epsilon)
+            if (Math.Abs(field - value) <= double.Epsilon)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop11)));
-            _prop11 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop11)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets a value indicating whether prop12 is true.
-    /// </summary>
+    /// <summary>Gets or sets a value indicating whether prop12 is true.</summary>
     public bool Prop12
     {
-        get => _prop12;
+        get => field;
         set
         {
-            if (_prop12 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop12)));
-            _prop12 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop12)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets prop13 (string).
-    /// </summary>
+    /// <summary>Gets or sets prop13 (string).</summary>
     public string Prop13
     {
-        get => _prop13;
+        get => field;
         set
         {
-            if (_prop13 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop13)));
-            _prop13 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop13)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets prop14 (int).
-    /// </summary>
+    /// <summary>Gets or sets prop14 (int).</summary>
     public int Prop14
     {
-        get => _prop14;
+        get => field;
         set
         {
-            if (_prop14 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop14)));
-            _prop14 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop14)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets prop15 (double).
-    /// </summary>
+    /// <summary>Gets or sets prop15 (double).</summary>
     public double Prop15
     {
-        get => _prop15;
+        get => field;
         set
         {
-            if (Math.Abs(_prop15 - value) <= double.Epsilon)
+            if (Math.Abs(field - value) <= double.Epsilon)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop15)));
-            _prop15 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop15)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets a value indicating whether prop16 is true.
-    /// </summary>
+    /// <summary>Gets or sets a value indicating whether prop16 is true.</summary>
     public bool Prop16
     {
-        get => _prop16;
+        get => field;
         set
         {
-            if (_prop16 == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Prop16)));
-            _prop16 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Prop16)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets the address for deep property chain testing.
-    /// </summary>
+    /// <summary>Gets or sets the address for deep property chain testing.</summary>
     public Address Address
     {
-        get => _address;
+        get => field;
         set
         {
-            if (_address == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Address)));
-            _address = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Address)));
         }
-    }
+    } = new();
+
+    /// <summary>
+    /// Creates an instance with every property set to a distinct non-default value, so a test observing
+    /// any subset of the sixteen properties starts from a fully populated model.
+    /// </summary>
+    /// <returns>A populated view model.</returns>
+    public static BigViewModel CreatePopulated() => new()
+    {
+        Prop1 = "a",
+        Prop2 = Prop2Seed,
+        Prop3 = Prop3Seed,
+        Prop4 = true,
+        Prop5 = "e",
+        Prop6 = Prop6Seed,
+        Prop7 = Prop7Seed,
+        Prop8 = false,
+        Prop9 = "i",
+        Prop10 = Prop10Seed,
+        Prop11 = Prop11Seed,
+        Prop12 = true,
+        Prop13 = "m",
+        Prop14 = Prop14Seed,
+        Prop15 = Prop15Seed,
+        Prop16 = false,
+    };
 }

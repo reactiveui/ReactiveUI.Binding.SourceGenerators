@@ -4,36 +4,24 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Represents a binding between a view and a view model property.
-/// </summary>
+/// <summary>Represents a binding between a view and a view model property.</summary>
 /// <typeparam name="TView">The type of the view.</typeparam>
 /// <typeparam name="TValue">The type of the bound value.</typeparam>
 public interface IReactiveBinding<out TView, out TValue> : IDisposable
     where TView : IViewFor
 {
-    /// <summary>
-    /// Gets the expression representing the view model property that is bound.
-    /// </summary>
+    /// <summary>Gets the expression representing the view model property that is bound.</summary>
     Expression? ViewModelExpression { get; }
 
-    /// <summary>
-    /// Gets the view that is bound.
-    /// </summary>
+    /// <summary>Gets the view that is bound.</summary>
     TView View { get; }
 
-    /// <summary>
-    /// Gets the expression representing the view property that is bound.
-    /// </summary>
+    /// <summary>Gets the expression representing the view property that is bound.</summary>
     Expression? ViewExpression { get; }
 
-    /// <summary>
-    /// Gets an observable that signals when the binding value changes.
-    /// </summary>
+    /// <summary>Gets an observable that signals when the binding value changes.</summary>
     IObservable<TValue> Changed { get; }
 
-    /// <summary>
-    /// Gets the direction of the binding.
-    /// </summary>
+    /// <summary>Gets the direction of the binding.</summary>
     BindingDirection Direction { get; }
 }

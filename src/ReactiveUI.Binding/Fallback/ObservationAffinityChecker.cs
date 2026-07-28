@@ -15,11 +15,7 @@ namespace ReactiveUI.Binding.Fallback;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class ObservationAffinityChecker
 {
-    /// <summary>
-    /// Returns <see langword="true"/> if any registered <see cref="ICreatesObservableForProperty"/>
-    /// implementation reports a higher affinity than <paramref name="generatedAffinity"/>
-    /// for the given type.
-    /// </summary>
+    /// <summary>Returns <see langword="true"/> if a registered <see cref="ICreatesObservableForProperty"/> outranks <paramref name="generatedAffinity"/>.</summary>
     /// <param name="type">The type being observed.</param>
     /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
     /// <param name="beforeChanged">Whether before-change (PropertyChanging) observation is requested.</param>

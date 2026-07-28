@@ -6,87 +6,63 @@ using System.ComponentModel;
 
 namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
-/// <summary>
-/// An address model for testing deep property chains.
-/// Implements both INotifyPropertyChanged and INotifyPropertyChanging.
-/// </summary>
+/// <summary>An address model for testing deep property chains. Implements both INotifyPropertyChanged and INotifyPropertyChanging.</summary>
 public class Address : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backer for Street.
-    /// </summary>
-    private string _street = string.Empty;
-
-    /// <summary>
-    /// The backer for City.
-    /// </summary>
-    private string _city = string.Empty;
-
-    /// <summary>
-    /// The backer for ZipCode.
-    /// </summary>
-    private string _zipCode = string.Empty;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the street.
-    /// </summary>
+    /// <summary>Gets or sets the street.</summary>
     public string Street
     {
-        get => _street;
+        get => field;
         set
         {
-            if (_street == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Street)));
-            _street = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Street)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the city.
-    /// </summary>
+    /// <summary>Gets or sets the city.</summary>
     public string City
     {
-        get => _city;
+        get => field;
         set
         {
-            if (_city == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(City)));
-            _city = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(City)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the zip code.
-    /// </summary>
+    /// <summary>Gets or sets the zip code.</summary>
     public string ZipCode
     {
-        get => _zipCode;
+        get => field;
         set
         {
-            if (_zipCode == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(ZipCode)));
-            _zipCode = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(ZipCode)));
         }
-    }
+    } = string.Empty;
 }

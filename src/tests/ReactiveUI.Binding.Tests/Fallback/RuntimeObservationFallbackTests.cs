@@ -9,39 +9,35 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.Fallback;
 
-/// <summary>
-/// Tests for the <see cref="RuntimeObservationFallback"/> class.
-/// </summary>
+/// <summary>Tests for the <see cref="RuntimeObservationFallback"/> class.</summary>
 public class RuntimeObservationFallbackTests
 {
-    /// <summary>
-    /// A sample name value used across the multi-property tests.
-    /// </summary>
+    /// <summary>The value the view model starts with.</summary>
+    private const string InitialValue = "Initial";
+
+    /// <summary>The value assigned to trigger a notification.</summary>
+    private const string ChangedValue = "Changed";
+
+    /// <summary>A sample name value used across the multi-property tests.</summary>
     private const string SampleName = "Alice";
 
-    /// <summary>
-    /// A sample age value used across the multi-property tests.
-    /// </summary>
+    /// <summary>A sample age value used across the multi-property tests.</summary>
     private const int SampleAge = 30;
 
     /// <summary>The sample city value used across the fallback tests.</summary>
     private const string SampleCity = "Seattle";
 
-    /// <summary>
-    /// The expected number of emissions when an initial value plus one change are observed.
-    /// </summary>
+    /// <summary>The expected number of emissions when an initial value plus one change are observed.</summary>
     private const int ExpectedTwoEmissions = 2;
 
-    /// <summary>
-    /// Verifies that WhenChanged emits the initial value and subsequent changes.
-    /// </summary>
+    /// <summary>Verifies that WhenChanged emits the initial value and subsequent changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenChanged_SingleProperty_EmitsInitialAndChanges()
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Initial" };
+        var vm = new TestViewModel { Name = InitialValue };
         var values = new List<string>();
 
         using var sub = RuntimeObservationFallback.WhenChanged(
@@ -49,23 +45,21 @@ public class RuntimeObservationFallbackTests
                 x => x.Name)
             .Subscribe(values.Add);
 
-        vm.Name = "Changed";
+        vm.Name = ChangedValue;
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
-        await Assert.That(values[0]).IsEqualTo("Initial");
-        await Assert.That(values[1]).IsEqualTo("Changed");
+        await Assert.That(values[0]).IsEqualTo(InitialValue);
+        await Assert.That(values[1]).IsEqualTo(ChangedValue);
     }
 
-    /// <summary>
-    /// Verifies that WhenChanging emits before-change notifications.
-    /// </summary>
+    /// <summary>Verifies that WhenChanging emits before-change notifications.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenChanging_SingleProperty_EmitsBeforeChange()
     {
         EnsureInitialized();
 
-        var vm = new TestViewModel { Name = "Initial" };
+        var vm = new TestViewModel { Name = InitialValue };
         var values = new List<string>();
 
         using var sub = RuntimeObservationFallback.WhenChanging(
@@ -73,15 +67,13 @@ public class RuntimeObservationFallbackTests
                 x => x.Name)
             .Subscribe(values.Add);
 
-        vm.Name = "Changed";
+        vm.Name = ChangedValue;
 
         // Before-change should emit the old value at the time of notification
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that WhenAnyValue emits the initial and subsequent values.
-    /// </summary>
+    /// <summary>Verifies that WhenAnyValue emits the initial and subsequent values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenAnyValue_SingleProperty_EmitsValues()
@@ -102,9 +94,7 @@ public class RuntimeObservationFallbackTests
         await Assert.That(values[0]).IsEqualTo("Start");
     }
 
-    /// <summary>
-    /// Verifies that WhenChanged with two properties emits tuples.
-    /// </summary>
+    /// <summary>Verifies that WhenChanged with two properties emits tuples.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenChanged_TwoProperties_EmitsTuples()
@@ -125,9 +115,7 @@ public class RuntimeObservationFallbackTests
         await Assert.That(values[0].Value2).IsEqualTo(SampleAge);
     }
 
-    /// <summary>
-    /// Verifies that WhenChanged with three properties emits tuples.
-    /// </summary>
+    /// <summary>Verifies that WhenChanged with three properties emits tuples.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenChanged_ThreeProperties_EmitsTuples()
@@ -150,9 +138,7 @@ public class RuntimeObservationFallbackTests
         await Assert.That(values[0].Value3).IsEqualTo(SampleCity);
     }
 
-    /// <summary>
-    /// Verifies that WhenChanged emits after property changes with three properties.
-    /// </summary>
+    /// <summary>Verifies that WhenChanged emits after property changes with three properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenChanged_ThreeProperties_UpdatesOnChange()
@@ -175,9 +161,7 @@ public class RuntimeObservationFallbackTests
         await Assert.That(values[^1].Value1).IsEqualTo("Bob");
     }
 
-    /// <summary>
-    /// Verifies that WhenChanging with two properties emits tuples.
-    /// </summary>
+    /// <summary>Verifies that WhenChanging with two properties emits tuples.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenChanging_TwoProperties_EmitsTuples()
@@ -198,9 +182,7 @@ public class RuntimeObservationFallbackTests
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that WhenChanging with three properties emits tuples.
-    /// </summary>
+    /// <summary>Verifies that WhenChanging with three properties emits tuples.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenChanging_ThreeProperties_EmitsTuples()
@@ -222,9 +204,7 @@ public class RuntimeObservationFallbackTests
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that WhenAnyValue with two properties emits tuples.
-    /// </summary>
+    /// <summary>Verifies that WhenAnyValue with two properties emits tuples.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenAnyValue_TwoProperties_EmitsTuples()
@@ -245,9 +225,7 @@ public class RuntimeObservationFallbackTests
         await Assert.That(values[0].Value2).IsEqualTo(SampleAge);
     }
 
-    /// <summary>
-    /// Verifies that WhenAnyValue with three properties emits tuples.
-    /// </summary>
+    /// <summary>Verifies that WhenAnyValue with three properties emits tuples.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenAnyValue_ThreeProperties_EmitsTuples()
@@ -270,9 +248,7 @@ public class RuntimeObservationFallbackTests
         await Assert.That(values[0].Value3).IsEqualTo(SampleCity);
     }
 
-    /// <summary>
-    /// Verifies that WhenAnyValue with two properties updates on change.
-    /// </summary>
+    /// <summary>Verifies that WhenAnyValue with two properties updates on change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenAnyValue_TwoProperties_UpdatesOnChange()
@@ -294,13 +270,11 @@ public class RuntimeObservationFallbackTests
         await Assert.That(values[^1].Value1).IsEqualTo("Bob");
     }
 
-    /// <summary>
-    /// Resets and initializes the ReactiveUI binding infrastructure for testing.
-    /// </summary>
+    /// <summary>Resets and initializes the ReactiveUI binding infrastructure for testing.</summary>
     internal static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();
-        RxBindingBuilder.CreateReactiveUIBindingBuilder()
+        _ = RxBindingBuilder.CreateReactiveUIBindingBuilder()
             .WithCoreServices()
             .BuildApp();
     }

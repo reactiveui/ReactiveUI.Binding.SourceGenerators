@@ -4,9 +4,7 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts any value to <see cref="bool"/> by comparing it with a hint value using <see cref="object.Equals(object, object)"/>.
-/// </summary>
+/// <summary>Converts any value to <see cref="bool"/> by comparing it with a hint value using <see cref="object.Equals(object, object)"/>.</summary>
 /// <remarks>
 /// <para>
 /// This converter is useful for binding scenarios where you need to determine if a value

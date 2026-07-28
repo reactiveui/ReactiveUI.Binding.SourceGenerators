@@ -4,14 +4,16 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for the EqualityTypeConverter which compares objects for equality.
-/// </summary>
+/// <summary>Tests for the EqualityTypeConverter which compares objects for equality.</summary>
 public class EqualityTypeConverterTests
 {
-    /// <summary>
-    ///     Verifies FromType ReturnsObjectType.
-    /// </summary>
+    /// <summary>A value deliberately different from SampleValue, so equality fails.</summary>
+    private const int DifferentValue = 43;
+
+    /// <summary>A sample value used by these tests.</summary>
+    private const int SampleValue = 42;
+
+    /// <summary>Verifies FromType ReturnsObjectType.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task FromType_ReturnsObjectType()
@@ -20,9 +22,7 @@ public class EqualityTypeConverterTests
         await Assert.That(converter.FromType).IsEqualTo(typeof(object));
     }
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns1.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns1.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns1()
@@ -32,9 +32,7 @@ public class EqualityTypeConverterTests
         await Assert.That(affinity).IsEqualTo(1);
     }
 
-    /// <summary>
-    ///     Verifies ToType ReturnsBoolType.
-    /// </summary>
+    /// <summary>Verifies ToType ReturnsBoolType.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ToType_ReturnsBoolType()
@@ -43,9 +41,7 @@ public class EqualityTypeConverterTests
         await Assert.That(converter.ToType).IsEqualTo(typeof(bool));
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped BothNull ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped BothNull ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_BothNull_ReturnsTrue()
@@ -58,9 +54,7 @@ public class EqualityTypeConverterTests
         await Assert.That((bool)output!).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped DifferentIntegers ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped DifferentIntegers ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_DifferentIntegers_ReturnsFalse()
@@ -68,15 +62,13 @@ public class EqualityTypeConverterTests
         var converter = new EqualityTypeConverter();
         const int obj = 42;
 
-        var result = converter.TryConvertTyped(obj, 43, out var output);
+        var result = converter.TryConvertTyped(obj, DifferentValue, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That((bool)output!).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped DifferentTypes ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped DifferentTypes ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_DifferentTypes_ReturnsFalse()
@@ -84,15 +76,13 @@ public class EqualityTypeConverterTests
         var converter = new EqualityTypeConverter();
         const string obj = "42";
 
-        var result = converter.TryConvertTyped(obj, 42, out var output);
+        var result = converter.TryConvertTyped(obj, SampleValue, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That((bool)output!).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped DifferentValues ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped DifferentValues ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_DifferentValues_ReturnsFalse()
@@ -106,9 +96,7 @@ public class EqualityTypeConverterTests
         await Assert.That((bool)output!).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped EqualIntegers ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped EqualIntegers ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_EqualIntegers_ReturnsTrue()
@@ -116,15 +104,13 @@ public class EqualityTypeConverterTests
         var converter = new EqualityTypeConverter();
         const int obj = 42;
 
-        var result = converter.TryConvertTyped(obj, 42, out var output);
+        var result = converter.TryConvertTyped(obj, SampleValue, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That((bool)output!).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped EqualStrings ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped EqualStrings ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_EqualStrings_ReturnsTrue()
@@ -138,9 +124,7 @@ public class EqualityTypeConverterTests
         await Assert.That((bool)output!).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped EqualValues ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped EqualValues ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_EqualValues_ReturnsTrue()
@@ -154,9 +138,7 @@ public class EqualityTypeConverterTests
         await Assert.That((bool)output!).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped NoConversionHint UseNullComparison.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped NoConversionHint UseNullComparison.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_NoConversionHint_UseNullComparison()
@@ -170,9 +152,7 @@ public class EqualityTypeConverterTests
         await Assert.That((bool)output!).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped OneNull ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped OneNull ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_OneNull_ReturnsFalse()
@@ -188,9 +168,7 @@ public class EqualityTypeConverterTests
         await Assert.That((bool)output2!).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped ReferenceEquality ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped ReferenceEquality ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_ReferenceEquality_ReturnsTrue()
@@ -204,9 +182,7 @@ public class EqualityTypeConverterTests
         await Assert.That((bool)output!).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped ValueEquality ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped ValueEquality ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_ValueEquality_ReturnsTrue()

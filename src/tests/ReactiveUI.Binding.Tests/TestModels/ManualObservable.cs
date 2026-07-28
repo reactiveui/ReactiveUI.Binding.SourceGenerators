@@ -12,10 +12,8 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// <typeparam name="T">The element type.</typeparam>
 internal sealed class ManualObservable<T> : IObservable<T>
 {
-    /// <summary>
-    /// Gets the observer that was passed to Subscribe.
-    /// </summary>
-    public IObserver<T>? Observer { get; private set; }
+    /// <summary>Gets the observer that was passed to Subscribe.</summary>
+    internal IObserver<T>? Observer { get; private set; }
 
     /// <inheritdoc/>
     public IDisposable Subscribe(IObserver<T> observer)
@@ -24,9 +22,7 @@ internal sealed class ManualObservable<T> : IObservable<T>
         return new NoOpDisposable();
     }
 
-    /// <summary>
-    /// A disposable that performs no action on dispose.
-    /// </summary>
+    /// <summary>A disposable that performs no action on dispose.</summary>
     private sealed class NoOpDisposable : IDisposable
     {
         /// <inheritdoc/>

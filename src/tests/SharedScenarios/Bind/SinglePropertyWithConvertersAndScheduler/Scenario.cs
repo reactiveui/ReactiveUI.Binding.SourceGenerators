@@ -7,14 +7,10 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler;
 
-/// <summary>
-/// Exercises Bind (view-first two-way) with conversion functions and a scheduler.
-/// </summary>
+/// <summary>Exercises Bind (view-first two-way) with conversion functions and a scheduler.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a two-way binding between ViewModel.Count and View.CountText with converters and scheduler.
-    /// </summary>
+    /// <summary>Creates a two-way binding between ViewModel.Count and View.CountText with converters and scheduler.</summary>
     /// <param name="view">The target view.</param>
     /// <param name="vm">The source view model.</param>
     /// <param name="scheduler">The scheduler to observe on.</param>

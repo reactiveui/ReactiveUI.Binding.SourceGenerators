@@ -6,34 +6,25 @@ using System.ComponentModel;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
-/// <summary>
-/// A child view model for deep chain benchmarks.
-/// </summary>
+/// <summary>A child view model for deep chain benchmarks.</summary>
 public class BenchmarkChildViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for the <see cref="Value"/> property.
-    /// </summary>
-    private string _value = string.Empty;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the value.
-    /// </summary>
+    /// <summary>Gets or sets the value.</summary>
     public string Value
     {
-        get => _value;
+        get => field;
         set
         {
-            if (_value == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value)));
         }
-    }
+    } = string.Empty;
 }

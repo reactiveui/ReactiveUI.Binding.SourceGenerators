@@ -6,14 +6,10 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Tests for <see cref="RoslynHelpers"/> predicate methods.
-/// </summary>
+/// <summary>Tests for <see cref="RoslynHelpers"/> predicate methods.</summary>
 public class RoslynHelpersTests
 {
-    /// <summary>
-    /// Verifies that GetMemberAccessName returns the method name for a member access invocation.
-    /// </summary>
+    /// <summary>Verifies that GetMemberAccessName returns the method name for a member access invocation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetMemberAccessName_MemberAccessInvocation_ReturnsName()
@@ -26,9 +22,7 @@ public class RoslynHelpersTests
         await Assert.That(result).IsEqualTo("WhenChanged");
     }
 
-    /// <summary>
-    /// Verifies that GetMemberAccessName returns null for a non-invocation node.
-    /// </summary>
+    /// <summary>Verifies that GetMemberAccessName returns null for a non-invocation node.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetMemberAccessName_NonInvocation_ReturnsNull()
@@ -40,9 +34,7 @@ public class RoslynHelpersTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that GetMemberAccessName returns null for a simple invocation without member access.
-    /// </summary>
+    /// <summary>Verifies that GetMemberAccessName returns null for a simple invocation without member access.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetMemberAccessName_SimpleInvocation_ReturnsNull()
@@ -54,9 +46,7 @@ public class RoslynHelpersTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies IsBindSpecificInvocation returns true only for Bind method name.
-    /// </summary>
+    /// <summary>Verifies IsBindSpecificInvocation returns true only for Bind method name.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsBindSpecificInvocation_BindMethod_ReturnsTrue()
@@ -69,9 +59,7 @@ public class RoslynHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies IsBindSpecificInvocation returns false for BindOneWay method.
-    /// </summary>
+    /// <summary>Verifies IsBindSpecificInvocation returns false for BindOneWay method.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsBindSpecificInvocation_BindOneWayMethod_ReturnsFalse()
@@ -84,9 +72,7 @@ public class RoslynHelpersTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies IsBindOneWaySpecificInvocation returns true for BindOneWay.
-    /// </summary>
+    /// <summary>Verifies IsBindOneWaySpecificInvocation returns true for BindOneWay.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsBindOneWaySpecificInvocation_BindOneWayMethod_ReturnsTrue()
@@ -99,9 +85,7 @@ public class RoslynHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies IsBindOneWaySpecificInvocation returns false for BindTwoWay.
-    /// </summary>
+    /// <summary>Verifies IsBindOneWaySpecificInvocation returns false for BindTwoWay.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsBindOneWaySpecificInvocation_BindTwoWayMethod_ReturnsFalse()
@@ -114,9 +98,7 @@ public class RoslynHelpersTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies IsBindTwoWaySpecificInvocation returns true for BindTwoWay.
-    /// </summary>
+    /// <summary>Verifies IsBindTwoWaySpecificInvocation returns true for BindTwoWay.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsBindTwoWaySpecificInvocation_BindTwoWayMethod_ReturnsTrue()
@@ -129,9 +111,7 @@ public class RoslynHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies IsOneWayBindSpecificInvocation returns true for OneWayBind.
-    /// </summary>
+    /// <summary>Verifies IsOneWayBindSpecificInvocation returns true for OneWayBind.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsOneWayBindSpecificInvocation_OneWayBindMethod_ReturnsTrue()
@@ -144,9 +124,7 @@ public class RoslynHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies IsOneWayBindSpecificInvocation returns false for Bind.
-    /// </summary>
+    /// <summary>Verifies IsOneWayBindSpecificInvocation returns false for Bind.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsOneWayBindSpecificInvocation_BindMethod_ReturnsFalse()
@@ -159,9 +137,7 @@ public class RoslynHelpersTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies specific predicates return false for non-invocation nodes.
-    /// </summary>
+    /// <summary>Verifies specific predicates return false for non-invocation nodes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SpecificPredicates_NonInvocation_ReturnFalse()

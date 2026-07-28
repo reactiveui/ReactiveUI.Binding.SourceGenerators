@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="string"/> to nullable <see cref="decimal"/> using <see cref="decimal.TryParse(string?, out decimal)"/>.
-/// </summary>
+/// <summary>Converts <see cref="string"/> to nullable <see cref="decimal"/> using <see cref="decimal.TryParse(string?, out decimal)"/>.</summary>
 public sealed class StringToNullableDecimalTypeConverter : BindingTypeConverter<string, decimal?>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

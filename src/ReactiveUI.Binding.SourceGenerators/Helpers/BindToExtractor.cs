@@ -14,14 +14,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 /// </summary>
 internal static class BindToExtractor
 {
-    /// <summary>
-    /// The minimum number of arguments a BindTo invocation must have (target, property).
-    /// </summary>
+    /// <summary>The minimum number of arguments a BindTo invocation must have (target, property).</summary>
     private const int MinimumBindToArgumentCount = 2;
 
-    /// <summary>
-    /// Pipeline B transform: extracts <see cref="BindToInvocationInfo"/> from a <c>BindTo</c> invocation.
-    /// </summary>
+    /// <summary>Pipeline B transform: extracts <see cref="BindToInvocationInfo"/> from a <c>BindTo</c> invocation.</summary>
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A <see cref="BindToInvocationInfo"/> POCO, or null if the invocation is not analyzable.</returns>
@@ -32,7 +28,7 @@ internal static class BindToExtractor
 
         var semanticModel = context.SemanticModel;
         var methodSymbol = ExtractorValidation.ExtractMethodSymbol(semanticModel.GetSymbolInfo(invocation, ct));
-        if (methodSymbol == null)
+        if (methodSymbol is null)
         {
             return null;
         }
@@ -52,27 +48,27 @@ internal static class BindToExtractor
         // The source value type is the T in the receiver's IObservable<T>.
         var receiverType = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type;
         var sourceValueType = GetObservableValueType(receiverType);
-        if (sourceValueType == null)
+        if (sourceValueType is null)
         {
             return null;
         }
 
         var targetPropertyArg = args[1].Expression;
         var targetPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(targetPropertyArg, semanticModel, ct);
-        if (targetPropertyPath == null || targetPropertyPath.Length == 0)
+        if (targetPropertyPath is null || targetPropertyPath.Length == 0)
         {
             return null;
         }
 
         var targetTypeName =
             ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
-        if (targetTypeName == null)
+        if (targetTypeName is null)
         {
             return null;
         }
 
         var sourceValueTypeFullName = sourceValueType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        var targetPropertyTypeFullName = targetPropertyPath[targetPropertyPath.Length - 1].PropertyTypeFullName;
+        var targetPropertyTypeFullName = targetPropertyPath[^1].PropertyTypeFullName;
 
         DetectConversionParameters(methodSymbol, out var hasConversionHint, out var hasConverterOverride);
 

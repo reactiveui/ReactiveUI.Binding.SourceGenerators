@@ -8,14 +8,10 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
-/// <summary>
-/// Extracts <see cref="ViewRegistrationInfo"/> from class declarations implementing <c>IViewFor&lt;T&gt;</c>.
-/// </summary>
+/// <summary>Extracts <see cref="ViewRegistrationInfo"/> from class declarations implementing <c>IViewFor&lt;T&gt;</c>.</summary>
 internal static class ViewRegistrationExtractor
 {
-    /// <summary>
-    /// Extracts a <see cref="ViewRegistrationInfo"/> from a class that implements <c>IViewFor&lt;T&gt;</c>.
-    /// </summary>
+    /// <summary>Extracts a <see cref="ViewRegistrationInfo"/> from a class that implements <c>IViewFor&lt;T&gt;</c>.</summary>
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A <see cref="ViewRegistrationInfo"/> if the class implements <c>IViewFor&lt;T&gt;</c>; otherwise, <see langword="null"/>.</returns>
@@ -31,7 +27,7 @@ internal static class ViewRegistrationExtractor
             return null;
         }
 
-        var iViewForGeneric = semanticModel.Compilation.GetTypeByMetadataName(
+        var viewForGenericInterface = semanticModel.Compilation.GetTypeByMetadataName(
             Constants.IViewForGenericMetadataName);
 
         // Walk AllInterfaces to find IViewFor<T>
@@ -41,9 +37,9 @@ internal static class ViewRegistrationExtractor
             ct.ThrowIfCancellationRequested();
             var iface = allInterfaces[i];
 
-            if (iViewForGeneric is object
+            if (viewForGenericInterface is not null
                 && iface.IsGenericType
-                && SymbolEqualityComparer.Default.Equals(iface.OriginalDefinition, iViewForGeneric)
+                && SymbolEqualityComparer.Default.Equals(iface.OriginalDefinition, viewForGenericInterface)
                 && iface.TypeArguments.Length == 1)
             {
                 // Check [ExcludeFromViewRegistration] only after confirming IViewFor<T> is
@@ -74,9 +70,7 @@ internal static class ViewRegistrationExtractor
         return null;
     }
 
-    /// <summary>
-    /// Checks whether the type has the specified attribute applied.
-    /// </summary>
+    /// <summary>Checks whether the type has the specified attribute applied.</summary>
     /// <param name="type">The type to check.</param>
     /// <param name="attributeMetadataName">The metadata name of the attribute.</param>
     /// <param name="compilation">The compilation for symbol resolution.</param>
@@ -100,9 +94,7 @@ internal static class ViewRegistrationExtractor
         return false;
     }
 
-    /// <summary>
-    /// Extracts the contract string from <c>[ViewContract("...")]</c> if present.
-    /// </summary>
+    /// <summary>Extracts the contract string from <c>[ViewContract("...")]</c> if present.</summary>
     /// <param name="type">The type to check.</param>
     /// <param name="compilation">The compilation for symbol resolution.</param>
     /// <returns>The contract string, or <see langword="null"/> if not present.</returns>
@@ -128,9 +120,7 @@ internal static class ViewRegistrationExtractor
         return null;
     }
 
-    /// <summary>
-    /// Checks whether the type has an accessible parameterless constructor (public or internal).
-    /// </summary>
+    /// <summary>Checks whether the type has an accessible parameterless constructor (public or internal).</summary>
     /// <param name="type">The type to check.</param>
     /// <returns><see langword="true"/> if a parameterless constructor is accessible; otherwise, <see langword="false"/>.</returns>
     private static bool HasAccessibleParameterlessConstructor(INamedTypeSymbol type)
@@ -139,7 +129,7 @@ internal static class ViewRegistrationExtractor
         for (var i = 0; i < constructors.Length; i++)
         {
             var ctor = constructors[i];
-            if (ctor.Parameters.Length == 0
+            if (ctor.Parameters.IsEmpty
                 && (ctor.DeclaredAccessibility == Accessibility.Public
                     || ctor.DeclaredAccessibility == Accessibility.Internal))
             {

@@ -19,6 +19,12 @@
     <DefineConstants>$(DefineConstants);WINUI_TARGET</DefineConstants>
   </PropertyGroup>
 
+  <!-- The WinUI DependencyProperty observer is guarded with #if WINUI_TARGET, so exclude the source
+       on the non-Windows targets rather than compiling a file that declares nothing there. -->
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'windows'">
+    <Compile Remove="DependencyObjectObservableForProperty.cs"/>
+  </ItemGroup>
+
   <ItemGroup>
     <Using Include="System"/>
     <Using Include="System.ComponentModel"/>

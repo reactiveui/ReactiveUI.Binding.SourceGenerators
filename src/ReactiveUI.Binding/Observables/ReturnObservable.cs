@@ -6,10 +6,7 @@ using System.ComponentModel;
 
 namespace ReactiveUI.Binding.Observables;
 
-/// <summary>
-/// An observable that emits a single value and then completes.
-/// Lightweight replacement for <c>Observable.Return&lt;T&gt;(value)</c>.
-/// </summary>
+/// <summary>An observable that emits a single value and then completes. Lightweight replacement for <c>Observable.Return&lt;T&gt;(value)</c>.</summary>
 /// <typeparam name="T">The type of the value.</typeparam>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ReturnObservable<T> : IObservable<T>
@@ -20,9 +17,7 @@ public sealed class ReturnObservable<T> : IObservable<T>
     /// </summary>
     private readonly T? _value;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ReturnObservable{T}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="ReturnObservable{T}"/> class.</summary>
     /// <param name="value">The value to emit; may be <see langword="null"/> for reference types.</param>
     public ReturnObservable(T? value) => _value = value;
 

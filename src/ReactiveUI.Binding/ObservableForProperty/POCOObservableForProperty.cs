@@ -11,15 +11,9 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 /// Final fallback implementation for observation when no observable mechanism is available.
 /// Emits exactly one value (the current value at subscription time) and then never emits again.
 /// </summary>
-[SuppressMessage(
-    "Minor Code Smell",
-    "S101:Types should be named in PascalCase",
-    Justification = "POCO is an established acronym (Plain Old CLR Object) and matches the ReactiveUI public API name.")]
 public sealed class POCOObservableForProperty : ICreatesObservableForProperty
 {
-    /// <summary>
-    /// Tracks which (type, property) pairs have already emitted a POCO warning to avoid duplicate messages.
-    /// </summary>
+    /// <summary>Tracks which (type, property) pairs have already emitted a POCO warning to avoid duplicate messages.</summary>
     private static readonly ConcurrentDictionary<(Type Type, string PropertyName), byte> HasWarned = new();
 
     /// <inheritdoc/>

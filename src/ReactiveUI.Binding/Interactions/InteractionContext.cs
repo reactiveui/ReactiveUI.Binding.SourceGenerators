@@ -4,9 +4,7 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Contains contextual information for an interaction.
-/// </summary>
+/// <summary>Contains contextual information for an interaction.</summary>
 /// <remarks>
 /// <para>
 /// Instances of this class are passed into interaction handlers. The <see cref="Input"/> property exposes
@@ -23,19 +21,13 @@ namespace ReactiveUI.Binding;
 /// <typeparam name="TOutput">The type of the interaction's output.</typeparam>
 public sealed class InteractionContext<TInput, TOutput> : IOutputContext<TInput, TOutput>
 {
-    /// <summary>
-    /// The output value set by a handler via <see cref="SetOutput"/>.
-    /// </summary>
+    /// <summary>The output value set by a handler via <see cref="SetOutput"/>.</summary>
     private TOutput _output = default!;
 
-    /// <summary>
-    /// Tracks whether the output has been set (0 = not set, 1 = set).
-    /// </summary>
+    /// <summary>Tracks whether the output has been set (0 = not set, 1 = set).</summary>
     private int _outputSet;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="InteractionContext{TInput, TOutput}"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="InteractionContext{TInput, TOutput}"/> class.</summary>
     /// <param name="input">The input value for this interaction.</param>
     internal InteractionContext(TInput input) => Input = input;
 
@@ -43,7 +35,7 @@ public sealed class InteractionContext<TInput, TOutput> : IOutputContext<TInput,
     public TInput Input { get; }
 
     /// <inheritdoc />
-    public bool IsHandled => _outputSet == 1;
+    public bool IsHandled => Volatile.Read(ref _outputSet) == 1;
 
     /// <inheritdoc />
     public void SetOutput(TOutput output)
@@ -59,7 +51,7 @@ public sealed class InteractionContext<TInput, TOutput> : IOutputContext<TInput,
     /// <inheritdoc />
     public TOutput GetOutput()
     {
-        if (_outputSet == 0)
+        if (Volatile.Read(ref _outputSet) == 0)
         {
             throw new InvalidOperationException("Output has not been set.");
         }
@@ -67,9 +59,7 @@ public sealed class InteractionContext<TInput, TOutput> : IOutputContext<TInput,
         return _output;
     }
 
-    /// <summary>
-    /// Atomically claims the output slot.
-    /// </summary>
+    /// <summary>Atomically claims the output slot.</summary>
     /// <returns><see langword="true"/> if the claim was successful; <see langword="false"/> if already set.</returns>
     [ExcludeFromCodeCoverage]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

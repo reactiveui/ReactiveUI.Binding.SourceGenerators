@@ -31,13 +31,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
             {
-                return __BindTwoWay_000013957A2E95F4(source, target, sourceToTargetConv, targetToSourceConv);
+                return __BindTwoWay_000013957A2E9404(source, target, sourceToTargetConv, targetToSourceConv);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_000013957A2E95F4(global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyView target, global::System.Func<int, string> sourceToTargetConv, global::System.Func<string, int> targetToSourceConv)
+        private static global::System.IDisposable __BindTwoWay_000013957A2E9404(global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyView target, global::System.Func<int, string> sourceToTargetConv, global::System.Func<string, int> targetToSourceConv)
         {
             // BindTwoWay: Count <-> CountText (with conversion)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(

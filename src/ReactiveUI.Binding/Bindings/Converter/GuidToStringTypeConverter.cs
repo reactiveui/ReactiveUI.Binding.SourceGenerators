@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Converts <see cref="Guid"/> to <see cref="string"/> using the "D" format (standard hyphenated format).
-/// </summary>
+/// <summary>Converts <see cref="Guid"/> to <see cref="string"/> using the "D" format (standard hyphenated format).</summary>
 public sealed class GuidToStringTypeConverter : BindingTypeConverter<Guid, string>
 {
-    /// <summary>
-    /// The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.
-    /// </summary>
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
     private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
 
     /// <inheritdoc/>

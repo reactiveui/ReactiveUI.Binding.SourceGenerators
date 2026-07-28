@@ -9,18 +9,13 @@ using System.Diagnostics;
 
 namespace System.Diagnostics.CodeAnalysis;
 
-/// <summary>
-/// Specifies that when a method returns <see cref="ReturnValue"/>,
-/// the parameter may be <see langword="null"/> even if the corresponding type disallows it.
-/// </summary>
+/// <summary>Specifies that when a method returns <see cref="ReturnValue"/>, the parameter may be <see langword="null"/> even if the corresponding type disallows it.</summary>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
 [AttributeUsage(AttributeTargets.Parameter)]
 internal sealed class MaybeNullWhenAttribute : Attribute
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MaybeNullWhenAttribute"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="MaybeNullWhenAttribute"/> class.</summary>
     /// <param name="returnValue">
     /// The return value condition. If the method returns this value,
     /// the associated parameter may be <see langword="null"/>.
@@ -31,7 +26,7 @@ internal sealed class MaybeNullWhenAttribute : Attribute
     /// Gets a value indicating whether the return condition has been satisfied.
     /// If the method returns this value, the associated parameter may be <see langword="null"/>.
     /// </summary>
-    public bool ReturnValue { get; }
+    internal bool ReturnValue { get; }
 }
 
 #else

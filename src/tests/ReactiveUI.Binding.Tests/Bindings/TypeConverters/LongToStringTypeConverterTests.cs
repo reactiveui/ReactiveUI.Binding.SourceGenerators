@@ -4,19 +4,16 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for the <see cref="LongToStringTypeConverter"/> type converter.
-/// </summary>
+/// <summary>Tests for the <see cref="LongToStringTypeConverter"/> type converter.</summary>
 public class LongToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>The conversion hint passed to the converter, which selects the output format.</summary>
+    private const int ConversionHint = 10;
+
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,9 +23,7 @@ public class LongToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert LongToString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert LongToString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_LongToString_Succeeds()
@@ -42,9 +37,7 @@ public class LongToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("123456789012");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MaxValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MaxValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MaxValue_Succeeds()
@@ -58,9 +51,7 @@ public class LongToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(long.MaxValue.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MinValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MinValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MinValue_Succeeds()
@@ -74,9 +65,7 @@ public class LongToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(long.MinValue.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithConversionHint FormatsCorrectly.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithConversionHint FormatsCorrectly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
@@ -84,15 +73,13 @@ public class LongToStringTypeConverterTests
         var converter = new LongToStringTypeConverter();
         const long value = 42;
 
-        var result = converter.TryConvert(value, 10, out var output);
+        var result = converter.TryConvert(value, ConversionHint, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("0000000042");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert with a string format hint formats correctly.
-    /// </summary>
+    /// <summary>Verifies TryConvert with a string format hint formats correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()

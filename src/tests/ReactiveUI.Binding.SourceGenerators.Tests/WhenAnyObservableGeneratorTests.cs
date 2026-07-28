@@ -7,14 +7,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for WhenAnyObservable (Switch/Merge/CombineLatest) invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for WhenAnyObservable (Switch/Merge/CombineLatest) invocation generation.</summary>
 public class WhenAnyObservableGeneratorTests
 {
-    /// <summary>
-    /// Verifies WhenAnyObservable with a single observable property (Switch pattern).
-    /// </summary>
+    /// <summary>Verifies WhenAnyObservable with a single observable property (Switch pattern).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleObservable()
@@ -28,9 +24,7 @@ public class WhenAnyObservableGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyObservable with two same-type observable properties (Merge pattern).
-    /// </summary>
+    /// <summary>Verifies WhenAnyObservable with two same-type observable properties (Merge pattern).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoObservables_Merge()
@@ -44,9 +38,7 @@ public class WhenAnyObservableGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyObservable with two different-type observable properties and a selector (CombineLatest pattern).
-    /// </summary>
+    /// <summary>Verifies WhenAnyObservable with two different-type observable properties and a selector (CombineLatest pattern).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoObservables_WithSelector()
@@ -77,9 +69,7 @@ public class WhenAnyObservableGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyObservable with a deep property chain in the Switch pattern (x => x.Child.MyCommand).
-    /// </summary>
+    /// <summary>Verifies WhenAnyObservable with a deep property chain in the Switch pattern (x => x.Child.MyCommand).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleObservable_DeepChain()
@@ -93,9 +83,7 @@ public class WhenAnyObservableGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyObservable with deep property chains in a Merge pattern.
-    /// </summary>
+    /// <summary>Verifies WhenAnyObservable with deep property chains in a Merge pattern.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoObservables_DeepChain_Merge()
@@ -109,9 +97,7 @@ public class WhenAnyObservableGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAnyObservable with deep property chains in a CombineLatest pattern with selector.
-    /// </summary>
+    /// <summary>Verifies WhenAnyObservable with deep property chains in a CombineLatest pattern with selector.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoObservables_DeepChain_CombineLatest()

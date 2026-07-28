@@ -7,16 +7,12 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenChanged.IntProperty;
 
-/// <summary>
-/// Exercises WhenChanged with an integer property type.
-/// </summary>
+/// <summary>Exercises WhenChanged with an integer property type.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenChanged observable for the Count property.
-    /// </summary>
+    /// <summary>Creates a WhenChanged observable for the Count property.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of count values.</returns>
-    public static IObservable<int> Execute(MyViewModel vm)
-        => vm.WhenChanged(x => x.Count);
+    public static IObservable<int> Execute(MyViewModel vm) =>
+        vm.WhenChanged(x => x.Count);
 }

@@ -31,13 +31,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
             {
-                return __BindOneWay_7FFFED3E0F13A733(source, target, conversionFunc, scheduler);
+                return __BindOneWay_7FFFED3E0F13A543(source, target, conversionFunc, scheduler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindOneWay_7FFFED3E0F13A733(global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyView target, global::System.Func<int, string> conversionFunc, global::System.Reactive.Concurrency.IScheduler scheduler)
+        private static global::System.IDisposable __BindOneWay_7FFFED3E0F13A543(global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyView target, global::System.Func<int, string> conversionFunc, global::System.Reactive.Concurrency.IScheduler scheduler)
         {
             // BindOneWay: Count -> CountText (with conversion) (with scheduler)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(

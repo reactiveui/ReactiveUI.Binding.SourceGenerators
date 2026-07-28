@@ -22,10 +22,6 @@ namespace ReactiveUI.Binding;
 /// properties, WinForms event-based binding).
 /// </para>
 /// </remarks>
-[SuppressMessage(
-    "Major Code Smell",
-    "S4018:Generic methods should provide type parameter for type inference",
-    Justification = "The type parameter denotes the target type (value/control/view), supplied explicitly by callers; it is not derivable from the arguments. Public API.")]
 public interface ICreatesCommandBinding
 {
     /// <summary>
@@ -37,9 +33,11 @@ public interface ICreatesCommandBinding
     /// <typeparam name="T">The type of the control to bind to.</typeparam>
     /// <param name="hasEventTarget">Whether the caller specifies a custom event target.</param>
     /// <returns>A positive integer if binding is supported, or zero/negative if not.</returns>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; the interface shape dictates it.")]
+    [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Carries the trimming annotation for the control type; implementations resolve it via typeof(T).")]
     int GetAffinityForObject<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents |
-                                    DynamicallyAccessedMemberTypes.PublicProperties)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicEvents
+                                    | DynamicallyAccessedMemberTypes.PublicProperties)]
     T>(bool hasEventTarget);
 
     /// <summary>
@@ -50,28 +48,34 @@ public interface ICreatesCommandBinding
     /// <param name="command">The command to bind. If <see langword="null"/>, no binding is created.</param>
     /// <param name="target">The target object, usually a UI control.</param>
     /// <param name="commandParameter">An observable that provides the command parameter value.</param>
-    /// <returns>An <see cref="IDisposable"/> that disconnects the binding when disposed, or <see langword="null"/> if no binding was created.</returns>
+    /// <returns>
+    /// An <see cref="IDisposable"/> that disconnects the binding when disposed, or
+    /// <see langword="null"/> if no binding was created.
+    /// </returns>
     [RequiresUnreferencedCode("String/reflection-based event binding may require members removed by trimming.")]
     IDisposable? BindCommandToObject<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
-                                    DynamicallyAccessedMemberTypes.PublicEvents |
-                                    DynamicallyAccessedMemberTypes.NonPublicEvents)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties
+                                    | DynamicallyAccessedMemberTypes.PublicEvents
+                                    | DynamicallyAccessedMemberTypes.NonPublicEvents)]
     T>(
         ICommand? command,
         T? target,
         IObservable<object?> commandParameter)
         where T : class;
 
-    /// <summary>
-    /// Binds an <see cref="ICommand"/> to a UI object to a specific named event.
-    /// </summary>
+    /// <summary>Binds an <see cref="ICommand"/> to a UI object to a specific named event.</summary>
     /// <typeparam name="T">The type of the target object.</typeparam>
     /// <typeparam name="TEventArgs">The event argument type.</typeparam>
     /// <param name="command">The command to bind. If <see langword="null"/>, no binding is created.</param>
     /// <param name="target">The target object, usually a UI control.</param>
     /// <param name="commandParameter">An observable that provides the command parameter value.</param>
     /// <param name="eventName">The event to bind to.</param>
-    /// <returns>An <see cref="IDisposable"/> that disconnects the binding when disposed, or <see langword="null"/> if no binding was created.</returns>
+    /// <returns>
+    /// An <see cref="IDisposable"/> that disconnects the binding when disposed, or
+    /// <see langword="null"/> if no binding was created.
+    /// </returns>
+    [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the bound command shape.")]
+    [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Types the event handler this overload binds; it mirrors the add/remove handler overload.")]
     [RequiresUnreferencedCode("String/reflection-based event binding may require members removed by trimming.")]
     IDisposable? BindCommandToObject<T, TEventArgs>(
         ICommand? command,
@@ -93,9 +97,9 @@ public interface ICreatesCommandBinding
     /// <param name="removeHandler">Removes the handler from the target event.</param>
     /// <returns>A disposable that unbinds the command.</returns>
     IDisposable? BindCommandToObject<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties |
-                                    DynamicallyAccessedMemberTypes.PublicEvents |
-                                    DynamicallyAccessedMemberTypes.NonPublicEvents)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties
+                                    | DynamicallyAccessedMemberTypes.PublicEvents
+                                    | DynamicallyAccessedMemberTypes.NonPublicEvents)]
     T, TEventArgs>(
         ICommand? command,
         T? target,

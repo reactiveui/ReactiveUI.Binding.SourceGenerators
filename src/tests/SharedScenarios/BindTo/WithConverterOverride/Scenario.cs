@@ -7,18 +7,14 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindTo.WithConverterOverride;
 
-/// <summary>
-/// Exercises BindTo with an explicit <see cref="IBindingTypeConverter"/> override.
-/// </summary>
+/// <summary>Exercises BindTo with an explicit <see cref="IBindingTypeConverter"/> override.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Binds the int observable stream to the view's string caption using the supplied converter.
-    /// </summary>
+    /// <summary>Binds the int observable stream to the view's string caption using the supplied converter.</summary>
     /// <param name="source">The source observable stream.</param>
     /// <param name="view">The target view.</param>
     /// <param name="converter">The explicit converter to use.</param>
     /// <returns>A disposable representing the binding.</returns>
-    public static IDisposable Execute(IObservable<int> source, MyView view, IBindingTypeConverter converter)
-        => source.BindTo(view, x => x.Caption, converter);
+    public static IDisposable Execute(IObservable<int> source, MyView view, IBindingTypeConverter converter) =>
+        source.BindTo(view, x => x.Caption, converter);
 }

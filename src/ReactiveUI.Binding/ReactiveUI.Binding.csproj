@@ -25,6 +25,27 @@
 
   <ItemGroup>
     <PackageReference Include="Splat"/>
-    <PackageReference Include="System.Reactive"/>
+    <PackageReference Include="ReactiveUI.Primitives"/>
+  </ItemGroup>
+
+  <!-- DateOnly and TimeOnly only exist on .NET 6+. Their converters are guarded with
+       #if NET6_0_OR_GREATER, so exclude the sources outright on the older targets rather than
+       compiling files that declare nothing there. -->
+  <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
+    <Compile Remove="Bindings\Converter\*DateOnly*.cs"/>
+    <Compile Remove="Bindings\Converter\*TimeOnly*.cs"/>
+  </ItemGroup>
+
+  <!-- NotNullAttribute ships in the framework from netcoreapp3.0/netstandard2.1 onwards; the
+       polyfill is only needed below that. -->
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))">
+    <Compile Remove="Polyfills\NotNullAttribute.cs"/>
+  </ItemGroup>
+
+  <!-- Index and Range back the ^ and .. operators on the targets that predate them; .NET 5+ ships
+       both, where these sources are guarded out entirely. -->
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">
+    <Compile Remove="Polyfills\Index.cs"/>
+    <Compile Remove="Polyfills\Range.cs"/>
   </ItemGroup>
 </Project>

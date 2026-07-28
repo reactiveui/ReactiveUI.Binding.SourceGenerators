@@ -9,23 +9,20 @@ using Splat.Builder;
 
 namespace ReactiveUI.Binding.Tests.Builder;
 
-/// <summary>
-/// Tests for the <see cref="BuilderMixins"/> extension methods that bridge
-/// <see cref="IAppBuilder"/> to <see cref="IReactiveUIBindingBuilder"/>.
-/// </summary>
+/// <summary>Tests for the <see cref="BuilderMixins"/> extension methods that bridge <see cref="IAppBuilder"/> to <see cref="IReactiveUIBindingBuilder"/>.</summary>
 public class BuilderMixinsTests
 {
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.BuildApp"/> succeeds when the
-    /// <see cref="IAppBuilder"/> is a valid <see cref="IReactiveUIBindingBuilder"/>.
-    /// </summary>
+    /// <summary>The value the stub converter returns.</summary>
+    private const int ConvertedValue = 42;
+
+    /// <summary>Verifies that <see cref="BuilderMixins.BuildApp"/> succeeds when the <see cref="IAppBuilder"/> is a valid <see cref="IReactiveUIBindingBuilder"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildApp_WithValidBuilder_Succeeds()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
+        _ = builder.WithCoreServices();
 
         IAppBuilder appBuilder = builder;
         var instance = appBuilder.BuildApp();
@@ -33,26 +30,19 @@ public class BuilderMixinsTests
         await Assert.That(instance).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.BuildApp"/> throws
-    /// <see cref="InvalidOperationException"/> when the <see cref="IAppBuilder"/>
-    /// is not an <see cref="IReactiveUIBindingBuilder"/>.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.BuildApp"/> throws when the builder is not an <see cref="IReactiveUIBindingBuilder"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildApp_WithNonReactiveUIBuilder_ThrowsInvalidOperationException()
     {
-        IAppBuilder fakeBuilder = new FakeAppBuilder();
+        var fakeBuilder = new FakeAppBuilder();
 
         var action = () => fakeBuilder.BuildApp();
 
         await Assert.That(action).ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.WithPlatformModule{T}"/> delegates
-    /// to the underlying <see cref="IReactiveUIBindingBuilder.WithPlatformModule{T}"/>.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.WithPlatformModule{T}"/> delegates to the underlying <see cref="IReactiveUIBindingBuilder.WithPlatformModule{T}"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithPlatformModule_DelegatesToBuilder()
@@ -64,32 +54,25 @@ public class BuilderMixinsTests
         IAppBuilder appBuilder = builder;
         var result = appBuilder.WithPlatformModule(new TestModule(() => registered = true));
 
-        builder.BuildApp();
+        _ = builder.BuildApp();
 
         await Assert.That(registered).IsTrue();
         await Assert.That(result).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.WithPlatformModule{T}"/> throws
-    /// <see cref="InvalidOperationException"/> when the <see cref="IAppBuilder"/>
-    /// is not an <see cref="IReactiveUIBindingBuilder"/>.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.WithPlatformModule{T}"/> throws when the builder is not an <see cref="IReactiveUIBindingBuilder"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithPlatformModule_WithNonReactiveUIBuilder_ThrowsInvalidOperationException()
     {
-        IAppBuilder fakeBuilder = new FakeAppBuilder();
+        var fakeBuilder = new FakeAppBuilder();
 
-        var action = () => fakeBuilder.WithPlatformModule(new TestModule(() => { }));
+        var action = () => fakeBuilder.WithPlatformModule(new TestModule(static () => { }));
 
         await Assert.That(action).ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.WithRegistration"/> delegates
-    /// to the underlying <see cref="IReactiveUIBindingBuilder.WithRegistration"/>.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.WithRegistration"/> delegates to the underlying <see cref="IReactiveUIBindingBuilder.WithRegistration"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithRegistration_DelegatesToBuilder()
@@ -105,26 +88,19 @@ public class BuilderMixinsTests
         await Assert.That(result).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.WithRegistration"/> throws
-    /// <see cref="InvalidOperationException"/> when the <see cref="IAppBuilder"/>
-    /// is not an <see cref="IReactiveUIBindingBuilder"/>.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.WithRegistration"/> throws when the builder is not an <see cref="IReactiveUIBindingBuilder"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithRegistration_WithNonReactiveUIBuilder_ThrowsInvalidOperationException()
     {
-        IAppBuilder fakeBuilder = new FakeAppBuilder();
+        var fakeBuilder = new FakeAppBuilder();
 
-        var action = () => fakeBuilder.WithRegistration(_ => { });
+        var action = () => fakeBuilder.WithRegistration(static _ => { });
 
         await Assert.That(action).ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.WithConverter"/> registers a
-    /// typed converter via the <see cref="IAppBuilder"/> extension method.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.WithConverter"/> registers a typed converter via the <see cref="IAppBuilder"/> extension method.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithConverter_RegistersConverterViaAppBuilder()
@@ -134,7 +110,7 @@ public class BuilderMixinsTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(bool),
-            (_, _) => (true, true));
+            static (_, _) => (true, true));
 
         IAppBuilder appBuilder = builder;
         var result = appBuilder.WithConverter(converter);
@@ -146,37 +122,30 @@ public class BuilderMixinsTests
         await Assert.That(ReferenceEquals(resolved, converter)).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.WithConverter"/> throws
-    /// <see cref="InvalidOperationException"/> when the <see cref="IAppBuilder"/>
-    /// is not an <see cref="IReactiveUIBindingBuilder"/>.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.WithConverter"/> throws when the builder is not an <see cref="IReactiveUIBindingBuilder"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithConverter_WithNonReactiveUIBuilder_ThrowsInvalidOperationException()
     {
-        IAppBuilder fakeBuilder = new FakeAppBuilder();
+        var fakeBuilder = new FakeAppBuilder();
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(bool),
-            (_, _) => (true, true));
+            static (_, _) => (true, true));
 
         var action = () => fakeBuilder.WithConverter(converter);
 
         await Assert.That(action).ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.WithFallbackConverter"/> registers a
-    /// fallback converter via the <see cref="IAppBuilder"/> extension method.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.WithFallbackConverter"/> registers a fallback converter via the <see cref="IAppBuilder"/> extension method.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithFallbackConverter_RegistersConverterViaAppBuilder()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        var converter = new StubFallbackConverter((_, _, _, _) => (true, "converted"));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, "converted"));
 
         IAppBuilder appBuilder = builder;
         var result = appBuilder.WithFallbackConverter(converter);
@@ -187,27 +156,20 @@ public class BuilderMixinsTests
         await Assert.That(allConverters).Contains(converter);
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.WithFallbackConverter"/> throws
-    /// <see cref="InvalidOperationException"/> when the <see cref="IAppBuilder"/>
-    /// is not an <see cref="IReactiveUIBindingBuilder"/>.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.WithFallbackConverter"/> throws when the builder is not an <see cref="IReactiveUIBindingBuilder"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithFallbackConverter_WithNonReactiveUIBuilder_ThrowsInvalidOperationException()
     {
-        IAppBuilder fakeBuilder = new FakeAppBuilder();
-        var converter = new StubFallbackConverter((_, _, _, _) => (true, "converted"));
+        var fakeBuilder = new FakeAppBuilder();
+        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, "converted"));
 
         var action = () => fakeBuilder.WithFallbackConverter(converter);
 
         await Assert.That(action).ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.WithSetMethodConverter"/> registers a
-    /// set-method converter via the <see cref="IAppBuilder"/> extension method.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.WithSetMethodConverter"/> registers a set-method converter via the <see cref="IAppBuilder"/> extension method.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithSetMethodConverter_RegistersConverterViaAppBuilder()
@@ -225,16 +187,12 @@ public class BuilderMixinsTests
         await Assert.That(allConverters).Contains(converter);
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.WithSetMethodConverter"/> throws
-    /// <see cref="InvalidOperationException"/> when the <see cref="IAppBuilder"/>
-    /// is not an <see cref="IReactiveUIBindingBuilder"/>.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.WithSetMethodConverter"/> throws when the builder is not an <see cref="IReactiveUIBindingBuilder"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithSetMethodConverter_WithNonReactiveUIBuilder_ThrowsInvalidOperationException()
     {
-        IAppBuilder fakeBuilder = new FakeAppBuilder();
+        var fakeBuilder = new FakeAppBuilder();
         var converter = new StubSetMethodBindingConverter();
 
         var action = () => fakeBuilder.WithSetMethodConverter(converter);
@@ -242,10 +200,7 @@ public class BuilderMixinsTests
         await Assert.That(action).ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that chaining multiple extension methods through <see cref="IAppBuilder"/>
-    /// works correctly and returns the builder each time.
-    /// </summary>
+    /// <summary>Verifies that chaining multiple extension methods through <see cref="IAppBuilder"/> works correctly and returns the builder each time.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FluentChaining_ThroughIAppBuilder_Works()
@@ -255,8 +210,8 @@ public class BuilderMixinsTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(int),
-            (_, _) => (true, 42));
-        var fallbackConverter = new StubFallbackConverter((_, _, _, _) => (true, "fallback"));
+            static (_, _) => (true, ConvertedValue));
+        var fallbackConverter = new StubFallbackConverter(static (_, _, _, _) => (true, "fallback"));
         var setConverter = new StubSetMethodBindingConverter();
 
         IAppBuilder appBuilder = builder;
@@ -274,10 +229,7 @@ public class BuilderMixinsTests
             .Contains(setConverter);
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.ConfigureViewLocator"/> delegates
-    /// to the underlying <see cref="IReactiveUIBindingBuilder.ConfigureViewLocator"/>.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.ConfigureViewLocator"/> delegates to the underlying <see cref="IReactiveUIBindingBuilder.ConfigureViewLocator"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ConfigureViewLocator_DelegatesToBuilder()
@@ -285,9 +237,9 @@ public class BuilderMixinsTests
         RxBindingBuilder.ResetForTesting();
         var appBuilder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
 
-        appBuilder
+        _ = appBuilder
             .WithCoreServices()
-            .ConfigureViewLocator(mappings =>
+            .ConfigureViewLocator(static mappings =>
                 mappings.Map<MixinTestViewModel, MixinTestView>())
             .BuildApp();
 
@@ -297,30 +249,23 @@ public class BuilderMixinsTests
         await Assert.That(result).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="BuilderMixins.ConfigureViewLocator"/> throws when the
-    /// <see cref="IAppBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.
-    /// </summary>
+    /// <summary>Verifies that <see cref="BuilderMixins.ConfigureViewLocator"/> throws when the <see cref="IAppBuilder"/> is not an <see cref="IReactiveUIBindingBuilder"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ConfigureViewLocator_WithNonReactiveUIBuilder_Throws()
     {
-        IAppBuilder fakeBuilder = new FakeAppBuilder();
+        var fakeBuilder = new FakeAppBuilder();
 
-        var action = () => fakeBuilder.ConfigureViewLocator(_ => { });
+        var action = () => fakeBuilder.ConfigureViewLocator(static _ => { });
 
         await Assert.That(action).ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Simple view model for mixin testing.
-    /// </summary>
-    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Used for testing")]
+    /// <summary>Simple view model for mixin testing.</summary>
+    [SuppressMessage("Design", "SST1436:Empty type", Justification = "The tests only need a distinct view model type; members would not be exercised.")]
     private sealed class MixinTestViewModel;
 
-    /// <summary>
-    /// Simple view for mixin testing.
-    /// </summary>
+    /// <summary>Simple view for mixin testing.</summary>
     private sealed class MixinTestView : IViewFor<MixinTestViewModel>
     {
         /// <inheritdoc/>
@@ -334,60 +279,41 @@ public class BuilderMixinsTests
         }
     }
 
-    /// <summary>
-    /// A fake <see cref="IAppBuilder"/> that does NOT implement <see cref="IReactiveUIBindingBuilder"/>
-    /// to test the guard clauses in <see cref="BuilderMixins"/>.
-    /// </summary>
+    /// <summary>A fake <see cref="IAppBuilder"/> that does NOT implement <see cref="IReactiveUIBindingBuilder"/> to test the guard clauses in <see cref="BuilderMixins"/>.</summary>
     private sealed class FakeAppBuilder : IAppBuilder
     {
-        /// <summary>
-        /// Registers core services.
-        /// </summary>
+        /// <summary>Registers core services.</summary>
         /// <returns>The builder instance.</returns>
         public IAppBuilder WithCoreServices() => this;
 
-        /// <summary>
-        /// Uses the current Splat locator.
-        /// </summary>
+        /// <summary>Uses the current Splat locator.</summary>
         /// <returns>The builder instance.</returns>
-        public IAppBuilder UseCurrentSplatLocator() => this;
+        public IAppBuilder UseCurrentSplatLocator() => WithCoreServices();
 
-        /// <summary>
-        /// Registers a module.
-        /// </summary>
+        /// <summary>Registers a module.</summary>
         /// <typeparam name="T">The module type.</typeparam>
-        /// <param name="module">The module instance.</param>
+        /// <param name="registrationModule">The module instance.</param>
         /// <returns>The builder instance.</returns>
-        public IAppBuilder UsingModule<T>(T module)
+        public IAppBuilder UsingModule<T>(T registrationModule)
             where T : IModule => this;
 
-        /// <summary>
-        /// Registers a custom action.
-        /// </summary>
+        /// <summary>Registers a custom action.</summary>
         /// <param name="configureAction">The configuration action.</param>
         /// <returns>The builder instance.</returns>
         public IAppBuilder WithCustomRegistration(Action<IMutableDependencyResolver> configureAction) => this;
 
-        /// <summary>
-        /// Builds the application instance.
-        /// </summary>
+        /// <summary>Builds the application instance.</summary>
         /// <returns>The application instance.</returns>
         public IAppInstance Build() => throw new NotSupportedException();
     }
 
-    /// <summary>
-    /// A test <see cref="IModule"/> that invokes a callback when configured.
-    /// </summary>
+    /// <summary>A test <see cref="IModule"/> that invokes a callback when configured.</summary>
     private sealed class TestModule : IModule
     {
-        /// <summary>
-        /// A callback action invoked during the configuration process of the <see cref="TestModule"/>.
-        /// </summary>
+        /// <summary>A callback action invoked during the configuration process of the <see cref="TestModule"/>.</summary>
         private readonly Action _onConfigure;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TestModule"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="TestModule"/> class.</summary>
         /// <param name="onConfigure">The callback to invoke during configuration.</param>
         public TestModule(Action onConfigure) => _onConfigure = onConfigure;
 

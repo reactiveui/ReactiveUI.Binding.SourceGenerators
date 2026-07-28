@@ -13,40 +13,35 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 /// </summary>
 public class WhenChangedEdgeCaseTests
 {
-    /// <summary>
-    /// The initial city value used by deep-chain tests.
-    /// </summary>
+    /// <summary>The initial city value used by deep-chain tests.</summary>
     private const string Seattle = "Seattle";
 
-    /// <summary>
-    /// The replacement city value used by deep-chain tests.
-    /// </summary>
+    /// <summary>The replacement city value used by deep-chain tests.</summary>
     private const string Portland = "Portland";
 
-    /// <summary>
-    /// The second replacement city value used by deep-chain tests.
-    /// </summary>
+    /// <summary>The second replacement city value used by deep-chain tests.</summary>
     private const string Eugene = "Eugene";
 
-    /// <summary>
-    /// The simple property value used by multi-property tests.
-    /// </summary>
+    /// <summary>The simple property value used by multi-property tests.</summary>
     private const string HelloValue = "Hello";
 
-    /// <summary>
-    /// The minimum number of emissions expected after a change.
-    /// </summary>
+    /// <summary>The minimum number of emissions expected after a change.</summary>
     private const int MinEmissionsAfterChange = 2;
 
-    /// <summary>
-    /// The initial age value used by integer-property tests.
-    /// </summary>
+    /// <summary>The initial age value used by integer-property tests.</summary>
     private const int AgeValue = 25;
 
-    /// <summary>
-    /// The updated age value used by integer-property tests.
-    /// </summary>
+    /// <summary>The updated age value used by integer-property tests.</summary>
     private const int UpdatedAgeValue = 30;
+
+    /// <summary>The value written to a property to trigger a change notification.</summary>
+    private const string ChangedValue = "Changed";
+
+    /// <summary>The value written after the subscription is disposed, which must not be observed.</summary>
+    private const string AfterDisposalValue = "AfterDisposal";
+
+    /// <summary>The initial name used by the fixtures in these tests.</summary>
+    private const string AliceName = "Alice";
 
     /// <summary>
     /// Verifies that replacing the intermediate object in a deep chain re-subscribes
@@ -77,10 +72,7 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values).Contains(Eugene);
     }
 
-    /// <summary>
-    /// Verifies that after replacing the intermediate object, changes to the old
-    /// object's property are no longer observed.
-    /// </summary>
+    /// <summary>Verifies that after replacing the intermediate object, changes to the old object's property are no longer observed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_IntermediateObjectReplacement_UnsubscribesOld()
@@ -106,10 +98,7 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values[^1]).IsEqualTo("Second Ave");
     }
 
-    /// <summary>
-    /// Verifies that DistinctUntilChanged filters out duplicate consecutive values
-    /// for single-property observation.
-    /// </summary>
+    /// <summary>Verifies that DistinctUntilChanged filters out duplicate consecutive values for single-property observation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_DistinctUntilChanged_FiltersDuplicates()
@@ -130,10 +119,7 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values.Count).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that DistinctUntilChanged filters out duplicate consecutive values
-    /// in deep chain observation.
-    /// </summary>
+    /// <summary>Verifies that DistinctUntilChanged filters out duplicate consecutive values in deep chain observation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_DistinctUntilChanged_FiltersDuplicates()
@@ -154,10 +140,7 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values.Count).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that multi-property observation with a deep chain emits when
-    /// the nested property changes.
-    /// </summary>
+    /// <summary>Verifies that multi-property observation with a deep chain emits when the nested property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_WithDeepChain_EmitsOnNestedChange()
@@ -180,10 +163,7 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values[^1].prop1).IsEqualTo(HelloValue);
     }
 
-    /// <summary>
-    /// Verifies that multi-property observation with a deep chain emits when
-    /// the simple property changes.
-    /// </summary>
+    /// <summary>Verifies that multi-property observation with a deep chain emits when the simple property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_WithDeepChain_EmitsOnSimpleChange()
@@ -202,10 +182,7 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values[^1].prop1).IsEqualTo("World");
     }
 
-    /// <summary>
-    /// Verifies that multi-property observation with a deep chain re-subscribes
-    /// when the intermediate object is replaced.
-    /// </summary>
+    /// <summary>Verifies that multi-property observation with a deep chain re-subscribes when the intermediate object is replaced.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_WithDeepChain_IntermediateReplacement()
@@ -228,10 +205,7 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values[^1].city).IsEqualTo(Eugene);
     }
 
-    /// <summary>
-    /// Verifies that multiple subscriptions to the same WhenChanged observable
-    /// each receive independent emissions.
-    /// </summary>
+    /// <summary>Verifies that multiple subscriptions to the same WhenChanged observable each receive independent emissions.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleSubscriptions_ReceiveIndependentEmissions()
@@ -245,17 +219,15 @@ public class WhenChangedEdgeCaseTests
         using var sub1 = obs.Subscribe(values1.Add);
         using var sub2 = obs.Subscribe(values2.Add);
 
-        vm.Name = "Changed";
+        vm.Name = ChangedValue;
 
         await Assert.That(values1.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterChange);
         await Assert.That(values2.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterChange);
-        await Assert.That(values1).Contains("Changed");
-        await Assert.That(values2).Contains("Changed");
+        await Assert.That(values1).Contains(ChangedValue);
+        await Assert.That(values2).Contains(ChangedValue);
     }
 
-    /// <summary>
-    /// Verifies that disposing one subscription does not affect another.
-    /// </summary>
+    /// <summary>Verifies that disposing one subscription does not affect another.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleSubscriptions_DisposingOneDoesNotAffectOther()
@@ -271,15 +243,13 @@ public class WhenChangedEdgeCaseTests
 
         sub1.Dispose();
 
-        vm.Name = "AfterDisposal";
+        vm.Name = AfterDisposalValue;
 
-        await Assert.That(values1).DoesNotContain("AfterDisposal");
-        await Assert.That(values2).Contains("AfterDisposal");
+        await Assert.That(values1).DoesNotContain(AfterDisposalValue);
+        await Assert.That(values2).Contains(AfterDisposalValue);
     }
 
-    /// <summary>
-    /// Verifies that the deep chain disposal stops listening for nested property changes.
-    /// </summary>
+    /// <summary>Verifies that the deep chain disposal stops listening for nested property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_Disposal_StopsListening()
@@ -299,9 +269,7 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values[0]).IsEqualTo(Seattle);
     }
 
-    /// <summary>
-    /// Verifies that the deep chain disposal also stops listening after intermediate replacement.
-    /// </summary>
+    /// <summary>Verifies that the deep chain disposal also stops listening after intermediate replacement.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_Disposal_AfterIntermediateReplacement()
@@ -321,9 +289,7 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values).DoesNotContain(Eugene);
     }
 
-    /// <summary>
-    /// Verifies that the int property WhenChanged emits the initial value and changes.
-    /// </summary>
+    /// <summary>Verifies that the int property WhenChanged emits the initial value and changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_IntType_EmitsChanges()
@@ -351,24 +317,21 @@ public class WhenChangedEdgeCaseTests
     [Test]
     public async Task DeepChain_NullForgiving_EmitsWhenChildSet()
     {
-        var host = new HostTestFixture { Child = new() { Name = "Alice" } };
+        var host = new HostTestFixture { Child = new() { Name = AliceName } };
         var values = new List<string>();
 
         using var sub = WhenChangedScenarios.DeepChain_ChildName(host)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo("Alice");
+        await Assert.That(values[0]).IsEqualTo(AliceName);
 
         host.Child!.Name = "Bob";
 
         await Assert.That(values).Contains("Bob");
     }
 
-    /// <summary>
-    /// Verifies that deep chain with null-forgiving operator emits default
-    /// when the intermediate object is null.
-    /// </summary>
+    /// <summary>Verifies that deep chain with null-forgiving operator emits default when the intermediate object is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_NullForgiving_EmitsDefaultWhenChildNull()
@@ -383,15 +346,12 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that deep chain with null-forgiving operator re-subscribes
-    /// when the intermediate object is replaced.
-    /// </summary>
+    /// <summary>Verifies that deep chain with null-forgiving operator re-subscribes when the intermediate object is replaced.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_NullForgiving_ReSubscribesOnReplacement()
     {
-        var host = new HostTestFixture { Child = new() { Name = "Alice" } };
+        var host = new HostTestFixture { Child = new() { Name = AliceName } };
         var values = new List<string>();
 
         using var sub = WhenChangedScenarios.DeepChain_ChildName(host)
@@ -408,10 +368,7 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values).Contains("Dave");
     }
 
-    /// <summary>
-    /// Verifies that deep chain with null-forgiving operator transitions
-    /// from null to non-null and starts observing.
-    /// </summary>
+    /// <summary>Verifies that deep chain with null-forgiving operator transitions from null to non-null and starts observing.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_NullForgiving_NullToNonNull()

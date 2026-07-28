@@ -4,29 +4,19 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting nullable decimal to decimal.
-/// </summary>
+/// <summary>Tests for converting nullable decimal to decimal.</summary>
 public class NullableDecimalToDecimalTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    /// Sample decimal value used for precise conversion checks.
-    /// </summary>
-    private const decimal SampleDecimal = 123.456789m;
+    /// <summary>Sample decimal value used for precise conversion checks.</summary>
+    private const decimal SampleDecimal = 123.456789M;
 
-    /// <summary>
-    /// Sample rounded decimal value used for conversion checks.
-    /// </summary>
-    private const decimal RoundedDecimal = 42.5m;
+    /// <summary>Sample rounded decimal value used for conversion checks.</summary>
+    private const decimal RoundedDecimal = 42.5M;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -36,15 +26,13 @@ public class NullableDecimalToDecimalTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithValue_Succeeds()
     {
         var converter = new NullableDecimalToDecimalTypeConverter();
-        decimal? value = 123.456789m;
+        decimal? value = 123.456789M;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -52,9 +40,7 @@ public class NullableDecimalToDecimalTypeConverterTests
         await Assert.That(output).IsEqualTo(SampleDecimal);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsFalse()
@@ -66,9 +52,7 @@ public class NullableDecimalToDecimalTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies FromType ReturnsDecimalNullable.
-    /// </summary>
+    /// <summary>Verifies FromType ReturnsDecimalNullable.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task FromType_ReturnsDecimalNullable()
@@ -77,9 +61,7 @@ public class NullableDecimalToDecimalTypeConverterTests
         await Assert.That(converter.FromType).IsEqualTo(typeof(decimal?));
     }
 
-    /// <summary>
-    ///     Verifies ToType ReturnsDecimal.
-    /// </summary>
+    /// <summary>Verifies ToType ReturnsDecimal.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ToType_ReturnsDecimal()
@@ -88,15 +70,13 @@ public class NullableDecimalToDecimalTypeConverterTests
         await Assert.That(converter.ToType).IsEqualTo(typeof(decimal));
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithValidValue ReturnsTrueAndOutput.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithValidValue ReturnsTrueAndOutput.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithValidValue_ReturnsTrueAndOutput()
     {
         var converter = new NullableDecimalToDecimalTypeConverter();
-        decimal? value = 42.5m;
+        decimal? value = 42.5M;
 
         var success = converter.TryConvertTyped(value, null, out var result);
 
@@ -104,9 +84,7 @@ public class NullableDecimalToDecimalTypeConverterTests
         await Assert.That(result).IsEqualTo(RoundedDecimal);
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithNullValue ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithNullValue ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithNullValue_ReturnsFalse()
@@ -119,9 +97,7 @@ public class NullableDecimalToDecimalTypeConverterTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithInvalidType ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithInvalidType ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()

@@ -7,70 +7,63 @@ using ReactiveUI.Binding.SourceGenerators.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
-/// <summary>
-/// Tests for <see cref="CommandExtractor"/> internal helper methods.
-/// </summary>
+/// <summary>Tests for <see cref="CommandExtractor"/> internal helper methods.</summary>
 public class CommandExtractorHelperTests
 {
-    /// <summary>
-    /// Verifies that IsToEventArgument returns true for a named argument with "toEvent".
-    /// </summary>
+    /// <summary>Verifies that IsToEventArgument returns true for a named argument with "toEvent".</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsToEventArgument_NamedToEvent_ReturnsTrue()
     {
+        const int SampleValue = 5;
         var argument = ParseFirstArgument("Method(toEvent: \"Click\")");
 
-        var result = CommandExtractor.IsToEventArgument(argument, 0, 5);
+        var result = CommandExtractor.IsToEventArgument(argument, 0, SampleValue);
 
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that IsToEventArgument returns false for a named argument with a different name.
-    /// </summary>
+    /// <summary>Verifies that IsToEventArgument returns false for a named argument with a different name.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsToEventArgument_NamedOtherParam_ReturnsFalse()
     {
+        const int SampleValue = 5;
         var argument = ParseFirstArgument("Method(scheduler: null)");
 
-        var result = CommandExtractor.IsToEventArgument(argument, 0, 5);
+        var result = CommandExtractor.IsToEventArgument(argument, 0, SampleValue);
 
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that IsToEventArgument returns true for a positional argument at the correct index.
-    /// </summary>
+    /// <summary>Verifies that IsToEventArgument returns true for a positional argument at the correct index.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsToEventArgument_PositionalAtCorrectIndex_ReturnsTrue()
     {
+        const int SampleValue = 3;
         var argument = ParseFirstArgument("Method(\"Click\")");
 
-        var result = CommandExtractor.IsToEventArgument(argument, 3, 3);
+        var result = CommandExtractor.IsToEventArgument(argument, SampleValue, SampleValue);
 
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that IsToEventArgument returns false for a positional argument at the wrong index.
-    /// </summary>
+    /// <summary>Verifies that IsToEventArgument returns false for a positional argument at the wrong index.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsToEventArgument_PositionalAtWrongIndex_ReturnsFalse()
     {
+        const int SampleValue = 2;
+        const int SampleValue2 = 5;
         var argument = ParseFirstArgument("Method(\"Click\")");
 
-        var result = CommandExtractor.IsToEventArgument(argument, 2, 5);
+        var result = CommandExtractor.IsToEventArgument(argument, SampleValue, SampleValue2);
 
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that HasCommandProperties returns false for a type with no Command property.
-    /// </summary>
+    /// <summary>Verifies that HasCommandProperties returns false for a type with no Command property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasCommandProperties_NoCommand_ReturnsFalse()
@@ -96,9 +89,7 @@ public class CommandExtractorHelperTests
         await Assert.That(hasParam).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that HasCommandProperties returns true for a type with a settable Command (ICommand) property.
-    /// </summary>
+    /// <summary>Verifies that HasCommandProperties returns true for a type with a settable Command (ICommand) property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasCommandProperties_WithCommand_ReturnsTrue()
@@ -125,9 +116,7 @@ public class CommandExtractorHelperTests
         await Assert.That(hasParam).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that HasCommandProperties returns true with CommandParameter when both exist.
-    /// </summary>
+    /// <summary>Verifies that HasCommandProperties returns true with CommandParameter when both exist.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasCommandProperties_WithCommandAndParameter_ReturnsTrueWithParam()
@@ -155,9 +144,7 @@ public class CommandExtractorHelperTests
         await Assert.That(hasParam).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that HasCommandProperties does not match a readonly Command property.
-    /// </summary>
+    /// <summary>Verifies that HasCommandProperties does not match a readonly Command property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasCommandProperties_ReadOnlyCommand_ReturnsFalse()
@@ -184,9 +171,7 @@ public class CommandExtractorHelperTests
         await Assert.That(hasParam).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that HasEnabledProperty returns false when no Enabled property exists.
-    /// </summary>
+    /// <summary>Verifies that HasEnabledProperty returns false when no Enabled property exists.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasEnabledProperty_NoEnabledProperty_ReturnsFalse()
@@ -211,9 +196,7 @@ public class CommandExtractorHelperTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that HasEnabledProperty returns true when a settable bool Enabled property exists.
-    /// </summary>
+    /// <summary>Verifies that HasEnabledProperty returns true when a settable bool Enabled property exists.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasEnabledProperty_WithEnabled_ReturnsTrue()
@@ -238,9 +221,7 @@ public class CommandExtractorHelperTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that HasEnabledProperty returns false for non-bool Enabled property.
-    /// </summary>
+    /// <summary>Verifies that HasEnabledProperty returns false for non-bool Enabled property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasEnabledProperty_StringEnabled_ReturnsFalse()
@@ -306,10 +287,7 @@ public class CommandExtractorHelperTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that FindParameterLambda returns null when args after index 3
-    /// are not valid lambda expressions.
-    /// </summary>
+    /// <summary>Verifies that FindParameterLambda returns null when args after index 3 are not valid lambda expressions.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindParameterLambda_NonLambdaArgs_ReturnsNull()
@@ -347,9 +325,7 @@ public class CommandExtractorHelperTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Parses an invocation expression and returns the first argument.
-    /// </summary>
+    /// <summary>Parses an invocation expression and returns the first argument.</summary>
     /// <param name="expression">The invocation expression text to parse.</param>
     /// <returns>The first argument syntax node.</returns>
     private static Microsoft.CodeAnalysis.CSharp.Syntax.ArgumentSyntax ParseFirstArgument(string expression)
@@ -359,9 +335,7 @@ public class CommandExtractorHelperTests
         return invocation.ArgumentList.Arguments[0];
     }
 
-    /// <summary>
-    /// Gets the first class symbol from a syntax tree.
-    /// </summary>
+    /// <summary>Gets the first class symbol from a syntax tree.</summary>
     /// <param name="tree">The syntax tree.</param>
     /// <param name="model">The semantic model.</param>
     /// <returns>The first named type symbol.</returns>

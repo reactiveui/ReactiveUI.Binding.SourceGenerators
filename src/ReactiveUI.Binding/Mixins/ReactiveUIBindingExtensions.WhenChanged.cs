@@ -2,20 +2,17 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Diagnostics.CodeAnalysis;
 using ReactiveUI.Binding.Fallback;
 using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding;
 
-/// <summary>
-/// Extension methods for observing property changes after they occur (WhenChanged).
-/// </summary>
+/// <summary>Extension methods for observing property changes after they occur (WhenChanged).</summary>
 public static partial class ReactiveUIBindingExtensions
 {
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes a property change on the specified object and emits the value after it changes.
-    /// </summary>
+    /// <summary>Observes a property change on the specified object and emits the value after it changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <param name="objectToMonitor">The object instance to observe for property changes.</param>
@@ -33,9 +30,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes a property change on the specified object and emits the value after it changes.
-    /// </summary>
+    /// <summary>Observes a property change on the specified object and emits the value after it changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <param name="objectToMonitor">The object instance to observe for property changes.</param>
@@ -58,9 +53,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 2 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 2 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -84,9 +77,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 2 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 2 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -113,9 +104,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 3 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 3 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -130,6 +119,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<(T1 property1, T2 property2, T3 property3)> WhenChanged<TObj, T1, T2, T3>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -145,9 +135,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 3 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 3 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -178,9 +166,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 4 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 4 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -198,6 +184,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4)> WhenChanged<
         TObj,
         T1,
@@ -221,9 +209,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 4 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 4 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -259,13 +245,11 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property2),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property3),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property4),
-            (v1, v2, v3, v4) => (v1, v2, v3, v4));
+            static (v1, v2, v3, v4) => (v1, v2, v3, v4));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 5 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 5 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -286,6 +270,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5)> WhenChanged<
         TObj,
         T1,
@@ -313,9 +299,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 5 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 5 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -331,6 +315,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5)> WhenChanged<TObj, T1, T2, T3, T4, T5>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -356,13 +341,11 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property3),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property4),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property5),
-            (v1, v2, v3, v4, v5) => (v1, v2, v3, v4, v5));
+            static (v1, v2, v3, v4, v5) => (v1, v2, v3, v4, v5));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 6 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 6 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -386,6 +369,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6)>
         WhenChanged<TObj, T1, T2, T3, T4, T5, T6>(
             this TObj objectToMonitor,
@@ -411,9 +396,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 6 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 6 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -431,6 +414,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6)> WhenChanged<TObj, T1, T2, T3, T4, T5, T6>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -459,13 +443,11 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property4),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property5),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property6),
-            (v1, v2, v3, v4, v5, v6) => (v1, v2, v3, v4, v5, v6));
+            static (v1, v2, v3, v4, v5, v6) => (v1, v2, v3, v4, v5, v6));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 7 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 7 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -492,6 +474,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
         IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7)>
         WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7>(
@@ -521,9 +505,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 7 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 7 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -543,6 +525,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7)> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -574,13 +557,11 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property5),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property6),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property7),
-            (v1, v2, v3, v4, v5, v6, v7) => (v1, v2, v3, v4, v5, v6, v7));
+            static (v1, v2, v3, v4, v5, v6, v7) => (v1, v2, v3, v4, v5, v6, v7));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 8 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 8 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -610,6 +591,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
         IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
             T8
@@ -643,9 +626,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 8 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 8 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -667,6 +648,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8)> WhenChanged<TObj, T1, T2, T3, T4, T5, T6, T7, T8>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -701,13 +683,11 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property6),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property7),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property8),
-            (v1, v2, v3, v4, v5, v6, v7, v8) => (v1, v2, v3, v4, v5, v6, v7, v8));
+            static (v1, v2, v3, v4, v5, v6, v7, v8) => (v1, v2, v3, v4, v5, v6, v7, v8));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 9 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 9 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -740,6 +720,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
         IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
             T8
@@ -776,9 +758,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 9 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 9 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -802,6 +782,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
         T1 property1,
         T2 property2,
@@ -848,13 +829,11 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property7),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property8),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property9),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9) => (v1, v2, v3, v4, v5, v6, v7, v8, v9));
+            static (v1, v2, v3, v4, v5, v6, v7, v8, v9) => (v1, v2, v3, v4, v5, v6, v7, v8, v9));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 10 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 10 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -890,6 +869,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
         IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
             T8
@@ -929,9 +910,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 10 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 10 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -957,6 +936,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
         T1 property1,
         T2 property2,
@@ -1007,13 +987,11 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property8),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property9),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property10),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10) => (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10));
+            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10) => (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 11 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 11 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1052,6 +1030,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
         IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
             T8
@@ -1106,9 +1086,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 11 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 11 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1136,6 +1114,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
         T1 property1,
         T2 property2,
@@ -1190,13 +1169,11 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property9),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property10),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property11),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) => (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11));
+            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) => (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 12 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 12 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1238,6 +1215,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
         IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
             T8
@@ -1296,9 +1275,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 12 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 12 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1328,6 +1305,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
         T1 property1,
         T2 property2,
@@ -1386,13 +1365,11 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property10),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property11),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property12),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12) => (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12));
+            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12) => (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 13 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 13 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1437,6 +1414,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
         IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
             T8
@@ -1499,9 +1478,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 13 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 13 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1533,6 +1510,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
         T1 property1,
         T2 property2,
@@ -1595,14 +1574,12 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property11),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property12),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property13),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13) =>
+            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13) =>
                 (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 14 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 14 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1650,6 +1627,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
         IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
             T8
@@ -1702,9 +1681,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 14 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 14 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1738,6 +1715,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
         T1 property1,
         T2 property2,
@@ -1804,14 +1783,12 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property12),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property13),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property14),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14) =>
+            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14) =>
                 (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 15 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 15 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1862,6 +1839,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
         IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
             T8
@@ -1917,9 +1896,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 15 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 15 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -1955,6 +1932,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
         T1 property1,
         T2 property2,
@@ -2025,14 +2004,12 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property13),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property14),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property15),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) =>
+            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) =>
                 (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15));
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>
-    /// Observes changes on 16 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 16 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -2086,6 +2063,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
         IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
             T8
@@ -2161,9 +2140,7 @@ public static partial class ReactiveUIBindingExtensions
             [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #else
-    /// <summary>
-    /// Observes changes on 16 properties on the specified object and emits their values as a tuple after any property changes.
-    /// </summary>
+    /// <summary>Observes changes on 16 properties on the specified object and emits their values as a tuple after any property changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
     /// <typeparam name="T2">The type of the second observed property value.</typeparam>
@@ -2201,6 +2178,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
+    [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
         T1 property1,
         T2 property2,
@@ -2275,7 +2254,7 @@ public static partial class ReactiveUIBindingExtensions
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property14),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property15),
             RuntimeObservationFallback.WhenChanged(objectToMonitor, property16),
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) => (v1, v2, v3, v4, v5, v6, v7, v8,
+            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) => (v1, v2, v3, v4, v5, v6, v7, v8,
                 v9, v10, v11, v12, v13, v14, v15, v16));
     }
 }

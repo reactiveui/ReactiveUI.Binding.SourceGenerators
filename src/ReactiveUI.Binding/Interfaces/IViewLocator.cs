@@ -10,10 +10,7 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public interface IViewLocator : IEnableLogger
 {
-    /// <summary>
-    /// Resolves a view for the specified view model type.
-    /// This overload is AOT-safe when registered mappings are available.
-    /// </summary>
+    /// <summary>Resolves a view for the specified view model type. This overload is AOT-safe when registered mappings are available.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <param name="viewModel">The view model instance to resolve a view for.</param>
     /// <param name="contract">An optional contract string for named registrations.</param>

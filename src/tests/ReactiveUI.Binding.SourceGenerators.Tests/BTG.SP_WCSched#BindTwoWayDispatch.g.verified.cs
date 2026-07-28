@@ -32,13 +32,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
             {
-                return __BindTwoWay_00000972B7EA34FC(source, target, sourceToTargetConv, targetToSourceConv, scheduler);
+                return __BindTwoWay_00000972B7EA330C(source, target, sourceToTargetConv, targetToSourceConv, scheduler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_00000972B7EA34FC(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView target, global::System.Func<int, string> sourceToTargetConv, global::System.Func<string, int> targetToSourceConv, global::System.Reactive.Concurrency.IScheduler scheduler)
+        private static global::System.IDisposable __BindTwoWay_00000972B7EA330C(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView target, global::System.Func<int, string> sourceToTargetConv, global::System.Func<string, int> targetToSourceConv, global::System.Reactive.Concurrency.IScheduler scheduler)
         {
             // BindTwoWay: Count <-> CountText (with conversion) (with scheduler)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(

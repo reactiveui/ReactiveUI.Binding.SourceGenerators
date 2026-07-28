@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
@@ -30,17 +31,12 @@ public static class TestHelper
     public static LanguageVersion FallbackLanguageVersion(bool nullableEnabled) =>
         nullableEnabled ? LanguageVersion.CSharp8 : LanguageVersion.CSharp7_3;
 
-    /// <summary>
-    /// Creates a compilation from source code, targeting C# 7.3 to verify generated output compatibility.
-    /// </summary>
+    /// <summary>Creates a compilation from source code, targeting C# 7.3 to verify generated output compatibility.</summary>
     /// <param name="source">The source code to compile.</param>
     /// <returns>A compilation ready for testing.</returns>
     public static Compilation CreateCompilation(string source) => CreateCompilation(source, null);
 
-    /// <summary>
-    /// Creates a compilation from source code with appropriate references.
-    /// Includes ReactiveUI for IReactiveObject testing.
-    /// </summary>
+    /// <summary>Creates a compilation from source code with appropriate references. Includes ReactiveUI for IReactiveObject testing.</summary>
     /// <param name="source">The source code to compile.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <returns>A compilation ready for testing.</returns>
@@ -52,20 +48,22 @@ public static class TestHelper
 
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
-        IEnumerable<MetadataReference> references;
-
 #if NET10_0_OR_GREATER
-        references = Basic.Reference.Assemblies.Net100.References.All;
+        IEnumerable<MetadataReference> references = Basic.Reference.Assemblies.Net100.References.All;
 #elif NET9_0_OR_GREATER
-        references = Basic.Reference.Assemblies.Net90.References.All;
+        IEnumerable<MetadataReference> references = Basic.Reference.Assemblies.Net90.References.All;
 #else
-        references = Basic.Reference.Assemblies.Net80.References.All;
+        IEnumerable<MetadataReference> references = Basic.Reference.Assemblies.Net80.References.All;
 #endif
 
-        // Add ReactiveUI and transitive assembly references
+        // Add ReactiveUI and transitive assembly references.
+        // ReactiveUI is seeded by ReactiveObject rather than IReactiveObject: the two live in
+        // different assemblies, and the walk only follows references outward, so seeding from the
+        // interface would leave the assembly that declares ReactiveObject out of the compilation.
         var seedAssemblies = new[]
         {
-            typeof(IReactiveObject).Assembly, typeof(System.Reactive.Linq.Observable).Assembly,
+            typeof(ReactiveObject).Assembly, typeof(IReactiveObject).Assembly,
+            typeof(System.Reactive.Linq.Observable).Assembly,
             typeof(ReactiveUIBindingExtensions).Assembly, typeof(Reactive.ObserveOnObservable<>).Assembly
         };
 
@@ -78,10 +76,7 @@ public static class TestHelper
             new(OutputKind.DynamicallyLinkedLibrary));
     }
 
-    /// <summary>
-    /// Tests a source generator scenario that is expected to succeed.
-    /// Verifies the generated output against a snapshot.
-    /// </summary>
+    /// <summary>Tests a source generator scenario that is expected to succeed. Verifies the generated output against a snapshot.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
     /// <param name="file">The source file path of the caller (automatically populated).</param>
@@ -91,8 +86,8 @@ public static class TestHelper
         string source,
         Type callerType,
         [CallerFilePath] string file = "",
-        [CallerMemberName] string memberName = "")
-        => TestPass(source, callerType, null, file, memberName);
+        [CallerMemberName] string memberName = "") =>
+        TestPass(source, callerType, null, file, memberName);
 
     /// <summary>
     /// Tests a source generator scenario that is expected to succeed, targeting a specific language version.
@@ -119,12 +114,12 @@ public static class TestHelper
         // Log any diagnostics for debugging
         var allDiagnostics = result.OutputCompilation.GetDiagnostics()
             .Concat(result.GeneratorDiagnostics)
-            .Where(d => d.Severity >= DiagnosticSeverity.Warning)
+            .Where(static d => d.Severity >= DiagnosticSeverity.Warning)
             .ToImmutableArray();
 
         foreach (var diagnostic in allDiagnostics)
         {
-            Console.WriteLine($"{diagnostic.Severity}: {diagnostic.GetMessage()}");
+            TestContext.Current?.OutputWriter.WriteLine($"{diagnostic.Severity}: {diagnostic.GetMessage()}");
         }
 
         VerifySettings settings = new();
@@ -147,8 +142,8 @@ public static class TestHelper
         string source,
         Type callerType,
         [CallerFilePath] string file = "",
-        [CallerMemberName] string memberName = "")
-        => TestPassWithResult(source, callerType, null, file, memberName);
+        [CallerMemberName] string memberName = "") =>
+        TestPassWithResult(source, callerType, null, file, memberName);
 
     /// <summary>
     /// Tests a source generator scenario that is expected to succeed, targeting a specific language version.
@@ -175,12 +170,16 @@ public static class TestHelper
         // Log any diagnostics for debugging
         var allDiagnostics = result.OutputCompilation.GetDiagnostics()
             .Concat(result.GeneratorDiagnostics)
-            .Where(d => d.Severity >= DiagnosticSeverity.Warning)
+            .Where(static d => d.Severity >= DiagnosticSeverity.Warning)
             .ToImmutableArray();
 
         foreach (var diagnostic in allDiagnostics)
         {
-            Console.WriteLine($"{diagnostic.Severity}: {diagnostic.GetMessage()}");
+            var writer = TestContext.Current?.OutputWriter;
+            if (writer is not null)
+            {
+                await writer.WriteLineAsync($"{diagnostic.Severity}: {diagnostic.GetMessage()}");
+            }
         }
 
         VerifySettings settings = new();
@@ -192,16 +191,12 @@ public static class TestHelper
         return result;
     }
 
-    /// <summary>
-    /// Runs the source generator on the provided source code and returns the result.
-    /// </summary>
+    /// <summary>Runs the source generator on the provided source code and returns the result.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
     public static GeneratorTestResult RunGenerator(string source) => RunGenerator(source, null);
 
-    /// <summary>
-    /// Runs the source generator on the provided source code, targeting a specific language version.
-    /// </summary>
+    /// <summary>Runs the source generator on the provided source code, targeting a specific language version.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
@@ -229,12 +224,14 @@ public static class TestHelper
         return new(driver, outputCompilation, diagnostics);
     }
 
-    /// <summary>
-    /// Emits the output compilation to memory and loads it into a collectible assembly load context.
-    /// </summary>
+    /// <summary>Emits the output compilation to memory and loads it into a collectible assembly load context.</summary>
     /// <param name="result">The generator test result to emit.</param>
     /// <returns>The loaded assembly and the load context (dispose context to unload).</returns>
     /// <exception cref="InvalidOperationException">Thrown when emission fails.</exception>
+    [SuppressMessage(
+        "Security",
+        "SES1402:Assembly loaded from an unverifiable source",
+        Justification = "loads the compilation this test just emitted, in-process, into a collectible context")]
     public static (Assembly Assembly, CollectibleAssemblyLoadContext Context) EmitAndLoad(GeneratorTestResult result)
     {
         ArgumentNullException.ThrowIfNull(result);
@@ -247,8 +244,8 @@ public static class TestHelper
             var errors = string.Join(
                 Environment.NewLine,
                 emitResult.Diagnostics
-                    .Where(d => d.Severity == DiagnosticSeverity.Error)
-                    .Select(d => $"  {d.Id}: {d.GetMessage()}"));
+                    .Where(static d => d.Severity == DiagnosticSeverity.Error)
+                    .Select(static d => $"  {d.Id}: {d.GetMessage()}"));
 
             throw new InvalidOperationException(
                 $"Failed to emit compilation:{Environment.NewLine}{errors}");
@@ -348,9 +345,14 @@ public static class TestHelper
                 {
                     queue.Enqueue(System.Reflection.Assembly.Load(referencedName));
                 }
-                catch
+                catch (Exception e)
                 {
-                    // System assemblies already covered by Basic.Reference.Assemblies
+                    // Reference discovery is best-effort: anything that will not load is already
+                    // covered by the Basic.Reference.Assemblies framework set. The walk must carry
+                    // on, because letting a load failure escape truncates the reference list and
+                    // surfaces later as "type could not be found" in every generated compilation.
+                    TestContext.Current?.OutputWriter.WriteLine(
+                        $"skipped unresolvable reference '{referencedName.Name}': {e.Message}");
                 }
             }
         }

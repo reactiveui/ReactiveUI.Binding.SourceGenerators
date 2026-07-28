@@ -7,16 +7,12 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenAnyObservable.DeepObservableSwitch;
 
-/// <summary>
-/// Exercises WhenAnyObservable with a deep property chain (x => x.Child.MyCommand).
-/// </summary>
+/// <summary>Exercises WhenAnyObservable with a deep property chain (x => x.Child.MyCommand).</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenAnyObservable that switches to the latest value of Child.MyCommand.
-    /// </summary>
+    /// <summary>Creates a WhenAnyObservable that switches to the latest value of Child.MyCommand.</summary>
     /// <param name="vm">The parent view model to observe.</param>
     /// <returns>An observable that switches to the latest Child.MyCommand observable.</returns>
-    public static IObservable<string> Execute(ParentViewModel vm)
-        => vm.WhenAnyObservable(x => x.Child.MyCommand);
+    public static IObservable<string> Execute(ParentViewModel vm) =>
+        vm.WhenAnyObservable(x => x.Child.MyCommand);
 }
