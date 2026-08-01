@@ -70,6 +70,8 @@
 
     <!-- MAUI -->
     <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
+    <!-- Deprecated from net11 onwards, and no net11 build ships, so it is pinned to the net10 heads. -->
+    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" Condition="$(TargetFramework.StartsWith('net10'))"/>
 
     <!-- Benchmarking -->
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8"/>

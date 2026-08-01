@@ -18,17 +18,17 @@
     <!-- Windows-specific platform targets (WPF, WinForms) -->
     <BindingWindowsTargets>net8.0-windows10.0.19041.0;net9.0-windows10.0.19041.0;net10.0-windows10.0.19041.0;net11.0-windows10.0.19041.0</BindingWindowsTargets>
 
-    <!--
-      MAUI targets: the plain TFMs plus Windows, and no per-platform ones.
-      The library binds MAUI's own abstractions and has nothing platform-specific to compile, so an
-      iOS/Android/macOS TFM only bought a workload dependency - and every leg that lacks that workload
-      fails the build rather than skipping the target. MAUI's net9 heads are end of life, so it starts
-      at net10 while everything else still offers net8.
-    -->
+    <!-- MAUI targets. The net8 and net9 heads are end of life, so MAUI starts at net10 while everything
+         else still offers net8. -->
     <BindingMauiWindowsTargets>net10.0-windows10.0.19041.0;net11.0-windows10.0.19041.0</BindingMauiWindowsTargets>
+    <!-- net10 pins the compile-SDK to API 36 (Android 16) and net11 to API 37, the latest released stable
+         levels, both above Google Play's API 35 floor. -->
+    <BindingAndroidTargets>net10.0-android36.0;net11.0-android37</BindingAndroidTargets>
+    <BindingAppleTargets>net10.0-ios;net10.0-macos;net10.0-maccatalyst;net10.0-tvos;net11.0-ios;net11.0-macos;net11.0-maccatalyst;net11.0-tvos</BindingAppleTargets>
 
     <BindingMauiTargets>$(BindingMauiWindowsTargets)</BindingMauiTargets>
-    <BindingMauiTargets>$(BindingMauiTargets);net10.0;net11.0</BindingMauiTargets>
+    <BindingMauiTargets>$(BindingMauiTargets);net10.0;net11.0;$(BindingAndroidTargets)</BindingMauiTargets>
+    <BindingMauiTargets Condition="$([MSBuild]::IsOsPlatform('Windows')) or $([MSBuild]::IsOsPlatform('OSX'))">$(BindingMauiTargets);$(BindingAppleTargets)</BindingMauiTargets>
 
     <!-- Windows-only targets (Framework + Windows-specific) -->
     <BindingWindowsOnlyTargets>$(BindingWindowsTargets)</BindingWindowsOnlyTargets>
@@ -106,6 +106,10 @@
   <ItemGroup Condition="'$(IsTestProject)' != 'true'">
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All"/>
   </ItemGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net11.0'))">
+    <Features>$(Features);runtime-async=on</Features>
+  </PropertyGroup>
 
   <!-- Alias Lock to the dedicated System.Threading.Lock on .NET 9+ (faster EnterScope fast path),
        and to a plain object elsewhere (the lock statement falls back to Monitor). -->

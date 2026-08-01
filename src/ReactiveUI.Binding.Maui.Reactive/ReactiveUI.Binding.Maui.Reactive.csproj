@@ -7,6 +7,9 @@
     <RootNamespace>ReactiveUI.Binding.Reactive.Maui</RootNamespace>
     <UseMaui>true</UseMaui>
     <DefineConstants>$(DefineConstants);IS_MAUI</DefineConstants>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([System.String]::Copy('$(TargetFramework)').EndsWith('-windows10.0.19041.0'))">10.0.19041.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="$([System.String]::Copy('$(TargetFramework)').EndsWith('-windows10.0.19041.0'))">10.0.19041.0</TargetPlatformMinVersion>
     <PackageDescription>MAUI platform support for ReactiveUI.Binding.Reactive, for consumers on System.Reactive.</PackageDescription>
@@ -54,6 +57,8 @@
   <ItemGroup>
     <ProjectReference Include="..\ReactiveUI.Binding.Reactive\ReactiveUI.Binding.Reactive.csproj"/>
     <PackageReference Include="Microsoft.Maui.Controls"/>
+    <!-- The compatibility shims are deprecated from net11 onwards and ship no build for it. -->
+    <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Condition="$(TargetFramework.StartsWith('net10'))"/>
   </ItemGroup>
 
   <!-- A recompilation of ReactiveUI.Binding.Maui.Shared, which ReactiveUI.Binding.Maui already covers.
