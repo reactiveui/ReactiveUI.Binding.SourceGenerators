@@ -30,6 +30,43 @@ public class DispatchReachAnalyzerTests
     private const string GrantsInternals =
         "[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"Contoso.App.Tests\")]\n";
 
+    /// <summary>A consumer whose call site sits in the global namespace, with no enclosing namespace at all.</summary>
+    private const string GlobalNamespaceSource = """
+                                                 using System;
+                                                 using System.ComponentModel;
+                                                 using System.Linq.Expressions;
+                                                 using ReactiveUI.Binding;
+
+                                                 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Contoso.App.Tests")]
+
+                                                 namespace ReactiveUI.Binding
+                                                 {
+                                                     public static class ReactiveUIBindingExtensions
+                                                     {
+                                                         public static IObservable<TReturn> WhenChanged<TObj, TReturn>(
+                                                             this TObj objectToMonitor,
+                                                             Expression<Func<TObj, TReturn>> property1)
+                                                             where TObj : class
+                                                             => throw new NotImplementedException();
+                                                     }
+                                                 }
+
+                                                 public class GlobalViewModel : INotifyPropertyChanged
+                                                 {
+                                                     public event PropertyChangedEventHandler PropertyChanged;
+
+                                                     public string Name { get; set; }
+                                                 }
+
+                                                 public static class GlobalUsage
+                                                 {
+                                                     public static IObservable<string> Observe(GlobalViewModel viewModel)
+                                                     {
+                                                         return viewModel.WhenChanged(x => x.Name);
+                                                     }
+                                                 }
+                                                 """;
+
     /// <summary>All three conditions hold, so the call is reported.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -94,6 +131,83 @@ public class DispatchReachAnalyzerTests
             SourceIn(UnrelatedNamespace, GrantsInternals),
             LanguageVersion.CSharp7_3,
             null);
+
+        await Assert.That(diagnostics.Any(static d => d.Id == DiagnosticId)).IsFalse();
+    }
+
+    /// <summary>
+    /// A file declared in the global namespace has no enclosing namespace at all, so it never reaches the root
+    /// namespace either.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CallSiteInTheGlobalNamespace_IsReported()
+    {
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            GlobalNamespaceSource,
+            LanguageVersion.CSharp7_3,
+            RootNamespace);
+
+        await Assert.That(diagnostics.Count(static d => d.Id == DiagnosticId)).IsEqualTo(1);
+    }
+
+    /// <summary>A file declared as the root namespace itself reaches the dispatch without being nested in it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CallSiteExactlyInTheRootNamespace_IsNotReported()
+    {
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            SourceIn(RootNamespace, GrantsInternals),
+            LanguageVersion.CSharp7_3,
+            RootNamespace);
+
+        await Assert.That(diagnostics.Any(static d => d.Id == DiagnosticId)).IsFalse();
+    }
+
+    /// <summary>
+    /// Sharing the root namespace's opening characters is not the same as being nested under it, so
+    /// <c>Contoso.AppExtra</c> is out of reach even though it starts with <c>Contoso.App</c>.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CallSiteInANamespaceMerelySharingThePrefix_IsReported()
+    {
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            SourceIn($"{RootNamespace}Extra", GrantsInternals),
+            LanguageVersion.CSharp7_3,
+            RootNamespace);
+
+        await Assert.That(diagnostics.Count(static d => d.Id == DiagnosticId)).IsEqualTo(1);
+    }
+
+    /// <summary>An invocation that is not a binding call is passed over, wherever it sits.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NonBindingInvocation_IsNotReported()
+    {
+        var source = SourceIn(UnrelatedNamespace, GrantsInternals)
+            .Replace(
+                "return viewModel.WhenChanged(x => x.Name);",
+                "viewModel.ToString();\n            return null;",
+                StringComparison.Ordinal);
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            source,
+            LanguageVersion.CSharp7_3,
+            RootNamespace);
+
+        await Assert.That(diagnostics.Any(static d => d.Id == DiagnosticId)).IsFalse();
+    }
+
+    /// <summary>A blank root namespace names nowhere, so it is treated as none at all.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BlankRootNamespace_IsNotReported()
+    {
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            SourceIn(UnrelatedNamespace, GrantsInternals),
+            LanguageVersion.CSharp7_3,
+            "   ");
 
         await Assert.That(diagnostics.Any(static d => d.Id == DiagnosticId)).IsFalse();
     }
