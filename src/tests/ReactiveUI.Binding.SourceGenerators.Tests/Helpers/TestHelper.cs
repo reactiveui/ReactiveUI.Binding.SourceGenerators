@@ -64,7 +64,9 @@ public static class TestHelper
 
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
-#if NET10_0_OR_GREATER
+#if NET11_0_OR_GREATER
+        IEnumerable<MetadataReference> references = Basic.Reference.Assemblies.Net110.References.All;
+#elif NET10_0_OR_GREATER
         IEnumerable<MetadataReference> references = Basic.Reference.Assemblies.Net100.References.All;
 #elif NET9_0_OR_GREATER
         IEnumerable<MetadataReference> references = Basic.Reference.Assemblies.Net90.References.All;

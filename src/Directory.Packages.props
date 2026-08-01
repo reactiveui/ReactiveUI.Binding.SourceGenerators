@@ -7,7 +7,7 @@
   <!-- MAUI version varies by target framework -->
   <PropertyGroup>
     <MauiVersion Condition="$(TargetFramework.StartsWith('net10'))">10.0.90</MauiVersion>
-    <MauiVersion Condition="$(TargetFramework.StartsWith('net9'))">9.0.120</MauiVersion>
+    <MauiVersion Condition="$(TargetFramework.StartsWith('net11'))">11.0.0-preview.6.26360.8</MauiVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -48,6 +48,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
 
     <!-- Test Infrastructure -->
+    <PackageVersion Include="Basic.Reference.Assemblies.Net110" Version="1.8.10"/>
     <PackageVersion Include="Basic.Reference.Assemblies.Net100" Version="1.8.10"/>
     <PackageVersion Include="Basic.Reference.Assemblies.Net90" Version="1.8.10"/>
     <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.8.10"/>
@@ -69,7 +70,6 @@
 
     <!-- MAUI -->
     <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
-    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)"/>
 
     <!-- Benchmarking -->
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8"/>

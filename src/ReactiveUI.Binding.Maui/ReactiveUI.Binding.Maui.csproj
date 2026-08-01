@@ -3,9 +3,6 @@
     <TargetFrameworks>$(BindingMauiTargets)</TargetFrameworks>
     <UseMaui>true</UseMaui>
     <DefineConstants>$(DefineConstants);IS_MAUI</DefineConstants>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([System.String]::Copy('$(TargetFramework)').EndsWith('-windows10.0.19041.0'))">10.0.19041.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="$([System.String]::Copy('$(TargetFramework)').EndsWith('-windows10.0.19041.0'))">10.0.19041.0</TargetPlatformMinVersion>
     <PackageDescription>MAUI platform support for ReactiveUI.Binding. Provides DependencyProperty observation for WinUI and Visibility converters.</PackageDescription>
@@ -56,7 +53,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
     <PackageReference Include="Microsoft.Maui.Controls"/>
-    <PackageReference Include="Microsoft.Maui.Controls.Compatibility"/>
   </ItemGroup>
 
   <ItemGroup>
