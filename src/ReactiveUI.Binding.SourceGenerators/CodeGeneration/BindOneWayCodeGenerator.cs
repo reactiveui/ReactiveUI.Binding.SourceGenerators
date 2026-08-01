@@ -15,6 +15,9 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class BindOneWayCodeGenerator
 {
+    /// <summary>What this API calls the conversion argument in its generated signatures.</summary>
+    private const string ConversionParameterName = "conversionFunc";
+
     /// <summary>Name of the emitted local holding the source property observation, before conversion or scheduling.</summary>
     private const string SourceObservableVariable = "sourceObs";
 
@@ -72,51 +75,8 @@ internal static class BindOneWayCodeGenerator
     /// <summary>Groups binding invocation information by a unique type signature, producing a collection of grouped results.</summary>
     /// <param name="invocations">The collection of binding invocation details to be grouped.</param>
     /// <returns>A list of grouped binding type information, where each group shares the same type signature.</returns>
-    internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations)
-    {
-        var groupMap = new Dictionary<string, List<BindingInvocationInfo>>(invocations.Length);
-        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
-
-        for (var i = 0; i < invocations.Length; i++)
-        {
-            var inv = invocations[i];
-            _ = keySb.Clear()
-                .Append(inv.SourceTypeFullName).Append('|')
-                .Append(inv.TargetTypeFullName).Append('|')
-                .Append(inv.SourcePropertyTypeFullName).Append('|')
-                .Append(inv.TargetPropertyTypeFullName).Append('|')
-                .Append(inv.HasConversion).Append('|')
-                .Append(inv.HasScheduler);
-
-            var key = keySb.ToString();
-
-            if (!groupMap.TryGetValue(key, out var list))
-            {
-                list = [];
-                groupMap[key] = list;
-            }
-
-            list.Add(inv);
-        }
-
-        keySb.Return();
-
-        var result = new List<BindingTypeGroup>();
-        foreach (var kvp in groupMap)
-        {
-            var first = kvp.Value[0];
-            result.Add(new(
-                first.SourceTypeFullName,
-                first.TargetTypeFullName,
-                first.SourcePropertyTypeFullName,
-                first.TargetPropertyTypeFullName,
-                first.HasConversion,
-                first.HasScheduler,
-                [.. kvp.Value]));
-        }
-
-        return result;
-    }
+    internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations) =>
+        BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
     /// <summary>
     /// Generates a concrete typed extension method overload for a specific group of binding types,
@@ -334,60 +294,20 @@ internal static class BindOneWayCodeGenerator
     /// <summary>Appends extra parameters (converter, scheduler) to the concrete overload signature.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
-    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group)
-    {
-        if (group.HasConversion)
-        {
-            _ = sb.AppendLine(
-                $"            global::System.Func<{group.SourcePropertyTypeFullName}, {group.TargetPropertyTypeFullName}> conversionFunc,");
-        }
-
-        if (!group.HasScheduler)
-        {
-            return;
-        }
-
-        _ = sb.AppendLine($"            {ISequencer} scheduler,");
-    }
+    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group) =>
+        BindingEmitterHelpers.AppendExtraParameters(sb, group, ConversionParameterName);
 
     /// <summary>Formats extra arguments (converter, scheduler) for forwarding to the binding method.</summary>
     /// <param name="group">The binding type group.</param>
     /// <returns>Extra arguments string like ", conversionFunc, scheduler" or empty.</returns>
-    internal static string FormatExtraArgs(BindingTypeGroup group)
-    {
-        var sb = new PooledStringBuilder();
-        if (group.HasConversion)
-        {
-            _ = sb.Append(", conversionFunc");
-        }
-
-        if (group.HasScheduler)
-        {
-            _ = sb.Append(", scheduler");
-        }
-
-        return sb.ToStringAndReturn();
-    }
+    internal static string FormatExtraArgs(BindingTypeGroup group) =>
+        BindingEmitterHelpers.FormatExtraArgs(group, ConversionParameterName);
 
     /// <summary>Formats extra method parameters for the private binding method signature.</summary>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>Extra parameters string like ", Func&lt;int, string&gt; conversionFunc, ISequencer scheduler" or empty.</returns>
-    internal static string FormatExtraMethodParams(BindingInvocationInfo inv)
-    {
-        var sb = new PooledStringBuilder();
-        if (inv.HasConversion)
-        {
-            _ = sb.Append(
-                $", global::System.Func<{inv.SourcePropertyTypeFullName}, {inv.TargetPropertyTypeFullName}> conversionFunc");
-        }
-
-        if (inv.HasScheduler)
-        {
-            _ = sb.Append($", {ISequencer} scheduler");
-        }
-
-        return sb.ToStringAndReturn();
-    }
+    internal static string FormatExtraMethodParams(BindingInvocationInfo inv) =>
+        BindingEmitterHelpers.FormatExtraMethodParams(inv, ConversionParameterName);
 
     /// <summary>Emits the conversion and scheduler stages between the source observation and the subscription.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -414,21 +334,4 @@ internal static class BindOneWayCodeGenerator
 
         return currentVar;
     }
-
-    /// <summary>Groups binding invocations by source, target, property types, and overload variant for overload generation.</summary>
-    /// <param name="SourceTypeFullName">The fully qualified name of the source (data) type.</param>
-    /// <param name="TargetTypeFullName">The fully qualified name of the target (UI) type.</param>
-    /// <param name="SourcePropertyTypeFullName">The fully qualified type of the source property.</param>
-    /// <param name="TargetPropertyTypeFullName">The fully qualified type of the target property.</param>
-    /// <param name="HasConversion">Whether this group uses inline Func conversion.</param>
-    /// <param name="HasScheduler">Whether this group uses an explicit scheduler.</param>
-    /// <param name="Invocations">All binding invocations sharing the same type signature.</param>
-    internal sealed record BindingTypeGroup(
-        string SourceTypeFullName,
-        string TargetTypeFullName,
-        string SourcePropertyTypeFullName,
-        string TargetPropertyTypeFullName,
-        bool HasConversion,
-        bool HasScheduler,
-        BindingInvocationInfo[] Invocations);
 }

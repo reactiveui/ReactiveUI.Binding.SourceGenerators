@@ -71,7 +71,7 @@ public class OneWayBindCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_NoConversionNoScheduler_ReturnsEmpty()
     {
-        var group = new OneWayBindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -90,7 +90,7 @@ public class OneWayBindCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_WithConversion_IncludesSelectorArg()
     {
-        var group = new OneWayBindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -109,7 +109,7 @@ public class OneWayBindCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_WithScheduler_IncludesSchedulerArg()
     {
-        var group = new OneWayBindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -128,7 +128,7 @@ public class OneWayBindCodeGeneratorHelperTests
     [Test]
     public async Task FormatReturnType_NoConversion_UsesSourcePropertyType()
     {
-        var group = new OneWayBindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             Int32TypeName,
@@ -148,7 +148,7 @@ public class OneWayBindCodeGeneratorHelperTests
     [Test]
     public async Task FormatReturnType_WithConversion_UsesTargetPropertyType()
     {
-        var group = new OneWayBindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             Int32TypeName,
@@ -213,7 +213,7 @@ public class OneWayBindCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: OneWayBindName);
-        var group = new OneWayBindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             "global::TestApp.MyViewModel",
             "global::TestApp.MyView",
             StringTypeName,

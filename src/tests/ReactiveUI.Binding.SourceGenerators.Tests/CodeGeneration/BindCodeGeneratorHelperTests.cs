@@ -92,7 +92,7 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_NoConversionNoScheduler_ReturnsEmpty()
     {
-        var group = new BindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -111,7 +111,7 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_WithConversion_IncludesConverterArgs()
     {
-        var group = new BindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -131,7 +131,7 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_WithScheduler_IncludesSchedulerArg()
     {
-        var group = new BindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -150,7 +150,7 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_WithConversionAndScheduler_IncludesBoth()
     {
-        var group = new BindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -170,7 +170,7 @@ public class BindCodeGeneratorHelperTests
     [Test]
     public async Task FormatReturnType_ReturnsIReactiveBindingType()
     {
-        var group = new BindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -247,7 +247,7 @@ public class BindCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: "Bind");
-        var group = new BindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             "global::TestApp.MyViewModel",
             MyViewTypeName,
             StringTypeName,
@@ -270,7 +270,7 @@ public class BindCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: "Bind");
-        var group = new BindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             "global::TestApp.MyViewModel",
             MyViewTypeName,
             StringTypeName,
@@ -317,7 +317,7 @@ public class BindCodeGeneratorHelperTests
     public async Task AppendExtraParameters_WithConversion_AppendsConverterParams()
     {
         var sb = new StringBuilder();
-        var group = new BindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -340,7 +340,7 @@ public class BindCodeGeneratorHelperTests
     public async Task AppendExtraParameters_WithScheduler_AppendsSchedulerParam()
     {
         var sb = new StringBuilder();
-        var group = new BindCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,

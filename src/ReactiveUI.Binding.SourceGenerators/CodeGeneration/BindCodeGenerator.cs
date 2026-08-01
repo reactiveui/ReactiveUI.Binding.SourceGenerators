@@ -15,6 +15,12 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class BindCodeGenerator
 {
+    /// <summary>What this API calls the view-model-to-view converter in its generated signatures.</summary>
+    private const string ForwardConverterName = "viewModelToViewConverter";
+
+    /// <summary>What this API calls the view-to-view-model converter in its generated signatures.</summary>
+    private const string ReverseConverterName = "viewToViewModelConverter";
+
     /// <summary>Name of the generated local holding the view model side observable.</summary>
     private const string ViewModelObservableName = "vmObs";
 
@@ -73,51 +79,8 @@ internal static class BindCodeGenerator
     /// <summary>Groups Bind invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The Bind invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
-    internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations)
-    {
-        var groupMap = new Dictionary<string, List<BindingInvocationInfo>>(invocations.Length);
-        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
-
-        for (var i = 0; i < invocations.Length; i++)
-        {
-            var inv = invocations[i];
-            _ = keySb.Clear()
-                .Append(inv.SourceTypeFullName).Append('|')
-                .Append(inv.TargetTypeFullName).Append('|')
-                .Append(inv.SourcePropertyTypeFullName).Append('|')
-                .Append(inv.TargetPropertyTypeFullName).Append('|')
-                .Append(inv.HasConversion).Append('|')
-                .Append(inv.HasScheduler);
-
-            var key = keySb.ToString();
-
-            if (!groupMap.TryGetValue(key, out var list))
-            {
-                list = [];
-                groupMap[key] = list;
-            }
-
-            list.Add(inv);
-        }
-
-        keySb.Return();
-
-        var result = new List<BindingTypeGroup>();
-        foreach (var kvp in groupMap)
-        {
-            var first = kvp.Value[0];
-            result.Add(new(
-                first.SourceTypeFullName,
-                first.TargetTypeFullName,
-                first.SourcePropertyTypeFullName,
-                first.TargetPropertyTypeFullName,
-                first.HasConversion,
-                first.HasScheduler,
-                [.. kvp.Value]));
-        }
-
-        return result;
-    }
+    internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations) =>
+        BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
     /// <summary>Generates the concrete typed overload using the appropriate dispatch strategy.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -336,64 +299,20 @@ internal static class BindCodeGenerator
     /// <summary>Appends extra parameters (converters, scheduler) to the concrete overload signature.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
-    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group)
-    {
-        if (group.HasConversion)
-        {
-            _ = sb.AppendLine($"""
-                                       global::System.Func<{group.SourcePropertyTypeFullName}, {group.TargetPropertyTypeFullName}> viewModelToViewConverter,
-                                       global::System.Func<{group.TargetPropertyTypeFullName}, {group.SourcePropertyTypeFullName}> viewToViewModelConverter,
-                           """);
-        }
-
-        if (!group.HasScheduler)
-        {
-            return;
-        }
-
-        _ = sb.AppendLine($"            {ISequencer} scheduler,");
-    }
+    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group) =>
+        BindingEmitterHelpers.AppendTwoWayExtraParameters(sb, group, ForwardConverterName, ReverseConverterName);
 
     /// <summary>Formats extra arguments (converters, scheduler) for forwarding to the binding method.</summary>
     /// <param name="group">The binding type group.</param>
     /// <returns>Extra arguments string or empty.</returns>
-    internal static string FormatExtraArgs(BindingTypeGroup group)
-    {
-        var sb = new PooledStringBuilder();
-        if (group.HasConversion)
-        {
-            _ = sb.Append(", viewModelToViewConverter, viewToViewModelConverter");
-        }
-
-        if (group.HasScheduler)
-        {
-            _ = sb.Append(", scheduler");
-        }
-
-        return sb.ToStringAndReturn();
-    }
+    internal static string FormatExtraArgs(BindingTypeGroup group) =>
+        BindingEmitterHelpers.FormatTwoWayExtraArgs(group, ForwardConverterName, ReverseConverterName);
 
     /// <summary>Formats extra method parameters for the private binding method signature.</summary>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>Extra parameters string for converter and scheduler parameters.</returns>
-    internal static string FormatExtraMethodParams(BindingInvocationInfo inv)
-    {
-        var sb = new PooledStringBuilder();
-        if (inv.HasConversion)
-        {
-            _ = sb.Append(
-                    $", global::System.Func<{inv.SourcePropertyTypeFullName}, {inv.TargetPropertyTypeFullName}> viewModelToViewConverter")
-                .Append(
-                    $", global::System.Func<{inv.TargetPropertyTypeFullName}, {inv.SourcePropertyTypeFullName}> viewToViewModelConverter");
-        }
-
-        if (inv.HasScheduler)
-        {
-            _ = sb.Append($", {ISequencer} scheduler");
-        }
-
-        return sb.ToStringAndReturn();
-    }
+    internal static string FormatExtraMethodParams(BindingInvocationInfo inv) =>
+        BindingEmitterHelpers.FormatTwoWayExtraMethodParams(inv, ForwardConverterName, ReverseConverterName);
 
     /// <summary>Formats the return type for a concrete Bind overload.</summary>
     /// <param name="group">The binding type group.</param>
@@ -504,21 +423,4 @@ internal static class BindCodeGenerator
     /// <returns>The value-tuple type string.</returns>
     private static string BindReturnValueType(bool supportsNullable) =>
         supportsNullable ? "(object? view, bool isViewModel)" : "(object view, bool isViewModel)";
-
-    /// <summary>Groups binding invocations by source, target, property types, and overload variant for overload generation.</summary>
-    /// <param name="SourceTypeFullName">The fully qualified source (view model) type.</param>
-    /// <param name="TargetTypeFullName">The fully qualified target (view) type.</param>
-    /// <param name="SourcePropertyTypeFullName">The fully qualified type of the bound source property.</param>
-    /// <param name="TargetPropertyTypeFullName">The fully qualified type of the bound target property.</param>
-    /// <param name="HasConversion">Whether the overload takes a conversion function.</param>
-    /// <param name="HasScheduler">Whether the overload takes a scheduler.</param>
-    /// <param name="Invocations">The call sites sharing this group's shape.</param>
-    internal sealed record BindingTypeGroup(
-        string SourceTypeFullName,
-        string TargetTypeFullName,
-        string SourcePropertyTypeFullName,
-        string TargetPropertyTypeFullName,
-        bool HasConversion,
-        bool HasScheduler,
-        BindingInvocationInfo[] Invocations);
 }

@@ -69,7 +69,7 @@ public class BindOneWayCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo();
-        var group = new BindOneWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             MyViewModelTypeName,
             MyViewTypeName,
             StringTypeName,
@@ -92,7 +92,7 @@ public class BindOneWayCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo();
-        var group = new BindOneWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             MyViewModelTypeName,
             MyViewTypeName,
             StringTypeName,
@@ -115,7 +115,7 @@ public class BindOneWayCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo();
-        var group = new BindOneWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             MyViewModelTypeName,
             MyViewTypeName,
             StringTypeName,
@@ -139,7 +139,7 @@ public class BindOneWayCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo();
-        var group = new BindOneWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             MyViewModelTypeName,
             MyViewTypeName,
             StringTypeName,
@@ -180,7 +180,7 @@ public class BindOneWayCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_NoConversionNoScheduler_ReturnsEmpty()
     {
-        var group = new BindOneWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             "global::TestApp.VM",
             "global::TestApp.View",
             StringTypeName,
@@ -199,7 +199,7 @@ public class BindOneWayCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_WithConversion_IncludesConversionFunc()
     {
-        var group = new BindOneWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             "global::TestApp.VM",
             "global::TestApp.View",
             StringTypeName,

@@ -94,7 +94,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true, methodName: BindTwoWayName);
-        var group = new BindTwoWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             MyViewModelTypeName,
             MyViewTypeName,
             StringTypeName,
@@ -117,7 +117,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true, methodName: BindTwoWayName);
-        var group = new BindTwoWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             MyViewModelTypeName,
             MyViewTypeName,
             StringTypeName,
@@ -142,7 +142,7 @@ public class BindTwoWayCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindingInvocationInfo(
             isTwoWay: true,
             methodName: BindTwoWayName);
-        var group = new BindTwoWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             MyViewModelTypeName,
             MyViewTypeName,
             StringTypeName,
@@ -171,7 +171,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             CallerLineNumber,
             isTwoWay: true,
             methodName: BindTwoWayName);
-        var group = new BindTwoWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             MyViewModelTypeName,
             MyViewTypeName,
             StringTypeName,
@@ -217,7 +217,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_NoConversionNoScheduler_ReturnsEmpty()
     {
-        var group = new BindTwoWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -236,7 +236,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_WithConversion_IncludesTwoWayConverterArgs()
     {
-        var group = new BindTwoWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -256,7 +256,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     [Test]
     public async Task FormatExtraArgs_WithScheduler_IncludesSchedulerArg()
     {
-        var group = new BindTwoWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             StringTypeName,
@@ -375,7 +375,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     public async Task AppendExtraParameters_WithConversion_AppendsConverterParamsWithTypes()
     {
         var sb = new StringBuilder();
-        var group = new BindTwoWayCodeGenerator.BindingTypeGroup(
+        var group = new BindingTypeGroup(
             VMTypeName,
             ViewTypeName,
             "global::System.Int32",
