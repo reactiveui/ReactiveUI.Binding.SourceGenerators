@@ -83,15 +83,9 @@ internal static class BindingTypeConverterDispatch
         ArgumentExceptionHelper.ThrowIfNull(from);
         ArgumentExceptionHelper.ThrowIfNull(toType);
 
-        // Delegate to fallback converter (from is guaranteed non-null)
-        if (!converter.TryConvert(fromType, from, toType, conversionHint, out result))
-        {
-            result = null;
-            return false;
-        }
-
-        // Fallback converters must still guarantee a non-null result on success.
-        if (result is not null)
+        // A converter that reports success without producing a value has broken its contract.
+        // Treat that as a failed conversion rather than pushing the null on into a binding.
+        if (converter.TryConvert(fromType, from, toType, conversionHint, out result) && result is not null)
         {
             return true;
         }

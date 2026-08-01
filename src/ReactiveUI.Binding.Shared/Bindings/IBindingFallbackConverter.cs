@@ -71,13 +71,17 @@ public interface IBindingFallbackConverter : IEnableLogger
     /// <param name="toType">The target type (guaranteed non-null).</param>
     /// <param name="conversionHint">Implementation-defined conversion hint (e.g., format string, culture).</param>
     /// <param name="result">
-    /// The converted value. Guaranteed non-null when this method returns <see langword="true"/>.
+    /// The converted value. Implementations must produce a non-null value when returning
+    /// <see langword="true"/>.
     /// </param>
     /// <returns><see langword="true"/> if conversion succeeded; otherwise, <see langword="false"/>.</returns>
     /// <remarks>
     /// <para>
-    /// When this method returns <see langword="true"/>, the <paramref name="result"/> parameter
-    /// is guaranteed to be non-null (modern nullability contract).
+    /// Returning <see langword="true"/> obliges an implementation to produce a non-null
+    /// <paramref name="result"/>, but that obligation is not expressed as a nullability annotation:
+    /// implementations come from outside the library and nothing enforces it. The dispatch layer
+    /// therefore checks, and reports a null result as a failed conversion rather than letting it
+    /// reach a binding.
     /// </para>
     /// <para>
     /// Null input handling is performed by the dispatch layer. This method will never receive
@@ -91,5 +95,5 @@ public interface IBindingFallbackConverter : IEnableLogger
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type toType,
         object? conversionHint,
-        [NotNullWhen(true)] out object? result);
+        out object? result);
 }
