@@ -39,6 +39,12 @@
     <ProjectReference Include="..\ReactiveUI.Binding.Reactive\ReactiveUI.Binding.Reactive.csproj"/>
   </ItemGroup>
 
+  <!-- The mirror test project recompiles the lean project's test source, which reaches the platform
+       primitives, so it needs the same grant the lean leaf gives its own tests. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Wpf.Tests.Reactive"/>
+  </ItemGroup>
+
   <!-- A recompilation of ReactiveUI.Binding.Wpf.Shared, which ReactiveUI.Binding.Wpf already covers.
        See the note on ReactiveUI.Binding.Reactive for why this is an attribute and not a module path. -->
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))">

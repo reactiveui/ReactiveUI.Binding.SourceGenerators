@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Using Include="ReactiveUI.Binding"/>
+    <Using Include="ReactiveUI.Binding.Observables"/>
     <Using Include="ReactiveUI.Binding.Wpf"/>
     <Using Include="TUnit.Core"/>
   </ItemGroup>

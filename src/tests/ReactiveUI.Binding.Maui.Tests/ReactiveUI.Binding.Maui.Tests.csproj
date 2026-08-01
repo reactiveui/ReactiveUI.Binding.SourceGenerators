@@ -10,7 +10,11 @@
 
   <ItemGroup>
     <Using Include="ReactiveUI.Binding"/>
+    <Using Include="ReactiveUI.Binding.Builder"/>
     <Using Include="ReactiveUI.Binding.Maui"/>
+    <Using Include="ReactiveUI.Binding.Maui.Builder"/>
+    <Using Include="Splat"/>
+    <Using Include="Splat.Builder"/>
     <Using Include="TUnit.Core"/>
   </ItemGroup>
 

@@ -73,8 +73,10 @@ public class DispatchReachAnalyzer : DiagnosticAnalyzer
             return;
         }
 
+        // The symbol enclosing an invocation is always declared in a namespace, the global one at worst,
+        // so this never has to account for there being none.
         var containingNamespace = context.ContainingSymbol.ContainingNamespace;
-        var callSiteNamespace = containingNamespace?.IsGlobalNamespace != false
+        var callSiteNamespace = containingNamespace.IsGlobalNamespace
             ? string.Empty
             : containingNamespace.ToDisplayString();
 
