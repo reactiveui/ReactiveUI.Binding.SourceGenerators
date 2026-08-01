@@ -50,7 +50,7 @@ internal static class ViewLocatorDispatchGenerator
     /// <param name="context">The source production context.</param>
     /// <param name="registrations">All detected view registration infos.</param>
     /// <param name="features">The consumer compilation's language-feature and generation-option snapshot.</param>
-    internal static void Generate(in SourceProductionContext context, ImmutableArray<ViewRegistrationInfo> registrations, LanguageFeatures features)
+    internal static void Generate(in SourceProductionContext context, ImmutableArray<ViewRegistrationInfo> registrations, in LanguageFeatures features)
     {
         if (!ExtractorValidation.HasItems(registrations))
         {
@@ -63,9 +63,13 @@ internal static class ViewLocatorDispatchGenerator
         const int DispatchPreambleCapacity = 2_048;
         const int PerRegistrationCapacity = 512;
 
-        var sb = new StringBuilder(DispatchPreambleCapacity + (deduplicated.Count * PerRegistrationCapacity));
+        var sb = CodeGeneration.PooledBuilder.Rent(DispatchPreambleCapacity + (deduplicated.Count * PerRegistrationCapacity));
         GenerateSource(sb, deduplicated, features);
-        context.AddSource("ViewDispatch.g.cs", sb.ToString());
+        CodeGeneration.CodeGeneratorHelpers.AddGeneratedSource(
+            context,
+            "ViewDispatch.g.cs",
+            CodeGeneration.PooledBuilder.ToStringAndReturn(sb),
+            features);
     }
 
     /// <summary>Deduplicates view registrations by (view model fully qualified name, contract) pair.</summary>
@@ -92,7 +96,7 @@ internal static class ViewLocatorDispatchGenerator
     /// <param name="sb">The string builder to write to.</param>
     /// <param name="registrations">The deduplicated registrations.</param>
     /// <param name="features">The consumer compilation's language-feature and generation-option snapshot.</param>
-    private static void GenerateSource(StringBuilder sb, List<ViewRegistrationInfo> registrations, LanguageFeatures features)
+    private static void GenerateSource(StringBuilder sb, List<ViewRegistrationInfo> registrations, in LanguageFeatures features)
     {
         var supportsNullable = features.SupportsNullable;
         EmitFileHeader(sb, features);
@@ -127,7 +131,7 @@ internal static class ViewLocatorDispatchGenerator
     /// <summary>Emits the generated-file markers, nullable directive, and the enclosing namespace and class declarations.</summary>
     /// <param name="sb">The string builder to write to.</param>
     /// <param name="features">The consumer compilation's language-feature and generation-option snapshot.</param>
-    private static void EmitFileHeader(StringBuilder sb, LanguageFeatures features)
+    private static void EmitFileHeader(StringBuilder sb, in LanguageFeatures features)
     {
         CodeGeneration.CodeGeneratorHelpers.AppendGeneratedFileMarkers(sb, features.EmitGeneratedCodeMarkers);
         if (features.SupportsNullable)
@@ -135,13 +139,11 @@ internal static class ViewLocatorDispatchGenerator
             _ = sb.AppendLine("#nullable enable");
         }
 
-        _ = sb.Append("""
-
-                  namespace ReactiveUI.Binding
-                  {
-                      internal static partial class __ReactiveUIGeneratedBindings
-                      {
-                  """);
+        _ = sb.Append("\nnamespace ")
+            .Append(features.GeneratedNamespace)
+            .Append("\n{\n    internal static partial class ")
+            .Append(Constants.GeneratedExtensionClassName)
+            .Append("\n    {");
     }
 
     /// <summary>

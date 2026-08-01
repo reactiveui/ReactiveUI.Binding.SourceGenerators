@@ -1,4 +1,6 @@
 <Project>
+  <Import Project="ReactiveShim.props"/>
+
   <PropertyGroup>
     <!-- Enable building Windows-specific targets on non-Windows platforms -->
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
@@ -32,6 +34,9 @@
     <!-- Test targets -->
     <BindingTestTargets>net8.0;net9.0;net10.0</BindingTestTargets>
 
+    <!-- MAUI starts at net9.0, so its tests cannot offer the net8.0 leg the other test projects do. -->
+    <BindingMauiTestTargets>net9.0;net10.0</BindingMauiTestTargets>
+
     <!-- Windows-specific test targets: use Windows TFMs on Windows, core TFMs elsewhere -->
     <BindingTestWindowsTargets>$(BindingTestTargets)</BindingTestWindowsTargets>
     <BindingTestWindowsTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(BindingWindowsTargets)</BindingTestWindowsTargets>
@@ -44,6 +49,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Platform>AnyCPU</Platform>
     <IsTestProject>$(MSBuildProjectName.Contains('Tests'))</IsTestProject>
+
+    <!-- WPF and WinForms tests target the windows TFMs, so they need the Windows Desktop runtime to execute.
+         Off Windows they still compile (EnableWindowsTargeting) - which is the validation we want from the
+         Linux and macOS legs - but demoting them out of IsTestProject keeps the test run from launching an
+         app that cannot start there and reporting it as "Zero tests ran". The MAUI tests are deliberately
+         absent: they target the plain TFMs and run everywhere. -->
+    <IsWindowsDesktopTestProject Condition="'$(IsTestProject)' == 'true' and ($(MSBuildProjectName.Contains('.Wpf.')) or $(MSBuildProjectName.Contains('.WinForms.')))">true</IsWindowsDesktopTestProject>
+    <IsTestProject Condition="'$(IsWindowsDesktopTestProject)' == 'true' and !$([MSBuild]::IsOsPlatform('Windows'))">false</IsTestProject>
+    <IsTestingPlatformApplication Condition="'$(IsWindowsDesktopTestProject)' == 'true' and !$([MSBuild]::IsOsPlatform('Windows'))">false</IsTestingPlatformApplication>
     <DebugType>embedded</DebugType>
     <Authors>Glenn Watson</Authors>
     <Copyright>Copyright (c) $([System.DateTime]::Now.ToString(yyyy)) ReactiveUI Association Inc</Copyright>

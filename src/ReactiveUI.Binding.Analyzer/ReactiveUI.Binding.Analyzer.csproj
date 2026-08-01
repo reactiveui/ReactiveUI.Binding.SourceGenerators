@@ -30,8 +30,8 @@
 
   <!-- Link polyfills and helpers from runtime library for netstandard2.0 compatibility -->
   <ItemGroup>
-    <Compile Include="..\ReactiveUI.Binding\Polyfills\**.cs" Link="Polyfills"/>
-    <Compile Include="..\ReactiveUI.Binding\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.Shared\Polyfills\**.cs" Link="Polyfills"/>
+    <Compile Include="..\ReactiveUI.Binding.Shared\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs"/>
   </ItemGroup>
 
   <!-- Include analyzer release tracking files -->

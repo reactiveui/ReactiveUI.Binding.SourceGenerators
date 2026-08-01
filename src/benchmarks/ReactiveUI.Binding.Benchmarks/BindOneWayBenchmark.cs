@@ -2,9 +2,9 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Reactive.Concurrency;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
+using ReactiveUI.Primitives.Concurrency;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
@@ -48,11 +48,11 @@ public class BindOneWayBenchmark
         }
     }
 
-    /// <summary>One-way binding with ImmediateScheduler: measures ObserveOnObservable overhead.</summary>
+    /// <summary>One-way binding with ImmediateSequencer: measures ObserveOnObservable overhead.</summary>
     [Benchmark(Description = "BindOneWay + Scheduler")]
     public void WithScheduler()
     {
-        using var binding = _source.BindOneWay(_target, x => x.Name, x => x.DisplayName, ImmediateScheduler.Instance);
+        using var binding = _source.BindOneWay(_target, x => x.Name, x => x.DisplayName, ImmediateSequencer.Instance);
 
         for (var i = 0; i < PropertyChangeCount; i++)
         {

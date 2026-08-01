@@ -18,6 +18,8 @@ namespace ReactiveUI.Binding
             global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel, string?>> sourceProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView, string?>> targetProperty,
+            string sourcePropertyExpression = "",
+            string targetPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {

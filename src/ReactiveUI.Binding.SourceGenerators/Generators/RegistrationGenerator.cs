@@ -19,7 +19,7 @@ internal static class RegistrationGenerator
     /// <param name="context">The source production context.</param>
     /// <param name="allTypes">All detected observable type infos across all notification kinds.</param>
     /// <param name="features">The consumer compilation's language-feature and generation-option snapshot.</param>
-    internal static void Generate(in SourceProductionContext context, ImmutableArray<ObservableTypeInfo> allTypes, LanguageFeatures features)
+    internal static void Generate(in SourceProductionContext context, ImmutableArray<ObservableTypeInfo> allTypes, in LanguageFeatures features)
     {
         if (!Helpers.ExtractorValidation.HasItems(allTypes))
         {
@@ -33,7 +33,7 @@ internal static class RegistrationGenerator
             _ = uniqueKinds.Add(allTypes[i].ObservationKind);
         }
 
-        var sb = new StringBuilder(
+        var sb = CodeGeneration.PooledBuilder.Rent(
             CodeGeneration.CodeGeneratorHelpers.PerInvocationBufferCapacity
             + (allTypes.Length * CodeGeneration.CodeGeneratorHelpers.FragmentBufferCapacity));
         CodeGeneration.CodeGeneratorHelpers.AppendGeneratedFileMarkers(sb, features.EmitGeneratedCodeMarkers);
@@ -73,6 +73,10 @@ internal static class RegistrationGenerator
                       }
                       """);
 
-        context.AddSource("GeneratedBinderRegistration.g.cs", sb.ToString());
+        CodeGeneration.CodeGeneratorHelpers.AddGeneratedSource(
+            context,
+            "GeneratedBinderRegistration.g.cs",
+            CodeGeneration.PooledBuilder.ToStringAndReturn(sb),
+            features);
     }
 }

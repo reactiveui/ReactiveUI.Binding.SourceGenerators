@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet"/>
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.dotTrace" Condition="false"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    <PackageReference Include="Basic.Reference.Assemblies.Net80"/>
+  </ItemGroup>
+
+  <!--
+    The generator is referenced as a plain library, not as an analyzer: these benchmarks drive it directly
+    so the measurement covers the emitter rather than whatever the host build decides to do with it.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\ReactiveUI.Binding.SourceGenerators\ReactiveUI.Binding.SourceGenerators.csproj"/>
+    <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
+  </ItemGroup>
+
+</Project>

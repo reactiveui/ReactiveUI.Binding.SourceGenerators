@@ -85,6 +85,27 @@ internal static partial class SharedSourceReader
 
     /// <summary>Finds the root directory of the SharedScenarios.</summary>
     /// <returns>The path to the SharedScenarios directory.</returns>
+    /// <summary>Lists every shared scenario, so a test can sweep all of them without a hand-kept list.</summary>
+    /// <returns>The scenario paths, relative to the shared scenario root, in a stable order.</returns>
+    internal static IReadOnlyList<string> EnumerateScenarioPaths()
+    {
+        var root = FindRoot();
+        var scenarios = new List<string>();
+
+        foreach (var directory in Directory.GetDirectories(root, "*", SearchOption.AllDirectories))
+        {
+            if (Directory.GetFiles(directory, "*.cs").Length > 0)
+            {
+                scenarios.Add(Path.GetRelativePath(root, directory).Replace('\\', '/'));
+            }
+        }
+
+        scenarios.Sort(StringComparer.Ordinal);
+        return scenarios;
+    }
+
+    /// <summary>Locates the shared scenario root in the test output directory.</summary>
+    /// <returns>The absolute path to the shared scenario root.</returns>
     internal static string FindRoot() =>
         Path.Combine(Path.GetDirectoryName(typeof(SharedSourceReader).Assembly.Location)!, "SharedScenarios");
 

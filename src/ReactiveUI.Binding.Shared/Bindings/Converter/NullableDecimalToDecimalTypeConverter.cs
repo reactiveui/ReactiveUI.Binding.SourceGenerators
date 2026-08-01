@@ -1,0 +1,66 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+#if REACTIVE_SHIM
+namespace ReactiveUI.Binding.Reactive;
+#else
+namespace ReactiveUI.Binding;
+#endif
+
+/// <summary>Converts a nullable <see cref="decimal"/> to <see cref="decimal"/>.</summary>
+/// <remarks>
+/// When the nullable value is null, the conversion fails and returns false.
+/// </remarks>
+public sealed class NullableDecimalToDecimalTypeConverter : IBindingTypeConverter<decimal?, decimal>
+{
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
+    /// <inheritdoc/>
+    public Type FromType => typeof(decimal?);
+
+    /// <inheritdoc/>
+    public Type ToType => typeof(decimal);
+
+    /// <inheritdoc/>
+    public int GetAffinityForObjects() => Affinity;
+
+    /// <inheritdoc/>
+    public bool TryConvert(decimal? from, object? conversionHint, [NotNullWhen(true)] out decimal result)
+    {
+        if (from is null)
+        {
+            result = default;
+            return false;
+        }
+
+        result = from.Value;
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public bool TryConvertTyped(object? from, object? conversionHint, [NotNullWhen(true)] out object? result)
+    {
+        switch (from)
+        {
+            case null:
+                {
+                    result = null;
+                    return TryConvert(null, conversionHint, out _);
+                }
+
+            case decimal value:
+                {
+                    result = value;
+                    return true;
+                }
+
+            default:
+                {
+                    result = null;
+                    return false;
+                }
+        }
+    }
+}

@@ -17,6 +17,7 @@ namespace ReactiveUI.Binding
             this global::System.IObservable<string> source,
             global::SharedScenarios.BindTo.SameTypeString.MyView target,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTo.SameTypeString.MyView, string?>> property,
+            string propertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {

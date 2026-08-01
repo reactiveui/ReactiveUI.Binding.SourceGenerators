@@ -227,7 +227,7 @@ public class BindCodeGeneratorHelperTests
         await Assert.That(result).Contains(ViewToViewModelConverterName);
     }
 
-    /// <summary>Verifies FormatExtraMethodParams includes IScheduler when HasScheduler is true.</summary>
+    /// <summary>Verifies FormatExtraMethodParams includes ISequencer when HasScheduler is true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FormatExtraMethodParams_WithScheduler_IncludesSchedulerParam()
@@ -236,7 +236,7 @@ public class BindCodeGeneratorHelperTests
 
         var result = BindCodeGenerator.FormatExtraMethodParams(inv);
 
-        await Assert.That(result).Contains("IScheduler");
+        await Assert.That(result).Contains("ISequencer");
         await Assert.That(result).Contains(SchedulerName);
     }
 
@@ -256,7 +256,7 @@ public class BindCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
+        BindCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -279,7 +279,7 @@ public class BindCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindCodeGenerator.GenerateConcreteOverload(sb, group, false, false);
+        BindCodeGenerator.GenerateConcreteOverload(sb, group, false, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerFilePath.EndsWith");
@@ -352,6 +352,6 @@ public class BindCodeGeneratorHelperTests
         BindCodeGenerator.AppendExtraParameters(sb, group);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("IScheduler");
+        await Assert.That(result).Contains("ISequencer");
     }
 }

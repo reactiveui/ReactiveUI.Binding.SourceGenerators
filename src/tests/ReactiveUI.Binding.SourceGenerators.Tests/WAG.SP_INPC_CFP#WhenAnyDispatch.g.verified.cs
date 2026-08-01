@@ -16,6 +16,7 @@ namespace ReactiveUI.Binding
             this global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel objectToMonitor,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel, string?>> property1,
             global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel, string>, string> selector,
+            string property1Expression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {

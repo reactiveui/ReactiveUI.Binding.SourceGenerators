@@ -23,14 +23,14 @@ internal static class WhenAnyCodeGenerator
     internal static string? Generate(
         ImmutableArray<InvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        LanguageFeatures features)
+        in LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        var sb = new StringBuilder();
+        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         var supportsCallerArgExpr = features.SupportsCallerArgExpr;
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         _ = sb.AppendLine();
@@ -43,7 +43,7 @@ internal static class WhenAnyCodeGenerator
             var group = groups[g];
 
             // Generate the concrete typed extension method overload
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable);
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
             _ = sb.AppendLine();
 
             // Generate the observation methods for each invocation in this group
@@ -63,7 +63,7 @@ internal static class WhenAnyCodeGenerator
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
         _ = sb.AppendLine();
 
-        return sb.ToString();
+        return PooledBuilder.ToStringAndReturn(sb);
     }
 
     /// <summary>
@@ -74,11 +74,13 @@ internal static class WhenAnyCodeGenerator
     /// <param name="group">The type group containing invocations that share a signature.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         ObservationCodeGenerator.TypeGroup group,
         bool supportsCallerArgExpr,
-        bool supportsNullable)
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
     {
         var first = group.First;
         var propCount = first.PropertyPaths.Length;
@@ -101,12 +103,15 @@ internal static class WhenAnyCodeGenerator
         // WhenAny always has a selector that takes IObservedChange parameters
         _ = sb.Append("            ").Append(GetWhenAnySelectorType(first)).AppendLine(" selector,");
 
-        if (supportsCallerArgExpr)
+        if (stubHasExpressionParameters)
         {
             for (var i = 0; i < propCount; i++)
             {
-                _ = sb.AppendLine(
-                    $"            [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"property{i + 1}\")] string property{i + 1}Expression = \"\",");
+                CodeGeneratorHelpers.AppendExpressionParameter(
+                    sb,
+                    $"property{i + 1}",
+                    $"property{i + 1}Expression",
+                    supportsCallerArgExpr);
             }
         }
 
@@ -280,7 +285,7 @@ internal static class WhenAnyCodeGenerator
     /// <returns>A fully qualified Func type string.</returns>
     internal static string GetWhenAnySelectorType(InvocationInfo inv)
     {
-        var sb = new StringBuilder("global::System.Func<");
+        var sb = new PooledStringBuilder().Append("global::System.Func<");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             var path = inv.PropertyPaths[i];
@@ -289,7 +294,7 @@ internal static class WhenAnyCodeGenerator
         }
 
         _ = sb.Append(inv.ReturnTypeFullName).Append('>');
-        return sb.ToString();
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>Emits normalization that strips the <c>static</c> prefix from CallerArgumentExpression values.</summary>

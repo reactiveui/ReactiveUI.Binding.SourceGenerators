@@ -103,7 +103,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
+        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -126,7 +126,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, false, false);
+        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, false, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerFilePath");
@@ -180,7 +180,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateCallerFilePathOverload(sb, group, false);
+        BindTwoWayCodeGenerator.GenerateCallerFilePathOverload(sb, group, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerLineNumber == 55");

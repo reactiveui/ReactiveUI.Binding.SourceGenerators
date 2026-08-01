@@ -145,6 +145,7 @@ open /tmp/code_coverage/index.html        # macOS
 **Tips:**
 - Always clean `bin/` and `obj/` folders before coverage runs to avoid stale results
 - The `ReactiveUI.Binding.GeneratedCode.TestModels` assembly has `[assembly: ExcludeFromCodeCoverage]` so it won't appear in reports even though its module path matches the include pattern
+- `ReactiveUI.Binding.Reactive` carries the same attribute (applied via `<AssemblyAttribute>` in its .csproj). It is a recompilation of `ReactiveUI.Binding.Shared`, so every line in it is a line `ReactiveUI.Binding` already covers — only the scheduler binding and the namespace differ. Cover shared code through the lean leaf; the `modulePaths` exclusions do not reach an assembly that is only present as a copied reference
 - `DiagnosticWarnings.cs` coverage appears as 0% in `ReactiveUI.Binding.SourceGenerators` — this is a linked-file artifact; the code is actually tested via the `ReactiveUI.Binding.Analyzer` assembly
 - Put coverage reports in `/tmp/` to avoid accidentally committing them
 
@@ -158,9 +159,23 @@ ReactiveUI.Binding.SourceGenerators is an **incremental source generator** that 
 
 ```
 src/
-├── ReactiveUI.Binding/                          # Runtime library (net8.0;net9.0;net10.0;net462-net481)
+├── ReactiveShim.props                           # The lean/.Reactive seam (REACTIVE_SHIM + ISequencer alias)
+│
+├── ReactiveUI.Binding.Shared/                   # The runtime library source; compiled by BOTH leaves below
 │   ├── Interfaces/                              # ICreatesObservableForProperty, IObservedChange, etc.
+│   ├── Mixins/                                  # ReactiveUIBindingExtensions, ReactiveSchedulerExtensions
+│   ├── Observables/                             # Hand-rolled observables and disposables
 │   └── View/                                    # ViewLocator, DefaultViewLocator, IViewFor<T>, attributes
+│
+├── ReactiveUI.Binding/                          # Lean leaf (net8.0;net9.0;net10.0;net462-net481)
+├── ReactiveUI.Binding.Reactive/                 # System.Reactive leaf: same source, REACTIVE_SHIM
+│
+├── build/                                       # SkipMakePriOnNonWindows.targets (see below)
+├── ReactiveUI.Binding.Platform.Shared/          # Private primitives for the platform observers
+├── ReactiveUI.Binding.Wpf.Shared/               # Each platform's source, compiled by both its leaves
+├── ReactiveUI.Binding.Wpf/                      # Lean platform leaf
+├── ReactiveUI.Binding.Wpf.Reactive/             # System.Reactive platform leaf
+│                                                # ...and the same triple for WinForms and Maui
 │
 ├── ReactiveUI.Binding.SourceGenerators/         # Source generator (netstandard2.0)
 │   ├── BindingGenerator.cs                      # [Generator] IIncrementalGenerator entry point
@@ -194,12 +209,20 @@ src/
 │   │   ├── ViewRegistrationExtractor.cs         # IViewFor<T> → ViewRegistrationInfo extraction
 │   │   └── ...                                  # ExtractorValidation, SymbolHelpers, etc.
 │   └── CodeGeneration/
-│       └── CodeGenerator.cs                     # StringBuilder-based code generation
+│       ├── CodeGenerator.cs                     # StringBuilder-based code generation
+│       ├── PooledBuilder.cs                     # Per-thread StringBuilder pool for whole files
+│       ├── PooledStringBuilder.cs               # char[]-backed builder for generated fragments
+│       └── RuntimeFlavourRewriter.cs            # Retargets output onto the .Reactive package
 │
 ├── ReactiveUI.Binding.Analyzer/                 # Roslyn analyzer (netstandard2.0)
 │   └── Analyzers/
-│       ├── BindingInvocationAnalyzer.cs          # RXUIBIND001, 003, 004, 005
+│       ├── BindingInvocationAnalyzer.cs          # RXUIBIND001, 003, 004, 005, 006, 007, 008
+│       ├── DispatchReachAnalyzer.cs              # RXUIBIND009
 │       └── TypeAnalyzer.cs                       # RXUIBIND002
+│
+├── benchmarks/
+│   ├── ReactiveUI.Binding.Benchmarks/            # Runtime binding benchmarks
+│   └── ReactiveUI.Binding.Generator.Benchmarks/  # Generation-pass benchmarks over a corpus
 │
 └── tests/
     ├── ReactiveUI.Binding.SourceGenerators.Tests/ # Generator snapshot tests
@@ -240,6 +263,85 @@ private static IObservable<string> __WhenChanged_0(MyViewModel obj)
 }
 ```
 
+### Where the Dispatch Overloads Live
+
+The generated concrete overloads have to beat the runtime stub at the call site, and they have to do it
+without two generator-running assemblies seeing each other's copies. Extension-method lookup decides both:
+it walks the enclosing namespaces of the call site from the inside out and **stops at the first level that
+offers any candidate**, and a namespace brought in by a `using` (file-level or global) is only ever consulted
+at the outermost level.
+
+From C# 10 the overloads go in the **consumer's own root namespace** (`build_property.RootNamespace`,
+rendered as identifier segments so a project name like `My-App` still yields a legal namespace), plus a
+generated `global using` of it. Two routes, two jobs:
+
+- the root namespace catches call sites nested under it, including a consumer whose own code sits under
+  `ReactiveUI.Binding.*` — those reach the stub at an enclosing level, so a `global using` alone never gets
+  looked at and the call falls through to the stub's runtime throw;
+- the `global using` catches files declared outside the root namespace.
+
+Either way the concrete overload lands in the same candidate set as the generic stub and wins outright, because
+a non-generic candidate beats a generic one. A `global using` is scoped to the compilation that declares it and
+is never exported, which is what keeps one assembly's overloads out of another's lookup — the case that matters
+when the two are joined by `InternalsVisibleTo`, since identical overloads visible from both make every matching
+call site ambiguous (CS0121). When the build exposes no root namespace, the fallback is
+`ReactiveUI.Binding.Generated.<assembly>`.
+
+The residual risk is two assemblies that **share a root namespace**, grant each other `InternalsVisibleTo`, and
+both generate a dispatch for the same concrete types — those calls are ambiguous again. All three have to
+coincide; a project and its test project have distinct root namespaces and are unaffected.
+
+Below C# 10 there are no global usings, so there is nothing to scope a namespace with. The overloads stay in
+`ReactiveUI.Binding`, where the import every consumer already has reaches them from any file — **unless the
+assembly grants `InternalsVisibleTo`**, which is the only way another assembly can see them at all. Those
+assemblies emit into their own root namespace instead, which nobody else's code sits under. The cost is that a
+file declared outside the root namespace falls back to the runtime path; the alternative for those assemblies
+is not universal reach but a build that does not compile (CS0121). With no root namespace to move to, the
+shared namespace is kept — nowhere else would be reachable.
+
+### Generating for the Lean or the .Reactive Runtime
+
+The two runtime packages share **no type names** — everything the lean one puts in `ReactiveUI.Binding.*`, the
+other puts in `ReactiveUI.Binding.Reactive.*`, and the scheduler abstraction differs outright
+(`ISequencer` vs `IScheduler`). Output written for one does not compile against the other at all, so the
+generator branches on which package the consumer actually references, detected by looking up the stub class.
+
+The emitters write the lean names throughout, and `RuntimeFlavourRewriter` retargets the finished text when the
+consumer is on the System.Reactive package. It runs on the finished text rather than being threaded through the
+emitters because most generated bodies are **non-interpolated** raw string literals whose braces are the braces
+of the generated code — making them interpolated to inject a namespace would mean escaping every one.
+
+The shift is anchored on the names the runtime namespace actually declares, read from the referenced assembly
+rather than listed in the generator. That way it cannot go stale as the runtime grows, and it will not touch a
+consumer type that merely happens to sit under `ReactiveUI.Binding` — which is exactly what a consumer whose own
+root namespace starts that way would otherwise hit.
+
+Every generated file goes out through `CodeGeneratorHelpers.AddGeneratedSource` so no emitter can forget the
+retargeting. Forgetting would only ever show up as generated code that does not compile, for consumers of the
+package the test suite reaches least. `ReactiveRuntimeFlavourTests` sweeps **every** shared scenario against the
+System.Reactive package for that reason — one unshifted type name in one emitter is enough to break every
+consumer on it, and no representative subset can be trusted to reach it.
+
+### Matching the Stub's Parameter List
+
+The concrete overload only beats the generic stub once their parameter lists match — a non-generic candidate is
+preferred over a generic one, but that tie-break needs the two to be otherwise indistinguishable. A shorter
+parameter list leaves both merely applicable, neither better, and **every matching call site fails with CS0121**.
+
+The stub declares its `[CallerArgumentExpression]` parameters wherever the attribute is available to it, which
+is a property of the *target framework*. Whether dispatch can use them is a property of the *language version*,
+and the two vary independently: `<LangVersion>7.3</LangVersion>` on `net8.0` is a perfectly ordinary project.
+So `LanguageFeatures` carries them separately:
+
+- `StubHasExpressionParameters` — the attribute type is present **and accessible** from the consumer's assembly.
+  Drives whether the parameters are emitted at all. Accessibility matters: on a framework without the attribute
+  the only one in reach is the runtime library's own `internal` polyfill, which generated code cannot apply.
+- `SupportsCallerArgExpr` — the above **and** C# 10. Drives whether the parameters carry the attribute and
+  whether dispatch matches on expression text rather than on `CallerFilePath` + `CallerLineNumber`.
+
+Below C# 10 on a framework that has the attribute, the parameters are emitted unattributed and inert: they exist
+only so the lists line up, and dispatch runs off the file and line.
+
 ### WhenChanged vs WhenChanging
 
 | API | Interface | Event | Timing |
@@ -258,6 +360,10 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 | RXUIBIND003 | Warning | Expression contains private/protected member |
 | RXUIBIND004 | Warning | Type does not support before-change notifications |
 | RXUIBIND005 | Info | Source type implements INotifyDataErrorInfo; validation binding requires runtime engine |
+| RXUIBIND006 | Warning | Expression contains an unsupported path segment (indexer, field, or method call) |
+| RXUIBIND007 | Warning | BindCommand control has no bindable event |
+| RXUIBIND008 | Warning | Property does not implement IInteraction |
+| RXUIBIND009 | Warning | Generated binding dispatch is out of reach from this file |
 
 ## Code Style & Quality Requirements
 
@@ -354,6 +460,73 @@ The analyzer project links shared files from the generator project:
 <Compile Include="..\ReactiveUI.Binding.SourceGenerators\DiagnosticWarnings.cs" Link="DiagnosticWarnings.cs" />
 <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Constants.cs" Link="Constants.cs" />
 ```
+
+### The Lean / .Reactive Seam
+
+`ReactiveUI.Binding.Shared` holds the whole runtime library and is compiled twice:
+
+| Leaf | Scheduler type | Namespaces |
+|------|----------------|------------|
+| `ReactiveUI.Binding` | `ReactiveUI.Primitives.Concurrency.ISequencer` | `ReactiveUI.Binding.*` |
+| `ReactiveUI.Binding.Reactive` | `System.Reactive.Concurrency.IScheduler` | `ReactiveUI.Binding.Reactive.*` |
+
+`ReactiveShim.props` (imported by `Directory.Build.props`) keys on the `.Reactive` project-name suffix: it
+defines `REACTIVE_SHIM` and aliases `ISequencer` onto `IScheduler`. A future platform leaf such as
+`ReactiveUI.Binding.Wpf.Reactive` picks the seam up with no further wiring.
+
+Rules for anything in `ReactiveUI.Binding.Shared`:
+
+- Name only `ISequencer`, never `IScheduler` or a Primitives sequencer type directly.
+- Declare namespaces with the macro, so both leaves get their own:
+  ```csharp
+  #if REACTIVE_SHIM
+  namespace ReactiveUI.Binding.Reactive.Observables;
+  #else
+  namespace ReactiveUI.Binding.Observables;
+  #endif
+  ```
+- Never write a per-file `using ReactiveUI.Binding.*;` — those namespaces shift between leaves, so the
+  import has to come from each csproj as a `<Using>` item (unshifted vs shifted).
+- Only call scheduler APIs that exist in both flavours. The state-carrying
+  `Schedule<TState>(TState, Func<scheduler, TState, IDisposable>)` is the shared shape; the plain
+  `Action<TState>` overload exists on `ISequencer` but binds to recursive scheduling on `IScheduler`.
+
+The platform packages follow the same shape: `ReactiveUI.Binding.<Platform>.Shared` is compiled by
+`ReactiveUI.Binding.<Platform>` and `ReactiveUI.Binding.<Platform>.Reactive`, with namespaces shifting
+`ReactiveUI.Binding.<Platform>` to `ReactiveUI.Binding.Reactive.<Platform>`. Neither platform leaf
+references System.Reactive directly — `AnonymousObservable` and `ActionDisposable<TState>` in
+`ReactiveUI.Binding.Platform.Shared` replace `Observable.Create`/`Disposable.Create`, and are compiled
+privately into each platform assembly rather than added to the base library's surface.
+
+### Platform Test Projects
+
+Each platform package is tested by a pair: `ReactiveUI.Binding.<Platform>.Tests` owns the test source, and
+`ReactiveUI.Binding.<Platform>.Tests.Reactive` has no source of its own — it links the lean project's `.cs`
+so the same assertions run against both leaves. **The `.Reactive` suffix must come last in the name**, or
+`ReactiveShim.props` will not recognise it and the mirror silently compiles against the lean namespaces.
+
+WPF and WinForms tests target the windows TFMs and need the Windows Desktop runtime, so off Windows
+`Directory.Build.targets` demotes them (`IsTestProject`, `IsTestingPlatformApplication`,
+`TestingPlatformDotnetTestSupport` to false, `OutputType` to `Library`). They still compile on every leg;
+they only execute on the Windows one. That demotion has to live in `Directory.Build.targets`, not
+`Directory.Build.props` — the testing-platform props set those back to true after props are evaluated, and
+launching a windows-TFM app on Linux fails the whole run with "Zero tests ran" even when every real test
+passed. The MAUI pair is exempt: it targets the plain TFMs and runs everywhere.
+
+Test fixtures that the product code finds by reflection must be `public` — the WinForms observer looks up
+`{PropertyName}Changed` over public members only, so an `internal` fixture would pass for the wrong reason.
+
+### Building Windows Targets off Windows
+
+`MakePri.exe` and `cswinrt.exe` are native Windows binaries. On Linux/macOS the build reaches for them
+through Wine, which crashes. `build/SkipMakePriOnNonWindows.targets` turns that pipeline off, imported
+by a `Directory.Build.targets` in each Windows-desktop project (WPF and MAUI, both leaves) under
+`Condition="!$([MSBuild]::IsOsPlatform('Windows'))"`, so real Windows builds still generate PRI.
+
+**That `Directory.Build.targets` must sit in the project's own folder.** MSBuild discovers it by walking
+up from the project directory, so moving it into a `*.Shared` source folder silently disables it — the
+build keeps working right up until Wine starts. Each copy chains to the repository-level file with
+`GetPathOfFileAbove`; without that chain it shadows `src/Directory.Build.targets` instead of adding to it.
 
 ### ConditionalWeakTable Symbol Caching
 

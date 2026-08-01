@@ -4,7 +4,7 @@
 
 using System.Reactive.Concurrency;
 using System.Reactive.Subjects;
-using ReactiveUI.Binding.Reactive;
+using ReactiveUI.Binding.Reactive.Observables;
 
 namespace ReactiveUI.Binding.Tests.Reactive;
 

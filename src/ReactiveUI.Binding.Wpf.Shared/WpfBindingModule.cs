@@ -1,0 +1,27 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+using Splat.Builder;
+
+#if REACTIVE_SHIM
+namespace ReactiveUI.Binding.Reactive.Wpf;
+#else
+namespace ReactiveUI.Binding.Wpf;
+#endif
+
+/// <summary>WPF-specific module that registers DependencyObject observation with the dependency resolver.</summary>
+/// <remarks>
+/// WPF command binding (via Command property) is handled at compile time by the source generator.
+/// </remarks>
+public sealed class WpfBindingModule : IModule
+{
+    /// <inheritdoc/>
+    public void Configure(IMutableDependencyResolver resolver)
+    {
+        ArgumentExceptionHelper.ThrowIfNull(resolver);
+
+        resolver.RegisterLazySingleton<ICreatesObservableForProperty>(static () =>
+            new DependencyObjectObservableForProperty());
+    }
+}

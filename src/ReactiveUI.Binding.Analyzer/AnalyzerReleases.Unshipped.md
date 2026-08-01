@@ -10,3 +10,4 @@
  RXUIBIND006 | Usage    | Warning  | Expression contains unsupported path segment (indexer, field, or method call)           
  RXUIBIND007 | Usage    | Warning  | Control has no bindable event                                                           
  RXUIBIND008 | Usage    | Warning  | Property is not an IInteraction                                                         
+ RXUIBIND009 | Usage    | Warning  | Generated binding dispatch is out of reach for this file

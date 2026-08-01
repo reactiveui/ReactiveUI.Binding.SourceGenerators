@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -18,7 +18,7 @@ namespace ReactiveUI.Binding
             global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyView target,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyViewModel, string?>> sourceProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyView, string?>> targetProperty,
-            global::System.Reactive.Concurrency.IScheduler scheduler,
+            global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("sourceProperty")] string sourcePropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("targetProperty")] string targetPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
@@ -36,7 +36,7 @@ namespace ReactiveUI.Binding
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindOneWay_000023CFCD42C47A(global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyView target, global::System.Reactive.Concurrency.IScheduler scheduler)
+        private static global::System.IDisposable __BindOneWay_000023CFCD42C47A(global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyView target, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // BindOneWay: Name -> NameText (with scheduler)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -44,7 +44,7 @@ namespace ReactiveUI.Binding
             "Name",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyViewModel)__o).Name,
             true);
-        var bindObs = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<string>(sourceObs, scheduler);
+        var bindObs = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<string>(sourceObs, scheduler);
 
             return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(bindObs, value =>
             {

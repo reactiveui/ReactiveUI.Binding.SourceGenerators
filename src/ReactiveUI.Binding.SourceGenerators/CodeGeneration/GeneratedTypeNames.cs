@@ -57,6 +57,15 @@ internal static class GeneratedTypeNames
     /// <summary>The <c>ReactiveUI.Binding.Observables</c> namespace prefix (no trailing dot).</summary>
     internal const string Observables = "global::ReactiveUI.Binding.Observables";
 
+    /// <summary>
+    /// The scheduler abstraction the generated scheduler-taking overloads declare. ReactiveUI.Binding
+    /// binds its shared source to this type; the System.Reactive leaf binds the same source to IScheduler.
+    /// </summary>
+    internal const string ISequencer = "global::ReactiveUI.Primitives.Concurrency.ISequencer";
+
+    /// <summary><c>ReactiveUI.Binding.Observables.ObserveOnObservable</c> (open generic).</summary>
+    internal const string ObserveOnObservable = "global::ReactiveUI.Binding.Observables.ObserveOnObservable";
+
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Observables.RxBindingExtensions</c>.</summary>
     internal const string RxBindingExtensions = "global::ReactiveUI.Binding.Observables.RxBindingExtensions";
 

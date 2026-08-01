@@ -4,6 +4,7 @@
 
 using System.Collections.Immutable;
 using System.Text;
+using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
@@ -16,6 +17,9 @@ internal static class CodeGeneratorHelpers
 
     /// <summary>Buffer capacity for a dispatch key or other short generated fragment.</summary>
     internal const int FragmentBufferCapacity = 128;
+
+    /// <summary>The indent every generated method parameter sits at: namespace, class, member, then parameter.</summary>
+    internal const string ParameterIndent = "            ";
 
     /// <summary>Buffer capacity to reserve per property-path segment when building an access chain.</summary>
     private const int PerPathSegmentCapacity = 16;
@@ -64,14 +68,14 @@ internal static class CodeGeneratorHelpers
             return root;
         }
 
-        var sb = new StringBuilder(root.Length + (path.Length * PerPathSegmentCapacity));
+        var sb = new PooledStringBuilder(root.Length + (path.Length * PerPathSegmentCapacity));
         _ = sb.Append(root);
         for (var i = 0; i < path.Length; i++)
         {
             _ = sb.Append('.').Append(path[i].PropertyName);
         }
 
-        return sb.ToString();
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>Builds a property access expression for use in a lambda body.</summary>
@@ -98,7 +102,7 @@ internal static class CodeGeneratorHelpers
             return string.Empty;
         }
 
-        var sb = new StringBuilder(path.Length * PerPathSegmentCapacity);
+        var sb = new PooledStringBuilder(path.Length * PerPathSegmentCapacity);
         for (var i = 0; i < path.Length; i++)
         {
             if (i > 0)
@@ -109,7 +113,7 @@ internal static class CodeGeneratorHelpers
             _ = sb.Append(path[i].PropertyName);
         }
 
-        return sb.ToString();
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>
@@ -164,7 +168,7 @@ internal static class CodeGeneratorHelpers
             return value;
         }
 
-        var sb = new StringBuilder(value.Length + EscapeOverheadCapacity);
+        var sb = new PooledStringBuilder(value.Length + EscapeOverheadCapacity);
         for (var i = 0; i < value.Length; i++)
         {
             var c = value[i];
@@ -182,7 +186,7 @@ internal static class CodeGeneratorHelpers
             }
         }
 
-        return sb.ToString();
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>
@@ -201,6 +205,54 @@ internal static class CodeGeneratorHelpers
             && expressionText.StartsWith(StaticPrefix, StringComparison.Ordinal) ? expressionText.Substring(StaticPrefix.Length) : expressionText;
     }
 
+    /// <summary>Hands finished source to the compilation, retargeted onto the consumer's runtime flavour.</summary>
+    /// <param name="context">The source production context.</param>
+    /// <param name="hintName">The generated file name.</param>
+    /// <param name="source">The generated source, written against the lean runtime library.</param>
+    /// <param name="features">The consumer compilation's snapshot, naming the flavour.</param>
+    /// <remarks>
+    /// Every generated file goes out through here so no emitter can forget the retargeting, which would only
+    /// show up as generated code that does not compile for consumers of the System.Reactive flavour.
+    /// </remarks>
+    internal static void AddGeneratedSource(
+        in SourceProductionContext context,
+        string hintName,
+        string source,
+        in LanguageFeatures features) =>
+        context.AddSource(hintName, RuntimeFlavourRewriter.Retarget(source, features));
+
+    /// <summary>
+    /// Appends one optional expression parameter to a generated overload's parameter list, mirroring the one the
+    /// runtime stub declares for the same argument.
+    /// </summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sourceParameterName">The parameter whose expression text this one captures.</param>
+    /// <param name="expressionParameterName">The name of the expression parameter itself.</param>
+    /// <param name="withAttribute">
+    /// Whether to attribute the parameter so the compiler fills it in. Off below C# 10, where the compiler would
+    /// not populate it: the parameter is then inert and only present so the parameter lists match, which is what
+    /// lets this concrete overload win against the generic stub instead of tying with it.
+    /// </param>
+    internal static void AppendExpressionParameter(
+        StringBuilder sb,
+        string sourceParameterName,
+        string expressionParameterName,
+        bool withAttribute)
+    {
+        _ = sb.Append(ParameterIndent);
+
+        if (withAttribute)
+        {
+            _ = sb.Append('[')
+                .Append(GeneratedTypeNames.CallerArgumentExpression)
+                .Append("(\"")
+                .Append(sourceParameterName)
+                .Append("\")] ");
+        }
+
+        _ = sb.Append("string ").Append(expressionParameterName).AppendLine(" = \"\",");
+    }
+
     /// <summary>Appends the standard auto-generated file header and opens the extension partial class.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="features">
@@ -208,7 +260,7 @@ internal static class CodeGeneratorHelpers
     /// <c>// &lt;auto-generated/&gt;</c> + <c>#pragma warning disable</c> markers and the <c>#nullable enable</c>
     /// directive are emitted.
     /// </param>
-    internal static void AppendExtensionClassHeader(StringBuilder sb, LanguageFeatures features)
+    internal static void AppendExtensionClassHeader(StringBuilder sb, in LanguageFeatures features)
     {
         AppendGeneratedFileMarkers(sb, features.EmitGeneratedCodeMarkers);
         if (features.SupportsNullable)
@@ -216,15 +268,11 @@ internal static class CodeGeneratorHelpers
             _ = sb.AppendLine("#nullable enable");
         }
 
-        _ = sb.Append("""
-
-                  using System;
-
-                  namespace ReactiveUI.Binding
-                  {
-                      internal static partial class __ReactiveUIGeneratedBindings
-                      {
-                  """);
+        _ = sb.Append("\nusing System;\n\nnamespace ")
+            .Append(features.GeneratedNamespace)
+            .Append("\n{\n    internal static partial class ")
+            .Append(Constants.GeneratedExtensionClassName)
+            .Append("\n    {");
     }
 
     /// <summary>

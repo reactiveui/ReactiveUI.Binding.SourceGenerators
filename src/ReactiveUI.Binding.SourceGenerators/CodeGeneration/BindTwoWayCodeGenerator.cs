@@ -5,6 +5,7 @@
 using System.Collections.Immutable;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
@@ -28,14 +29,14 @@ internal static class BindTwoWayCodeGenerator
     internal static string? Generate(
         ImmutableArray<BindingInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        LanguageFeatures features)
+        in LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        var sb = new StringBuilder();
+        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         var supportsCallerArgExpr = features.SupportsCallerArgExpr;
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         _ = sb.AppendLine();
@@ -48,7 +49,7 @@ internal static class BindTwoWayCodeGenerator
             var group = groups[g];
 
             // Generate the concrete typed extension method overload
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable);
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
             _ = sb.AppendLine();
 
             // Generate binding methods
@@ -69,7 +70,7 @@ internal static class BindTwoWayCodeGenerator
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
         _ = sb.AppendLine();
 
-        return sb.ToString();
+        return PooledBuilder.ToStringAndReturn(sb);
     }
 
     /// <summary>Groups BindTwoWay invocations by their type signature for overload generation.</summary>
@@ -78,7 +79,7 @@ internal static class BindTwoWayCodeGenerator
     internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations)
     {
         var groupMap = new Dictionary<string, List<BindingInvocationInfo>>(invocations.Length);
-        var keySb = new StringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
 
         for (var i = 0; i < invocations.Length; i++)
         {
@@ -102,6 +103,8 @@ internal static class BindTwoWayCodeGenerator
             list.Add(inv);
         }
 
+        keySb.Return();
+
         var result = new List<BindingTypeGroup>();
         foreach (var kvp in groupMap)
         {
@@ -124,11 +127,13 @@ internal static class BindTwoWayCodeGenerator
     /// <param name="group">The binding type group.</param>
     /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is available.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         BindingTypeGroup group,
         bool supportsCallerArgExpr,
-        bool supportsNullable)
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
     {
         if (supportsCallerArgExpr)
         {
@@ -136,7 +141,7 @@ internal static class BindTwoWayCodeGenerator
         }
         else
         {
-            GenerateCallerFilePathOverload(sb, group, supportsNullable);
+            GenerateCallerFilePathOverload(sb, group, supportsNullable, stubHasExpressionParameters);
         }
     }
 
@@ -208,10 +213,12 @@ internal static class BindTwoWayCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateCallerFilePathOverload(
         StringBuilder sb,
         BindingTypeGroup group,
-        bool supportsNullable)
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
     {
         var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
         var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
@@ -228,6 +235,12 @@ internal static class BindTwoWayCodeGenerator
                        """);
 
         AppendExtraParameters(sb, group);
+
+        if (stubHasExpressionParameters)
+        {
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "sourceProperty", "sourcePropertyExpression", false);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "targetProperty", "targetPropertyExpression", false);
+        }
 
         _ = sb.AppendLine("""
                                   [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
@@ -337,7 +350,7 @@ internal static class BindTwoWayCodeGenerator
             return;
         }
 
-        _ = sb.AppendLine("            global::System.Reactive.Concurrency.IScheduler scheduler,");
+        _ = sb.AppendLine($"            {ISequencer} scheduler,");
     }
 
     /// <summary>Formats extra arguments (converters, scheduler) for forwarding to the binding method.</summary>
@@ -345,7 +358,7 @@ internal static class BindTwoWayCodeGenerator
     /// <returns>Extra arguments string like ", sourceToTargetConv, targetToSourceConv, scheduler" or empty.</returns>
     internal static string FormatExtraArgs(BindingTypeGroup group)
     {
-        var sb = new StringBuilder();
+        var sb = new PooledStringBuilder();
         if (group.HasConversion)
         {
             _ = sb.Append(", sourceToTargetConv, targetToSourceConv");
@@ -356,7 +369,7 @@ internal static class BindTwoWayCodeGenerator
             _ = sb.Append(", scheduler");
         }
 
-        return sb.ToString();
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>Formats extra method parameters for the private binding method signature.</summary>
@@ -364,7 +377,7 @@ internal static class BindTwoWayCodeGenerator
     /// <returns>Extra parameters string for two-way converter and scheduler parameters.</returns>
     internal static string FormatExtraMethodParams(BindingInvocationInfo inv)
     {
-        var sb = new StringBuilder();
+        var sb = new PooledStringBuilder();
         if (inv.HasConversion)
         {
             _ = sb.Append(
@@ -375,10 +388,10 @@ internal static class BindTwoWayCodeGenerator
 
         if (inv.HasScheduler)
         {
-            _ = sb.Append(", global::System.Reactive.Concurrency.IScheduler scheduler");
+            _ = sb.Append($", {ISequencer} scheduler");
         }
 
-        return sb.ToString();
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>
@@ -410,8 +423,8 @@ internal static class BindTwoWayCodeGenerator
         if (inv.HasScheduler)
         {
             _ = sb.AppendLine($"""
-                                   var sourceBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<{inv.TargetPropertyTypeFullName}>({sourceVar}, scheduler);
-                                   var targetBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<{inv.SourcePropertyTypeFullName}>({targetVar}, scheduler);
+                                   var sourceBind = new {ObserveOnObservable}<{inv.TargetPropertyTypeFullName}>({sourceVar}, scheduler);
+                                   var targetBind = new {ObserveOnObservable}<{inv.SourcePropertyTypeFullName}>({targetVar}, scheduler);
                            """);
             sourceVar = "sourceBind";
             targetVar = "targetBind";

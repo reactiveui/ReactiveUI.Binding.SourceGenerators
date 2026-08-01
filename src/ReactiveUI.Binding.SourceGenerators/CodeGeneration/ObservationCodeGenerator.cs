@@ -65,7 +65,7 @@ internal static class ObservationCodeGenerator
     internal static string? Generate(
         ImmutableArray<InvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        LanguageFeatures features,
+        in LanguageFeatures features,
         string methodPrefix)
     {
         if (invocations.IsDefaultOrEmpty)
@@ -73,7 +73,7 @@ internal static class ObservationCodeGenerator
             return null;
         }
 
-        var sb = new StringBuilder(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
+        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         var supportsCallerArgExpr = features.SupportsCallerArgExpr;
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         _ = sb.AppendLine();
@@ -86,7 +86,7 @@ internal static class ObservationCodeGenerator
 
         for (var g = 0; g < groups.Count; g++)
         {
-            GenerateGroup(sb, groups[g], allClasses, supportsCallerArgExpr, methodPrefix, usedPluginKinds);
+            GenerateGroup(sb, groups[g], allClasses, supportsCallerArgExpr, features.StubHasExpressionParameters, methodPrefix, usedPluginKinds);
         }
 
         EmitUsedHelperClasses(sb, usedPluginKinds);
@@ -94,7 +94,7 @@ internal static class ObservationCodeGenerator
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
         _ = sb.AppendLine();
 
-        return sb.ToString();
+        return PooledBuilder.ToStringAndReturn(sb);
     }
 
     /// <summary>Generates an observation method for a single invocation.</summary>
@@ -165,7 +165,7 @@ internal static class ObservationCodeGenerator
     /// <returns>A fully qualified Func type string like <c>global::System.Func&lt;T1, T2, TReturn&gt;</c>.</returns>
     internal static string GetSelectorType(InvocationInfo inv)
     {
-        var sb = new StringBuilder("global::System.Func<");
+        var sb = new PooledStringBuilder().Append("global::System.Func<");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             var path = inv.PropertyPaths[i];
@@ -173,7 +173,7 @@ internal static class ObservationCodeGenerator
         }
 
         _ = sb.Append(inv.ReturnTypeFullName).Append('>');
-        return sb.ToString();
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>
@@ -375,7 +375,7 @@ internal static class ObservationCodeGenerator
     internal static List<TypeGroup> GroupByTypeSignature(ImmutableArray<InvocationInfo> invocations)
     {
         var groupMap = new Dictionary<string, List<InvocationInfo>>(invocations.Length);
-        var keySb = new StringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
 
         for (var i = 0; i < invocations.Length; i++)
         {
@@ -402,6 +402,8 @@ internal static class ObservationCodeGenerator
             list.Add(inv);
         }
 
+        keySb.Return();
+
         var result = new List<TypeGroup>();
         foreach (var kvp in groupMap)
         {
@@ -420,12 +422,14 @@ internal static class ObservationCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The type group containing invocations that share a signature.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
     /// <param name="generatedAffinity">The affinity of the source generator's selected plugin, or -1 if unknown.</param>
     internal static void GenerateConcreteOverload(
     StringBuilder sb,
     TypeGroup group,
     bool supportsCallerArgExpr,
+    bool stubHasExpressionParameters,
     string methodPrefix,
     int generatedAffinity = -1)
     {
@@ -433,7 +437,7 @@ internal static class ObservationCodeGenerator
         var propCount = first.PropertyPaths.Length;
         var hasSelector = first.HasSelector;
 
-        EmitOverloadSignature(sb, first, supportsCallerArgExpr, methodPrefix, propCount, hasSelector);
+        EmitOverloadSignature(sb, first, supportsCallerArgExpr, stubHasExpressionParameters, methodPrefix, propCount, hasSelector);
         EmitStaticPrefixNormalization(sb, supportsCallerArgExpr, propCount);
 
         // Emit runtime affinity check: allow user-registered plugins to override generated observation.
@@ -520,7 +524,7 @@ internal static class ObservationCodeGenerator
         var fallbackMethod = methodPrefix;
 
         // Build the property arguments (property1, property2, ...)
-        var propArgs = new StringBuilder();
+        var propArgs = new PooledStringBuilder();
         for (var i = 0; i < propCount; i++)
         {
             _ = propArgs.Append($", property{i + 1}");
@@ -545,7 +549,7 @@ internal static class ObservationCodeGenerator
         else
         {
             // Multi-property with selector: wrap fallback tuple with selector decomposition
-            var tupleType = new StringBuilder("global::System.ValueTuple<");
+            var tupleType = new PooledStringBuilder().Append("global::System.ValueTuple<");
             for (var i = 0; i < propCount; i++)
             {
                 var path = first.PropertyPaths[i];
@@ -559,7 +563,7 @@ internal static class ObservationCodeGenerator
             _ = tupleType.Append('>');
 
             // Build the selector decomposition lambda: __t => selector(__t.Item1, __t.Item2, ...)
-            var selectorArgs = new StringBuilder();
+            var selectorArgs = new PooledStringBuilder();
             for (var i = 0; i < propCount; i++)
             {
                 _ = selectorArgs.Append("__t.Item").Append(i + 1);
@@ -574,7 +578,12 @@ internal static class ObservationCodeGenerator
             .AppendLine(
             $"                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.{fallbackMethod}(objectToMonitor{propArgs}),")
             .AppendLine($"                    __t => selector({selectorArgs}));");
+
+            tupleType.Return();
+            selectorArgs.Return();
         }
+
+        propArgs.Return();
     }
 
     /// <summary>Generates a single-property observation method body using plugin dispatch.</summary>
@@ -904,6 +913,7 @@ internal static class ObservationCodeGenerator
     /// <param name="group">The type group to generate code for.</param>
     /// <param name="allClasses">All detected class binding info for type mechanism lookup.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
     /// <param name="usedPluginKinds">Accumulates the observation kinds of plugins that require helper classes.</param>
     private static void GenerateGroup(
@@ -911,6 +921,7 @@ internal static class ObservationCodeGenerator
         TypeGroup group,
         ImmutableArray<ClassBindingInfo> allClasses,
         bool supportsCallerArgExpr,
+        bool stubHasExpressionParameters,
         string methodPrefix,
         HashSet<string> usedPluginKinds)
     {
@@ -922,7 +933,7 @@ internal static class ObservationCodeGenerator
         var groupAffinity = groupPlugin is not null ? groupPlugin.Affinity : -1;
 
         // Generate the concrete typed extension method overload
-        GenerateConcreteOverload(sb, group, supportsCallerArgExpr, methodPrefix, groupAffinity);
+        GenerateConcreteOverload(sb, group, supportsCallerArgExpr, stubHasExpressionParameters, methodPrefix, groupAffinity);
         _ = sb.AppendLine();
 
         // Generate the observation methods for each invocation in this group. Call sites that share the
@@ -1004,6 +1015,7 @@ internal static class ObservationCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="first">The first invocation in the group, used for type information.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
     /// <param name="propCount">The number of property expressions.</param>
     /// <param name="hasSelector">Whether a selector function is present.</param>
@@ -1011,6 +1023,7 @@ internal static class ObservationCodeGenerator
         StringBuilder sb,
         InvocationInfo first,
         bool supportsCallerArgExpr,
+        bool stubHasExpressionParameters,
         string methodPrefix,
         int propCount,
         bool hasSelector)
@@ -1035,12 +1048,15 @@ internal static class ObservationCodeGenerator
             _ = sb.AppendLine($"            {GetSelectorType(first)} selector,");
         }
 
-        if (supportsCallerArgExpr)
+        if (stubHasExpressionParameters)
         {
             for (var i = 0; i < propCount; i++)
             {
-                _ = sb.AppendLine(
-                    $"            [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"property{i + 1}\")] string property{i + 1}Expression = \"\",");
+                CodeGeneratorHelpers.AppendExpressionParameter(
+                    sb,
+                    $"property{i + 1}",
+                    $"property{i + 1}Expression",
+                    supportsCallerArgExpr);
             }
         }
 

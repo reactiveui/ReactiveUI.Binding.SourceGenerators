@@ -366,7 +366,7 @@ public class BindCommandCodeGeneratorHelperTests
             null,
             [inv]);
 
-        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
+        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -390,7 +390,7 @@ public class BindCommandCodeGeneratorHelperTests
             null,
             [inv]);
 
-        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, false, false);
+        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, false, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerFilePath.EndsWith");
@@ -468,7 +468,7 @@ public class BindCommandCodeGeneratorHelperTests
             StringTypeName,
             [inv]);
 
-        BindCommandCodeGenerator.GenerateCallerFilePathOverload(sb, group, false);
+        BindCommandCodeGenerator.GenerateCallerFilePathOverload(sb, group, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(IObservableGlobalSystemStringWithParameterFragment);
@@ -493,7 +493,7 @@ public class BindCommandCodeGeneratorHelperTests
             StringTypeName,
             [inv]);
 
-        BindCommandCodeGenerator.GenerateCallerFilePathOverload(sb, group, false);
+        BindCommandCodeGenerator.GenerateCallerFilePathOverload(sb, group, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("Expression<global::System.Func<");
@@ -833,7 +833,7 @@ public class BindCommandCodeGeneratorHelperTests
         var group = BindCommandCodeGenerator.GroupByTypeSignature(
             [ModelFactory.CreateBindCommandInvocationInfo()])[0];
 
-        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, true, true);
+        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, true, true, true);
 
         await Assert.That(sb.ToString()).Contains("string? toEvent = null");
     }
@@ -847,7 +847,7 @@ public class BindCommandCodeGeneratorHelperTests
         var group = BindCommandCodeGenerator.GroupByTypeSignature(
             [ModelFactory.CreateBindCommandInvocationInfo()])[0];
 
-        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
+        BindCommandCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("string toEvent = null");

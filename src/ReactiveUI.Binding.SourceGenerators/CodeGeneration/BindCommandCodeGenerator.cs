@@ -20,14 +20,14 @@ internal static class BindCommandCodeGenerator
     internal static string? Generate(
         ImmutableArray<BindCommandInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        LanguageFeatures features)
+        in LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        var sb = new StringBuilder(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
+        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         var supportsCallerArgExpr = features.SupportsCallerArgExpr;
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         _ = sb.AppendLine();
@@ -38,7 +38,7 @@ internal static class BindCommandCodeGenerator
         {
             var group = groups[g];
 
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable);
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
             _ = sb.AppendLine();
 
             for (var i = 0; i < group.Invocations.Length; i++)
@@ -57,7 +57,7 @@ internal static class BindCommandCodeGenerator
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
         _ = sb.AppendLine();
 
-        return sb.ToString();
+        return PooledBuilder.ToStringAndReturn(sb);
     }
 
     /// <summary>Groups BindCommand invocations by their type signature for overload generation.</summary>
@@ -67,7 +67,7 @@ internal static class BindCommandCodeGenerator
         ImmutableArray<BindCommandInvocationInfo> invocations)
     {
         var groupMap = new Dictionary<string, List<BindCommandInvocationInfo>>(invocations.Length);
-        var keySb = new StringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
 
         for (var i = 0; i < invocations.Length; i++)
         {
@@ -92,6 +92,8 @@ internal static class BindCommandCodeGenerator
             list.Add(inv);
         }
 
+        keySb.Return();
+
         var result = new List<BindCommandTypeGroup>();
         foreach (var kvp in groupMap)
         {
@@ -115,11 +117,13 @@ internal static class BindCommandCodeGenerator
     /// <param name="group">The BindCommand type group.</param>
     /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is available.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         BindCommandTypeGroup group,
         bool supportsCallerArgExpr,
-        bool supportsNullable)
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
     {
         if (supportsCallerArgExpr)
         {
@@ -127,7 +131,7 @@ internal static class BindCommandCodeGenerator
         }
         else
         {
-            GenerateCallerFilePathOverload(sb, group, supportsNullable);
+            GenerateCallerFilePathOverload(sb, group, supportsNullable, stubHasExpressionParameters);
         }
     }
 
@@ -204,10 +208,12 @@ internal static class BindCommandCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindCommand type group.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateCallerFilePathOverload(
         StringBuilder sb,
         BindCommandTypeGroup group,
-        bool supportsNullable)
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
     {
         // The command selector is nullable (a command property may be null), matching the runtime stub's
         // Expression<Func<TViewModel, TProp?>>. The control selector stays non-nullable to match the stub's
@@ -245,6 +251,20 @@ internal static class BindCommandCodeGenerator
 
         _ = sb.AppendLine($$"""
                                   string{{(supportsNullable ? "?" : string.Empty)}} toEvent = null,
+                      """);
+
+        if (stubHasExpressionParameters)
+        {
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "propertyName", "propertyNameExpression", false);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "controlName", "controlNameExpression", false);
+
+            if (group.HasExpressionParameter)
+            {
+                CodeGeneratorHelpers.AppendExpressionParameter(sb, "withParameter", "withParameterExpression", false);
+            }
+        }
+
+        _ = sb.AppendLine("""
                                   [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
                                   [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
                               {

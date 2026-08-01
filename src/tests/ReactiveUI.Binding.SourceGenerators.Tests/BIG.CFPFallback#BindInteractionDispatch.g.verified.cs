@@ -18,6 +18,7 @@ namespace ReactiveUI.Binding
             global::SharedScenarios.BindInteraction.TaskHandler.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.TaskHandler.MyViewModel, global::ReactiveUI.Binding.IInteraction<string, bool>>> propertyName,
             global::System.Func<global::ReactiveUI.Binding.IInteractionContext<string, bool>, global::System.Threading.Tasks.Task> handler,
+            string propertyNameExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {

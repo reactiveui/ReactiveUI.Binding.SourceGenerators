@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- System.Reactive-flavoured WPF leaf: recompiles the shared WPF source against
+         ReactiveUI.Binding.Reactive, shifting its types to ReactiveUI.Binding.Reactive.Wpf.
+         REACTIVE_SHIM comes from ReactiveShim.props via the '.Reactive' name suffix. -->
+    <TargetFrameworks>$(BindingWindowsOnlyTargets)</TargetFrameworks>
+    <RootNamespace>ReactiveUI.Binding.Reactive.Wpf</RootNamespace>
+    <UseWpf>true</UseWpf>
+    <PackageDescription>WPF platform support for ReactiveUI.Binding.Reactive, for consumers on System.Reactive.</PackageDescription>
+    <PackageTags>reactiveui;binding;wpf;dependencyproperty;system.reactive</PackageTags>
+    <IsAotCompatible>false</IsAotCompatible>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+    <EnableSingleFileAnalyzer>false</EnableSingleFileAnalyzer>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ReactiveUI.Binding.Wpf.Shared\**\*.cs" Link="ReactiveUI.Binding.Wpf.Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
+    <Compile Include="..\ReactiveUI.Binding.Platform.Shared\**\*.cs" Link="ReactiveUI.Binding.Platform.Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="System"/>
+    <Using Include="System.ComponentModel"/>
+    <Using Include="System.Diagnostics"/>
+    <Using Include="System.Diagnostics.CodeAnalysis"/>
+    <Using Include="System.Runtime.CompilerServices"/>
+    <Using Include="Splat"/>
+  </ItemGroup>
+
+  <!-- The shifted counterparts of the lean leaf's imports. -->
+  <ItemGroup>
+    <Using Include="ReactiveUI.Binding.Reactive.Builder"/>
+    <Using Include="ReactiveUI.Binding.Reactive.Helpers"/>
+    <Using Include="ReactiveUI.Binding.Reactive.ObservableForProperty"/>
+    <Using Include="ReactiveUI.Binding.Reactive.Observables"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ReactiveUI.Binding.Reactive\ReactiveUI.Binding.Reactive.csproj"/>
+  </ItemGroup>
+
+  <!-- A recompilation of ReactiveUI.Binding.Wpf.Shared, which ReactiveUI.Binding.Wpf already covers.
+       See the note on ReactiveUI.Binding.Reactive for why this is an attribute and not a module path. -->
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))">
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage"/>
+  </ItemGroup>
+</Project>

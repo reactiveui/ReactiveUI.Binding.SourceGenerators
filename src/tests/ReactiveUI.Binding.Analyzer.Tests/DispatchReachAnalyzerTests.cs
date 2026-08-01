@@ -1,0 +1,147 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+using Microsoft.CodeAnalysis.CSharp;
+using ReactiveUI.Binding.Analyzer.Analyzers;
+using ReactiveUI.Binding.Analyzer.Tests.Helpers;
+
+namespace ReactiveUI.Binding.Analyzer.Tests;
+
+/// <summary>
+/// Covers RXUIBIND009, which reports a binding the generated dispatch cannot reach. Without it the call
+/// silently takes the runtime path, which is a performance cliff nothing in the build points at.
+/// </summary>
+public class DispatchReachAnalyzerTests
+{
+    /// <summary>The diagnostic this analyzer reports.</summary>
+    private const string DiagnosticId = "RXUIBIND009";
+
+    /// <summary>The root namespace the dispatch would be emitted into.</summary>
+    private const string RootNamespace = "Contoso.App";
+
+    /// <summary>A namespace with no relationship to the root namespace.</summary>
+    private const string UnrelatedNamespace = "Fabrikam.Ui";
+
+    /// <summary>A namespace nested under the root namespace.</summary>
+    private const string NestedNamespace = $"{RootNamespace}.Views";
+
+    /// <summary>An assembly-level grant of internals to another assembly.</summary>
+    private const string GrantsInternals =
+        "[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"Contoso.App.Tests\")]\n";
+
+    /// <summary>All three conditions hold, so the call is reported.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task OldLanguageVersion_ExposedInternals_FileOutsideTheRootNamespace_IsReported()
+    {
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            SourceIn(UnrelatedNamespace, GrantsInternals),
+            LanguageVersion.CSharp7_3,
+            RootNamespace);
+
+        await Assert.That(diagnostics.Count(static d => d.Id == DiagnosticId)).IsEqualTo(1);
+    }
+
+    /// <summary>A file under the root namespace reaches the dispatch, so nothing is reported.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FileUnderTheRootNamespace_IsNotReported()
+    {
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            SourceIn(NestedNamespace, GrantsInternals),
+            LanguageVersion.CSharp7_3,
+            RootNamespace);
+
+        await Assert.That(diagnostics.Any(static d => d.Id == DiagnosticId)).IsFalse();
+    }
+
+    /// <summary>
+    /// Without exposed internals the dispatch stays in the shared namespace, which every file reaches, so
+    /// there is nothing to warn about wherever the file sits.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WithoutExposedInternals_IsNotReported()
+    {
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            SourceIn(UnrelatedNamespace, string.Empty),
+            LanguageVersion.CSharp7_3,
+            RootNamespace);
+
+        await Assert.That(diagnostics.Any(static d => d.Id == DiagnosticId)).IsFalse();
+    }
+
+    /// <summary>From C# 10 the generated import carries every file, so there is nothing to warn about.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FromCSharp10_IsNotReported()
+    {
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            SourceIn(UnrelatedNamespace, GrantsInternals),
+            LanguageVersion.CSharp10,
+            RootNamespace);
+
+        await Assert.That(diagnostics.Any(static d => d.Id == DiagnosticId)).IsFalse();
+    }
+
+    /// <summary>With no root namespace there is nowhere else to emit, so the shared namespace is kept.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WithoutARootNamespace_IsNotReported()
+    {
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            SourceIn(UnrelatedNamespace, GrantsInternals),
+            LanguageVersion.CSharp7_3,
+            null);
+
+        await Assert.That(diagnostics.Any(static d => d.Id == DiagnosticId)).IsFalse();
+    }
+
+    /// <summary>Renders a consumer with one binding call in the given namespace.</summary>
+    /// <param name="consumerNamespace">The namespace the call site is declared in.</param>
+    /// <param name="assemblyAttributes">Assembly-level attributes to include.</param>
+    /// <returns>The source code.</returns>
+    /// <remarks>
+    /// Declares the runtime stub in source, the way the other analyzer tests do: the test compilation carries
+    /// framework references only, so a call has to have something in the compilation to bind to.
+    /// </remarks>
+    private static string SourceIn(string consumerNamespace, string assemblyAttributes) =>
+        $$"""
+          using System;
+          using System.ComponentModel;
+          using System.Linq.Expressions;
+          using ReactiveUI.Binding;
+
+          {{assemblyAttributes}}
+          namespace ReactiveUI.Binding
+          {
+              public static class ReactiveUIBindingExtensions
+              {
+                  public static IObservable<TReturn> WhenChanged<TObj, TReturn>(
+                      this TObj objectToMonitor,
+                      Expression<Func<TObj, TReturn>> property1)
+                      where TObj : class
+                      => throw new NotImplementedException();
+              }
+          }
+
+          namespace {{consumerNamespace}}
+          {
+              public class MyViewModel : INotifyPropertyChanged
+              {
+                  public event PropertyChangedEventHandler PropertyChanged;
+
+                  public string Name { get; set; }
+              }
+
+              public static class Usage
+              {
+                  public static IObservable<string> Observe(MyViewModel viewModel)
+                  {
+                      return viewModel.WhenChanged(x => x.Name);
+                  }
+              }
+          }
+          """;
+}

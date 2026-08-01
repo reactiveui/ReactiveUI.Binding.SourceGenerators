@@ -46,6 +46,40 @@ internal static class Constants
     /// <summary>Class name for the generated per-invocation dispatch class.</summary>
     internal const string GeneratedExtensionClassName = "__ReactiveUIGeneratedBindings";
 
+    /// <summary>
+    /// The namespace the dispatch overloads are emitted into on consumers that predate global usings, where
+    /// there is no way to reach a compilation-private namespace.
+    /// </summary>
+    internal const string SharedGeneratedNamespace = "ReactiveUI.Binding";
+
+    /// <summary>
+    /// The root under which each assembly gets its own generated namespace, used when the build exposes no root
+    /// namespace to emit into.
+    /// </summary>
+    internal const string GeneratedNamespaceRoot = "ReactiveUI.Binding.Generated";
+
+    /// <summary>Fully qualified name of the attribute that exposes an assembly's internals to another.</summary>
+    internal const string InternalsVisibleToAttributeFullName =
+        "global::System.Runtime.CompilerServices.InternalsVisibleToAttribute";
+
+    /// <summary>The namespace the System.Reactive flavour of the runtime library lives in.</summary>
+    internal const string ReactiveRuntimeNamespace = "ReactiveUI.Binding.Reactive";
+
+    /// <summary>Metadata name of the runtime stub class in the lean runtime package.</summary>
+    internal const string LeanStubMetadataName = "ReactiveUI.Binding.ReactiveUIBindingExtensions";
+
+    /// <summary>Metadata name of the runtime stub class in the System.Reactive runtime package.</summary>
+    internal const string ReactiveStubMetadataName = "ReactiveUI.Binding.Reactive.ReactiveUIBindingExtensions";
+
+    /// <summary>The scheduler abstraction the lean runtime library schedules on.</summary>
+    internal const string LeanSchedulerTypeName = "global::ReactiveUI.Primitives.Concurrency.ISequencer";
+
+    /// <summary>The scheduler abstraction the System.Reactive flavour schedules on.</summary>
+    internal const string ReactiveSchedulerTypeName = "global::System.Reactive.Concurrency.IScheduler";
+
+    /// <summary>The generated namespace segment used when the compilation has no assembly name.</summary>
+    internal const string AnonymousAssemblyNamespaceSegment = "Anonymous";
+
     /// <summary>Class name for the generated module-initializer registration class.</summary>
     internal const string GeneratedBinderRegistrationClassName = "__GeneratedBinderRegistration";
 

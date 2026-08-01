@@ -222,7 +222,7 @@ public class OneWayBindCodeGeneratorHelperTests
             false,
             [inv]);
 
-        OneWayBindCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
+        OneWayBindCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");

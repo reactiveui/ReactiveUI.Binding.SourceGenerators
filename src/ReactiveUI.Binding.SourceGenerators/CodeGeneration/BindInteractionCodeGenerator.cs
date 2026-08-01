@@ -21,14 +21,14 @@ internal static class BindInteractionCodeGenerator
     internal static string? Generate(
         ImmutableArray<BindInteractionInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        LanguageFeatures features)
+        in LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        var sb = new StringBuilder(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
+        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         var supportsCallerArgExpr = features.SupportsCallerArgExpr;
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         _ = sb.AppendLine();
@@ -39,7 +39,7 @@ internal static class BindInteractionCodeGenerator
         {
             var group = groups[g];
 
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr);
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.StubHasExpressionParameters);
             _ = sb.AppendLine();
 
             for (var i = 0; i < group.Invocations.Length; i++)
@@ -58,7 +58,7 @@ internal static class BindInteractionCodeGenerator
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
         _ = sb.AppendLine();
 
-        return sb.ToString();
+        return PooledBuilder.ToStringAndReturn(sb);
     }
 
     /// <summary>Groups BindInteraction invocations by their type signature for overload generation.</summary>
@@ -68,7 +68,7 @@ internal static class BindInteractionCodeGenerator
         ImmutableArray<BindInteractionInvocationInfo> invocations)
     {
         var groupMap = new Dictionary<string, List<BindInteractionInvocationInfo>>(invocations.Length);
-        var keySb = new StringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
 
         for (var i = 0; i < invocations.Length; i++)
         {
@@ -91,6 +91,8 @@ internal static class BindInteractionCodeGenerator
             list.Add(inv);
         }
 
+        keySb.Return();
+
         var result = new List<BindInteractionTypeGroup>();
         foreach (var kvp in groupMap)
         {
@@ -112,10 +114,12 @@ internal static class BindInteractionCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindInteraction type group.</param>
     /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is available.</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         BindInteractionTypeGroup group,
-        bool supportsCallerArgExpr)
+        bool supportsCallerArgExpr,
+        bool stubHasExpressionParameters)
     {
         if (supportsCallerArgExpr)
         {
@@ -123,7 +127,7 @@ internal static class BindInteractionCodeGenerator
         }
         else
         {
-            GenerateCallerFilePathOverload(sb, group);
+            GenerateCallerFilePathOverload(sb, group, stubHasExpressionParameters);
         }
     }
 
@@ -185,9 +189,11 @@ internal static class BindInteractionCodeGenerator
     /// <summary>Generates the CallerFilePath-based overload for BindInteraction dispatch.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindInteraction type group.</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateCallerFilePathOverload(
         StringBuilder sb,
-        BindInteractionTypeGroup group)
+        BindInteractionTypeGroup group,
+        bool stubHasExpressionParameters)
     {
         var handlerType = group.IsTaskHandler
             ? $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.Threading.Tasks.Task>"
@@ -203,6 +209,14 @@ internal static class BindInteractionCodeGenerator
             {{group.ViewModelTypeFullName}} viewModel,
             {{Expression}}<{{Func}}<{{group.ViewModelTypeFullName}}, {{IInteraction}}<{{group.InputTypeFullName}}, {{group.OutputTypeFullName}}>>> propertyName,
             {{handlerType}} handler,
+""");
+
+        if (stubHasExpressionParameters)
+        {
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "propertyName", "propertyNameExpression", false);
+        }
+
+        _ = sb.AppendLine("""
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {

@@ -2,8 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Reactive.Concurrency;
 using ReactiveUI.Binding;
+using ReactiveUI.Primitives.Concurrency;
 
 namespace SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler;
 
@@ -18,5 +18,5 @@ public static class Scenario
     public static IReactiveBinding<MyView, (object? view, bool isViewModel)> Execute(
         MyView view,
         MyViewModel vm,
-        IScheduler scheduler) => view.Bind(vm, x => x.Count, x => x.CountText, count => count.ToString(), int.Parse, scheduler);
+        ISequencer scheduler) => view.Bind(vm, x => x.Count, x => x.CountText, count => count.ToString(), int.Parse, scheduler);
 }

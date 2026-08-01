@@ -68,6 +68,19 @@ internal static class DiagnosticWarnings
         true,
         ValidationNotGeneratedDescription);
 
+    /// <summary>RXUIBIND009: The generated dispatch for this call site is out of reach.</summary>
+    internal static readonly DiagnosticDescriptor DispatchOutOfReach = new(
+        "RXUIBIND009",
+        "Generated binding dispatch is out of reach here",
+        "This binding falls back to runtime observation. The assembly exposes its internals, so on C# 9 and "
+        + "below the generated dispatch has to live in the root namespace '{0}' to stay unambiguous, and this "
+        + "file's namespace '{1}' is not under it. Move the file under the root namespace, or raise the "
+        + "language version to 10 or later.",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        DispatchOutOfReachDescription);
+
     /// <summary>RXUIBIND006: Expression contains unsupported path segment (indexer, field, or method call).</summary>
     internal static readonly DiagnosticDescriptor UnsupportedPathSegment = new(
         "RXUIBIND006",
@@ -97,6 +110,14 @@ internal static class DiagnosticWarnings
         DiagnosticSeverity.Warning,
         true,
         InvalidInteractionTypeDescription);
+
+    /// <summary>The string description of the out-of-reach dispatch warning.</summary>
+    private const string DispatchOutOfReachDescription =
+        "Compile-time dispatch is chosen by extension-method lookup, which only reaches an overload declared "
+        + "in a namespace enclosing the call site. Before C# 10 there is no global using to widen that, and an "
+        + "assembly that exposes its internals cannot leave the overloads in the shared namespace without "
+        + "risking an ambiguous call against the assembly it exposes them to. Files outside the root namespace "
+        + "therefore bind to the runtime stub instead.";
 
     /// <summary>The string description of the none inline lambda.</summary>
     private const string NoneInlineLambdaDescription =

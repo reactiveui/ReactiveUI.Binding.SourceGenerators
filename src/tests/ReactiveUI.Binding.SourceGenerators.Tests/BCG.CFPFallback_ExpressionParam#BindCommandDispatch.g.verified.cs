@@ -20,6 +20,9 @@ namespace ReactiveUI.Binding
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.ExpressionParam.MyView, global::SharedScenarios.BindCommand.ExpressionParam.MyButton>> controlName,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.ExpressionParam.MyViewModel, string?>> withParameter,
             string? toEvent = null,
+            string propertyNameExpression = "",
+            string controlNameExpression = "",
+            string withParameterExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {

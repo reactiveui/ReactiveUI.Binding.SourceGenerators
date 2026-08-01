@@ -4,13 +4,14 @@
 
 using System.ComponentModel;
 using System.Reactive.Concurrency;
+using ReactiveUI.Binding.Reactive;
 
 namespace ReactiveUI.Binding.Tests.Reactive;
 
 /// <summary>
-///     Tests for the <see cref="ReactiveSchedulerExtensions"/> class.
-///     All extension methods are CallerInfo stubs that throw InvalidOperationException
-///     unless a source generator provides the implementation.
+///     Tests for the System.Reactive flavour of <see cref="ReactiveSchedulerExtensions"/>, which takes
+///     an <see cref="IScheduler"/>. All extension methods are CallerInfo stubs that throw
+///     InvalidOperationException unless a source generator provides the implementation.
 /// </summary>
 public class ReactiveSchedulerExtensionsTests
 {

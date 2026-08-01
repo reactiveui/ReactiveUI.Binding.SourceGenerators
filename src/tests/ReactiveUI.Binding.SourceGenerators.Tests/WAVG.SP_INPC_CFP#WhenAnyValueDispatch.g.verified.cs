@@ -15,6 +15,7 @@ namespace ReactiveUI.Binding
         public static global::System.IObservable<string> WhenAnyValue(
             this global::SharedScenarios.WhenAnyValue.SinglePropertyINPC.MyViewModel objectToMonitor,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.SinglePropertyINPC.MyViewModel, string>> property1,
+            string property1Expression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {

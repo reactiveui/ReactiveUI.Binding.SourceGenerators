@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {

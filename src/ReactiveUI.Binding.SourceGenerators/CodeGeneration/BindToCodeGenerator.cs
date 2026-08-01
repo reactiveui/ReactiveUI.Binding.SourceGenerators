@@ -23,14 +23,14 @@ internal static class BindToCodeGenerator
     /// <returns>Generated source code string, or null if no invocations.</returns>
     internal static string? Generate(
         ImmutableArray<BindToInvocationInfo> invocations,
-        LanguageFeatures features)
+        in LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        var sb = new StringBuilder(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
+        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         var supportsCallerArgExpr = features.SupportsCallerArgExpr;
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         _ = sb.AppendLine();
@@ -41,7 +41,7 @@ internal static class BindToCodeGenerator
         {
             var group = groups[g];
 
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable);
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
             _ = sb.AppendLine();
 
             for (var i = 0; i < group.Invocations.Length; i++)
@@ -59,7 +59,7 @@ internal static class BindToCodeGenerator
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
         _ = sb.AppendLine();
 
-        return sb.ToString();
+        return PooledBuilder.ToStringAndReturn(sb);
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ internal static class BindToCodeGenerator
     internal static List<BindToTypeGroup> GroupByTypeSignature(ImmutableArray<BindToInvocationInfo> invocations)
     {
         var groupMap = new Dictionary<string, List<BindToInvocationInfo>>(invocations.Length);
-        var keySb = new StringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
 
         for (var i = 0; i < invocations.Length; i++)
         {
@@ -93,6 +93,8 @@ internal static class BindToCodeGenerator
 
             list.Add(inv);
         }
+
+        keySb.Return();
 
         var result = new List<BindToTypeGroup>();
         foreach (var kvp in groupMap)
@@ -118,7 +120,13 @@ internal static class BindToCodeGenerator
     /// <param name="group">The group of invocations sharing one overload signature.</param>
     /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is supported.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    internal static void GenerateConcreteOverload(StringBuilder sb, BindToTypeGroup group, bool supportsCallerArgExpr, bool supportsNullable)
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
+    internal static void GenerateConcreteOverload(
+        StringBuilder sb,
+        BindToTypeGroup group,
+        bool supportsCallerArgExpr,
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
     {
         if (supportsCallerArgExpr)
         {
@@ -126,7 +134,7 @@ internal static class BindToCodeGenerator
         }
         else
         {
-            GenerateCallerFilePathOverload(sb, group, supportsNullable);
+            GenerateCallerFilePathOverload(sb, group, supportsNullable, stubHasExpressionParameters);
         }
     }
 
@@ -189,7 +197,12 @@ internal static class BindToCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group of invocations sharing one overload signature.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    internal static void GenerateCallerFilePathOverload(StringBuilder sb, BindToTypeGroup group, bool supportsNullable)
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
+    internal static void GenerateCallerFilePathOverload(
+        StringBuilder sb,
+        BindToTypeGroup group,
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
     {
         var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
         _ = sb.AppendLine($"""
@@ -204,6 +217,11 @@ internal static class BindToCodeGenerator
                        """);
 
         AppendExtraParameters(sb, group);
+
+        if (stubHasExpressionParameters)
+        {
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "property", "propertyExpression", false);
+        }
 
         _ = sb.AppendLine($$"""
                                   [{{CallerFilePath}}] string callerFilePath = "",
@@ -314,7 +332,7 @@ internal static class BindToCodeGenerator
     /// <returns>An argument list fragment like ", conversionHint, converterOverride", or empty.</returns>
     internal static string FormatExtraArgs(BindToTypeGroup group)
     {
-        var sb = new StringBuilder();
+        var sb = new PooledStringBuilder();
         if (group.HasConversionHint)
         {
             _ = sb.Append(", conversionHint");
@@ -325,7 +343,7 @@ internal static class BindToCodeGenerator
             _ = sb.Append(", converterOverride");
         }
 
-        return sb.ToString();
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>Formats the extra parameters for the private worker method signature.</summary>
@@ -333,7 +351,7 @@ internal static class BindToCodeGenerator
     /// <returns>A parameter list fragment like ", object conversionHint, ... converterOverride", or empty.</returns>
     internal static string FormatExtraMethodParams(BindToInvocationInfo inv)
     {
-        var sb = new StringBuilder();
+        var sb = new PooledStringBuilder();
         if (inv.HasConversionHint)
         {
             _ = sb.Append(", object conversionHint");
@@ -344,7 +362,7 @@ internal static class BindToCodeGenerator
             _ = sb.Append($", {IBindingTypeConverter} converterOverride");
         }
 
-        return sb.ToString();
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>Groups <c>BindTo</c> invocations sharing source value type, target type, target property type, and overload shape.</summary>

@@ -78,7 +78,7 @@ public class BindOneWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, true, false);
+        BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -101,7 +101,7 @@ public class BindOneWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, false, false);
+        BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, false, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerFilePath");
@@ -148,7 +148,7 @@ public class BindOneWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindOneWayCodeGenerator.GenerateCallerFilePathOverload(sb, group, false);
+        BindOneWayCodeGenerator.GenerateCallerFilePathOverload(sb, group, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerLineNumber == 50");
@@ -238,7 +238,7 @@ public class BindOneWayCodeGeneratorHelperTests
         await Assert.That(result).Contains(ConversionFuncName);
     }
 
-    /// <summary>Verifies FormatExtraMethodParams includes IScheduler when HasScheduler is true.</summary>
+    /// <summary>Verifies FormatExtraMethodParams includes ISequencer when HasScheduler is true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FormatExtraMethodParams_WithScheduler_IncludesSchedulerParam()
@@ -247,7 +247,7 @@ public class BindOneWayCodeGeneratorHelperTests
 
         var result = BindOneWayCodeGenerator.FormatExtraMethodParams(inv);
 
-        await Assert.That(result).Contains("IScheduler");
+        await Assert.That(result).Contains("ISequencer");
         await Assert.That(result).Contains("scheduler");
     }
 

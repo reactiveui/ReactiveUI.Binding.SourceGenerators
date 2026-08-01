@@ -68,7 +68,7 @@ public class WhenChangingCodeGeneratorHelperTests
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: WhenChangingName);
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, WhenChangingName);
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, true, WhenChangingName);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -84,7 +84,7 @@ public class WhenChangingCodeGeneratorHelperTests
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: WhenChangingName);
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, false, WhenChangingName);
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, false, false, WhenChangingName);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerFilePath");
@@ -100,7 +100,7 @@ public class WhenChangingCodeGeneratorHelperTests
         var inv = ModelFactory.CreateInvocationInfo(isBeforeChange: true, methodName: WhenChangingName);
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, WhenChangingName);
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, true, true, WhenChangingName);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("Expression ==");
@@ -122,7 +122,7 @@ public class WhenChangingCodeGeneratorHelperTests
             methodName: WhenChangingName);
         var group = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, false, WhenChangingName);
+        ObservationCodeGenerator.GenerateConcreteOverload(sb, group, false, false, WhenChangingName);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerLineNumber == 42");

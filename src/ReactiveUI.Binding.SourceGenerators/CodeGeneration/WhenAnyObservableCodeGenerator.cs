@@ -26,14 +26,14 @@ internal static class WhenAnyObservableCodeGenerator
     internal static string? Generate(
         ImmutableArray<WhenAnyObservableInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        LanguageFeatures features)
+        in LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        var sb = new StringBuilder(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
+        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         var supportsCallerArgExpr = features.SupportsCallerArgExpr;
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         _ = sb.AppendLine();
@@ -46,7 +46,7 @@ internal static class WhenAnyObservableCodeGenerator
             var group = groups[g];
 
             // Generate the concrete typed extension method overload
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable);
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
             _ = sb.AppendLine();
 
             // Generate the observation methods for each invocation in this group
@@ -66,7 +66,7 @@ internal static class WhenAnyObservableCodeGenerator
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
         _ = sb.AppendLine();
 
-        return sb.ToString();
+        return PooledBuilder.ToStringAndReturn(sb);
     }
 
     /// <summary>Generates a concrete typed extension method overload with dispatch logic for WhenAnyObservable.</summary>
@@ -74,11 +74,13 @@ internal static class WhenAnyObservableCodeGenerator
     /// <param name="group">The type group containing invocations that share a signature.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         TypeGroup group,
         bool supportsCallerArgExpr,
-        bool supportsNullable)
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
     {
         var first = group.First;
         var propCount = first.PropertyPaths.Length;
@@ -105,12 +107,15 @@ internal static class WhenAnyObservableCodeGenerator
             _ = sb.Append("            ").Append(GetSelectorType(first)).AppendLine(" selector,");
         }
 
-        if (supportsCallerArgExpr)
+        if (stubHasExpressionParameters)
         {
             for (var i = 0; i < propCount; i++)
             {
-                _ = sb.AppendLine(
-                    $"            [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"obs{i + 1}\")] string obs{i + 1}Expression = \"\",");
+                CodeGeneratorHelpers.AppendExpressionParameter(
+                    sb,
+                    $"obs{i + 1}",
+                    $"obs{i + 1}Expression",
+                    supportsCallerArgExpr);
             }
         }
 
@@ -300,14 +305,14 @@ internal static class WhenAnyObservableCodeGenerator
     /// <returns>A fully qualified Func type string.</returns>
     internal static string GetSelectorType(WhenAnyObservableInvocationInfo inv)
     {
-        var sb = new StringBuilder("global::System.Func<");
+        var sb = new PooledStringBuilder().Append("global::System.Func<");
         for (var i = 0; i < inv.InnerObservableTypeFullNames.Length; i++)
         {
             _ = sb.Append(inv.InnerObservableTypeFullNames[i]).Append(", ");
         }
 
         _ = sb.Append(inv.ReturnTypeFullName).Append('>');
-        return sb.ToString();
+        return sb.ToStringAndReturn();
     }
 
     /// <summary>Groups WhenAnyObservable invocations by their type signature for overload generation.</summary>
@@ -316,7 +321,7 @@ internal static class WhenAnyObservableCodeGenerator
     internal static List<TypeGroup> GroupByTypeSignature(ImmutableArray<WhenAnyObservableInvocationInfo> invocations)
     {
         var groupMap = new Dictionary<string, List<WhenAnyObservableInvocationInfo>>(invocations.Length);
-        var keySb = new StringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
 
         for (var i = 0; i < invocations.Length; i++)
         {
@@ -342,6 +347,8 @@ internal static class WhenAnyObservableCodeGenerator
 
             list.Add(inv);
         }
+
+        keySb.Return();
 
         var result = new List<TypeGroup>();
         foreach (var kvp in groupMap)

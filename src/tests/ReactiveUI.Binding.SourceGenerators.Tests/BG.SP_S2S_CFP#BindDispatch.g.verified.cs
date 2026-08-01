@@ -18,6 +18,8 @@ namespace ReactiveUI.Binding
             global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel, string?>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, string?>> viewProperty,
+            string viewModelPropertyExpression = "",
+            string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {

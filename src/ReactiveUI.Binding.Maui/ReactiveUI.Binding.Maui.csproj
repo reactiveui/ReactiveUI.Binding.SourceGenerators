@@ -9,7 +9,7 @@
     <SupportedOSPlatformVersion Condition="$([System.String]::Copy('$(TargetFramework)').EndsWith('-windows10.0.19041.0'))">10.0.19041.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="$([System.String]::Copy('$(TargetFramework)').EndsWith('-windows10.0.19041.0'))">10.0.19041.0</TargetPlatformMinVersion>
     <PackageDescription>MAUI platform support for ReactiveUI.Binding. Provides DependencyProperty observation for WinUI and Visibility converters.</PackageDescription>
-    <PackageTags>reactiveui;binding;maui;winui;system.reactive</PackageTags>
+    <PackageTags>reactiveui;binding;maui;winui</PackageTags>
     <IsAotCompatible>false</IsAotCompatible>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <EnableSingleFileAnalyzer>false</EnableSingleFileAnalyzer>
@@ -19,10 +19,20 @@
     <DefineConstants>$(DefineConstants);WINUI_TARGET</DefineConstants>
   </PropertyGroup>
 
+  <!-- The seam source, compiled here against the lean ReactiveUI.Binding. ReactiveUI.Binding.Maui.Reactive
+       links the same files under REACTIVE_SHIM. -->
+  <ItemGroup>
+    <Compile Include="..\ReactiveUI.Binding.Maui.Shared\**\*.cs" Link="ReactiveUI.Binding.Maui.Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
+  </ItemGroup>
+
   <!-- The WinUI DependencyProperty observer is guarded with #if WINUI_TARGET, so exclude the source
-       on the non-Windows targets rather than compiling a file that declares nothing there. -->
+       on the non-Windows targets rather than compiling a file that declares nothing there. It is also the
+       only consumer of the shared platform primitives, which are therefore linked on the same targets. -->
   <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'windows'">
-    <Compile Remove="DependencyObjectObservableForProperty.cs"/>
+    <Compile Remove="..\ReactiveUI.Binding.Maui.Shared\DependencyObjectObservableForProperty.cs"/>
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+    <Compile Include="..\ReactiveUI.Binding.Platform.Shared\**\*.cs" Link="ReactiveUI.Binding.Platform.Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -30,20 +40,23 @@
     <Using Include="System.ComponentModel"/>
     <Using Include="System.Diagnostics"/>
     <Using Include="System.Diagnostics.CodeAnalysis"/>
-    <Using Include="System.Reactive"/>
-    <Using Include="System.Reactive.Concurrency"/>
-    <Using Include="System.Reactive.Disposables"/>
-    <Using Include="System.Reactive.Linq"/>
     <Using Include="System.Runtime.CompilerServices"/>
     <Using Include="Splat"/>
+  </ItemGroup>
+
+  <!-- The shared source carries no per-file usings for the namespaces that shift between the two
+       leaves, so this leaf imports the unshifted forms. -->
+  <ItemGroup>
+    <Using Include="ReactiveUI.Binding.Builder"/>
     <Using Include="ReactiveUI.Binding.Helpers"/>
+    <Using Include="ReactiveUI.Binding.ObservableForProperty"/>
+    <Using Include="ReactiveUI.Binding.Observables"/>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
     <PackageReference Include="Microsoft.Maui.Controls"/>
     <PackageReference Include="Microsoft.Maui.Controls.Compatibility"/>
-    <PackageReference Include="System.Reactive"/>
   </ItemGroup>
 
   <ItemGroup>
