@@ -37,6 +37,23 @@
     <PackageReference Include="System.Reactive"/>
   </ItemGroup>
 
+  <!-- The runtime library is useless on its own: every API it exposes is a stub that throws unless the
+       generator has replaced the call site, so the generator and its analyzer ship in this package rather
+       than being something the consumer has to remember to add. Referenced only to order the build - the
+       generator is not run over this project's own source. -->
+  <ItemGroup>
+    <ProjectReference Include="..\ReactiveUI.Binding.SourceGenerators\ReactiveUI.Binding.SourceGenerators.csproj" PrivateAssets="all" ReferenceOutputAssembly="false"/>
+  </ItemGroup>
+
+  <!-- Packed as plain files rather than through TargetsForTfmSpecificContentInPackage: that hook runs once
+       per target framework, and the analyzer folder is framework-agnostic, so it would offer the same path
+       six times over. -->
+  <ItemGroup>
+    <None Include="..\ReactiveUI.Binding.SourceGenerators\bin\$(Configuration)\netstandard2.0\ReactiveUI.Binding.SourceGenerators.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    <None Include="..\ReactiveUI.Binding.Analyzer\bin\$(Configuration)\netstandard2.0\ReactiveUI.Binding.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    <None Include="..\ReactiveUI.Binding.SourceGenerators\build\ReactiveUI.Binding.SourceGenerators.props" Pack="true" PackagePath="build\$(MSBuildProjectName).props;buildTransitive\$(MSBuildProjectName).props" Visible="false"/>
+  </ItemGroup>
+
   <!-- DateOnly and TimeOnly only exist on .NET 6+. Their converters are guarded with
        #if NET6_0_OR_GREATER, so exclude the sources outright on the older targets rather than
        compiling files that declare nothing there. -->

@@ -198,6 +198,7 @@ src/
 │   │   ├── WinFormsBindingGenerator.cs          # WinForms Component (affinity 23)
 │   │   ├── AndroidBindingGenerator.cs           # Android View (affinity 19)
 │   │   ├── RegistrationGenerator.cs             # Consolidates all → [ModuleInitializer]
+│   │   ├── ObservationHelperGenerator.cs        # Declares the KVO/WinUI helper classes, once per compilation
 │   │   └── ViewLocatorDispatchGenerator.cs      # IViewFor<T> → AOT view dispatch (Pipeline C)
 │   ├── Invocations/                             # Per-invocation generators (Pipeline B)
 │   │   ├── WhenChangedInvocationGenerator.cs    # After-change observation
@@ -418,6 +419,20 @@ All pipeline models are `sealed record` types with value equality. NEVER include
 - `#pragma warning disable` at top of generated files
 - All generated types use `[Microsoft.CodeAnalysis.Embedded]` attribute
 
+### Where the Observation Helper Classes Are Declared
+
+Some plugins (`KVOObservationPlugin`, `WinUIObservationPlugin`) emit observation code that instantiates helper
+classes by bare name — `__KVOObservable<T>`, `__KVOObserver`, `__WinUIDPObservable<T>`. Every dispatch file is
+another part of the same `__ReactiveUIGeneratedBindings` class, so one part declaring them is enough for all of
+them, and two parts declaring them is a duplicate-member error.
+
+`ObservationHelperGenerator` therefore owns the declarations outright, in `ObservationHelpers.g.cs`. Emitters
+only ever reference the helpers; none of them declare any. Which helpers to declare is decided from the
+**detected types**, not from the call sites — a reference can only be emitted for a type
+`CodeGeneratorHelpers.FindClassInfo` matched, so the declarations are a superset of the references whichever
+binding API reaches for them. Deciding it from the call sites is what left `BindOneWay`, `BindTwoWay`, `Bind`,
+`OneWayBind`, `WhenAny` and `WhenAnyObservable` emitting references to types nobody declared.
+
 ### Two-Layer Language Version Constraint
 
 There are **two distinct C# language contexts** in this project:
@@ -576,6 +591,10 @@ build keeps working right up until Wine starts. Each copy chains to the reposito
 - **Generator + Analyzer targets:** netstandard2.0 (Roslyn requirement)
 - **Runtime library targets:** net8.0;net9.0;net10.0;net462;net472;net481
 - **No shallow clones:** Repository requires full clone for Nerdbank.GitVersioning
-- **PackBuildOutputs target:** Generator .csproj packages both generator and analyzer DLLs into `analyzers/dotnet/cs`
+- **Where the analyzers ship:** `ReactiveUI.Binding` and `ReactiveUI.Binding.Reactive` each pack the generator
+  and analyzer DLLs into `analyzers/dotnet/cs`, so referencing a runtime package is all a consumer needs.
+  `ReactiveUI.Binding.SourceGenerators` is a compatibility package that ships only the MSBuild props: a second
+  copy of the same assemblies under a different package root loads as a second generator and emits every
+  dispatch file twice, which fails the consumer's build
 
 **Philosophy:** Generate zero-reflection, AOT-compatible property observation and binding code at compile-time. Support all ReactiveUI platform notification mechanisms. Fall back to runtime expression analysis only when compile-time analysis is not possible.

@@ -68,6 +68,8 @@ public class BindingGenerator : IIncrementalGenerator
             consolidated.Combine(languageFeatures),
             static (ctx, data) => RegistrationGenerator.Generate(ctx, data.Left, data.Right));
 
+        RegisterObservationHelperOutput(in context, allObservableTypes, languageFeatures);
+
         // Pipeline C: View locator dispatch (IViewFor<T> scanning)
         ViewLocatorDispatchGenerator.Register(context, languageFeatures);
 
@@ -101,6 +103,31 @@ public class BindingGenerator : IIncrementalGenerator
         BindCommandInvocationGenerator.Register(context, bindCommand, allClasses, languageFeatures);
         BindToInvocationGenerator.Register(context, bindTo, allClasses, languageFeatures);
     }
+
+    /// <summary>
+    /// Declares the observation helper classes that generated observation code instantiates by name, once
+    /// for the whole compilation.
+    /// </summary>
+    /// <param name="context">The generator initialization context.</param>
+    /// <param name="observableTypes">Every detected type that has an observation plugin.</param>
+    /// <param name="languageFeatures">The consumer's language-feature snapshot, which names the namespace.</param>
+    /// <remarks>
+    /// Keyed to the detected types rather than to the call sites, which keeps the declarations a superset of
+    /// the references: observation code can only name a helper for a detected type, whichever binding API
+    /// reaches for it. Collapsing the per-type kinds to a distinct set first means adding another type of an
+    /// already-seen kind leaves this output cached.
+    /// </remarks>
+    private static void RegisterObservationHelperOutput(
+        in IncrementalGeneratorInitializationContext context,
+        IncrementalValuesProvider<ObservableTypeInfo> observableTypes,
+        IncrementalValueProvider<LanguageFeatures> languageFeatures) =>
+        context.RegisterSourceOutput(
+            observableTypes
+                .Select(static (typeInfo, _) => typeInfo.ObservationKind)
+                .Collect()
+                .Select(static (kinds, _) => ObservationHelperGenerator.SelectHelperKinds(kinds))
+                .Combine(languageFeatures),
+            static (ctx, data) => ObservationHelperGenerator.Generate(ctx, data.Left, data.Right));
 
     /// <summary>Runs one syntax scan and keeps the call sites it could extract.</summary>
     /// <typeparam name="T">The extracted call-site model.</typeparam>

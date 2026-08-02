@@ -83,26 +83,17 @@ public class PlatformDetectionSnapshotTests
         return TestHelper.TestPass(source, typeof(PlatformDetectionSnapshotTests));
     }
 
-    /// <summary>Verifies detection of Apple NSObject (KVO).</summary>
+    /// <summary>
+    /// Verifies detection of Apple NSObject (KVO), and that the KVO observation helpers it brings with it
+    /// compile on the minimum supported language version even with no binding call to use them.
+    /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public Task NSObject_Detected()
+    public async Task NSObject_Detected()
     {
-        const string source = """
-                              namespace Foundation
-                              {
-                                  public class NSObject {}
-                              }
+        var source = ApplePlatformSource.TypeDetectionScenario();
 
-                              namespace TestApp
-                              {
-                                  public class MyAppleView : Foundation.NSObject
-                                  {
-                                      public string Text { get; set; }
-                                  }
-                              }
-                              """;
-
-        return TestHelper.TestPass(source, typeof(PlatformDetectionSnapshotTests));
+        var result = await TestHelper.TestPassWithResult(source, typeof(PlatformDetectionSnapshotTests));
+        await result.CompilationSucceeds();
     }
 }
