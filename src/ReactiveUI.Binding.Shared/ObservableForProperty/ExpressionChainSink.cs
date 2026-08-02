@@ -258,8 +258,7 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
                 _sink = sink;
                 _index = index;
                 _isLeaf = isLeaf;
-                var member = sink._links[index].GetMemberInfo();
-                _getter = member is null ? null : Reflection.GetValueFetcherForProperty(member);
+                _getter = ChainLinkReader.CreateGetter(sink._links[index]);
                 _arguments = sink._links[index].GetArgumentsArray();
             }
 
@@ -316,17 +315,8 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
             /// <summary>Reads the current value of this link from a parent using the cached fetcher.</summary>
             /// <param name="parent">The object the link is read from.</param>
             /// <returns>The link's current value, or the default when the parent is null.</returns>
-            private object? ReadValue(object? parent)
-            {
-                if (parent is null)
-                {
-                    return null;
-                }
-
-                return _getter is not null
-                    ? _getter(parent, _arguments)
-                    : new ObservedChange<object?, object?>(parent, _sink._links[_index], null).GetValueOrDefault();
-            }
+            private object? ReadValue(object? parent) =>
+                ChainLinkReader.ReadValue(parent, _getter, _arguments, _sink._links[_index]);
 
             /// <summary>Forwards this link's value to the next level, or emits it at the leaf.</summary>
             /// <param name="value">The value this link produced.</param>
