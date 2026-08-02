@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -16,26 +16,26 @@ namespace ReactiveUI.Binding
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? view, bool isViewModel)> Bind(
             this global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView view,
             global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel viewModel,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel, int>> vmProperty,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel, int>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, string?>> viewProperty,
-            global::System.Func<int, string> vmToViewConverter,
-            global::System.Func<string, int> viewToVmConverter,
-            global::System.Reactive.Concurrency.IScheduler scheduler,
-            [global::System.Runtime.CompilerServices.CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+            global::System.Func<int, string> viewModelToViewConverter,
+            global::System.Func<string, int> viewToViewModelConverter,
+            global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler,
+            [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (vmPropertyExpression == "x => x.Count"
+            if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountText")
             {
-                return __Bind_7FFFD53F494406F0(viewModel, view, vmToViewConverter, viewToVmConverter, scheduler);
+                return __Bind_7FFFD53F494404E1(viewModel, view, viewModelToViewConverter, viewToViewModelConverter, scheduler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? view, bool isViewModel)> __Bind_7FFFD53F494406F0(global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView view, global::System.Func<int, string> vmToViewConverter, global::System.Func<string, int> viewToVmConverter, global::System.Reactive.Concurrency.IScheduler scheduler)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? view, bool isViewModel)> __Bind_7FFFD53F494404E1(global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView view, global::System.Func<int, string> viewModelToViewConverter, global::System.Func<string, int> viewToViewModelConverter, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // Bind: Count <-> CountText (with conversion) (with scheduler)
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
@@ -48,10 +48,10 @@ namespace ReactiveUI.Binding
             "CountText",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView)__o).CountText,
             true);
-        var __vmSelected = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmObs, vmToViewConverter);
-        var __viewSelected = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(viewObs, viewToVmConverter);
-        var vmBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<string>(__vmSelected, scheduler);
-        var viewBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<int>(__viewSelected, scheduler);
+        var __vmSelected = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmObs, viewModelToViewConverter);
+        var __viewSelected = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(viewObs, viewToViewModelConverter);
+        var vmBind = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<string>(__vmSelected, scheduler);
+        var viewBind = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<int>(__viewSelected, scheduler);
 
             var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(vmBind, value =>
             {

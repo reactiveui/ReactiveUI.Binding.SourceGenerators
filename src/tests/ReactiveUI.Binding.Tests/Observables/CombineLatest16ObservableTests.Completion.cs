@@ -8,19 +8,12 @@ using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-/// Completion-propagation tests for <see cref="CombineLatest16Observable{T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult}"/>.
-/// </summary>
+/// <summary>Completion-propagation tests for <see cref="CombineLatest16Observable{T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult}"/>.</summary>
 public partial class CombineLatest16ObservableTests
 {
-    /// <summary>
-    /// Verifies that OnCompleted from a single source does not propagate completion.
-    /// </summary>
+    /// <summary>Verifies that OnCompleted from a single source does not propagate completion.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
+    [SuppressMessage("Design", "SST1523:Methods should not be too long", Justification = "Length is intrinsic to the fixed CombineLatest arity; each source needs its own line.")]
     [Test]
     public async Task CompletedInSource_DoesNotPropagateCompletion()
     {
@@ -57,14 +50,14 @@ public partial class CombineLatest16ObservableTests
             source14,
             source15,
             source16,
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}-{o}-{p}");
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}-{o}-{p}");
 
         var completed = false;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
-            _ => { },
+            static _ => { },
             () => completed = true));
 
         source1.OnNext(1);

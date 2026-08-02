@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Reflection;
 using ReactiveUI.Binding.Expressions;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Tests.TestModels;
@@ -10,34 +11,22 @@ using LinqExpression = System.Linq.Expressions.Expression;
 
 namespace ReactiveUI.Binding.Tests.ObservableForProperty;
 
-/// <summary>
-/// Tests for the <see cref="INPCObservableForProperty"/> class.
-/// </summary>
+/// <summary>Tests for the <see cref="INPCObservableForProperty"/> class.</summary>
 public class INPCObservableForPropertyTests
 {
-    /// <summary>
-    /// The affinity score returned for INotifyPropertyChanged-compatible types.
-    /// </summary>
+    /// <summary>The affinity score returned for INotifyPropertyChanged-compatible types.</summary>
     private const int InpcAffinity = 5;
 
-    /// <summary>
-    /// A sample name value assigned during notification tests.
-    /// </summary>
+    /// <summary>A sample name value assigned during notification tests.</summary>
     private const string SampleName = "Alice";
 
-    /// <summary>
-    /// A sample indexer value used during notification tests.
-    /// </summary>
+    /// <summary>A sample indexer value used during notification tests.</summary>
     private const string SampleValue = "value";
 
-    /// <summary>
-    /// The name of the non-indexer property used in PropertyChanging tests.
-    /// </summary>
+    /// <summary>The name of the non-indexer property used in PropertyChanging tests.</summary>
     private const string SomePropName = "SomeProp";
 
-    /// <summary>
-    /// A sample age value assigned to an unrelated property.
-    /// </summary>
+    /// <summary>A sample age value assigned to an unrelated property.</summary>
     private const int SampleAge = 30;
 
     /// <summary>
@@ -46,9 +35,7 @@ public class INPCObservableForPropertyTests
     /// </summary>
     private const int ExpectedNonDistinctCount = 4;
 
-    /// <summary>
-    /// Verifies affinity is 5 for types implementing INotifyPropertyChanged.
-    /// </summary>
+    /// <summary>Verifies affinity is 5 for types implementing INotifyPropertyChanged.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetAffinityForObject_INPCType_Returns5()
@@ -60,9 +47,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(affinity).IsEqualTo(InpcAffinity);
     }
 
-    /// <summary>
-    /// Verifies affinity is 5 for INotifyPropertyChanging when beforeChanged is true.
-    /// </summary>
+    /// <summary>Verifies affinity is 5 for INotifyPropertyChanging when beforeChanged is true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetAffinityForObject_INPCChangingType_Returns5ForBeforeChanged()
@@ -74,9 +59,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(affinity).IsEqualTo(InpcAffinity);
     }
 
-    /// <summary>
-    /// Verifies affinity is 0 for POCO types.
-    /// </summary>
+    /// <summary>Verifies affinity is 0 for POCO types.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetAffinityForObject_PocoType_Returns0()
@@ -88,9 +71,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(affinity).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that GetNotificationForProperty emits when a property changes.
-    /// </summary>
+    /// <summary>Verifies that GetNotificationForProperty emits when a property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetNotificationForProperty_PropertyChanged_EmitsNotification()
@@ -110,9 +91,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(emitted).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that GetNotificationForProperty emits before-change notifications.
-    /// </summary>
+    /// <summary>Verifies that GetNotificationForProperty emits before-change notifications.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetNotificationForProperty_BeforeChanged_EmitsNotification()
@@ -132,9 +111,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(emitted).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that GetNotificationForProperty filters by property name.
-    /// </summary>
+    /// <summary>Verifies that GetNotificationForProperty filters by property name.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetNotificationForProperty_DifferentProperty_DoesNotEmit()
@@ -155,9 +132,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(emitted).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that GetNotificationForProperty returns Observable.Never for POCO types.
-    /// </summary>
+    /// <summary>Verifies that GetNotificationForProperty returns Observable.Never for POCO types.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetNotificationForProperty_PocoType_ReturnsNever()
@@ -177,9 +152,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(emitted).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that null or empty PropertyName in PropertyChanged emits for all listeners.
-    /// </summary>
+    /// <summary>Verifies that null or empty PropertyName in PropertyChanged emits for all listeners.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetNotificationForProperty_NullPropertyName_EmitsNotification()
@@ -199,9 +172,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(emitted).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies affinity is 0 for before-change on types without INotifyPropertyChanging.
-    /// </summary>
+    /// <summary>Verifies affinity is 0 for before-change on types without INotifyPropertyChanging.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetAffinityForObject_NonChangingType_Returns0ForBeforeChanged()
@@ -213,9 +184,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(affinity).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that GetNotificationForProperty emits for indexer property changes (PropertyChanged path).
-    /// </summary>
+    /// <summary>Verifies that GetNotificationForProperty emits for indexer property changes (PropertyChanged path).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetNotificationForProperty_IndexExpression_PropertyChanged_EmitsNotification()
@@ -240,9 +209,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(emitted).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that GetNotificationForProperty emits for indexer property changes (PropertyChanging/beforeChanged path).
-    /// </summary>
+    /// <summary>Verifies that GetNotificationForProperty emits for indexer property changes (PropertyChanging/beforeChanged path).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetNotificationForProperty_IndexExpression_BeforeChanged_EmitsNotification()
@@ -266,9 +233,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(emitted).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that indexer property notification does not emit for unrelated property name changes.
-    /// </summary>
+    /// <summary>Verifies that indexer property notification does not emit for unrelated property name changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetNotificationForProperty_IndexExpression_DifferentPropertyName_DoesNotEmit()
@@ -292,9 +257,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(emitted).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that indexer property notification emits when PropertyChanged fires with null/empty name.
-    /// </summary>
+    /// <summary>Verifies that indexer property notification emits when PropertyChanged fires with null/empty name.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetNotificationForProperty_IndexExpression_NullPropertyName_EmitsNotification()
@@ -335,9 +298,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(emitted).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that ObservableForProperty by name with skipInitial=false emits the initial value.
-    /// </summary>
+    /// <summary>Verifies that ObservableForProperty by name with skipInitial=false emits the initial value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObservableForProperty_ByName_SkipInitialFalse_EmitsInitialValue()
@@ -351,9 +312,7 @@ public class INPCObservableForPropertyTests
         await Assert.That(receivedValue).IsEqualTo("Initial");
     }
 
-    /// <summary>
-    /// Verifies that ObservableForProperty by name with isDistinct=false allows duplicate values.
-    /// </summary>
+    /// <summary>Verifies that ObservableForProperty by name with isDistinct=false allows duplicate values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObservableForProperty_ByName_IsDistinctFalse_AllowsDuplicates()
@@ -599,78 +558,8 @@ public class INPCObservableForPropertyTests
         await Assert.That(count).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// A test model with a nullable property for testing null GetCurrentValue path.
-    /// </summary>
-    private sealed class NullablePropertyViewModel : INotifyPropertyChanged
-    {
-        /// <summary>
-        /// A private field representing a nullable string property used for testing
-        /// scenarios where the property's value may be null.
-        /// </summary>
-        private string? _nullableName;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the nullable name.
-        /// </summary>
-        public string? NullableName
-        {
-            get => _nullableName;
-            set
-            {
-                _nullableName = value;
-                PropertyChanged?.Invoke(this, new(nameof(NullableName)));
-            }
-        }
-    }
-
-    /// <summary>
-    /// A test model that implements INotifyPropertyChanged but NOT INotifyPropertyChanging.
-    /// </summary>
-    [SuppressMessage(
-        "Performance",
-        "CA1812:Avoid uninstantiated internal classes",
-        Justification = "Referenced only via typeof metadata to assert affinity behavior; never constructed by design.")]
-    private sealed class NonChangingViewModel : INotifyPropertyChanged
-    {
-        /// <inheritdoc/>
-#pragma warning disable CS0067 // Event is never used
-        public event PropertyChangedEventHandler? PropertyChanged;
-#pragma warning restore CS0067
-
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        public string Name { get; set; } = string.Empty;
-    }
-
-    /// <summary>
-    /// A test model that raises PropertyChanged with null PropertyName.
-    /// </summary>
-    private sealed class NullPropertyNameViewModel : INotifyPropertyChanged
-    {
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        public string Name { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Raises PropertyChanged with null property name (all properties changed).
-        /// </summary>
-        public void RaiseAllPropertiesChanged() =>
-            PropertyChanged?.Invoke(this, new(null));
-    }
-
-    /// <summary>
-    /// A test model with an indexer that implements both INotifyPropertyChanged and INotifyPropertyChanging.
-    /// </summary>
-    private sealed class IndexableViewModel : INotifyPropertyChanged, INotifyPropertyChanging
+    /// <summary>A test model with an indexer that implements both INotifyPropertyChanged and INotifyPropertyChanging.</summary>
+    public sealed class IndexableViewModel : INotifyPropertyChanged, INotifyPropertyChanging
     {
         /// <summary>
         /// A private dictionary field used to store key-value pairs for the indexer implementation
@@ -685,14 +574,10 @@ public class INPCObservableForPropertyTests
         /// <inheritdoc/>
         public event PropertyChangingEventHandler? PropertyChanging;
 
-        /// <summary>
-        /// Gets or sets a non-indexer property for testing non-Index expression paths.
-        /// </summary>
+        /// <summary>Gets or sets a non-indexer property for testing non-Index expression paths.</summary>
         public string SomeProp { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the value associated with the specified key.
-        /// </summary>
+        /// <summary>Gets or sets the value associated with the specified key.</summary>
         /// <param name="key">The key of the value to get or set.</param>
         /// <returns>The value associated with the specified key.</returns>
         public string this[string key]
@@ -706,30 +591,67 @@ public class INPCObservableForPropertyTests
             }
         }
 
-        /// <summary>
-        /// Raises PropertyChanged with null property name (all properties changed).
-        /// </summary>
+        /// <summary>Raises PropertyChanged with null property name (all properties changed).</summary>
         public void RaiseAllPropertiesChanged() =>
             PropertyChanged?.Invoke(this, new(null));
 
-        /// <summary>
-        /// Raises PropertyChanged with a specific property name.
-        /// </summary>
+        /// <summary>Raises PropertyChanged with a specific property name.</summary>
         /// <param name="propertyName">The property name to raise.</param>
         public void RaisePropertyChangedWithName(string? propertyName) =>
             PropertyChanged?.Invoke(this, new(propertyName));
 
-        /// <summary>
-        /// Raises PropertyChanging with null property name (all properties changing).
-        /// </summary>
+        /// <summary>Raises PropertyChanging with null property name (all properties changing).</summary>
         public void RaiseAllPropertyChanging() =>
             PropertyChanging?.Invoke(this, new(null));
 
-        /// <summary>
-        /// Raises PropertyChanging with a specific property name.
-        /// </summary>
+        /// <summary>Raises PropertyChanging with a specific property name.</summary>
         /// <param name="propertyName">The property name to raise.</param>
         public void RaisePropertyChangingWithName(string? propertyName) =>
             PropertyChanging?.Invoke(this, new(propertyName));
+    }
+
+    /// <summary>A test model with a nullable property for testing null GetCurrentValue path.</summary>
+    private sealed class NullablePropertyViewModel : INotifyPropertyChanged
+    {
+        /// <inheritdoc/>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>Gets or sets the nullable name.</summary>
+        [SuppressMessage("Design", "SST1440:Unused private member", Justification = "Resolved by name through the property observation path under test.")]
+        private string? NullableName
+        {
+            get => field;
+            set
+            {
+                field = value;
+                PropertyChanged?.Invoke(this, new(nameof(NullableName)));
+            }
+        }
+    }
+
+    /// <summary>A test model that implements INotifyPropertyChanged but NOT INotifyPropertyChanging.</summary>
+    private sealed class NonChangingViewModel : INotifyPropertyChanged
+    {
+        /// <inheritdoc/>
+#pragma warning disable CS0067 // Event is never used
+        public event PropertyChangedEventHandler? PropertyChanged;
+#pragma warning restore CS0067
+
+        /// <summary>Gets or sets the name.</summary>
+        public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>A test model that raises PropertyChanged with null PropertyName.</summary>
+    private sealed class NullPropertyNameViewModel : INotifyPropertyChanged
+    {
+        /// <inheritdoc/>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>Gets or sets the name.</summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>Raises PropertyChanged with null property name (all properties changed).</summary>
+        public void RaiseAllPropertiesChanged() =>
+            PropertyChanged?.Invoke(this, new(null));
     }
 }

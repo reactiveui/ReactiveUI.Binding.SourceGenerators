@@ -15,13 +15,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Generators;
 /// </summary>
 internal static class RegistrationGenerator
 {
-    /// <summary>
-    /// Generates the consolidated registration output: all per-kind binder classes.
-    /// </summary>
+    /// <summary>Generates the consolidated registration output: all per-kind binder classes.</summary>
     /// <param name="context">The source production context.</param>
     /// <param name="allTypes">All detected observable type infos across all notification kinds.</param>
     /// <param name="features">The consumer compilation's language-feature and generation-option snapshot.</param>
-    internal static void Generate(SourceProductionContext context, ImmutableArray<ObservableTypeInfo> allTypes, LanguageFeatures features)
+    internal static void Generate(in SourceProductionContext context, ImmutableArray<ObservableTypeInfo> allTypes, in LanguageFeatures features)
     {
         if (!Helpers.ExtractorValidation.HasItems(allTypes))
         {
@@ -32,17 +30,19 @@ internal static class RegistrationGenerator
         var uniqueKinds = new HashSet<string>();
         for (var i = 0; i < allTypes.Length; i++)
         {
-            uniqueKinds.Add(allTypes[i].ObservationKind);
+            _ = uniqueKinds.Add(allTypes[i].ObservationKind);
         }
 
-        var sb = new StringBuilder(1_024 + (allTypes.Length * 128));
+        var sb = CodeGeneration.PooledBuilder.Rent(
+            CodeGeneration.CodeGeneratorHelpers.PerInvocationBufferCapacity
+            + (allTypes.Length * CodeGeneration.CodeGeneratorHelpers.FragmentBufferCapacity));
         CodeGeneration.CodeGeneratorHelpers.AppendGeneratedFileMarkers(sb, features.EmitGeneratedCodeMarkers);
         if (features.SupportsNullable)
         {
-            sb.AppendLine("#nullable enable");
+            _ = sb.AppendLine("#nullable enable");
         }
 
-        sb.AppendLine("""
+        _ = sb.AppendLine("""
 
                       namespace ReactiveUI.Binding.Generated
                       {
@@ -64,15 +64,19 @@ internal static class RegistrationGenerator
 
         foreach (var kind in uniqueKinds)
         {
-            sb.AppendLine($"            // Detected types for kind: {kind}");
+            _ = sb.AppendLine($"            // Detected types for kind: {kind}");
         }
 
-        sb.AppendLine("""
+        _ = sb.AppendLine("""
                               }
                           }
                       }
                       """);
 
-        context.AddSource("GeneratedBinderRegistration.g.cs", sb.ToString());
+        CodeGeneration.CodeGeneratorHelpers.AddGeneratedSource(
+            context,
+            "GeneratedBinderRegistration.g.cs",
+            CodeGeneration.PooledBuilder.ToStringAndReturn(sb),
+            features);
     }
 }

@@ -7,11 +7,12 @@ using ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
-/// <summary>
-/// Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND004 (before-change notification support).
-/// </summary>
+/// <summary>Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND004 (before-change notification support).</summary>
 public partial class BindingInvocationAnalyzerTests
 {
+    /// <summary>The diagnostic id reported when a type has no before-change notification support.</summary>
+    private const string NoBeforeChangeSupportDiagnosticId = "RXUIBIND004";
+
     /// <summary>
     /// Verifies RXUIBIND004 is reported when WhenChanging is called on a type
     /// that only implements INotifyPropertyChanged (no INotifyPropertyChanging).
@@ -42,14 +43,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND004 is NOT reported when WhenChanging is called on a type
-    /// that implements INotifyPropertyChanging.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND004 is NOT reported when WhenChanging is called on a type that implements INotifyPropertyChanging.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND004_INPChanging_NoDiagnostic()
@@ -77,13 +75,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND004 is NOT reported for WhenChanged (only applies to WhenChanging).
-    /// </summary>
+    /// <summary>Verifies RXUIBIND004 is NOT reported for WhenChanged (only applies to WhenChanging).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND004_WhenChanged_NoDiagnostic()
@@ -110,7 +106,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(0);
     }
 
@@ -143,7 +139,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(0);
     }
 
@@ -181,7 +177,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
     }
 
@@ -219,7 +215,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
     }
 
@@ -257,7 +253,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
     }
 
@@ -295,7 +291,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
     }
 
@@ -333,7 +329,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(0);
     }
 
@@ -366,7 +362,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
     }
 
@@ -410,7 +406,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
     }
 
@@ -445,7 +441,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
         var message = beforeChangeDiags[0].GetMessage();
         await Assert.That(message).Contains("INotifyPropertyChanged");
@@ -485,7 +481,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
         var message = beforeChangeDiags[0].GetMessage();
         await Assert.That(message).Contains("WPF DependencyObject");
@@ -525,7 +521,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
         var message = beforeChangeDiags[0].GetMessage();
         await Assert.That(message).Contains("WinUI DependencyObject");
@@ -565,7 +561,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
         var message = beforeChangeDiags[0].GetMessage();
         await Assert.That(message).Contains("WinForms Component");
@@ -605,7 +601,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
         var message = beforeChangeDiags[0].GetMessage();
         await Assert.That(message).Contains("Android View");
@@ -641,7 +637,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(1);
         var message = beforeChangeDiags[0].GetMessage();
         await Assert.That(message).Contains("unknown");
@@ -684,7 +680,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(0);
     }
 
@@ -735,7 +731,7 @@ public partial class BindingInvocationAnalyzerTests
                               """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var beforeChangeDiags = diagnostics.Where(d => d.Id == "RXUIBIND004").ToArray();
+        var beforeChangeDiags = diagnostics.Where(static d => d.Id == NoBeforeChangeSupportDiagnosticId).ToArray();
         await Assert.That(beforeChangeDiags.Length).IsEqualTo(0);
     }
 }

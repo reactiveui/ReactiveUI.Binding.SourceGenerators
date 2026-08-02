@@ -6,14 +6,10 @@ using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-///     Tests for the <see cref="Binding.Observables.ActionDisposable"/> class which invokes an action on disposal.
-/// </summary>
+/// <summary>Tests for the <see cref="Binding.Observables.ActionDisposable"/> class which invokes an action on disposal.</summary>
 public class ActionDisposableTests
 {
-    /// <summary>
-    ///     Verifies that the action is invoked when Dispose is called.
-    /// </summary>
+    /// <summary>Verifies that the action is invoked when Dispose is called.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Dispose_InvokesAction()
@@ -26,9 +22,7 @@ public class ActionDisposableTests
         await Assert.That(invoked).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies that the action is invoked only once even if Dispose is called multiple times.
-    /// </summary>
+    /// <summary>Verifies that the action is invoked only once even if Dispose is called multiple times.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Dispose_CalledTwice_InvokesActionOnlyOnce()
@@ -42,10 +36,8 @@ public class ActionDisposableTests
         await Assert.That(invokeCount).IsEqualTo(1);
     }
 
-    /// <summary>
-    ///     Verifies that constructor throws ArgumentNullException when action is null.
-    /// </summary>
+    /// <summary>Verifies that constructor throws ArgumentNullException when action is null.</summary>
     [Test]
     public void Constructor_NullAction_ThrowsArgumentNullException() =>
-        Assert.Throws<ArgumentNullException>(() => _ = new ActionDisposable(null!));
+        Assert.Throws<ArgumentNullException>(static () => _ = new ActionDisposable(null!));
 }

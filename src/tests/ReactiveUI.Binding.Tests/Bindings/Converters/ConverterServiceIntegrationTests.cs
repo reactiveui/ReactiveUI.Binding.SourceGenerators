@@ -10,9 +10,25 @@ namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 /// </summary>
 public class ConverterServiceIntegrationTests
 {
-    /// <summary>
-    ///     Verifies that all three registries are accessible.
-    /// </summary>
+    /// <summary>The lowest affinity ranking used in these tests.</summary>
+    private const int LowAffinity = 2;
+
+    /// <summary>Affinity ranking below <see cref="DefaultAffinity"/>.</summary>
+    private const int BelowDefaultAffinity = 3;
+
+    /// <summary>The affinity a plain test converter reports unless a test needs a ranking.</summary>
+    private const int DefaultAffinity = 5;
+
+    /// <summary>Affinity ranking above <see cref="DefaultAffinity"/>.</summary>
+    private const int AboveDefaultAffinity = 8;
+
+    /// <summary>Affinity ranking that outranks every other converter registered in a test.</summary>
+    private const int HighAffinity = 10;
+
+    /// <summary>The highest affinity used, for the converter a test expects to win outright.</summary>
+    private const int HighestAffinity = 100;
+
+    /// <summary>Verifies that all three registries are accessible.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ConverterService_ShouldExposeAllRegistries()
@@ -26,17 +42,15 @@ public class ConverterServiceIntegrationTests
         await Assert.That(service.SetMethodConverters).IsNotNull();
     }
 
-    /// <summary>
-    ///     Verifies that custom converters with high affinity can override defaults.
-    /// </summary>
+    /// <summary>Verifies that custom converters with high affinity can override defaults.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task CustomHighAffinityConverter_ShouldOverrideDefault()
     {
         // Arrange
         var service = new ConverterService();
-        var defaultConverter = new TestTypedConverter<int, string>(2);
-        var customConverter = new TestTypedConverter<int, string>(100);
+        var defaultConverter = new TestTypedConverter<int, string>(LowAffinity);
+        var customConverter = new TestTypedConverter<int, string>(HighestAffinity);
 
         service.TypedConverters.Register(defaultConverter);
         service.TypedConverters.Register(customConverter);
@@ -48,17 +62,15 @@ public class ConverterServiceIntegrationTests
         await Assert.That(result).IsEqualTo(customConverter);
     }
 
-    /// <summary>
-    ///     Verifies that fallback converters are used when no typed converter matches.
-    /// </summary>
+    /// <summary>Verifies that fallback converters are used when no typed converter matches.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task FallbackConverter_ShouldBeUsedWhenNoTypedMatch()
     {
         // Arrange
         var service = new ConverterService();
-        var typedConverter = new TestTypedConverter<int, string>(5);
-        var fallbackConverter = new TestFallbackConverter(3);
+        var typedConverter = new TestTypedConverter<int, string>(DefaultAffinity);
+        var fallbackConverter = new TestFallbackConverter(BelowDefaultAffinity);
 
         service.TypedConverters.Register(typedConverter);
         service.FallbackConverters.Register(fallbackConverter);
@@ -70,18 +82,16 @@ public class ConverterServiceIntegrationTests
         await Assert.That(result).IsEqualTo(fallbackConverter);
     }
 
-    /// <summary>
-    ///     Verifies that the highest affinity fallback converter is selected.
-    /// </summary>
+    /// <summary>Verifies that the highest affinity fallback converter is selected.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task MultipleFallbackConverters_ShouldSelectHighestAffinity()
     {
         // Arrange
         var service = new ConverterService();
-        var lowAffinity = new TestFallbackConverter(2);
-        var mediumAffinity = new TestFallbackConverter(5);
-        var highAffinity = new TestFallbackConverter(10);
+        var lowAffinity = new TestFallbackConverter(LowAffinity);
+        var mediumAffinity = new TestFallbackConverter(DefaultAffinity);
+        var highAffinity = new TestFallbackConverter(HighAffinity);
 
         service.FallbackConverters.Register(mediumAffinity);
         service.FallbackConverters.Register(lowAffinity);
@@ -94,16 +104,14 @@ public class ConverterServiceIntegrationTests
         await Assert.That(result).IsEqualTo(highAffinity);
     }
 
-    /// <summary>
-    ///     Verifies that null is returned when no converter matches.
-    /// </summary>
+    /// <summary>Verifies that null is returned when no converter matches.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task NoConverter_ShouldReturnNull()
     {
         // Arrange
         var service = new ConverterService();
-        var converter = new TestTypedConverter<int, string>(5);
+        var converter = new TestTypedConverter<int, string>(DefaultAffinity);
         service.TypedConverters.Register(converter);
 
         // Act
@@ -113,9 +121,7 @@ public class ConverterServiceIntegrationTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    ///     Verifies end-to-end integration with real converters.
-    /// </summary>
+    /// <summary>Verifies end-to-end integration with real converters.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task RealConverters_ShouldResolveCorrectly()
@@ -139,16 +145,14 @@ public class ConverterServiceIntegrationTests
         await Assert.That(result2).IsEqualTo(stringToInt);
     }
 
-    /// <summary>
-    ///     Verifies that BindingConverters.Current works after being set.
-    /// </summary>
+    /// <summary>Verifies that BindingConverters.Current works after being set.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task BindingConverters_CurrentShouldBeAccessible()
     {
         // Arrange
         var service = new ConverterService();
-        var converter = new TestTypedConverter<int, string>(5);
+        var converter = new TestTypedConverter<int, string>(DefaultAffinity);
         service.TypedConverters.Register(converter);
 
         // Act
@@ -162,16 +166,14 @@ public class ConverterServiceIntegrationTests
         BindingConverters.SetService(new());
     }
 
-    /// <summary>
-    ///     Verifies that set-method converters can be registered and retrieved.
-    /// </summary>
+    /// <summary>Verifies that set-method converters can be registered and retrieved.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task SetMethodConverter_ShouldBeRetrievable()
     {
         // Arrange
         var service = new ConverterService();
-        var setMethodConverter = new TestSetMethodConverter(8);
+        var setMethodConverter = new TestSetMethodConverter(AboveDefaultAffinity);
 
         service.SetMethodConverters.Register(setMethodConverter);
 
@@ -182,17 +184,15 @@ public class ConverterServiceIntegrationTests
         await Assert.That(result).IsEqualTo(setMethodConverter);
     }
 
-    /// <summary>
-    ///     Verifies that typed converters are selected before fallback converters.
-    /// </summary>
+    /// <summary>Verifies that typed converters are selected before fallback converters.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TypedConverter_ShouldBePreferredOverFallback()
     {
         // Arrange
         var service = new ConverterService();
-        var typedConverter = new TestTypedConverter<int, string>(2);
-        var fallbackConverter = new TestFallbackConverter(10); // Higher affinity but should lose to typed
+        var typedConverter = new TestTypedConverter<int, string>(LowAffinity);
+        var fallbackConverter = new TestFallbackConverter(HighAffinity); // Higher affinity but should lose to typed
 
         service.TypedConverters.Register(typedConverter);
         service.FallbackConverters.Register(fallbackConverter);
@@ -204,9 +204,7 @@ public class ConverterServiceIntegrationTests
         await Assert.That(result).IsEqualTo(typedConverter);
     }
 
-    /// <summary>
-    ///     Verifies that converters with affinity 0 are ignored in resolution.
-    /// </summary>
+    /// <summary>Verifies that converters with affinity 0 are ignored in resolution.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ZeroAffinityConverter_ShouldBeIgnoredInResolution()
@@ -214,7 +212,7 @@ public class ConverterServiceIntegrationTests
         // Arrange
         var service = new ConverterService();
         var zeroAffinity = new TestTypedConverter<int, string>(0);
-        var validAffinity = new TestTypedConverter<int, string>(2);
+        var validAffinity = new TestTypedConverter<int, string>(LowAffinity);
 
         service.TypedConverters.Register(zeroAffinity);
         service.TypedConverters.Register(validAffinity);
@@ -226,9 +224,8 @@ public class ConverterServiceIntegrationTests
         await Assert.That(result).IsEqualTo(validAffinity);
     }
 
-    /// <summary>
-    /// Test fallback converter for integration testing with configurable affinity.
-    /// </summary>
+    /// <summary>Test fallback converter for integration testing with configurable affinity.</summary>
+    /// <param name="baseAffinity">The affinity this converter reports.</param>
     private sealed class TestFallbackConverter(int baseAffinity) : IBindingFallbackConverter
     {
         /// <inheritdoc/>
@@ -253,9 +250,8 @@ public class ConverterServiceIntegrationTests
         }
     }
 
-    /// <summary>
-    /// Test set-method converter for integration testing with configurable affinity.
-    /// </summary>
+    /// <summary>Test set-method converter for integration testing with configurable affinity.</summary>
+    /// <param name="baseAffinity">The affinity this converter reports.</param>
     private sealed class TestSetMethodConverter(int baseAffinity) : ISetMethodBindingConverter
     {
         /// <inheritdoc/>
@@ -265,11 +261,10 @@ public class ConverterServiceIntegrationTests
         public object? PerformSet(object? toTarget, object? newValue, object?[]? arguments) => newValue;
     }
 
-    /// <summary>
-    /// Test typed converter for integration testing with configurable affinity.
-    /// </summary>
+    /// <summary>Test typed converter for integration testing with configurable affinity.</summary>
     /// <typeparam name="TFrom">The source type for conversion.</typeparam>
     /// <typeparam name="TTo">The target type for conversion.</typeparam>
+    /// <param name="affinity">The affinity this converter reports.</param>
     private sealed class TestTypedConverter<TFrom, TTo>(int affinity) : BindingTypeConverter<TFrom, TTo>
     {
         /// <inheritdoc/>

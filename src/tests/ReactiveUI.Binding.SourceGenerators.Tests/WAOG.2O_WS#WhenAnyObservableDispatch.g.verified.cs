@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -27,12 +27,12 @@ namespace ReactiveUI.Binding
 
             if (obs1Expression == "x => x.Count" && obs2Expression == "x => x.Message")
             {
-                return __WhenAnyObservable_7FFFE3651E3C4253(objectToMonitor, selector);
+                return __WhenAnyObservable_7FFFE3651E3C40A1(objectToMonitor, selector);
             }
             throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
         }
 
-        private static global::System.IObservable<string> __WhenAnyObservable_7FFFE3651E3C4253(global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel obj, global::System.Func<int, string, string> selector)
+        private static global::System.IObservable<string> __WhenAnyObservable_7FFFE3651E3C40A1(global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel obj, global::System.Func<int, string, string> selector)
         {
             var __obsProperty0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<int>>(
                 obj,

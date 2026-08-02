@@ -9,9 +9,7 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.CodeGeneration;
 
-/// <summary>
-/// Tests for <see cref="ObservationCodeGenerator"/> — single-property and shallow-path observation.
-/// </summary>
+/// <summary>Tests for <see cref="ObservationCodeGenerator"/> — single-property and shallow-path observation.</summary>
 public partial class ObservationCodeGeneratorHelperTests
 {
     /// <summary>
@@ -30,13 +28,13 @@ public partial class ObservationCodeGeneratorHelperTests
             sb,
             inv,
             classInfo,
-            "obj.Name",
+            ObjNameAccess,
             "Name",
             false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("PropertyObservable");
-        await Assert.That(result).Contains("\"Name\"");
+        await Assert.That(result).Contains(PropertyObservableName);
+        await Assert.That(result).Contains(QuotedNameLiteral);
         await Assert.That(result).Contains("INotifyPropertyChanged");
     }
 
@@ -56,18 +54,16 @@ public partial class ObservationCodeGeneratorHelperTests
             sb,
             inv,
             classInfo,
-            "obj.Name",
+            ObjNameAccess,
             "Name",
             true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("PropertyChangingObservable");
-        await Assert.That(result).Contains("\"Name\"");
+        await Assert.That(result).Contains(PropertyChangingObservableName);
+        await Assert.That(result).Contains(QuotedNameLiteral);
     }
 
-    /// <summary>
-    /// Verifies GenerateSinglePropertyObservation generates INPC after-change code.
-    /// </summary>
+    /// <summary>Verifies GenerateSinglePropertyObservation generates INPC after-change code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateSinglePropertyObservation_INPCAfterChange_GeneratesPropertyChangedHandler()
@@ -80,18 +76,16 @@ public partial class ObservationCodeGeneratorHelperTests
             sb,
             inv,
             classInfo,
-            "obj.Name",
+            ObjNameAccess,
             "Name",
             false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("PropertyObservable");
+        await Assert.That(result).Contains(PropertyObservableName);
         await Assert.That(result).Contains("INotifyPropertyChanged");
     }
 
-    /// <summary>
-    /// Verifies GenerateSinglePropertyObservation generates INPChanging before-change code.
-    /// </summary>
+    /// <summary>Verifies GenerateSinglePropertyObservation generates INPChanging before-change code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateSinglePropertyObservation_INPChangingBeforeChange_GeneratesPropertyChangingHandler()
@@ -104,18 +98,16 @@ public partial class ObservationCodeGeneratorHelperTests
             sb,
             inv,
             classInfo,
-            "obj.Name",
+            ObjNameAccess,
             "Name",
             true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("PropertyChangingObservable");
-        await Assert.That(result).Contains("INotifyPropertyChanging");
+        await Assert.That(result).Contains(PropertyChangingObservableName);
+        await Assert.That(result).Contains(INotifyPropertyChangingName);
     }
 
-    /// <summary>
-    /// Verifies GenerateSinglePropertyObservation generates Observable.Return fallback.
-    /// </summary>
+    /// <summary>Verifies GenerateSinglePropertyObservation generates Observable.Return fallback.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateSinglePropertyObservation_NoInterface_GeneratesObservableReturn()
@@ -128,126 +120,114 @@ public partial class ObservationCodeGeneratorHelperTests
             sb,
             inv,
             classInfo,
-            "obj.Name",
+            ObjNameAccess,
             "Name",
             false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ReturnObservable");
+        await Assert.That(result).Contains(ReturnObservableName);
     }
 
-    /// <summary>
-    /// Verifies GenerateShallowPathObservation for single segment delegates to single property logic.
-    /// </summary>
+    /// <summary>Verifies GenerateShallowPathObservation for single segment delegates to single property logic.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowPathObservation_SingleSegment_GeneratesInlineObservation()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("PropertyObservable");
-        await Assert.That(result).Contains("\"Name\"");
+        await Assert.That(result).Contains(PropertyObservableName);
+        await Assert.That(result).Contains(QuotedNameLiteral);
     }
 
-    /// <summary>
-    /// Verifies GenerateShallowObservableVariable generates INPC variable for after-change.
-    /// </summary>
+    /// <summary>Verifies GenerateShallowObservableVariable generates INPC variable for after-change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowObservableVariable_INPCAfterChange_GeneratesVariableDeclaration()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, "__propObs0");
+        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, PropObs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("var __propObs0");
-        await Assert.That(result).Contains("PropertyObservable");
+        await Assert.That(result).Contains(PropObs0Declaration);
+        await Assert.That(result).Contains(PropertyObservableName);
     }
 
-    /// <summary>
-    /// Verifies GenerateShallowObservableVariable generates INPChanging variable for before-change.
-    /// </summary>
+    /// <summary>Verifies GenerateShallowObservableVariable generates INPChanging variable for before-change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowObservableVariable_INPChangingBeforeChange_GeneratesVariableDeclaration()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
-        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, true, "__propObs0");
+        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, true, PropObs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("var __propObs0");
+        await Assert.That(result).Contains(PropObs0Declaration);
         await Assert.That(result).Contains("PropertyChanging");
-        await Assert.That(result).Contains("INotifyPropertyChanging");
+        await Assert.That(result).Contains(INotifyPropertyChangingName);
     }
 
-    /// <summary>
-    /// Verifies GenerateShallowObservableVariable generates Observable.Return fallback.
-    /// </summary>
+    /// <summary>Verifies GenerateShallowObservableVariable generates Observable.Return fallback.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowObservableVariable_NoInterface_GeneratesObservableReturn()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo();
 
-        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, "__propObs0");
+        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, PropObs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("var __propObs0");
-        await Assert.That(result).Contains("ReturnObservable");
+        await Assert.That(result).Contains(PropObs0Declaration);
+        await Assert.That(result).Contains(ReturnObservableName);
     }
 
-    /// <summary>
-    /// Verifies GenerateShallowPathObservation for before-change produces PropertyChanging code.
-    /// </summary>
+    /// <summary>Verifies GenerateShallowPathObservation for before-change produces PropertyChanging code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowPathObservation_BeforeChange_GeneratesPropertyChangingCode()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
 
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("PropertyChanging");
-        await Assert.That(result).Contains("INotifyPropertyChanging");
+        await Assert.That(result).Contains(INotifyPropertyChangingName);
     }
 
-    /// <summary>
-    /// Verifies GenerateShallowPathObservation with no interface generates Observable.Return.
-    /// </summary>
+    /// <summary>Verifies GenerateShallowPathObservation with no interface generates Observable.Return.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowPathObservation_NoInterface_GeneratesObservableReturn()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo();
 
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ReturnObservable");
+        await Assert.That(result).Contains(ReturnObservableName);
     }
 
     /// <summary>
@@ -260,12 +240,12 @@ public partial class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
 
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, null, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ReturnObservable");
+        await Assert.That(result).Contains(ReturnObservableName);
     }
 
     /// <summary>
@@ -278,83 +258,75 @@ public partial class ObservationCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
 
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("PropertyObservable");
+        await Assert.That(result).Contains(PropertyObservableName);
     }
 
-    /// <summary>
-    /// Verifies GenerateShallowPathObservation with IReactiveObject before-change generates PropertyChangingObservable.
-    /// </summary>
+    /// <summary>Verifies GenerateShallowPathObservation with IReactiveObject before-change generates PropertyChangingObservable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowPathObservation_ReactiveObjectBeforeChange_GeneratesPropertyChangingObservable()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
 
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("PropertyChangingObservable");
+        await Assert.That(result).Contains(PropertyChangingObservableName);
     }
 
-    /// <summary>
-    /// Verifies GenerateShallowObservableVariable with null classInfo generates ReturnObservable.
-    /// </summary>
+    /// <summary>Verifies GenerateShallowObservableVariable with null classInfo generates ReturnObservable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowObservableVariable_NullClassInfo_GeneratesReturnObservable()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
 
-        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, null, false, "__obs0");
+        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, null, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ReturnObservable");
+        await Assert.That(result).Contains(ReturnObservableName);
     }
 
-    /// <summary>
-    /// Verifies GenerateShallowObservableVariable with IReactiveObject after-change generates PropertyObservable.
-    /// </summary>
+    /// <summary>Verifies GenerateShallowObservableVariable with IReactiveObject after-change generates PropertyObservable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowObservableVariable_ReactiveObjectAfterChange_GeneratesPropertyObservable()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
 
-        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, "__obs0");
+        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("PropertyObservable");
+        await Assert.That(result).Contains(PropertyObservableName);
     }
 
-    /// <summary>
-    /// Verifies GenerateShallowObservableVariable with IReactiveObject before-change generates PropertyChangingObservable.
-    /// </summary>
+    /// <summary>Verifies GenerateShallowObservableVariable with IReactiveObject before-change generates PropertyChangingObservable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateShallowObservableVariable_ReactiveObjectBeforeChange_GeneratesPropertyChangingObservable()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsIReactiveObject: true);
 
-        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, true, "__obs0");
+        ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, true, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("PropertyChangingObservable");
+        await Assert.That(result).Contains(PropertyChangingObservableName);
     }
 }

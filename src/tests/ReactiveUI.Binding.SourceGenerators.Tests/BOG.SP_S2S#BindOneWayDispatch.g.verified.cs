@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -29,13 +29,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Name"
                 && targetPropertyExpression == "x => x.NameText")
             {
-                return __BindOneWay_7FFFD267615F289E(source, target);
+                return __BindOneWay_7FFFD267615F26AE(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindOneWay_7FFFD267615F289E(global::SharedScenarios.BindOneWay.SinglePropertyStringToString.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyStringToString.MyView target)
+        private static global::System.IDisposable __BindOneWay_7FFFD267615F26AE(global::SharedScenarios.BindOneWay.SinglePropertyStringToString.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyStringToString.MyView target)
         {
             // BindOneWay: Name -> NameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

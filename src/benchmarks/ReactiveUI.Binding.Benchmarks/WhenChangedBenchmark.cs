@@ -7,10 +7,7 @@ using BenchmarkDotNet.Jobs;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
-/// <summary>
-/// Source-generated WhenChanged benchmarks using lightweight observables.
-/// </summary>
-////[SimpleJob(RuntimeMoniker.Net462)]
+/// <summary>Source-generated WhenChanged benchmarks using lightweight observables.</summary>
 [SimpleJob(RuntimeMoniker.Net80)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [SimpleJob(RuntimeMoniker.NativeAot10_0, id: nameof(RuntimeMoniker.NativeAot10_0))]
@@ -18,26 +15,18 @@ namespace ReactiveUI.Binding.Benchmarks;
 [MarkdownExporterAttribute.GitHub]
 public class WhenChangedBenchmark
 {
-    /// <summary>
-    /// Represents the number of property change events to be triggered during the benchmark tests.
-    /// </summary>
+    /// <summary>Represents the number of property change events to be triggered during the benchmark tests.</summary>
     private const int PropertyChangeCount = 1_000;
 
-    /// <summary>
-    /// The view model instance used for observation benchmarks.
-    /// </summary>
+    /// <summary>The view model instance used for observation benchmarks.</summary>
     private BenchmarkViewModel _vm = null!;
 
-    /// <summary>
-    /// Sets up a fresh view model before each benchmark iteration.
-    /// </summary>
+    /// <summary>Sets up a fresh view model before each benchmark iteration.</summary>
     [IterationSetup]
     public void Setup() =>
         _vm = new() { Name = "Initial", Age = 0, Child = new() { Value = "ChildInitial" } };
 
-    /// <summary>
-    /// Single property observation: subscribe, fire N changes, dispose.
-    /// </summary>
+    /// <summary>Single property observation: subscribe, fire N changes, dispose.</summary>
     [Benchmark(Description = "Single Property")]
     public void SingleProperty()
     {
@@ -51,9 +40,7 @@ public class WhenChangedBenchmark
         }
     }
 
-    /// <summary>
-    /// Deep chain observation: subscribe, fire N changes on nested property, dispose.
-    /// </summary>
+    /// <summary>Deep chain observation: subscribe, fire N changes on nested property, dispose.</summary>
     [Benchmark(Description = "Deep Chain")]
     public void DeepChain()
     {
@@ -67,9 +54,7 @@ public class WhenChangedBenchmark
         }
     }
 
-    /// <summary>
-    /// Multi-property observation with CombineLatest: subscribe, fire N changes, dispose.
-    /// </summary>
+    /// <summary>Multi-property observation with CombineLatest: subscribe, fire N changes, dispose.</summary>
     [Benchmark(Description = "Two Properties")]
     public void TwoProperties()
     {
@@ -84,9 +69,7 @@ public class WhenChangedBenchmark
         }
     }
 
-    /// <summary>
-    /// Cold start: subscribe, read initial value, dispose. No property changes.
-    /// </summary>
+    /// <summary>Cold start: subscribe, read initial value, dispose. No property changes.</summary>
     /// <returns>The observed value.</returns>
     [Benchmark(Description = "First Observation")]
     public string FirstObservation()

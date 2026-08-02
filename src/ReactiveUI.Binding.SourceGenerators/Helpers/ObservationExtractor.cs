@@ -8,50 +8,38 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
-/// <summary>
-/// Extracts InvocationInfo from WhenChanged, WhenChanging, WhenAnyValue, and WhenAny invocations.
-/// </summary>
+/// <summary>Extracts InvocationInfo from WhenChanged, WhenChanging, WhenAnyValue, and WhenAny invocations.</summary>
 internal static class ObservationExtractor
 {
-    /// <summary>
-    /// Pipeline B transform: extracts InvocationInfo from a WhenChanged invocation.
-    /// </summary>
+    /// <summary>Pipeline B transform: extracts InvocationInfo from a WhenChanged invocation.</summary>
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
-    internal static InvocationInfo? ExtractWhenChangedInvocation(GeneratorSyntaxContext context, CancellationToken ct)
-        => ExtractInvocationInfo(context, false, Constants.WhenChangedMethodName, ct);
+    internal static InvocationInfo? ExtractWhenChangedInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
+        ExtractInvocationInfo(context, false, Constants.WhenChangedMethodName, ct);
 
-    /// <summary>
-    /// Pipeline B transform: extracts InvocationInfo from a WhenChanging invocation.
-    /// </summary>
+    /// <summary>Pipeline B transform: extracts InvocationInfo from a WhenChanging invocation.</summary>
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
-    internal static InvocationInfo? ExtractWhenChangingInvocation(GeneratorSyntaxContext context, CancellationToken ct)
-        => ExtractInvocationInfo(context, true, Constants.WhenChangingMethodName, ct);
+    internal static InvocationInfo? ExtractWhenChangingInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
+        ExtractInvocationInfo(context, true, Constants.WhenChangingMethodName, ct);
 
-    /// <summary>
-    /// Pipeline B transform: extracts InvocationInfo from a WhenAnyValue invocation.
-    /// </summary>
+    /// <summary>Pipeline B transform: extracts InvocationInfo from a WhenAnyValue invocation.</summary>
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
-    internal static InvocationInfo? ExtractWhenAnyValueInvocation(GeneratorSyntaxContext context, CancellationToken ct)
-        => ExtractInvocationInfo(context, false, Constants.WhenAnyValueMethodName, ct);
+    internal static InvocationInfo? ExtractWhenAnyValueInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
+        ExtractInvocationInfo(context, false, Constants.WhenAnyValueMethodName, ct);
 
-    /// <summary>
-    /// Pipeline B transform: extracts InvocationInfo from a WhenAny invocation (with IObservedChange selector).
-    /// </summary>
+    /// <summary>Pipeline B transform: extracts InvocationInfo from a WhenAny invocation (with IObservedChange selector).</summary>
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
-    internal static InvocationInfo? ExtractWhenAnyInvocation(GeneratorSyntaxContext context, CancellationToken ct)
-        => ExtractInvocationInfo(context, false, Constants.WhenAnyMethodName, ct);
+    internal static InvocationInfo? ExtractWhenAnyInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
+        ExtractInvocationInfo(context, false, Constants.WhenAnyMethodName, ct);
 
-    /// <summary>
-    /// Extracts the invocation info from the generator syntax context.
-    /// </summary>
+    /// <summary>Extracts the invocation info from the generator syntax context.</summary>
     /// <param name="context">The generator syntax context.</param>
     /// <param name="isBeforeChange">A value indicating whether the invocation is before a change.</param>
     /// <param name="expectedMethodName">The expected method name.</param>
@@ -69,7 +57,7 @@ internal static class ObservationExtractor
 
         var semanticModel = context.SemanticModel;
         var methodSymbol = ExtractorValidation.ExtractMethodSymbol(semanticModel.GetSymbolInfo(invocation, ct));
-        if (methodSymbol == null)
+        if (methodSymbol is null)
         {
             return null;
         }
@@ -148,7 +136,7 @@ internal static class ObservationExtractor
             if (parameter.Type is INamedTypeSymbol { Name: "Expression" })
             {
                 var path = SyntaxHelpers.ExtractPropertyPathFromLambda(args[i].Expression, semanticModel, ct);
-                if (path != null)
+                if (path is not null)
                 {
                     propertyPaths.Add(new(path));
                     expressionTexts.Add(
@@ -202,14 +190,14 @@ internal static class ObservationExtractor
         {
             var path = propertyPaths[i];
             var leafType = path[path.Length - 1].PropertyTypeFullName;
-            tupleBuilder.Append(leafType).Append(" property").Append(i + 1);
+            _ = tupleBuilder.Append(leafType).Append(" property").Append(i + 1);
             if (i < propertyPaths.Count - 1)
             {
-                tupleBuilder.Append(", ");
+                _ = tupleBuilder.Append(", ");
             }
         }
 
-        tupleBuilder.Append(')');
+        _ = tupleBuilder.Append(')');
         return tupleBuilder.ToString();
     }
 }

@@ -7,16 +7,12 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenAny.MultiPropertyTwoProperties;
 
-/// <summary>
-/// Exercises WhenAny with two properties and a selector combining IObservedChange values.
-/// </summary>
+/// <summary>Exercises WhenAny with two properties and a selector combining IObservedChange values.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenAny observable combining FirstName and LastName via IObservedChange.
-    /// </summary>
+    /// <summary>Creates a WhenAny observable combining FirstName and LastName via IObservedChange.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of combined name strings.</returns>
-    public static IObservable<string> Execute(MyViewModel vm)
-        => vm.WhenAny(x => x.FirstName, x => x.LastName, (c1, c2) => $"{c1.Value} {c2.Value}");
+    public static IObservable<string> Execute(MyViewModel vm) =>
+        vm.WhenAny(x => x.FirstName, x => x.LastName, (c1, c2) => $"{c1.Value} {c2.Value}");
 }

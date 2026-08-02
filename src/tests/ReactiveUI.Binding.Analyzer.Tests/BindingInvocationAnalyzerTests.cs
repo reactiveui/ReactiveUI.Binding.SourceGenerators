@@ -6,9 +6,7 @@ using ReactiveUI.Binding.Analyzer.Analyzers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
-/// <summary>
-/// Tests for <see cref="BindingInvocationAnalyzer"/>.
-/// </summary>
+/// <summary>Tests for <see cref="BindingInvocationAnalyzer"/>.</summary>
 public partial class BindingInvocationAnalyzerTests
 {
     /// <summary>
@@ -65,9 +63,7 @@ public partial class BindingInvocationAnalyzerTests
                                     }
                                     """;
 
-    /// <summary>
-    /// Preamble with BindInteraction and BindCommand stub methods.
-    /// </summary>
+    /// <summary>Preamble with BindInteraction and BindCommand stub methods.</summary>
     private const string InteractionCommandPreamble = """
                                                       using System;
                                                       using System.ComponentModel;

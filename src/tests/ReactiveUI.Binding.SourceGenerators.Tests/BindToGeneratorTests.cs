@@ -7,14 +7,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for BindTo (observable-to-property binding) invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for BindTo (observable-to-property binding) invocation generation.</summary>
 public class BindToGeneratorTests
 {
-    /// <summary>
-    /// Verifies BindTo with a same-typed string observable and string property (direct assignment).
-    /// </summary>
+    /// <summary>Verifies BindTo with a same-typed string observable and string property (direct assignment).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SameTypeString()
@@ -26,9 +22,7 @@ public class BindToGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindTo coerces differing source/target types via the converter registry.
-    /// </summary>
+    /// <summary>Verifies BindTo coerces differing source/target types via the converter registry.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DifferingTypes()
@@ -40,9 +34,7 @@ public class BindToGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindTo with an explicit IBindingTypeConverter override.
-    /// </summary>
+    /// <summary>Verifies BindTo with an explicit IBindingTypeConverter override.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithConverterOverride()
@@ -54,9 +46,7 @@ public class BindToGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindTo with a conversion hint forwarded to the resolved converter.
-    /// </summary>
+    /// <summary>Verifies BindTo with a conversion hint forwarded to the resolved converter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithConversionHint()

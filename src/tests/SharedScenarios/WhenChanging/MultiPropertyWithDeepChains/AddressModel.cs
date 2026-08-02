@@ -6,14 +6,10 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanging.MultiPropertyWithDeepChains;
 
-/// <summary>
-/// Address model with a city property and before-change notifications.
-/// </summary>
+/// <summary>Address model with a city property and before-change notifications.</summary>
 public class AddressModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backing field for <see cref="City"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="City"/>.</summary>
     private string _city = string.Empty;
 
     /// <inheritdoc/>
@@ -22,9 +18,7 @@ public class AddressModel : INotifyPropertyChanged, INotifyPropertyChanging
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the city.
-    /// </summary>
+    /// <summary>Gets or sets the city.</summary>
     public string City
     {
         get => _city;

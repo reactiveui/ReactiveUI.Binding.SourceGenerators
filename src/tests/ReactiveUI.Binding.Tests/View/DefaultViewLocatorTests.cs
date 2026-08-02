@@ -7,16 +7,12 @@ using TUnit.Core.Executors;
 
 namespace ReactiveUI.Binding.Tests.View;
 
-/// <summary>
-/// Tests for the <see cref="DefaultViewLocator"/> class.
-/// </summary>
+/// <summary>Tests for the <see cref="DefaultViewLocator"/> class.</summary>
 [NotInParallel]
 [TestExecutor<BindingBuilderTestExecutor>]
 public class DefaultViewLocatorTests
 {
-    /// <summary>
-    /// Verifies that ResolveView returns null when the view model is null.
-    /// </summary>
+    /// <summary>Verifies that ResolveView returns null when the view model is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveView_NullViewModel_ReturnsNull()
@@ -28,9 +24,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that the generic ResolveView returns null when the view model is null.
-    /// </summary>
+    /// <summary>Verifies that the generic ResolveView returns null when the view model is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveViewGeneric_NullViewModel_ReturnsNull()
@@ -42,9 +36,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that Map registers a view and ResolveView resolves it.
-    /// </summary>
+    /// <summary>Verifies that Map registers a view and ResolveView resolves it.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Map_ThenResolve_ReturnsView()
@@ -58,9 +50,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result).IsTypeOf<TestView>();
     }
 
-    /// <summary>
-    /// Verifies that Map with a factory creates views using the factory.
-    /// </summary>
+    /// <summary>Verifies that Map with a factory creates views using the factory.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MapWithFactory_ThenResolve_UsesFactory()
@@ -79,9 +69,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that the generic ResolveView resolves from explicit mappings.
-    /// </summary>
+    /// <summary>Verifies that the generic ResolveView resolves from explicit mappings.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveViewGeneric_WithMapping_ReturnsView()
@@ -96,9 +84,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result!.ViewModel).IsEqualTo(vm);
     }
 
-    /// <summary>
-    /// Verifies that Unmap removes a mapping and subsequent resolves return null.
-    /// </summary>
+    /// <summary>Verifies that Unmap removes a mapping and subsequent resolves return null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Unmap_RemovesMapping()
@@ -113,9 +99,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that Unmap returns false when no mapping exists.
-    /// </summary>
+    /// <summary>Verifies that Unmap returns false when no mapping exists.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Unmap_NoMapping_ReturnsFalse()
@@ -127,9 +111,7 @@ public class DefaultViewLocatorTests
         await Assert.That(removed).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that contracts provide independent namespaces for mappings.
-    /// </summary>
+    /// <summary>Verifies that contracts provide independent namespaces for mappings.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Map_WithContract_ResolvesByContract()
@@ -144,9 +126,7 @@ public class DefaultViewLocatorTests
         await Assert.That(withoutContract).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that ResolveView sets the ViewModel property on the resolved view.
-    /// </summary>
+    /// <summary>Verifies that ResolveView sets the ViewModel property on the resolved view.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveView_SetsViewModelOnView()
@@ -161,9 +141,7 @@ public class DefaultViewLocatorTests
         await Assert.That(view!.ViewModel).IsEqualTo(vm);
     }
 
-    /// <summary>
-    /// Verifies that the generated dispatch function is called when set.
-    /// </summary>
+    /// <summary>Verifies that the generated dispatch function is called when set.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SetGeneratedViewDispatch_IsUsedByResolve()
@@ -183,16 +161,14 @@ public class DefaultViewLocatorTests
         await Assert.That(result).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that generated dispatch takes priority over explicit mappings.
-    /// </summary>
+    /// <summary>Verifies that generated dispatch takes priority over explicit mappings.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GeneratedDispatch_TakesPriorityOverMappings()
     {
         var locator = new DefaultViewLocator();
         var generatedView = new TestView();
-        locator.Map<TestViewModel>(() => new TestView());
+        locator.Map<TestViewModel>(static () => new TestView());
 
         DefaultViewLocator.SetGeneratedViewDispatch((_, _) => generatedView);
 
@@ -201,9 +177,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result).IsEqualTo(generatedView);
     }
 
-    /// <summary>
-    /// Verifies that when generated dispatch returns null, mappings are used as fallback.
-    /// </summary>
+    /// <summary>Verifies that when generated dispatch returns null, mappings are used as fallback.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GeneratedDispatch_ReturnsNull_FallsBackToMappings()
@@ -211,7 +185,7 @@ public class DefaultViewLocatorTests
         var locator = new DefaultViewLocator();
         locator.Map<TestViewModel, TestView>();
 
-        DefaultViewLocator.SetGeneratedViewDispatch((_, _) => null);
+        DefaultViewLocator.SetGeneratedViewDispatch(static (_, _) => null);
 
         var result = locator.ResolveView(new TestViewModel());
 
@@ -219,9 +193,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result).IsTypeOf<TestView>();
     }
 
-    /// <summary>
-    /// Verifies that the generic ResolveView uses the generated dispatch.
-    /// </summary>
+    /// <summary>Verifies that the generic ResolveView uses the generated dispatch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveViewGeneric_UsesGeneratedDispatch()
@@ -236,9 +208,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result).IsEqualTo(generatedView);
     }
 
-    /// <summary>
-    /// Verifies that null contract is normalized to empty string.
-    /// </summary>
+    /// <summary>Verifies that null contract is normalized to empty string.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveView_NullContract_NormalizedToEmpty()
@@ -253,21 +223,17 @@ public class DefaultViewLocatorTests
         await Assert.That(withEmpty).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that SetGeneratedViewDispatch throws on null argument.
-    /// </summary>
+    /// <summary>Verifies that SetGeneratedViewDispatch throws on null argument.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SetGeneratedViewDispatch_NullThrows()
     {
-        var action = () => DefaultViewLocator.SetGeneratedViewDispatch(null!);
+        var action = static () => DefaultViewLocator.SetGeneratedViewDispatch(null!);
 
         await Assert.That(action).ThrowsException();
     }
 
-    /// <summary>
-    /// Verifies that Map with factory throws on null factory.
-    /// </summary>
+    /// <summary>Verifies that Map with factory throws on null factory.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MapWithFactory_NullFactory_Throws()
@@ -278,9 +244,7 @@ public class DefaultViewLocatorTests
         await Assert.That(action).ThrowsException();
     }
 
-    /// <summary>
-    /// Verifies that generic ResolveView falls back to service locator when no dispatch or mapping exists.
-    /// </summary>
+    /// <summary>Verifies that generic ResolveView falls back to service locator when no dispatch or mapping exists.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveViewGeneric_ServiceLocatorFallback()
@@ -289,7 +253,7 @@ public class DefaultViewLocatorTests
         var vm = new TestViewModel();
 
         // Register an IViewFor<TestViewModel> in the service locator
-        AppLocator.CurrentMutable.Register<IViewFor<TestViewModel>>(() => new TestView());
+        AppLocator.CurrentMutable.Register<IViewFor<TestViewModel>>(static () => new TestView());
 
         var result = locator.ResolveView(vm);
 
@@ -298,9 +262,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result!.ViewModel).IsEqualTo(vm);
     }
 
-    /// <summary>
-    /// Verifies that generic ResolveView falls back to service locator with a non-empty contract.
-    /// </summary>
+    /// <summary>Verifies that generic ResolveView falls back to service locator with a non-empty contract.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveViewGeneric_ServiceLocatorWithContract()
@@ -308,7 +270,7 @@ public class DefaultViewLocatorTests
         var locator = new DefaultViewLocator();
         var vm = new TestViewModel();
 
-        AppLocator.CurrentMutable.Register<IViewFor<TestViewModel>>(() => new TestView(), "custom");
+        AppLocator.CurrentMutable.Register<IViewFor<TestViewModel>>(static () => new TestView(), "custom");
 
         var result = locator.ResolveView(vm, "custom");
 
@@ -316,9 +278,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result!.ViewModel).IsEqualTo(vm);
     }
 
-    /// <summary>
-    /// Verifies that non-generic ResolveView uses generated dispatch and sets ViewModel.
-    /// </summary>
+    /// <summary>Verifies that non-generic ResolveView uses generated dispatch and sets ViewModel.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveViewNonGeneric_GeneratedDispatch_SetsViewModel()
@@ -335,9 +295,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result!.ViewModel).IsEqualTo(vm);
     }
 
-    /// <summary>
-    /// Verifies that non-generic ResolveView falls back to mappings when dispatch returns null.
-    /// </summary>
+    /// <summary>Verifies that non-generic ResolveView falls back to mappings when dispatch returns null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveViewNonGeneric_MappingFallback_SetsViewModel()
@@ -346,7 +304,7 @@ public class DefaultViewLocatorTests
         var vm = new TestViewModel { Name = "mapped" };
         locator.Map<TestViewModel, TestView>();
 
-        DefaultViewLocator.SetGeneratedViewDispatch((_, _) => null);
+        DefaultViewLocator.SetGeneratedViewDispatch(static (_, _) => null);
 
         var result = locator.ResolveView((object)vm);
 
@@ -354,9 +312,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result!.ViewModel).IsEqualTo(vm);
     }
 
-    /// <summary>
-    /// Verifies that non-generic ResolveView returns null when no resolution succeeds.
-    /// </summary>
+    /// <summary>Verifies that non-generic ResolveView returns null when no resolution succeeds.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveViewNonGeneric_NoMatch_ReturnsNull()
@@ -368,9 +324,7 @@ public class DefaultViewLocatorTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that CreateMappingBuilder returns a builder that registers mappings on this locator.
-    /// </summary>
+    /// <summary>Verifies that CreateMappingBuilder returns a builder that registers mappings on this locator.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CreateMappingBuilder_RegistersOnLocator()
@@ -378,7 +332,7 @@ public class DefaultViewLocatorTests
         var locator = new DefaultViewLocator();
         var builder = locator.CreateMappingBuilder();
 
-        builder.Map<TestViewModel, TestView>();
+        _ = builder.Map<TestViewModel, TestView>();
 
         var vm = new TestViewModel();
         var result = locator.ResolveView(vm);
@@ -387,20 +341,14 @@ public class DefaultViewLocatorTests
         await Assert.That(result).IsTypeOf<TestView>();
     }
 
-    /// <summary>
-    /// Simple view model for testing.
-    /// </summary>
+    /// <summary>Simple view model for testing.</summary>
     private sealed class TestViewModel
     {
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
+        /// <summary>Gets or sets the name.</summary>
         public string? Name { get; set; }
     }
 
-    /// <summary>
-    /// Simple view for testing.
-    /// </summary>
+    /// <summary>Simple view for testing.</summary>
     private sealed class TestView : IViewFor<TestViewModel>
     {
         /// <inheritdoc/>

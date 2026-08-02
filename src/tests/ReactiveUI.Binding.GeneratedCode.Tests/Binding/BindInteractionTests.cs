@@ -6,24 +6,16 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 
-/// <summary>
-/// Tests that the source-generator-generated BindInteraction code works correctly at runtime.
-/// </summary>
+/// <summary>Tests that the source-generator-generated BindInteraction code works correctly at runtime.</summary>
 public class BindInteractionTests
 {
-    /// <summary>
-    /// The interaction input value used across the handler tests.
-    /// </summary>
+    /// <summary>The interaction input value used across the handler tests.</summary>
     private const string Question = "question";
 
-    /// <summary>
-    /// The number of sequential Handle calls in the multiple-calls test.
-    /// </summary>
+    /// <summary>The number of sequential Handle calls in the multiple-calls test.</summary>
     private const int HandleCallCount = 5;
 
-    /// <summary>
-    /// Verifies that a task-based handler is registered and produces the expected output.
-    /// </summary>
+    /// <summary>Verifies that a task-based handler is registered and produces the expected output.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TaskHandler_Handle_ReturnsExpectedOutput()
@@ -38,9 +30,7 @@ public class BindInteractionTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that an observable-based handler is registered and produces the expected output.
-    /// </summary>
+    /// <summary>Verifies that an observable-based handler is registered and produces the expected output.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObservableHandler_Handle_ReturnsExpectedOutput()
@@ -55,9 +45,7 @@ public class BindInteractionTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that disposing the binding unregisters the handler so subsequent Handle calls throw.
-    /// </summary>
+    /// <summary>Verifies that disposing the binding unregisters the handler so subsequent Handle calls throw.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TaskHandler_Dispose_UnregistersHandler()
@@ -72,9 +60,7 @@ public class BindInteractionTests
             .ThrowsExactly<UnhandledInteractionException<string, bool>>();
     }
 
-    /// <summary>
-    /// Verifies that when the VM's interaction property changes, the handler follows the new interaction.
-    /// </summary>
+    /// <summary>Verifies that when the VM's interaction property changes, the handler follows the new interaction.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TaskHandler_InteractionPropertyChanges_HandlerFollowsNewInteraction()
@@ -98,9 +84,7 @@ public class BindInteractionTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that a deep property path (Child.Confirm) interaction binding works.
-    /// </summary>
+    /// <summary>Verifies that a deep property path (Child.Confirm) interaction binding works.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepPropertyPath_Handle_ReturnsExpectedOutput()
@@ -115,9 +99,7 @@ public class BindInteractionTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that when Child is replaced, the handler follows the new child's interaction.
-    /// </summary>
+    /// <summary>Verifies that when Child is replaced, the handler follows the new child's interaction.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepPropertyPath_ChildReplaced_HandlerFollowsNewChild()
@@ -140,9 +122,7 @@ public class BindInteractionTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that disposing the observable handler binding unregisters the handler.
-    /// </summary>
+    /// <summary>Verifies that disposing the observable handler binding unregisters the handler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObservableHandler_Dispose_UnregistersHandler()
@@ -157,9 +137,7 @@ public class BindInteractionTests
             .ThrowsExactly<UnhandledInteractionException<string, bool>>();
     }
 
-    /// <summary>
-    /// Verifies that when the VM's interaction property changes, the observable handler follows the new interaction.
-    /// </summary>
+    /// <summary>Verifies that when the VM's interaction property changes, the observable handler follows the new interaction.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObservableHandler_InteractionPropertyChanges_HandlerFollows()
@@ -182,9 +160,7 @@ public class BindInteractionTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that setting child to null on a deep path unregisters the handler.
-    /// </summary>
+    /// <summary>Verifies that setting child to null on a deep path unregisters the handler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepPropertyPath_ChildSetToNull_HandlerUnregisters()
@@ -206,9 +182,7 @@ public class BindInteractionTests
             .ThrowsExactly<UnhandledInteractionException<string, bool>>();
     }
 
-    /// <summary>
-    /// Verifies that disposing twice does not throw.
-    /// </summary>
+    /// <summary>Verifies that disposing twice does not throw.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TaskHandler_DoubleDispose_DoesNotThrow()
@@ -223,9 +197,7 @@ public class BindInteractionTests
         await Assert.That(action).ThrowsNothing();
     }
 
-    /// <summary>
-    /// Verifies that the interaction binding handles multiple sequential Handle calls correctly.
-    /// </summary>
+    /// <summary>Verifies that the interaction binding handles multiple sequential Handle calls correctly.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TaskHandler_MultipleHandleCalls_AllReturnExpectedOutput()

@@ -6,27 +6,19 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanged.MultiPropertyWithDeepChains;
 
-/// <summary>
-/// ViewModel with a shallow property and a deep property chain.
-/// </summary>
+/// <summary>ViewModel with a shallow property and a deep property chain.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Name"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Name"/>.</summary>
     private string _name = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="Address"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Address"/>.</summary>
     private AddressModel _address = new AddressModel();
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
         get => _name;
@@ -42,9 +34,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the address.
-    /// </summary>
+    /// <summary>Gets or sets the address.</summary>
     public AddressModel Address
     {
         get => _address;

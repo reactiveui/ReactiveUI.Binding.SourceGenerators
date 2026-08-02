@@ -28,16 +28,20 @@
           PackagePath="build\ReactiveUI.Binding.SourceGenerators.props;buildTransitive\ReactiveUI.Binding.SourceGenerators.props"/>
   </ItemGroup>
 
+  <!-- Roslyn 4.8.0 baseline (VS 2022 17.8, .NET 8.0.1xx SDK). The generator ships in the
+       version-less analyzers/dotnet/cs folder, and a compiler will not load a generator built
+       against a newer Roslyn than itself, so building against 4.8.0 is what keeps .NET 8 SDK
+       consumers working. Only APIs present in Roslyn 4.8 may be used here. -->
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" VersionOverride="4.8.0"/>
   </ItemGroup>
 
   <!-- Link polyfills and helpers from runtime library for netstandard2.0 compatibility -->
   <ItemGroup>
-    <Compile Include="..\ReactiveUI.Binding\Polyfills\**.cs" Link="Polyfills"/>
-    <Compile Include="..\ReactiveUI.Binding\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs"/>
-    <Compile Include="..\ReactiveUI.Binding\Bindings\BindingAffinity.cs" Link="Bindings\BindingAffinity.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.Shared\Polyfills\**.cs" Link="Polyfills"/>
+    <Compile Include="..\ReactiveUI.Binding.Shared\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.Shared\Bindings\BindingAffinity.cs" Link="Bindings\BindingAffinity.cs"/>
   </ItemGroup>
 
   <ItemGroup>

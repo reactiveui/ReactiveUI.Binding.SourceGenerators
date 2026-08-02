@@ -21,14 +21,10 @@ internal interface IObservationPlugin
     /// </summary>
     int Affinity { get; }
 
-    /// <summary>
-    /// Gets the observation kind identifier (e.g., "INPC", "ReactiveObject", "WpfDP").
-    /// </summary>
+    /// <summary>Gets the observation kind identifier (e.g., "INPC", "ReactiveObject", "WpfDP").</summary>
     string ObservationKind { get; }
 
-    /// <summary>
-    /// Gets a value indicating whether this plugin supports before-change (PropertyChanging) observation.
-    /// </summary>
+    /// <summary>Gets a value indicating whether this plugin supports before-change (PropertyChanging) observation.</summary>
     bool SupportsBeforeChanged { get; }
 
     /// <summary>
@@ -38,9 +34,7 @@ internal interface IObservationPlugin
     /// </summary>
     bool RequiresHelperClasses { get; }
 
-    /// <summary>
-    /// Determines whether this plugin can handle the given type based on ClassBindingInfo flags.
-    /// </summary>
+    /// <summary>Determines whether this plugin can handle the given type based on ClassBindingInfo flags.</summary>
     /// <param name="classInfo">The type-level binding info.</param>
     /// <returns>True if this plugin can generate observation code for this type.</returns>
     bool IsAMatch(ClassBindingInfo classInfo);
@@ -71,9 +65,7 @@ internal interface IObservationPlugin
         bool isBeforeChange,
         bool includeStartWith);
 
-    /// <summary>
-    /// Emits a shallow (single-segment) observation as a local variable declaration.
-    /// </summary>
+    /// <summary>Emits a shallow (single-segment) observation as a local variable declaration.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="rootVar">The root variable name (e.g., "obj").</param>
     /// <param name="segment">The property path segment.</param>
@@ -88,9 +80,7 @@ internal interface IObservationPlugin
         bool isBeforeChange,
         string varName);
 
-    /// <summary>
-    /// Emits the root segment of a deep chain observation as a local variable declaration.
-    /// </summary>
+    /// <summary>Emits the root segment of a deep chain observation as a local variable declaration.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="rootVar">The root variable name (e.g., "obj").</param>
     /// <param name="segment">The first property path segment.</param>
@@ -105,9 +95,7 @@ internal interface IObservationPlugin
         bool isBeforeChange,
         string obsVarName);
 
-    /// <summary>
-    /// Emits an inner segment of a deep chain observation using Select/Switch re-subscription.
-    /// </summary>
+    /// <summary>Emits an inner segment of a deep chain observation using Select/Switch re-subscription.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="prevVar">The previous segment's observable variable name.</param>
     /// <param name="curVar">The current segment's observable variable name.</param>
@@ -122,10 +110,7 @@ internal interface IObservationPlugin
         PropertyPathSegment segment,
         bool isBeforeChange);
 
-    /// <summary>
-    /// Emits an inline observation variable for binding generators.
-    /// Used by BindOneWay/BindTwoWay for direct observation code.
-    /// </summary>
+    /// <summary>Emits an inline observation variable for binding generators. Used by BindOneWay/BindTwoWay for direct observation code.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="rootVar">The root variable name (e.g., "source", "target").</param>
     /// <param name="segment">The property path segment.</param>

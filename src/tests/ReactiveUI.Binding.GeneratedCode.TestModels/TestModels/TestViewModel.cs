@@ -12,56 +12,42 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class TestViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backer for Name.
-    /// </summary>
-    private string _name = string.Empty;
-
-    /// <summary>
-    /// The backer for Age.
-    /// </summary>
-    private int _age;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
-        get => _name;
+        get => field;
         set
         {
-            if (_name == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Name)));
-            _name = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Name)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the age.
-    /// </summary>
+    /// <summary>Gets or sets the age.</summary>
     public int Age
     {
-        get => _age;
+        get => field;
         set
         {
-            if (_age == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Age)));
-            _age = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Age)));
         }
     }

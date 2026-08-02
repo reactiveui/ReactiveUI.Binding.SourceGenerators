@@ -16,6 +16,8 @@ namespace ReactiveUI.Binding
             this global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel objectToMonitor,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel, string>> property1,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel, int>> property2,
+            string property1Expression = "",
+            string property2Expression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
@@ -25,7 +27,7 @@ namespace ReactiveUI.Binding
                 return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanging(objectToMonitor, property1, property2);
             }
 
-            if (callerLineNumber == 83 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
+            if (callerLineNumber == 69 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
                 return __WhenChanging_000011A95039C09F(objectToMonitor);
             }

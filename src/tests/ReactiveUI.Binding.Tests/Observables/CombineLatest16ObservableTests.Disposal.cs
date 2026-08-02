@@ -9,19 +9,11 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-/// Disposal and post-dispose behavior tests for <see cref="CombineLatest16Observable{T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult}"/>.
-/// </summary>
+/// <summary>Disposal and post-dispose behavior tests for <see cref="CombineLatest16Observable{T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult}"/>.</summary>
 public partial class CombineLatest16ObservableTests
 {
-    /// <summary>
-    /// Verifies that disposing twice does not throw an exception.
-    /// </summary>
+    /// <summary>Verifies that disposing twice does not throw an exception.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task Dispose_CalledTwice_NoException()
     {
@@ -42,23 +34,17 @@ public partial class CombineLatest16ObservableTests
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) => a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p);
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) => a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p);
 
-        var subscription = combined.Subscribe(new AnonymousObserver<int>(_ => { }, _ => { }, () => { }));
+        var subscription = combined.Subscribe(new AnonymousObserver<int>(static _ => { }, static _ => { }, static () => { }));
         subscription.Dispose();
         subscription.Dispose();
 
         await Assert.That(subscription.GetType()).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that a source emitting after dispose does not throw.
-    /// </summary>
+    /// <summary>Verifies that a source emitting after dispose does not throw.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task SourceEmitsAfterDispose_NoException()
     {
@@ -95,10 +81,10 @@ public partial class CombineLatest16ObservableTests
             source14,
             source15,
             source16,
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) => a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p);
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) => a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p);
 
         var results = new List<int>();
-        var subscription = combined.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
+        var subscription = combined.Subscribe(new AnonymousObserver<int>(results.Add, static _ => { }, static () => { }));
 
         source1.OnNext(1);
         source2.OnNext(1);
@@ -123,14 +109,9 @@ public partial class CombineLatest16ObservableTests
         await Assert.That(results).Count().IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that an error after dispose is ignored.
-    /// </summary>
+    /// <summary>Verifies that an error after dispose is ignored.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
+    [SuppressMessage("Design", "SST1523:Methods should not be too long", Justification = "Length is intrinsic to the fixed CombineLatest arity; each source needs its own line.")]
     [Test]
     public async Task ErrorAfterDispose_IsIgnored()
     {
@@ -167,13 +148,13 @@ public partial class CombineLatest16ObservableTests
             source14,
             source15,
             source16,
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) => a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p);
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) => a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p);
 
         Exception? receivedError = null;
         var subscription = combined.Subscribe(new AnonymousObserver<int>(
-            _ => { },
+            static _ => { },
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         subscription.Dispose();
         source1.OnError(new InvalidOperationException(IgnoredErrorMessage));
@@ -201,10 +182,7 @@ public partial class CombineLatest16ObservableTests
     /// when the subscription has been disposed but the observers are still reachable.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
+    [SuppressMessage("Design", "SST1523:Methods should not be too long", Justification = "Length is intrinsic to the fixed CombineLatest arity; each source needs its own line.")]
     [Test]
     public async Task ErrorAfterDispose_AllObservers_CoverNullPath()
     {
@@ -241,13 +219,13 @@ public partial class CombineLatest16ObservableTests
             manual14,
             manual15,
             manual16,
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) => a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p);
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) => a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p);
 
         Exception? receivedError = null;
         var subscription = combined.Subscribe(new AnonymousObserver<int>(
-            _ => { },
+            static _ => { },
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         // Set all has-value flags so TryEmit reaches _observer?.OnNext
         manual1.Observer!.OnNext(1);
@@ -276,9 +254,7 @@ public partial class CombineLatest16ObservableTests
         await Assert.That(receivedError).IsNull();
     }
 
-    /// <summary>
-    /// Emits the post-dispose sample value through each manual observer in turn.
-    /// </summary>
+    /// <summary>Emits the post-dispose sample value through each manual observer in turn.</summary>
     /// <param name="observables">The manual observables to emit through, in order.</param>
     private static void EmitPostDisposeValues(params ManualObservable<int>[] observables)
     {
@@ -294,9 +270,7 @@ public partial class CombineLatest16ObservableTests
         }
     }
 
-    /// <summary>
-    /// Emits a post-dispose error that is expected to be ignored through each manual observer.
-    /// </summary>
+    /// <summary>Emits a post-dispose error that is expected to be ignored through each manual observer.</summary>
     /// <param name="observables">The manual observables to emit through, in order.</param>
     private static void EmitPostDisposeErrors(params ManualObservable<int>[] observables)
     {

@@ -14,24 +14,16 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnumerable<T>
     where T : IEquatable<T>
 {
-    /// <summary>
-    /// The multiplier used in the deterministic hash-combine loop.
-    /// </summary>
+    /// <summary>The multiplier used in the deterministic hash-combine loop.</summary>
     private const int HashMultiplier = 31;
 
-    /// <summary>
-    /// The underlying array, or null if default-constructed.
-    /// </summary>
+    /// <summary>The underlying array, or null if default-constructed.</summary>
     private readonly T[]? _array;
 
-    /// <summary>
-    /// Cached hash code computed once at construction.
-    /// </summary>
+    /// <summary>Cached hash code computed once at construction.</summary>
     private readonly int _cachedHashCode;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="EquatableArray{T}"/> struct.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="EquatableArray{T}"/> struct.</summary>
     /// <param name="array">The array to wrap.</param>
     public EquatableArray(T[] array)
     {
@@ -39,46 +31,36 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnu
         _cachedHashCode = ComputeHashCode(array);
     }
 
-    /// <summary>
-    /// Gets the length of the array.
-    /// </summary>
-    public int Length => _array?.Length ?? 0;
+    /// <summary>Gets the length of the array.</summary>
+    internal int Length => _array?.Length ?? 0;
 
-    /// <summary>
-    /// Gets the element at the specified index.
-    /// </summary>
+    /// <summary>Gets the element at the specified index.</summary>
     /// <param name="index">The zero-based index of the element to get.</param>
-    public T this[int index] => _array![index];
+    internal T this[int index] => _array![index];
 
-    /// <summary>
-    /// Determines whether two arrays are equal.
-    /// </summary>
+    /// <summary>Determines whether two arrays are equal.</summary>
     /// <param name="left">The first array to compare.</param>
     /// <param name="right">The second array to compare.</param>
     /// <returns>true if the arrays are equal; otherwise, false.</returns>
     public static bool operator ==(EquatableArray<T> left, EquatableArray<T> right) => left.Equals(right);
 
-    /// <summary>
-    /// Determines whether two arrays are not equal.
-    /// </summary>
+    /// <summary>Determines whether two arrays are not equal.</summary>
     /// <param name="left">The first array to compare.</param>
     /// <param name="right">The second array to compare.</param>
     /// <returns>true if the arrays are not equal; otherwise, false.</returns>
     public static bool operator !=(EquatableArray<T> left, EquatableArray<T> right) => !left.Equals(right);
 
-    /// <summary>
-    /// Indicates whether the current array is equal to another array.
-    /// </summary>
+    /// <summary>Indicates whether the current array is equal to another array.</summary>
     /// <param name="other">An array to compare with this array.</param>
     /// <returns>true if the arrays are equal; otherwise, false.</returns>
     public bool Equals(EquatableArray<T> other)
     {
-        if (_array == null && other._array == null)
+        if (_array is null && other._array is null)
         {
             return true;
         }
 
-        if (_array == null || other._array == null)
+        if (_array is null || other._array is null)
         {
             return false;
         }
@@ -99,39 +81,29 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnu
         return true;
     }
 
-    /// <summary>
-    /// Determines whether the specified object is equal to the current array.
-    /// </summary>
+    /// <summary>Determines whether the specified object is equal to the current array.</summary>
     /// <param name="obj">The object to compare with the current array.</param>
     /// <returns>true if the specified object is equal to the current array; otherwise, false.</returns>
     public override bool Equals(object? obj) => obj is EquatableArray<T> other && Equals(other);
 
-    /// <summary>
-    /// Returns the cached hash code for this array.
-    /// </summary>
+    /// <summary>Returns the cached hash code for this array.</summary>
     /// <returns>A hash code for the current array.</returns>
     public override int GetHashCode() => _cachedHashCode;
 
-    /// <summary>
-    /// Returns an enumerator that iterates through the array.
-    /// </summary>
+    /// <summary>Returns an enumerator that iterates through the array.</summary>
     /// <returns>An enumerator for the array.</returns>
     public IEnumerator<T> GetEnumerator() => ((_array ?? []) as IEnumerable<T>).GetEnumerator();
 
-    /// <summary>
-    /// Returns an enumerator that iterates through the array.
-    /// </summary>
+    /// <summary>Returns an enumerator that iterates through the array.</summary>
     /// <returns>An enumerator for the array.</returns>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    /// <summary>
-    /// Computes a deterministic hash code for the given array.
-    /// </summary>
+    /// <summary>Computes a deterministic hash code for the given array.</summary>
     /// <param name="array">The array to hash.</param>
     /// <returns>A hash code for the array.</returns>
     internal static int ComputeHashCode(T[]? array)
     {
-        if (array == null)
+        if (array is null)
         {
             return 0;
         }

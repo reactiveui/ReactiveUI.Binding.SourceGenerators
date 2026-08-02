@@ -7,34 +7,25 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 
-/// <summary>
-/// Tests that the source-generator-generated BindTwoWay code works correctly at runtime.
-/// </summary>
+/// <summary>Tests that the source-generator-generated BindTwoWay code works correctly at runtime.</summary>
 public class BindTwoWayTests
 {
-    /// <summary>
-    /// The initial string property value used across the binding tests.
-    /// </summary>
+    /// <summary>The initial string property value used across the binding tests.</summary>
     private const string HelloValue = "Hello";
 
-    /// <summary>
-    /// The initial integer property test value.
-    /// </summary>
+    /// <summary>The initial integer property test value.</summary>
     private const int IntValue = 42;
 
-    /// <summary>
-    /// The updated integer property test value.
-    /// </summary>
+    /// <summary>The updated integer property test value.</summary>
     private const int UpdatedIntValue = 100;
 
-    /// <summary>
-    /// The second updated integer property test value.
-    /// </summary>
+    /// <summary>The second updated integer property test value.</summary>
     private const int SecondIntValue = 200;
 
-    /// <summary>
-    /// Verifies that BindTwoWay syncs the initial value from source to target.
-    /// </summary>
+    /// <summary>The value written to the view side to prove the target-to-source direction.</summary>
+    private const string FromTargetValue = "FromTarget";
+
+    /// <summary>Verifies that BindTwoWay syncs the initial value from source to target.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringProperty_SyncsSourceToTarget()
@@ -51,9 +42,7 @@ public class BindTwoWayTests
         await Assert.That(target.ViewProp1).IsEqualTo("World");
     }
 
-    /// <summary>
-    /// Verifies that BindTwoWay syncs changes from target back to source.
-    /// </summary>
+    /// <summary>Verifies that BindTwoWay syncs changes from target back to source.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringProperty_SyncsTargetToSource()
@@ -63,14 +52,12 @@ public class BindTwoWayTests
 
         using var binding = BindTwoWayScenarios.StringProperty(source, target);
 
-        target.ViewProp1 = "FromTarget";
+        target.ViewProp1 = FromTargetValue;
 
-        await Assert.That(source.Prop1).IsEqualTo("FromTarget");
+        await Assert.That(source.Prop1).IsEqualTo(FromTargetValue);
     }
 
-    /// <summary>
-    /// Verifies that BindTwoWay syncs int property in both directions.
-    /// </summary>
+    /// <summary>Verifies that BindTwoWay syncs int property in both directions.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IntProperty_SyncsBothDirections()
@@ -89,9 +76,7 @@ public class BindTwoWayTests
         await Assert.That(source.Prop2).IsEqualTo(SecondIntValue);
     }
 
-    /// <summary>
-    /// Verifies that disposing the two-way binding stops syncing in both directions.
-    /// </summary>
+    /// <summary>Verifies that disposing the two-way binding stops syncing in both directions.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Disposal_StopsSyncing()
@@ -107,7 +92,7 @@ public class BindTwoWayTests
         source.Prop1 = "AfterDisposal";
         await Assert.That(target.ViewProp1).IsEqualTo(HelloValue);
 
-        target.ViewProp1 = "FromTarget";
+        target.ViewProp1 = FromTargetValue;
         await Assert.That(source.Prop1).IsEqualTo("AfterDisposal");
     }
 }

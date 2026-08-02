@@ -7,14 +7,10 @@ using SerialDisposable = ReactiveUI.Binding.Observables.SerialDisposable;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-/// Tests for <see cref="SerialDisposable"/>.
-/// </summary>
+/// <summary>Tests for <see cref="SerialDisposable"/>.</summary>
 public class SerialDisposableTests
 {
-    /// <summary>
-    /// Verifies that setting a new disposable disposes the previous one.
-    /// </summary>
+    /// <summary>Verifies that setting a new disposable disposes the previous one.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task SetDisposable_DisposesPrevious()
@@ -30,9 +26,7 @@ public class SerialDisposableTests
         await Assert.That(disposed2).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that disposing the serial disposable disposes the current inner.
-    /// </summary>
+    /// <summary>Verifies that disposing the serial disposable disposes the current inner.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Dispose_DisposesInner()
@@ -45,9 +39,7 @@ public class SerialDisposableTests
         await Assert.That(disposed).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that setting a disposable after the serial is disposed, disposes it immediately.
-    /// </summary>
+    /// <summary>Verifies that setting a disposable after the serial is disposed, disposes it immediately.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task SetAfterDispose_DisposesImmediately()
@@ -60,9 +52,7 @@ public class SerialDisposableTests
         await Assert.That(disposed).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that disposing twice does not double-dispose the inner.
-    /// </summary>
+    /// <summary>Verifies that disposing twice does not double-dispose the inner.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Dispose_Twice_NoDoubleFree()
@@ -76,9 +66,7 @@ public class SerialDisposableTests
         await Assert.That(disposed).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that the Disposable getter returns the currently set disposable.
-    /// </summary>
+    /// <summary>Verifies that the Disposable getter returns the currently set disposable.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Disposable_Getter_ReturnsCurrentValue()
@@ -86,14 +74,12 @@ public class SerialDisposableTests
         var serial = new SerialDisposable();
         await Assert.That(serial.Disposable).IsNull();
 
-        var inner = new ActionDisposable(() => { });
+        var inner = new ActionDisposable(static () => { });
         serial.Disposable = inner;
         await Assert.That(serial.Disposable).IsSameReferenceAs(inner);
     }
 
-    /// <summary>
-    /// Verifies that setting Disposable to null disposes the old value.
-    /// </summary>
+    /// <summary>Verifies that setting Disposable to null disposes the old value.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task SetToNull_DisposesOldValue()

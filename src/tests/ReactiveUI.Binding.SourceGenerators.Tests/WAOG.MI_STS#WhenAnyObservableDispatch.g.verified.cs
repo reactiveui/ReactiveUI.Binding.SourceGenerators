@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -23,16 +23,16 @@ namespace ReactiveUI.Binding
 
             if (obs1Expression == "x => x.Command1")
             {
-                return __WhenAnyObservable_7FFFC6DF44F5655E(objectToMonitor);
+                return __WhenAnyObservable_7FFFC6DF44F563AC(objectToMonitor);
             }
             else if (obs1Expression == "x => x.Command2")
             {
-                return __WhenAnyObservable_7FFFC6DF47F56A17(objectToMonitor);
+                return __WhenAnyObservable_7FFFC6DF47F56865(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
         }
 
-        private static global::System.IObservable<string> __WhenAnyObservable_7FFFC6DF44F5655E(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel obj)
+        private static global::System.IObservable<string> __WhenAnyObservable_7FFFC6DF44F563AC(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel obj)
         {
             var __obsProperty = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,
@@ -45,7 +45,7 @@ namespace ReactiveUI.Binding
                     __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
         }
 
-        private static global::System.IObservable<string> __WhenAnyObservable_7FFFC6DF47F56A17(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel obj)
+        private static global::System.IObservable<string> __WhenAnyObservable_7FFFC6DF47F56865(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel obj)
         {
             var __obsProperty = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,

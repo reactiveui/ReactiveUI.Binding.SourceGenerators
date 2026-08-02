@@ -6,27 +6,19 @@ using System.ComponentModel;
 
 namespace SharedScenarios.BindTwoWay.MultipleSameTypeBindings;
 
-/// <summary>
-/// Target View with two string properties.
-/// </summary>
+/// <summary>Target View with two string properties.</summary>
 public class MyView : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="FirstNameText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="FirstNameText"/>.</summary>
     private string _firstNameText = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="LastNameText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="LastNameText"/>.</summary>
     private string _lastNameText = string.Empty;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the first name text.
-    /// </summary>
+    /// <summary>Gets or sets the first name text.</summary>
     public string FirstNameText
     {
         get => _firstNameText;
@@ -42,9 +34,7 @@ public class MyView : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the last name text.
-    /// </summary>
+    /// <summary>Gets or sets the last name text.</summary>
     public string LastNameText
     {
         get => _lastNameText;

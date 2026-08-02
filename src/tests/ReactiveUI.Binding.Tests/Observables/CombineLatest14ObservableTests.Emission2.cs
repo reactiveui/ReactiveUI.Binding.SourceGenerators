@@ -8,19 +8,11 @@ using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-/// Per-source error-propagation tests (part 2) for <see cref="CombineLatest14Observable{T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult}"/>.
-/// </summary>
+/// <summary>Per-source error-propagation tests (part 2) for <see cref="CombineLatest14Observable{T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult}"/>.</summary>
 public partial class CombineLatest14ObservableTests
 {
-    /// <summary>
-    /// Verifies that an error in the eighth source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in the eighth source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource8_PropagatedToSubscriber()
     {
@@ -53,15 +45,15 @@ public partial class CombineLatest14ObservableTests
             source12,
             source13,
             source14,
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
 
         Exception? receivedError = null;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         var expectedError = new InvalidOperationException("source8 error");
         source8.OnError(expectedError);
@@ -71,14 +63,8 @@ public partial class CombineLatest14ObservableTests
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that an error in the ninth source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in the ninth source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource9_PropagatedToSubscriber()
     {
@@ -111,15 +97,15 @@ public partial class CombineLatest14ObservableTests
             source12,
             source13,
             source14,
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
 
         Exception? receivedError = null;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         var expectedError = new InvalidOperationException("source9 error");
         source9.OnError(expectedError);
@@ -129,14 +115,8 @@ public partial class CombineLatest14ObservableTests
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that an error in the tenth source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in the tenth source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource10_PropagatedToSubscriber()
     {
@@ -169,15 +149,15 @@ public partial class CombineLatest14ObservableTests
             source12,
             source13,
             source14,
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
 
         Exception? receivedError = null;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         var expectedError = new InvalidOperationException("source10 error");
         source10.OnError(expectedError);
@@ -187,14 +167,8 @@ public partial class CombineLatest14ObservableTests
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that an error in the eleventh source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in the eleventh source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource11_PropagatedToSubscriber()
     {
@@ -227,15 +201,15 @@ public partial class CombineLatest14ObservableTests
             source12,
             source13,
             source14,
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
 
         Exception? receivedError = null;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         var expectedError = new InvalidOperationException("source11 error");
         source11.OnError(expectedError);
@@ -245,14 +219,8 @@ public partial class CombineLatest14ObservableTests
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that an error in the twelfth source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in the twelfth source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource12_PropagatedToSubscriber()
     {
@@ -285,15 +253,15 @@ public partial class CombineLatest14ObservableTests
             source12,
             source13,
             source14,
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
 
         Exception? receivedError = null;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         var expectedError = new InvalidOperationException("source12 error");
         source12.OnError(expectedError);
@@ -303,14 +271,8 @@ public partial class CombineLatest14ObservableTests
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that an error in the thirteenth source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in the thirteenth source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource13_PropagatedToSubscriber()
     {
@@ -343,15 +305,15 @@ public partial class CombineLatest14ObservableTests
             source12,
             source13,
             source14,
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
 
         Exception? receivedError = null;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         var expectedError = new InvalidOperationException("source13 error");
         source13.OnError(expectedError);
@@ -361,14 +323,8 @@ public partial class CombineLatest14ObservableTests
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that an error in the fourteenth source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in the fourteenth source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Major Code Smell",
-        "S107:Methods should not have too many parameters",
-        Justification = "The combine selector lambda's parameter count equals the source arity under test.")]
     [Test]
     public async Task ErrorInSource14_PropagatedToSubscriber()
     {
@@ -401,15 +357,15 @@ public partial class CombineLatest14ObservableTests
             source12,
             source13,
             source14,
-            (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
+            static (a, b, c, d, e, f, g, h, i, j, k, l, m, n) => $"{a}-{b}-{c}-{d}-{e}-{f}-{g}-{h}-{i}-{j}-{k}-{l}-{m}-{n}");
 
         Exception? receivedError = null;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         var expectedError = new InvalidOperationException("source14 error");
         source14.OnError(expectedError);

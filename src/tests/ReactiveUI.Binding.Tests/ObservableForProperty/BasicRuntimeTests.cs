@@ -4,19 +4,13 @@
 
 namespace ReactiveUI.Binding.Tests.ObservableForProperty;
 
-/// <summary>
-/// Basic tests for the runtime library types.
-/// </summary>
+/// <summary>Basic tests for the runtime library types.</summary>
 public class BasicRuntimeTests
 {
-    /// <summary>
-    /// The expected value used when constructing and asserting an observed change.
-    /// </summary>
+    /// <summary>The expected value used when constructing and asserting an observed change.</summary>
     private const int ExpectedValue = 42;
 
-    /// <summary>
-    /// Verifies that ObservedChange can be constructed and its properties accessed.
-    /// </summary>
+    /// <summary>Verifies that ObservedChange can be constructed and its properties accessed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObservedChange_Properties()
@@ -28,9 +22,7 @@ public class BasicRuntimeTests
         await Assert.That(change.Expression).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that the BindingDirection enum defines the expected members at runtime.
-    /// </summary>
+    /// <summary>Verifies that the BindingDirection enum defines the expected members at runtime.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindingDirection_Values()

@@ -7,14 +7,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for BindTwoWay (two-way binding) invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for BindTwoWay (two-way binding) invocation generation.</summary>
 public class BindTwoWayGeneratorTests
 {
-    /// <summary>
-    /// Verifies BindTwoWay with same-type string property binding.
-    /// </summary>
+    /// <summary>Verifies BindTwoWay with same-type string property binding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_StringToString()
@@ -26,9 +22,7 @@ public class BindTwoWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindTwoWay with int property binding.
-    /// </summary>
+    /// <summary>Verifies BindTwoWay with int property binding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_IntToInt()
@@ -40,9 +34,7 @@ public class BindTwoWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindTwoWay with multiple bindings on the same source/target pair.
-    /// </summary>
+    /// <summary>Verifies BindTwoWay with multiple bindings on the same source/target pair.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleBindings()
@@ -54,9 +46,7 @@ public class BindTwoWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindTwoWay on a ReactiveObject-based ViewModel and View.
-    /// </summary>
+    /// <summary>Verifies BindTwoWay on a ReactiveObject-based ViewModel and View.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ReactiveObject_Both()
@@ -68,9 +58,7 @@ public class BindTwoWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindTwoWay combined with BindOneWay in the same compilation.
-    /// </summary>
+    /// <summary>Verifies BindTwoWay combined with BindOneWay in the same compilation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MixedWithBindOneWay()
@@ -82,9 +70,7 @@ public class BindTwoWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindTwoWay with conversion functions between int and string.
-    /// </summary>
+    /// <summary>Verifies BindTwoWay with conversion functions between int and string.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_WithConverters()
@@ -96,9 +82,7 @@ public class BindTwoWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindTwoWay with a scheduler parameter.
-    /// </summary>
+    /// <summary>Verifies BindTwoWay with a scheduler parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_WithScheduler()
@@ -127,9 +111,7 @@ public class BindTwoWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindTwoWay with both conversion functions and a scheduler parameter.
-    /// </summary>
+    /// <summary>Verifies BindTwoWay with both conversion functions and a scheduler parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_WithConvertersAndScheduler()
@@ -141,9 +123,7 @@ public class BindTwoWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies BindTwoWay with multiple bindings sharing the same type signature to cover the else-if dispatch branch.
-    /// </summary>
+    /// <summary>Verifies BindTwoWay with multiple bindings sharing the same type signature to cover the else-if dispatch branch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleSameTypeBindings()
@@ -155,9 +135,7 @@ public class BindTwoWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies that BindTwoWay with multiple same-type bindings generates CallerFilePath dispatch when targeting pre-C# 10.
-    /// </summary>
+    /// <summary>Verifies that BindTwoWay with multiple same-type bindings generates CallerFilePath dispatch when targeting pre-C# 10.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleSameTypeBindings_CallerFilePath()

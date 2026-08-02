@@ -7,16 +7,12 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties;
 
-/// <summary>
-/// Exercises WhenAnyValue with three properties returning a tuple.
-/// </summary>
+/// <summary>Exercises WhenAnyValue with three properties returning a tuple.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenAnyValue observable for Name, Age, and Score.
-    /// </summary>
+    /// <summary>Creates a WhenAnyValue observable for Name, Age, and Score.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of (name, age, score) tuples.</returns>
-    public static IObservable<(string Name, int Age, double Score)> Execute(MyViewModel vm)
-        => vm.WhenAnyValue(x => x.Name, x => x.Age, x => x.Score);
+    public static IObservable<(string Name, int Age, double Score)> Execute(MyViewModel vm) =>
+        vm.WhenAnyValue(x => x.Name, x => x.Age, x => x.Score);
 }

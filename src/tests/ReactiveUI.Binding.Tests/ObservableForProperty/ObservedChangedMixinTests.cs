@@ -8,29 +8,25 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.ObservableForProperty;
 
-/// <summary>
-/// Tests for the <see cref="ObservedChangedMixin"/> class.
-/// </summary>
+/// <summary>Tests for the <see cref="ObservedChangedMixins"/> class.</summary>
 public class ObservedChangedMixinTests
 {
-    /// <summary>
-    /// A directly-populated change value used across tests.
-    /// </summary>
+    /// <summary>The value assigned through the observed change under test.</summary>
+    private const string NewValue = "NewValue";
+
+    /// <summary>The age assigned to the sample view model.</summary>
+    private const int SampleAge = 42;
+
+    /// <summary>A directly-populated change value used across tests.</summary>
     private const string DirectValue = "Direct";
 
-    /// <summary>
-    /// A sample integer value carried by an observed change.
-    /// </summary>
+    /// <summary>A sample integer value carried by an observed change.</summary>
     private const int SampleIntValue = 99;
 
-    /// <summary>
-    /// The expected number of mapped values from a two-element change stream.
-    /// </summary>
+    /// <summary>The expected number of mapped values from a two-element change stream.</summary>
     private const int ExpectedTwoValues = 2;
 
-    /// <summary>
-    /// Verifies that GetPropertyName returns the correct property name from an observed change.
-    /// </summary>
+    /// <summary>Verifies that GetPropertyName returns the correct property name from an observed change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetPropertyName_SimpleProperty_ReturnsName()
@@ -45,9 +41,7 @@ public class ObservedChangedMixinTests
         await Assert.That(name).IsEqualTo("Name");
     }
 
-    /// <summary>
-    /// Verifies that GetPropertyName returns a dotted path for nested properties.
-    /// </summary>
+    /// <summary>Verifies that GetPropertyName returns a dotted path for nested properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetPropertyName_NestedProperty_ReturnsDottedPath()
@@ -62,9 +56,7 @@ public class ObservedChangedMixinTests
         await Assert.That(name).IsEqualTo("Address.City");
     }
 
-    /// <summary>
-    /// Verifies that GetValue returns the value when it's already populated.
-    /// </summary>
+    /// <summary>Verifies that GetValue returns the value when it's already populated.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValue_WithPopulatedValue_ReturnsValue()
@@ -79,9 +71,7 @@ public class ObservedChangedMixinTests
         await Assert.That(value).IsEqualTo(DirectValue);
     }
 
-    /// <summary>
-    /// Verifies that GetValue evaluates the expression chain when value is default.
-    /// </summary>
+    /// <summary>Verifies that GetValue evaluates the expression chain when value is default.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValue_WithDefaultValue_EvaluatesChain()
@@ -97,9 +87,7 @@ public class ObservedChangedMixinTests
         await Assert.That(value).IsEqualTo("Evaluated");
     }
 
-    /// <summary>
-    /// Verifies that GetValueOrDefault returns default when chain is broken.
-    /// </summary>
+    /// <summary>Verifies that GetValueOrDefault returns default when chain is broken.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueOrDefault_NullInChain_ReturnsDefault()
@@ -115,9 +103,7 @@ public class ObservedChangedMixinTests
         await Assert.That(value).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that GetPropertyName throws for null input.
-    /// </summary>
+    /// <summary>Verifies that GetPropertyName throws for null input.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetPropertyName_NullItem_ThrowsArgumentNullException()
@@ -128,9 +114,7 @@ public class ObservedChangedMixinTests
             .ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that GetValue throws for null input.
-    /// </summary>
+    /// <summary>Verifies that GetValue throws for null input.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValue_NullItem_ThrowsArgumentNullException()
@@ -141,9 +125,7 @@ public class ObservedChangedMixinTests
             .ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that GetValueOrDefault throws for null input.
-    /// </summary>
+    /// <summary>Verifies that GetValueOrDefault throws for null input.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueOrDefault_NullItem_ThrowsArgumentNullException()
@@ -154,9 +136,7 @@ public class ObservedChangedMixinTests
             .ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that GetValue returns the populated value for a non-default value.
-    /// </summary>
+    /// <summary>Verifies that GetValue returns the populated value for a non-default value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValue_NonDefaultValue_ReturnsDirectValue()
@@ -164,7 +144,7 @@ public class ObservedChangedMixinTests
         Expression<Func<TestViewModel, int>> expr = x => x.Age;
         var body = Reflection.Rewrite(expr.Body);
 
-        var vm = new TestViewModel { Age = 42 };
+        var vm = new TestViewModel { Age = SampleAge };
         var change = new ObservedChange<TestViewModel, int>(vm, body, SampleIntValue);
 
         var value = change.GetValue();
@@ -172,9 +152,7 @@ public class ObservedChangedMixinTests
         await Assert.That(value).IsEqualTo(SampleIntValue);
     }
 
-    /// <summary>
-    /// Verifies that GetValueOrDefault returns the value when it's non-default.
-    /// </summary>
+    /// <summary>Verifies that GetValueOrDefault returns the value when it's non-default.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValueOrDefault_WithNonDefaultValue_ReturnsValue()
@@ -189,9 +167,7 @@ public class ObservedChangedMixinTests
         await Assert.That(value).IsEqualTo(DirectValue);
     }
 
-    /// <summary>
-    /// Verifies that GetValue throws when the expression chain is broken (null intermediate).
-    /// </summary>
+    /// <summary>Verifies that GetValue throws when the expression chain is broken (null intermediate).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetValue_BrokenChain_ThrowsException()
@@ -206,9 +182,7 @@ public class ObservedChangedMixinTests
             .ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that Value() observable extension maps a stream of changes to values.
-    /// </summary>
+    /// <summary>Verifies that Value() observable extension maps a stream of changes to values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Value_MapsChangesToValues()
@@ -229,9 +203,7 @@ public class ObservedChangedMixinTests
         await Assert.That(values[1]).IsEqualTo("Second");
     }
 
-    /// <summary>
-    /// Verifies that SetValueToProperty applies the change to the target object.
-    /// </summary>
+    /// <summary>Verifies that SetValueToProperty applies the change to the target object.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SetValueToProperty_ValidTarget_SetsValue()
@@ -239,17 +211,15 @@ public class ObservedChangedMixinTests
         Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
 
-        var change = new ObservedChange<TestViewModel, string>(new(), body, "NewValue");
+        var change = new ObservedChange<TestViewModel, string>(new(), body, NewValue);
         var target = new TestViewModel { Name = "OldValue" };
 
         change.SetValueToProperty(target, x => x.Name);
 
-        await Assert.That(target.Name).IsEqualTo("NewValue");
+        await Assert.That(target.Name).IsEqualTo(NewValue);
     }
 
-    /// <summary>
-    /// Verifies that SetValueToProperty does nothing when target is null.
-    /// </summary>
+    /// <summary>Verifies that SetValueToProperty does nothing when target is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SetValueToProperty_NullTarget_DoesNotThrow()
@@ -257,7 +227,7 @@ public class ObservedChangedMixinTests
         Expression<Func<TestViewModel, string>> expr = x => x.Name;
         var body = Reflection.Rewrite(expr.Body);
 
-        var change = new ObservedChange<TestViewModel, string>(new(), body, "NewValue");
+        var change = new ObservedChange<TestViewModel, string>(new(), body, NewValue);
         TestViewModel? target = null;
 
         // Should not throw

@@ -21,7 +21,7 @@ namespace ReactiveUI.Binding.Tests.TestExecutors;
 /// <item><description>Customizable builder configuration via virtual method.</description></item>
 /// </list>
 /// </remarks>
-public abstract class BaseBindingBuilderTestExecutor : ITestExecutor
+public class BaseBindingBuilderTestExecutor : ITestExecutor
 {
     /// <inheritdoc />
     public virtual async ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
@@ -55,6 +55,6 @@ public abstract class BaseBindingBuilderTestExecutor : ITestExecutor
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(context);
 
-        builder.WithCoreServices();
+        _ = builder.WithCoreServices();
     }
 }

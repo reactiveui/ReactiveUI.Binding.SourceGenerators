@@ -2,16 +2,13 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Reactive.Concurrency;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
+using ReactiveUI.Primitives.Concurrency;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
-/// <summary>
-/// Source-generated BindOneWay benchmarks with and without scheduler.
-/// </summary>
-////[SimpleJob(RuntimeMoniker.Net462)]
+/// <summary>Source-generated BindOneWay benchmarks with and without scheduler.</summary>
 [SimpleJob(RuntimeMoniker.Net80)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [SimpleJob(RuntimeMoniker.NativeAot10_0, id: nameof(RuntimeMoniker.NativeAot10_0))]
@@ -19,29 +16,19 @@ namespace ReactiveUI.Binding.Benchmarks;
 [MarkdownExporterAttribute.GitHub]
 public class BindOneWayBenchmark
 {
-    /// <summary>
-    /// Represents the number of property change events to be triggered during the benchmark tests.
-    /// </summary>
+    /// <summary>Represents the number of property change events to be triggered during the benchmark tests.</summary>
     private const int PropertyChangeCount = 1_000;
 
-    /// <summary>
-    /// The number of consecutive bindings created in the setup/teardown benchmark.
-    /// </summary>
+    /// <summary>The number of consecutive bindings created in the setup/teardown benchmark.</summary>
     private const int BindingCount = 10;
 
-    /// <summary>
-    /// The source view model of the benchmark.
-    /// </summary>
+    /// <summary>The source view model of the benchmark.</summary>
     private BenchmarkViewModel _source = null!;
 
-    /// <summary>
-    /// The target view of the benchmark.
-    /// </summary>
+    /// <summary>The target view of the benchmark.</summary>
     private BenchmarkView _target = null!;
 
-    /// <summary>
-    /// Sets up fresh source and target objects before each benchmark iteration.
-    /// </summary>
+    /// <summary>Sets up fresh source and target objects before each benchmark iteration.</summary>
     [IterationSetup]
     public void Setup()
     {
@@ -49,9 +36,7 @@ public class BindOneWayBenchmark
         _target = new();
     }
 
-    /// <summary>
-    /// One-way binding without scheduler: setup, fire N changes, dispose.
-    /// </summary>
+    /// <summary>One-way binding without scheduler: setup, fire N changes, dispose.</summary>
     [Benchmark(Description = "BindOneWay")]
     public void Standard()
     {
@@ -63,13 +48,11 @@ public class BindOneWayBenchmark
         }
     }
 
-    /// <summary>
-    /// One-way binding with ImmediateScheduler: measures ObserveOnObservable overhead.
-    /// </summary>
+    /// <summary>One-way binding with ImmediateSequencer: measures ObserveOnObservable overhead.</summary>
     [Benchmark(Description = "BindOneWay + Scheduler")]
     public void WithScheduler()
     {
-        using var binding = _source.BindOneWay(_target, x => x.Name, x => x.DisplayName, ImmediateScheduler.Instance);
+        using var binding = _source.BindOneWay(_target, x => x.Name, x => x.DisplayName, ImmediateSequencer.Instance);
 
         for (var i = 0; i < PropertyChangeCount; i++)
         {
@@ -77,18 +60,14 @@ public class BindOneWayBenchmark
         }
     }
 
-    /// <summary>
-    /// Cold start: create binding, dispose immediately. No property changes.
-    /// </summary>
+    /// <summary>Cold start: create binding, dispose immediately. No property changes.</summary>
     [Benchmark(Description = "First Binding")]
     public void FirstBinding()
     {
         using var binding = _source.BindOneWay(_target, x => x.Name, x => x.DisplayName);
     }
 
-    /// <summary>
-    /// Setup and teardown cost of 10 consecutive bindings.
-    /// </summary>
+    /// <summary>Setup and teardown cost of 10 consecutive bindings.</summary>
     [Benchmark(Description = "10x Setup/Teardown")]
     public void SetupTeardown()
     {

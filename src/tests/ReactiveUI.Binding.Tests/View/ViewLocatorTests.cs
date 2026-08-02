@@ -8,16 +8,12 @@ using TUnit.Core.Executors;
 
 namespace ReactiveUI.Binding.Tests.View;
 
-/// <summary>
-/// Tests for the <see cref="ViewLocator"/> static accessor.
-/// </summary>
+/// <summary>Tests for the <see cref="ViewLocator"/> static accessor.</summary>
 [NotInParallel]
 [TestExecutor<BindingBuilderTestExecutor>]
 public class ViewLocatorTests
 {
-    /// <summary>
-    /// Verifies that GetCurrent returns a locator when one is registered.
-    /// </summary>
+    /// <summary>Verifies that GetCurrent returns a locator when one is registered.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetCurrent_WhenRegistered_ReturnsLocator()
@@ -29,9 +25,7 @@ public class ViewLocatorTests
         await Assert.That(locator).IsTypeOf<DefaultViewLocator>();
     }
 
-    /// <summary>
-    /// Verifies that GetCurrent throws ViewLocatorNotFoundException when no locator is registered.
-    /// </summary>
+    /// <summary>Verifies that GetCurrent throws ViewLocatorNotFoundException when no locator is registered.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetCurrent_NotRegistered_ThrowsViewLocatorNotFoundException()

@@ -7,22 +7,16 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenAnyObservable.DeepObservableSwitch;
 
-/// <summary>
-/// Child model with an observable property.
-/// </summary>
+/// <summary>Child model with an observable property.</summary>
 public class ChildModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="MyCommand"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="MyCommand"/>.</summary>
     private IObservable<string>? _myCommand;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the command observable.
-    /// </summary>
+    /// <summary>Gets or sets the command observable.</summary>
     public IObservable<string>? MyCommand
     {
         get => _myCommand;

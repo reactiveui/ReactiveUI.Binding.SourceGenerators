@@ -4,34 +4,22 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for converting strings to decimals.
-/// </summary>
+/// <summary>Tests for converting strings to decimals.</summary>
 public class StringToDecimalTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    /// Decimal value parsed from a positive numeric string.
-    /// </summary>
-    private const decimal ParsedDecimal = 123.456m;
+    /// <summary>Decimal value parsed from a positive numeric string.</summary>
+    private const decimal ParsedDecimal = 123.456M;
 
-    /// <summary>
-    /// Decimal value parsed from a negative numeric string.
-    /// </summary>
-    private const decimal NegativeDecimal = -123.456m;
+    /// <summary>Decimal value parsed from a negative numeric string.</summary>
+    private const decimal NegativeDecimal = -123.456M;
 
-    /// <summary>
-    /// Decimal value parsed in the typed conversion test.
-    /// </summary>
-    private const decimal TypedDecimal = 456.789m;
+    /// <summary>Decimal value parsed in the typed conversion test.</summary>
+    private const decimal TypedDecimal = 456.789M;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -41,9 +29,7 @@ public class StringToDecimalTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert EmptyString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert EmptyString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_EmptyString_ReturnsFalse()
@@ -54,9 +40,7 @@ public class StringToDecimalTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert InvalidString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert InvalidString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_InvalidString_ReturnsFalse()
@@ -67,9 +51,7 @@ public class StringToDecimalTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert StringToDecimal Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert StringToDecimal Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_StringToDecimal_Succeeds()
@@ -82,9 +64,7 @@ public class StringToDecimalTypeConverterTests
         await Assert.That(output).IsEqualTo(ParsedDecimal);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert NullString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert NullString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_NullString_ReturnsFalse()
@@ -94,12 +74,10 @@ public class StringToDecimalTypeConverterTests
         var result = converter.TryConvert(null, null, out var output);
 
         await Assert.That(result).IsFalse();
-        await Assert.That(output).IsEqualTo(0m);
+        await Assert.That(output).IsEqualTo(0M);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert ZeroValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert ZeroValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_ZeroValue_Succeeds()
@@ -109,12 +87,10 @@ public class StringToDecimalTypeConverterTests
         var result = converter.TryConvert("0", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo(0m);
+        await Assert.That(output).IsEqualTo(0M);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert NegativeValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert NegativeValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_NegativeValue_Succeeds()
@@ -127,9 +103,7 @@ public class StringToDecimalTypeConverterTests
         await Assert.That(output).IsEqualTo(NegativeDecimal);
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped ValidString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped ValidString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_ValidString_Succeeds()
@@ -142,24 +116,20 @@ public class StringToDecimalTypeConverterTests
         await Assert.That(output).IsEqualTo(TypedDecimal);
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped InvalidType ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped InvalidType ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_InvalidType_ReturnsFalse()
     {
         var converter = new StringToDecimalTypeConverter();
 
-        var result = converter.TryConvertTyped(123.456, null, out var output);
+        var result = converter.TryConvertTyped(ParsedDecimal, null, out var output);
 
         await Assert.That(result).IsFalse();
         await Assert.That(output).IsNull();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped NullInput ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped NullInput ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_NullInput_ReturnsFalse()
@@ -172,9 +142,7 @@ public class StringToDecimalTypeConverterTests
         await Assert.That(output).IsNull();
     }
 
-    /// <summary>
-    ///     Verifies FromType ReturnsStringType.
-    /// </summary>
+    /// <summary>Verifies FromType ReturnsStringType.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task FromType_ReturnsStringType()
@@ -184,9 +152,7 @@ public class StringToDecimalTypeConverterTests
         await Assert.That(converter.FromType).IsEqualTo(typeof(string));
     }
 
-    /// <summary>
-    ///     Verifies ToType ReturnsDecimalType.
-    /// </summary>
+    /// <summary>Verifies ToType ReturnsDecimalType.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ToType_ReturnsDecimalType()

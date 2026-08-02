@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -29,18 +29,18 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.FirstName"
                 && targetPropertyExpression == "x => x.FirstNameText")
             {
-                return __BindTwoWay_7FFFD5F622CF3052(source, target);
+                return __BindTwoWay_7FFFD5F622CF2D6A(source, target);
             }
             else if (sourcePropertyExpression == "x => x.LastName"
                 && targetPropertyExpression == "x => x.LastNameText")
             {
-                return __BindTwoWay_7FFFD5F5F103D6C9(source, target);
+                return __BindTwoWay_7FFFD5F5F103D3E1(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_7FFFD5F622CF3052(global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target)
+        private static global::System.IDisposable __BindTwoWay_7FFFD5F622CF2D6A(global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target)
         {
             // BindTwoWay: FirstName <-> FirstNameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -68,7 +68,7 @@ namespace ReactiveUI.Binding
             return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
         }
 
-        private static global::System.IDisposable __BindTwoWay_7FFFD5F5F103D6C9(global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target)
+        private static global::System.IDisposable __BindTwoWay_7FFFD5F5F103D3E1(global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target)
         {
             // BindTwoWay: LastName <-> LastNameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

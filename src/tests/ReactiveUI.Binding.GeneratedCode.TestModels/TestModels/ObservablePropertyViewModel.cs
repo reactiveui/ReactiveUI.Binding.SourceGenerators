@@ -13,47 +13,37 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class ObservablePropertyViewModel : INotifyPropertyChanged
 {
-    /// <summary>The backing field for <see cref="MyCommand"/>.</summary>
-    private IObservable<string>? _myCommand;
-
-    /// <summary>The backing field for <see cref="OtherCommand"/>.</summary>
-    private IObservable<string>? _otherCommand;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the command observable.
-    /// </summary>
+    /// <summary>Gets or sets the command observable.</summary>
     public IObservable<string>? MyCommand
     {
-        get => _myCommand;
+        get => field;
         set
         {
-            if (_myCommand == value)
+            if (field == value)
             {
                 return;
             }
 
-            _myCommand = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(MyCommand)));
         }
     }
 
-    /// <summary>
-    /// Gets or sets another command observable.
-    /// </summary>
+    /// <summary>Gets or sets another command observable.</summary>
     public IObservable<string>? OtherCommand
     {
-        get => _otherCommand;
+        get => field;
         set
         {
-            if (_otherCommand == value)
+            if (field == value)
             {
                 return;
             }
 
-            _otherCommand = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(OtherCommand)));
         }
     }

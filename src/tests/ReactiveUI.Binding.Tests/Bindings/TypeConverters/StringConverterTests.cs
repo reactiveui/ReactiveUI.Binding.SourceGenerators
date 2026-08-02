@@ -4,19 +4,13 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for the <see cref="StringConverter"/> type converter.
-/// </summary>
+/// <summary>Tests for the <see cref="StringConverter"/> type converter.</summary>
 public class StringConverterTests
 {
-    /// <summary>
-    ///     The expected affinity reported by the string converter.
-    /// </summary>
+    /// <summary>The expected affinity reported by the string converter.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies FromType ReturnsStringType.
-    /// </summary>
+    /// <summary>Verifies FromType ReturnsStringType.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task FromType_ReturnsStringType()
@@ -25,9 +19,7 @@ public class StringConverterTests
         await Assert.That(converter.FromType).IsEqualTo(typeof(string));
     }
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -37,9 +29,7 @@ public class StringConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies ToType ReturnsStringType.
-    /// </summary>
+    /// <summary>Verifies ToType ReturnsStringType.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ToType_ReturnsStringType()
@@ -48,9 +38,7 @@ public class StringConverterTests
         await Assert.That(converter.ToType).IsEqualTo(typeof(string));
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped EmptyString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped EmptyString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_EmptyString_Succeeds()
@@ -64,9 +52,7 @@ public class StringConverterTests
         await Assert.That(output).IsEqualTo(string.Empty);
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped IgnoresConversionHint.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped IgnoresConversionHint.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_IgnoresConversionHint()
@@ -80,9 +66,7 @@ public class StringConverterTests
         await Assert.That(output).IsEqualTo("test");
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped NonStringValue ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped NonStringValue ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_NonStringValue_ReturnsFalse()
@@ -94,9 +78,7 @@ public class StringConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped NullValue ReturnsFalseAndNull.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped NullValue ReturnsFalseAndNull.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_NullValue_ReturnsFalseAndNull()
@@ -109,9 +91,7 @@ public class StringConverterTests
         await Assert.That(output).IsNull();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped StringToString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped StringToString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_StringToString_Succeeds()

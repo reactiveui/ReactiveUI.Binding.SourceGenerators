@@ -7,14 +7,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for Bind (view-first two-way binding) invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for Bind (view-first two-way binding) invocation generation.</summary>
 public class BindGeneratorTests
 {
-    /// <summary>
-    /// Verifies Bind with same-type string property binding.
-    /// </summary>
+    /// <summary>Verifies Bind with same-type string property binding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_StringToString()
@@ -25,9 +21,7 @@ public class BindGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies Bind with multiple bindings on the same view/vm pair.
-    /// </summary>
+    /// <summary>Verifies Bind with multiple bindings on the same view/vm pair.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleBindings()
@@ -38,9 +32,7 @@ public class BindGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies Bind with conversion functions between int and string.
-    /// </summary>
+    /// <summary>Verifies Bind with conversion functions between int and string.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_WithConverters()
@@ -51,9 +43,7 @@ public class BindGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies Bind with conversion functions and a scheduler.
-    /// </summary>
+    /// <summary>Verifies Bind with conversion functions and a scheduler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_WithConvertersAndScheduler()

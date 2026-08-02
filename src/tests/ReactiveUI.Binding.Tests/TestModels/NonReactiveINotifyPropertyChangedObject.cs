@@ -13,35 +13,26 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class NonReactiveINotifyPropertyChangedObject : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="InpcProperty"/>.
-    /// </summary>
-    private string _inpcProperty = string.Empty;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the INPC property.
-    /// </summary>
+    /// <summary>Gets or sets the INPC property.</summary>
     public string InpcProperty
     {
-        get => _inpcProperty;
+        get => field;
         set
         {
-            if (_inpcProperty == value)
+            if (field == value)
             {
                 return;
             }
 
-            _inpcProperty = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Raises the PropertyChanged event.
-    /// </summary>
+    /// <summary>Raises the PropertyChanged event.</summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new(propertyName));

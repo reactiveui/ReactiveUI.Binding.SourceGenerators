@@ -4,43 +4,29 @@
 
 using System.Reactive.Concurrency;
 using System.Reactive.Subjects;
-using ReactiveUI.Binding.Reactive;
+using ReactiveUI.Binding.Reactive.Observables;
 
 namespace ReactiveUI.Binding.Tests.Reactive;
 
-/// <summary>
-///     Tests for the <see cref="ObserveOnObservable{T}"/> class which forwards notifications on a scheduler.
-/// </summary>
+/// <summary>Tests for the <see cref="ObserveOnObservable{T}"/> class which forwards notifications on a scheduler.</summary>
 public class ObserveOnObservableTests
 {
-    /// <summary>
-    ///     The second value pushed through the source observable.
-    /// </summary>
+    /// <summary>The second value pushed through the source observable.</summary>
     private const int SecondValue = 2;
 
-    /// <summary>
-    ///     The third value pushed through the source observable.
-    /// </summary>
+    /// <summary>The third value pushed through the source observable.</summary>
     private const int ThirdValue = 3;
 
-    /// <summary>
-    ///     The index of the third received value.
-    /// </summary>
+    /// <summary>The index of the third received value.</summary>
     private const int ThirdIndex = 2;
 
-    /// <summary>
-    ///     The expected number of forwarded notifications when three values are pushed.
-    /// </summary>
+    /// <summary>The expected number of forwarded notifications when three values are pushed.</summary>
     private const int ExpectedThreeCount = 3;
 
-    /// <summary>
-    ///     The delay, in milliseconds, allowed for the scheduler to process notifications.
-    /// </summary>
+    /// <summary>The delay, in milliseconds, allowed for the scheduler to process notifications.</summary>
     private const int SchedulerProcessingDelayMs = 50;
 
-    /// <summary>
-    ///     Verifies that notifications are forwarded to the observer.
-    /// </summary>
+    /// <summary>Verifies that notifications are forwarded to the observer.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Subscribe_ForwardsOnNextNotifications()
@@ -49,9 +35,9 @@ public class ObserveOnObservableTests
         var scheduler = new EventLoopScheduler();
         var observable = new ObserveOnObservable<int>(subject, scheduler);
         var received = new List<int>();
-        var completed = new TaskCompletionSource<bool>();
+        var completed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        observable.Subscribe(
+        _ = observable.Subscribe(
             received.Add,
             () => completed.SetResult(true));
 
@@ -69,9 +55,7 @@ public class ObserveOnObservableTests
         await Assert.That(received[ThirdIndex]).IsEqualTo(ThirdValue);
     }
 
-    /// <summary>
-    ///     Verifies that OnError is forwarded to the observer.
-    /// </summary>
+    /// <summary>Verifies that OnError is forwarded to the observer.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Subscribe_ForwardsOnErrorNotification()
@@ -79,10 +63,10 @@ public class ObserveOnObservableTests
         var subject = new Subject<int>();
         var scheduler = new EventLoopScheduler();
         var observable = new ObserveOnObservable<int>(subject, scheduler);
-        var errorReceived = new TaskCompletionSource<Exception>();
+        var errorReceived = new TaskCompletionSource<Exception>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        observable.Subscribe(
-            _ => { },
+        _ = observable.Subscribe(
+            static _ => { },
             errorReceived.SetResult);
 
         var expected = new InvalidOperationException("test error");
@@ -94,9 +78,7 @@ public class ObserveOnObservableTests
         await Assert.That(actual.Message).IsEqualTo("test error");
     }
 
-    /// <summary>
-    ///     Verifies that disposal stops notifications.
-    /// </summary>
+    /// <summary>Verifies that disposal stops notifications.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Subscribe_DisposalStopsNotifications()
@@ -124,9 +106,7 @@ public class ObserveOnObservableTests
         await Assert.That(received.Count).IsEqualTo(1);
     }
 
-    /// <summary>
-    ///     Verifies that Subscribe throws ArgumentNullException when observer is null.
-    /// </summary>
+    /// <summary>Verifies that Subscribe throws ArgumentNullException when observer is null.</summary>
     [Test]
     public void Subscribe_NullObserver_ThrowsArgumentNullException()
     {
@@ -134,28 +114,24 @@ public class ObserveOnObservableTests
         var scheduler = new EventLoopScheduler();
         var observable = new ObserveOnObservable<int>(subject, scheduler);
 
-        Assert.Throws<ArgumentNullException>(() => observable.Subscribe(null!));
+        _ = Assert.Throws<ArgumentNullException>(() => observable.Subscribe(null!));
         scheduler.Dispose();
     }
 
-    /// <summary>
-    ///     Verifies that constructor throws when source is null.
-    /// </summary>
+    /// <summary>Verifies that constructor throws when source is null.</summary>
     [Test]
     public void Constructor_NullSource_ThrowsArgumentNullException()
     {
         var scheduler = new EventLoopScheduler();
-        Assert.Throws<ArgumentNullException>(() => _ = new ObserveOnObservable<int>(null!, scheduler));
+        _ = Assert.Throws<ArgumentNullException>(() => _ = new ObserveOnObservable<int>(null!, scheduler));
         scheduler.Dispose();
     }
 
-    /// <summary>
-    ///     Verifies that constructor throws when scheduler is null.
-    /// </summary>
+    /// <summary>Verifies that constructor throws when scheduler is null.</summary>
     [Test]
     public void Constructor_NullScheduler_ThrowsArgumentNullException()
     {
         var subject = new Subject<int>();
-        Assert.Throws<ArgumentNullException>(() => _ = new ObserveOnObservable<int>(subject, null!));
+        _ = Assert.Throws<ArgumentNullException>(() => _ = new ObserveOnObservable<int>(subject, null!));
     }
 }

@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -16,25 +16,25 @@ namespace ReactiveUI.Binding
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView, string> OneWayBind(
             this global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView view,
             global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel viewModel,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel, int>> vmProperty,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel, int>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView, string?>> viewProperty,
             global::System.Func<int, string> selector,
-            global::System.Reactive.Concurrency.IScheduler scheduler,
-            [global::System.Runtime.CompilerServices.CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+            global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler,
+            [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (vmPropertyExpression == "x => x.Count"
+            if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountText")
             {
-                return __OneWayBind_7FFFFAB8DECC397F(viewModel, view, selector, scheduler);
+                return __OneWayBind_7FFFFAB8DECC3770(viewModel, view, selector, scheduler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView, string> __OneWayBind_7FFFFAB8DECC397F(global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView view, global::System.Func<int, string> selector, global::System.Reactive.Concurrency.IScheduler scheduler)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView, string> __OneWayBind_7FFFFAB8DECC3770(global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView view, global::System.Func<int, string> selector, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // OneWayBind: Count -> CountText (with conversion) (with scheduler)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
@@ -43,7 +43,7 @@ namespace ReactiveUI.Binding
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel)__o).Count,
             true);
         var __selected = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(sourceObs, selector);
-        var bindObs = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<string>(__selected, scheduler);
+        var bindObs = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<string>(__selected, scheduler);
 
             var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(bindObs, value =>
             {

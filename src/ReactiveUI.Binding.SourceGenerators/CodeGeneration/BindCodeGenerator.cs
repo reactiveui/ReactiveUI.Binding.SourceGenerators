@@ -5,6 +5,7 @@
 using System.Collections.Immutable;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
@@ -14,9 +15,19 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class BindCodeGenerator
 {
-    /// <summary>
-    /// Generates concrete typed overloads and binding methods for Bind invocations.
-    /// </summary>
+    /// <summary>What this API calls the view-model-to-view converter in its generated signatures.</summary>
+    private const string ForwardConverterName = "viewModelToViewConverter";
+
+    /// <summary>What this API calls the view-to-view-model converter in its generated signatures.</summary>
+    private const string ReverseConverterName = "viewToViewModelConverter";
+
+    /// <summary>Name of the generated local holding the view model side observable.</summary>
+    private const string ViewModelObservableName = "vmObs";
+
+    /// <summary>Name of the generated local holding the view side observable.</summary>
+    private const string ViewObservableName = "viewObs";
+
+    /// <summary>Generates concrete typed overloads and binding methods for Bind invocations.</summary>
     /// <param name="invocations">All detected Bind invocations.</param>
     /// <param name="allClasses">All detected class binding info.</param>
     /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
@@ -24,17 +35,17 @@ internal static class BindCodeGenerator
     internal static string? Generate(
         ImmutableArray<BindingInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        LanguageFeatures features)
+        in LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        var sb = new StringBuilder(invocations.Length * 1_024);
+        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         var supportsCallerArgExpr = features.SupportsCallerArgExpr;
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
-        sb.AppendLine();
+        _ = sb.AppendLine();
 
         var groups = GroupByTypeSignature(invocations);
 
@@ -42,8 +53,8 @@ internal static class BindCodeGenerator
         {
             var group = groups[g];
 
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable);
-            sb.AppendLine();
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
+            _ = sb.AppendLine();
 
             for (var i = 0; i < group.Invocations.Length; i++)
             {
@@ -54,78 +65,35 @@ internal static class BindCodeGenerator
                     inv.SourceTypeFullName,
                     inv.CallerFilePath,
                     inv.CallerLineNumber,
-                    inv.SourceExpressionText + "|" + inv.TargetExpressionText);
+                    $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
                 GenerateBindMethod(sb, inv, sourceClassInfo, targetClassInfo, suffix, features.SupportsNullable);
             }
         }
 
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
-        sb.AppendLine();
+        _ = sb.AppendLine();
 
-        return sb.ToString();
+        return PooledBuilder.ToStringAndReturn(sb);
     }
 
-    /// <summary>
-    /// Groups Bind invocations by their type signature for overload generation.
-    /// </summary>
+    /// <summary>Groups Bind invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The Bind invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
-    internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations)
-    {
-        var groupMap = new Dictionary<string, List<BindingInvocationInfo>>(invocations.Length);
-        var keySb = new StringBuilder(128);
+    internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations) =>
+        BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
-        for (var i = 0; i < invocations.Length; i++)
-        {
-            var inv = invocations[i];
-            keySb.Clear()
-                .Append(inv.SourceTypeFullName).Append('|')
-                .Append(inv.TargetTypeFullName).Append('|')
-                .Append(inv.SourcePropertyTypeFullName).Append('|')
-                .Append(inv.TargetPropertyTypeFullName).Append('|')
-                .Append(inv.HasConversion).Append('|')
-                .Append(inv.HasScheduler);
-
-            var key = keySb.ToString();
-
-            if (!groupMap.TryGetValue(key, out var list))
-            {
-                list = [];
-                groupMap[key] = list;
-            }
-
-            list.Add(inv);
-        }
-
-        var result = new List<BindingTypeGroup>();
-        foreach (var kvp in groupMap)
-        {
-            var first = kvp.Value[0];
-            result.Add(new(
-                first.SourceTypeFullName,
-                first.TargetTypeFullName,
-                first.SourcePropertyTypeFullName,
-                first.TargetPropertyTypeFullName,
-                first.HasConversion,
-                first.HasScheduler,
-                [.. kvp.Value]));
-        }
-
-        return result;
-    }
-
-    /// <summary>
-    /// Generates the concrete typed overload using the appropriate dispatch strategy.
-    /// </summary>
+    /// <summary>Generates the concrete typed overload using the appropriate dispatch strategy.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
     /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is available.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         BindingTypeGroup group,
         bool supportsCallerArgExpr,
-        bool supportsNullable)
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
     {
         if (supportsCallerArgExpr)
         {
@@ -133,13 +101,11 @@ internal static class BindCodeGenerator
         }
         else
         {
-            GenerateCallerFilePathOverload(sb, group, supportsNullable);
+            GenerateCallerFilePathOverload(sb, group, supportsNullable, stubHasExpressionParameters);
         }
     }
 
-    /// <summary>
-    /// Generates the CallerArgumentExpression-based overload for Bind dispatch.
-    /// </summary>
+    /// <summary>Generates the CallerArgumentExpression-based overload for Bind dispatch.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
@@ -152,7 +118,7 @@ internal static class BindCodeGenerator
         var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
         var returnType = FormatReturnType(group, supportsNullable);
 
-        sb.AppendLine($"""
+        _ = sb.AppendLine($"""
                                /// <summary>
                                /// Concrete typed overload for Bind from {group.SourceTypeFullName} to {group.TargetTypeFullName}.
                                /// Uses CallerArgumentExpression for dispatch.
@@ -160,14 +126,14 @@ internal static class BindCodeGenerator
                                public static {returnType} Bind(
                                    this {group.TargetTypeFullName} view,
                                    {group.SourceTypeFullName} viewModel,
-                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {sourcePropType}>> vmProperty,
+                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {sourcePropType}>> viewModelProperty,
                                    global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {targetPropType}>> viewProperty,
                        """);
 
         AppendExtraParameters(sb, group);
 
-        sb.AppendLine("""
-                                  [global::System.Runtime.CompilerServices.CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+        _ = sb.AppendLine("""
+                                  [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
                                   [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
                                   [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
                                   [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
@@ -184,10 +150,10 @@ internal static class BindCodeGenerator
                 inv.SourceTypeFullName,
                 inv.CallerFilePath,
                 inv.CallerLineNumber,
-                inv.SourceExpressionText + "|" + inv.TargetExpressionText);
+                $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
 
-            sb.AppendLine($$"""
-                                        {{condition}} (vmPropertyExpression == "{{escapedSourceExpr}}"
+            _ = sb.AppendLine($$"""
+                                        {{condition}} (viewModelPropertyExpression == "{{escapedSourceExpr}}"
                                             && viewPropertyExpression == "{{escapedTargetExpr}}")
                                         {
                                             return __Bind_{{methodSuffix}}(viewModel, view{{FormatExtraArgs(group)}});
@@ -195,29 +161,29 @@ internal static class BindCodeGenerator
                             """);
         }
 
-        sb.AppendLine("""
+        _ = sb.AppendLine("""
                                   throw new global::System.InvalidOperationException(
                                       "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
                               }
                       """);
     }
 
-    /// <summary>
-    /// Generates the CallerFilePath-based overload for Bind dispatch.
-    /// </summary>
+    /// <summary>Generates the CallerFilePath-based overload for Bind dispatch.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateCallerFilePathOverload(
         StringBuilder sb,
         BindingTypeGroup group,
-        bool supportsNullable)
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
     {
         var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
         var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
         var returnType = FormatReturnType(group, supportsNullable);
 
-        sb.AppendLine($"""
+        _ = sb.AppendLine($"""
                                /// <summary>
                                /// Concrete typed overload for Bind from {group.SourceTypeFullName} to {group.TargetTypeFullName}.
                                /// Uses CallerFilePath + CallerLineNumber for dispatch.
@@ -225,13 +191,19 @@ internal static class BindCodeGenerator
                                public static {returnType} Bind(
                                    this {group.TargetTypeFullName} view,
                                    {group.SourceTypeFullName} viewModel,
-                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {sourcePropType}>> vmProperty,
+                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {sourcePropType}>> viewModelProperty,
                                    global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {targetPropType}>> viewProperty,
                        """);
 
         AppendExtraParameters(sb, group);
 
-        sb.AppendLine("""
+        if (stubHasExpressionParameters)
+        {
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "viewModelProperty", "viewModelPropertyExpression", false);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "viewProperty", "viewPropertyExpression", false);
+        }
+
+        _ = sb.AppendLine("""
                                   [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
                                   [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
                               {
@@ -246,9 +218,9 @@ internal static class BindCodeGenerator
                 inv.SourceTypeFullName,
                 inv.CallerFilePath,
                 inv.CallerLineNumber,
-                inv.SourceExpressionText + "|" + inv.TargetExpressionText);
+                $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
 
-            sb.AppendLine($$"""
+            _ = sb.AppendLine($$"""
                                         {{condition}} (callerLineNumber == {{inv.CallerLineNumber}}
                                             && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(suffix)}}", global::System.StringComparison.OrdinalIgnoreCase))
                                         {
@@ -257,16 +229,14 @@ internal static class BindCodeGenerator
                             """);
         }
 
-        sb.AppendLine("""
+        _ = sb.AppendLine("""
                                   throw new global::System.InvalidOperationException(
                                       "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
                               }
                       """);
     }
 
-    /// <summary>
-    /// Generates a private Bind method for a specific invocation.
-    /// </summary>
+    /// <summary>Generates a private Bind method for a specific invocation.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
     /// <param name="sourceClassInfo">The source type class binding info.</param>
@@ -282,8 +252,8 @@ internal static class BindCodeGenerator
         bool supportsNullable)
     {
         var viewPropertyAccess = CodeGeneratorHelpers.BuildPropertySetterChain("view", inv.TargetPropertyPath);
-        var vmSetAccess = CodeGeneratorHelpers.BuildPropertySetterChain("viewModel", inv.SourcePropertyPath);
-        var vmPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath);
+        var viewModelSetAccess = CodeGeneratorHelpers.BuildPropertySetterChain("viewModel", inv.SourcePropertyPath);
+        var viewModelPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath);
         var viewPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
 
         var extraParams = FormatExtraMethodParams(inv);
@@ -291,10 +261,10 @@ internal static class BindCodeGenerator
         var schedulerComment = inv.HasScheduler ? " (with scheduler)" : string.Empty;
         var returnType = FormatMethodReturnType(inv, supportsNullable);
 
-        sb.AppendLine($$"""
+        _ = sb.AppendLine($$"""
                                 private static {{returnType}} __Bind_{{suffix}}({{inv.SourceTypeFullName}} viewModel, {{inv.TargetTypeFullName}} view{{extraParams}})
                                 {
-                                    // Bind: {{vmPathComment}} <-> {{viewPathComment}}{{conversionComment}}{{schedulerComment}}
+                                    // Bind: {{viewModelPathComment}} <-> {{viewPathComment}}{{conversionComment}}{{schedulerComment}}
                         """);
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
@@ -304,7 +274,7 @@ internal static class BindCodeGenerator
             inv.SourcePropertyPath,
             inv.SourcePropertyTypeFullName,
             sourceClassInfo,
-            "vmObs");
+            ViewModelObservableName);
 
         ObservationCodeGenerator.EmitInlineObservation(
             sb,
@@ -312,123 +282,46 @@ internal static class BindCodeGenerator
             inv.TargetPropertyPath,
             inv.TargetPropertyTypeFullName,
             targetClassInfo,
-            "viewObs");
+            ViewObservableName);
 
         if (inv.HasConversion || inv.HasScheduler)
         {
-            var vmVar = "vmObs";
-            var viewVar = "viewObs";
+            var (viewModelVar, viewVar) = EmitConversionAndSchedulerStages(sb, inv);
 
-            if (inv.HasConversion)
-            {
-                var vmNext = inv.HasScheduler ? "__vmSelected" : "vmBind";
-                var viewNext = inv.HasScheduler ? "__viewSelected" : "viewBind";
-                sb.AppendLine($"""
-                                       var {vmNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({vmVar}, vmToViewConverter);
-                                       var {viewNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({viewVar}, viewToVmConverter);
-                               """);
-                vmVar = vmNext;
-                viewVar = viewNext;
-            }
-
-            if (inv.HasScheduler)
-            {
-                sb.AppendLine($"""
-                                       var vmBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<{inv.TargetPropertyTypeFullName}>({vmVar}, scheduler);
-                                       var viewBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<{inv.SourcePropertyTypeFullName}>({viewVar}, scheduler);
-                               """);
-                vmVar = "vmBind";
-                viewVar = "viewBind";
-            }
-
-            EmitTwoWaySubscription(sb, inv, vmVar, viewVar, viewPropertyAccess, vmSetAccess, supportsNullable);
+            EmitTwoWaySubscription(sb, inv, viewModelVar, viewVar, viewPropertyAccess, viewModelSetAccess, supportsNullable);
         }
         else
         {
-            EmitTwoWaySubscription(sb, inv, "vmObs", "viewObs", viewPropertyAccess, vmSetAccess, supportsNullable);
+            EmitTwoWaySubscription(sb, inv, ViewModelObservableName, ViewObservableName, viewPropertyAccess, viewModelSetAccess, supportsNullable);
         }
     }
 
-    /// <summary>
-    /// Appends extra parameters (converters, scheduler) to the concrete overload signature.
-    /// </summary>
+    /// <summary>Appends extra parameters (converters, scheduler) to the concrete overload signature.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
-    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group)
-    {
-        if (group.HasConversion)
-        {
-            sb.AppendLine($"""
-                                       global::System.Func<{group.SourcePropertyTypeFullName}, {group.TargetPropertyTypeFullName}> vmToViewConverter,
-                                       global::System.Func<{group.TargetPropertyTypeFullName}, {group.SourcePropertyTypeFullName}> viewToVmConverter,
-                           """);
-        }
+    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group) =>
+        BindingEmitterHelpers.AppendTwoWayExtraParameters(sb, group, ForwardConverterName, ReverseConverterName);
 
-        if (!group.HasScheduler)
-        {
-            return;
-        }
-
-        sb.AppendLine("            global::System.Reactive.Concurrency.IScheduler scheduler,");
-    }
-
-    /// <summary>
-    /// Formats extra arguments (converters, scheduler) for forwarding to the binding method.
-    /// </summary>
+    /// <summary>Formats extra arguments (converters, scheduler) for forwarding to the binding method.</summary>
     /// <param name="group">The binding type group.</param>
     /// <returns>Extra arguments string or empty.</returns>
-    internal static string FormatExtraArgs(BindingTypeGroup group)
-    {
-        var sb = new StringBuilder();
-        if (group.HasConversion)
-        {
-            sb.Append(", vmToViewConverter, viewToVmConverter");
-        }
+    internal static string FormatExtraArgs(BindingTypeGroup group) =>
+        BindingEmitterHelpers.FormatTwoWayExtraArgs(group, ForwardConverterName, ReverseConverterName);
 
-        if (group.HasScheduler)
-        {
-            sb.Append(", scheduler");
-        }
-
-        return sb.ToString();
-    }
-
-    /// <summary>
-    /// Formats extra method parameters for the private binding method signature.
-    /// </summary>
+    /// <summary>Formats extra method parameters for the private binding method signature.</summary>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>Extra parameters string for converter and scheduler parameters.</returns>
-    internal static string FormatExtraMethodParams(BindingInvocationInfo inv)
-    {
-        var sb = new StringBuilder();
-        if (inv.HasConversion)
-        {
-            sb.Append(
-                    $", global::System.Func<{inv.SourcePropertyTypeFullName}, {inv.TargetPropertyTypeFullName}> vmToViewConverter")
-                .Append(
-                    $", global::System.Func<{inv.TargetPropertyTypeFullName}, {inv.SourcePropertyTypeFullName}> viewToVmConverter");
-        }
+    internal static string FormatExtraMethodParams(BindingInvocationInfo inv) =>
+        BindingEmitterHelpers.FormatTwoWayExtraMethodParams(inv, ForwardConverterName, ReverseConverterName);
 
-        if (inv.HasScheduler)
-        {
-            sb.Append(", global::System.Reactive.Concurrency.IScheduler scheduler");
-        }
-
-        return sb.ToString();
-    }
-
-    /// <summary>
-    /// Formats the return type for a concrete Bind overload.
-    /// </summary>
+    /// <summary>Formats the return type for a concrete Bind overload.</summary>
     /// <param name="group">The binding type group.</param>
     /// <returns>The fully qualified return type string.</returns>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static string FormatReturnType(BindingTypeGroup group, bool supportsNullable) =>
         $"global::ReactiveUI.Binding.IReactiveBinding<{group.TargetTypeFullName}, {BindReturnValueType(supportsNullable)}>";
 
-    /// <summary>
-    /// Formats the return type for a private Bind method.
-    /// </summary>
+    /// <summary>Formats the return type for a private Bind method.</summary>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>The fully qualified return type string.</returns>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
@@ -436,28 +329,65 @@ internal static class BindCodeGenerator
         $"global::ReactiveUI.Binding.IReactiveBinding<{inv.TargetTypeFullName}, {BindReturnValueType(supportsNullable)}>";
 
     /// <summary>
-    /// Emits the two-way subscription, change-stream merge, and <c>ReactiveBinding</c> return block.
+    /// Emits the conversion and scheduler stages that sit between the raw observations and the
+    /// subscription, and reports the variable names the subscription should read from.
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
-    /// <param name="vmVar">The view model observable variable name to subscribe to.</param>
+    /// <returns>The view model and view observable variable names after the stages are applied.</returns>
+    private static (string ViewModelVar, string ViewVar) EmitConversionAndSchedulerStages(
+        StringBuilder sb,
+        BindingInvocationInfo inv)
+    {
+        var viewModelVar = ViewModelObservableName;
+        var viewVar = ViewObservableName;
+
+        if (inv.HasConversion)
+        {
+            var viewModelNext = inv.HasScheduler ? "__vmSelected" : "vmBind";
+            var viewNext = inv.HasScheduler ? "__viewSelected" : "viewBind";
+            _ = sb.AppendLine($"""
+                                   var {viewModelNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({viewModelVar}, viewModelToViewConverter);
+                                   var {viewNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({viewVar}, viewToViewModelConverter);
+                           """);
+            viewModelVar = viewModelNext;
+            viewVar = viewNext;
+        }
+
+        if (inv.HasScheduler)
+        {
+            _ = sb.AppendLine($"""
+                                   var vmBind = new {ObserveOnObservable}<{inv.TargetPropertyTypeFullName}>({viewModelVar}, scheduler);
+                                   var viewBind = new {ObserveOnObservable}<{inv.SourcePropertyTypeFullName}>({viewVar}, scheduler);
+                           """);
+            viewModelVar = "vmBind";
+            viewVar = "viewBind";
+        }
+
+        return (viewModelVar, viewVar);
+    }
+
+    /// <summary>Emits the two-way subscription, change-stream merge, and <c>ReactiveBinding</c> return block.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="inv">The binding invocation info.</param>
+    /// <param name="viewModelVar">The view model observable variable name to subscribe to.</param>
     /// <param name="viewVar">The view observable variable name to subscribe to.</param>
     /// <param name="viewPropertyAccess">The view property setter access chain.</param>
-    /// <param name="vmSetAccess">The view model property setter access chain.</param>
+    /// <param name="viewModelSetAccess">The view model property setter access chain.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     private static void EmitTwoWaySubscription(
         StringBuilder sb,
         BindingInvocationInfo inv,
-        string vmVar,
+        string viewModelVar,
         string viewVar,
         string viewPropertyAccess,
-        string vmSetAccess,
+        string viewModelSetAccess,
         bool supportsNullable)
     {
         var nullable = supportsNullable ? "?" : string.Empty;
-        sb.AppendLine($$"""
+        _ = sb.AppendLine($$"""
 
-                                    var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe({{vmVar}}, value =>
+                                    var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe({{viewModelVar}}, value =>
                                     {
                                         {{viewPropertyAccess}} = value;
                                     });
@@ -465,10 +395,10 @@ internal static class BindCodeGenerator
                                     var __viewSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip({{viewVar}}, 1);
                                     var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__viewSkipped, value =>
                                     {
-                                        {{vmSetAccess}} = value;
+                                        {{viewModelSetAccess}} = value;
                                     });
 
-                                    var __vmTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{vmVar}}, v => ((object{{nullable}})v, true));
+                                    var __vmTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({{viewModelVar}}, v => ((object{{nullable}})v, true));
                                     var __viewTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__viewSkipped, v => ((object{{nullable}})v, false));
                                     var changed = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(__vmTagged, __viewTagged);
 
@@ -493,16 +423,4 @@ internal static class BindCodeGenerator
     /// <returns>The value-tuple type string.</returns>
     private static string BindReturnValueType(bool supportsNullable) =>
         supportsNullable ? "(object? view, bool isViewModel)" : "(object view, bool isViewModel)";
-
-    /// <summary>
-    /// Groups binding invocations by source, target, property types, and overload variant for overload generation.
-    /// </summary>
-    internal sealed record BindingTypeGroup(
-        string SourceTypeFullName,
-        string TargetTypeFullName,
-        string SourcePropertyTypeFullName,
-        string TargetPropertyTypeFullName,
-        bool HasConversion,
-        bool HasScheduler,
-        BindingInvocationInfo[] Invocations);
 }

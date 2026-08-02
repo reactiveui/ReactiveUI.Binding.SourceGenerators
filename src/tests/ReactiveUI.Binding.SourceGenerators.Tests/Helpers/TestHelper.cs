@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -30,21 +32,31 @@ public static class TestHelper
     public static LanguageVersion FallbackLanguageVersion(bool nullableEnabled) =>
         nullableEnabled ? LanguageVersion.CSharp8 : LanguageVersion.CSharp7_3;
 
-    /// <summary>
-    /// Creates a compilation from source code, targeting C# 7.3 to verify generated output compatibility.
-    /// </summary>
+    /// <summary>Creates a compilation from source code, targeting C# 7.3 to verify generated output compatibility.</summary>
     /// <param name="source">The source code to compile.</param>
     /// <returns>A compilation ready for testing.</returns>
     public static Compilation CreateCompilation(string source) => CreateCompilation(source, null);
 
-    /// <summary>
-    /// Creates a compilation from source code with appropriate references.
-    /// Includes ReactiveUI for IReactiveObject testing.
-    /// </summary>
+    /// <summary>Creates a compilation from source code with appropriate references. Includes ReactiveUI for IReactiveObject testing.</summary>
     /// <param name="source">The source code to compile.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <returns>A compilation ready for testing.</returns>
-    public static Compilation CreateCompilation(string source, LanguageVersion? languageVersion)
+    public static Compilation CreateCompilation(string source, LanguageVersion? languageVersion) =>
+        CreateCompilation(source, languageVersion, false);
+
+    /// <summary>
+    /// Creates a compilation from source code, referencing one of the two runtime packages. The packages share
+    /// no type names, so a compilation references one or the other and never both - which is also what lets the
+    /// generator tell which flavour it is generating for.
+    /// </summary>
+    /// <param name="source">The source code to compile.</param>
+    /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
+    /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>
+    /// <returns>A compilation ready for testing.</returns>
+    public static Compilation CreateCompilation(
+        string source,
+        LanguageVersion? languageVersion,
+        bool useReactiveRuntime)
     {
         var parseOptions = languageVersion.HasValue
             ? new CSharpParseOptions(languageVersion.Value)
@@ -52,22 +64,33 @@ public static class TestHelper
 
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
-        IEnumerable<MetadataReference> references;
-
-#if NET10_0_OR_GREATER
-        references = Basic.Reference.Assemblies.Net100.References.All;
+#if NET11_0_OR_GREATER
+        IEnumerable<MetadataReference> references = Basic.Reference.Assemblies.Net110.References.All;
+#elif NET10_0_OR_GREATER
+        IEnumerable<MetadataReference> references = Basic.Reference.Assemblies.Net100.References.All;
 #elif NET9_0_OR_GREATER
-        references = Basic.Reference.Assemblies.Net90.References.All;
+        IEnumerable<MetadataReference> references = Basic.Reference.Assemblies.Net90.References.All;
 #else
-        references = Basic.Reference.Assemblies.Net80.References.All;
+        IEnumerable<MetadataReference> references = Basic.Reference.Assemblies.Net80.References.All;
 #endif
 
-        // Add ReactiveUI and transitive assembly references
+        // Add ReactiveUI and transitive assembly references.
+        // ReactiveUI is seeded by ReactiveObject rather than IReactiveObject: the two live in
+        // different assemblies, and the walk only follows references outward, so seeding from the
+        // interface would leave the assembly that declares ReactiveObject out of the compilation.
+        var runtimeSeeds = useReactiveRuntime
+            ? new[] { typeof(ReactiveUI.Binding.Reactive.ReactiveUIBindingExtensions).Assembly }
+            : new[]
+            {
+                typeof(ReactiveUIBindingExtensions).Assembly,
+                typeof(ReactiveUI.Primitives.Concurrency.ISequencer).Assembly
+            };
+
         var seedAssemblies = new[]
         {
-            typeof(IReactiveObject).Assembly, typeof(System.Reactive.Linq.Observable).Assembly,
-            typeof(ReactiveUIBindingExtensions).Assembly, typeof(Reactive.ObserveOnObservable<>).Assembly
-        };
+            typeof(ReactiveObject).Assembly, typeof(IReactiveObject).Assembly,
+            typeof(System.Reactive.Linq.Observable).Assembly
+        }.Concat(runtimeSeeds).ToArray();
 
         var allReferences = references.Concat(GetTransitiveReferences(seedAssemblies));
 
@@ -78,10 +101,7 @@ public static class TestHelper
             new(OutputKind.DynamicallyLinkedLibrary));
     }
 
-    /// <summary>
-    /// Tests a source generator scenario that is expected to succeed.
-    /// Verifies the generated output against a snapshot.
-    /// </summary>
+    /// <summary>Tests a source generator scenario that is expected to succeed. Verifies the generated output against a snapshot.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
     /// <param name="file">The source file path of the caller (automatically populated).</param>
@@ -91,8 +111,8 @@ public static class TestHelper
         string source,
         Type callerType,
         [CallerFilePath] string file = "",
-        [CallerMemberName] string memberName = "")
-        => TestPass(source, callerType, null, file, memberName);
+        [CallerMemberName] string memberName = "") =>
+        TestPass(source, callerType, null, file, memberName);
 
     /// <summary>
     /// Tests a source generator scenario that is expected to succeed, targeting a specific language version.
@@ -119,12 +139,12 @@ public static class TestHelper
         // Log any diagnostics for debugging
         var allDiagnostics = result.OutputCompilation.GetDiagnostics()
             .Concat(result.GeneratorDiagnostics)
-            .Where(d => d.Severity >= DiagnosticSeverity.Warning)
+            .Where(static d => d.Severity >= DiagnosticSeverity.Warning)
             .ToImmutableArray();
 
         foreach (var diagnostic in allDiagnostics)
         {
-            Console.WriteLine($"{diagnostic.Severity}: {diagnostic.GetMessage()}");
+            TestContext.Current?.OutputWriter.WriteLine($"{diagnostic.Severity}: {diagnostic.GetMessage()}");
         }
 
         VerifySettings settings = new();
@@ -147,8 +167,8 @@ public static class TestHelper
         string source,
         Type callerType,
         [CallerFilePath] string file = "",
-        [CallerMemberName] string memberName = "")
-        => TestPassWithResult(source, callerType, null, file, memberName);
+        [CallerMemberName] string memberName = "") =>
+        TestPassWithResult(source, callerType, null, file, memberName);
 
     /// <summary>
     /// Tests a source generator scenario that is expected to succeed, targeting a specific language version.
@@ -175,12 +195,16 @@ public static class TestHelper
         // Log any diagnostics for debugging
         var allDiagnostics = result.OutputCompilation.GetDiagnostics()
             .Concat(result.GeneratorDiagnostics)
-            .Where(d => d.Severity >= DiagnosticSeverity.Warning)
+            .Where(static d => d.Severity >= DiagnosticSeverity.Warning)
             .ToImmutableArray();
 
         foreach (var diagnostic in allDiagnostics)
         {
-            Console.WriteLine($"{diagnostic.Severity}: {diagnostic.GetMessage()}");
+            var writer = TestContext.Current?.OutputWriter;
+            if (writer is not null)
+            {
+                await writer.WriteLineAsync($"{diagnostic.Severity}: {diagnostic.GetMessage()}");
+            }
         }
 
         VerifySettings settings = new();
@@ -192,22 +216,51 @@ public static class TestHelper
         return result;
     }
 
-    /// <summary>
-    /// Runs the source generator on the provided source code and returns the result.
-    /// </summary>
+    /// <summary>Runs the source generator on the provided source code and returns the result.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
     public static GeneratorTestResult RunGenerator(string source) => RunGenerator(source, null);
 
-    /// <summary>
-    /// Runs the source generator on the provided source code, targeting a specific language version.
-    /// </summary>
+    /// <summary>Runs the source generator on the provided source code, targeting a specific language version.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
-    public static GeneratorTestResult RunGenerator(string source, LanguageVersion? languageVersion)
+    public static GeneratorTestResult RunGenerator(string source, LanguageVersion? languageVersion) =>
+        RunGenerator(source, languageVersion, null);
+
+    /// <summary>
+    /// Runs the source generator on the provided source code, targeting a specific language version and
+    /// reporting the given root namespace to it the way a real build would.
+    /// </summary>
+    /// <param name="source">The source code to compile and generate.</param>
+    /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
+    /// <param name="rootNamespace">
+    /// The root namespace the build exposes, or <see langword="null"/> to run with none - which is what every
+    /// other overload does, because an in-memory compilation carries no MSBuild properties.
+    /// </param>
+    /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
+    public static GeneratorTestResult RunGenerator(
+        string source,
+        LanguageVersion? languageVersion,
+        string? rootNamespace) =>
+        RunGenerator(source, languageVersion, rootNamespace, false);
+
+    /// <summary>
+    /// Runs the source generator against one of the two runtime packages, reporting the given root namespace to
+    /// it the way a real build would.
+    /// </summary>
+    /// <param name="source">The source code to compile and generate.</param>
+    /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
+    /// <param name="rootNamespace">The root namespace the build exposes, or <see langword="null"/> for none.</param>
+    /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>
+    /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
+    public static GeneratorTestResult RunGenerator(
+        string source,
+        LanguageVersion? languageVersion,
+        string? rootNamespace,
+        bool useReactiveRuntime)
     {
-        var compilation = CreateCompilation(source, languageVersion);
+        var compilation = CreateCompilation(source, languageVersion, useReactiveRuntime);
         var generator = new BindingGenerator();
         var sourceGenerator = generator.AsSourceGenerator();
 
@@ -219,7 +272,7 @@ public static class TestHelper
             [sourceGenerator],
             null,
             parseOptions,
-            null,
+            rootNamespace is null ? null : new BuildPropertyOptionsProvider(rootNamespace),
             new(
                 default,
                 true));
@@ -229,12 +282,14 @@ public static class TestHelper
         return new(driver, outputCompilation, diagnostics);
     }
 
-    /// <summary>
-    /// Emits the output compilation to memory and loads it into a collectible assembly load context.
-    /// </summary>
+    /// <summary>Emits the output compilation to memory and loads it into a collectible assembly load context.</summary>
     /// <param name="result">The generator test result to emit.</param>
     /// <returns>The loaded assembly and the load context (dispose context to unload).</returns>
     /// <exception cref="InvalidOperationException">Thrown when emission fails.</exception>
+    [SuppressMessage(
+        "Security",
+        "SES1402:Assembly loaded from an unverifiable source",
+        Justification = "loads the compilation this test just emitted, in-process, into a collectible context")]
     public static (Assembly Assembly, CollectibleAssemblyLoadContext Context) EmitAndLoad(GeneratorTestResult result)
     {
         ArgumentNullException.ThrowIfNull(result);
@@ -247,8 +302,8 @@ public static class TestHelper
             var errors = string.Join(
                 Environment.NewLine,
                 emitResult.Diagnostics
-                    .Where(d => d.Severity == DiagnosticSeverity.Error)
-                    .Select(d => $"  {d.Id}: {d.GetMessage()}"));
+                    .Where(static d => d.Severity == DiagnosticSeverity.Error)
+                    .Select(static d => $"  {d.Id}: {d.GetMessage()}"));
 
             throw new InvalidOperationException(
                 $"Failed to emit compilation:{Environment.NewLine}{errors}");
@@ -348,11 +403,71 @@ public static class TestHelper
                 {
                     queue.Enqueue(System.Reflection.Assembly.Load(referencedName));
                 }
-                catch
+                catch (Exception e)
                 {
-                    // System assemblies already covered by Basic.Reference.Assemblies
+                    // Reference discovery is best-effort: anything that will not load is already
+                    // covered by the Basic.Reference.Assemblies framework set. The walk must carry
+                    // on, because letting a load failure escape truncates the reference list and
+                    // surfaces later as "type could not be found" in every generated compilation.
+                    TestContext.Current?.OutputWriter.WriteLine(
+                        $"skipped unresolvable reference '{referencedName.Name}': {e.Message}");
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Supplies the generator the MSBuild properties a real build would, which an in-memory compilation
+    /// otherwise has no way to carry.
+    /// </summary>
+    private sealed class BuildPropertyOptionsProvider : AnalyzerConfigOptionsProvider
+    {
+        /// <summary>The analyzer config key a build exposes the root namespace under.</summary>
+        private const string RootNamespaceKey = "build_property.RootNamespace";
+
+        /// <summary>The per-file options, which nothing under test reads.</summary>
+        private static readonly BuildPropertyOptions NoOptions = new(new Dictionary<string, string>(StringComparer.Ordinal));
+
+        /// <summary>Initializes a new instance of the <see cref="BuildPropertyOptionsProvider"/> class.</summary>
+        /// <param name="rootNamespace">The root namespace to report.</param>
+        public BuildPropertyOptionsProvider(string rootNamespace) =>
+            GlobalOptions = new BuildPropertyOptions(
+                new Dictionary<string, string>(StringComparer.Ordinal) { [RootNamespaceKey] = rootNamespace });
+
+        /// <inheritdoc/>
+        public override AnalyzerConfigOptions GlobalOptions { get; }
+
+        /// <inheritdoc/>
+        public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => NoOptions;
+
+        /// <inheritdoc/>
+        public override AnalyzerConfigOptions GetOptions(AdditionalText textFile) => NoOptions;
+    }
+
+    /// <summary>A fixed set of analyzer config options.</summary>
+    /// <param name="options">The options to expose.</param>
+    /// <remarks>
+    /// The out parameter is non-nullable where the base declares it nullable-with-a-postcondition, because the
+    /// attribute that states the postcondition cannot be named in this assembly: the generator compiles its own
+    /// netstandard2.0 copy of it and makes it visible here, so the name resolves to two types. Always assigning
+    /// a value keeps the stronger promise, so nothing downstream can observe the difference.
+    /// </remarks>
+    private sealed class BuildPropertyOptions(IReadOnlyDictionary<string, string> options) : AnalyzerConfigOptions
+    {
+        /// <inheritdoc/>
+        public override IEnumerable<string> Keys => options.Keys;
+
+        /// <inheritdoc/>
+        public override bool TryGetValue(string key, out string value)
+        {
+            if (options.TryGetValue(key, out var found))
+            {
+                value = found;
+                return true;
+            }
+
+            value = string.Empty;
+            return false;
         }
     }
 }

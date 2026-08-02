@@ -18,24 +18,26 @@ namespace ReactiveUI.Binding
             global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel, string?>> sourceProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView, string?>> targetProperty,
+            string sourcePropertyExpression = "",
+            string targetPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 134
+            if (callerLineNumber == 110
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __BindTwoWay_7FFFD5F622CF3052(source, target);
+                return __BindTwoWay_7FFFD5F622CF2D6A(source, target);
             }
-            else if (callerLineNumber == 135
+            else if (callerLineNumber == 111
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __BindTwoWay_7FFFD5F5F103D6C9(source, target);
+                return __BindTwoWay_7FFFD5F5F103D3E1(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_7FFFD5F622CF3052(global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target)
+        private static global::System.IDisposable __BindTwoWay_7FFFD5F622CF2D6A(global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target)
         {
             // BindTwoWay: FirstName <-> FirstNameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -63,7 +65,7 @@ namespace ReactiveUI.Binding
             return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
         }
 
-        private static global::System.IDisposable __BindTwoWay_7FFFD5F5F103D6C9(global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target)
+        private static global::System.IDisposable __BindTwoWay_7FFFD5F5F103D3E1(global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target)
         {
             // BindTwoWay: LastName <-> LastNameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

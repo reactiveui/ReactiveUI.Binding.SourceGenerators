@@ -6,22 +6,16 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanged.MultipleViewModels;
 
-/// <summary>
-/// First ViewModel with a name property.
-/// </summary>
+/// <summary>First ViewModel with a name property.</summary>
 public class ViewModel1 : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Name"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Name"/>.</summary>
     private string _name = string.Empty;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
         get => _name;

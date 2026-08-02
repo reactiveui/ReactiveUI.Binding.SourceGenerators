@@ -7,14 +7,10 @@ using Microsoft.CodeAnalysis;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
-/// <summary>
-/// Wraps the results of a source generator execution for assertion and verification.
-/// </summary>
+/// <summary>Wraps the results of a source generator execution for assertion and verification.</summary>
 public sealed class GeneratorTestResult
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GeneratorTestResult"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="GeneratorTestResult"/> class.</summary>
     /// <param name="driver">The generator driver after execution.</param>
     /// <param name="outputCompilation">The compilation after generator execution.</param>
     /// <param name="generatorDiagnostics">Diagnostics produced by the generator itself.</param>
@@ -34,12 +30,12 @@ public sealed class GeneratorTestResult
         CompilationErrors =
         [
             ..compilationDiagnostics
-                .Where(d => d.Severity == DiagnosticSeverity.Error)
+                .Where(static d => d.Severity == DiagnosticSeverity.Error)
         ];
         CompilationWarnings =
         [
             ..compilationDiagnostics
-                .Where(d => d.Severity == DiagnosticSeverity.Warning)
+                .Where(static d => d.Severity == DiagnosticSeverity.Warning)
         ];
 
         var generatedSources = new Dictionary<string, string>();
@@ -55,38 +51,24 @@ public sealed class GeneratorTestResult
         GeneratedSources = generatedSources;
     }
 
-    /// <summary>
-    /// Gets the generator driver after execution (for Verify snapshot testing).
-    /// </summary>
+    /// <summary>Gets the generator driver after execution (for Verify snapshot testing).</summary>
     public GeneratorDriver Driver { get; }
 
-    /// <summary>
-    /// Gets the compilation after generator execution.
-    /// </summary>
+    /// <summary>Gets the compilation after generator execution.</summary>
     public Compilation OutputCompilation { get; }
 
-    /// <summary>
-    /// Gets the diagnostics produced by the generator itself.
-    /// </summary>
+    /// <summary>Gets the diagnostics produced by the generator itself.</summary>
     public ImmutableArray<Diagnostic> GeneratorDiagnostics { get; }
 
-    /// <summary>
-    /// Gets the compilation diagnostics with severity Error.
-    /// </summary>
+    /// <summary>Gets the compilation diagnostics with severity Error.</summary>
     public ImmutableArray<Diagnostic> CompilationErrors { get; }
 
-    /// <summary>
-    /// Gets the compilation diagnostics with severity Warning.
-    /// </summary>
+    /// <summary>Gets the compilation diagnostics with severity Warning.</summary>
     public ImmutableArray<Diagnostic> CompilationWarnings { get; }
 
-    /// <summary>
-    /// Gets the generated source files as a dictionary of hint name to source text.
-    /// </summary>
+    /// <summary>Gets the generated source files as a dictionary of hint name to source text.</summary>
     public IReadOnlyDictionary<string, string> GeneratedSources { get; }
 
-    /// <summary>
-    /// Gets a value indicating whether the output compilation has no errors.
-    /// </summary>
-    public bool CompilesWithoutErrors => CompilationErrors.Length == 0;
+    /// <summary>Gets a value indicating whether the output compilation has no errors.</summary>
+    public bool CompilesWithoutErrors => CompilationErrors.IsEmpty;
 }

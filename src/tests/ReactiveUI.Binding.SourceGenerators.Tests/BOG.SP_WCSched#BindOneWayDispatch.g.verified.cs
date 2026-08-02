@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -19,7 +19,7 @@ namespace ReactiveUI.Binding
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel, int>> sourceProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyView, string?>> targetProperty,
             global::System.Func<int, string> conversionFunc,
-            global::System.Reactive.Concurrency.IScheduler scheduler,
+            global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("sourceProperty")] string sourcePropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("targetProperty")] string targetPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
@@ -31,13 +31,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
             {
-                return __BindOneWay_7FFFED3E0F13A733(source, target, conversionFunc, scheduler);
+                return __BindOneWay_7FFFED3E0F13A543(source, target, conversionFunc, scheduler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindOneWay_7FFFED3E0F13A733(global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyView target, global::System.Func<int, string> conversionFunc, global::System.Reactive.Concurrency.IScheduler scheduler)
+        private static global::System.IDisposable __BindOneWay_7FFFED3E0F13A543(global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyView target, global::System.Func<int, string> conversionFunc, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // BindOneWay: Count -> CountText (with conversion) (with scheduler)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
@@ -46,7 +46,7 @@ namespace ReactiveUI.Binding
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel)__o).Count,
             true);
         var __selected = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(sourceObs, conversionFunc);
-        var bindObs = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<string>(__selected, scheduler);
+        var bindObs = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<string>(__selected, scheduler);
 
             return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(bindObs, value =>
             {

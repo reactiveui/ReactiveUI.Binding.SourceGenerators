@@ -12,282 +12,198 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class WhenAnyTestFixture : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backer for Value1.
-    /// </summary>
-    private string _value1 = string.Empty;
-
-    /// <summary>
-    /// The backer for Value2.
-    /// </summary>
-    private string _value2 = string.Empty;
-
-    /// <summary>
-    /// The backer for Value3.
-    /// </summary>
-    private string _value3 = string.Empty;
-
-    /// <summary>
-    /// The backer for Value4.
-    /// </summary>
-    private string _value4 = string.Empty;
-
-    /// <summary>
-    /// The backer for Value5.
-    /// </summary>
-    private string _value5 = string.Empty;
-
-    /// <summary>
-    /// The backer for Value6.
-    /// </summary>
-    private string _value6 = string.Empty;
-
-    /// <summary>
-    /// The backer for Value7.
-    /// </summary>
-    private string _value7 = string.Empty;
-
-    /// <summary>
-    /// The backer for Value8.
-    /// </summary>
-    private string _value8 = string.Empty;
-
-    /// <summary>
-    /// The backer for Value9.
-    /// </summary>
-    private string _value9 = string.Empty;
-
-    /// <summary>
-    /// The backer for Value10.
-    /// </summary>
-    private string _value10 = string.Empty;
-
-    /// <summary>
-    /// The backer for Value11.
-    /// </summary>
-    private string _value11 = string.Empty;
-
-    /// <summary>
-    /// The backer for Value12.
-    /// </summary>
-    private string _value12 = string.Empty;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets value1.
-    /// </summary>
+    /// <summary>Gets or sets value1.</summary>
     public string Value1
     {
-        get => _value1;
+        get => field;
         set
         {
-            if (_value1 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value1 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value1)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets value2.
-    /// </summary>
+    /// <summary>Gets or sets value2.</summary>
     public string Value2
     {
-        get => _value2;
+        get => field;
         set
         {
-            if (_value2 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value2 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value2)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets value3.
-    /// </summary>
+    /// <summary>Gets or sets value3.</summary>
     public string Value3
     {
-        get => _value3;
+        get => field;
         set
         {
-            if (_value3 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value3 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value3)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets value4.
-    /// </summary>
+    /// <summary>Gets or sets value4.</summary>
     public string Value4
     {
-        get => _value4;
+        get => field;
         set
         {
-            if (_value4 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value4 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value4)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets value5.
-    /// </summary>
+    /// <summary>Gets or sets value5.</summary>
     public string Value5
     {
-        get => _value5;
+        get => field;
         set
         {
-            if (_value5 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value5 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value5)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets value6.
-    /// </summary>
+    /// <summary>Gets or sets value6.</summary>
     public string Value6
     {
-        get => _value6;
+        get => field;
         set
         {
-            if (_value6 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value6 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value6)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets value7.
-    /// </summary>
+    /// <summary>Gets or sets value7.</summary>
     public string Value7
     {
-        get => _value7;
+        get => field;
         set
         {
-            if (_value7 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value7 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value7)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets value8.
-    /// </summary>
+    /// <summary>Gets or sets value8.</summary>
     public string Value8
     {
-        get => _value8;
+        get => field;
         set
         {
-            if (_value8 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value8 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value8)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets value9.
-    /// </summary>
+    /// <summary>Gets or sets value9.</summary>
     public string Value9
     {
-        get => _value9;
+        get => field;
         set
         {
-            if (_value9 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value9 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value9)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets value10.
-    /// </summary>
+    /// <summary>Gets or sets value10.</summary>
     public string Value10
     {
-        get => _value10;
+        get => field;
         set
         {
-            if (_value10 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value10 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value10)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets value11.
-    /// </summary>
+    /// <summary>Gets or sets value11.</summary>
     public string Value11
     {
-        get => _value11;
+        get => field;
         set
         {
-            if (_value11 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value11 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value11)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets value12.
-    /// </summary>
+    /// <summary>Gets or sets value12.</summary>
     public string Value12
     {
-        get => _value12;
+        get => field;
         set
         {
-            if (_value12 == value)
+            if (field == value)
             {
                 return;
             }
 
-            _value12 = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Value12)));
         }
-    }
+    } = string.Empty;
 }

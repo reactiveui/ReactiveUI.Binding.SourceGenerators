@@ -6,14 +6,10 @@ using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-/// Unit tests for <see cref="EmptyObservable{T}"/>.
-/// </summary>
+/// <summary>Unit tests for <see cref="EmptyObservable{T}"/>.</summary>
 public class EmptyObservableTests
 {
-    /// <summary>
-    /// Verifies that EmptyObservable completes immediately on subscribe.
-    /// </summary>
+    /// <summary>Verifies that EmptyObservable completes immediately on subscribe.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_CompletesImmediately()
@@ -21,25 +17,21 @@ public class EmptyObservableTests
         var completed = false;
         var results = new List<int>();
 
-        EmptyObservable<int>.Instance.Subscribe(new AnonymousObserver<int>(
+        _ = EmptyObservable<int>.Instance.Subscribe(new AnonymousObserver<int>(
             results.Add,
-            _ => { },
+            static _ => { },
             () => completed = true));
 
         await Assert.That(completed).IsTrue();
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that EmptyObservable throws ArgumentNullException for null observer.
-    /// </summary>
+    /// <summary>Verifies that EmptyObservable throws ArgumentNullException for null observer.</summary>
     [Test]
     public void Subscribe_NullObserver_ThrowsArgumentNullException() =>
-        Assert.Throws<ArgumentNullException>(() => EmptyObservable<int>.Instance.Subscribe(null!));
+        Assert.Throws<ArgumentNullException>(static () => EmptyObservable<int>.Instance.Subscribe(null!));
 
-    /// <summary>
-    /// Verifies that the singleton instance is reused.
-    /// </summary>
+    /// <summary>Verifies that the singleton instance is reused.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Instance_IsSingleton()
@@ -50,15 +42,12 @@ public class EmptyObservableTests
         await Assert.That(ReferenceEquals(instance1, instance2)).IsTrue();
     }
 
-    /// <summary>
-    /// A simple observer that delegates to provided actions.
-    /// </summary>
+    /// <summary>A simple observer that delegates to provided actions.</summary>
     /// <typeparam name="T">The type of elements observed.</typeparam>
     /// <param name="onNext">The action to invoke for each element.</param>
     /// <param name="onError">The action to invoke on error.</param>
     /// <param name="onCompleted">The action to invoke on completion.</param>
-    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-        : IObserver<T>
+    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted) : IObserver<T>
     {
         /// <inheritdoc/>
         public void OnCompleted() => onCompleted();

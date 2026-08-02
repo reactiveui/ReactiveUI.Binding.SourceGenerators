@@ -7,14 +7,10 @@ using ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
-/// <summary>
-/// Tests for <see cref="BindingInvocationAnalyzer"/> — general and cross-cutting cases.
-/// </summary>
+/// <summary>Tests for <see cref="BindingInvocationAnalyzer"/> — general and cross-cutting cases.</summary>
 public partial class BindingInvocationAnalyzerTests
 {
-    /// <summary>
-    /// Placeholder test to verify the analyzer test infrastructure works.
-    /// </summary>
+    /// <summary>Placeholder test to verify the analyzer test infrastructure works.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EmptySource_NoDiagnostics()
@@ -30,9 +26,7 @@ public partial class BindingInvocationAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that non-binding methods do not trigger any diagnostics.
-    /// </summary>
+    /// <summary>Verifies that non-binding methods do not trigger any diagnostics.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NonBindingMethod_NoDiagnostics()
@@ -94,11 +88,11 @@ public partial class BindingInvocationAnalyzerTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
 
         // RXUIBIND001 for non-inline lambda
-        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        var nonInlineDiags = diagnostics.Where(static d => d.Id == NonInlineLambdaDiagnosticId).ToArray();
         await Assert.That(nonInlineDiags.Length).IsEqualTo(1);
 
         // RXUIBIND003 should NOT be reported because the lambda is not inline
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == "RXUIBIND003").ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(0);
     }
 
@@ -165,14 +159,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        var nonInlineDiags = diagnostics.Where(static d => d.Id == NonInlineLambdaDiagnosticId).ToArray();
         await Assert.That(nonInlineDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that a block-body parenthesized lambda is still considered inline
-    /// and does NOT trigger RXUIBIND001.
-    /// </summary>
+    /// <summary>Verifies that a block-body parenthesized lambda is still considered inline and does NOT trigger RXUIBIND001.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ParenthesizedBlockBodyLambda_IsInlineLambda_NoDiagnosticForRXUIBIND001()
@@ -199,7 +190,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var nonInlineDiags = diagnostics.Where(d => d.Id == "RXUIBIND001").ToArray();
+        var nonInlineDiags = diagnostics.Where(static d => d.Id == NonInlineLambdaDiagnosticId).ToArray();
         await Assert.That(nonInlineDiags.Length).IsEqualTo(0);
     }
 
@@ -347,9 +338,7 @@ public partial class BindingInvocationAnalyzerTests
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies BindTo with an inline target lambda accessing a public property reports no diagnostics.
-    /// </summary>
+    /// <summary>Verifies BindTo with an inline target lambda accessing a public property reports no diagnostics.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND_BindTo_InlineLambda_NoDiagnostic()
@@ -377,7 +366,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var bindDiags = diagnostics.Where(d => d.Id.StartsWith("RXUIBIND", StringComparison.Ordinal)).ToArray();
+        var bindDiags = diagnostics.Where(static d => d.Id.StartsWith("RXUIBIND", StringComparison.Ordinal)).ToArray();
         await Assert.That(bindDiags.Length).IsEqualTo(0);
     }
 }

@@ -6,17 +6,13 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 
-/// <summary>
-/// Scenario methods for OneWayBind (view-first compat alias) that the source generator processes at compile time.
-/// </summary>
+/// <summary>Scenario methods for OneWayBind (view-first compat alias) that the source generator processes at compile time.</summary>
 public static class OneWayBindCompatScenarios
 {
-    /// <summary>
-    /// View-first one-way binding for a string property using the OneWayBind compat alias.
-    /// </summary>
+    /// <summary>View-first one-way binding for a string property using the OneWayBind compat alias.</summary>
     /// <param name="view">The target view.</param>
     /// <param name="vm">The source view model.</param>
     /// <returns>A reactive binding representing the binding.</returns>
-    public static IReactiveBinding<TestView, string> StringProperty(TestView view, TestViewModel vm)
-        => view.OneWayBind(vm, x => x.Name, x => x.DisplayName);
+    public static IReactiveBinding<TestView, string> StringProperty(TestView view, TestViewModel vm) =>
+        view.OneWayBind(vm, x => x.Name, x => x.DisplayName);
 }

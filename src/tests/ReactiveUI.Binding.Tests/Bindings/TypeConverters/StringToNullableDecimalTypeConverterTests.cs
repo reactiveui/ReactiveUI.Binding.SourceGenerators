@@ -4,24 +4,16 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for converting strings to nullable decimals.
-/// </summary>
+/// <summary>Tests for converting strings to nullable decimals.</summary>
 public class StringToNullableDecimalTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    /// Decimal value parsed from a positive numeric string.
-    /// </summary>
-    private const decimal ParsedDecimal = 123.456m;
+    /// <summary>Decimal value parsed from a positive numeric string.</summary>
+    private const decimal ParsedDecimal = 123.456M;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -31,9 +23,7 @@ public class StringToNullableDecimalTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert EmptyString ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvert EmptyString ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_EmptyString_ReturnsTrue()
@@ -44,9 +34,7 @@ public class StringToNullableDecimalTypeConverterTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert InvalidString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert InvalidString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_InvalidString_ReturnsFalse()
@@ -57,9 +45,7 @@ public class StringToNullableDecimalTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert StringToDecimalNullable Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert StringToDecimalNullable Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_StringToDecimalNullable_Succeeds()

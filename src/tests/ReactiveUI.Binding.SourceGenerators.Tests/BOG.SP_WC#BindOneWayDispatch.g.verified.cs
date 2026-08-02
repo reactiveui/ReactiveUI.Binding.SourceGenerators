@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -30,13 +30,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
             {
-                return __BindOneWay_7FFFE88AB8C052CB(source, target, conversionFunc);
+                return __BindOneWay_7FFFE88AB8C050DB(source, target, conversionFunc);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindOneWay_7FFFE88AB8C052CB(global::SharedScenarios.BindOneWay.SinglePropertyWithConverter.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyWithConverter.MyView target, global::System.Func<int, string> conversionFunc)
+        private static global::System.IDisposable __BindOneWay_7FFFE88AB8C050DB(global::SharedScenarios.BindOneWay.SinglePropertyWithConverter.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyWithConverter.MyView target, global::System.Func<int, string> conversionFunc)
         {
             // BindOneWay: Count -> CountText (with conversion)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(

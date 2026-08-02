@@ -7,19 +7,13 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.Builder;
 
-/// <summary>
-/// Tests for the <see cref="ReactiveUIBindingBuilder"/> class.
-/// </summary>
+/// <summary>Tests for the <see cref="ReactiveUIBindingBuilder"/> class.</summary>
 public class ReactiveUIBindingBuilderTests
 {
-    /// <summary>
-    /// The minimum number of observable-for-property services expected after core registration.
-    /// </summary>
+    /// <summary>The minimum number of observable-for-property services expected after core registration.</summary>
     private const int MinimumCoreObservableServices = 2;
 
-    /// <summary>
-    /// Verifies that the builder can be created and has a non-null ConverterService.
-    /// </summary>
+    /// <summary>Verifies that the builder can be created and has a non-null ConverterService.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Constructor_CreatesConverterService()
@@ -30,9 +24,7 @@ public class ReactiveUIBindingBuilderTests
         await Assert.That(builder.ConverterService).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that WithCoreServices registers INPC and POCO observation services.
-    /// </summary>
+    /// <summary>Verifies that WithCoreServices registers INPC and POCO observation services.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithCoreServices_RegistersObservationServices()
@@ -40,17 +32,15 @@ public class ReactiveUIBindingBuilderTests
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
 
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
 
         var services = Locator.Current.GetServices<ICreatesObservableForProperty>().ToList();
 
         await Assert.That(services.Count).IsGreaterThanOrEqualTo(MinimumCoreObservableServices);
     }
 
-    /// <summary>
-    /// Verifies that WithPlatformModule registers a module.
-    /// </summary>
+    /// <summary>Verifies that WithPlatformModule registers a module.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithPlatformModule_RegistersModule()
@@ -59,15 +49,13 @@ public class ReactiveUIBindingBuilderTests
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         var registered = false;
 
-        builder.WithPlatformModule(new TestModule(() => registered = true));
-        builder.BuildApp();
+        _ = builder.WithPlatformModule(new TestModule(() => registered = true));
+        _ = builder.BuildApp();
 
         await Assert.That(registered).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that WithRegistration executes the registration action.
-    /// </summary>
+    /// <summary>Verifies that WithRegistration executes the registration action.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithRegistration_ExecutesAction()
@@ -76,21 +64,19 @@ public class ReactiveUIBindingBuilderTests
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         var executed = false;
 
-        builder.WithRegistration(_ => executed = true);
+        _ = builder.WithRegistration(_ => executed = true);
 
         await Assert.That(executed).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that BuildApp sets the global ConverterService.
-    /// </summary>
+    /// <summary>Verifies that BuildApp sets the global ConverterService.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildApp_SetsGlobalConverterService()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
+        _ = builder.WithCoreServices();
 
         var instance = builder.BuildApp();
 
@@ -98,9 +84,7 @@ public class ReactiveUIBindingBuilderTests
         await Assert.That(BindingConverters.Current).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that WithCoreServices is idempotent.
-    /// </summary>
+    /// <summary>Verifies that WithCoreServices is idempotent.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithCoreServices_CalledTwice_OnlyRegistersOnce()
@@ -108,18 +92,16 @@ public class ReactiveUIBindingBuilderTests
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
 
-        builder.WithCoreServices();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
 
         // Should not throw; services registered once
         var services = Locator.Current.GetServices<ICreatesObservableForProperty>().ToList();
         await Assert.That(services.Count).IsGreaterThanOrEqualTo(MinimumCoreObservableServices);
     }
 
-    /// <summary>
-    /// Verifies that the fluent API supports chaining.
-    /// </summary>
+    /// <summary>Verifies that the fluent API supports chaining.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FluentAPI_SupportsChainingCalls()
@@ -127,16 +109,13 @@ public class ReactiveUIBindingBuilderTests
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
 
-        builder.WithCoreServices();
-        var result = builder.WithRegistration(_ => { });
+        _ = builder.WithCoreServices();
+        var result = builder.WithRegistration(static _ => { });
 
         await Assert.That(result).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithConverter"/> registers a
-    /// typed converter that appears in the <see cref="ConverterService.TypedConverters"/> registry.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.WithConverter"/> registers a typed converter that appears in the <see cref="ConverterService.TypedConverters"/> registry.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithConverter_RegistersInTypedConverters()
@@ -146,19 +125,16 @@ public class ReactiveUIBindingBuilderTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(bool),
-            (_, _) => (true, true));
+            static (_, _) => (true, true));
 
-        builder.WithConverter(converter);
+        _ = builder.WithConverter(converter);
 
         var resolved = builder.ConverterService.TypedConverters.TryGetConverter(typeof(int), typeof(bool));
         await Assert.That(resolved).IsNotNull();
         await Assert.That(ReferenceEquals(resolved, converter)).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithConverter"/> returns the builder
-    /// for fluent chaining.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.WithConverter"/> returns the builder for fluent chaining.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithConverter_ReturnsSelfForChaining()
@@ -168,52 +144,43 @@ public class ReactiveUIBindingBuilderTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(string),
-            (from, _) => (true, from?.ToString()));
+            static (from, _) => (true, from?.ToString()));
 
         var result = builder.WithConverter(converter);
 
         await Assert.That(result).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithFallbackConverter"/> registers a
-    /// fallback converter that appears in the <see cref="ConverterService.FallbackConverters"/> registry.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.WithFallbackConverter"/> registers a fallback converter in <see cref="ConverterService.FallbackConverters"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithFallbackConverter_RegistersInFallbackConverters()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        var converter = new StubFallbackConverter((_, _, _, _) => (true, "converted"));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, "converted"));
 
-        builder.WithFallbackConverter(converter);
+        _ = builder.WithFallbackConverter(converter);
 
         var allConverters = builder.ConverterService.FallbackConverters.GetAllConverters().ToList();
         await Assert.That(allConverters).Contains(converter);
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithFallbackConverter"/> returns the builder
-    /// for fluent chaining.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.WithFallbackConverter"/> returns the builder for fluent chaining.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithFallbackConverter_ReturnsSelfForChaining()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        var converter = new StubFallbackConverter((_, _, _, _) => (true, "converted"));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, "converted"));
 
         var result = builder.WithFallbackConverter(converter);
 
         await Assert.That(result).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithSetMethodConverter"/> registers a
-    /// set-method converter that appears in the <see cref="ConverterService.SetMethodConverters"/> registry.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.WithSetMethodConverter"/> registers a set-method converter in <see cref="ConverterService.SetMethodConverters"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithSetMethodConverter_RegistersInSetMethodConverters()
@@ -222,16 +189,13 @@ public class ReactiveUIBindingBuilderTests
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         var converter = new StubSetMethodBindingConverter();
 
-        builder.WithSetMethodConverter(converter);
+        _ = builder.WithSetMethodConverter(converter);
 
         var allConverters = builder.ConverterService.SetMethodConverters.GetAllConverters().ToList();
         await Assert.That(allConverters).Contains(converter);
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithSetMethodConverter"/> returns the builder
-    /// for fluent chaining.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.WithSetMethodConverter"/> returns the builder for fluent chaining.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithSetMethodConverter_ReturnsSelfForChaining()
@@ -245,10 +209,7 @@ public class ReactiveUIBindingBuilderTests
         await Assert.That(result).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithCoreServices"/> registers default
-    /// converters, spot-checking that the <see cref="StringConverter"/> is present.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.WithCoreServices"/> registers default converters, spot-checking that the <see cref="StringConverter"/> is present.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithCoreServices_RegistersDefaultConverters()
@@ -256,17 +217,14 @@ public class ReactiveUIBindingBuilderTests
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
 
-        builder.WithCoreServices();
+        _ = builder.WithCoreServices();
 
         // Spot-check: StringConverter registers string -> string
         var stringConverter = builder.ConverterService.TypedConverters.TryGetConverter(typeof(string), typeof(string));
         await Assert.That(stringConverter).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithCoreServices"/> registers
-    /// the <see cref="IntegerToStringTypeConverter"/> (int -> string).
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.WithCoreServices"/> registers the <see cref="IntegerToStringTypeConverter"/> (int -> string).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithCoreServices_RegistersIntegerToStringConverter()
@@ -274,66 +232,54 @@ public class ReactiveUIBindingBuilderTests
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
 
-        builder.WithCoreServices();
+        _ = builder.WithCoreServices();
 
         var converter = builder.ConverterService.TypedConverters.TryGetConverter(typeof(int), typeof(string));
         await Assert.That(converter).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that calling <see cref="IReactiveUIBindingBuilder.WithCoreServices"/>
-    /// via the explicit interface method returns an <see cref="IReactiveUIBindingBuilder"/>.
-    /// </summary>
+    /// <summary>Verifies that calling <see cref="IReactiveUIBindingBuilder.WithCoreServices"/> via the explicit interface method returns an <see cref="IReactiveUIBindingBuilder"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithCoreServices_ExplicitInterface_ReturnsIReactiveUIBindingBuilder()
     {
         RxBindingBuilder.ResetForTesting();
-        IReactiveUIBindingBuilder iBuilder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        var result = iBuilder.WithCoreServices();
+        IReactiveUIBindingBuilder builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+        var result = builder.WithCoreServices();
 
         await Assert.That(result).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.BuildApp"/> sets the global
-    /// <see cref="BindingConverters.Current"/> to the builder's <see cref="ConverterService"/>.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.BuildApp"/> sets the global <see cref="BindingConverters.Current"/> to the builder's <see cref="ConverterService"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildApp_SetsGlobalConverterServiceToBuilderInstance()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
+        _ = builder.WithCoreServices();
 
-        builder.BuildApp();
+        _ = builder.BuildApp();
 
         await Assert.That(ReferenceEquals(BindingConverters.Current, builder.ConverterService)).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.BuildApp"/> marks the system as initialized
-    /// so that <see cref="RxBindingBuilder.EnsureInitialized"/> does not throw.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.BuildApp"/> marks the system as initialized so that <see cref="RxBindingBuilder.EnsureInitialized"/> does not throw.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildApp_MarksAsInitialized()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
+        _ = builder.WithCoreServices();
 
-        builder.BuildApp();
+        _ = builder.BuildApp();
 
         var action = RxBindingBuilder.EnsureInitialized;
         await Assert.That(action).ThrowsNothing();
     }
 
-    /// <summary>
-    /// Verifies that multiple converters of different types can be registered
-    /// and all appear in their respective registries.
-    /// </summary>
+    /// <summary>Verifies that multiple converters of different types can be registered and all appear in their respective registries.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleConverterTypes_AllRegistered()
@@ -343,13 +289,13 @@ public class ReactiveUIBindingBuilderTests
         var typed = new StubBindingTypeConverter(
             typeof(double),
             typeof(string),
-            (from, _) => (true, from?.ToString()));
-        var fallback = new StubFallbackConverter((_, _, _, _) => (true, "fallback"));
+            static (from, _) => (true, from?.ToString()));
+        var fallback = new StubFallbackConverter(static (_, _, _, _) => (true, "fallback"));
         var setMethod = new StubSetMethodBindingConverter();
 
-        builder.WithConverter(typed);
-        builder.WithFallbackConverter(fallback);
-        builder.WithSetMethodConverter(setMethod);
+        _ = builder.WithConverter(typed);
+        _ = builder.WithFallbackConverter(fallback);
+        _ = builder.WithSetMethodConverter(setMethod);
 
         await Assert.That(builder.ConverterService.TypedConverters.TryGetConverter(typeof(double), typeof(string)))
             .IsNotNull();
@@ -357,10 +303,7 @@ public class ReactiveUIBindingBuilderTests
         await Assert.That(builder.ConverterService.SetMethodConverters.GetAllConverters().ToList()).Contains(setMethod);
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithCommandBinder"/> registers a
-    /// command binder that appears in Splat's <see cref="ICreatesCommandBinding"/> services.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.WithCommandBinder"/> registers a command binder that appears in Splat's <see cref="ICreatesCommandBinding"/> services.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithCommandBinder_RegistersInSplat()
@@ -369,17 +312,14 @@ public class ReactiveUIBindingBuilderTests
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         var binder = new StubCommandBinder();
 
-        builder.WithCommandBinder(binder);
-        builder.BuildApp();
+        _ = builder.WithCommandBinder(binder);
+        _ = builder.BuildApp();
 
         var services = Locator.Current.GetServices<ICreatesCommandBinding>().ToList();
         await Assert.That(services).Contains(binder);
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithCommandBinder"/> returns the builder
-    /// for fluent chaining.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.WithCommandBinder"/> returns the builder for fluent chaining.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithCommandBinder_ReturnsSelfForChaining()
@@ -393,9 +333,7 @@ public class ReactiveUIBindingBuilderTests
         await Assert.That(result).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that <see cref="ReactiveUIBindingBuilder.WithCommandBinder"/> throws on null binder.
-    /// </summary>
+    /// <summary>Verifies that <see cref="ReactiveUIBindingBuilder.WithCommandBinder"/> throws on null binder.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithCommandBinder_NullBinder_Throws()
@@ -407,9 +345,7 @@ public class ReactiveUIBindingBuilderTests
             .ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that ConfigureViewLocator registers a configured DefaultViewLocator.
-    /// </summary>
+    /// <summary>Verifies that ConfigureViewLocator registers a configured DefaultViewLocator.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ConfigureViewLocator_RegistersConfiguredLocator()
@@ -417,10 +353,10 @@ public class ReactiveUIBindingBuilderTests
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
 
-        builder.WithCoreServices();
-        builder.ConfigureViewLocator(mappings =>
+        _ = builder.WithCoreServices();
+        _ = builder.ConfigureViewLocator(static mappings =>
             mappings.Map<ConfigTestViewModel, ConfigTestView>());
-        builder.BuildApp();
+        _ = builder.BuildApp();
 
         var locator = ViewLocator.GetCurrent();
         var result = locator.ResolveView(new ConfigTestViewModel());
@@ -429,9 +365,7 @@ public class ReactiveUIBindingBuilderTests
         await Assert.That(result).IsTypeOf<ConfigTestView>();
     }
 
-    /// <summary>
-    /// A test <see cref="Splat.Builder.IModule"/> that invokes a callback when configured.
-    /// </summary>
+    /// <summary>A test <see cref="Splat.Builder.IModule"/> that invokes a callback when configured.</summary>
     /// <param name="onConfigure">The callback to invoke during configuration.</param>
     private sealed class TestModule(Action onConfigure) : Splat.Builder.IModule
     {
@@ -439,16 +373,11 @@ public class ReactiveUIBindingBuilderTests
         public void Configure(IMutableDependencyResolver resolver) => onConfigure();
     }
 
-    /// <summary>
-    /// A stub implementation of <see cref="ICreatesCommandBinding"/> for testing registration.
-    /// </summary>
+    /// <summary>A stub implementation of <see cref="ICreatesCommandBinding"/> for testing registration.</summary>
     private sealed class StubCommandBinder : ICreatesCommandBinding
     {
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public int GetAffinityForObject<T>(bool hasEventTarget) => 0;
 
         /// <inheritdoc/>
@@ -460,11 +389,8 @@ public class ReactiveUIBindingBuilderTests
             where T : class => null;
 
         /// <inheritdoc/>
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         [RequiresUnreferencedCode("Test stub")]
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
         public IDisposable? BindCommandToObject<T, TEventArgs>(
             System.Windows.Input.ICommand? command,
             T? target,
@@ -483,15 +409,11 @@ public class ReactiveUIBindingBuilderTests
             where TEventArgs : EventArgs => null;
     }
 
-    /// <summary>
-    /// Simple view model for ConfigureViewLocator testing.
-    /// </summary>
-    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Test class")]
+    /// <summary>Simple view model for ConfigureViewLocator testing.</summary>
+    [SuppressMessage("Design", "SST1436:Empty type", Justification = "The view locator tests key off the type identity alone.")]
     private sealed class ConfigTestViewModel;
 
-    /// <summary>
-    /// Simple view for ConfigureViewLocator testing.
-    /// </summary>
+    /// <summary>Simple view for ConfigureViewLocator testing.</summary>
     private sealed class ConfigTestView : IViewFor<ConfigTestViewModel>
     {
         /// <inheritdoc/>

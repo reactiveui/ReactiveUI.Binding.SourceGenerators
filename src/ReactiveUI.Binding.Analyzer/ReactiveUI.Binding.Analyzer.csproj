@@ -13,10 +13,13 @@
     <InternalsVisibleTo Include="ReactiveUI.Binding.Analyzer.Tests"/>
   </ItemGroup>
 
+  <!-- Roslyn 4.8.0 baseline (VS 2022 17.8, .NET 8.0.1xx SDK). Ships alongside the generator in the
+       version-less analyzers/dotnet/cs folder, so it must build against the same floor: a compiler
+       will not load an analyzer built against a newer Roslyn than itself. -->
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" VersionOverride="4.8.0"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" VersionOverride="4.8.0"/>
   </ItemGroup>
 
   <!-- Link shared diagnostic descriptors and constants from generator project -->
@@ -27,8 +30,8 @@
 
   <!-- Link polyfills and helpers from runtime library for netstandard2.0 compatibility -->
   <ItemGroup>
-    <Compile Include="..\ReactiveUI.Binding\Polyfills\**.cs" Link="Polyfills"/>
-    <Compile Include="..\ReactiveUI.Binding\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.Shared\Polyfills\**.cs" Link="Polyfills"/>
+    <Compile Include="..\ReactiveUI.Binding.Shared\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs"/>
   </ItemGroup>
 
   <!-- Include analyzer release tracking files -->

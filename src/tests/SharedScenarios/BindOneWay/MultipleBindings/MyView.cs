@@ -6,27 +6,19 @@ using System.ComponentModel;
 
 namespace SharedScenarios.BindOneWay.MultipleBindings;
 
-/// <summary>
-/// Target View with multiple properties.
-/// </summary>
+/// <summary>Target View with multiple properties.</summary>
 public class MyView : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="NameText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="NameText"/>.</summary>
     private string _nameText = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="AgeDisplay"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="AgeDisplay"/>.</summary>
     private int _ageDisplay;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the name text.
-    /// </summary>
+    /// <summary>Gets or sets the name text.</summary>
     public string NameText
     {
         get => _nameText;
@@ -42,9 +34,7 @@ public class MyView : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the age display.
-    /// </summary>
+    /// <summary>Gets or sets the age display.</summary>
     public int AgeDisplay
     {
         get => _ageDisplay;

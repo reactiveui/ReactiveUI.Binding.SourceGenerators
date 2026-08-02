@@ -2,30 +2,21 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
-/// <summary>
-/// Provides well-known symbol caching and type-checking helpers shared across all extractors.
-/// </summary>
+/// <summary>Provides well-known symbol caching and type-checking helpers shared across all extractors.</summary>
 internal static class SymbolHelpers
 {
-    /// <summary>
-    /// The number of type arguments on <c>IInteraction&lt;TInput, TOutput&gt;</c>.
-    /// </summary>
+    /// <summary>The number of type arguments on <c>IInteraction&lt;TInput, TOutput&gt;</c>.</summary>
     private const int InteractionTypeArgumentCount = 2;
 
-    /// <summary>
-    /// The symbol cache for the compilation.
-    /// </summary>
+    /// <summary>The symbol cache for the compilation.</summary>
     private static readonly ConditionalWeakTable<Compilation, WellKnownSymbolsBox> SymbolCache = new();
 
-    /// <summary>
-    /// Gets the well-known symbols for a compilation.
-    /// </summary>
+    /// <summary>Gets the well-known symbols for a compilation.</summary>
     /// <param name="compilation">The compilation.</param>
     /// <returns>The well-known symbols box.</returns>
     internal static WellKnownSymbolsBox GetWellKnownSymbols(Compilation compilation) =>
@@ -64,7 +55,7 @@ internal static class SymbolHelpers
         if (argExpression is Microsoft.CodeAnalysis.CSharp.Syntax.LambdaExpressionSyntax lambda)
         {
             var body = SyntaxHelpers.GetLambdaBody(lambda);
-            if (body != null)
+            if (body is not null)
             {
                 body = SyntaxHelpers.UnwrapNullForgiving(body);
                 if (body is Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax memberAccess)
@@ -73,7 +64,7 @@ internal static class SymbolHelpers
                     if (memberSymbol is IPropertySymbol { Type: INamedTypeSymbol namedType })
                     {
                         var observableType = TryGetObservableTypeArgument(namedType);
-                        if (observableType != null)
+                        if (observableType is not null)
                         {
                             return observableType;
                         }
@@ -86,20 +77,16 @@ internal static class SymbolHelpers
         return leafSegment.PropertyTypeFullName;
     }
 
-    /// <summary>
-    /// Checks if a named type symbol is IObservable&lt;T&gt;.
-    /// </summary>
+    /// <summary>Checks if a named type symbol is IObservable&lt;T&gt;.</summary>
     /// <param name="type">The type symbol to check.</param>
     /// <returns>A value indicating whether the type is IObservable&lt;T&gt;.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsIObservable(INamedTypeSymbol type) =>
         type is { IsGenericType: true, TypeArguments.Length: 1 }
-        && type.ConstructedFrom.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ==
-        "global::System.IObservable<T>";
+        && type.ConstructedFrom.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+        == "global::System.IObservable<T>";
 
-    /// <summary>
-    /// Checks if a type is IInteraction&lt;TInput, TOutput&gt;.
-    /// </summary>
+    /// <summary>Checks if a type is IInteraction&lt;TInput, TOutput&gt;.</summary>
     /// <param name="type">The type symbol to check.</param>
     /// <returns>A value indicating whether the type is IInteraction&lt;TInput, TOutput&gt;.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,9 +94,7 @@ internal static class SymbolHelpers
         type is { IsGenericType: true, TypeArguments.Length: InteractionTypeArgumentCount, MetadataName: "IInteraction`2" }
         && type.ContainingNamespace!.ToDisplayString() == "ReactiveUI.Binding";
 
-    /// <summary>
-    /// Extracts TInput and TOutput type arguments from a type that implements IInteraction&lt;TInput, TOutput&gt;.
-    /// </summary>
+    /// <summary>Extracts TInput and TOutput type arguments from a type that implements IInteraction&lt;TInput, TOutput&gt;.</summary>
     /// <param name="type">The type symbol.</param>
     /// <param name="inputType">The resulting TInput type name.</param>
     /// <param name="outputType">The resulting TOutput type name.</param>
@@ -158,14 +143,12 @@ internal static class SymbolHelpers
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool DetectHasConverterOverride(IParameterSymbol parameter) =>
-        parameter.Name is "converter" or "sourceToTargetConverter" or "vmToViewConverter"
+        parameter.Name is "converter" or "sourceToTargetConverter" or "vmToViewConverter" or "viewModelToViewConverter"
         && parameter.Type is INamedTypeSymbol paramType
         && paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
             .EndsWith("IBindingTypeConverter", StringComparison.Ordinal);
 
-    /// <summary>
-    /// Resolves a PropertyPathSegment leaf type to its INamedTypeSymbol using the semantic model.
-    /// </summary>
+    /// <summary>Resolves a PropertyPathSegment leaf type to its INamedTypeSymbol using the semantic model.</summary>
     /// <param name="segment">The property path segment.</param>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="lambdaExpression">The lambda expression.</param>
@@ -184,7 +167,7 @@ internal static class SymbolHelpers
 
         var body = SyntaxHelpers.GetLambdaBody(lambda);
 
-        if (body == null)
+        if (body is null)
         {
             return null;
         }
@@ -196,12 +179,7 @@ internal static class SymbolHelpers
         }
 
         var memberSymbol = semanticModel.GetSymbolInfo(memberAccess, ct).Symbol;
-        if (!(memberSymbol is IPropertySymbol { Type: INamedTypeSymbol namedType }))
-        {
-            return null;
-        }
-
-        return namedType;
+        return !(memberSymbol is IPropertySymbol { Type: INamedTypeSymbol namedType }) ? null : namedType;
     }
 
     /// <summary>
@@ -237,52 +215,28 @@ internal static class SymbolHelpers
     /// </summary>
     internal sealed class WellKnownSymbolsBox
     {
-        /// <summary>
-        /// Gets or sets the INPC symbol.
-        /// </summary>
-        [SuppressMessage(
-            "Minor Code Smell",
-            "S100:Methods and properties should be named in PascalCase",
-            Justification = "INPC abbreviates INotifyPropertyChanged, an established acronym matching the ReactiveUI domain terminology.")]
+        /// <summary>Gets or sets the INPC symbol.</summary>
         internal INamedTypeSymbol? INPC { get; set; }
 
-        /// <summary>
-        /// Gets or sets the INPChanging symbol.
-        /// </summary>
-        [SuppressMessage(
-            "Minor Code Smell",
-            "S100:Methods and properties should be named in PascalCase",
-            Justification = "INPChanging abbreviates INotifyPropertyChanging, an established acronym matching the ReactiveUI domain terminology.")]
+        /// <summary>Gets or sets the INPChanging symbol.</summary>
         internal INamedTypeSymbol? INPChanging { get; set; }
 
-        /// <summary>
-        /// Gets or sets the IReactiveObject symbol.
-        /// </summary>
+        /// <summary>Gets or sets the IReactiveObject symbol.</summary>
         internal INamedTypeSymbol? IReactiveObject { get; set; }
 
-        /// <summary>
-        /// Gets or sets the WpfDependencyObject symbol.
-        /// </summary>
+        /// <summary>Gets or sets the WpfDependencyObject symbol.</summary>
         internal INamedTypeSymbol? WpfDependencyObject { get; set; }
 
-        /// <summary>
-        /// Gets or sets the WinUIDependencyObject symbol.
-        /// </summary>
+        /// <summary>Gets or sets the WinUIDependencyObject symbol.</summary>
         internal INamedTypeSymbol? WinUIDependencyObject { get; set; }
 
-        /// <summary>
-        /// Gets or sets the NSObject symbol.
-        /// </summary>
+        /// <summary>Gets or sets the NSObject symbol.</summary>
         internal INamedTypeSymbol? NSObject { get; set; }
 
-        /// <summary>
-        /// Gets or sets the WinFormsComponent symbol.
-        /// </summary>
+        /// <summary>Gets or sets the WinFormsComponent symbol.</summary>
         internal INamedTypeSymbol? WinFormsComponent { get; set; }
 
-        /// <summary>
-        /// Gets or sets the AndroidView symbol.
-        /// </summary>
+        /// <summary>Gets or sets the AndroidView symbol.</summary>
         internal INamedTypeSymbol? AndroidView { get; set; }
     }
 }

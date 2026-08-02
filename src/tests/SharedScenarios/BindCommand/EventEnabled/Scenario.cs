@@ -13,12 +13,10 @@ namespace SharedScenarios.BindCommand.EventEnabled;
 /// </summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Binds the Save command to the SaveButton via event+Enabled synchronization.
-    /// </summary>
+    /// <summary>Binds the Save command to the SaveButton via event+Enabled synchronization.</summary>
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
-    public static IDisposable Execute(MyViewModel vm, MyView view)
-        => view.BindCommand(vm, x => x.Save, x => x.SaveButton);
+    public static IDisposable Execute(MyViewModel vm, MyView view) =>
+        view.BindCommand(vm, x => x.Save, x => x.SaveButton);
 }

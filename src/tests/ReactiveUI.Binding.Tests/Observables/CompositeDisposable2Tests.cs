@@ -6,14 +6,10 @@ using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-/// Unit tests for <see cref="CompositeDisposable2"/>.
-/// </summary>
+/// <summary>Unit tests for <see cref="CompositeDisposable2"/>.</summary>
 public class CompositeDisposable2Tests
 {
-    /// <summary>
-    /// Verifies that Dispose() disposes both inner disposables.
-    /// </summary>
+    /// <summary>Verifies that Dispose() disposes both inner disposables.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Dispose_DisposesBothInners()
@@ -30,9 +26,7 @@ public class CompositeDisposable2Tests
         await Assert.That(d2Disposed).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that multiple calls to Dispose() only dispose the inner disposables once.
-    /// </summary>
+    /// <summary>Verifies that multiple calls to Dispose() only dispose the inner disposables once.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Dispose_MultipleTimes_DisposesInnersOnlyOnce()
@@ -50,26 +44,22 @@ public class CompositeDisposable2Tests
         await Assert.That(d2Disposed).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that the constructor throws <see cref="ArgumentNullException"/> when d1 is null.
-    /// </summary>
+    /// <summary>Verifies that the constructor throws <see cref="ArgumentNullException"/> when d1 is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullD1_ThrowsArgumentNullException()
     {
-        var action = () => new CompositeDisposable2(null!, EmptyDisposable.Instance);
+        var action = static () => new CompositeDisposable2(null!, EmptyDisposable.Instance);
 
         await Assert.That(action).Throws<ArgumentNullException>().WithParameterName("d1");
     }
 
-    /// <summary>
-    /// Verifies that the constructor throws <see cref="ArgumentNullException"/> when d2 is null.
-    /// </summary>
+    /// <summary>Verifies that the constructor throws <see cref="ArgumentNullException"/> when d2 is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullD2_ThrowsArgumentNullException()
     {
-        var action = () => new CompositeDisposable2(EmptyDisposable.Instance, null!);
+        var action = static () => new CompositeDisposable2(EmptyDisposable.Instance, null!);
 
         await Assert.That(action).Throws<ArgumentNullException>().WithParameterName("d2");
     }

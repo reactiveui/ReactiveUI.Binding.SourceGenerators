@@ -8,14 +8,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Tests for <see cref="SyntaxHelpers"/> methods.
-/// </summary>
+/// <summary>Tests for <see cref="SyntaxHelpers"/> methods.</summary>
 public class SyntaxHelpersTests
 {
-    /// <summary>
-    /// Verifies ExtractPropertyPathFromLambda extracts a single property path from a lambda expression.
-    /// </summary>
+    /// <summary>Verifies ExtractPropertyPathFromLambda extracts a single property path from a lambda expression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractPropertyPathFromLambda_SingleProperty_ExtractsPath()
@@ -56,13 +52,12 @@ public class SyntaxHelpersTests
         await Assert.That(path[0].PropertyName).IsEqualTo("Name");
     }
 
-    /// <summary>
-    /// Verifies ExtractPropertyPathFromLambda extracts a chained property path.
-    /// </summary>
+    /// <summary>Verifies ExtractPropertyPathFromLambda extracts a chained property path.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractPropertyPathFromLambda_ChainedProperty_ExtractsFullPath()
     {
+        const int Expected = 2;
         const string source = """
                               using System;
                               using System.ComponentModel;
@@ -100,14 +95,12 @@ public class SyntaxHelpersTests
         var path = SyntaxHelpers.ExtractPropertyPathFromLambda(lambda, semanticModel, default);
 
         await Assert.That(path).IsNotNull();
-        await Assert.That(path!.Length).IsEqualTo(2);
+        await Assert.That(path!.Length).IsEqualTo(Expected);
         await Assert.That(path[0].PropertyName).IsEqualTo("Address");
         await Assert.That(path[1].PropertyName).IsEqualTo("City");
     }
 
-    /// <summary>
-    /// Verifies ExtractPropertyPathFromLambda returns null for non-lambda expression.
-    /// </summary>
+    /// <summary>Verifies ExtractPropertyPathFromLambda returns null for non-lambda expression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractPropertyPathFromLambda_NonLambda_ReturnsNull()
@@ -139,9 +132,7 @@ public class SyntaxHelpersTests
         await Assert.That(path).IsNull();
     }
 
-    /// <summary>
-    /// Verifies GetLambdaBody returns the body for a simple lambda expression.
-    /// </summary>
+    /// <summary>Verifies GetLambdaBody returns the body for a simple lambda expression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetLambdaBody_SimpleLambda_ReturnsBody()
@@ -170,9 +161,7 @@ public class SyntaxHelpersTests
         await Assert.That(body).IsTypeOf<IdentifierNameSyntax>();
     }
 
-    /// <summary>
-    /// Verifies GetLambdaBody returns the body for a parenthesized lambda expression.
-    /// </summary>
+    /// <summary>Verifies GetLambdaBody returns the body for a parenthesized lambda expression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetLambdaBody_ParenthesizedLambda_ReturnsBody()
@@ -201,9 +190,7 @@ public class SyntaxHelpersTests
         await Assert.That(body).IsTypeOf<BinaryExpressionSyntax>();
     }
 
-    /// <summary>
-    /// Verifies GetLambdaBody returns null for a parenthesized lambda with a block body.
-    /// </summary>
+    /// <summary>Verifies GetLambdaBody returns null for a parenthesized lambda with a block body.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetLambdaBody_BlockBody_ReturnsNull()
@@ -231,9 +218,7 @@ public class SyntaxHelpersTests
         await Assert.That(body).IsNull();
     }
 
-    /// <summary>
-    /// Verifies ExtractPropertyPathFromLambda works with parenthesized lambda expressions.
-    /// </summary>
+    /// <summary>Verifies ExtractPropertyPathFromLambda works with parenthesized lambda expressions.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractPropertyPathFromLambda_ParenthesizedLambda_ExtractsPath()

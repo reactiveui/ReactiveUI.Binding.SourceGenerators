@@ -13,13 +13,11 @@ namespace SharedScenarios.BindCommand.CommandPropertyObsParam;
 /// </summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Binds the Save command with an observable parameter.
-    /// </summary>
+    /// <summary>Binds the Save command with an observable parameter.</summary>
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <param name="parameter">An observable producing command parameters.</param>
     /// <returns>A disposable representing the binding.</returns>
-    public static IDisposable Execute(MyViewModel vm, MyView view, IObservable<string> parameter)
-        => view.BindCommand(vm, x => x.Save, x => x.SaveButton, parameter);
+    public static IDisposable Execute(MyViewModel vm, MyView view, IObservable<string> parameter) =>
+        view.BindCommand(vm, x => x.Save, x => x.SaveButton, parameter);
 }

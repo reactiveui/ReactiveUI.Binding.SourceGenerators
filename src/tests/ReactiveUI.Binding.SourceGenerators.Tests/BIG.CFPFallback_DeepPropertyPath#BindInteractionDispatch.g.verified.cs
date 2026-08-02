@@ -18,19 +18,20 @@ namespace ReactiveUI.Binding
             global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel, global::ReactiveUI.Binding.IInteraction<string, bool>>> propertyName,
             global::System.Func<global::ReactiveUI.Binding.IInteractionContext<string, bool>, global::System.Threading.Tasks.Task> handler,
+            string propertyNameExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 104
+            if (callerLineNumber == 86
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __BindInteraction_7FFFEF09AD5AF4FB(viewModel, handler);
+                return __BindInteraction_7FFFEF09AD5AF2CD(viewModel, handler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindInteraction_7FFFEF09AD5AF4FB(
+        private static global::System.IDisposable __BindInteraction_7FFFEF09AD5AF2CD(
             global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel viewModel,
             global::System.Func<global::ReactiveUI.Binding.IInteractionContext<string, bool>, global::System.Threading.Tasks.Task> handler)
         {

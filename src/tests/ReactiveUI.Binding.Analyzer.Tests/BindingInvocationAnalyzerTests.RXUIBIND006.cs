@@ -7,14 +7,13 @@ using ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
-/// <summary>
-/// Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND006 (unsupported path segment).
-/// </summary>
+/// <summary>Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND006 (unsupported path segment).</summary>
 public partial class BindingInvocationAnalyzerTests
 {
-    /// <summary>
-    /// Verifies RXUIBIND006 is reported when a property path contains an indexer.
-    /// </summary>
+    /// <summary>The diagnostic id reported for an unsupported property-path segment.</summary>
+    private const string UnsupportedPathSegmentDiagnosticId = "RXUIBIND006";
+
+    /// <summary>Verifies RXUIBIND006 is reported when a property path contains an indexer.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_Indexer_InPropertyPath_ReportsDiagnostic()
@@ -41,13 +40,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 is reported when a property path contains a field access.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND006 is reported when a property path contains a field access.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_FieldAccess_InPropertyPath_ReportsDiagnostic()
@@ -74,13 +71,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 is reported when a property path contains a method call.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND006 is reported when a property path contains a method call.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_MethodCall_InPropertyPath_ReportsDiagnostic()
@@ -107,13 +102,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 is NOT reported for simple property chain.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND006 is NOT reported for simple property chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_SimplePropertyChain_NoDiagnostic()
@@ -146,7 +139,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
     }
 
@@ -177,7 +170,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
     }
 
@@ -217,7 +210,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
@@ -257,14 +250,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 is reported for BindOneWay when source property path
-    /// contains a method call.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND006 is reported for BindOneWay when source property path contains a method call.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_BindOneWay_MethodCallInPath_ReportsDiagnostic()
@@ -298,14 +288,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 is reported for BindTwoWay when target property path
-    /// contains a field access.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND006 is reported for BindTwoWay when target property path contains a field access.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_BindTwoWay_FieldInTargetPath_ReportsDiagnostic()
@@ -339,13 +326,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 is reported for a field access in the middle of a property chain.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND006 is reported for a field access in the middle of a property chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_FieldInChain_ReportsDiagnostic()
@@ -378,13 +363,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 is reported for WhenChanging with a method call in the property path.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND006 is reported for WhenChanging with a method call in the property path.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_WhenChanging_MethodCallInPath_ReportsDiagnostic()
@@ -412,13 +395,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 is reported for WhenChanging with a field access in the property path.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND006 is reported for WhenChanging with a field access in the property path.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_WhenChanging_FieldAccess_ReportsDiagnostic()
@@ -446,13 +427,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 is reported for an indexer access in a BindOneWay source lambda.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND006 is reported for an indexer access in a BindOneWay source lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_BindOneWay_IndexerInPath_ReportsDiagnostic()
@@ -486,14 +465,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that a parenthesized lambda with block body does not report RXUIBIND006
-    /// for unsupported path segments.
-    /// </summary>
+    /// <summary>Verifies that a parenthesized lambda with block body does not report RXUIBIND006 for unsupported path segments.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_ParenthesizedBlockBodyLambda_NoDiagnostic()
@@ -517,7 +493,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
     }
 
@@ -552,7 +528,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
 
         // Const field is excluded from the field check — no diagnostic
         await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
@@ -587,7 +563,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(0);
     }
 
@@ -628,7 +604,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
@@ -662,13 +638,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND006 is reported for BindTo when the target property path contains a method call.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND006 is reported for BindTo when the target property path contains a method call.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND006_BindTo_MethodCallInPath_ReportsDiagnostic()
@@ -696,7 +670,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == UnsupportedPathSegmentDiagnosticId).ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 }

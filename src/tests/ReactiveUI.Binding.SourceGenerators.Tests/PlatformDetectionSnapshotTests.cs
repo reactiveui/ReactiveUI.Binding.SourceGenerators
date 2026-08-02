@@ -13,9 +13,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests;
 /// </summary>
 public class PlatformDetectionSnapshotTests
 {
-    /// <summary>
-    /// Verifies detection of WPF DependencyObject.
-    /// </summary>
+    /// <summary>Verifies detection of WPF DependencyObject.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task WpfDependencyObject_Detected()
@@ -39,9 +37,7 @@ public class PlatformDetectionSnapshotTests
         return TestHelper.TestPass(source, typeof(PlatformDetectionSnapshotTests));
     }
 
-    /// <summary>
-    /// Verifies detection of WinForms Component.
-    /// </summary>
+    /// <summary>Verifies detection of WinForms Component.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task WinFormsComponent_Detected()
@@ -64,9 +60,7 @@ public class PlatformDetectionSnapshotTests
         return TestHelper.TestPass(source, typeof(PlatformDetectionSnapshotTests));
     }
 
-    /// <summary>
-    /// Verifies detection of Android View.
-    /// </summary>
+    /// <summary>Verifies detection of Android View.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task AndroidView_Detected()
@@ -89,9 +83,7 @@ public class PlatformDetectionSnapshotTests
         return TestHelper.TestPass(source, typeof(PlatformDetectionSnapshotTests));
     }
 
-    /// <summary>
-    /// Verifies detection of Apple NSObject (KVO).
-    /// </summary>
+    /// <summary>Verifies detection of Apple NSObject (KVO).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task NSObject_Detected()

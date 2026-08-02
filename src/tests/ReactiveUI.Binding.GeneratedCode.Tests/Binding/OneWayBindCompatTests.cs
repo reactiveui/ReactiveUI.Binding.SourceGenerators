@@ -7,19 +7,13 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 
-/// <summary>
-/// Tests that the OneWayBind compat alias (view-first syntax) works correctly at runtime.
-/// </summary>
+/// <summary>Tests that the OneWayBind compat alias (view-first syntax) works correctly at runtime.</summary>
 public class OneWayBindCompatTests
 {
-    /// <summary>
-    /// The initial property value used across the binding tests.
-    /// </summary>
+    /// <summary>The initial property value used across the binding tests.</summary>
     private const string HelloValue = "Hello";
 
-    /// <summary>
-    /// Verifies that OneWayBind syncs the initial value from view model to view.
-    /// </summary>
+    /// <summary>Verifies that OneWayBind syncs the initial value from view model to view.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OneWayBind_SyncsInitialValue()
@@ -32,9 +26,7 @@ public class OneWayBindCompatTests
         await Assert.That(view.DisplayName).IsEqualTo(HelloValue);
     }
 
-    /// <summary>
-    /// Verifies that OneWayBind syncs changes from view model to view.
-    /// </summary>
+    /// <summary>Verifies that OneWayBind syncs changes from view model to view.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OneWayBind_SyncsOnSourceChange()
@@ -49,9 +41,7 @@ public class OneWayBindCompatTests
         await Assert.That(view.DisplayName).IsEqualTo("World");
     }
 
-    /// <summary>
-    /// Verifies that disposing the OneWayBind binding stops syncing.
-    /// </summary>
+    /// <summary>Verifies that disposing the OneWayBind binding stops syncing.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OneWayBind_Disposal_StopsSyncing()

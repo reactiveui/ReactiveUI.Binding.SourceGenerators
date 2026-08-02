@@ -4,34 +4,22 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for converting strings to bytes.
-/// </summary>
+/// <summary>Tests for converting strings to bytes.</summary>
 public class StringToByteTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    /// Byte value parsed from a typical numeric string.
-    /// </summary>
+    /// <summary>Byte value parsed from a typical numeric string.</summary>
     private const byte ParsedByte = 123;
 
-    /// <summary>
-    /// Byte maximum value parsed from string.
-    /// </summary>
+    /// <summary>Byte maximum value parsed from string.</summary>
     private const byte MaxByte = 255;
 
-    /// <summary>
-    /// Byte value parsed in the typed conversion test.
-    /// </summary>
+    /// <summary>Byte value parsed in the typed conversion test.</summary>
     private const byte TypedByte = 100;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -41,9 +29,7 @@ public class StringToByteTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert EmptyString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert EmptyString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_EmptyString_ReturnsFalse()
@@ -54,9 +40,7 @@ public class StringToByteTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert InvalidString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert InvalidString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_InvalidString_ReturnsFalse()
@@ -67,9 +51,7 @@ public class StringToByteTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert NegativeValue ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert NegativeValue ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_NegativeValue_ReturnsFalse()
@@ -80,9 +62,7 @@ public class StringToByteTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert OutOfRangeValue ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert OutOfRangeValue ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_OutOfRangeValue_ReturnsFalse()
@@ -93,9 +73,7 @@ public class StringToByteTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert StringToByte Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert StringToByte Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_StringToByte_Succeeds()
@@ -105,12 +83,10 @@ public class StringToByteTypeConverterTests
         var result = converter.TryConvert("123", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((byte)ParsedByte);
+        await Assert.That(output).IsEqualTo(ParsedByte);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert NullString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert NullString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_NullString_ReturnsFalse()
@@ -123,9 +99,7 @@ public class StringToByteTypeConverterTests
         await Assert.That(output).IsEqualTo((byte)0);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert ZeroValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert ZeroValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_ZeroValue_Succeeds()
@@ -138,9 +112,7 @@ public class StringToByteTypeConverterTests
         await Assert.That(output).IsEqualTo((byte)0);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MaxValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MaxValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MaxValue_Succeeds()
@@ -150,12 +122,10 @@ public class StringToByteTypeConverterTests
         var result = converter.TryConvert("255", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((byte)MaxByte);
+        await Assert.That(output).IsEqualTo(MaxByte);
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped ValidString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped ValidString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_ValidString_Succeeds()
@@ -165,27 +135,23 @@ public class StringToByteTypeConverterTests
         var result = converter.TryConvertTyped("100", null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((byte)TypedByte);
+        await Assert.That(output).IsEqualTo(TypedByte);
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped InvalidType ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped InvalidType ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_InvalidType_ReturnsFalse()
     {
         var converter = new StringToByteTypeConverter();
 
-        var result = converter.TryConvertTyped(123, null, out var output);
+        var result = converter.TryConvertTyped(ParsedByte, null, out var output);
 
         await Assert.That(result).IsFalse();
         await Assert.That(output).IsNull();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped NullInput ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped NullInput ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_NullInput_ReturnsFalse()
@@ -198,9 +164,7 @@ public class StringToByteTypeConverterTests
         await Assert.That(output).IsNull();
     }
 
-    /// <summary>
-    ///     Verifies FromType ReturnsStringType.
-    /// </summary>
+    /// <summary>Verifies FromType ReturnsStringType.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task FromType_ReturnsStringType()
@@ -210,9 +174,7 @@ public class StringToByteTypeConverterTests
         await Assert.That(converter.FromType).IsEqualTo(typeof(string));
     }
 
-    /// <summary>
-    ///     Verifies ToType ReturnsByteType.
-    /// </summary>
+    /// <summary>Verifies ToType ReturnsByteType.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ToType_ReturnsByteType()

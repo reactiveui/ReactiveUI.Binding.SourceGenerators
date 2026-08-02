@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding.Tests.Interactions;
 
-/// <summary>
-/// Tests for <see cref="UnhandledInteractionException{TInput, TOutput}"/>.
-/// </summary>
+/// <summary>Tests for <see cref="UnhandledInteractionException{TInput, TOutput}"/>.</summary>
 public class UnhandledInteractionExceptionTests
 {
-    /// <summary>
-    /// Verifies that the parameterless constructor creates a valid instance.
-    /// </summary>
+    /// <summary>Verifies that the parameterless constructor creates a valid instance.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task ParameterlessConstructor_CreatesInstance()
@@ -21,9 +17,7 @@ public class UnhandledInteractionExceptionTests
         await Assert.That(ex.Message).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that the message constructor sets the message.
-    /// </summary>
+    /// <summary>Verifies that the message constructor sets the message.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task MessageConstructor_SetsMessage()
@@ -33,9 +27,7 @@ public class UnhandledInteractionExceptionTests
         await Assert.That(ex.Interaction).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that the message+innerException constructor sets both properties.
-    /// </summary>
+    /// <summary>Verifies that the message+innerException constructor sets both properties.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task MessageAndInnerExceptionConstructor_SetsBoth()

@@ -7,22 +7,16 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindInteraction.TaskHandler;
 
-/// <summary>
-/// ViewModel exposing a string-to-bool interaction.
-/// </summary>
+/// <summary>ViewModel exposing a string-to-bool interaction.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Confirm"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Confirm"/>.</summary>
     private Interaction<string, bool> _confirm = new Interaction<string, bool>();
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the confirmation interaction.
-    /// </summary>
+    /// <summary>Gets or sets the confirmation interaction.</summary>
     public Interaction<string, bool> Confirm
     {
         get => _confirm;

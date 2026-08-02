@@ -7,14 +7,13 @@ using ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
-/// <summary>
-/// Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND003 (private or protected member access).
-/// </summary>
+/// <summary>Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND003 (private or protected member access).</summary>
 public partial class BindingInvocationAnalyzerTests
 {
-    /// <summary>
-    /// Verifies RXUIBIND003 is reported when accessing a private property in a lambda.
-    /// </summary>
+    /// <summary>The diagnostic id reported for a private or protected member access.</summary>
+    private const string PrivateMemberDiagnosticId = "RXUIBIND003";
+
+    /// <summary>Verifies RXUIBIND003 is reported when accessing a private property in a lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND003_PrivateProperty_ReportsDiagnostic()
@@ -37,13 +36,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND003 is reported when accessing a protected property in a lambda.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND003 is reported when accessing a protected property in a lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND003_ProtectedProperty_ReportsDiagnostic()
@@ -69,13 +66,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND003 is NOT reported for public property access.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND003 is NOT reported for public property access.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND003_PublicProperty_NoDiagnostic()
@@ -102,7 +97,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateMemberDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateMemberDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateMemberDiags.Length).IsEqualTo(0);
     }
 
@@ -132,13 +127,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND003 is reported when accessing a private property in a WhenChanging lambda.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND003 is reported when accessing a private property in a WhenChanging lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND003_WhenChanging_PrivateProperty_ReportsDiagnostic()
@@ -162,13 +155,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND003 is reported when accessing a private property in a BindOneWay source lambda.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND003 is reported when accessing a private property in a BindOneWay source lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND003_BindOneWay_PrivateProperty_ReportsDiagnostic()
@@ -199,13 +190,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND003 with block-body lambda does not fire for BindTwoWay.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND003 with block-body lambda does not fire for BindTwoWay.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND003_BindTwoWay_BlockBodyLambda_NoDiagnostic()
@@ -236,14 +225,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that a parenthesized lambda with block body does not report RXUIBIND003
-    /// for private members.
-    /// </summary>
+    /// <summary>Verifies that a parenthesized lambda with block body does not report RXUIBIND003 for private members.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND003_ParenthesizedBlockBodyLambda_NoDiagnostic()
@@ -266,7 +252,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(0);
     }
 
@@ -301,7 +287,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
 
         // Internal is not Private or Protected, so no diagnostic
         await Assert.That(privateDiags.Length).IsEqualTo(0);
@@ -344,7 +330,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(0);
     }
 
@@ -381,7 +367,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(1);
     }
 
@@ -412,7 +398,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(1);
     }
 
@@ -446,17 +432,15 @@ public partial class BindingInvocationAnalyzerTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
 
         // RXUIBIND003 for private member access
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(1);
 
         // RXUIBIND006 for field access (separate check)
-        var unsupportedDiags = diagnostics.Where(d => d.Id == "RXUIBIND006").ToArray();
+        var unsupportedDiags = diagnostics.Where(static d => d.Id == "RXUIBIND006").ToArray();
         await Assert.That(unsupportedDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND003 is reported for BindTo when the target lambda accesses a private member.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND003 is reported for BindTo when the target lambda accesses a private member.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND003_BindTo_PrivateMember_ReportsDiagnostic()
@@ -480,7 +464,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var privateDiags = diagnostics.Where(d => d.Id == "RXUIBIND003").ToArray();
+        var privateDiags = diagnostics.Where(static d => d.Id == PrivateMemberDiagnosticId).ToArray();
         await Assert.That(privateDiags.Length).IsEqualTo(1);
     }
 }

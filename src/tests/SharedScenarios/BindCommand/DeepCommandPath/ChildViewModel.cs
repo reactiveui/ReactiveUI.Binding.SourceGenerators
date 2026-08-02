@@ -7,22 +7,16 @@ using System.Windows.Input;
 
 namespace SharedScenarios.BindCommand.DeepCommandPath;
 
-/// <summary>
-/// Child ViewModel that owns the command.
-/// </summary>
+/// <summary>Child ViewModel that owns the command.</summary>
 public class ChildViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="SaveCommand"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="SaveCommand"/>.</summary>
     private ICommand? _saveCommand;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the save command.
-    /// </summary>
+    /// <summary>Gets or sets the save command.</summary>
     public ICommand? SaveCommand
     {
         get => _saveCommand;

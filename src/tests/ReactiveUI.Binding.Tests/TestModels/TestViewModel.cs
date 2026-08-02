@@ -7,99 +7,72 @@ using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
-/// <summary>
-/// A test view model implementing INotifyPropertyChanged and INotifyPropertyChanging.
-/// </summary>
+/// <summary>A test view model implementing INotifyPropertyChanged and INotifyPropertyChanging.</summary>
 public class TestViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backer for Name.
-    /// </summary>
-    private string _name = string.Empty;
-
-    /// <summary>
-    /// The backer for Age.
-    /// </summary>
-    private int _age;
-
-    /// <summary>
-    /// The backer for Address.
-    /// </summary>
-    private TestAddress? _address;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
-        get => _name;
+        get => field;
         set
         {
-            if (_name == value)
+            if (field == value)
             {
                 return;
             }
 
             OnPropertyChanging();
-            _name = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the age.
-    /// </summary>
+    /// <summary>Gets or sets the age.</summary>
     public int Age
     {
-        get => _age;
+        get => field;
         set
         {
-            if (_age == value)
+            if (field == value)
             {
                 return;
             }
 
             OnPropertyChanging();
-            _age = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
-    /// <summary>
-    /// Gets or sets the address.
-    /// </summary>
+    /// <summary>Gets or sets the address.</summary>
     public TestAddress? Address
     {
-        get => _address;
+        get => field;
         set
         {
-            if (ReferenceEquals(_address, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
             OnPropertyChanging();
-            _address = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
-    /// <summary>
-    /// Raises the PropertyChanging event.
-    /// </summary>
+    /// <summary>Raises the PropertyChanging event.</summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanging([CallerMemberName] string? propertyName = null) =>
         PropertyChanging?.Invoke(this, new(propertyName));
 
-    /// <summary>
-    /// Raises the PropertyChanged event.
-    /// </summary>
+    /// <summary>Raises the PropertyChanged event.</summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new(propertyName));

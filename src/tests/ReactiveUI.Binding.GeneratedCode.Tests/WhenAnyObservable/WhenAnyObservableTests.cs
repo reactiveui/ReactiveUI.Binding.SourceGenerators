@@ -8,24 +8,16 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAnyObservable;
 
-/// <summary>
-/// Tests that the source-generator-generated WhenAnyObservable code (Switch/Merge) works correctly at runtime.
-/// </summary>
+/// <summary>Tests that the source-generator-generated WhenAnyObservable code (Switch/Merge) works correctly at runtime.</summary>
 public class WhenAnyObservableTests
 {
-    /// <summary>
-    /// The value emitted from the first observable.
-    /// </summary>
+    /// <summary>The value emitted from the first observable.</summary>
     private const string From1 = "From1";
 
-    /// <summary>
-    /// The value emitted from the second observable.
-    /// </summary>
+    /// <summary>The value emitted from the second observable.</summary>
     private const string From2 = "From2";
 
-    /// <summary>
-    /// Verifies that single observable Switch pattern emits inner values.
-    /// </summary>
+    /// <summary>Verifies that single observable Switch pattern emits inner values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleObservable_Switch_EmitsInnerValues()
@@ -42,9 +34,7 @@ public class WhenAnyObservableTests
         await Assert.That(values).Contains("Hello");
     }
 
-    /// <summary>
-    /// Verifies that single observable Switch pattern resubscribes when the observable property changes.
-    /// </summary>
+    /// <summary>Verifies that single observable Switch pattern resubscribes when the observable property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleObservable_Switch_ResubscribesOnNewObservable()
@@ -74,9 +64,7 @@ public class WhenAnyObservableTests
         await Assert.That(values).DoesNotContain("StaleFrom1");
     }
 
-    /// <summary>
-    /// Verifies that two observable Merge pattern emits from both streams.
-    /// </summary>
+    /// <summary>Verifies that two observable Merge pattern emits from both streams.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoObservables_Merge_EmitsBothStreams()
@@ -96,9 +84,7 @@ public class WhenAnyObservableTests
         await Assert.That(values).Contains(From2);
     }
 
-    /// <summary>
-    /// Verifies that disposing the WhenAnyObservable subscription stops listening.
-    /// </summary>
+    /// <summary>Verifies that disposing the WhenAnyObservable subscription stops listening.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Disposal_StopsListening()

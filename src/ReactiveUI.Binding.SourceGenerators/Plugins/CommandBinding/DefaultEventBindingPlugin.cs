@@ -19,9 +19,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 /// </remarks>
 internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
 {
-    /// <summary>
-    /// The affinity score for the default-event binder (lowest priority among command binding plugins).
-    /// </summary>
+    /// <summary>The affinity score for the default-event binder (lowest priority among command binding plugins).</summary>
     private static readonly int DefaultEventAffinity = BindingAffinity.DefaultEvent;
 
     /// <inheritdoc/>
@@ -31,17 +29,15 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
     public bool RequiresCustomBinderFallback => true;
 
     /// <inheritdoc/>
-    public bool CanHandle(BindCommandInvocationInfo inv)
-        => inv.ResolvedEventName != null;
+    public bool CanHandle(BindCommandInvocationInfo inv) =>
+        inv.ResolvedEventName is not null;
 
     /// <inheritdoc/>
     public void EmitBinding(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
-        bool supportsNullable)
-    {
-        CommandEventBindingEmitter.EmitByParameterKind(
+        bool supportsNullable) => CommandEventBindingEmitter.EmitByParameterKind(
             sb,
             inv,
             controlAccess,
@@ -49,11 +45,8 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
             EmitWithObservableParameter,
             EmitWithExpressionParameter,
             EmitWithNoParameter);
-    }
 
-    /// <summary>
-    /// Emits event-only command binding with an observable parameter.
-    /// </summary>
+    /// <summary>Emits event-only command binding with an observable parameter.</summary>
     /// <param name="sb">The string builder.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The control access chain.</param>
@@ -98,9 +91,7 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
                                     }
                             """);
 
-    /// <summary>
-    /// Emits event-only command binding with an expression parameter.
-    /// </summary>
+    /// <summary>Emits event-only command binding with an expression parameter.</summary>
     /// <param name="sb">The string builder.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The control access chain.</param>
@@ -142,9 +133,7 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
                                     }
                             """);
 
-    /// <summary>
-    /// Emits event-only command binding with no parameter.
-    /// </summary>
+    /// <summary>Emits event-only command binding with no parameter.</summary>
     /// <param name="sb">The string builder.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The control access chain.</param>

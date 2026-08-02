@@ -8,21 +8,17 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
 
-/// <summary>
-/// Shared helper methods for analyzers. No LINQ, manual loops.
-/// </summary>
+/// <summary>Shared helper methods for analyzers. No LINQ, manual loops.</summary>
 internal static class AnalyzerHelpers
 {
-    /// <summary>
-    /// Checks if a method symbol belongs to our generated extension class.
-    /// </summary>
+    /// <summary>Checks if a method symbol belongs to our generated extension class.</summary>
     /// <param name="methodSymbol">The method symbol to check.</param>
     /// <returns>true if the method is from our generated extension class.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsBindingExtensionMethod(IMethodSymbol methodSymbol)
     {
         var containingType = methodSymbol.ContainingType;
-        if (containingType == null)
+        if (containingType is null)
         {
             return false;
         }
@@ -32,18 +28,14 @@ internal static class AnalyzerHelpers
             or SourceGenerators.Constants.StubExtensionClassName;
     }
 
-    /// <summary>
-    /// Checks if an expression is an inline lambda (not a variable reference or method call).
-    /// </summary>
+    /// <summary>Checks if an expression is an inline lambda (not a variable reference or method call).</summary>
     /// <param name="expression">The expression to check.</param>
     /// <returns>true if the expression is an inline lambda.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsInlineLambda(ExpressionSyntax expression) =>
         expression is SimpleLambdaExpressionSyntax or ParenthesizedLambdaExpressionSyntax;
 
-    /// <summary>
-    /// Checks if a type supports before-change notifications based on its notification mechanism.
-    /// </summary>
+    /// <summary>Checks if a type supports before-change notifications based on its notification mechanism.</summary>
     /// <param name="typeSymbol">The type to check.</param>
     /// <param name="compilation">The current compilation for type resolution.</param>
     /// <param name="mechanism">Output: the name of the detected mechanism.</param>
@@ -117,15 +109,7 @@ internal static class AnalyzerHelpers
     /// <param name="methodSymbol">The method symbol to extract from.</param>
     /// <returns>The first type argument as <see cref="INamedTypeSymbol"/>, or null.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static INamedTypeSymbol? ExtractFirstTypeArgument(IMethodSymbol methodSymbol)
-    {
-        if (methodSymbol.TypeArguments.Length == 0)
-        {
-            return null;
-        }
-
-        return methodSymbol.TypeArguments[0] as INamedTypeSymbol;
-    }
+    internal static INamedTypeSymbol? ExtractFirstTypeArgument(IMethodSymbol methodSymbol) => methodSymbol.TypeArguments.IsEmpty ? null : methodSymbol.TypeArguments[0] as INamedTypeSymbol;
 
     /// <summary>
     /// Determines whether a method's first type argument lacks any observable notification mechanism.
@@ -141,12 +125,7 @@ internal static class AnalyzerHelpers
         out INamedTypeSymbol? sourceType)
     {
         sourceType = ExtractFirstTypeArgument(methodSymbol);
-        if (sourceType == null)
-        {
-            return false;
-        }
-
-        return !TypeAnalyzer.HasObservableMechanism(sourceType, compilation);
+        return sourceType is null ? false : !TypeAnalyzer.HasObservableMechanism(sourceType, compilation);
     }
 
     /// <summary>
@@ -166,12 +145,7 @@ internal static class AnalyzerHelpers
     {
         mechanism = string.Empty;
         receiverType = ExtractFirstTypeArgument(methodSymbol);
-        if (receiverType == null)
-        {
-            return false;
-        }
-
-        return !HasBeforeChangeSupport(receiverType, compilation, out mechanism);
+        return receiverType is null ? false : !HasBeforeChangeSupport(receiverType, compilation, out mechanism);
     }
 
     /// <summary>
@@ -190,24 +164,17 @@ internal static class AnalyzerHelpers
         out INamedTypeSymbol? sourceType)
     {
         sourceType = ExtractFirstTypeArgument(methodSymbol);
-        if (sourceType == null)
+        if (sourceType is null)
         {
             return false;
         }
 
         var dataErrorInfo =
             compilation.GetTypeByMetadataName(SourceGenerators.Constants.INotifyDataErrorInfoMetadataName);
-        if (dataErrorInfo == null)
-        {
-            return false;
-        }
-
-        return ImplementsInterface(sourceType, dataErrorInfo);
+        return dataErrorInfo is null ? false : ImplementsInterface(sourceType, dataErrorInfo);
     }
 
-    /// <summary>
-    /// Determines whether a type implements a specific interface.
-    /// </summary>
+    /// <summary>Determines whether a type implements a specific interface.</summary>
     /// <param name="typeSymbol">The type symbol to check.</param>
     /// <param name="interfaceSymbol">The interface symbol to look for.</param>
     /// <returns><c>true</c> if the type implements the specified interface; otherwise, <c>false</c>.</returns>
@@ -225,16 +192,14 @@ internal static class AnalyzerHelpers
         return false;
     }
 
-    /// <summary>
-    /// Determines whether a type inherits from a specific base type.
-    /// </summary>
+    /// <summary>Determines whether a type inherits from a specific base type.</summary>
     /// <param name="typeSymbol">The type symbol to check.</param>
     /// <param name="baseTypeSymbol">The base type symbol to look for in the inheritance hierarchy.</param>
     /// <returns><c>true</c> if the type inherits from the specified base type; otherwise, <c>false</c>.</returns>
     internal static bool InheritsFrom(INamedTypeSymbol typeSymbol, INamedTypeSymbol baseTypeSymbol)
     {
         var current = typeSymbol.BaseType;
-        while (current != null)
+        while (current is not null)
         {
             if (SymbolEqualityComparer.Default.Equals(current, baseTypeSymbol))
             {
@@ -265,7 +230,7 @@ internal static class AnalyzerHelpers
         bool byInterface)
     {
         var target = compilation.GetTypeByMetadataName(metadataName);
-        if (target == null)
+        if (target is null)
         {
             return false;
         }

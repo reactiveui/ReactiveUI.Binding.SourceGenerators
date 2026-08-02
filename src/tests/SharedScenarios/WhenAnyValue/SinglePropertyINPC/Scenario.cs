@@ -7,16 +7,12 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenAnyValue.SinglePropertyINPC;
 
-/// <summary>
-/// Exercises WhenAnyValue on a single INPC property.
-/// </summary>
+/// <summary>Exercises WhenAnyValue on a single INPC property.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenAnyValue observable for the Name property.
-    /// </summary>
+    /// <summary>Creates a WhenAnyValue observable for the Name property.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of name values.</returns>
-    public static IObservable<string> Execute(MyViewModel vm)
-        => vm.WhenAnyValue(x => x.Name);
+    public static IObservable<string> Execute(MyViewModel vm) =>
+        vm.WhenAnyValue(x => x.Name);
 }

@@ -7,40 +7,29 @@ using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
-/// <summary>
-/// A simple observable class with a Name property.
-/// </summary>
+/// <summary>A simple observable class with a Name property.</summary>
 public class OwnerClass : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backer for Name.
-    /// </summary>
-    private string _name = string.Empty;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
-        get => _name;
+        get => field;
         set
         {
-            if (_name == value)
+            if (field == value)
             {
                 return;
             }
 
-            _name = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Raises the PropertyChanged event.
-    /// </summary>
+    /// <summary>Raises the PropertyChanged event.</summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new(propertyName));

@@ -6,34 +6,25 @@ using System.ComponentModel;
 
 namespace ReactiveUI.Binding.AotValidation;
 
-/// <summary>
-/// A view used for AOT binding validation.
-/// </summary>
+/// <summary>A view used for AOT binding validation.</summary>
 public class AotView : INotifyPropertyChanged
 {
-    /// <summary>
-    /// Backing field for the <see cref="DisplayName"/> property, representing the display name of the view.
-    /// </summary>
-    private string _displayName = string.Empty;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the display name.
-    /// </summary>
+    /// <summary>Gets or sets the display name.</summary>
     public string DisplayName
     {
-        get => _displayName;
+        get => field;
         set
         {
-            if (_displayName == value)
+            if (field == value)
             {
                 return;
             }
 
-            _displayName = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(DisplayName)));
         }
-    }
+    } = string.Empty;
 }

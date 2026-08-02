@@ -4,29 +4,19 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting nullable long to long.
-/// </summary>
+/// <summary>Tests for converting nullable long to long.</summary>
 public class NullableLongToLongTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    /// Sample long value used for conversion round-trips.
-    /// </summary>
+    /// <summary>Sample long value used for conversion round-trips.</summary>
     private const long SampleLong = 1_234_567_890_123_456L;
 
-    /// <summary>
-    /// Smaller long value used for conversion checks.
-    /// </summary>
+    /// <summary>Smaller long value used for conversion checks.</summary>
     private const long SmallLong = 42L;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -36,9 +26,7 @@ public class NullableLongToLongTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithValue_Succeeds()
@@ -52,9 +40,7 @@ public class NullableLongToLongTypeConverterTests
         await Assert.That(output).IsEqualTo(SampleLong);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsFalse()
@@ -66,9 +52,7 @@ public class NullableLongToLongTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies FromType ReturnsLongNullable.
-    /// </summary>
+    /// <summary>Verifies FromType ReturnsLongNullable.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task FromType_ReturnsLongNullable()
@@ -77,9 +61,7 @@ public class NullableLongToLongTypeConverterTests
         await Assert.That(converter.FromType).IsEqualTo(typeof(long?));
     }
 
-    /// <summary>
-    ///     Verifies ToType ReturnsLong.
-    /// </summary>
+    /// <summary>Verifies ToType ReturnsLong.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ToType_ReturnsLong()
@@ -88,9 +70,7 @@ public class NullableLongToLongTypeConverterTests
         await Assert.That(converter.ToType).IsEqualTo(typeof(long));
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithValidValue ReturnsTrueAndOutput.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithValidValue ReturnsTrueAndOutput.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithValidValue_ReturnsTrueAndOutput()
@@ -104,9 +84,7 @@ public class NullableLongToLongTypeConverterTests
         await Assert.That(result).IsEqualTo(SmallLong);
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithNullValue ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithNullValue ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithNullValue_ReturnsFalse()
@@ -119,9 +97,7 @@ public class NullableLongToLongTypeConverterTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithInvalidType ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithInvalidType ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()

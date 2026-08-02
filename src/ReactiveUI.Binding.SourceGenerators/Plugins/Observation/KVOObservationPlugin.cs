@@ -27,10 +27,6 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// for the subscription lifetime.
 /// </para>
 /// </remarks>
-[System.Diagnostics.CodeAnalysis.SuppressMessage(
-    "Minor Code Smell",
-    "S101:Types should be named in PascalCase",
-    Justification = "KVO is an established acronym (Key-Value Observing) matching the ReactiveUI domain terminology.")]
 internal sealed class KVOObservationPlugin : IObservationPlugin
 {
     /// <summary>
@@ -72,7 +68,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         bool includeStartWith)
     {
         var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        sb.Append($"new __KVOObservable<{segment.PropertyTypeFullName}>(")
+        _ = sb.Append($"new __KVOObservable<{segment.PropertyTypeFullName}>(")
             .Append($"(global::Foundation.NSObject){rootVar}, ")
             .Append($"\"{keyPath}\", ")
             .Append($"(global::Foundation.NSObject __o) => (({castTypeName})__o).{segment.PropertyName}, ")
@@ -92,7 +88,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         string varName)
     {
         var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        sb.Append($"""
+        _ = sb.Append($"""
                                var {varName} = new __KVOObservable<{segment.PropertyTypeFullName}>(
                                    (global::Foundation.NSObject){rootVar},
                                    "{keyPath}",
@@ -112,7 +108,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         string obsVarName)
     {
         var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        sb.AppendLine($"""
+        _ = sb.AppendLine($"""
                                    var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new __KVOObservable<{segment.PropertyTypeFullName}>(
                                        (global::Foundation.NSObject){rootVar},
                                        "{keyPath}",
@@ -135,7 +131,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         var declType = segment.DeclaringTypeFullName;
         var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
 
-        sb.AppendLine()
+        _ = sb.AppendLine()
             .AppendLine($"""
                                  var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
                                      global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
@@ -159,7 +155,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         string varName)
     {
         var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        sb.AppendLine($"""
+        _ = sb.AppendLine($"""
                                var {varName} = new __KVOObservable<{segment.PropertyTypeFullName}>(
                                    (global::Foundation.NSObject){rootVar},
                                    "{keyPath}",
@@ -169,10 +165,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
                        """);
     }
 
-    /// <summary>
-    /// Renders a boolean as the lowercase C# literal text (<c>true</c>/<c>false</c>) for emission
-    /// into generated source.
-    /// </summary>
+    /// <summary>Renders a boolean as the lowercase C# literal text (<c>true</c>/<c>false</c>) for emission into generated source.</summary>
     /// <param name="value">The boolean value.</param>
     /// <returns><c>"true"</c> or <c>"false"</c>.</returns>
     private static string BoolLiteral(bool value) => value ? "true" : "false";
@@ -190,20 +183,13 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
     {
         if (propertyTypeFullName == "bool" && !propertyName.StartsWith("Is", StringComparison.Ordinal))
         {
-            propertyName = "Is" + propertyName;
+            propertyName = $"Is{propertyName}";
         }
 
-        if (propertyName.Length == 0)
-        {
-            return propertyName;
-        }
-
-        return char.ToLowerInvariant(propertyName[0]) + propertyName.Substring(1);
+        return propertyName.Length == 0 ? propertyName : char.ToLowerInvariant(propertyName[0]) + propertyName[1..];
     }
 
-    /// <summary>
-    /// Emits the <c>__KVOObserver</c> NSObject subclass that forwards ObserveValue callbacks.
-    /// </summary>
+    /// <summary>Emits the <c>__KVOObserver</c> NSObject subclass that forwards ObserveValue callbacks.</summary>
     /// <param name="sb">The string builder.</param>
     private static void EmitObserverClass(StringBuilder sb) =>
         sb.AppendLine("""
@@ -232,13 +218,11 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
                           }
                       """);
 
-    /// <summary>
-    /// Emits the <c>__KVOObservable&lt;T&gt;</c> fused observable that wraps KVO add/remove observer calls.
-    /// </summary>
+    /// <summary>Emits the <c>__KVOObservable&lt;T&gt;</c> fused observable that wraps KVO add/remove observer calls.</summary>
     /// <param name="sb">The string builder.</param>
     private static void EmitObservableClass(StringBuilder sb)
     {
-        sb.AppendLine("""
+        _ = sb.AppendLine("""
 
                           /// <summary>
                           /// Fused observable for Apple KVO property observation.
@@ -278,11 +262,17 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         EmitSubscriptionClass(sb);
     }
 
-    /// <summary>
-    /// Emits the nested <c>Subscription</c> type of <c>__KVOObservable&lt;T&gt;</c> and the closing brace of the observable.
-    /// </summary>
+    /// <summary>Emits the nested <c>Subscription</c> type of <c>__KVOObservable&lt;T&gt;</c> and the closing brace of the observable.</summary>
     /// <param name="sb">The string builder.</param>
-    private static void EmitSubscriptionClass(StringBuilder sb) =>
+    private static void EmitSubscriptionClass(StringBuilder sb)
+    {
+        EmitSubscriptionClassHead(sb);
+        EmitSubscriptionClassCallbacks(sb);
+    }
+
+    /// <summary>Emits the subscription's fields and constructor, which registers the KVO observer.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    private static void EmitSubscriptionClassHead(StringBuilder sb) =>
         sb.AppendLine("""
 
                               private sealed class Subscription : global::System.IDisposable
@@ -316,6 +306,12 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
                                       _hasValue = true;
                                       observer.OnNext(initial);
                                   }
+                      """);
+
+    /// <summary>Emits the subscription's value-changed callback and disposal.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    private static void EmitSubscriptionClassCallbacks(StringBuilder sb) =>
+        sb.AppendLine("""
 
                                   private void OnValueChanged()
                                   {

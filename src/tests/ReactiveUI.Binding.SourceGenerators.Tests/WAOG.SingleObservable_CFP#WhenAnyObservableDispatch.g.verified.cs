@@ -15,17 +15,18 @@ namespace ReactiveUI.Binding
         public static global::System.IObservable<string> WhenAnyObservable(
             this global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel objectToMonitor,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel, global::System.IObservable<string>?>> obs1,
+            string obs1Expression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 55 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
+            if (callerLineNumber == 45 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __WhenAnyObservable_7FFFCD977933883E(objectToMonitor);
+                return __WhenAnyObservable_7FFFCD9779338708(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
         }
 
-        private static global::System.IObservable<string> __WhenAnyObservable_7FFFCD977933883E(global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel obj)
+        private static global::System.IObservable<string> __WhenAnyObservable_7FFFCD9779338708(global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel obj)
         {
             var __obsProperty = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,

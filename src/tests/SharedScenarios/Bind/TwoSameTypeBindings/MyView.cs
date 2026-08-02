@@ -7,19 +7,13 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.Bind.TwoSameTypeBindings;
 
-/// <summary>
-/// Target View with two string properties to test same-type-signature grouping.
-/// </summary>
+/// <summary>Target View with two string properties to test same-type-signature grouping.</summary>
 public class MyView : IViewFor, INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="FirstNameText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="FirstNameText"/>.</summary>
     private string _firstNameText = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="LastNameText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="LastNameText"/>.</summary>
     private string _lastNameText = string.Empty;
 
     /// <inheritdoc/>
@@ -28,9 +22,7 @@ public class MyView : IViewFor, INotifyPropertyChanged
     /// <inheritdoc/>
     public object? ViewModel { get; set; }
 
-    /// <summary>
-    /// Gets or sets the first name text.
-    /// </summary>
+    /// <summary>Gets or sets the first name text.</summary>
     public string FirstNameText
     {
         get => _firstNameText;
@@ -46,9 +38,7 @@ public class MyView : IViewFor, INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the last name text.
-    /// </summary>
+    /// <summary>Gets or sets the last name text.</summary>
     public string LastNameText
     {
         get => _lastNameText;

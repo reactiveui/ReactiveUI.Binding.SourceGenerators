@@ -19,19 +19,21 @@ namespace ReactiveUI.Binding
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.BasicNoParam.MyViewModel, global::System.Windows.Input.ICommand?>> propertyName,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.BasicNoParam.MyView, global::SharedScenarios.BindCommand.BasicNoParam.MyButton>> controlName,
             string? toEvent = null,
+            string propertyNameExpression = "",
+            string controlNameExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 93
+            if (callerLineNumber == 73
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __BindCommand_7FFFF69B2C59E18F(view, viewModel);
+                return __BindCommand_7FFFF69B2C59DF23(view, viewModel);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindCommand_7FFFF69B2C59E18F(
+        private static global::System.IDisposable __BindCommand_7FFFF69B2C59DF23(
             global::SharedScenarios.BindCommand.BasicNoParam.MyView view,
             global::SharedScenarios.BindCommand.BasicNoParam.MyViewModel viewModel)
         {

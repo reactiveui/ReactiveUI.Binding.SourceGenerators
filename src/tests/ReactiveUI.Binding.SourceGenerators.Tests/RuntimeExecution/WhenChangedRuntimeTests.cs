@@ -13,9 +13,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests.RuntimeExecution;
 /// </summary>
 public class WhenChangedRuntimeTests
 {
-    /// <summary>
-    /// Verifies that single-property WhenChanged generates a dispatch file with correct structure.
-    /// </summary>
+    /// <summary>The <c>WhenChangedDispatch.g.cs</c> name these tests generate against.</summary>
+    private const string WhenChangedDispatchgcsName = "WhenChangedDispatch.g.cs";
+
+    /// <summary>Verifies that single-property WhenChanged generates a dispatch file with correct structure.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_GeneratesDispatchAndRegistration()
@@ -61,15 +62,13 @@ public class WhenChangedRuntimeTests
 
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
-        await result.HasGeneratedSource("WhenChangedDispatch.g.cs");
+        await result.HasGeneratedSource(WhenChangedDispatchgcsName);
         await result.HasGeneratedSource("GeneratedBinderRegistration.g.cs");
-        await result.GeneratedSourceContains("WhenChangedDispatch.g.cs", "PropertyChanged");
-        await result.GeneratedSourceContains("WhenChangedDispatch.g.cs", "Name");
+        await result.GeneratedSourceContains(WhenChangedDispatchgcsName, "PropertyChanged");
+        await result.GeneratedSourceContains(WhenChangedDispatchgcsName, "Name");
     }
 
-    /// <summary>
-    /// Verifies that multi-property WhenChanged generates CombineLatest observation code.
-    /// </summary>
+    /// <summary>Verifies that multi-property WhenChanged generates CombineLatest observation code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_GeneratesCombineLatest()
@@ -103,13 +102,11 @@ public class WhenChangedRuntimeTests
 
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
-        await result.HasGeneratedSource("WhenChangedDispatch.g.cs");
-        await result.GeneratedSourceContains("WhenChangedDispatch.g.cs", "CombineLatest");
+        await result.HasGeneratedSource(WhenChangedDispatchgcsName);
+        await result.GeneratedSourceContains(WhenChangedDispatchgcsName, "CombineLatest");
     }
 
-    /// <summary>
-    /// Verifies that deep chain WhenChanged generates Switch-based re-subscription code.
-    /// </summary>
+    /// <summary>Verifies that deep chain WhenChanged generates Switch-based re-subscription code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_GeneratesSwitchPattern()
@@ -148,13 +145,11 @@ public class WhenChangedRuntimeTests
 
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
-        await result.HasGeneratedSource("WhenChangedDispatch.g.cs");
-        await result.GeneratedSourceContains("WhenChangedDispatch.g.cs", "Switch");
+        await result.HasGeneratedSource(WhenChangedDispatchgcsName);
+        await result.GeneratedSourceContains(WhenChangedDispatchgcsName, "Switch");
     }
 
-    /// <summary>
-    /// Verifies that WhenChanged with a selector generates the selector invocation.
-    /// </summary>
+    /// <summary>Verifies that WhenChanged with a selector generates the selector invocation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WithSelector_GeneratesSelectorInvocation()
@@ -188,7 +183,7 @@ public class WhenChangedRuntimeTests
 
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
-        await result.HasGeneratedSource("WhenChangedDispatch.g.cs");
-        await result.GeneratedSourceContains("WhenChangedDispatch.g.cs", "selector");
+        await result.HasGeneratedSource(WhenChangedDispatchgcsName);
+        await result.GeneratedSourceContains(WhenChangedDispatchgcsName, "selector");
     }
 }

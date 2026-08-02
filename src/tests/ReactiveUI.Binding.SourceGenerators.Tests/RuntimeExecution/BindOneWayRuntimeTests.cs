@@ -13,9 +13,13 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests.RuntimeExecution;
 /// </summary>
 public class BindOneWayRuntimeTests
 {
-    /// <summary>
-    /// Verifies that BindOneWay generates dispatch and registration files.
-    /// </summary>
+    /// <summary>The <c>BindOneWayDispatch.g.cs</c> name these tests generate against.</summary>
+    private const string BindOneWayDispatchgcsName = "BindOneWayDispatch.g.cs";
+
+    /// <summary>The <c>BindTwoWayDispatch.g.cs</c> name these tests generate against.</summary>
+    private const string BindTwoWayDispatchgcsName = "BindTwoWayDispatch.g.cs";
+
+    /// <summary>Verifies that BindOneWay generates dispatch and registration files.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringBinding_GeneratesDispatchAndRegistration()
@@ -54,15 +58,13 @@ public class BindOneWayRuntimeTests
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.HasNoGeneratorDiagnostics();
-        await result.HasGeneratedSource("BindOneWayDispatch.g.cs");
+        await result.HasGeneratedSource(BindOneWayDispatchgcsName);
         await result.HasGeneratedSource("GeneratedBinderRegistration.g.cs");
-        await result.GeneratedSourceContains("BindOneWayDispatch.g.cs", "NameText");
-        await result.GeneratedSourceContains("BindOneWayDispatch.g.cs", "Name");
+        await result.GeneratedSourceContains(BindOneWayDispatchgcsName, "NameText");
+        await result.GeneratedSourceContains(BindOneWayDispatchgcsName, "Name");
     }
 
-    /// <summary>
-    /// Verifies that WhenChanging generates dispatch code with PropertyChanging subscription.
-    /// </summary>
+    /// <summary>Verifies that WhenChanging generates dispatch code with PropertyChanging subscription.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenChanging_GeneratesPropertyChangingSubscription()
@@ -100,9 +102,7 @@ public class BindOneWayRuntimeTests
         await result.GeneratedSourceContains("WhenChangingDispatch.g.cs", "PropertyChanging");
     }
 
-    /// <summary>
-    /// Verifies that WhenAnyValue generates dispatch code.
-    /// </summary>
+    /// <summary>Verifies that WhenAnyValue generates dispatch code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WhenAnyValue_GeneratesDispatch()
@@ -140,9 +140,7 @@ public class BindOneWayRuntimeTests
         await result.GeneratedSourceContains("WhenAnyValueDispatch.g.cs", "CombineLatest");
     }
 
-    /// <summary>
-    /// Verifies that BindTwoWay generates dispatch code for two-way binding.
-    /// </summary>
+    /// <summary>Verifies that BindTwoWay generates dispatch code for two-way binding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindTwoWay_GeneratesDispatch()
@@ -181,8 +179,8 @@ public class BindOneWayRuntimeTests
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.HasNoGeneratorDiagnostics();
-        await result.HasGeneratedSource("BindTwoWayDispatch.g.cs");
-        await result.GeneratedSourceContains("BindTwoWayDispatch.g.cs", "Name");
-        await result.GeneratedSourceContains("BindTwoWayDispatch.g.cs", "NameText");
+        await result.HasGeneratedSource(BindTwoWayDispatchgcsName);
+        await result.GeneratedSourceContains(BindTwoWayDispatchgcsName, "Name");
+        await result.GeneratedSourceContains(BindTwoWayDispatchgcsName, "NameText");
     }
 }

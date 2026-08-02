@@ -6,32 +6,22 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties;
 
-/// <summary>
-/// ViewModel with three observable properties.
-/// </summary>
+/// <summary>ViewModel with three observable properties.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Name"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Name"/>.</summary>
     private string _name = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="Age"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Age"/>.</summary>
     private int _age;
 
-    /// <summary>
-    /// The backing field for <see cref="Score"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Score"/>.</summary>
     private double _score;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
         get => _name;
@@ -47,9 +37,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the age.
-    /// </summary>
+    /// <summary>Gets or sets the age.</summary>
     public int Age
     {
         get => _age;
@@ -65,9 +53,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the score.
-    /// </summary>
+    /// <summary>Gets or sets the score.</summary>
     public double Score
     {
         get => _score;

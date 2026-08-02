@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -25,13 +25,13 @@ namespace ReactiveUI.Binding
 
             if (propertyExpression == "x => x.Caption")
             {
-                return __BindTo_000016A7FA446C30(source, target);
+                return __BindTo_000016A7FA446AFA(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTo_000016A7FA446C30(global::System.IObservable<string> source, global::SharedScenarios.BindTo.SameTypeString.MyView target)
+        private static global::System.IDisposable __BindTo_000016A7FA446AFA(global::System.IObservable<string> source, global::SharedScenarios.BindTo.SameTypeString.MyView target)
         {
             // BindTo: observable -> Caption
             return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(source, value =>

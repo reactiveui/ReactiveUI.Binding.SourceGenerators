@@ -4,14 +4,10 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 
-/// <summary>
-/// Tests for the internal <see cref="BindingTypeConverterRegistry.CloneRegistryShallow"/> method.
-/// </summary>
+/// <summary>Tests for the internal <see cref="BindingTypeConverterRegistry.CloneRegistryShallow"/> method.</summary>
 public class BindingTypeConverterRegistryTests
 {
-    /// <summary>
-    /// Verifies that CloneRegistryShallow returns an empty dictionary for empty input.
-    /// </summary>
+    /// <summary>Verifies that CloneRegistryShallow returns an empty dictionary for empty input.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CloneRegistryShallow_EmptyDictionary_ReturnsEmpty()
@@ -23,19 +19,14 @@ public class BindingTypeConverterRegistryTests
         await Assert.That(clone.Count).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that CloneRegistryShallow returns a shallow copy with the same entries.
-    /// </summary>
+    /// <summary>Verifies that CloneRegistryShallow returns a shallow copy with the same entries.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CloneRegistryShallow_WithEntries_ReturnsShallowCopy()
     {
         var converter = new TestConverter(typeof(string), typeof(int));
         var list = new List<IBindingTypeConverter> { converter };
-        var source = new Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>>
-        {
-            [(typeof(string), typeof(int))] = list
-        };
+        var source = new Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>> { [(typeof(string), typeof(int))] = list };
 
         var clone = BindingTypeConverterRegistry.CloneRegistryShallow(source);
 
@@ -47,47 +38,38 @@ public class BindingTypeConverterRegistryTests
         await Assert.That(ReferenceEquals(clonedList, list)).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that modifying the clone does not affect the original dictionary.
-    /// </summary>
+    /// <summary>Verifies that modifying the clone does not affect the original dictionary.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CloneRegistryShallow_ModifyingClone_DoesNotAffectOriginal()
     {
         var converter = new TestConverter(typeof(string), typeof(int));
         var list = new List<IBindingTypeConverter> { converter };
-        var source = new Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>>
-        {
-            [(typeof(string), typeof(int))] = list
-        };
+        var source = new Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>> { [(typeof(string), typeof(int))] = list };
 
         var clone = BindingTypeConverterRegistry.CloneRegistryShallow(source);
 
         // Remove entry from clone
-        clone.Remove((typeof(string), typeof(int)));
+        _ = clone.Remove((typeof(string), typeof(int)));
 
         // Original should still have the entry
         await Assert.That(source.Count).IsEqualTo(1);
         await Assert.That(clone.Count).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that CloneRegistryShallow throws ArgumentNullException for null input.
-    /// </summary>
+    /// <summary>Verifies that CloneRegistryShallow throws ArgumentNullException for null input.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CloneRegistryShallow_NullInput_ThrowsArgumentNullException() =>
-        await Assert.That(() => BindingTypeConverterRegistry.CloneRegistryShallow(null!))
+        await Assert.That(static () => BindingTypeConverterRegistry.CloneRegistryShallow(null!))
             .ThrowsExactly<ArgumentNullException>();
 
-    /// <summary>
-    /// Minimal test implementation of <see cref="IBindingTypeConverter"/>.
-    /// </summary>
+    /// <summary>Minimal test implementation of <see cref="IBindingTypeConverter"/>.</summary>
+    /// <param name="fromType">The source type this converter claims to handle.</param>
+    /// <param name="toType">The target type this converter claims to handle.</param>
     private sealed class TestConverter(Type fromType, Type toType) : IBindingTypeConverter
     {
-        /// <summary>
-        /// Affinity returned by this stub converter indicating a strong match.
-        /// </summary>
+        /// <summary>Affinity returned by this stub converter indicating a strong match.</summary>
         private const int StubAffinity = 2;
 
         /// <inheritdoc/>

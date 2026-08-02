@@ -6,14 +6,10 @@ using ReactiveUI.Binding.Builder;
 
 namespace ReactiveUI.Binding.Tests.Builder;
 
-/// <summary>
-/// Tests for the <see cref="RxBindingBuilder"/> static factory class.
-/// </summary>
+/// <summary>Tests for the <see cref="RxBindingBuilder"/> static factory class.</summary>
 public class RxBindingBuilderTests
 {
-    /// <summary>
-    /// Verifies that CreateReactiveUIBindingBuilder returns a non-null builder.
-    /// </summary>
+    /// <summary>Verifies that CreateReactiveUIBindingBuilder returns a non-null builder.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CreateReactiveUIBindingBuilder_ReturnsBuilder()
@@ -25,9 +21,7 @@ public class RxBindingBuilderTests
         await Assert.That(builder).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that EnsureInitialized throws when not initialized.
-    /// </summary>
+    /// <summary>Verifies that EnsureInitialized throws when not initialized.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EnsureInitialized_NotInitialized_ThrowsInvalidOperationException()
@@ -38,9 +32,7 @@ public class RxBindingBuilderTests
             .ThrowsExactly<InvalidOperationException>();
     }
 
-    /// <summary>
-    /// Verifies that EnsureInitialized does not throw after BuildApp has been called.
-    /// </summary>
+    /// <summary>Verifies that EnsureInitialized does not throw after BuildApp has been called.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EnsureInitialized_AfterBuildApp_DoesNotThrow()
@@ -48,15 +40,13 @@ public class RxBindingBuilderTests
         RxBindingBuilder.ResetForTesting();
 
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
 
         await Assert.That(RxBindingBuilder.EnsureInitialized).ThrowsNothing();
     }
 
-    /// <summary>
-    /// Verifies that ResetForTesting resets the initialization state.
-    /// </summary>
+    /// <summary>Verifies that ResetForTesting resets the initialization state.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResetForTesting_ResetsInitializationState()
@@ -64,8 +54,8 @@ public class RxBindingBuilderTests
         RxBindingBuilder.ResetForTesting();
 
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
 
         // Should not throw
         RxBindingBuilder.EnsureInitialized();
@@ -89,9 +79,9 @@ public class RxBindingBuilderTests
         RxBindingBuilder.ResetForTesting();
 
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.WithCoreServices(); // Second call should be a no-op
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.WithCoreServices(); // Second call should be a no-op
+        _ = builder.BuildApp();
 
         await Assert.That(RxBindingBuilder.EnsureInitialized).ThrowsNothing();
     }
@@ -112,14 +102,12 @@ public class RxBindingBuilderTests
         await Assert.That(builder).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that the extension method overload throws ArgumentNullException when resolver is null.
-    /// </summary>
+    /// <summary>Verifies that the extension method overload throws ArgumentNullException when resolver is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CreateReactiveUIBindingBuilder_NullResolver_ThrowsArgumentNullException()
     {
-        var action = () => ((IMutableDependencyResolver)null!).CreateReactiveUIBindingBuilder();
+        var action = static () => ((IMutableDependencyResolver)null!).CreateReactiveUIBindingBuilder();
 
         await Assert.That(action).ThrowsExactly<ArgumentNullException>();
     }
@@ -155,17 +143,11 @@ public class RxBindingBuilderTests
         public bool HasRegistration(Type? serviceType, string? contract) => false;
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public bool HasRegistration<T>() => false;
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public bool HasRegistration<T>(string? contract) => false;
 
         /// <inheritdoc/>
@@ -189,10 +171,7 @@ public class RxBindingBuilderTests
         }
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public void Register<TService, TImplementation>()
             where TService : class
             where TImplementation : class, TService, new()
@@ -200,10 +179,7 @@ public class RxBindingBuilderTests
         }
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public void Register<TService, TImplementation>(string? contract)
             where TService : class
             where TImplementation : class, TService, new()
@@ -221,19 +197,13 @@ public class RxBindingBuilderTests
         }
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public void UnregisterCurrent<T>()
         {
         }
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public void UnregisterCurrent<T>(string? contract)
         {
         }
@@ -249,19 +219,13 @@ public class RxBindingBuilderTests
         }
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public void UnregisterAll<T>()
         {
         }
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public void UnregisterAll<T>(string? contract)
         {
         }
@@ -276,18 +240,12 @@ public class RxBindingBuilderTests
             Disposable.Empty;
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public IDisposable ServiceRegistrationCallback<T>(Action<IDisposable> callback) =>
             Disposable.Empty;
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "Major Code Smell",
-            "S4018:Generic methods should provide type parameter for type inference",
-            Justification = "Type parameter is dictated by the implemented interface and is not inferable from the arguments.")]
+        [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         public IDisposable ServiceRegistrationCallback<T>(string? contract, Action<IDisposable> callback) =>
             Disposable.Empty;
 

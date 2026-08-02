@@ -13,15 +13,10 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// </summary>
 internal static class ModuleInitializer
 {
-    /// <summary>
-    /// Guard flag to ensure initialization runs at most once. Uses <see cref="Interlocked.Exchange(ref int, int)"/>.
-    /// </summary>
+    /// <summary>Guard flag to ensure initialization runs at most once. Uses <see cref="Interlocked.Exchange(ref int, int)"/>.</summary>
     private static int _initialized;
 
-    /// <summary>
-    /// Ensures ReactiveUI is initialized exactly once, regardless of how many
-    /// benchmark classes call this method.
-    /// </summary>
+    /// <summary>Ensures ReactiveUI is initialized exactly once, regardless of how many benchmark classes call this method.</summary>
     internal static void EnsureInitialized()
     {
         if (Interlocked.Exchange(ref _initialized, 1) != 0)
@@ -30,14 +25,12 @@ internal static class ModuleInitializer
         }
 
         ModeDetector.OverrideModeDetector(new BenchmarkModeDetector());
-        RxAppBuilder.CreateReactiveUIBuilder()
+        _ = RxAppBuilder.CreateReactiveUIBuilder()
             .WithCoreServices()
             .BuildApp();
     }
 
-    /// <summary>
-    /// Mode detector for benchmark context.
-    /// </summary>
+    /// <summary>Mode detector for benchmark context.</summary>
     private sealed class BenchmarkModeDetector : IModeDetector
     {
         /// <inheritdoc/>

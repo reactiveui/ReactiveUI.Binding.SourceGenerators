@@ -8,20 +8,13 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
-/// <summary>
-/// Extracts BindInteractionInvocationInfo from BindInteraction invocations.
-/// </summary>
+/// <summary>Extracts BindInteractionInvocationInfo from BindInteraction invocations.</summary>
 internal static class InteractionExtractor
 {
-    /// <summary>
-    /// The minimum number of arguments a BindInteraction invocation must have
-    /// (view model, property name, handler).
-    /// </summary>
+    /// <summary>The minimum number of arguments a BindInteraction invocation must have (view model, property name, handler).</summary>
     private const int MinimumBindInteractionArgumentCount = 3;
 
-    /// <summary>
-    /// Pipeline B transform: extracts BindInteractionInvocationInfo from a BindInteraction invocation.
-    /// </summary>
+    /// <summary>Pipeline B transform: extracts BindInteractionInvocationInfo from a BindInteraction invocation.</summary>
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A BindInteractionInvocationInfo POCO, or null if the invocation is not analyzable.</returns>
@@ -35,7 +28,7 @@ internal static class InteractionExtractor
 
         var semanticModel = context.SemanticModel;
         var methodSymbol = ExtractorValidation.ExtractMethodSymbol(semanticModel.GetSymbolInfo(invocation, ct));
-        if (methodSymbol == null)
+        if (methodSymbol is null)
         {
             return null;
         }
@@ -52,7 +45,7 @@ internal static class InteractionExtractor
         // Extract the interaction property path from the second argument (propertyName)
         var propertyNameArg = args[1].Expression;
         var interactionPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(propertyNameArg, semanticModel, ct);
-        if (interactionPropertyPath == null)
+        if (interactionPropertyPath is null)
         {
             return null;
         }
@@ -128,7 +121,7 @@ internal static class InteractionExtractor
         }
 
         var body = SyntaxHelpers.GetLambdaBody(lambda);
-        if (body == null)
+        if (body is null)
         {
             return;
         }

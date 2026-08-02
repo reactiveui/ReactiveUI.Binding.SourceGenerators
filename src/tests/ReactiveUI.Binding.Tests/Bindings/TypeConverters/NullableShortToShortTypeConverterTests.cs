@@ -4,29 +4,19 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting nullable short to short.
-/// </summary>
+/// <summary>Tests for converting nullable short to short.</summary>
 public class NullableShortToShortTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    /// Sample short value used for conversion round-trips.
-    /// </summary>
+    /// <summary>Sample short value used for conversion round-trips.</summary>
     private const short SampleShort = 1_234;
 
-    /// <summary>
-    /// Smaller short value used for conversion checks.
-    /// </summary>
+    /// <summary>Smaller short value used for conversion checks.</summary>
     private const short SmallShort = 42;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -36,9 +26,7 @@ public class NullableShortToShortTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithValue_Succeeds()
@@ -49,12 +37,10 @@ public class NullableShortToShortTypeConverterTests
         var result = converter.TryConvert(value, null, out var output);
 
         await Assert.That(result).IsTrue();
-        await Assert.That(output).IsEqualTo((short)SampleShort);
+        await Assert.That(output).IsEqualTo(SampleShort);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsFalse()
@@ -66,9 +52,7 @@ public class NullableShortToShortTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies FromType ReturnsShortNullable.
-    /// </summary>
+    /// <summary>Verifies FromType ReturnsShortNullable.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task FromType_ReturnsShortNullable()
@@ -77,9 +61,7 @@ public class NullableShortToShortTypeConverterTests
         await Assert.That(converter.FromType).IsEqualTo(typeof(short?));
     }
 
-    /// <summary>
-    ///     Verifies ToType ReturnsShort.
-    /// </summary>
+    /// <summary>Verifies ToType ReturnsShort.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ToType_ReturnsShort()
@@ -88,9 +70,7 @@ public class NullableShortToShortTypeConverterTests
         await Assert.That(converter.ToType).IsEqualTo(typeof(short));
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithValidValue ReturnsTrueAndOutput.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithValidValue ReturnsTrueAndOutput.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithValidValue_ReturnsTrueAndOutput()
@@ -101,12 +81,10 @@ public class NullableShortToShortTypeConverterTests
         var success = converter.TryConvertTyped(value, null, out var result);
 
         await Assert.That(success).IsTrue();
-        await Assert.That(result).IsEqualTo((short)SmallShort);
+        await Assert.That(result).IsEqualTo(SmallShort);
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithNullValue ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithNullValue ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithNullValue_ReturnsFalse()
@@ -119,9 +97,7 @@ public class NullableShortToShortTypeConverterTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithInvalidType ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithInvalidType ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()

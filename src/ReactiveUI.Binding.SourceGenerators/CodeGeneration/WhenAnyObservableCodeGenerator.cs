@@ -15,14 +15,10 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class WhenAnyObservableCodeGenerator
 {
-    /// <summary>
-    /// The base name used to build emitted local variable identifiers for the raw observable property.
-    /// </summary>
+    /// <summary>The base name used to build emitted local variable identifiers for the raw observable property.</summary>
     private const string ObsPropertyVarName = "__obsProperty";
 
-    /// <summary>
-    /// Generates concrete typed overloads and observation methods for WhenAnyObservable invocations.
-    /// </summary>
+    /// <summary>Generates concrete typed overloads and observation methods for WhenAnyObservable invocations.</summary>
     /// <param name="invocations">All detected WhenAnyObservable invocations.</param>
     /// <param name="allClasses">All detected class binding info for type mechanism lookup.</param>
     /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
@@ -30,17 +26,17 @@ internal static class WhenAnyObservableCodeGenerator
     internal static string? Generate(
         ImmutableArray<WhenAnyObservableInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        LanguageFeatures features)
+        in LanguageFeatures features)
     {
         if (invocations.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        var sb = new StringBuilder(invocations.Length * 1_024);
+        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
         var supportsCallerArgExpr = features.SupportsCallerArgExpr;
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
-        sb.AppendLine();
+        _ = sb.AppendLine();
 
         // Group invocations by their method signature
         var groups = GroupByTypeSignature(invocations);
@@ -50,8 +46,8 @@ internal static class WhenAnyObservableCodeGenerator
             var group = groups[g];
 
             // Generate the concrete typed extension method overload
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable);
-            sb.AppendLine();
+            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
+            _ = sb.AppendLine();
 
             // Generate the observation methods for each invocation in this group
             for (var i = 0; i < group.Invocations.Length; i++)
@@ -68,29 +64,29 @@ internal static class WhenAnyObservableCodeGenerator
         }
 
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
-        sb.AppendLine();
+        _ = sb.AppendLine();
 
-        return sb.ToString();
+        return PooledBuilder.ToStringAndReturn(sb);
     }
 
-    /// <summary>
-    /// Generates a concrete typed extension method overload with dispatch logic for WhenAnyObservable.
-    /// </summary>
+    /// <summary>Generates a concrete typed extension method overload with dispatch logic for WhenAnyObservable.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The type group containing invocations that share a signature.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         TypeGroup group,
         bool supportsCallerArgExpr,
-        bool supportsNullable)
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
     {
         var first = group.First;
         var propCount = first.PropertyPaths.Length;
         var hasSelector = first.HasSelector;
 
-        sb.AppendLine($"""
+        _ = sb.AppendLine($"""
                                /// <summary>
                                /// Concrete typed overload for WhenAnyObservable on {first.SourceTypeFullName}.
                                /// </summary>
@@ -102,25 +98,28 @@ internal static class WhenAnyObservableCodeGenerator
         {
             var innerType = first.InnerObservableTypeFullNames[i];
             var obsType = $"global::System.IObservable<{innerType}>{(supportsNullable ? "?" : string.Empty)}";
-            sb.AppendLine(
+            _ = sb.AppendLine(
                 $"            global::System.Linq.Expressions.Expression<global::System.Func<{first.SourceTypeFullName}, {obsType}>> obs{i + 1},");
         }
 
         if (hasSelector)
         {
-            sb.Append("            ").Append(GetSelectorType(first)).AppendLine(" selector,");
+            _ = sb.Append("            ").Append(GetSelectorType(first)).AppendLine(" selector,");
         }
 
-        if (supportsCallerArgExpr)
+        if (stubHasExpressionParameters)
         {
             for (var i = 0; i < propCount; i++)
             {
-                sb.AppendLine(
-                    $"            [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"obs{i + 1}\")] string obs{i + 1}Expression = \"\",");
+                CodeGeneratorHelpers.AppendExpressionParameter(
+                    sb,
+                    $"obs{i + 1}",
+                    $"obs{i + 1}Expression",
+                    supportsCallerArgExpr);
             }
         }
 
-        sb.AppendLine("""
+        _ = sb.AppendLine("""
                                   [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
                                   [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
                               {
@@ -130,14 +129,12 @@ internal static class WhenAnyObservableCodeGenerator
         EmitDispatchTable(sb, group, supportsCallerArgExpr, propCount, hasSelector);
 
         // Runtime fallback: throw for now (WhenAnyObservable doesn't have a simple fallback path)
-        sb.AppendLine(
+        _ = sb.AppendLine(
                 "            throw new global::System.InvalidOperationException(\"No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.\");")
             .AppendLine("        }");
     }
 
-    /// <summary>
-    /// Generates an observation method for a single WhenAnyObservable invocation.
-    /// </summary>
+    /// <summary>Generates an observation method for a single WhenAnyObservable invocation.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="classInfo">The class binding info for the source type, or null.</param>
@@ -148,9 +145,9 @@ internal static class WhenAnyObservableCodeGenerator
         ClassBindingInfo? classInfo,
         string suffix)
     {
-        var selectorParam = inv.HasSelector ? ", " + GetSelectorType(inv) + " selector" : string.Empty;
+        var selectorParam = inv.HasSelector ? $", {GetSelectorType(inv)} selector" : string.Empty;
 
-        sb.AppendLine($$"""
+        _ = sb.AppendLine($$"""
                                 private static global::System.IObservable<{{inv.ReturnTypeFullName}}> __WhenAnyObservable_{{suffix}}({{inv.SourceTypeFullName}} obj{{selectorParam}})
                                 {
                         """);
@@ -168,14 +165,12 @@ internal static class WhenAnyObservableCodeGenerator
             GenerateMultiObservableCombineLatest(sb, inv, classInfo);
         }
 
-        sb.AppendLine()
+        _ = sb.AppendLine()
             .AppendLine("        }")
             .AppendLine();
     }
 
-    /// <summary>
-    /// Generates a single-property Switch pattern: observe the IObservable property, switch to its latest value.
-    /// </summary>
+    /// <summary>Generates a single-property Switch pattern: observe the IObservable property, switch to its latest value.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="classInfo">The class binding info for the source type, or null.</param>
@@ -197,20 +192,18 @@ internal static class WhenAnyObservableCodeGenerator
             ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, ObsPropertyVarName);
         }
 
-        sb.AppendLine()
+        _ = sb.AppendLine()
             .AppendLine();
 
         // Switch pattern: take the observable property value, replace null with Empty, and switch
-        sb.Append($"""
+        _ = sb.Append($"""
                                return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
                                    global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty,
                                        __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance));
                    """);
     }
 
-    /// <summary>
-    /// Generates a multi-property Merge pattern: observe each IObservable property, switch each, then merge.
-    /// </summary>
+    /// <summary>Generates a multi-property Merge pattern: observe each IObservable property, switch each, then merge.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="classInfo">The class binding info for the source type, or null.</param>
@@ -225,7 +218,7 @@ internal static class WhenAnyObservableCodeGenerator
             var path = inv.PropertyPaths[i];
             var innerType = inv.InnerObservableTypeFullNames[i];
             var rawVar = ObsPropertyVarName + i;
-            var switchedVar = "__switched" + i;
+            var switchedVar = $"__switched{i}";
 
             if (path.Length > 1)
             {
@@ -236,7 +229,7 @@ internal static class WhenAnyObservableCodeGenerator
                 ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, rawVar);
             }
 
-            sb.AppendLine()
+            _ = sb.AppendLine()
                 .AppendLine()
                 .AppendLine($"""
                                          var {switchedVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
@@ -246,17 +239,17 @@ internal static class WhenAnyObservableCodeGenerator
                 .AppendLine();
         }
 
-        sb.AppendLine("            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(");
+        _ = sb.AppendLine("            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
-            sb.Append("                __switched").Append(i);
+            _ = sb.Append("                __switched").Append(i);
             if (i < inv.PropertyPaths.Length - 1)
             {
-                sb.AppendLine(",");
+                _ = sb.AppendLine(",");
             }
         }
 
-        sb.Append(");");
+        _ = sb.Append(");");
     }
 
     /// <summary>
@@ -277,7 +270,7 @@ internal static class WhenAnyObservableCodeGenerator
             var path = inv.PropertyPaths[i];
             var innerType = inv.InnerObservableTypeFullNames[i];
             var rawVar = ObsPropertyVarName + i;
-            var switchedVar = "__switched" + i;
+            var switchedVar = $"__switched{i}";
 
             if (path.Length > 1)
             {
@@ -288,7 +281,7 @@ internal static class WhenAnyObservableCodeGenerator
                 ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, rawVar);
             }
 
-            sb.AppendLine()
+            _ = sb.AppendLine()
                 .AppendLine()
                 .AppendLine($"""
                                          var {switchedVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
@@ -298,46 +291,42 @@ internal static class WhenAnyObservableCodeGenerator
                 .AppendLine();
         }
 
-        sb.AppendLine("            return global::ReactiveUI.Binding.Observables.CombineLatestObservable.Create(");
+        _ = sb.AppendLine("            return global::ReactiveUI.Binding.Observables.CombineLatestObservable.Create(");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
-            sb.Append("                __switched").Append(i).AppendLine(",");
+            _ = sb.Append("                __switched").Append(i).AppendLine(",");
         }
 
-        sb.Append("                selector);");
+        _ = sb.Append("                selector);");
     }
 
-    /// <summary>
-    /// Gets the Func type signature for a WhenAnyObservable selector parameter.
-    /// </summary>
+    /// <summary>Gets the Func type signature for a WhenAnyObservable selector parameter.</summary>
     /// <param name="inv">The invocation info.</param>
     /// <returns>A fully qualified Func type string.</returns>
     internal static string GetSelectorType(WhenAnyObservableInvocationInfo inv)
     {
-        var sb = new StringBuilder("global::System.Func<");
+        var sb = new PooledStringBuilder().Append("global::System.Func<");
         for (var i = 0; i < inv.InnerObservableTypeFullNames.Length; i++)
         {
-            sb.Append(inv.InnerObservableTypeFullNames[i]).Append(", ");
+            _ = sb.Append(inv.InnerObservableTypeFullNames[i]).Append(", ");
         }
 
-        sb.Append(inv.ReturnTypeFullName).Append('>');
-        return sb.ToString();
+        _ = sb.Append(inv.ReturnTypeFullName).Append('>');
+        return sb.ToStringAndReturn();
     }
 
-    /// <summary>
-    /// Groups WhenAnyObservable invocations by their type signature for overload generation.
-    /// </summary>
+    /// <summary>Groups WhenAnyObservable invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">All detected invocations.</param>
     /// <returns>A list of type groups.</returns>
     internal static List<TypeGroup> GroupByTypeSignature(ImmutableArray<WhenAnyObservableInvocationInfo> invocations)
     {
         var groupMap = new Dictionary<string, List<WhenAnyObservableInvocationInfo>>(invocations.Length);
-        var keySb = new StringBuilder(128);
+        var keySb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
 
         for (var i = 0; i < invocations.Length; i++)
         {
             var inv = invocations[i];
-            keySb.Clear()
+            _ = keySb.Clear()
                 .Append(inv.SourceTypeFullName).Append('|')
                 .Append(inv.ReturnTypeFullName).Append('|')
                 .Append(inv.PropertyPaths.Length).Append('|')
@@ -345,7 +334,7 @@ internal static class WhenAnyObservableCodeGenerator
 
             for (var p = 0; p < inv.InnerObservableTypeFullNames.Length; p++)
             {
-                keySb.Append('|').Append(inv.InnerObservableTypeFullNames[p]);
+                _ = keySb.Append('|').Append(inv.InnerObservableTypeFullNames[p]);
             }
 
             var key = keySb.ToString();
@@ -359,6 +348,8 @@ internal static class WhenAnyObservableCodeGenerator
             list.Add(inv);
         }
 
+        keySb.Return();
+
         var result = new List<TypeGroup>();
         foreach (var kvp in groupMap)
         {
@@ -368,9 +359,7 @@ internal static class WhenAnyObservableCodeGenerator
         return result;
     }
 
-    /// <summary>
-    /// Emits normalization that strips the <c>static</c> prefix from CallerArgumentExpression values.
-    /// </summary>
+    /// <summary>Emits normalization that strips the <c>static</c> prefix from CallerArgumentExpression values.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
     /// <param name="propCount">The number of observable expressions.</param>
@@ -384,16 +373,14 @@ internal static class WhenAnyObservableCodeGenerator
         for (var i = 0; i < propCount; i++)
         {
             var paramName = $"obs{i + 1}Expression";
-            sb.AppendLine(
+            _ = sb.AppendLine(
                 $"""            {paramName} = {paramName}.StartsWith("static ") ? {paramName}.Substring(7) : {paramName};""");
         }
 
-        sb.AppendLine();
+        _ = sb.AppendLine();
     }
 
-    /// <summary>
-    /// Emits the if/else-if dispatch table that routes each matched invocation to its generated method.
-    /// </summary>
+    /// <summary>Emits the if/else-if dispatch table that routes each matched invocation to its generated method.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The type group containing invocations that share a signature.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
@@ -418,26 +405,24 @@ internal static class WhenAnyObservableCodeGenerator
             else
             {
                 var suffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-                sb.AppendLine(
-                    $"""            {condition} (callerLineNumber == {inv.CallerLineNumber} && callerFilePath.EndsWith("{CodeGeneratorHelpers.EscapeString(suffix)}",""" +
-                    " global::System.StringComparison.OrdinalIgnoreCase))");
+                _ = sb
+                    .Append($"""            {condition} (callerLineNumber == {inv.CallerLineNumber} && callerFilePath.EndsWith("{CodeGeneratorHelpers.EscapeString(suffix)}",""")
+                    .AppendLine(" global::System.StringComparison.OrdinalIgnoreCase))");
             }
 
-            sb.AppendLine("            {");
+            _ = sb.AppendLine("            {");
             var selectorArg = hasSelector ? ", selector" : string.Empty;
             var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
                 inv.SourceTypeFullName,
                 inv.CallerFilePath,
                 inv.CallerLineNumber,
                 string.Join("|", inv.ExpressionTexts));
-            sb.AppendLine($"                return __WhenAnyObservable_{methodSuffix}(objectToMonitor{selectorArg});")
+            _ = sb.AppendLine($"                return __WhenAnyObservable_{methodSuffix}(objectToMonitor{selectorArg});")
                 .AppendLine("            }");
         }
     }
 
-    /// <summary>
-    /// Emits the CallerArgumentExpression match condition for a single invocation in the dispatch table.
-    /// </summary>
+    /// <summary>Emits the CallerArgumentExpression match condition for a single invocation in the dispatch table.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="condition">The conditional keyword (<c>"if"</c> or <c>"else if"</c>).</param>
@@ -448,23 +433,21 @@ internal static class WhenAnyObservableCodeGenerator
         string condition,
         int propCount)
     {
-        sb.Append($"            {condition} (");
+        _ = sb.Append($"            {condition} (");
         for (var p = 0; p < propCount; p++)
         {
-            sb.Append(
+            _ = sb.Append(
                 $"obs{p + 1}Expression == \"{CodeGeneratorHelpers.EscapeString(inv.ExpressionTexts[p])}\"");
             if (p < propCount - 1)
             {
-                sb.Append(" && ");
+                _ = sb.Append(" && ");
             }
         }
 
-        sb.AppendLine(")");
+        _ = sb.AppendLine(")");
     }
 
-    /// <summary>
-    /// Groups invocations by source type and observable type signature for overload generation.
-    /// </summary>
+    /// <summary>Groups invocations by source type and observable type signature for overload generation.</summary>
     /// <param name="First">The first invocation in the group, used for type information.</param>
     /// <param name="Invocations">All invocations sharing the same type signature.</param>
     internal sealed record TypeGroup(

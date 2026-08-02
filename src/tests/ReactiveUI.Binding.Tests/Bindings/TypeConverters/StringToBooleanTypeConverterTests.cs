@@ -4,19 +4,13 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting strings to booleans.
-/// </summary>
+/// <summary>Tests for converting strings to booleans.</summary>
 public class StringToBooleanTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,9 +20,7 @@ public class StringToBooleanTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert TrueString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert TrueString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_TrueString_Succeeds()
@@ -41,9 +33,7 @@ public class StringToBooleanTypeConverterTests
         await Assert.That(output).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert FalseString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert FalseString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_FalseString_Succeeds()
@@ -56,9 +46,7 @@ public class StringToBooleanTypeConverterTests
         await Assert.That(output).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert TrueLowercase Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert TrueLowercase Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_TrueLowercase_Succeeds()
@@ -71,9 +59,7 @@ public class StringToBooleanTypeConverterTests
         await Assert.That(output).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert FalseLowercase Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert FalseLowercase Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_FalseLowercase_Succeeds()
@@ -86,9 +72,7 @@ public class StringToBooleanTypeConverterTests
         await Assert.That(output).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsFalse()
@@ -99,9 +83,7 @@ public class StringToBooleanTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert EmptyString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert EmptyString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_EmptyString_ReturnsFalse()
@@ -112,9 +94,7 @@ public class StringToBooleanTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert InvalidString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert InvalidString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_InvalidString_ReturnsFalse()

@@ -13,12 +13,10 @@ namespace SharedScenarios.BindCommand.CommandPropertyExprParam;
 /// </summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Binds the Save command with an expression parameter.
-    /// </summary>
+    /// <summary>Binds the Save command with an expression parameter.</summary>
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
-    public static IDisposable Execute(MyViewModel vm, MyView view)
-        => view.BindCommand(vm, x => x.Save, x => x.SaveButton, x => x.CurrentItem);
+    public static IDisposable Execute(MyViewModel vm, MyView view) =>
+        view.BindCommand(vm, x => x.Save, x => x.SaveButton, x => x.CurrentItem);
 }

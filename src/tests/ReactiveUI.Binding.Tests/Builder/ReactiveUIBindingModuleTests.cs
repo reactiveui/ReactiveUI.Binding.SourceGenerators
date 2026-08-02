@@ -7,19 +7,13 @@ using ReactiveUI.Binding.ObservableForProperty;
 
 namespace ReactiveUI.Binding.Tests.Builder;
 
-/// <summary>
-/// Tests for the <see cref="ReactiveUIBindingModule"/> class.
-/// </summary>
+/// <summary>Tests for the <see cref="ReactiveUIBindingModule"/> class.</summary>
 public class ReactiveUIBindingModuleTests
 {
-    /// <summary>
-    /// The expected number of observable-for-property services registered by the module.
-    /// </summary>
+    /// <summary>The expected number of observable-for-property services registered by the module.</summary>
     private const int ExpectedObservableServices = 2;
 
-    /// <summary>
-    /// Verifies that Configure registers INPC and POCO observable for property implementations.
-    /// </summary>
+    /// <summary>Verifies that Configure registers INPC and POCO observable for property implementations.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Configure_RegistersINPCAndPOCO()
@@ -33,8 +27,8 @@ public class ReactiveUIBindingModuleTests
 
         await Assert.That(services.Count).IsEqualTo(ExpectedObservableServices);
 
-        var hasINPC = services.Exists(s => s is INPCObservableForProperty);
-        var hasPOCO = services.Exists(s => s is POCOObservableForProperty);
+        var hasINPC = services.Exists(static s => s is INPCObservableForProperty);
+        var hasPOCO = services.Exists(static s => s is POCOObservableForProperty);
 
         await Assert.That(hasINPC).IsTrue();
         await Assert.That(hasPOCO).IsTrue();
@@ -58,9 +52,7 @@ public class ReactiveUIBindingModuleTests
         await Assert.That(binders.Count).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that Configure throws for null resolver.
-    /// </summary>
+    /// <summary>Verifies that Configure throws for null resolver.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Configure_NullResolver_ThrowsArgumentNullException()

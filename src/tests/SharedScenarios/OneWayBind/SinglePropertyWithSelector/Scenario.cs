@@ -6,17 +6,13 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.OneWayBind.SinglePropertyWithSelector;
 
-/// <summary>
-/// Exercises OneWayBind (view-first) with a conversion function from int to string.
-/// </summary>
+/// <summary>Exercises OneWayBind (view-first) with a conversion function from int to string.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a one-way binding from ViewModel.Count to View.CountText with int-to-string conversion.
-    /// </summary>
+    /// <summary>Creates a one-way binding from ViewModel.Count to View.CountText with int-to-string conversion.</summary>
     /// <param name="view">The target view.</param>
     /// <param name="vm">The source view model.</param>
     /// <returns>A reactive binding representing the binding.</returns>
-    public static IReactiveBinding<MyView, string> Execute(MyView view, MyViewModel vm)
-        => view.OneWayBind(vm, x => x.Count, x => x.CountText, count => count.ToString());
+    public static IReactiveBinding<MyView, string> Execute(MyView view, MyViewModel vm) =>
+        view.OneWayBind(vm, x => x.Count, x => x.CountText, count => count.ToString());
 }

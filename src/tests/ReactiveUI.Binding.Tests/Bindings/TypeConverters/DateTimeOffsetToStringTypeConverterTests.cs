@@ -4,19 +4,16 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting DateTimeOffset to strings.
-/// </summary>
+/// <summary>Tests for converting DateTimeOffset to strings.</summary>
 public class DateTimeOffsetToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>The UTC offset, in hours, of the sample timestamp under test.</summary>
+    private const int OffsetHours = -5;
+
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,15 +23,13 @@ public class DateTimeOffsetToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert DateTimeOffset Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert DateTimeOffset Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_DateTimeOffset_Succeeds()
     {
         var converter = new DateTimeOffsetToStringTypeConverter();
-        var value = new DateTimeOffset(2_024, 1, 15, 10, 30, 45, TimeSpan.FromHours(-5));
+        var value = new DateTimeOffset(2_024, 1, 15, 10, 30, 45, TimeSpan.FromHours(OffsetHours));
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -42,9 +37,7 @@ public class DateTimeOffsetToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MinValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MinValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MinValue_Succeeds()
@@ -58,9 +51,7 @@ public class DateTimeOffsetToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(DateTimeOffset.MinValue.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MaxValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MaxValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MaxValue_Succeeds()

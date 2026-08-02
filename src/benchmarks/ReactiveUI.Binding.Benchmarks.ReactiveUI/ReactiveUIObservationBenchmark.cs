@@ -7,42 +7,28 @@ using BenchmarkDotNet.Jobs;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
-/// <summary>
-/// ReactiveUI expression-tree WhenAnyValue benchmarks for comparison.
-/// </summary>
-////[SimpleJob(RuntimeMoniker.Net462)]
+/// <summary>ReactiveUI expression-tree WhenAnyValue benchmarks for comparison.</summary>
 [SimpleJob(RuntimeMoniker.Net80)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [MemoryDiagnoser]
 [MarkdownExporterAttribute.GitHub]
 public class ReactiveUIObservationBenchmark
 {
-    /// <summary>
-    /// The number of property changes to fire during each benchmark iteration.
-    /// </summary>
+    /// <summary>The number of property changes to fire during each benchmark iteration.</summary>
     private const int PropertyChangeCount = 1_000;
 
-    /// <summary>
-    /// The view model instance used for observation benchmarks.
-    /// </summary>
+    /// <summary>The view model instance used for observation benchmarks.</summary>
     private BenchmarkViewModel _vm = null!;
 
-    /// <summary>
-    /// Initializes static members of the <see cref="ReactiveUIObservationBenchmark"/> class.
-    /// Ensures ReactiveUI is configured before any benchmarks run.
-    /// </summary>
+    /// <summary>Initializes static members of the <see cref="ReactiveUIObservationBenchmark"/> class. Ensures ReactiveUI is configured before any benchmarks run.</summary>
     static ReactiveUIObservationBenchmark() => ModuleInitializer.EnsureInitialized();
 
-    /// <summary>
-    /// Sets up a fresh view model before each benchmark iteration.
-    /// </summary>
+    /// <summary>Sets up a fresh view model before each benchmark iteration.</summary>
     [IterationSetup]
     public void Setup() =>
         _vm = new() { Name = "Initial", Age = 0, Child = new() { Value = "ChildInitial" } };
 
-    /// <summary>
-    /// Expression-tree single property observation: subscribe, fire N changes, dispose.
-    /// </summary>
+    /// <summary>Expression-tree single property observation: subscribe, fire N changes, dispose.</summary>
     [Benchmark(Description = "Single Property")]
     public void SingleProperty()
     {
@@ -56,9 +42,7 @@ public class ReactiveUIObservationBenchmark
         }
     }
 
-    /// <summary>
-    /// Expression-tree deep chain observation: subscribe, fire N changes, dispose.
-    /// </summary>
+    /// <summary>Expression-tree deep chain observation: subscribe, fire N changes, dispose.</summary>
     [Benchmark(Description = "Deep Chain")]
     public void DeepChain()
     {
@@ -72,14 +56,12 @@ public class ReactiveUIObservationBenchmark
         }
     }
 
-    /// <summary>
-    /// Expression-tree multi-property observation: subscribe, fire N changes, dispose.
-    /// </summary>
+    /// <summary>Expression-tree multi-property observation: subscribe, fire N changes, dispose.</summary>
     [Benchmark(Description = "Two Properties")]
     public void TwoProperties()
     {
         (string name, int age) last = default;
-        using var sub = _vm.WhenAnyValue(x => x.Name, x => x.Age, (name, age) => (name, age))
+        using var sub = _vm.WhenAnyValue(x => x.Name, x => x.Age, static (name, age) => (name, age))
             .Subscribe(v => last = v);
 
         for (var i = 0; i < PropertyChangeCount; i++)
@@ -89,9 +71,7 @@ public class ReactiveUIObservationBenchmark
         }
     }
 
-    /// <summary>
-    /// Cold start: subscribe, read initial value, dispose. Includes expression compilation overhead.
-    /// </summary>
+    /// <summary>Cold start: subscribe, read initial value, dispose. Includes expression compilation overhead.</summary>
     /// <returns>The observed value.</returns>
     [Benchmark(Description = "First Observation")]
     public string FirstObservation()

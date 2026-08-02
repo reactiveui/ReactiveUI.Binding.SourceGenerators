@@ -4,19 +4,16 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting nullable TimeSpan to strings.
-/// </summary>
+/// <summary>Tests for converting nullable TimeSpan to strings.</summary>
 public class NullableTimeSpanToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>The number of hours in the sample duration under test.</summary>
+    private const double SampleHours = 2.5;
+
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,15 +23,13 @@ public class NullableTimeSpanToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert TimeSpan Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert TimeSpan Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_TimeSpan_Succeeds()
     {
         var converter = new NullableTimeSpanToStringTypeConverter();
-        TimeSpan? value = TimeSpan.FromHours(2.5);
+        TimeSpan? value = TimeSpan.FromHours(SampleHours);
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -42,9 +37,7 @@ public class NullableTimeSpanToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.Value.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsNullString.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsNullString.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsNullString()

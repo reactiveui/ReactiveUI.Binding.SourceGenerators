@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -27,12 +27,12 @@ namespace ReactiveUI.Binding
 
             if (property1Expression == "x => x.Child.Name" && property2Expression == "x => x.Title")
             {
-                return __WhenAny_7FFFD8112D4F4A57(objectToMonitor, selector);
+                return __WhenAny_7FFFD8112D4F47EB(objectToMonitor, selector);
             }
             throw new global::System.InvalidOperationException("No generated WhenAny dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<string> __WhenAny_7FFFD8112D4F4A57(global::SharedScenarios.WhenAny.MultiPropertyDeepChain.ParentViewModel obj, global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.MultiPropertyDeepChain.ParentViewModel, string>, global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.MultiPropertyDeepChain.ParentViewModel, string>, string> selector)
+        private static global::System.IObservable<string> __WhenAny_7FFFD8112D4F47EB(global::SharedScenarios.WhenAny.MultiPropertyDeepChain.ParentViewModel obj, global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.MultiPropertyDeepChain.ParentViewModel, string>, global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.MultiPropertyDeepChain.ParentViewModel, string>, string> selector)
         {
             var __propObs0_s0 = (global::System.IObservable<global::SharedScenarios.WhenAny.MultiPropertyDeepChain.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenAny.MultiPropertyDeepChain.ChildModel>(
                 obj,

@@ -7,40 +7,29 @@ using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
-/// <summary>
-/// Third-level object in a 4-level deep chain: ObjChain1 → ObjChain2 → ObjChain3 → HostTestFixture.
-/// </summary>
+/// <summary>Third-level object in a 4-level deep chain: ObjChain1 → ObjChain2 → ObjChain3 → HostTestFixture.</summary>
 public class ObjChain3 : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backer for Host.
-    /// </summary>
-    private HostTestFixture? _host;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the host test fixture at the end of the chain.
-    /// </summary>
+    /// <summary>Gets or sets the host test fixture at the end of the chain.</summary>
     public HostTestFixture? Host
     {
-        get => _host;
+        get => field;
         set
         {
-            if (ReferenceEquals(_host, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
-            _host = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
-    /// <summary>
-    /// Raises the PropertyChanged event.
-    /// </summary>
+    /// <summary>Raises the PropertyChanged event.</summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new(propertyName));

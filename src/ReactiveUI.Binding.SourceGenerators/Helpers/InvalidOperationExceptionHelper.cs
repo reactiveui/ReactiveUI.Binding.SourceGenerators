@@ -28,9 +28,7 @@ internal static class InvalidOperationExceptionHelper
         where T : class =>
         value ?? throw new InvalidOperationException($"Unexpected null in source generator pipeline: {context}");
 
-    /// <summary>
-    /// Returns the value if non-null and non-empty; otherwise throws <see cref="InvalidOperationException"/>.
-    /// </summary>
+    /// <summary>Returns the value if non-null and non-empty; otherwise throws <see cref="InvalidOperationException"/>.</summary>
     /// <param name="value">The string value to check.</param>
     /// <param name="context">A description of what was unexpectedly null or empty.</param>
     /// <returns>The non-null, non-empty <paramref name="value"/>.</returns>

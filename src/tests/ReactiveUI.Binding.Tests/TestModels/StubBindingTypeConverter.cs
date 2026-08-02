@@ -4,24 +4,16 @@
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
-/// <summary>
-/// A stub implementation of <see cref="IBindingTypeConverter"/> for testing.
-/// </summary>
+/// <summary>A stub implementation of <see cref="IBindingTypeConverter"/> for testing.</summary>
 public class StubBindingTypeConverter : IBindingTypeConverter
 {
-    /// <summary>
-    /// Affinity returned by this stub converter to indicate it can handle the conversion.
-    /// </summary>
+    /// <summary>Affinity returned by this stub converter to indicate it can handle the conversion.</summary>
     private const int StubAffinity = 10;
 
-    /// <summary>
-    /// The conversion logic.
-    /// </summary>
+    /// <summary>The conversion logic.</summary>
     private readonly Func<object?, object?, (bool success, object? result)> _tryConvert;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="StubBindingTypeConverter"/> class.
-    /// </summary>
+    /// <summary>Initializes a new instance of the <see cref="StubBindingTypeConverter"/> class.</summary>
     /// <param name="fromType">The source type.</param>
     /// <param name="toType">The target type.</param>
     /// <param name="tryConvert">The conversion logic.</param>

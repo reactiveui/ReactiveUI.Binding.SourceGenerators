@@ -7,14 +7,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for WhenChanging (before-change) invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for WhenChanging (before-change) invocation generation.</summary>
 public class WhenChangingGeneratorTests
 {
-    /// <summary>
-    /// Verifies that a WhenChanging invocation on an INPC+INPChanging class generates PropertyChanging observation.
-    /// </summary>
+    /// <summary>Verifies that a WhenChanging invocation on an INPC+INPChanging class generates PropertyChanging observation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_INPC()
@@ -26,9 +22,7 @@ public class WhenChangingGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanging on a ReactiveObject (which implements both INPC and INPChanging).
-    /// </summary>
+    /// <summary>Verifies WhenChanging on a ReactiveObject (which implements both INPC and INPChanging).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_ReactiveObject()
@@ -40,9 +34,7 @@ public class WhenChangingGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanging with two properties returns a tuple.
-    /// </summary>
+    /// <summary>Verifies WhenChanging with two properties returns a tuple.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_TwoProperties()
@@ -54,9 +46,7 @@ public class WhenChangingGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanging with a deep property chain.
-    /// </summary>
+    /// <summary>Verifies WhenChanging with a deep property chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepPropertyChain()
@@ -68,9 +58,7 @@ public class WhenChangingGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenChanging with a selector function.
-    /// </summary>
+    /// <summary>Verifies WhenChanging with a selector function.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_WithSelector()

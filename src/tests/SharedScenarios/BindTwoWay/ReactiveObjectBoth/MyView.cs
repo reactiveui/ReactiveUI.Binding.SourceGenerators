@@ -6,19 +6,13 @@ using ReactiveUI;
 
 namespace SharedScenarios.BindTwoWay.ReactiveObjectBoth;
 
-/// <summary>
-/// Target View extending ReactiveObject.
-/// </summary>
+/// <summary>Target View extending ReactiveObject.</summary>
 public class MyView : ReactiveObject
 {
-    /// <summary>
-    /// The backing field for <see cref="NameText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="NameText"/>.</summary>
     private string _nameText = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the name text.
-    /// </summary>
+    /// <summary>Gets or sets the name text.</summary>
     public string NameText
     {
         get => _nameText;

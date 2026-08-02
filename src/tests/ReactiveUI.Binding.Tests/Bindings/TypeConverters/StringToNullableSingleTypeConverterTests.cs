@@ -4,29 +4,19 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for converting strings to nullable floats (single-precision).
-/// </summary>
+/// <summary>Tests for converting strings to nullable floats (single-precision).</summary>
 public class StringToNullableSingleTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    /// Single value parsed from a positive numeric string.
-    /// </summary>
-    private const float ParsedSingle = 123.456f;
+    /// <summary>Single value parsed from a positive numeric string.</summary>
+    private const float ParsedSingle = 123.456F;
 
-    /// <summary>
-    /// Tolerance used when comparing parsed single-precision values.
-    /// </summary>
-    private const float SingleTolerance = 0.001f;
+    /// <summary>Tolerance used when comparing parsed single-precision values.</summary>
+    private const float SingleTolerance = 0.001F;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -36,9 +26,7 @@ public class StringToNullableSingleTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert EmptyString ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvert EmptyString ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_EmptyString_ReturnsTrue()
@@ -49,9 +37,7 @@ public class StringToNullableSingleTypeConverterTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert InvalidString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert InvalidString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_InvalidString_ReturnsFalse()
@@ -62,9 +48,7 @@ public class StringToNullableSingleTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert StringToSingleNullable Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert StringToSingleNullable Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_StringToSingleNullable_Succeeds()

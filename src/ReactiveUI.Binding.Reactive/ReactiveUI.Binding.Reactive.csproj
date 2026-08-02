@@ -1,24 +1,78 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <!-- System.Reactive-flavoured leaf: recompiles the same ReactiveUI.Binding.Shared source with
+         ISequencer bound to System.Reactive's IScheduler, shifting every shared type to the
+         ReactiveUI.Binding.Reactive.* namespace. The alias and the REACTIVE_SHIM define come from
+         ReactiveShim.props via the '.Reactive' name suffix. -->
     <TargetFrameworks>$(BindingRuntimeTargets)</TargetFrameworks>
-    <PackageDescription>System.Reactive adapter for ReactiveUI.Binding. Provides IScheduler-accepting overloads for BindOneWay, BindTwoWay, OneWayBind, and Bind APIs.</PackageDescription>
+    <PackageDescription>ReactiveUI.Binding recompiled against System.Reactive's IScheduler for seamless interop with System.Reactive consumers.</PackageDescription>
     <PackageTags>reactiveui;binding;system.reactive;scheduler</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ReactiveUI.Binding.Shared\**\*.cs" Link="ReactiveUI.Binding.Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
+  </ItemGroup>
 
   <ItemGroup>
     <Using Include="System.Diagnostics"/>
     <Using Include="System.Diagnostics.CodeAnalysis"/>
     <Using Include="System.Linq.Expressions"/>
-    <Using Include="System.Reactive.Concurrency"/>
     <Using Include="System.Runtime.CompilerServices"/>
-    <Using Include="ReactiveUI.Binding.Helpers"/>
+    <Using Include="Splat"/>
+  </ItemGroup>
+
+  <!-- The shifted counterparts of the lean leaf's imports: the same shared files, recompiled here
+       under the ReactiveUI.Binding.Reactive.* namespaces. -->
+  <ItemGroup>
+    <Using Include="ReactiveUI.Binding.Reactive.Builder"/>
+    <Using Include="ReactiveUI.Binding.Reactive.Expressions"/>
+    <Using Include="ReactiveUI.Binding.Reactive.Fallback"/>
+    <Using Include="ReactiveUI.Binding.Reactive.Helpers"/>
+    <Using Include="ReactiveUI.Binding.Reactive.ObservableForProperty"/>
+    <Using Include="ReactiveUI.Binding.Reactive.Observables"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Splat"/>
     <PackageReference Include="System.Reactive"/>
+  </ItemGroup>
+
+  <!-- DateOnly and TimeOnly only exist on .NET 6+. Their converters are guarded with
+       #if NET6_0_OR_GREATER, so exclude the sources outright on the older targets rather than
+       compiling files that declare nothing there. -->
+  <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
+    <Compile Remove="..\ReactiveUI.Binding.Shared\Bindings\Converter\*DateOnly*.cs"/>
+    <Compile Remove="..\ReactiveUI.Binding.Shared\Bindings\Converter\*TimeOnly*.cs"/>
+  </ItemGroup>
+
+  <!-- NotNullAttribute ships in the framework from netcoreapp3.0/netstandard2.1 onwards; the
+       polyfill is only needed below that. -->
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))">
+    <Compile Remove="..\ReactiveUI.Binding.Shared\Polyfills\NotNullAttribute.cs"/>
+  </ItemGroup>
+
+  <!-- Index and Range back the ^ and .. operators on the targets that predate them; .NET 5+ ships
+       both, where these sources are guarded out entirely. -->
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">
+    <Compile Remove="..\ReactiveUI.Binding.Shared\Polyfills\Index.cs"/>
+    <Compile Remove="..\ReactiveUI.Binding.Shared\Polyfills\Range.cs"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Tests"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.GeneratedCode.Tests"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Wpf.Reactive"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.WinForms.Reactive"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.Maui.Reactive"/>
+  </ItemGroup>
+
+  <!-- Every line here is a line of ReactiveUI.Binding.Shared that ReactiveUI.Binding already covers;
+       only the scheduler binding and the namespace differ. Measuring the recompilation says nothing
+       about untested logic, so keep it out of the report. The module-path exclusions in testconfig.json
+       do not reach an assembly that is only present as a copied reference, hence the attribute.
+       ExcludeFromCodeCoverage only accepts an assembly target from netcoreapp3.0 onwards, which is
+       also the only place coverage runs - the .NET Framework legs have no report to stay out of. -->
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))">
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage"/>
   </ItemGroup>
 </Project>

@@ -15,6 +15,7 @@ namespace ReactiveUI.Binding
         public static global::System.IObservable<string> WhenChanging(
             this global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel objectToMonitor,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel, string>> property1,
+            string property1Expression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
@@ -24,7 +25,7 @@ namespace ReactiveUI.Binding
                 return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanging(objectToMonitor, property1);
             }
 
-            if (callerLineNumber == 95 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
+            if (callerLineNumber == 79 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
                 return __WhenChanging_7FFFF85E7720B498(objectToMonitor);
             }

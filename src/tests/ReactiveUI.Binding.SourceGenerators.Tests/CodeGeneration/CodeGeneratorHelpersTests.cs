@@ -10,35 +10,41 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.CodeGeneration;
 
-/// <summary>
-/// Tests for <see cref="CodeGeneratorHelpers"/> methods.
-/// </summary>
+/// <summary>Tests for <see cref="CodeGeneratorHelpers"/> methods.</summary>
 public class CodeGeneratorHelpersTests
 {
-    /// <summary>
-    /// Verifies BuildPropertyAccessChain with a single segment produces "root.Property".
-    /// </summary>
+    /// <summary>The <c>Address</c> name these tests generate against.</summary>
+    private const string AddressName = "Address";
+
+    /// <summary>The fully qualified name of the <c>MyViewModel</c> type used by these tests.</summary>
+    private const string MyViewModelTypeName = "global::TestApp.MyViewModel";
+
+    /// <summary>The <c>/src/Test.cs</c> name these tests generate against.</summary>
+    private const string SrcTestcsName = "/src/Test.cs";
+
+    /// <summary>The <c>x =&gt; x.Name</c> property selector these tests bind against.</summary>
+    private const string NameSelector = "x => x.Name";
+
+    /// <summary>Verifies BuildPropertyAccessChain with a single segment produces "root.Property".</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildPropertyAccessChain_SingleSegment_ReturnsDottedPath()
     {
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
 
         var result = CodeGeneratorHelpers.BuildPropertyAccessChain("obj", path);
 
         await Assert.That(result).IsEqualTo("obj.Name");
     }
 
-    /// <summary>
-    /// Verifies BuildPropertyAccessChain with multiple segments produces "root.A.B".
-    /// </summary>
+    /// <summary>Verifies BuildPropertyAccessChain with multiple segments produces "root.A.B".</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildPropertyAccessChain_MultiSegment_ReturnsDottedPath()
     {
         var path = new EquatableArray<PropertyPathSegment>([
-            ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+            ModelFactory.CreatePropertyPathSegment(AddressName, "global::TestApp.Address"),
             ModelFactory.CreatePropertyPathSegment("City", "global::System.String", "global::TestApp.Address")
         ]);
 
@@ -47,9 +53,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("obj.Address.City");
     }
 
-    /// <summary>
-    /// Verifies BuildPropertyAccessChain with an empty path returns just the root.
-    /// </summary>
+    /// <summary>Verifies BuildPropertyAccessChain with an empty path returns just the root.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildPropertyAccessChain_EmptyPath_ReturnsRoot()
@@ -61,30 +65,26 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("obj");
     }
 
-    /// <summary>
-    /// Verifies BuildPropertyPathString produces dotted property names for a single segment.
-    /// </summary>
+    /// <summary>Verifies BuildPropertyPathString produces dotted property names for a single segment.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildPropertyPathString_SingleSegment_ReturnsPropertyName()
     {
         var path = new EquatableArray<PropertyPathSegment>(
-            [ModelFactory.CreatePropertyPathSegment("Name")]);
+            [ModelFactory.CreatePropertyPathSegment()]);
 
         var result = CodeGeneratorHelpers.BuildPropertyPathString(path);
 
         await Assert.That(result).IsEqualTo("Name");
     }
 
-    /// <summary>
-    /// Verifies BuildPropertyPathString produces dotted names for multiple segments.
-    /// </summary>
+    /// <summary>Verifies BuildPropertyPathString produces dotted names for multiple segments.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildPropertyPathString_MultiSegment_ReturnsDottedPath()
     {
         var path = new EquatableArray<PropertyPathSegment>([
-            ModelFactory.CreatePropertyPathSegment("Address"),
+            ModelFactory.CreatePropertyPathSegment(AddressName),
             ModelFactory.CreatePropertyPathSegment("City")
         ]);
 
@@ -93,9 +93,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("Address.City");
     }
 
-    /// <summary>
-    /// Verifies BuildPropertyPathString returns empty string for empty path.
-    /// </summary>
+    /// <summary>Verifies BuildPropertyPathString returns empty string for empty path.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildPropertyPathString_EmptyPath_ReturnsEmptyString()
@@ -107,9 +105,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo(string.Empty);
     }
 
-    /// <summary>
-    /// Verifies ComputePathSuffix returns the last two path segments.
-    /// </summary>
+    /// <summary>Verifies ComputePathSuffix returns the last two path segments.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputePathSuffix_NormalPath_ReturnsLastTwoSegments()
@@ -119,9 +115,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("ViewModels/MyViewModel.cs");
     }
 
-    /// <summary>
-    /// Verifies ComputePathSuffix returns just the filename for a single-segment path.
-    /// </summary>
+    /// <summary>Verifies ComputePathSuffix returns just the filename for a single-segment path.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputePathSuffix_SingleSegment_ReturnsFilename()
@@ -131,9 +125,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("MyViewModel.cs");
     }
 
-    /// <summary>
-    /// Verifies ComputePathSuffix returns empty for empty input.
-    /// </summary>
+    /// <summary>Verifies ComputePathSuffix returns empty for empty input.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputePathSuffix_EmptyString_ReturnsEmpty()
@@ -143,9 +135,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo(string.Empty);
     }
 
-    /// <summary>
-    /// Verifies ComputePathSuffix normalizes backslashes to forward slashes.
-    /// </summary>
+    /// <summary>Verifies ComputePathSuffix normalizes backslashes to forward slashes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputePathSuffix_Backslashes_NormalizesToForwardSlashes()
@@ -155,9 +145,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("ViewModels/MyViewModel.cs");
     }
 
-    /// <summary>
-    /// Verifies EscapeString escapes double quotes.
-    /// </summary>
+    /// <summary>Verifies EscapeString escapes double quotes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EscapeString_WithQuotes_EscapesQuotes()
@@ -167,9 +155,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("say \\\"hello\\\"");
     }
 
-    /// <summary>
-    /// Verifies EscapeString escapes backslashes.
-    /// </summary>
+    /// <summary>Verifies EscapeString escapes backslashes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EscapeString_WithBackslashes_EscapesBackslashes()
@@ -179,37 +165,31 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("path\\\\to\\\\file");
     }
 
-    /// <summary>
-    /// Verifies EscapeString leaves clean strings unchanged.
-    /// </summary>
+    /// <summary>Verifies EscapeString leaves clean strings unchanged.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EscapeString_CleanString_ReturnsUnchanged()
     {
-        var result = CodeGeneratorHelpers.EscapeString("x => x.Name");
+        var result = CodeGeneratorHelpers.EscapeString(NameSelector);
 
-        await Assert.That(result).IsEqualTo("x => x.Name");
+        await Assert.That(result).IsEqualTo(NameSelector);
     }
 
-    /// <summary>
-    /// Verifies FindClassInfo returns matching class info when found.
-    /// </summary>
+    /// <summary>Verifies FindClassInfo returns matching class info when found.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindClassInfo_Found_ReturnsMatchingInfo()
     {
-        var classInfo = ModelFactory.CreateClassBindingInfo("global::TestApp.MyViewModel");
+        var classInfo = ModelFactory.CreateClassBindingInfo();
         var allClasses = ImmutableArray.Create(classInfo);
 
-        var result = CodeGeneratorHelpers.FindClassInfo(allClasses, "global::TestApp.MyViewModel");
+        var result = CodeGeneratorHelpers.FindClassInfo(allClasses, MyViewModelTypeName);
 
         await Assert.That(result).IsNotNull();
-        await Assert.That(result!.FullyQualifiedName).IsEqualTo("global::TestApp.MyViewModel");
+        await Assert.That(result!.FullyQualifiedName).IsEqualTo(MyViewModelTypeName);
     }
 
-    /// <summary>
-    /// Verifies FindClassInfo returns null when class info is not found.
-    /// </summary>
+    /// <summary>Verifies FindClassInfo returns null when class info is not found.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindClassInfo_NotFound_ReturnsNull()
@@ -217,35 +197,31 @@ public class CodeGeneratorHelpersTests
         var classInfo = ModelFactory.CreateClassBindingInfo("global::TestApp.OtherType");
         var allClasses = ImmutableArray.Create(classInfo);
 
-        var result = CodeGeneratorHelpers.FindClassInfo(allClasses, "global::TestApp.MyViewModel");
+        var result = CodeGeneratorHelpers.FindClassInfo(allClasses, MyViewModelTypeName);
 
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies FindClassInfo returns null for empty array.
-    /// </summary>
+    /// <summary>Verifies FindClassInfo returns null for empty array.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindClassInfo_EmptyArray_ReturnsNull()
     {
         var allClasses = ImmutableArray<ClassBindingInfo>.Empty;
 
-        var result = CodeGeneratorHelpers.FindClassInfo(allClasses, "global::TestApp.MyViewModel");
+        var result = CodeGeneratorHelpers.FindClassInfo(allClasses, MyViewModelTypeName);
 
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies AppendExtensionClassHeader produces expected structure.
-    /// </summary>
+    /// <summary>Verifies AppendExtensionClassHeader produces expected structure.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task AppendExtensionClassHeader_ProducesExpectedStructure()
     {
         var sb = new StringBuilder();
 
-        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, new LanguageFeatures(false, true, true));
+        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, new(false, true, true));
 
         var result = sb.ToString();
         await Assert.That(result).Contains("// <auto-generated/>");
@@ -254,9 +230,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).Contains("__ReactiveUIGeneratedBindings");
     }
 
-    /// <summary>
-    /// Verifies AppendExtensionClassFooter produces closing braces.
-    /// </summary>
+    /// <summary>Verifies AppendExtensionClassFooter produces closing braces.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task AppendExtensionClassFooter_ProducesClosingBraces()
@@ -269,15 +243,13 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).Contains("}");
     }
 
-    /// <summary>
-    /// Verifies BuildPropertyAccessLambda delegates to BuildPropertyAccessChain.
-    /// </summary>
+    /// <summary>Verifies BuildPropertyAccessLambda delegates to BuildPropertyAccessChain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildPropertyAccessLambda_ReturnsParameterDotPath()
     {
         var path = new EquatableArray<PropertyPathSegment>([
-            ModelFactory.CreatePropertyPathSegment("Address"),
+            ModelFactory.CreatePropertyPathSegment(AddressName),
             ModelFactory.CreatePropertyPathSegment("City")
         ]);
 
@@ -286,9 +258,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("x.Address.City");
     }
 
-    /// <summary>
-    /// Verifies BuildPropertySetterChain delegates to BuildPropertyAccessChain.
-    /// </summary>
+    /// <summary>Verifies BuildPropertySetterChain delegates to BuildPropertyAccessChain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BuildPropertySetterChain_ReturnsRootDotPath()
@@ -301,22 +271,18 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("target.Text");
     }
 
-    /// <summary>
-    /// Verifies StableStringHash is deterministic across multiple calls.
-    /// </summary>
+    /// <summary>Verifies StableStringHash is deterministic across multiple calls.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StableStringHash_SameInput_ReturnsSameHash()
     {
-        var hash1 = CodeGeneratorHelpers.StableStringHash("global::TestApp.MyViewModel");
-        var hash2 = CodeGeneratorHelpers.StableStringHash("global::TestApp.MyViewModel");
+        var hash1 = CodeGeneratorHelpers.StableStringHash(MyViewModelTypeName);
+        var hash2 = CodeGeneratorHelpers.StableStringHash(MyViewModelTypeName);
 
         await Assert.That(hash1).IsEqualTo(hash2);
     }
 
-    /// <summary>
-    /// Verifies StableStringHash returns different hashes for different strings.
-    /// </summary>
+    /// <summary>Verifies StableStringHash returns different hashes for different strings.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StableStringHash_DifferentInput_ReturnsDifferentHash()
@@ -327,9 +293,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(hash1).IsNotEqualTo(hash2);
     }
 
-    /// <summary>
-    /// Verifies StableStringHash returns 0 for null input.
-    /// </summary>
+    /// <summary>Verifies StableStringHash returns 0 for null input.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StableStringHash_NullInput_ReturnsZero()
@@ -339,80 +303,78 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies ComputeStableMethodSuffix produces a 16-character hex string.
-    /// </summary>
+    /// <summary>Verifies ComputeStableMethodSuffix produces a 16-character hex string.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputeStableMethodSuffix_ReturnsHexString()
     {
+        const int CallerLineNumber = 42;
+        const int ExpectedResultCount = 16;
         var result = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-            "global::TestApp.MyViewModel",
-            "/src/Test.cs",
-            42,
-            "x => x.Name");
+            MyViewModelTypeName,
+            SrcTestcsName,
+            CallerLineNumber,
+            NameSelector);
 
-        await Assert.That(result.Length).IsEqualTo(16);
+        await Assert.That(result.Length).IsEqualTo(ExpectedResultCount);
         await Assert.That(result.All("0123456789ABCDEF".Contains)).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies ComputeStableMethodSuffix is deterministic.
-    /// </summary>
+    /// <summary>Verifies ComputeStableMethodSuffix is deterministic.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputeStableMethodSuffix_SameInput_ReturnsSameResult()
     {
+        const int CallerLineNumber = 42;
         var result1 = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-            "global::TestApp.MyViewModel",
-            "/src/Test.cs",
-            42,
-            "x => x.Name");
+            MyViewModelTypeName,
+            SrcTestcsName,
+            CallerLineNumber,
+            NameSelector);
         var result2 = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-            "global::TestApp.MyViewModel",
-            "/src/Test.cs",
-            42,
-            "x => x.Name");
+            MyViewModelTypeName,
+            SrcTestcsName,
+            CallerLineNumber,
+            NameSelector);
 
         await Assert.That(result1).IsEqualTo(result2);
     }
 
-    /// <summary>
-    /// Verifies ComputeStableMethodSuffix produces different results for different discriminators.
-    /// </summary>
+    /// <summary>Verifies ComputeStableMethodSuffix produces different results for different discriminators.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputeStableMethodSuffix_DifferentDiscriminator_ReturnsDifferentResult()
     {
+        const int CallerLineNumber = 42;
         var result1 = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-            "global::TestApp.MyViewModel",
-            "/src/Test.cs",
-            42,
-            "x => x.Name");
+            MyViewModelTypeName,
+            SrcTestcsName,
+            CallerLineNumber,
+            NameSelector);
         var result2 = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-            "global::TestApp.MyViewModel",
-            "/src/Test.cs",
-            42,
+            MyViewModelTypeName,
+            SrcTestcsName,
+            CallerLineNumber,
             "x => x.Age");
 
         await Assert.That(result1).IsNotEqualTo(result2);
     }
 
-    /// <summary>
-    /// Verifies ComputeStableMethodSuffix produces different results for different line numbers.
-    /// </summary>
+    /// <summary>Verifies ComputeStableMethodSuffix produces different results for different line numbers.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputeStableMethodSuffix_DifferentLineNumber_ReturnsDifferentResult()
     {
+        const int CallerLineNumber = 10;
+        const int CallerLineNumber2 = 20;
         var result1 = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-            "global::TestApp.MyViewModel",
-            "/src/Test.cs",
-            10);
+            MyViewModelTypeName,
+            SrcTestcsName,
+            CallerLineNumber);
         var result2 = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-            "global::TestApp.MyViewModel",
-            "/src/Test.cs",
-            20);
+            MyViewModelTypeName,
+            SrcTestcsName,
+            CallerLineNumber2);
 
         await Assert.That(result1).IsNotEqualTo(result2);
     }
@@ -430,28 +392,24 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("folder/MyFile.cs");
     }
 
-    /// <summary>
-    /// Verifies NormalizeLambdaText strips the "static " prefix from lambda text.
-    /// </summary>
+    /// <summary>Verifies NormalizeLambdaText strips the "static " prefix from lambda text.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NormalizeLambdaText_StaticPrefix_StripsPrefix()
     {
         var result = CodeGeneratorHelpers.NormalizeLambdaText("static x => x.Name");
 
-        await Assert.That(result).IsEqualTo("x => x.Name");
+        await Assert.That(result).IsEqualTo(NameSelector);
     }
 
-    /// <summary>
-    /// Verifies NormalizeLambdaText returns the input unchanged when no "static " prefix is present.
-    /// </summary>
+    /// <summary>Verifies NormalizeLambdaText returns the input unchanged when no "static " prefix is present.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NormalizeLambdaText_NoPrefix_ReturnsUnchanged()
     {
-        var result = CodeGeneratorHelpers.NormalizeLambdaText("x => x.Name");
+        var result = CodeGeneratorHelpers.NormalizeLambdaText(NameSelector);
 
-        await Assert.That(result).IsEqualTo("x => x.Name");
+        await Assert.That(result).IsEqualTo(NameSelector);
     }
 
     /// <summary>
@@ -467,9 +425,7 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("stat");
     }
 
-    /// <summary>
-    /// Verifies EscapeString handles strings with both quotes and backslashes.
-    /// </summary>
+    /// <summary>Verifies EscapeString handles strings with both quotes and backslashes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EscapeString_MixedSpecialChars_EscapesAll()
@@ -479,27 +435,24 @@ public class CodeGeneratorHelpersTests
         await Assert.That(result).IsEqualTo("a\\\\\\\"b");
     }
 
-    /// <summary>
-    /// Verifies ConditionKeyword returns "if" for index 0.
-    /// </summary>
+    /// <summary>Verifies ConditionKeyword returns "if" for index 0.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ConditionKeyword_IndexZero_ReturnsIf() =>
         await Assert.That(CodeGeneratorHelpers.ConditionKeyword(0)).IsEqualTo("if");
 
-    /// <summary>
-    /// Verifies ConditionKeyword returns "else if" for index 1.
-    /// </summary>
+    /// <summary>Verifies ConditionKeyword returns "else if" for index 1.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ConditionKeyword_IndexOne_ReturnsElseIf() =>
         await Assert.That(CodeGeneratorHelpers.ConditionKeyword(1)).IsEqualTo("else if");
 
-    /// <summary>
-    /// Verifies ConditionKeyword returns "else if" for index greater than 1.
-    /// </summary>
+    /// <summary>Verifies ConditionKeyword returns "else if" for index greater than 1.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task ConditionKeyword_IndexGreaterThanOne_ReturnsElseIf() =>
-        await Assert.That(CodeGeneratorHelpers.ConditionKeyword(5)).IsEqualTo("else if");
+    public async Task ConditionKeyword_IndexGreaterThanOne_ReturnsElseIf()
+    {
+        const int LaterBranchIndex = 5;
+        await Assert.That(CodeGeneratorHelpers.ConditionKeyword(LaterBranchIndex)).IsEqualTo("else if");
+    }
 }

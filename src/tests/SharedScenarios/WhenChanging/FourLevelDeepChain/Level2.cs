@@ -6,14 +6,10 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanging.FourLevelDeepChain;
 
-/// <summary>
-/// Second level in the deep chain with before-change notifications.
-/// </summary>
+/// <summary>Second level in the deep chain with before-change notifications.</summary>
 public class Level2 : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backing field for <see cref="Model"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Model"/>.</summary>
     private Level3 _model = new Level3();
 
     /// <inheritdoc/>
@@ -22,9 +18,7 @@ public class Level2 : INotifyPropertyChanged, INotifyPropertyChanging
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the level 3 model.
-    /// </summary>
+    /// <summary>Gets or sets the level 3 model.</summary>
     public Level3 Model
     {
         get => _model;

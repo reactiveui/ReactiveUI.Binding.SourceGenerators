@@ -16,21 +16,23 @@ namespace ReactiveUI.Binding
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView, string> OneWayBind(
             this global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView view,
             global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyViewModel viewModel,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyViewModel, string?>> vmProperty,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyViewModel, string?>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView, string?>> viewProperty,
+            string viewModelPropertyExpression = "",
+            string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 90
+            if (callerLineNumber == 74
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __OneWayBind_7FFFC4A056D62C24(viewModel, view);
+                return __OneWayBind_7FFFC4A056D62A34(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView, string> __OneWayBind_7FFFC4A056D62C24(global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView, string> __OneWayBind_7FFFC4A056D62A34(global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView view)
         {
             // OneWayBind: Name -> NameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

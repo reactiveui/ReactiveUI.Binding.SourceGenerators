@@ -7,19 +7,13 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.Bind.MultipleBindings;
 
-/// <summary>
-/// Target View with multiple properties.
-/// </summary>
+/// <summary>Target View with multiple properties.</summary>
 public class MyView : IViewFor, INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="NameText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="NameText"/>.</summary>
     private string _nameText = string.Empty;
 
-    /// <summary>
-    /// The backing field for <see cref="AgeText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="AgeText"/>.</summary>
     private int _ageText;
 
     /// <inheritdoc/>
@@ -28,9 +22,7 @@ public class MyView : IViewFor, INotifyPropertyChanged
     /// <inheritdoc/>
     public object? ViewModel { get; set; }
 
-    /// <summary>
-    /// Gets or sets the name text.
-    /// </summary>
+    /// <summary>Gets or sets the name text.</summary>
     public string NameText
     {
         get => _nameText;
@@ -46,9 +38,7 @@ public class MyView : IViewFor, INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the age text.
-    /// </summary>
+    /// <summary>Gets or sets the age text.</summary>
     public int AgeText
     {
         get => _ageText;

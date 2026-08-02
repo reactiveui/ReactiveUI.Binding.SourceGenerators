@@ -7,39 +7,25 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 
-/// <summary>
-/// Tests that the source-generator-generated BindOneWay code works correctly at runtime.
-/// </summary>
+/// <summary>Tests that the source-generator-generated BindOneWay code works correctly at runtime.</summary>
 public class BindOneWayTests
 {
-    /// <summary>
-    /// The initial string property value used across the binding tests.
-    /// </summary>
+    /// <summary>The initial string property value used across the binding tests.</summary>
     private const string HelloValue = "Hello";
 
-    /// <summary>
-    /// The initial integer property test value.
-    /// </summary>
+    /// <summary>The initial integer property test value.</summary>
     private const int IntValue = 42;
 
-    /// <summary>
-    /// The updated integer property test value.
-    /// </summary>
+    /// <summary>The updated integer property test value.</summary>
     private const int UpdatedIntValue = 100;
 
-    /// <summary>
-    /// The initial double property test value.
-    /// </summary>
+    /// <summary>The initial double property test value.</summary>
     private const double DoubleValue = 3.14;
 
-    /// <summary>
-    /// The updated double property test value.
-    /// </summary>
+    /// <summary>The updated double property test value.</summary>
     private const double UpdatedDoubleValue = 2.71;
 
-    /// <summary>
-    /// Verifies that BindOneWay syncs the initial string property value.
-    /// </summary>
+    /// <summary>Verifies that BindOneWay syncs the initial string property value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringProperty_SyncsInitialValue()
@@ -52,9 +38,7 @@ public class BindOneWayTests
         await Assert.That(target.ViewProp1).IsEqualTo(HelloValue);
     }
 
-    /// <summary>
-    /// Verifies that BindOneWay syncs string property changes from source to target.
-    /// </summary>
+    /// <summary>Verifies that BindOneWay syncs string property changes from source to target.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringProperty_SyncsOnSourceChange()
@@ -69,9 +53,7 @@ public class BindOneWayTests
         await Assert.That(target.ViewProp1).IsEqualTo("World");
     }
 
-    /// <summary>
-    /// Verifies that BindOneWay syncs int property values.
-    /// </summary>
+    /// <summary>Verifies that BindOneWay syncs int property values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IntProperty_SyncsValues()
@@ -88,9 +70,7 @@ public class BindOneWayTests
         await Assert.That(target.ViewProp2).IsEqualTo(UpdatedIntValue);
     }
 
-    /// <summary>
-    /// Verifies that BindOneWay syncs double property values.
-    /// </summary>
+    /// <summary>Verifies that BindOneWay syncs double property values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DoubleProperty_SyncsValues()
@@ -107,9 +87,7 @@ public class BindOneWayTests
         await Assert.That(target.ViewProp3).IsEqualTo(UpdatedDoubleValue);
     }
 
-    /// <summary>
-    /// Verifies that BindOneWay syncs bool property values.
-    /// </summary>
+    /// <summary>Verifies that BindOneWay syncs bool property values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BoolProperty_SyncsValues()
@@ -126,9 +104,7 @@ public class BindOneWayTests
         await Assert.That(target.ViewProp4).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that disposing the binding stops syncing values.
-    /// </summary>
+    /// <summary>Verifies that disposing the binding stops syncing values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Disposal_StopsSyncing()

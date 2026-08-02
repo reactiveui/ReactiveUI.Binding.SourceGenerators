@@ -8,9 +8,7 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
-/// <summary>
-/// Unit tests for <see cref="CombineLatest4Observable{T1, T2, T3, T4, TResult}"/> edge cases.
-/// </summary>
+/// <summary>Unit tests for <see cref="CombineLatest4Observable{T1, T2, T3, T4, TResult}"/> edge cases.</summary>
 public class CombineLatest4ObservableTests
 {
     /// <summary>The value emitted by the first source on the initial round.</summary>
@@ -46,82 +44,72 @@ public class CombineLatest4ObservableTests
     /// <summary>The message used for errors that are expected to be ignored.</summary>
     private const string IgnoredErrorMessage = "should be ignored";
 
-    /// <summary>
-    /// Verifies that a null first source throws <see cref="ArgumentNullException"/>.
-    /// </summary>
+    /// <summary>Verifies that a null first source throws <see cref="ArgumentNullException"/>.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullSource1_Throws()
     {
-        var act = () => CombineLatestObservable.Create(
+        var act = static () => CombineLatestObservable.Create(
             (IObservable<int>)null!,
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
-            (a, b, c, d) => a + b + c + d);
+            static (a, b, c, d) => a + b + c + d);
 
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that a null second source throws <see cref="ArgumentNullException"/>.
-    /// </summary>
+    /// <summary>Verifies that a null second source throws <see cref="ArgumentNullException"/>.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullSource2_Throws()
     {
-        var act = () => CombineLatestObservable.Create(
+        var act = static () => CombineLatestObservable.Create(
             new Subject<int>(),
             (IObservable<int>)null!,
             new Subject<int>(),
             new Subject<int>(),
-            (a, b, c, d) => a + b + c + d);
+            static (a, b, c, d) => a + b + c + d);
 
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that a null third source throws <see cref="ArgumentNullException"/>.
-    /// </summary>
+    /// <summary>Verifies that a null third source throws <see cref="ArgumentNullException"/>.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullSource3_Throws()
     {
-        var act = () => CombineLatestObservable.Create(
+        var act = static () => CombineLatestObservable.Create(
             new Subject<int>(),
             new Subject<int>(),
             (IObservable<int>)null!,
             new Subject<int>(),
-            (a, b, c, d) => a + b + c + d);
+            static (a, b, c, d) => a + b + c + d);
 
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that a null fourth source throws <see cref="ArgumentNullException"/>.
-    /// </summary>
+    /// <summary>Verifies that a null fourth source throws <see cref="ArgumentNullException"/>.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullSource4_Throws()
     {
-        var act = () => CombineLatestObservable.Create(
+        var act = static () => CombineLatestObservable.Create(
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
             (IObservable<int>)null!,
-            (a, b, c, d) => a + b + c + d);
+            static (a, b, c, d) => a + b + c + d);
 
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that a null result selector throws <see cref="ArgumentNullException"/>.
-    /// </summary>
+    /// <summary>Verifies that a null result selector throws <see cref="ArgumentNullException"/>.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Constructor_NullResultSelector_Throws()
     {
-        var act = () => CombineLatestObservable.Create<int, int, int, int, int>(
+        var act = static () => CombineLatestObservable.Create<int, int, int, int, int>(
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
@@ -131,9 +119,7 @@ public class CombineLatest4ObservableTests
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that subscribing with a null observer throws <see cref="ArgumentNullException"/>.
-    /// </summary>
+    /// <summary>Verifies that subscribing with a null observer throws <see cref="ArgumentNullException"/>.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Subscribe_NullObserver_Throws()
@@ -143,16 +129,14 @@ public class CombineLatest4ObservableTests
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
-            (a, b, c, d) => a + b + c + d);
+            static (a, b, c, d) => a + b + c + d);
 
         var act = () => combined.Subscribe(null!);
 
         await Assert.That(act).ThrowsExactly<ArgumentNullException>();
     }
 
-    /// <summary>
-    /// Verifies that disposing twice does not throw an exception.
-    /// </summary>
+    /// <summary>Verifies that disposing twice does not throw an exception.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task Dispose_CalledTwice_NoException()
@@ -162,18 +146,16 @@ public class CombineLatest4ObservableTests
             new Subject<int>(),
             new Subject<int>(),
             new Subject<int>(),
-            (a, b, c, d) => a + b + c + d);
+            static (a, b, c, d) => a + b + c + d);
 
-        var subscription = combined.Subscribe(new AnonymousObserver<int>(_ => { }, _ => { }, () => { }));
+        var subscription = combined.Subscribe(new AnonymousObserver<int>(static _ => { }, static _ => { }, static () => { }));
         subscription.Dispose();
         subscription.Dispose();
 
         await Assert.That(subscription.GetType()).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that a source emitting after dispose does not throw.
-    /// </summary>
+    /// <summary>Verifies that a source emitting after dispose does not throw.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task SourceEmitsAfterDispose_NoException()
@@ -187,10 +169,10 @@ public class CombineLatest4ObservableTests
             source2,
             source3,
             source4,
-            (a, b, c, d) => a + b + c + d);
+            static (a, b, c, d) => a + b + c + d);
 
         var results = new List<int>();
-        var subscription = combined.Subscribe(new AnonymousObserver<int>(results.Add, _ => { }, () => { }));
+        var subscription = combined.Subscribe(new AnonymousObserver<int>(results.Add, static _ => { }, static () => { }));
 
         source1.OnNext(FirstValue);
         source2.OnNext(SecondValue);
@@ -207,9 +189,7 @@ public class CombineLatest4ObservableTests
         await Assert.That(results[0]).IsEqualTo(ExpectedSum);
     }
 
-    /// <summary>
-    /// Verifies that an error after dispose is ignored.
-    /// </summary>
+    /// <summary>Verifies that an error after dispose is ignored.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task ErrorAfterDispose_IsIgnored()
@@ -223,13 +203,13 @@ public class CombineLatest4ObservableTests
             source2,
             source3,
             source4,
-            (a, b, c, d) => a + b + c + d);
+            static (a, b, c, d) => a + b + c + d);
 
         Exception? receivedError = null;
         var subscription = combined.Subscribe(new AnonymousObserver<int>(
-            _ => { },
+            static _ => { },
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         subscription.Dispose();
         source1.OnError(new InvalidOperationException(IgnoredErrorMessage));
@@ -257,13 +237,13 @@ public class CombineLatest4ObservableTests
             manual2,
             manual3,
             manual4,
-            (a, b, c, d) => a + b + c + d);
+            static (a, b, c, d) => a + b + c + d);
 
         Exception? receivedError = null;
         var subscription = combined.Subscribe(new AnonymousObserver<int>(
-            _ => { },
+            static _ => { },
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         // Set all has-value flags so TryEmit reaches _observer?.OnNext
         manual1.Observer!.OnNext(FirstValue);
@@ -286,9 +266,7 @@ public class CombineLatest4ObservableTests
         await Assert.That(receivedError).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that an error in the first source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in the first source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task ErrorInSource1_PropagatedToSubscriber()
@@ -302,15 +280,15 @@ public class CombineLatest4ObservableTests
             source2,
             source3,
             source4,
-            (a, b, c, d) => $"{a}-{b}-{c}-{d}");
+            static (a, b, c, d) => $"{a}-{b}-{c}-{d}");
 
         Exception? receivedError = null;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         var expectedError = new InvalidOperationException("source1 error");
         source1.OnError(expectedError);
@@ -320,9 +298,7 @@ public class CombineLatest4ObservableTests
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that an error in the second source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in the second source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task ErrorInSource2_PropagatedToSubscriber()
@@ -336,15 +312,15 @@ public class CombineLatest4ObservableTests
             source2,
             source3,
             source4,
-            (a, b, c, d) => $"{a}-{b}-{c}-{d}");
+            static (a, b, c, d) => $"{a}-{b}-{c}-{d}");
 
         Exception? receivedError = null;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         var expectedError = new InvalidOperationException("source2 error");
         source2.OnError(expectedError);
@@ -354,9 +330,7 @@ public class CombineLatest4ObservableTests
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that an error in the third source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in the third source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task ErrorInSource3_PropagatedToSubscriber()
@@ -370,15 +344,15 @@ public class CombineLatest4ObservableTests
             source2,
             source3,
             source4,
-            (a, b, c, d) => $"{a}-{b}-{c}-{d}");
+            static (a, b, c, d) => $"{a}-{b}-{c}-{d}");
 
         Exception? receivedError = null;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         var expectedError = new InvalidOperationException("source3 error");
         source3.OnError(expectedError);
@@ -388,9 +362,7 @@ public class CombineLatest4ObservableTests
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that an error in the fourth source observable is propagated to the subscriber.
-    /// </summary>
+    /// <summary>Verifies that an error in the fourth source observable is propagated to the subscriber.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task ErrorInSource4_PropagatedToSubscriber()
@@ -404,15 +376,15 @@ public class CombineLatest4ObservableTests
             source2,
             source3,
             source4,
-            (a, b, c, d) => $"{a}-{b}-{c}-{d}");
+            static (a, b, c, d) => $"{a}-{b}-{c}-{d}");
 
         Exception? receivedError = null;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
             ex => receivedError = ex,
-            () => { }));
+            static () => { }));
 
         var expectedError = new InvalidOperationException("source4 error");
         source4.OnError(expectedError);
@@ -422,9 +394,7 @@ public class CombineLatest4ObservableTests
         await Assert.That(results).IsEmpty();
     }
 
-    /// <summary>
-    /// Verifies that OnCompleted from a single source does not propagate completion.
-    /// </summary>
+    /// <summary>Verifies that OnCompleted from a single source does not propagate completion.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
     public async Task CompletedInSource_DoesNotPropagateCompletion()
@@ -438,14 +408,14 @@ public class CombineLatest4ObservableTests
             source2,
             source3,
             source4,
-            (a, b, c, d) => $"{a}-{b}-{c}-{d}");
+            static (a, b, c, d) => $"{a}-{b}-{c}-{d}");
 
         var completed = false;
         var results = new List<string>();
 
-        combined.Subscribe(new AnonymousObserver<string>(
+        _ = combined.Subscribe(new AnonymousObserver<string>(
             results.Add,
-            _ => { },
+            static _ => { },
             () => completed = true));
 
         source1.OnNext(FirstValue);
@@ -462,15 +432,12 @@ public class CombineLatest4ObservableTests
         await Assert.That(results).Count().IsEqualTo(ExpectedEmissionCount);
     }
 
-    /// <summary>
-    /// A simple observer implementation that delegates to provided action callbacks.
-    /// </summary>
+    /// <summary>A simple observer implementation that delegates to provided action callbacks.</summary>
     /// <typeparam name="T">The type of elements observed.</typeparam>
     /// <param name="onNext">The action to invoke for each observed element.</param>
     /// <param name="onError">The action to invoke when an error occurs.</param>
     /// <param name="onCompleted">The action to invoke when the sequence completes.</param>
-    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-        : IObserver<T>
+    private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted) : IObserver<T>
     {
         /// <inheritdoc/>
         public void OnCompleted() => onCompleted();

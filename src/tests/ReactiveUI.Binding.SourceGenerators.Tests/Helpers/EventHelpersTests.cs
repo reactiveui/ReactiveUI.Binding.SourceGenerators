@@ -10,11 +10,15 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Tests for <see cref="EventHelpers"/> methods.
-/// </summary>
+/// <summary>Tests for <see cref="EventHelpers"/> methods.</summary>
 public class EventHelpersTests
 {
+    /// <summary>The <c>Click</c> name these tests generate against.</summary>
+    private const string ClickName = "Click";
+
+    /// <summary>The <c>MyButton</c> name these tests generate against.</summary>
+    private const string MyButtonName = "MyButton";
+
     /// <summary>
     /// Verifies FindEventArgsType returns "global::System.EventArgs" when the event's delegate
     /// type has a non-standard number of parameters (e.g. Action with 0 params).
@@ -32,16 +36,14 @@ public class EventHelpersTests
                               """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
-        var typeSymbol = GetNamedTypeSymbol(compilation, "MyButton");
+        var typeSymbol = GetNamedTypeSymbol(compilation, MyButtonName);
 
         var result = EventHelpers.FindEventArgsType(typeSymbol, "Clicked");
 
         await Assert.That(result).IsEqualTo("global::System.EventArgs");
     }
 
-    /// <summary>
-    /// Verifies FindEventArgsType returns null when the type has no matching event.
-    /// </summary>
+    /// <summary>Verifies FindEventArgsType returns null when the type has no matching event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindEventArgsType_NoMatchingEvent_ReturnsNull()
@@ -54,16 +56,14 @@ public class EventHelpersTests
                               """;
 
         var compilation = TestHelper.CreateCompilation(source);
-        var typeSymbol = GetNamedTypeSymbol(compilation, "MyButton");
+        var typeSymbol = GetNamedTypeSymbol(compilation, MyButtonName);
 
-        var result = EventHelpers.FindEventArgsType(typeSymbol, "Click");
+        var result = EventHelpers.FindEventArgsType(typeSymbol, ClickName);
 
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies FindDefaultEvent returns the first matching default event name.
-    /// </summary>
+    /// <summary>Verifies FindDefaultEvent returns the first matching default event name.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindDefaultEvent_ControlWithClickEvent_ReturnsClick()
@@ -77,17 +77,15 @@ public class EventHelpersTests
                               """;
 
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
-        var typeSymbol = GetNamedTypeSymbol(compilation, "MyButton");
+        var typeSymbol = GetNamedTypeSymbol(compilation, MyButtonName);
 
         var eventName = EventHelpers.FindDefaultEvent(typeSymbol, out var argsType);
 
-        await Assert.That(eventName).IsEqualTo("Click");
+        await Assert.That(eventName).IsEqualTo(ClickName);
         await Assert.That(argsType).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies FindDefaultEvent returns TouchUpInside for controls with that event.
-    /// </summary>
+    /// <summary>Verifies FindDefaultEvent returns TouchUpInside for controls with that event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindDefaultEvent_ControlWithTouchUpInsideEvent_ReturnsTouchUpInside()
@@ -108,9 +106,7 @@ public class EventHelpersTests
         await Assert.That(eventName).IsEqualTo("TouchUpInside");
     }
 
-    /// <summary>
-    /// Verifies FindDefaultEvent returns null when no default event matches.
-    /// </summary>
+    /// <summary>Verifies FindDefaultEvent returns null when no default event matches.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindDefaultEvent_ControlWithNoMatchingEvent_ReturnsNull()
@@ -154,7 +150,7 @@ public class EventHelpersTests
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "ControlWithClickProperty");
 
-        var result = EventHelpers.FindEventArgsType(typeSymbol, "Click");
+        var result = EventHelpers.FindEventArgsType(typeSymbol, ClickName);
 
         await Assert.That(result).IsNull();
     }
@@ -180,14 +176,12 @@ public class EventHelpersTests
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "ControlWithClickMethod");
 
-        var result = EventHelpers.FindEventArgsType(typeSymbol, "Click");
+        var result = EventHelpers.FindEventArgsType(typeSymbol, ClickName);
 
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Gets a named type symbol from a compilation.
-    /// </summary>
+    /// <summary>Gets a named type symbol from a compilation.</summary>
     /// <param name="compilation">The compilation.</param>
     /// <param name="typeName">The type name.</param>
     /// <returns>The named type symbol.</returns>

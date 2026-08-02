@@ -6,22 +6,16 @@ using System.ComponentModel;
 
 namespace SharedScenarios.BindCommand.DeepCommandPath;
 
-/// <summary>
-/// Parent ViewModel containing a child with the command.
-/// </summary>
+/// <summary>Parent ViewModel containing a child with the command.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Child"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Child"/>.</summary>
     private ChildViewModel? _child;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the child view model.
-    /// </summary>
+    /// <summary>Gets or sets the child view model.</summary>
     public ChildViewModel? Child
     {
         get => _child;

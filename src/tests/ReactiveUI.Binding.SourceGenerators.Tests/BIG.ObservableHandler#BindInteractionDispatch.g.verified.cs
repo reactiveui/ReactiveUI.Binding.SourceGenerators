@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -26,13 +26,13 @@ namespace ReactiveUI.Binding
 
             if (propertyNameExpression == "x => x.Confirm")
             {
-                return __BindInteraction_7FFFDDE16443AE6A(viewModel, handler);
+                return __BindInteraction_7FFFDDE16443ACF6(viewModel, handler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindInteraction_7FFFDDE16443AE6A(
+        private static global::System.IDisposable __BindInteraction_7FFFDDE16443ACF6(
             global::SharedScenarios.BindInteraction.ObservableHandler.MyViewModel viewModel,
             global::System.Func<global::ReactiveUI.Binding.IInteractionContext<string, bool>, global::System.IObservable<int>> handler)
         {

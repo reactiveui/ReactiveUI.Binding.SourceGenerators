@@ -13,44 +13,28 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 /// </summary>
 public class BindingEdgeCaseTests
 {
-    /// <summary>
-    /// The initial deep-chain city value.
-    /// </summary>
+    /// <summary>The initial deep-chain city value.</summary>
     private const string Seattle = "Seattle";
 
-    /// <summary>
-    /// The updated deep-chain city value.
-    /// </summary>
+    /// <summary>The updated deep-chain city value.</summary>
     private const string Portland = "Portland";
 
-    /// <summary>
-    /// The pre-set source property value.
-    /// </summary>
+    /// <summary>The pre-set source property value.</summary>
     private const string PreSet = "PreSet";
 
-    /// <summary>
-    /// The initial double property test value.
-    /// </summary>
+    /// <summary>The initial double property test value.</summary>
     private const double DoubleValue = 3.14;
 
-    /// <summary>
-    /// The updated double property test value.
-    /// </summary>
+    /// <summary>The updated double property test value.</summary>
     private const double UpdatedDoubleValue = 2.71;
 
-    /// <summary>
-    /// The square root of two double property test value.
-    /// </summary>
+    /// <summary>The square root of two double property test value.</summary>
     private const double SqrtTwo = 1.41;
 
-    /// <summary>
-    /// The number of rapid sequential changes in the rapid-changes test.
-    /// </summary>
+    /// <summary>The number of rapid sequential changes in the rapid-changes test.</summary>
     private const int RapidChangeCount = 100;
 
-    /// <summary>
-    /// Verifies that BindOneWay with a deep chain source property syncs the initial value.
-    /// </summary>
+    /// <summary>Verifies that BindOneWay with a deep chain source property syncs the initial value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindOneWay_DeepChainSource_SyncsInitialValue()
@@ -64,9 +48,7 @@ public class BindingEdgeCaseTests
         await Assert.That(target.ViewProp1).IsEqualTo(Seattle);
     }
 
-    /// <summary>
-    /// Verifies that BindOneWay with a deep chain source property syncs nested changes.
-    /// </summary>
+    /// <summary>Verifies that BindOneWay with a deep chain source property syncs nested changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindOneWay_DeepChainSource_SyncsNestedChanges()
@@ -82,9 +64,7 @@ public class BindingEdgeCaseTests
         await Assert.That(target.ViewProp1).IsEqualTo(Portland);
     }
 
-    /// <summary>
-    /// Verifies that BindOneWay with a deep chain re-subscribes on intermediate replacement.
-    /// </summary>
+    /// <summary>Verifies that BindOneWay with a deep chain re-subscribes on intermediate replacement.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindOneWay_DeepChainSource_IntermediateReplacement()
@@ -105,10 +85,7 @@ public class BindingEdgeCaseTests
         await Assert.That(target.ViewProp1).IsEqualTo("Eugene");
     }
 
-    /// <summary>
-    /// Verifies that multiple BindOneWay bindings to the same target property
-    /// both function correctly (last write wins).
-    /// </summary>
+    /// <summary>Verifies that multiple BindOneWay bindings to the same target property both function correctly (last write wins).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindOneWay_MultipleBindingsToSameTarget()
@@ -131,9 +108,7 @@ public class BindingEdgeCaseTests
         await Assert.That(target.ViewProp5).IsEqualTo("Updated5");
     }
 
-    /// <summary>
-    /// Verifies that BindTwoWay handles rapid back-and-forth changes without infinite loop.
-    /// </summary>
+    /// <summary>Verifies that BindTwoWay handles rapid back-and-forth changes without infinite loop.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindTwoWay_RapidBackAndForth()
@@ -157,9 +132,7 @@ public class BindingEdgeCaseTests
         await Assert.That(source.Prop1).IsEqualTo("D");
     }
 
-    /// <summary>
-    /// Verifies that BindTwoWay syncs double property in both directions.
-    /// </summary>
+    /// <summary>Verifies that BindTwoWay syncs double property in both directions.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindTwoWay_DoubleProperty_SyncsBothDirections()
@@ -178,9 +151,7 @@ public class BindingEdgeCaseTests
         await Assert.That(source.Prop3).IsEqualTo(SqrtTwo);
     }
 
-    /// <summary>
-    /// Verifies that BindTwoWay syncs bool property in both directions.
-    /// </summary>
+    /// <summary>Verifies that BindTwoWay syncs bool property in both directions.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindTwoWay_BoolProperty_SyncsBothDirections()
@@ -199,9 +170,7 @@ public class BindingEdgeCaseTests
         await Assert.That(source.Prop4).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that disposing a BindOneWay with deep chain source stops syncing.
-    /// </summary>
+    /// <summary>Verifies that disposing a BindOneWay with deep chain source stops syncing.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindOneWay_DeepChainSource_Disposal()
@@ -237,10 +206,7 @@ public class BindingEdgeCaseTests
         await Assert.That(target.ViewProp1).IsEqualTo(PreSet);
     }
 
-    /// <summary>
-    /// Verifies that BindTwoWay correctly syncs a pre-set source value and then
-    /// supports bidirectional changes after binding.
-    /// </summary>
+    /// <summary>Verifies that BindTwoWay correctly syncs a pre-set source value and then supports bidirectional changes after binding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindTwoWay_SourcePropertySetBeforeBinding_SyncsAndBiDirectional()
@@ -261,9 +227,7 @@ public class BindingEdgeCaseTests
         await Assert.That(target.ViewProp1).IsEqualTo("FromSource");
     }
 
-    /// <summary>
-    /// Verifies that BindOneWay handles rapid sequential changes without missing any.
-    /// </summary>
+    /// <summary>Verifies that BindOneWay handles rapid sequential changes without missing any.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindOneWay_RapidChanges_AllSynced()

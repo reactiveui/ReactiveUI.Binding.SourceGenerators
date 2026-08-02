@@ -16,10 +16,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// </summary>
 internal sealed class ReactiveObjectObservationPlugin : IObservationPlugin
 {
-    /// <summary>
-    /// The affinity score for the IReactiveObject observation plugin
-    /// (matches ReactiveUI's IROObservableForProperty).
-    /// </summary>
+    /// <summary>The affinity score for the IReactiveObject observation plugin (matches ReactiveUI's IROObservableForProperty).</summary>
     private static readonly int ReactiveObjectAffinity = BindingAffinity.ExactType;
 
     /// <inheritdoc/>
@@ -55,16 +52,18 @@ internal sealed class ReactiveObjectObservationPlugin : IObservationPlugin
     {
         if (isBeforeChange)
         {
-            sb.Append(
-                $"new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>((" +
-                $"""global::System.ComponentModel.INotifyPropertyChanging){rootVar}, "{segment.PropertyName}", (""" +
-                $"global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName})");
+            _ = sb
+                .Append($"new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>((")
+                .Append($"""global::System.ComponentModel.INotifyPropertyChanging){rootVar}, "{segment.PropertyName}", (""")
+                .Append($"global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName})");
         }
         else
         {
-            sb.Append(
-                $"""new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>({rootVar}, "{segment.PropertyName}", (""" +
-                $"global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName}, {(includeStartWith ? "true" : "false")})");
+            _ = sb
+                .Append($"""new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>({rootVar}, "{segment.PropertyName}", (""")
+                .Append($"global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName}, ")
+                .Append(includeStartWith ? "true" : "false")
+                .Append(')');
         }
     }
 
@@ -125,7 +124,7 @@ internal sealed class ReactiveObjectObservationPlugin : IObservationPlugin
     {
         var segType = segment.PropertyTypeFullName;
 
-        sb.AppendLine()
+        _ = sb.AppendLine()
             .AppendLine(isBeforeChange
                 ? $"""
                            var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(

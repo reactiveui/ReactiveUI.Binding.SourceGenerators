@@ -5,19 +5,19 @@
 #if NET6_0_OR_GREATER
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting nullable DateOnly to strings.
-/// </summary>
+/// <summary>Tests for converting nullable DateOnly to strings.</summary>
 public class NullableDateOnlyToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Year component of the sample date used across the conversion round-trips.</summary>
+    private const int SampleYear = 2_024;
+
+    /// <summary>Day component of the sample date used across the conversion round-trips.</summary>
+    private const int SampleDay = 15;
+
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -27,15 +27,13 @@ public class NullableDateOnlyToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert DateOnly Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert DateOnly Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_DateOnly_Succeeds()
     {
         var converter = new NullableDateOnlyToStringTypeConverter();
-        DateOnly? value = new DateOnly(2_024, 1, 15);
+        DateOnly? value = new DateOnly(SampleYear, 1, SampleDay);
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -43,9 +41,7 @@ public class NullableDateOnlyToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.Value.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsNullString.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsNullString.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsNullString()

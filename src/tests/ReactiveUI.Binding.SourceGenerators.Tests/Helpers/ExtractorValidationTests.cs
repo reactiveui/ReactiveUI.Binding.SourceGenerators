@@ -9,37 +9,34 @@ using ReactiveUI.Binding.SourceGenerators.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
-/// <summary>
-/// Unit tests for <see cref="ExtractorValidation"/> helper methods.
-/// Tests the guard-clause branches extracted from extractor classes.
-/// </summary>
+/// <summary>Unit tests for <see cref="ExtractorValidation"/> helper methods. Tests the guard-clause branches extracted from extractor classes.</summary>
 public class ExtractorValidationTests
 {
-    /// <summary>
-    /// Verifies that the stub extension class name is recognized.
-    /// </summary>
+    /// <summary>The <c>selector</c> name these tests generate against.</summary>
+    private const string SelectorName = "selector";
+
+    /// <summary>The <c>string</c> name these tests generate against.</summary>
+    private const string StringName = "string";
+
+    /// <summary>Verifies that the stub extension class name is recognized.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsRecognizedExtensionClass_StubClassName_ReturnsTrue()
     {
-        var result = ExtractorValidation.IsRecognizedExtensionClass("ReactiveUIBindingExtensions");
+        var result = ExtractorValidation.IsRecognizedExtensionClass(nameof(ReactiveUIBindingExtensions));
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that the scheduler extension class name is recognized.
-    /// </summary>
+    /// <summary>Verifies that the scheduler extension class name is recognized.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsRecognizedExtensionClass_SchedulerClassName_ReturnsTrue()
     {
-        var result = ExtractorValidation.IsRecognizedExtensionClass("ReactiveSchedulerExtensions");
+        var result = ExtractorValidation.IsRecognizedExtensionClass(nameof(ReactiveSchedulerExtensions));
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that the generated extension class name is recognized.
-    /// </summary>
+    /// <summary>Verifies that the generated extension class name is recognized.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsRecognizedExtensionClass_GeneratedClassName_ReturnsTrue()
@@ -48,9 +45,7 @@ public class ExtractorValidationTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that an unrecognized class name is rejected.
-    /// </summary>
+    /// <summary>Verifies that an unrecognized class name is rejected.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsRecognizedExtensionClass_UnknownClassName_ReturnsFalse()
@@ -59,9 +54,7 @@ public class ExtractorValidationTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that null is rejected as unrecognized.
-    /// </summary>
+    /// <summary>Verifies that null is rejected as unrecognized.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsRecognizedExtensionClass_Null_ReturnsFalse()
@@ -70,9 +63,7 @@ public class ExtractorValidationTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that an empty string is rejected as unrecognized.
-    /// </summary>
+    /// <summary>Verifies that an empty string is rejected as unrecognized.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsRecognizedExtensionClass_Empty_ReturnsFalse()
@@ -81,53 +72,49 @@ public class ExtractorValidationTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that argument count at the minimum is accepted.
-    /// </summary>
+    /// <summary>Verifies that argument count at the minimum is accepted.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasMinimumArguments_ExactMinimum_ReturnsTrue()
     {
-        var result = ExtractorValidation.HasMinimumArguments(3, 3);
+        const int ArgumentCount = 3;
+        var result = ExtractorValidation.HasMinimumArguments(ArgumentCount, ArgumentCount);
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that argument count above the minimum is accepted.
-    /// </summary>
+    /// <summary>Verifies that argument count above the minimum is accepted.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasMinimumArguments_AboveMinimum_ReturnsTrue()
     {
-        var result = ExtractorValidation.HasMinimumArguments(5, 3);
+        const int ArgumentCount = 5;
+        const int MinimumRequired = 3;
+        var result = ExtractorValidation.HasMinimumArguments(ArgumentCount, MinimumRequired);
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that argument count below the minimum is rejected.
-    /// </summary>
+    /// <summary>Verifies that argument count below the minimum is rejected.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasMinimumArguments_BelowMinimum_ReturnsFalse()
     {
-        var result = ExtractorValidation.HasMinimumArguments(2, 3);
+        const int ArgumentCount = 2;
+        const int MinimumRequired = 3;
+        var result = ExtractorValidation.HasMinimumArguments(ArgumentCount, MinimumRequired);
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that zero arguments is rejected when minimum is required.
-    /// </summary>
+    /// <summary>Verifies that zero arguments is rejected when minimum is required.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasMinimumArguments_Zero_ReturnsFalse()
     {
-        var result = ExtractorValidation.HasMinimumArguments(0, 3);
+        const int MinimumRequired = 3;
+        var result = ExtractorValidation.HasMinimumArguments(0, MinimumRequired);
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that a populated immutable array is accepted.
-    /// </summary>
+    /// <summary>Verifies that a populated immutable array is accepted.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasItems_PopulatedArray_ReturnsTrue()
@@ -137,9 +124,7 @@ public class ExtractorValidationTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that a single-item array is accepted.
-    /// </summary>
+    /// <summary>Verifies that a single-item array is accepted.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasItems_SingleItem_ReturnsTrue()
@@ -149,9 +134,7 @@ public class ExtractorValidationTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that an empty immutable array is rejected.
-    /// </summary>
+    /// <summary>Verifies that an empty immutable array is rejected.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasItems_EmptyArray_ReturnsFalse()
@@ -161,9 +144,7 @@ public class ExtractorValidationTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that a default (uninitialized) immutable array is rejected.
-    /// </summary>
+    /// <summary>Verifies that a default (uninitialized) immutable array is rejected.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasItems_DefaultArray_ReturnsFalse()
@@ -209,109 +190,99 @@ public class ExtractorValidationTests
         await Assert.That(result).IsEqualTo("global::System.EventArgs");
     }
 
-    /// <summary>
-    /// Verifies that FindSelectorReturnType returns null when the parameters array is empty.
-    /// </summary>
+    /// <summary>Verifies that FindSelectorReturnType returns null when the parameters array is empty.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindSelectorReturnType_EmptyParameters_ReturnsNull()
     {
         var result = ExtractorValidation.FindSelectorReturnType(
             [],
-            "selector");
+            SelectorName);
 
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that FindSelectorReturnType returns null when no parameter matches the name.
-    /// </summary>
+    /// <summary>Verifies that FindSelectorReturnType returns null when no parameter matches the name.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindSelectorReturnType_NoMatchingParameter_ReturnsNull()
     {
         var typeArg = Substitute.For<ITypeSymbol>();
-        typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns("string");
+        _ = typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns(StringName);
 
         var funcType = Substitute.For<INamedTypeSymbol>();
-        funcType.TypeArguments.Returns([typeArg]);
+        _ = funcType.TypeArguments.Returns([typeArg]);
 
         var param = Substitute.For<IParameterSymbol>();
-        param.Name.Returns("otherParam");
-        param.Type.Returns(funcType);
+        _ = param.Name.Returns("otherParam");
+        _ = param.Type.Returns(funcType);
 
         var parameters = ImmutableArray.Create(param);
 
-        var result = ExtractorValidation.FindSelectorReturnType(parameters, "selector");
+        var result = ExtractorValidation.FindSelectorReturnType(parameters, SelectorName);
 
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that FindSelectorReturnType returns the return type when a matching parameter is found.
-    /// </summary>
+    /// <summary>Verifies that FindSelectorReturnType returns the return type when a matching parameter is found.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindSelectorReturnType_MatchingParameter_ReturnsType()
     {
         var typeArg = Substitute.For<ITypeSymbol>();
-        typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns("string");
+        _ = typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns(StringName);
 
         var funcType = Substitute.For<INamedTypeSymbol>();
-        funcType.TypeArguments.Returns([typeArg]);
+        _ = funcType.TypeArguments.Returns([typeArg]);
 
         var param = Substitute.For<IParameterSymbol>();
-        param.Name.Returns("selector");
-        param.Type.Returns(funcType);
+        _ = param.Name.Returns(SelectorName);
+        _ = param.Type.Returns(funcType);
 
         var parameters = ImmutableArray.Create(param);
 
-        var result = ExtractorValidation.FindSelectorReturnType(parameters, "selector");
+        var result = ExtractorValidation.FindSelectorReturnType(parameters, SelectorName);
 
-        await Assert.That(result).IsEqualTo("string");
+        await Assert.That(result).IsEqualTo(StringName);
     }
 
-    /// <summary>
-    /// Verifies that FindSelectorReturnType matches any of multiple parameter names.
-    /// </summary>
+    /// <summary>Verifies that FindSelectorReturnType matches any of multiple parameter names.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindSelectorReturnType_MultipleNames_MatchesSecondName()
     {
         var typeArg = Substitute.For<ITypeSymbol>();
-        typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns("int");
+        _ = typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns("int");
 
         var funcType = Substitute.For<INamedTypeSymbol>();
-        funcType.TypeArguments.Returns([typeArg]);
+        _ = funcType.TypeArguments.Returns([typeArg]);
 
         var param = Substitute.For<IParameterSymbol>();
-        param.Name.Returns("conversionFunc");
-        param.Type.Returns(funcType);
+        _ = param.Name.Returns("conversionFunc");
+        _ = param.Type.Returns(funcType);
 
         var parameters = ImmutableArray.Create(param);
 
-        var result = ExtractorValidation.FindSelectorReturnType(parameters, "selector", "conversionFunc");
+        var result = ExtractorValidation.FindSelectorReturnType(parameters, SelectorName, "conversionFunc");
 
         await Assert.That(result).IsEqualTo("int");
     }
 
-    /// <summary>
-    /// Verifies that FindSelectorReturnType skips parameters with non-generic types.
-    /// </summary>
+    /// <summary>Verifies that FindSelectorReturnType skips parameters with non-generic types.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindSelectorReturnType_NonGenericType_ReturnsNull()
     {
         var nonGenericType = Substitute.For<INamedTypeSymbol>();
-        nonGenericType.TypeArguments.Returns([]);
+        _ = nonGenericType.TypeArguments.Returns([]);
 
         var param = Substitute.For<IParameterSymbol>();
-        param.Name.Returns("selector");
-        param.Type.Returns(nonGenericType);
+        _ = param.Name.Returns(SelectorName);
+        _ = param.Type.Returns(nonGenericType);
 
         var parameters = ImmutableArray.Create(param);
 
-        var result = ExtractorValidation.FindSelectorReturnType(parameters, "selector");
+        var result = ExtractorValidation.FindSelectorReturnType(parameters, SelectorName);
 
         await Assert.That(result).IsNull();
     }

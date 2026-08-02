@@ -12,54 +12,40 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class TestView : INotifyPropertyChanged, IViewFor
 {
-    /// <summary>
-    /// The backer for DisplayName.
-    /// </summary>
-    private string _displayName = string.Empty;
-
-    /// <summary>
-    /// The backer for DisplayAge.
-    /// </summary>
-    private int _displayAge;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <inheritdoc/>
     public object? ViewModel { get; set; }
 
-    /// <summary>
-    /// Gets or sets the display name.
-    /// </summary>
+    /// <summary>Gets or sets the display name.</summary>
     public string DisplayName
     {
-        get => _displayName;
+        get => field;
         set
         {
-            if (_displayName == value)
+            if (field == value)
             {
                 return;
             }
 
-            _displayName = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(DisplayName)));
         }
-    }
+    } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the display age.
-    /// </summary>
+    /// <summary>Gets or sets the display age.</summary>
     public int DisplayAge
     {
-        get => _displayAge;
+        get => field;
         set
         {
-            if (_displayAge == value)
+            if (field == value)
             {
                 return;
             }
 
-            _displayAge = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(DisplayAge)));
         }
     }

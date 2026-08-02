@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -18,7 +18,7 @@ namespace ReactiveUI.Binding
             global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyView target,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyViewModel, string?>> sourceProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyView, string?>> targetProperty,
-            global::System.Reactive.Concurrency.IScheduler scheduler,
+            global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("sourceProperty")] string sourcePropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("targetProperty")] string targetPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
@@ -30,13 +30,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Name"
                 && targetPropertyExpression == "x => x.NameText")
             {
-                return __BindTwoWay_7FFFF863C3AFAEBC(source, target, scheduler);
+                return __BindTwoWay_7FFFF863C3AFACCC(source, target, scheduler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_7FFFF863C3AFAEBC(global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyView target, global::System.Reactive.Concurrency.IScheduler scheduler)
+        private static global::System.IDisposable __BindTwoWay_7FFFF863C3AFACCC(global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyView target, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // BindTwoWay: Name <-> NameText (with scheduler)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -49,8 +49,8 @@ namespace ReactiveUI.Binding
             "NameText",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyView)__o).NameText,
             true);
-        var sourceBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<string>(sourceObs, scheduler);
-        var targetBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<string>(targetObs, scheduler);
+        var sourceBind = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<string>(sourceObs, scheduler);
+        var targetBind = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<string>(targetObs, scheduler);
 
             var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceBind, value =>
             {

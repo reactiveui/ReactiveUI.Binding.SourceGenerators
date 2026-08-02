@@ -5,19 +5,22 @@
 #if NET6_0_OR_GREATER
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting TimeOnly to strings.
-/// </summary>
+/// <summary>Tests for converting TimeOnly to strings.</summary>
 public class TimeOnlyToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Hour component of the sample time used across the conversion round-trips.</summary>
+    private const int SampleHour = 10;
+
+    /// <summary>Minute component of the sample time used across the conversion round-trips.</summary>
+    private const int SampleMinute = 30;
+
+    /// <summary>Second component of the sample time used across the conversion round-trips.</summary>
+    private const int SampleSecond = 45;
+
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -27,15 +30,13 @@ public class TimeOnlyToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert TimeOnly Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert TimeOnly Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_TimeOnly_Succeeds()
     {
         var converter = new TimeOnlyToStringTypeConverter();
-        var value = new TimeOnly(10, 30, 45);
+        var value = new TimeOnly(SampleHour, SampleMinute, SampleSecond);
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -43,9 +44,7 @@ public class TimeOnlyToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MinValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MinValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MinValue_Succeeds()
@@ -59,9 +58,7 @@ public class TimeOnlyToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(TimeOnly.MinValue.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MaxValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MaxValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MaxValue_Succeeds()

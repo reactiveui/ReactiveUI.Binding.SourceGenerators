@@ -6,22 +6,16 @@ using System.ComponentModel;
 
 namespace SharedScenarios.BindTwoWay.SinglePropertyIntToInt;
 
-/// <summary>
-/// Source ViewModel with an integer property.
-/// </summary>
+/// <summary>Source ViewModel with an integer property.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Count"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Count"/>.</summary>
     private int _count;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the count.
-    /// </summary>
+    /// <summary>Gets or sets the count.</summary>
     public int Count
     {
         get => _count;

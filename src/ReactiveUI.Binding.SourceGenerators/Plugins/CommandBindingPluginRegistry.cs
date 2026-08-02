@@ -13,9 +13,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins;
 /// </summary>
 internal static class CommandBindingPluginRegistry
 {
-    /// <summary>
-    /// All command binding plugins sorted by affinity descending (highest priority first).
-    /// </summary>
+    /// <summary>All command binding plugins sorted by affinity descending (highest priority first).</summary>
     private static readonly ICommandBindingPlugin[] Plugins =
     [
         new CommandPropertyBindingPlugin(), // Affinity 5
@@ -23,10 +21,7 @@ internal static class CommandBindingPluginRegistry
         new DefaultEventBindingPlugin() // Affinity 3
     ];
 
-    /// <summary>
-    /// Returns the highest-affinity plugin that can handle the given invocation,
-    /// or <see langword="null"/> if no plugin matches.
-    /// </summary>
+    /// <summary>Returns the highest-affinity plugin that can handle the given invocation, or <see langword="null"/> if no plugin matches.</summary>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <returns>The best matching plugin, or null.</returns>
     internal static ICommandBindingPlugin? GetBestPlugin(BindCommandInvocationInfo inv)

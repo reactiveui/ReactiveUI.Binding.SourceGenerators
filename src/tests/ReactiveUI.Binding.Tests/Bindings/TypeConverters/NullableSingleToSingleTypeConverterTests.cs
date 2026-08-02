@@ -4,29 +4,19 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting nullable float to float.
-/// </summary>
+/// <summary>Tests for converting nullable float to float.</summary>
 public class NullableSingleToSingleTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    /// Sample single-precision value used for conversion checks.
-    /// </summary>
-    private const float SampleSingle = 123.45f;
+    /// <summary>Sample single-precision value used for conversion checks.</summary>
+    private const float SampleSingle = 123.45F;
 
-    /// <summary>
-    /// Sample rounded single-precision value used for conversion checks.
-    /// </summary>
-    private const float RoundedSingle = 42.5f;
+    /// <summary>Sample rounded single-precision value used for conversion checks.</summary>
+    private const float RoundedSingle = 42.5F;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -36,15 +26,13 @@ public class NullableSingleToSingleTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithValue_Succeeds()
     {
         var converter = new NullableSingleToSingleTypeConverter();
-        float? value = 123.45f;
+        float? value = 123.45F;
 
         var result = converter.TryConvert(value, null, out var output);
 
@@ -52,9 +40,7 @@ public class NullableSingleToSingleTypeConverterTests
         await Assert.That(output).IsEqualTo(SampleSingle);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Null ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert Null ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Null_ReturnsFalse()
@@ -66,9 +52,7 @@ public class NullableSingleToSingleTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies FromType ReturnsFloatNullable.
-    /// </summary>
+    /// <summary>Verifies FromType ReturnsFloatNullable.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task FromType_ReturnsFloatNullable()
@@ -77,9 +61,7 @@ public class NullableSingleToSingleTypeConverterTests
         await Assert.That(converter.FromType).IsEqualTo(typeof(float?));
     }
 
-    /// <summary>
-    ///     Verifies ToType ReturnsSingle.
-    /// </summary>
+    /// <summary>Verifies ToType ReturnsSingle.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ToType_ReturnsSingle()
@@ -88,15 +70,13 @@ public class NullableSingleToSingleTypeConverterTests
         await Assert.That(converter.ToType).IsEqualTo(typeof(float));
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithValidValue ReturnsTrueAndOutput.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithValidValue ReturnsTrueAndOutput.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithValidValue_ReturnsTrueAndOutput()
     {
         var converter = new NullableSingleToSingleTypeConverter();
-        float? value = 42.5f;
+        float? value = 42.5F;
 
         var success = converter.TryConvertTyped(value, null, out var result);
 
@@ -104,9 +84,7 @@ public class NullableSingleToSingleTypeConverterTests
         await Assert.That(result).IsEqualTo(RoundedSingle);
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithNullValue ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithNullValue ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithNullValue_ReturnsFalse()
@@ -119,9 +97,7 @@ public class NullableSingleToSingleTypeConverterTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    ///     Verifies TryConvertTyped WithInvalidType ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvertTyped WithInvalidType ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvertTyped_WithInvalidType_ReturnsFalse()

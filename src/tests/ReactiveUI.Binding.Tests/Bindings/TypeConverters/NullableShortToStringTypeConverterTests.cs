@@ -4,19 +4,16 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for the <see cref="NullableShortToStringTypeConverter"/> type converter.
-/// </summary>
+/// <summary>Tests for the <see cref="NullableShortToStringTypeConverter"/> type converter.</summary>
 public class NullableShortToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>The conversion hint passed to the converter, which selects the output format.</summary>
+    private const int ConversionHint = 5;
+
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,9 +23,7 @@ public class NullableShortToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MaxValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MaxValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MaxValue_Succeeds()
@@ -42,9 +37,7 @@ public class NullableShortToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(short.MaxValue.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MinValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MinValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MinValue_Succeeds()
@@ -58,9 +51,7 @@ public class NullableShortToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(short.MinValue.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert NullValue ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvert NullValue ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_NullValue_ReturnsTrue()
@@ -71,9 +62,7 @@ public class NullableShortToStringTypeConverterTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert ShortNullableToString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert ShortNullableToString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_ShortNullableToString_Succeeds()
@@ -87,9 +76,7 @@ public class NullableShortToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("12345");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithConversionHint FormatsCorrectly.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithConversionHint FormatsCorrectly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
@@ -97,15 +84,13 @@ public class NullableShortToStringTypeConverterTests
         var converter = new NullableShortToStringTypeConverter();
         short? value = 42;
 
-        var result = converter.TryConvert(value, 5, out var output);
+        var result = converter.TryConvert(value, ConversionHint, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("00042");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert with a string format hint formats correctly.
-    /// </summary>
+    /// <summary>Verifies TryConvert with a string format hint formats correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()

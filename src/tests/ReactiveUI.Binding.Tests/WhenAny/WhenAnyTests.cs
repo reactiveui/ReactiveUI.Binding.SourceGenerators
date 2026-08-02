@@ -7,19 +7,13 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.WhenAny;
 
-/// <summary>
-/// Tests for the WhenAny extension methods which provide IObservedChange context.
-/// </summary>
+/// <summary>Tests for the WhenAny extension methods which provide IObservedChange context.</summary>
 public class WhenAnyTests
 {
-    /// <summary>
-    /// The expected number of emitted values after the second notification.
-    /// </summary>
+    /// <summary>The expected number of emitted values after the second notification.</summary>
     private const int ExpectedTwoEmissions = 2;
 
-    /// <summary>
-    /// Verifies that WhenAny with a single property and selector returns the selector result.
-    /// </summary>
+    /// <summary>Verifies that WhenAny with a single property and selector returns the selector result.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_WithSelector_ReturnsObservedChange()
@@ -31,7 +25,7 @@ public class WhenAnyTests
 
         using var sub = fixture.WhenAny(
                 x => x.IsNotNullString,
-                change => change.Value)
+                static change => change.Value)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -43,9 +37,7 @@ public class WhenAnyTests
         await Assert.That(values[1]).IsEqualTo("Changed");
     }
 
-    /// <summary>
-    /// Verifies that WhenAny with two properties combines their observed changes.
-    /// </summary>
+    /// <summary>Verifies that WhenAny with two properties combines their observed changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwoProperties_CombinesWithSelector()
@@ -58,16 +50,14 @@ public class WhenAnyTests
         using var sub = fixture.WhenAny(
                 x => x.IsNotNullString,
                 x => x.IsOnlyOneWord,
-                (c1, c2) => $"{c1.Value} {c2.Value}")
+                static (c1, c2) => $"{c1.Value} {c2.Value}")
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
         await Assert.That(values[0]).IsEqualTo("Hello World");
     }
 
-    /// <summary>
-    /// Verifies that WhenAny returns the current value on subscription.
-    /// </summary>
+    /// <summary>Verifies that WhenAny returns the current value on subscription.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ReturnsCurrentValueOnSubscription()
@@ -79,16 +69,14 @@ public class WhenAnyTests
 
         using var sub = fixture.WhenAny(
                 x => x.IsNotNullString,
-                change => change.Value)
+                static change => change.Value)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
         await Assert.That(values[0]).IsEqualTo("PreExisting");
     }
 
-    /// <summary>
-    /// Verifies that WhenAny works with plain INPC objects.
-    /// </summary>
+    /// <summary>Verifies that WhenAny works with plain INPC objects.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task WorksWithINotifyPropertyChangedObjects()
@@ -100,7 +88,7 @@ public class WhenAnyTests
 
         using var sub = obj.WhenAny(
                 x => x.InpcProperty,
-                change => change.Value)
+                static change => change.Value)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -111,9 +99,7 @@ public class WhenAnyTests
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
 
-    /// <summary>
-    /// Verifies that WhenAny exposes the sender through the observed change.
-    /// </summary>
+    /// <summary>Verifies that WhenAny exposes the sender through the observed change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExposesSenderThroughObservedChange()
@@ -125,21 +111,19 @@ public class WhenAnyTests
 
         using var sub = fixture.WhenAny(
                 x => x.IsNotNullString,
-                change => change)
+                static change => change)
             .Subscribe(c => captured = c);
 
         await Assert.That(captured).IsNotNull();
         await Assert.That(captured!.Sender).IsEqualTo(fixture);
     }
 
-    /// <summary>
-    /// Resets and initializes the ReactiveUI binding infrastructure for testing.
-    /// </summary>
+    /// <summary>Resets and initializes the ReactiveUI binding infrastructure for testing.</summary>
     internal static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
     }
 }

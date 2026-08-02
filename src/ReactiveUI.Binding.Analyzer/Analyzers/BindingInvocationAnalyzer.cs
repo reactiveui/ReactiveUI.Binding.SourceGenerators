@@ -23,15 +23,14 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
 {
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-    [
-        DiagnosticWarnings.NonInlineLambda,
-        DiagnosticWarnings.PrivateMember,
-        DiagnosticWarnings.NoBeforeChangeSupport,
-        DiagnosticWarnings.ValidationNotGenerated,
-        DiagnosticWarnings.UnsupportedPathSegment,
-        DiagnosticWarnings.NoBindableEvent,
-        DiagnosticWarnings.InvalidInteractionType
-    ];
+        ImmutableArray.Create(
+            DiagnosticWarnings.NonInlineLambda,
+            DiagnosticWarnings.PrivateMember,
+            DiagnosticWarnings.NoBeforeChangeSupport,
+            DiagnosticWarnings.ValidationNotGenerated,
+            DiagnosticWarnings.UnsupportedPathSegment,
+            DiagnosticWarnings.NoBindableEvent,
+            DiagnosticWarnings.InvalidInteractionType);
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
@@ -39,14 +38,12 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         ArgumentExceptionHelper.ThrowIfNull(context);
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
+        context.RegisterOperationAction(static operationContext => AnalyzeInvocation(in operationContext), OperationKind.Invocation);
     }
 
-    /// <summary>
-    /// Analyzes a method invocation operation for binding-related diagnostics.
-    /// </summary>
+    /// <summary>Analyzes a method invocation operation for binding-related diagnostics.</summary>
     /// <param name="context">The operation analysis context.</param>
-    internal static void AnalyzeInvocation(OperationAnalysisContext context)
+    internal static void AnalyzeInvocation(in OperationAnalysisContext context)
     {
         var invocationOp = (IInvocationOperation)context.Operation;
 
@@ -95,14 +92,12 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         CheckBindableEvent(context, invocationOp);
     }
 
-    /// <summary>
-    /// Checks for RXUIBIND001: Expression arguments that are not inline lambdas.
-    /// </summary>
+    /// <summary>Checks for RXUIBIND001: Expression arguments that are not inline lambdas.</summary>
     /// <param name="context">The operation analysis context.</param>
     /// <param name="arguments">The invocation arguments to inspect.</param>
     /// <param name="methodName">The name of the method being invoked.</param>
     internal static void CheckNonInlineLambda(
-        OperationAnalysisContext context,
+        in OperationAnalysisContext context,
         ImmutableArray<IArgumentOperation> arguments,
         string methodName)
     {
@@ -133,13 +128,11 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    /// <summary>
-    /// Checks for RXUIBIND003: Lambda expressions that access private or protected members.
-    /// </summary>
+    /// <summary>Checks for RXUIBIND003: Lambda expressions that access private or protected members.</summary>
     /// <param name="context">The operation analysis context.</param>
     /// <param name="arguments">The invocation arguments to inspect.</param>
     internal static void CheckPrivateMember(
-        OperationAnalysisContext context,
+        in OperationAnalysisContext context,
         ImmutableArray<IArgumentOperation> arguments)
     {
         for (var i = 0; i < arguments.Length; i++)
@@ -152,7 +145,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
 
             // Walk the lambda body looking for member accesses
             var body = GetLambdaBody(lambda);
-            if (body == null)
+            if (body is null)
             {
                 continue;
             }
@@ -160,7 +153,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             var current = body;
             while (current is MemberAccessExpressionSyntax memberAccess)
             {
-                var memberSymbol = context.Operation.SemanticModel!.GetSymbolInfo(memberAccess).Symbol;
+                var memberSymbol = context.Operation.SemanticModel!.GetSymbolInfo(memberAccess, context.CancellationToken).Symbol;
                 if (memberSymbol is { DeclaredAccessibility: Accessibility.Private or Accessibility.Protected })
                 {
                     context.ReportDiagnostic(
@@ -176,14 +169,12 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    /// <summary>
-    /// Checks for RXUIBIND004: WhenChanging invocations on types that do not support before-change notifications.
-    /// </summary>
+    /// <summary>Checks for RXUIBIND004: WhenChanging invocations on types that do not support before-change notifications.</summary>
     /// <param name="context">The operation analysis context.</param>
     /// <param name="invocationOp">The invocation operation being analyzed.</param>
     /// <param name="methodSymbol">The method symbol of the invocation target.</param>
     internal static void CheckBeforeChangeSupport(
-        OperationAnalysisContext context,
+        in OperationAnalysisContext context,
         IInvocationOperation invocationOp,
         IMethodSymbol methodSymbol)
     {
@@ -211,7 +202,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     /// <param name="context">The operation analysis context.</param>
     /// <param name="invocationOp">The invocation operation being analyzed.</param>
     internal static void CheckValidationSupport(
-        OperationAnalysisContext context,
+        in OperationAnalysisContext context,
         IInvocationOperation invocationOp)
     {
         if (!AnalyzerHelpers.ImplementsDataErrorInfo(
@@ -236,7 +227,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     /// <param name="context">The operation analysis context.</param>
     /// <param name="invocationOp">The invocation operation being analyzed.</param>
     internal static void CheckInteractionType(
-        OperationAnalysisContext context,
+        in OperationAnalysisContext context,
         IInvocationOperation invocationOp)
     {
         // Find the propertyName argument (the Expression<Func<TViewModel, IInteraction<...>>> parameter)
@@ -257,19 +248,19 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             // Get the lambda body return type
             var body = GetLambdaBody(lambda);
 
-            if (body == null)
+            if (body is null)
             {
                 break;
             }
 
-            var typeInfo = context.Operation.SemanticModel!.GetTypeInfo(body);
-            if (typeInfo.Type == null)
+            var typeInfo = context.Operation.SemanticModel!.GetTypeInfo(body, context.CancellationToken);
+            if (typeInfo.Type is null)
             {
                 break;
             }
 
             var interactionType = context.Compilation.GetTypeByMetadataName(Constants.IInteractionMetadataName);
-            if (interactionType == null)
+            if (interactionType is null)
             {
                 break;
             }
@@ -296,7 +287,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     /// <param name="context">The operation analysis context.</param>
     /// <param name="invocationOp">The invocation operation being analyzed.</param>
     internal static void CheckBindableEvent(
-        OperationAnalysisContext context,
+        in OperationAnalysisContext context,
         IInvocationOperation invocationOp)
     {
         _ = invocationOp.TargetMethod;
@@ -323,12 +314,12 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             }
 
             var body = GetLambdaBody(lambda);
-            if (body == null)
+            if (body is null)
             {
                 break;
             }
 
-            var typeInfo = context.Operation.SemanticModel!.GetTypeInfo(body);
+            var typeInfo = context.Operation.SemanticModel!.GetTypeInfo(body, context.CancellationToken);
             if (typeInfo.Type is not INamedTypeSymbol controlType)
             {
                 break;
@@ -347,9 +338,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    /// <summary>
-    /// Determines whether a type implements a specific open generic interface.
-    /// </summary>
+    /// <summary>Determines whether a type implements a specific open generic interface.</summary>
     /// <param name="type">The type symbol to check.</param>
     /// <param name="openGenericInterface">The open generic interface to look for (e.g., <c>IInteraction&lt;,&gt;</c>).</param>
     /// <returns><c>true</c> if the type implements the specified open generic interface; otherwise, <c>false</c>.</returns>
@@ -381,7 +370,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     /// <param name="context">The operation analysis context.</param>
     /// <param name="arguments">The invocation arguments to inspect.</param>
     internal static void CheckUnsupportedPathSegment(
-        OperationAnalysisContext context,
+        in OperationAnalysisContext context,
         ImmutableArray<IArgumentOperation> arguments)
     {
         for (var i = 0; i < arguments.Length; i++)
@@ -404,7 +393,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
 
             var body = GetLambdaBody(lambda);
 
-            if (body == null)
+            if (body is null)
             {
                 continue;
             }
@@ -413,17 +402,15 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    /// <summary>
-    /// Walks a member access chain looking for unsupported path segments (method calls, indexers, or fields).
-    /// </summary>
+    /// <summary>Walks a member access chain looking for unsupported path segments (method calls, indexers, or fields).</summary>
     /// <param name="context">The operation analysis context.</param>
     /// <param name="expression">The expression to walk.</param>
     internal static void WalkForUnsupportedSegments(
-        OperationAnalysisContext context,
+        in OperationAnalysisContext context,
         ExpressionSyntax expression)
     {
         var current = expression;
-        while (current != null)
+        while (current is not null)
         {
             if (current is InvocationExpressionSyntax invocation)
             {
@@ -450,7 +437,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             if (current is MemberAccessExpressionSyntax memberAccess)
             {
                 // Check if the member is a field
-                var memberSymbol = context.Operation.SemanticModel!.GetSymbolInfo(memberAccess).Symbol;
+                var memberSymbol = context.Operation.SemanticModel!.GetSymbolInfo(memberAccess, context.CancellationToken).Symbol;
                 if (memberSymbol is IFieldSymbol { IsConst: false })
                 {
                     context.ReportDiagnostic(
@@ -470,11 +457,8 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    /// <summary>
-    /// Extracts the body expression from a lambda expression syntax node.
-    /// Only <see cref="SimpleLambdaExpressionSyntax"/> and <see cref="ParenthesizedLambdaExpressionSyntax"/>
-    /// exist in Roslyn's C# syntax model.
-    /// </summary>
+    /// <summary>Extracts the body expression from a lambda expression syntax node.</summary>
+    /// <remarks>Only <see cref="SimpleLambdaExpressionSyntax"/> and <see cref="ParenthesizedLambdaExpressionSyntax"/> exist in Roslyn's C# syntax model.</remarks>
     /// <param name="lambda">The lambda expression syntax node to extract the body from.</param>
     /// <returns>
     /// The body as an <see cref="ExpressionSyntax"/>, or <c>null</c> if the lambda body is a block statement.
@@ -491,9 +475,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         return parenthesized.Body as ExpressionSyntax;
     }
 
-    /// <summary>
-    /// Determines whether a non-empty constant <c>toEvent</c> argument was explicitly supplied.
-    /// </summary>
+    /// <summary>Determines whether a non-empty constant <c>toEvent</c> argument was explicitly supplied.</summary>
     /// <param name="arguments">The invocation arguments to inspect.</param>
     /// <returns><c>true</c> if a non-empty <c>toEvent</c> string was specified; otherwise, <c>false</c>.</returns>
     private static bool IsToEventSpecified(ImmutableArray<IArgumentOperation> arguments)

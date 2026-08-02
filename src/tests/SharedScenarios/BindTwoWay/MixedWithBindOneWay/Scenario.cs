@@ -7,18 +7,14 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindTwoWay.MixedWithBindOneWay;
 
-/// <summary>
-/// Exercises mixed BindTwoWay and BindOneWay in the same compilation.
-/// </summary>
+/// <summary>Exercises mixed BindTwoWay and BindOneWay in the same compilation.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a two-way binding for Name and a one-way binding for ReadOnlyCount.
-    /// </summary>
+    /// <summary>Creates a two-way binding for Name and a one-way binding for ReadOnlyCount.</summary>
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A tuple of disposables representing the bindings.</returns>
-    public static (IDisposable TwoWay, IDisposable OneWay) Execute(MyViewModel vm, MyView view)
-        => (vm.BindTwoWay(view, x => x.Name, x => x.NameText),
+    public static (IDisposable TwoWay, IDisposable OneWay) Execute(MyViewModel vm, MyView view) =>
+        (vm.BindTwoWay(view, x => x.Name, x => x.NameText),
             vm.BindOneWay(view, x => x.ReadOnlyCount, x => x.CountDisplay));
 }

@@ -8,34 +8,25 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.WhenAny;
 
-/// <summary>
-/// Tests for ObservableForProperty extension methods using the runtime fallback path.
-/// </summary>
+/// <summary>Tests for ObservableForProperty extension methods using the runtime fallback path.</summary>
 public class ObservableForPropertyTests
 {
-    /// <summary>
-    /// The name of the property observed by the string-based overload tests.
-    /// </summary>
+    /// <summary>The age assigned to the sample view model.</summary>
+    private const int SampleAge = 42;
+
+    /// <summary>The name of the property observed by the string-based overload tests.</summary>
     private const string ObservedPropertyName = "IsNotNullString";
 
-    /// <summary>
-    /// The initial property value used across tests.
-    /// </summary>
+    /// <summary>The initial property value used across tests.</summary>
     private const string InitialValue = "Initial";
 
-    /// <summary>
-    /// The expected number of emitted changes when two notifications are produced.
-    /// </summary>
+    /// <summary>The expected number of emitted changes when two notifications are produced.</summary>
     private const int ExpectedTwoChanges = 2;
 
-    /// <summary>
-    /// The updated leaf value used in deep-chain tests.
-    /// </summary>
+    /// <summary>The updated leaf value used in deep-chain tests.</summary>
     private const int UpdatedLeafValue = 99;
 
-    /// <summary>
-    /// Verifies that a single property emits on change.
-    /// </summary>
+    /// <summary>Verifies that a single property emits on change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsOnChange()
@@ -56,9 +47,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes[1].Value).IsEqualTo("Baz");
     }
 
-    /// <summary>
-    /// Verifies that ObservableForProperty skips the initial value by default.
-    /// </summary>
+    /// <summary>Verifies that ObservableForProperty skips the initial value by default.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_SkipsInitialByDefault()
@@ -75,9 +64,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes.Count).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that ObservableForProperty emits the initial value when skipInitial is false.
-    /// </summary>
+    /// <summary>Verifies that ObservableForProperty emits the initial value when skipInitial is false.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_EmitsInitialWhenRequested()
@@ -94,9 +81,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes[0].Value).IsEqualTo(InitialValue);
     }
 
-    /// <summary>
-    /// Verifies that a deep property chain emits when the leaf property changes.
-    /// </summary>
+    /// <summary>Verifies that a deep property chain emits when the leaf property changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_EmitsOnLeafChange()
@@ -116,9 +101,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes.Count).IsGreaterThanOrEqualTo(ExpectedTwoChanges);
     }
 
-    /// <summary>
-    /// Verifies that a deep chain resubscribes when an intermediate object changes.
-    /// </summary>
+    /// <summary>Verifies that a deep chain resubscribes when an intermediate object changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_ResubscribesOnIntermediateChange()
@@ -139,9 +122,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes.Count).IsGreaterThan(initialCount);
     }
 
-    /// <summary>
-    /// Verifies that a deep chain handles null intermediate objects gracefully.
-    /// </summary>
+    /// <summary>Verifies that a deep chain handles null intermediate objects gracefully.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepChain_ResubscribesAfterNullThenRestore()
@@ -165,16 +146,14 @@ public class ObservableForPropertyTests
         await Assert.That(changes.Count).IsGreaterThan(countAfterInitial);
     }
 
-    /// <summary>
-    /// Verifies that a four-level deep chain triggers updates at any level.
-    /// </summary>
+    /// <summary>Verifies that a four-level deep chain triggers updates at any level.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FourLevelDeepChain_AnyLevelTriggersUpdate()
     {
         EnsureInitialized();
 
-        var fixture = new ObjChain1 { Chain2 = new() { Chain3 = new() { Host = new() { SomeOtherParam = 42 } } } };
+        var fixture = new ObjChain1 { Chain2 = new() { Chain3 = new() { Host = new() { SomeOtherParam = SampleAge } } } };
         var values = new List<IObservedChange<ObjChain1, int>>();
 
         using var sub = fixture.ObservableForProperty(
@@ -190,14 +169,8 @@ public class ObservableForPropertyTests
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoChanges);
     }
 
-    /// <summary>
-    /// Verifies that ObservableForProperty works with plain INPC objects.
-    /// </summary>
+    /// <summary>Verifies that ObservableForProperty works with plain INPC objects.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
-    [SuppressMessage(
-        "Minor Code Smell",
-        "S100:Methods and properties should be named in PascalCase",
-        Justification = "established acronym matching ReactiveUI domain terminology")]
     [Test]
     public async Task WorksWithINPCObjects()
     {
@@ -215,9 +188,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes[0].Value).IsEqualTo("Hello");
     }
 
-    /// <summary>
-    /// Verifies that the string-based overload of ObservableForProperty works.
-    /// </summary>
+    /// <summary>Verifies that the string-based overload of ObservableForProperty works.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringOverload_ObservesProperty()
@@ -236,9 +207,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes[0].Value).IsEqualTo("Test");
     }
 
-    /// <summary>
-    /// Verifies that ObservableForProperty deduplicates same values by default.
-    /// </summary>
+    /// <summary>Verifies that ObservableForProperty deduplicates same values by default.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsDistinct_DeduplicatesSameValues()
@@ -257,9 +226,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes.Count).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that the string-based overload emits the initial value when skipInitial is false.
-    /// </summary>
+    /// <summary>Verifies that the string-based overload emits the initial value when skipInitial is false.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringOverload_SkipInitialFalse_EmitsInitialValue()
@@ -276,9 +243,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes[0].Value).IsEqualTo(InitialValue);
     }
 
-    /// <summary>
-    /// Verifies that the string-based overload works with isDistinct false.
-    /// </summary>
+    /// <summary>Verifies that the string-based overload works with isDistinct false.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringOverload_IsDistinctFalse_EmitsAll()
@@ -297,9 +262,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes.Count).IsGreaterThanOrEqualTo(ExpectedTwoChanges);
     }
 
-    /// <summary>
-    /// Verifies that the string-based overload works with beforeChange true.
-    /// </summary>
+    /// <summary>Verifies that the string-based overload works with beforeChange true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringOverload_BeforeChange_EmitsBeforePropertyChanges()
@@ -317,9 +280,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes.Count).IsGreaterThanOrEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that the expression-based overload works with isDistinct false.
-    /// </summary>
+    /// <summary>Verifies that the expression-based overload works with isDistinct false.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExpressionOverload_IsDistinctFalse_EmitsAll()
@@ -338,9 +299,7 @@ public class ObservableForPropertyTests
         await Assert.That(changes.Count).IsGreaterThanOrEqualTo(ExpectedTwoChanges);
     }
 
-    /// <summary>
-    /// Verifies that the expression-based overload works with beforeChange true.
-    /// </summary>
+    /// <summary>Verifies that the expression-based overload works with beforeChange true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExpressionOverload_BeforeChange_EmitsBeforePropertyChanges()
@@ -360,7 +319,7 @@ public class ObservableForPropertyTests
 
     /// <summary>
     /// Verifies that the string-based overload handles a non-existent property name gracefully.
-    /// Covers the catch block at ReactiveNotifyPropertyChangedMixin lines 65-68 where
+    /// Covers the catch block at ReactiveNotifyPropertyChangedMixins lines 65-68 where
     /// Expression.Property throws and falls back to the parameter expression.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -383,7 +342,7 @@ public class ObservableForPropertyTests
 
     /// <summary>
     /// Verifies that ObservableForProperty by name returns default when the property cannot be found via reflection.
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 82 (prop is null path in GetCurrentValue).
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 82 (prop is null path in GetCurrentValue).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -415,7 +374,7 @@ public class ObservableForPropertyTests
 
     /// <summary>
     /// Verifies that the SubscribeToExpressionChain val cast branch is exercised.
-    /// Covers ReactiveNotifyPropertyChangedMixin.cs line 211 (val is not null and val is not TValue).
+    /// Covers ReactiveNotifyPropertyChangedMixins.cs line 211 (val is not null and val is not TValue).
     /// When val is null, the condition evaluates differently.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -441,14 +400,12 @@ public class ObservableForPropertyTests
         await Assert.That(values[0].Value).IsNull();
     }
 
-    /// <summary>
-    /// Resets and initializes the ReactiveUI binding infrastructure for testing.
-    /// </summary>
+    /// <summary>Resets and initializes the ReactiveUI binding infrastructure for testing.</summary>
     internal static void EnsureInitialized()
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        builder.WithCoreServices();
-        builder.BuildApp();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
     }
 }

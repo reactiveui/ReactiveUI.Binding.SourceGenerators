@@ -7,14 +7,10 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.OneWayBind.SinglePropertyWithSelector;
 
-/// <summary>
-/// Target View with a string property.
-/// </summary>
+/// <summary>Target View with a string property.</summary>
 public class MyView : IViewFor, INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="CountText"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="CountText"/>.</summary>
     private string _countText = string.Empty;
 
     /// <inheritdoc/>
@@ -23,9 +19,7 @@ public class MyView : IViewFor, INotifyPropertyChanged
     /// <inheritdoc/>
     public object? ViewModel { get; set; }
 
-    /// <summary>
-    /// Gets or sets the count text.
-    /// </summary>
+    /// <summary>Gets or sets the count text.</summary>
     public string CountText
     {
         get => _countText;

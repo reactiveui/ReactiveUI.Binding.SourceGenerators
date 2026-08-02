@@ -7,20 +7,16 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties;
 
-/// <summary>
-/// Exercises WhenAnyValue with twelve properties (maximum standard overload).
-/// </summary>
+/// <summary>Exercises WhenAnyValue with twelve properties (maximum standard overload).</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenAnyValue observable for twelve properties.
-    /// </summary>
+    /// <summary>Creates a WhenAnyValue observable for twelve properties.</summary>
     /// <param name="fixture">The fixture to observe.</param>
     /// <returns>An observable of twelve-property tuples.</returns>
     public static
         IObservable<(string V1, string V2, string V3, string V4, string V5, string V6, string V7, string V8, string V9,
-            string V10, string V11, string V12)> Execute(WhenAnyFixture fixture)
-        => fixture.WhenAnyValue(
+            string V10, string V11, string V12)> Execute(WhenAnyFixture fixture) =>
+        fixture.WhenAnyValue(
             x => x.Value1,
             x => x.Value2,
             x => x.Value3,

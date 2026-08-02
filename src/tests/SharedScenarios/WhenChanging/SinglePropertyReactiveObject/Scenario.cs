@@ -7,16 +7,12 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenChanging.SinglePropertyReactiveObject;
 
-/// <summary>
-/// Exercises WhenChanging on a ReactiveObject property.
-/// </summary>
+/// <summary>Exercises WhenChanging on a ReactiveObject property.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenChanging observable for the Name property.
-    /// </summary>
+    /// <summary>Creates a WhenChanging observable for the Name property.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of name values (before change).</returns>
-    public static IObservable<string> Execute(MyViewModel vm)
-        => vm.WhenChanging(x => x.Name);
+    public static IObservable<string> Execute(MyViewModel vm) =>
+        vm.WhenChanging(x => x.Name);
 }

@@ -6,18 +6,12 @@ using System;
 
 namespace SharedScenarios.BindCommand.ObservableParam;
 
-/// <summary>
-/// A simple button control with a Click event.
-/// </summary>
+/// <summary>A simple button control with a Click event.</summary>
 public class MyButton
 {
-    /// <summary>
-    /// Occurs when the button is clicked.
-    /// </summary>
+    /// <summary>Occurs when the button is clicked.</summary>
     public event EventHandler? Click;
 
-    /// <summary>
-    /// Simulates a button click.
-    /// </summary>
+    /// <summary>Simulates a button click.</summary>
     public void PerformClick() => Click?.Invoke(this, EventArgs.Empty);
 }

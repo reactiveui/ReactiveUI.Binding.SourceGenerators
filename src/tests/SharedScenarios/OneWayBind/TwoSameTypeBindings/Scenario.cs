@@ -21,7 +21,7 @@ public static class Scenario
     /// <returns>A tuple of bindings.</returns>
     public static (IReactiveBinding<MyView, string> first, IReactiveBinding<MyView, string> last) Execute(
         MyView view,
-        MyViewModel vm)
-        => (view.OneWayBind(vm, x => x.FirstName, x => x.FirstNameText),
+        MyViewModel vm) =>
+        (view.OneWayBind(vm, x => x.FirstName, x => x.FirstNameText),
             view.OneWayBind(vm, x => x.LastName, x => x.LastNameText));
 }

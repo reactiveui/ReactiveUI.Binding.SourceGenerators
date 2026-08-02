@@ -4,19 +4,13 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for the <see cref="DoubleToStringTypeConverter"/> type converter.
-/// </summary>
+/// <summary>Tests for the <see cref="DoubleToStringTypeConverter"/> type converter.</summary>
 public class DoubleToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,9 +20,7 @@ public class DoubleToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert DoubleToString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert DoubleToString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_DoubleToString_Succeeds()
@@ -42,9 +34,7 @@ public class DoubleToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MaxValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MaxValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MaxValue_Succeeds()
@@ -58,9 +48,7 @@ public class DoubleToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(double.MaxValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MinValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MinValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MinValue_Succeeds()
@@ -74,9 +62,7 @@ public class DoubleToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(double.MinValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert NegativeValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert NegativeValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_NegativeValue_Succeeds()
@@ -90,9 +76,7 @@ public class DoubleToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithConversionHint FormatsCorrectly.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithConversionHint FormatsCorrectly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
@@ -100,15 +84,13 @@ public class DoubleToStringTypeConverterTests
         var converter = new DoubleToStringTypeConverter();
         const double value = 42.5;
 
-        var result = converter.TryConvert(value, 2, out var output);
+        var result = converter.TryConvert(value, ExpectedAffinity, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("42.50");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithStringFormatHint CustomPrecision.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithStringFormatHint CustomPrecision.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_CustomPrecision()
@@ -122,9 +104,7 @@ public class DoubleToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString("0.0000"));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithStringFormatHint GeneralFormat.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithStringFormatHint GeneralFormat.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_GeneralFormat()
@@ -138,9 +118,7 @@ public class DoubleToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString("G"));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithStringFormatHint RoundTripFormat.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithStringFormatHint RoundTripFormat.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_RoundTripFormat()
@@ -154,9 +132,7 @@ public class DoubleToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString("R"));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithStringFormatHint ScientificFormat.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithStringFormatHint ScientificFormat.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_ScientificFormat()

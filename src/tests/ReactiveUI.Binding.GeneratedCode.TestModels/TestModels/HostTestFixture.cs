@@ -12,32 +12,25 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 /// </summary>
 public class HostTestFixture : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>
-    /// The backer for Child.
-    /// </summary>
-    private TestViewModel? _child;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the child view model for deep chain testing.
-    /// </summary>
+    /// <summary>Gets or sets the child view model for deep chain testing.</summary>
     public TestViewModel? Child
     {
-        get => _child;
+        get => field;
         set
         {
-            if (_child == value)
+            if (field == value)
             {
                 return;
             }
 
             PropertyChanging?.Invoke(this, new(nameof(Child)));
-            _child = value;
+            field = value;
             PropertyChanged?.Invoke(this, new(nameof(Child)));
         }
     }

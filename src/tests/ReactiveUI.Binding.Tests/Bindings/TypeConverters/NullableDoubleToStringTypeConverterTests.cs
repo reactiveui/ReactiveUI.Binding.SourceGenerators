@@ -4,19 +4,13 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for the <see cref="NullableDoubleToStringTypeConverter"/> type converter.
-/// </summary>
+/// <summary>Tests for the <see cref="NullableDoubleToStringTypeConverter"/> type converter.</summary>
 public class NullableDoubleToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,9 +20,7 @@ public class NullableDoubleToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert DoubleNullableToString Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert DoubleNullableToString Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_DoubleNullableToString_Succeeds()
@@ -42,9 +34,7 @@ public class NullableDoubleToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MaxValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MaxValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MaxValue_Succeeds()
@@ -58,9 +48,7 @@ public class NullableDoubleToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(double.MaxValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert MinValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert MinValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_MinValue_Succeeds()
@@ -74,9 +62,7 @@ public class NullableDoubleToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(double.MinValue.ToString(System.Globalization.CultureInfo.CurrentCulture));
     }
 
-    /// <summary>
-    ///     Verifies TryConvert NegativeValue Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert NegativeValue Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_NegativeValue_Succeeds()
@@ -90,9 +76,7 @@ public class NullableDoubleToStringTypeConverterTests
         await Assert.That(output).IsEqualTo(value.ToString());
     }
 
-    /// <summary>
-    ///     Verifies TryConvert NullValue ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvert NullValue ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_NullValue_ReturnsTrue()
@@ -103,9 +87,7 @@ public class NullableDoubleToStringTypeConverterTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert WithConversionHint FormatsCorrectly.
-    /// </summary>
+    /// <summary>Verifies TryConvert WithConversionHint FormatsCorrectly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
@@ -113,15 +95,13 @@ public class NullableDoubleToStringTypeConverterTests
         var converter = new NullableDoubleToStringTypeConverter();
         double? value = 42.5;
 
-        var result = converter.TryConvert(value, 2, out var output);
+        var result = converter.TryConvert(value, ExpectedAffinity, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("42.50");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert with a string format hint formats correctly.
-    /// </summary>
+    /// <summary>Verifies TryConvert with a string format hint formats correctly.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()

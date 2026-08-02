@@ -7,22 +7,16 @@ using System.Windows.Input;
 
 namespace SharedScenarios.BindCommand.ObservableParam;
 
-/// <summary>
-/// ViewModel exposing an ICommand property.
-/// </summary>
+/// <summary>ViewModel exposing an ICommand property.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Save"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Save"/>.</summary>
     private ICommand? _save;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the save command.
-    /// </summary>
+    /// <summary>Gets or sets the save command.</summary>
     public ICommand? Save
     {
         get => _save;

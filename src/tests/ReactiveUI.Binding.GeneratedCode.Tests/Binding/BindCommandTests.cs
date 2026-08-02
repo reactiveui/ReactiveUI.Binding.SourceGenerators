@@ -7,34 +7,22 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 
-/// <summary>
-/// Tests that the source-generator-generated BindCommand code works correctly at runtime.
-/// </summary>
+/// <summary>Tests that the source-generator-generated BindCommand code works correctly at runtime.</summary>
 public class BindCommandTests
 {
-    /// <summary>
-    /// The expression-parameter test item value.
-    /// </summary>
+    /// <summary>The expression-parameter test item value.</summary>
     private const string TestItem = "TestItem";
 
-    /// <summary>
-    /// The observable command-parameter value.
-    /// </summary>
+    /// <summary>The observable command-parameter value.</summary>
     private const string ObsParam = "obs-param";
 
-    /// <summary>
-    /// The updated observable command-parameter value.
-    /// </summary>
+    /// <summary>The updated observable command-parameter value.</summary>
     private const string UpdatedValue = "updated";
 
-    /// <summary>
-    /// The number of clicks performed in the multiple-clicks test.
-    /// </summary>
+    /// <summary>The number of clicks performed in the multiple-clicks test.</summary>
     private const int ExpectedClickCount = 3;
 
-    /// <summary>
-    /// Verifies that clicking the button executes the bound command (command set before binding).
-    /// </summary>
+    /// <summary>Verifies that clicking the button executes the bound command (command set before binding).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BasicNoParam_CommandSetBeforeBinding_ExecutesOnClick()
@@ -51,9 +39,7 @@ public class BindCommandTests
         await Assert.That(command.ExecuteCount).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that clicking the button executes the bound command (command set after binding).
-    /// </summary>
+    /// <summary>Verifies that clicking the button executes the bound command (command set after binding).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BasicNoParam_CommandSetAfterBinding_ExecutesOnClick()
@@ -70,9 +56,7 @@ public class BindCommandTests
         await Assert.That(command.ExecuteCount).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that when the command is null, clicking the button does not throw.
-    /// </summary>
+    /// <summary>Verifies that when the command is null, clicking the button does not throw.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BasicNoParam_NullCommand_ClickDoesNotThrow()
@@ -86,9 +70,7 @@ public class BindCommandTests
         await Assert.That(action).ThrowsNothing();
     }
 
-    /// <summary>
-    /// Verifies that when the command changes, the new command is executed on click.
-    /// </summary>
+    /// <summary>Verifies that when the command changes, the new command is executed on click.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BasicNoParam_CommandChanges_NewCommandExecutes()
@@ -111,9 +93,7 @@ public class BindCommandTests
         await Assert.That(first.ExecuteCount).IsEqualTo(1); // no longer wired
     }
 
-    /// <summary>
-    /// Verifies that disposing the binding stops command execution on click.
-    /// </summary>
+    /// <summary>Verifies that disposing the binding stops command execution on click.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BasicNoParam_Dispose_StopsExecution()
@@ -133,9 +113,7 @@ public class BindCommandTests
         await Assert.That(command.ExecuteCount).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that when CanExecute returns false, the command is not executed.
-    /// </summary>
+    /// <summary>Verifies that when CanExecute returns false, the command is not executed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BasicNoParam_CanExecuteFalse_CommandNotExecuted()
@@ -151,9 +129,7 @@ public class BindCommandTests
         await Assert.That(command.ExecuteCount).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that the expression parameter is passed to the command on click.
-    /// </summary>
+    /// <summary>Verifies that the expression parameter is passed to the command on click.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExpressionParam_PassesParameterToCommand()
@@ -194,9 +170,7 @@ public class BindCommandTests
         await Assert.That(command.LastParameter).IsEqualTo("AtCommandSetTime");
     }
 
-    /// <summary>
-    /// Verifies that the observable parameter is passed to the command on click.
-    /// </summary>
+    /// <summary>Verifies that the observable parameter is passed to the command on click.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObservableParam_PassesParameterToCommand()
@@ -214,9 +188,7 @@ public class BindCommandTests
         await Assert.That(command.LastParameter).IsEqualTo("observable-param");
     }
 
-    /// <summary>
-    /// Verifies that clicking the button 3 times results in 3 executions.
-    /// </summary>
+    /// <summary>Verifies that clicking the button 3 times results in 3 executions.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BasicNoParam_MultipleClicks_ExecutesMultipleTimes()
@@ -235,9 +207,7 @@ public class BindCommandTests
         await Assert.That(command.ExecuteCount).IsEqualTo(ExpectedClickCount);
     }
 
-    /// <summary>
-    /// Verifies that setting command then null, then clicking does not throw.
-    /// </summary>
+    /// <summary>Verifies that setting command then null, then clicking does not throw.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BasicNoParam_CommandSetToNull_ClickDoesNotThrow()
@@ -255,9 +225,7 @@ public class BindCommandTests
         await Assert.That(command.ExecuteCount).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that pushing a new value to the observable parameter is used on click.
-    /// </summary>
+    /// <summary>Verifies that pushing a new value to the observable parameter is used on click.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObservableParam_ParameterUpdates_UsesLatestValue()
@@ -276,9 +244,7 @@ public class BindCommandTests
         await Assert.That(command.LastParameter).IsEqualTo("latest");
     }
 
-    /// <summary>
-    /// Verifies that a custom event fires and the command executes.
-    /// </summary>
+    /// <summary>Verifies that a custom event fires and the command executes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CustomEvent_ExecutesOnCustomEvent()
@@ -295,9 +261,7 @@ public class BindCommandTests
         await Assert.That(command.ExecuteCount).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that a deep command path (Child.SaveCommand) executes.
-    /// </summary>
+    /// <summary>Verifies that a deep command path (Child.SaveCommand) executes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepCommandPath_CommandExecutes()
@@ -315,9 +279,7 @@ public class BindCommandTests
         await Assert.That(command.ExecuteCount).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that when the child is replaced, the new child's command is wired.
-    /// </summary>
+    /// <summary>Verifies that when the child is replaced, the new child's command is wired.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DeepCommandPath_ChildReplaced_NewCommandExecutes()
@@ -341,9 +303,7 @@ public class BindCommandTests
         await Assert.That(oldCommand.ExecuteCount).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that disposing twice does not throw.
-    /// </summary>
+    /// <summary>Verifies that disposing twice does not throw.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BasicNoParam_DoubleDispose_DoesNotThrow()
@@ -360,10 +320,7 @@ public class BindCommandTests
     }
 
     // ── EventEnabled (Click + Enabled, no Command property) ─────────────
-
-    /// <summary>
-    /// Verifies that clicking executes the command via event+Enabled binding.
-    /// </summary>
+    /// <summary>Verifies that clicking executes the command via event+Enabled binding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EventEnabled_ClickExecutesCommand()
@@ -379,9 +336,7 @@ public class BindCommandTests
         await Assert.That(command.ExecuteCount).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that the Enabled property is synchronized with CanExecute.
-    /// </summary>
+    /// <summary>Verifies that the Enabled property is synchronized with CanExecute.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EventEnabled_EnabledSyncedWithCanExecute()
@@ -395,9 +350,7 @@ public class BindCommandTests
         await Assert.That(view.SaveButton.Enabled).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that the Enabled property becomes false when the command is null.
-    /// </summary>
+    /// <summary>Verifies that the Enabled property becomes false when the command is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EventEnabled_NullCommand_DisablesControl()
@@ -410,9 +363,7 @@ public class BindCommandTests
         await Assert.That(view.SaveButton.Enabled).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that disposing the binding stops command execution.
-    /// </summary>
+    /// <summary>Verifies that disposing the binding stops command execution.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EventEnabled_Dispose_StopsExecution()
@@ -432,9 +383,7 @@ public class BindCommandTests
         await Assert.That(command.ExecuteCount).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that CanExecute=false prevents execution via event+Enabled binding.
-    /// </summary>
+    /// <summary>Verifies that CanExecute=false prevents execution via event+Enabled binding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EventEnabled_CanExecuteFalse_DoesNotExecute()
@@ -450,9 +399,7 @@ public class BindCommandTests
         await Assert.That(command.ExecuteCount).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies event+Enabled binding with an expression parameter.
-    /// </summary>
+    /// <summary>Verifies event+Enabled binding with an expression parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EventEnabledExprParam_PassesParameter()
@@ -469,9 +416,7 @@ public class BindCommandTests
         await Assert.That(command.LastParameter).IsEqualTo(TestItem);
     }
 
-    /// <summary>
-    /// Verifies event+Enabled binding with an observable parameter.
-    /// </summary>
+    /// <summary>Verifies event+Enabled binding with an observable parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EventEnabledObsParam_PassesParameter()
@@ -489,9 +434,7 @@ public class BindCommandTests
         await Assert.That(command.LastParameter).IsEqualTo(ObsParam);
     }
 
-    /// <summary>
-    /// Verifies event+Enabled binding with observable parameter updates reactively.
-    /// </summary>
+    /// <summary>Verifies event+Enabled binding with observable parameter updates reactively.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EventEnabledObsParam_ParameterUpdates()
@@ -511,10 +454,7 @@ public class BindCommandTests
     }
 
     // ── CommandProperty (Command + CommandParameter, no event) ──────────
-
-    /// <summary>
-    /// Verifies that binding sets the Command property on the control.
-    /// </summary>
+    /// <summary>Verifies that binding sets the Command property on the control.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CommandProperty_SetsCommandOnControl()
@@ -529,9 +469,7 @@ public class BindCommandTests
         await Assert.That(view.SaveButton.Command).IsEqualTo(command);
     }
 
-    /// <summary>
-    /// Verifies that setting the command after binding updates the control.
-    /// </summary>
+    /// <summary>Verifies that setting the command after binding updates the control.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CommandProperty_CommandSetAfterBinding_UpdatesControl()
@@ -547,9 +485,7 @@ public class BindCommandTests
         await Assert.That(view.SaveButton.Command).IsEqualTo(command);
     }
 
-    /// <summary>
-    /// Verifies that changing the command updates the control's Command property.
-    /// </summary>
+    /// <summary>Verifies that changing the command updates the control's Command property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CommandProperty_CommandChanges_ControlUpdated()
@@ -567,9 +503,7 @@ public class BindCommandTests
         await Assert.That(view.SaveButton.Command).IsEqualTo(second);
     }
 
-    /// <summary>
-    /// Verifies that null command results in null on the control.
-    /// </summary>
+    /// <summary>Verifies that null command results in null on the control.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CommandProperty_NullCommand_SetsControlCommandNull()
@@ -582,9 +516,7 @@ public class BindCommandTests
         await Assert.That(view.SaveButton.Command).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that expression parameter sets CommandParameter on the control.
-    /// </summary>
+    /// <summary>Verifies that expression parameter sets CommandParameter on the control.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CommandPropertyExprParam_SetsCommandParameter()
@@ -600,9 +532,7 @@ public class BindCommandTests
         await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(TestItem);
     }
 
-    /// <summary>
-    /// Verifies that observable parameter sets CommandParameter on the control.
-    /// </summary>
+    /// <summary>Verifies that observable parameter sets CommandParameter on the control.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CommandPropertyObsParam_SetsCommandParameter()
@@ -619,9 +549,7 @@ public class BindCommandTests
         await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(ObsParam);
     }
 
-    /// <summary>
-    /// Verifies that the observable parameter updates CommandParameter reactively.
-    /// </summary>
+    /// <summary>Verifies that the observable parameter updates CommandParameter reactively.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CommandPropertyObsParam_ParameterUpdates()
@@ -639,9 +567,7 @@ public class BindCommandTests
         await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(UpdatedValue);
     }
 
-    /// <summary>
-    /// A simple <see cref="ICommand"/> implementation that tracks invocations for testing.
-    /// </summary>
+    /// <summary>A simple <see cref="ICommand"/> implementation that tracks invocations for testing.</summary>
     private sealed class TrackingCommand : ICommand
     {
         /// <inheritdoc/>
@@ -651,19 +577,13 @@ public class BindCommandTests
             remove { /* CanExecute never changes for this command. */ }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether <see cref="CanExecute"/> returns <see langword="true"/>.
-        /// </summary>
+        /// <summary>Gets or sets a value indicating whether <see cref="CanExecute"/> returns <see langword="true"/>.</summary>
         public bool CanExecuteResult { get; set; } = true;
 
-        /// <summary>
-        /// Gets the number of times <see cref="Execute"/> has been called.
-        /// </summary>
+        /// <summary>Gets the number of times <see cref="Execute"/> has been called.</summary>
         public int ExecuteCount { get; private set; }
 
-        /// <summary>
-        /// Gets the parameter passed to the most recent <see cref="Execute"/> call.
-        /// </summary>
+        /// <summary>Gets the parameter passed to the most recent <see cref="Execute"/> call.</summary>
         public object? LastParameter { get; private set; }
 
         /// <inheritdoc/>

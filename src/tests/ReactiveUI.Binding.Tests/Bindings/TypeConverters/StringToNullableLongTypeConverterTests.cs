@@ -4,24 +4,16 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-///     Tests for converting strings to nullable long integers.
-/// </summary>
+/// <summary>Tests for converting strings to nullable long integers.</summary>
 public class StringToNullableLongTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    /// Long value parsed from a positive numeric string.
-    /// </summary>
+    /// <summary>Long value parsed from a positive numeric string.</summary>
     private const long ParsedLong = 123_456_789_012L;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -31,9 +23,7 @@ public class StringToNullableLongTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert EmptyString ReturnsTrue.
-    /// </summary>
+    /// <summary>Verifies TryConvert EmptyString ReturnsTrue.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_EmptyString_ReturnsTrue()
@@ -44,9 +34,7 @@ public class StringToNullableLongTypeConverterTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert InvalidString ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert InvalidString ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_InvalidString_ReturnsFalse()
@@ -57,9 +45,7 @@ public class StringToNullableLongTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert OutOfRangeValue ReturnsFalse.
-    /// </summary>
+    /// <summary>Verifies TryConvert OutOfRangeValue ReturnsFalse.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_OutOfRangeValue_ReturnsFalse()
@@ -70,9 +56,7 @@ public class StringToNullableLongTypeConverterTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    ///     Verifies TryConvert StringToLongNullable Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert StringToLongNullable Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_StringToLongNullable_Succeeds()

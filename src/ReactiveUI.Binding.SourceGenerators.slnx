@@ -13,6 +13,8 @@
         <File Path="Directory.Build.props"/>
         <File Path="Directory.Build.targets"/>
         <File Path="Directory.Packages.props"/>
+        <File Path="build/SkipMakePriOnNonWindows.targets"/>
+        <File Path="ReactiveShim.props"/>
         <File Path="stylecop.json"/>
     </Folder>
     <Project Path="ReactiveUI.Binding/ReactiveUI.Binding.csproj"/>
@@ -22,8 +24,12 @@
     <Project Path="ReactiveUI.Binding.WinForms/ReactiveUI.Binding.WinForms.csproj"/>
     <Project Path="ReactiveUI.Binding.Reactive/ReactiveUI.Binding.Reactive.csproj"/>
     <Project Path="ReactiveUI.Binding.Maui/ReactiveUI.Binding.Maui.csproj"/>
+    <Project Path="ReactiveUI.Binding.Wpf.Reactive/ReactiveUI.Binding.Wpf.Reactive.csproj"/>
+    <Project Path="ReactiveUI.Binding.WinForms.Reactive/ReactiveUI.Binding.WinForms.Reactive.csproj"/>
+    <Project Path="ReactiveUI.Binding.Maui.Reactive/ReactiveUI.Binding.Maui.Reactive.csproj"/>
     <Folder Name="/benchmarks/">
         <Project Path="benchmarks/ReactiveUI.Binding.Benchmarks/ReactiveUI.Binding.Benchmarks.csproj"/>
+        <Project Path="benchmarks/ReactiveUI.Binding.Generator.Benchmarks/ReactiveUI.Binding.Generator.Benchmarks.csproj"/>
         <Project
             Path="benchmarks/ReactiveUI.Binding.Benchmarks.ReactiveUI/ReactiveUI.Binding.Benchmarks.ReactiveUI.csproj"/>
     </Folder>
@@ -36,5 +42,12 @@
             Path="tests/ReactiveUI.Binding.GeneratedCode.TestModels/ReactiveUI.Binding.GeneratedCode.TestModels.csproj"/>
         <Project Path="tests/ReactiveUI.Binding.GeneratedCode.Tests/ReactiveUI.Binding.GeneratedCode.Tests.csproj"/>
         <Project Path="tests/ReactiveUI.Binding.AotValidation/ReactiveUI.Binding.AotValidation.csproj"/>
+        <Project Path="tests/ReactiveUI.Binding.Wpf.Tests/ReactiveUI.Binding.Wpf.Tests.csproj"/>
+        <Project Path="tests/ReactiveUI.Binding.Wpf.Tests.Reactive/ReactiveUI.Binding.Wpf.Tests.Reactive.csproj"/>
+        <Project Path="tests/ReactiveUI.Binding.WinForms.Tests/ReactiveUI.Binding.WinForms.Tests.csproj"/>
+        <Project
+            Path="tests/ReactiveUI.Binding.WinForms.Tests.Reactive/ReactiveUI.Binding.WinForms.Tests.Reactive.csproj"/>
+        <Project Path="tests/ReactiveUI.Binding.Maui.Tests/ReactiveUI.Binding.Maui.Tests.csproj"/>
+        <Project Path="tests/ReactiveUI.Binding.Maui.Tests.Reactive/ReactiveUI.Binding.Maui.Tests.Reactive.csproj"/>
     </Folder>
 </Solution>

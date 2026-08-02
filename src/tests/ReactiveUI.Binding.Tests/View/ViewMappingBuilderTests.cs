@@ -7,16 +7,12 @@ using TUnit.Core.Executors;
 
 namespace ReactiveUI.Binding.Tests.View;
 
-/// <summary>
-/// Tests for the <see cref="ViewMappingBuilder"/> fluent API.
-/// </summary>
+/// <summary>Tests for the <see cref="ViewMappingBuilder"/> fluent API.</summary>
 [NotInParallel]
 [TestExecutor<BindingBuilderTestExecutor>]
 public class ViewMappingBuilderTests
 {
-    /// <summary>
-    /// Verifies that Map registers a mapping that the locator can resolve.
-    /// </summary>
+    /// <summary>Verifies that Map registers a mapping that the locator can resolve.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Map_RegistersMapping()
@@ -24,16 +20,14 @@ public class ViewMappingBuilderTests
         var locator = new DefaultViewLocator();
         var builder = new ViewMappingBuilder(locator);
 
-        builder.Map<TestViewModel, TestView>();
+        _ = builder.Map<TestViewModel, TestView>();
 
         var result = locator.ResolveView(new TestViewModel());
         await Assert.That(result).IsNotNull();
         await Assert.That(result).IsTypeOf<TestView>();
     }
 
-    /// <summary>
-    /// Verifies that Map returns the builder for chaining.
-    /// </summary>
+    /// <summary>Verifies that Map returns the builder for chaining.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Map_ReturnsSelfForChaining()
@@ -46,9 +40,7 @@ public class ViewMappingBuilderTests
         await Assert.That(returned).IsEqualTo(builder);
     }
 
-    /// <summary>
-    /// Verifies that multiple mappings can be chained.
-    /// </summary>
+    /// <summary>Verifies that multiple mappings can be chained.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Map_MultipleChained()
@@ -56,7 +48,7 @@ public class ViewMappingBuilderTests
         var locator = new DefaultViewLocator();
         var builder = new ViewMappingBuilder(locator);
 
-        builder
+        _ = builder
             .Map<TestViewModel, TestView>()
             .Map<OtherViewModel, OtherView>();
 
@@ -67,9 +59,7 @@ public class ViewMappingBuilderTests
         await Assert.That(result2).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that Map with factory delegates to the locator.
-    /// </summary>
+    /// <summary>Verifies that Map with factory delegates to the locator.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MapWithFactory_RegistersFactory()
@@ -78,32 +68,26 @@ public class ViewMappingBuilderTests
         var builder = new ViewMappingBuilder(locator);
         var factoryCalled = false;
 
-        builder.Map<TestViewModel>(() =>
+        _ = builder.Map<TestViewModel>(() =>
         {
             factoryCalled = true;
             return new TestView();
         });
 
-        locator.ResolveView(new TestViewModel());
+        _ = locator.ResolveView(new TestViewModel());
 
         await Assert.That(factoryCalled).IsTrue();
     }
 
-    /// <summary>
-    /// Simple view model for testing.
-    /// </summary>
-    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Used for testing")]
+    /// <summary>Simple view model for testing.</summary>
+    [SuppressMessage("Design", "SST1436:Empty type", Justification = "The mapping tests key off the type identity alone.")]
     private sealed class TestViewModel;
 
-    /// <summary>
-    /// Another view model for testing multiple mappings.
-    /// </summary>
-    [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty", Justification = "Used for testing")]
+    /// <summary>Another view model for testing multiple mappings.</summary>
+    [SuppressMessage("Design", "SST1436:Empty type", Justification = "The mapping tests key off the type identity alone.")]
     private sealed class OtherViewModel;
 
-    /// <summary>
-    /// Simple view for testing.
-    /// </summary>
+    /// <summary>Simple view for testing.</summary>
     private sealed class TestView : IViewFor<TestViewModel>
     {
         /// <inheritdoc/>
@@ -117,9 +101,7 @@ public class ViewMappingBuilderTests
         }
     }
 
-    /// <summary>
-    /// Another view for testing multiple mappings.
-    /// </summary>
+    /// <summary>Another view for testing multiple mappings.</summary>
     private sealed class OtherView : IViewFor<OtherViewModel>
     {
         /// <inheritdoc/>

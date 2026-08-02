@@ -6,19 +6,13 @@ using ReactiveUI;
 
 namespace SharedScenarios.WhenChanged.SinglePropertyReactiveObject;
 
-/// <summary>
-/// ViewModel extending ReactiveObject with a single string property.
-/// </summary>
+/// <summary>ViewModel extending ReactiveObject with a single string property.</summary>
 public class MyViewModel : ReactiveObject
 {
-    /// <summary>
-    /// The backing field for <see cref="Name"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Name"/>.</summary>
     private string _name = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
+    /// <summary>Gets or sets the name.</summary>
     public string Name
     {
         get => _name;

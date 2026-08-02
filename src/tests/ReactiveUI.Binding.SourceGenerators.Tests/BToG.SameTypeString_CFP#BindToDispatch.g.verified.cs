@@ -17,19 +17,20 @@ namespace ReactiveUI.Binding
             this global::System.IObservable<string> source,
             global::SharedScenarios.BindTo.SameTypeString.MyView target,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTo.SameTypeString.MyView, string?>> property,
+            string propertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 56
+            if (callerLineNumber == 46
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __BindTo_000016A7FA446C30(source, target);
+                return __BindTo_000016A7FA446AFA(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTo_000016A7FA446C30(global::System.IObservable<string> source, global::SharedScenarios.BindTo.SameTypeString.MyView target)
+        private static global::System.IDisposable __BindTo_000016A7FA446AFA(global::System.IObservable<string> source, global::SharedScenarios.BindTo.SameTypeString.MyView target)
         {
             // BindTo: observable -> Caption
             return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(source, value =>

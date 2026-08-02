@@ -1,0 +1,26 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+#if REACTIVE_SHIM
+namespace ReactiveUI.Binding.Reactive;
+#else
+namespace ReactiveUI.Binding;
+#endif
+
+/// <summary>Converts <see cref="Guid"/> to <see cref="string"/> using the "D" format (standard hyphenated format).</summary>
+public sealed class GuidToStringTypeConverter : BindingTypeConverter<Guid, string>
+{
+    /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
+    private static readonly int Affinity = BindingAffinity.DefaultInternalTypeConverter;
+
+    /// <inheritdoc/>
+    public override int GetAffinityForObjects() => Affinity;
+
+    /// <inheritdoc/>
+    public override bool TryConvert(Guid from, object? conversionHint, [NotNullWhen(true)] out string? result)
+    {
+        result = from.ToString("D");
+        return true;
+    }
+}

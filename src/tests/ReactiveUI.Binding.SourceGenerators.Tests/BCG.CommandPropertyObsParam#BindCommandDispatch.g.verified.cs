@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -31,13 +31,13 @@ namespace ReactiveUI.Binding
             if (propertyNameExpression == "x => x.Save"
                 && controlNameExpression == "x => x.SaveButton")
             {
-                return __BindCommand_000025BD0B2B0284(view, viewModel, withParameter);
+                return __BindCommand_000025BD0B2B0110(view, viewModel, withParameter);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindCommand_000025BD0B2B0284(
+        private static global::System.IDisposable __BindCommand_000025BD0B2B0110(
             global::SharedScenarios.BindCommand.CommandPropertyObsParam.MyView view,
             global::SharedScenarios.BindCommand.CommandPropertyObsParam.MyViewModel viewModel, global::System.IObservable<string> withParameter)
         {

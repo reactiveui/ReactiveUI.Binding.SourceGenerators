@@ -8,9 +8,7 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
-/// <summary>
-/// Pipeline A transform: extracts ClassBindingInfo from class declarations.
-/// </summary>
+/// <summary>Pipeline A transform: extracts ClassBindingInfo from class declarations.</summary>
 internal static class TypeDetectionExtractor
 {
     /// <summary>
@@ -59,9 +57,7 @@ internal static class TypeDetectionExtractor
             properties);
     }
 
-    /// <summary>
-    /// Extracts the properties from a named type symbol.
-    /// </summary>
+    /// <summary>Extracts the properties from a named type symbol.</summary>
     /// <param name="typeSymbol">The type symbol.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An array of observable property info.</returns>
@@ -70,7 +66,9 @@ internal static class TypeDetectionExtractor
         INamedTypeSymbol typeSymbol,
         CancellationToken ct)
     {
-        var properties = new List<ObservablePropertyInfo>(16);
+        const int TypicalObservablePropertyCount = 16;
+
+        var properties = new List<ObservablePropertyInfo>(TypicalObservablePropertyCount);
         var members = typeSymbol.GetMembers();
 
         for (var i = 0; i < members.Length; i++)
@@ -94,7 +92,7 @@ internal static class TypeDetectionExtractor
             for (var j = 0; j < members.Length; j++)
             {
                 if (members[j] is IFieldSymbol { IsStatic: true } field
-                    && field.Name == property.Name + "Property")
+                    && field.Name == $"{property.Name}Property")
                 {
                     isDependencyProperty = true;
                     break;
@@ -112,9 +110,7 @@ internal static class TypeDetectionExtractor
         return new([.. properties]);
     }
 
-    /// <summary>
-    /// Walks <c>AllInterfaces</c> to detect notification interfaces.
-    /// </summary>
+    /// <summary>Walks <c>AllInterfaces</c> to detect notification interfaces.</summary>
     /// <param name="typeSymbol">The type to inspect.</param>
     /// <param name="wellKnown">The cached well-known symbols.</param>
     /// <param name="ct">Cancellation token.</param>
@@ -139,27 +135,25 @@ internal static class TypeDetectionExtractor
             ct.ThrowIfCancellationRequested();
             var iface = allInterfaces[i];
 
-            if (wellKnown.IReactiveObject != null &&
-                SymbolEqualityComparer.Default.Equals(iface, wellKnown.IReactiveObject))
+            if (wellKnown.IReactiveObject is not null
+                && SymbolEqualityComparer.Default.Equals(iface, wellKnown.IReactiveObject))
             {
                 implementsIReactiveObject = true;
             }
 
-            if (wellKnown.INPC != null && SymbolEqualityComparer.Default.Equals(iface, wellKnown.INPC))
+            if (wellKnown.INPC is not null && SymbolEqualityComparer.Default.Equals(iface, wellKnown.INPC))
             {
                 implementsINPC = true;
             }
 
-            if (wellKnown.INPChanging != null && SymbolEqualityComparer.Default.Equals(iface, wellKnown.INPChanging))
+            if (wellKnown.INPChanging is not null && SymbolEqualityComparer.Default.Equals(iface, wellKnown.INPChanging))
             {
                 implementsINPChanging = true;
             }
         }
     }
 
-    /// <summary>
-    /// Walks the base type chain to detect platform-specific base types (WPF/WinUI/KVO/WinForms/Android).
-    /// </summary>
+    /// <summary>Walks the base type chain to detect platform-specific base types (WPF/WinUI/KVO/WinForms/Android).</summary>
     /// <param name="typeSymbol">The type to inspect.</param>
     /// <param name="wellKnown">The cached well-known symbols.</param>
     /// <param name="ct">Cancellation token.</param>
@@ -176,7 +170,7 @@ internal static class TypeDetectionExtractor
         var android = false;
 
         var baseType = typeSymbol.BaseType;
-        while (baseType != null)
+        while (baseType is not null)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -192,18 +186,14 @@ internal static class TypeDetectionExtractor
         return new(wpf, winui, ns, winforms, android);
     }
 
-    /// <summary>
-    /// Determines whether <paramref name="symbol"/> equals the (possibly null) candidate symbol.
-    /// </summary>
+    /// <summary>Determines whether <paramref name="symbol"/> equals the (possibly null) candidate symbol.</summary>
     /// <param name="symbol">The symbol to compare.</param>
     /// <param name="candidate">The candidate symbol; null is treated as no match.</param>
     /// <returns><c>true</c> if the candidate is non-null and equal; otherwise, <c>false</c>.</returns>
     private static bool Matches(INamedTypeSymbol symbol, INamedTypeSymbol? candidate) =>
-        candidate != null && SymbolEqualityComparer.Default.Equals(symbol, candidate);
+        candidate is not null && SymbolEqualityComparer.Default.Equals(symbol, candidate);
 
-    /// <summary>
-    /// Platform-specific base-type detection flags for a class.
-    /// </summary>
+    /// <summary>Platform-specific base-type detection flags for a class.</summary>
     /// <param name="InheritsWpfDependencyObject">Whether the type inherits a WPF DependencyObject.</param>
     /// <param name="InheritsWinUIDependencyObject">Whether the type inherits a WinUI DependencyObject.</param>
     /// <param name="InheritsNSObject">Whether the type inherits an Apple NSObject.</param>

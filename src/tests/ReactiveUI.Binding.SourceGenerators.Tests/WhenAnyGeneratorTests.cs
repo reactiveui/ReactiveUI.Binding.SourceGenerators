@@ -7,14 +7,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for WhenAny (IObservedChange-wrapping) invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for WhenAny (IObservedChange-wrapping) invocation generation.</summary>
 public class WhenAnyGeneratorTests
 {
-    /// <summary>
-    /// Verifies WhenAny with a single property on an INPC class.
-    /// </summary>
+    /// <summary>Verifies WhenAny with a single property on an INPC class.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_INPC()
@@ -26,9 +22,7 @@ public class WhenAnyGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAny with two properties and a selector combining IObservedChange values.
-    /// </summary>
+    /// <summary>Verifies WhenAny with two properties and a selector combining IObservedChange values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_TwoProperties()
@@ -57,9 +51,7 @@ public class WhenAnyGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAny with a deep property chain (x => x.Child.Name) to cover the deep chain branch.
-    /// </summary>
+    /// <summary>Verifies WhenAny with a deep property chain (x => x.Child.Name) to cover the deep chain branch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_DeepChain()
@@ -71,9 +63,7 @@ public class WhenAnyGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAny with multiple properties where one uses a deep chain to cover the multi-property deep chain branch.
-    /// </summary>
+    /// <summary>Verifies WhenAny with multiple properties where one uses a deep chain to cover the multi-property deep chain branch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultiProperty_DeepChain()
@@ -85,9 +75,7 @@ public class WhenAnyGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies WhenAny with multiple invocations sharing the same type signature to cover the else-if dispatch branch.
-    /// </summary>
+    /// <summary>Verifies WhenAny with multiple invocations sharing the same type signature to cover the else-if dispatch branch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleInvocations_SameTypeSignature()

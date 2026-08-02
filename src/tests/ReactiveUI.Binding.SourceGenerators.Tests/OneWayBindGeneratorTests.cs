@@ -7,14 +7,10 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for OneWayBind (view-first one-way binding) invocation generation.
-/// </summary>
+/// <summary>Snapshot tests for OneWayBind (view-first one-way binding) invocation generation.</summary>
 public class OneWayBindGeneratorTests
 {
-    /// <summary>
-    /// Verifies OneWayBind with same-type string property binding.
-    /// </summary>
+    /// <summary>Verifies OneWayBind with same-type string property binding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_StringToString()
@@ -26,9 +22,7 @@ public class OneWayBindGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies OneWayBind with multiple bindings on the same view/vm pair.
-    /// </summary>
+    /// <summary>Verifies OneWayBind with multiple bindings on the same view/vm pair.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task MultipleBindings()
@@ -40,9 +34,7 @@ public class OneWayBindGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies OneWayBind with int-to-int property binding.
-    /// </summary>
+    /// <summary>Verifies OneWayBind with int-to-int property binding.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_IntToInt()
@@ -54,9 +46,7 @@ public class OneWayBindGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies OneWayBind with a selector (conversion) function from int to string.
-    /// </summary>
+    /// <summary>Verifies OneWayBind with a selector (conversion) function from int to string.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_WithSelector()
@@ -68,9 +58,7 @@ public class OneWayBindGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies OneWayBind with a selector (conversion) function and scheduler.
-    /// </summary>
+    /// <summary>Verifies OneWayBind with a selector (conversion) function and scheduler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SingleProperty_WithSelectorAndScheduler()

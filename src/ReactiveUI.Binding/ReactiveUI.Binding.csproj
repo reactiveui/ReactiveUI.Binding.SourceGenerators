@@ -5,13 +5,19 @@
     <PackageTags>reactiveui;binding;observableforproperty</PackageTags>
   </PropertyGroup>
 
+  <!-- The seam source, compiled here with the lean identity: ISequencer resolves to
+       ReactiveUI.Primitives.Concurrency and the namespaces stay unshifted. ReactiveUI.Binding.Reactive
+       links these same files under REACTIVE_SHIM. -->
+  <ItemGroup>
+    <Compile Include="..\ReactiveUI.Binding.Shared\**\*.cs" Link="ReactiveUI.Binding.Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="ReactiveUI.Binding.Tests"/>
     <InternalsVisibleTo Include="ReactiveUI.Binding.GeneratedCode.Tests"/>
     <InternalsVisibleTo Include="ReactiveUI.Binding.Wpf"/>
     <InternalsVisibleTo Include="ReactiveUI.Binding.WinForms"/>
     <InternalsVisibleTo Include="ReactiveUI.Binding.Maui"/>
-    <InternalsVisibleTo Include="ReactiveUI.Binding.Reactive"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -20,11 +26,44 @@
     <Using Include="System.Linq.Expressions"/>
     <Using Include="System.Runtime.CompilerServices"/>
     <Using Include="Splat"/>
+  </ItemGroup>
+
+  <!-- The shared source carries no per-file usings for the namespaces that shift between the two
+       leaves, so this leaf imports the unshifted forms. ReactiveUI.Primitives.Concurrency supplies
+       ISequencer itself along with the Schedule(...) extensions the shared source calls on it. -->
+  <ItemGroup>
+    <Using Include="ReactiveUI.Primitives.Concurrency"/>
+    <Using Include="ReactiveUI.Binding.Builder"/>
+    <Using Include="ReactiveUI.Binding.Expressions"/>
+    <Using Include="ReactiveUI.Binding.Fallback"/>
     <Using Include="ReactiveUI.Binding.Helpers"/>
+    <Using Include="ReactiveUI.Binding.ObservableForProperty"/>
+    <Using Include="ReactiveUI.Binding.Observables"/>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Splat"/>
-    <PackageReference Include="System.Reactive"/>
+    <PackageReference Include="ReactiveUI.Primitives"/>
+  </ItemGroup>
+
+  <!-- DateOnly and TimeOnly only exist on .NET 6+. Their converters are guarded with
+       #if NET6_0_OR_GREATER, so exclude the sources outright on the older targets rather than
+       compiling files that declare nothing there. -->
+  <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
+    <Compile Remove="..\ReactiveUI.Binding.Shared\Bindings\Converter\*DateOnly*.cs"/>
+    <Compile Remove="..\ReactiveUI.Binding.Shared\Bindings\Converter\*TimeOnly*.cs"/>
+  </ItemGroup>
+
+  <!-- NotNullAttribute ships in the framework from netcoreapp3.0/netstandard2.1 onwards; the
+       polyfill is only needed below that. -->
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp3.0'))">
+    <Compile Remove="..\ReactiveUI.Binding.Shared\Polyfills\NotNullAttribute.cs"/>
+  </ItemGroup>
+
+  <!-- Index and Range back the ^ and .. operators on the targets that predate them; .NET 5+ ships
+       both, where these sources are guarded out entirely. -->
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">
+    <Compile Remove="..\ReactiveUI.Binding.Shared\Polyfills\Index.cs"/>
+    <Compile Remove="..\ReactiveUI.Binding.Shared\Polyfills\Range.cs"/>
   </ItemGroup>
 </Project>

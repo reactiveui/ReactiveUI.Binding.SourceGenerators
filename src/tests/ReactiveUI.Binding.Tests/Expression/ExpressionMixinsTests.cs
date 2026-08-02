@@ -8,44 +8,22 @@ using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.Expression;
 
-/// <summary>
-/// Tests for the <see cref="ExpressionMixins"/> class.
-/// </summary>
+/// <summary>Tests for the <see cref="ExpressionMixins"/> class.</summary>
 public class ExpressionMixinsTests
 {
-    /// <summary>
-    /// The expected number of expressions for a two-member chain.
-    /// </summary>
+    /// <summary>The constant value embedded in the expression under test.</summary>
+    private const int SampleConstant = 42;
+
+    /// <summary>The expected number of expressions for a two-member chain.</summary>
     private const int TwoMemberChainCount = 2;
 
-    /// <summary>
-    /// The expected number of expressions for a three-member chain.
-    /// </summary>
+    /// <summary>The expected number of expressions for a three-member chain.</summary>
     private const int ThreeMemberChainCount = 3;
 
-    /// <summary>
-    /// The index argument used in indexer expression tests.
-    /// </summary>
+    /// <summary>The index argument used in indexer expression tests.</summary>
     private const int IndexerArgument = 2;
 
-    /// <summary>
-    /// The first value stored in the test items list.
-    /// </summary>
-    private const int FirstItemValue = 10;
-
-    /// <summary>
-    /// The second value stored in the test items list.
-    /// </summary>
-    private const int SecondItemValue = 20;
-
-    /// <summary>
-    /// The third value stored in the test items list.
-    /// </summary>
-    private const int ThirdItemValue = 30;
-
-    /// <summary>
-    /// Verifies that GetExpressionChain returns a single member for a simple property access.
-    /// </summary>
+    /// <summary>Verifies that GetExpressionChain returns a single member for a simple property access.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetExpressionChain_SimpleProperty_ReturnsSingleExpression()
@@ -58,9 +36,7 @@ public class ExpressionMixinsTests
         await Assert.That(chain.Count).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that GetExpressionChain returns multiple members for a nested property chain.
-    /// </summary>
+    /// <summary>Verifies that GetExpressionChain returns multiple members for a nested property chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetExpressionChain_NestedProperty_ReturnsMultipleExpressions()
@@ -73,9 +49,7 @@ public class ExpressionMixinsTests
         await Assert.That(chain.Count).IsEqualTo(TwoMemberChainCount);
     }
 
-    /// <summary>
-    /// Verifies that GetExpressionChain returns three members for a 3-level deep property chain.
-    /// </summary>
+    /// <summary>Verifies that GetExpressionChain returns three members for a 3-level deep property chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetExpressionChain_ThreeLevelDeepChain_ReturnsThreeExpressions()
@@ -99,9 +73,7 @@ public class ExpressionMixinsTests
         await Assert.That(thirdMember!.Name).IsEqualTo("Host");
     }
 
-    /// <summary>
-    /// Verifies that GetMemberInfo returns the correct member for a property expression.
-    /// </summary>
+    /// <summary>Verifies that GetMemberInfo returns the correct member for a property expression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetMemberInfo_PropertyExpression_ReturnsMemberInfo()
@@ -116,9 +88,7 @@ public class ExpressionMixinsTests
         await Assert.That(memberInfo!.Name).IsEqualTo("Name");
     }
 
-    /// <summary>
-    /// Verifies that GetMemberInfo unwraps Convert expressions (boxing scenarios) and returns the underlying member.
-    /// </summary>
+    /// <summary>Verifies that GetMemberInfo unwraps Convert expressions (boxing scenarios) and returns the underlying member.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetMemberInfo_ConvertExpression_UnwrapsToUnderlyingMember()
@@ -137,9 +107,7 @@ public class ExpressionMixinsTests
         await Assert.That(memberInfo.MemberType).IsEqualTo(MemberTypes.Property);
     }
 
-    /// <summary>
-    /// Verifies that GetArgumentsArray returns null for a non-index member access expression.
-    /// </summary>
+    /// <summary>Verifies that GetArgumentsArray returns null for a non-index member access expression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetArgumentsArray_NonIndexExpression_ReturnsNull()
@@ -152,9 +120,7 @@ public class ExpressionMixinsTests
         await Assert.That(args).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that GetParent returns the correct parent expression for a simple member access.
-    /// </summary>
+    /// <summary>Verifies that GetParent returns the correct parent expression for a simple member access.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetParent_MemberExpression_ReturnsParent()
@@ -168,9 +134,7 @@ public class ExpressionMixinsTests
         await Assert.That(parent!.NodeType).IsEqualTo(ExpressionType.Parameter);
     }
 
-    /// <summary>
-    /// Verifies that GetParent returns the intermediate expression for a nested member access.
-    /// </summary>
+    /// <summary>Verifies that GetParent returns the intermediate expression for a nested member access.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetParent_NestedMemberExpression_ReturnsIntermediateExpression()
@@ -187,9 +151,7 @@ public class ExpressionMixinsTests
         await Assert.That(parentMember.Member.Name).IsEqualTo("Address");
     }
 
-    /// <summary>
-    /// Verifies that GetExpressionChain throws NotSupportedException for a ConstantExpression with a helpful message.
-    /// </summary>
+    /// <summary>Verifies that GetExpressionChain throws NotSupportedException for a ConstantExpression with a helpful message.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetExpressionChain_ConstantExpression_ThrowsWithHelpfulMessage()
@@ -200,31 +162,25 @@ public class ExpressionMixinsTests
         await Assert.That(ex!.Message).Contains("Did you miss the member access prefix");
     }
 
-    /// <summary>
-    /// Verifies that GetMemberInfo throws NotSupportedException for an unsupported expression type.
-    /// </summary>
+    /// <summary>Verifies that GetMemberInfo throws NotSupportedException for an unsupported expression type.</summary>
     [Test]
     public void GetMemberInfo_UnsupportedExpression_ThrowsNotSupportedException()
     {
-        var constant = System.Linq.Expressions.Expression.Constant(42);
+        var constant = System.Linq.Expressions.Expression.Constant(SampleConstant);
 
-        Assert.Throws<NotSupportedException>(() => constant.GetMemberInfo());
+        _ = Assert.Throws<NotSupportedException>(() => constant.GetMemberInfo());
     }
 
-    /// <summary>
-    /// Verifies that GetParent throws NotSupportedException for an unsupported expression type.
-    /// </summary>
+    /// <summary>Verifies that GetParent throws NotSupportedException for an unsupported expression type.</summary>
     [Test]
     public void GetParent_UnsupportedExpression_ThrowsNotSupportedException()
     {
-        var constant = System.Linq.Expressions.Expression.Constant(42);
+        var constant = System.Linq.Expressions.Expression.Constant(SampleConstant);
 
-        Assert.Throws<NotSupportedException>(() => constant.GetParent());
+        _ = Assert.Throws<NotSupportedException>(() => constant.GetParent());
     }
 
-    /// <summary>
-    /// Verifies that GetArgumentsArray returns constant arguments for an index expression.
-    /// </summary>
+    /// <summary>Verifies that GetArgumentsArray returns constant arguments for an index expression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetArgumentsArray_IndexExpression_ReturnsConstantArguments()
@@ -239,9 +195,7 @@ public class ExpressionMixinsTests
         await Assert.That(args[0]).IsEqualTo(IndexerArgument);
     }
 
-    /// <summary>
-    /// Verifies that GetExpressionChain handles index expressions in chains.
-    /// </summary>
+    /// <summary>Verifies that GetExpressionChain handles index expressions in chains.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetExpressionChain_WithIndexExpression_ReturnsChainIncludingIndex()
@@ -254,9 +208,7 @@ public class ExpressionMixinsTests
         await Assert.That(chain.Count).IsEqualTo(TwoMemberChainCount);
     }
 
-    /// <summary>
-    /// Verifies that GetMemberInfo returns indexer info for an IndexExpression.
-    /// </summary>
+    /// <summary>Verifies that GetMemberInfo returns indexer info for an IndexExpression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetMemberInfo_IndexExpression_ReturnsIndexerInfo()
@@ -271,9 +223,7 @@ public class ExpressionMixinsTests
         await Assert.That(memberInfo!.Name).IsEqualTo("Item");
     }
 
-    /// <summary>
-    /// Verifies that GetParent returns the object expression for an IndexExpression.
-    /// </summary>
+    /// <summary>Verifies that GetParent returns the object expression for an IndexExpression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetParent_IndexExpression_ReturnsObjectExpression()
@@ -337,38 +287,13 @@ public class ExpressionMixinsTests
         await Assert.That(chain[0].NodeType).IsEqualTo(ExpressionType.Index);
     }
 
-    /// <summary>
-    /// Test class with a list property for testing index expression chains.
-    /// </summary>
-    [SuppressMessage(
-        "Performance",
-        "CA1812:Avoid uninstantiated internal classes",
-        Justification = "Referenced only inside an inspected expression tree (never compiled), so no construction is visible to the analyzer.")]
-    private sealed class IndexTestClass
+    /// <summary>Test class with a list property for testing index expression chains.</summary>
+    public sealed class DirectIndexableClass
     {
-        /// <summary>
-        /// Gets a list of integers for testing index expressions.
-        /// </summary>
-        public List<int> Items { get; } = [FirstItemValue, SecondItemValue, ThirdItemValue];
-    }
-
-    /// <summary>
-    /// Test class with a direct string indexer for testing index expressions on the parameter itself.
-    /// </summary>
-    [SuppressMessage(
-        "Performance",
-        "CA1812:Avoid uninstantiated internal classes",
-        Justification = "Referenced only via typeof/reflection metadata for its indexer; never constructed by design.")]
-    private sealed class DirectIndexableClass
-    {
-        /// <summary>
-        /// Backing dictionary for the string indexer.
-        /// </summary>
+        /// <summary>Backing dictionary for the string indexer.</summary>
         private readonly Dictionary<string, string> _data = new() { ["key"] = "value" };
 
-        /// <summary>
-        /// Gets or sets the value associated with the specified key.
-        /// </summary>
+        /// <summary>Gets or sets the value associated with the specified key.</summary>
         /// <param name="key">The key to look up.</param>
         /// <returns>The value associated with the key, or an empty string if not found.</returns>
         [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Used for testing")]
@@ -377,5 +302,21 @@ public class ExpressionMixinsTests
             get => _data.TryGetValue(key, out var val) ? val : string.Empty;
             set => _data[key] = value;
         }
+    }
+
+    /// <summary>Test class with a list property for testing index expression chains.</summary>
+    private sealed class IndexTestClass
+    {
+        /// <summary>The first value stored in the test items list.</summary>
+        private const int FirstItemValue = 10;
+
+        /// <summary>The second value stored in the test items list.</summary>
+        private const int SecondItemValue = 20;
+
+        /// <summary>The third value stored in the test items list.</summary>
+        private const int ThirdItemValue = 30;
+
+        /// <summary>Gets a list of integers for testing index expressions.</summary>
+        public List<int> Items { get; } = [FirstItemValue, SecondItemValue, ThirdItemValue];
     }
 }

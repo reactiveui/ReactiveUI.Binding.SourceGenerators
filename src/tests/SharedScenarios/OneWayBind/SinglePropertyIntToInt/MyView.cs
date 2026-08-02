@@ -7,14 +7,10 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.OneWayBind.SinglePropertyIntToInt;
 
-/// <summary>
-/// Target View implementing IViewFor with an integer property.
-/// </summary>
+/// <summary>Target View implementing IViewFor with an integer property.</summary>
 public class MyView : IViewFor, INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="CountValue"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="CountValue"/>.</summary>
     private int _countValue;
 
     /// <inheritdoc/>
@@ -23,9 +19,7 @@ public class MyView : IViewFor, INotifyPropertyChanged
     /// <inheritdoc/>
     public object? ViewModel { get; set; }
 
-    /// <summary>
-    /// Gets or sets the count value.
-    /// </summary>
+    /// <summary>Gets or sets the count value.</summary>
     public int CountValue
     {
         get => _countValue;

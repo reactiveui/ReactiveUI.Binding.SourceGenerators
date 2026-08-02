@@ -6,22 +6,16 @@ using System.ComponentModel;
 
 namespace SharedScenarios.BindTo.DifferingTypes;
 
-/// <summary>
-/// Target View with a string property bound from an int observable.
-/// </summary>
+/// <summary>Target View with a string property bound from an int observable.</summary>
 public class MyView : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Caption"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Caption"/>.</summary>
     private string _caption = string.Empty;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the caption.
-    /// </summary>
+    /// <summary>Gets or sets the caption.</summary>
     public string Caption
     {
         get => _caption;

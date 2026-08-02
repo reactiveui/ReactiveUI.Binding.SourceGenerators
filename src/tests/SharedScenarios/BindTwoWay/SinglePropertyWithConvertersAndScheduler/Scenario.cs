@@ -3,25 +3,21 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
-using System.Reactive.Concurrency;
 using ReactiveUI.Binding;
+using ReactiveUI.Primitives.Concurrency;
 
 namespace SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler;
 
-/// <summary>
-/// Exercises BindTwoWay with conversion functions and a scheduler.
-/// </summary>
+/// <summary>Exercises BindTwoWay with conversion functions and a scheduler.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a two-way binding between ViewModel.Count and View.CountText with converters and scheduler.
-    /// </summary>
+    /// <summary>Creates a two-way binding between ViewModel.Count and View.CountText with converters and scheduler.</summary>
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <param name="scheduler">The scheduler to observe on.</param>
     /// <returns>A disposable representing the binding.</returns>
-    public static IDisposable Execute(MyViewModel vm, MyView view, IScheduler scheduler)
-        => vm.BindTwoWay(
+    public static IDisposable Execute(MyViewModel vm, MyView view, ISequencer scheduler) =>
+        vm.BindTwoWay(
             view,
             x => x.Count,
             x => x.CountText,

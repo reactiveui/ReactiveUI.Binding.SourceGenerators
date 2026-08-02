@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -20,7 +20,7 @@ namespace ReactiveUI.Binding
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView, string?>> targetProperty,
             global::System.Func<int, string> sourceToTargetConv,
             global::System.Func<string, int> targetToSourceConv,
-            global::System.Reactive.Concurrency.IScheduler scheduler,
+            global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("sourceProperty")] string sourcePropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("targetProperty")] string targetPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
@@ -32,13 +32,13 @@ namespace ReactiveUI.Binding
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
             {
-                return __BindTwoWay_00000972B7EA34FC(source, target, sourceToTargetConv, targetToSourceConv, scheduler);
+                return __BindTwoWay_00000972B7EA330C(source, target, sourceToTargetConv, targetToSourceConv, scheduler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_00000972B7EA34FC(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView target, global::System.Func<int, string> sourceToTargetConv, global::System.Func<string, int> targetToSourceConv, global::System.Reactive.Concurrency.IScheduler scheduler)
+        private static global::System.IDisposable __BindTwoWay_00000972B7EA330C(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView target, global::System.Func<int, string> sourceToTargetConv, global::System.Func<string, int> targetToSourceConv, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // BindTwoWay: Count <-> CountText (with conversion) (with scheduler)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
@@ -53,8 +53,8 @@ namespace ReactiveUI.Binding
             true);
         var __srcSelected = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(sourceObs, sourceToTargetConv);
         var __tgtSelected = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(targetObs, targetToSourceConv);
-        var sourceBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<string>(__srcSelected, scheduler);
-        var targetBind = new global::ReactiveUI.Binding.Reactive.ObserveOnObservable<int>(__tgtSelected, scheduler);
+        var sourceBind = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<string>(__srcSelected, scheduler);
+        var targetBind = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<int>(__tgtSelected, scheduler);
 
             var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceBind, value =>
             {

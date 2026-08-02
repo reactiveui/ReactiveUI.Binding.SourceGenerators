@@ -18,24 +18,26 @@ namespace ReactiveUI.Binding
             global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel, string?>> sourceProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView, string?>> targetProperty,
+            string sourcePropertyExpression = "",
+            string targetPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 134
+            if (callerLineNumber == 110
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __BindOneWay_0000177DD18BA19C(source, target);
+                return __BindOneWay_0000177DD18B9EB4(source, target);
             }
-            else if (callerLineNumber == 135
+            else if (callerLineNumber == 111
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __BindOneWay_0000177D9FC04813(source, target);
+                return __BindOneWay_0000177D9FC0452B(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindOneWay_0000177DD18BA19C(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
+        private static global::System.IDisposable __BindOneWay_0000177DD18B9EB4(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
         {
             // BindOneWay: FirstName -> FirstNameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -50,7 +52,7 @@ namespace ReactiveUI.Binding
             });
         }
 
-        private static global::System.IDisposable __BindOneWay_0000177D9FC04813(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
+        private static global::System.IDisposable __BindOneWay_0000177D9FC0452B(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
         {
             // BindOneWay: LastName -> LastNameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

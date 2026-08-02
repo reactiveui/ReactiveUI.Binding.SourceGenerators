@@ -6,27 +6,19 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenAny.MultiPropertyDeepChain;
 
-/// <summary>
-/// Parent ViewModel containing a child model and a direct property.
-/// </summary>
+/// <summary>Parent ViewModel containing a child model and a direct property.</summary>
 public class ParentViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Child"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Child"/>.</summary>
     private ChildModel _child = new ChildModel();
 
-    /// <summary>
-    /// The backing field for <see cref="Title"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Title"/>.</summary>
     private string _title = string.Empty;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the child model.
-    /// </summary>
+    /// <summary>Gets or sets the child model.</summary>
     public ChildModel Child
     {
         get => _child;
@@ -42,9 +34,7 @@ public class ParentViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the title.
-    /// </summary>
+    /// <summary>Gets or sets the title.</summary>
     public string Title
     {
         get => _title;

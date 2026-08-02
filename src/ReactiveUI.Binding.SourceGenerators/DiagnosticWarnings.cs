@@ -18,9 +18,7 @@ internal static class DiagnosticWarnings
     /// <summary>The diagnostic category shared by all RXUIBIND descriptors.</summary>
     internal const string UsageCategory = "Usage";
 
-    /// <summary>
-    /// RXUIBIND001: Expression must be inline lambda for compile-time optimization.
-    /// </summary>
+    /// <summary>RXUIBIND001: Expression must be inline lambda for compile-time optimization.</summary>
     internal static readonly DiagnosticDescriptor NonInlineLambda = new(
         "RXUIBIND001",
         "Expression must be inline lambda",
@@ -30,9 +28,7 @@ internal static class DiagnosticWarnings
         true,
         NoneInlineLambdaDescription);
 
-    /// <summary>
-    /// RXUIBIND002: Type has no observable properties.
-    /// </summary>
+    /// <summary>RXUIBIND002: Type has no observable properties.</summary>
     internal static readonly DiagnosticDescriptor NoObservableProperties = new(
         "RXUIBIND002",
         "Type has no observable properties",
@@ -42,9 +38,7 @@ internal static class DiagnosticWarnings
         true,
         NoObservablePropertiesDescription);
 
-    /// <summary>
-    /// RXUIBIND003: Expression contains private/protected member.
-    /// </summary>
+    /// <summary>RXUIBIND003: Expression contains private/protected member.</summary>
     internal static readonly DiagnosticDescriptor PrivateMember = new(
         "RXUIBIND003",
         "Expression contains private or protected member",
@@ -54,9 +48,7 @@ internal static class DiagnosticWarnings
         true,
         PrivateMemberDescription);
 
-    /// <summary>
-    /// RXUIBIND004: Type does not support before-change notifications.
-    /// </summary>
+    /// <summary>RXUIBIND004: Type does not support before-change notifications.</summary>
     internal static readonly DiagnosticDescriptor NoBeforeChangeSupport = new(
         "RXUIBIND004",
         "Type does not support before-change notifications",
@@ -66,9 +58,7 @@ internal static class DiagnosticWarnings
         true,
         NoBeforeChangeSupportDescription);
 
-    /// <summary>
-    /// RXUIBIND005: Source type implements INotifyDataErrorInfo.
-    /// </summary>
+    /// <summary>RXUIBIND005: Source type implements INotifyDataErrorInfo.</summary>
     internal static readonly DiagnosticDescriptor ValidationNotGenerated = new(
         "RXUIBIND005",
         "Validation binding not generated",
@@ -78,9 +68,20 @@ internal static class DiagnosticWarnings
         true,
         ValidationNotGeneratedDescription);
 
-    /// <summary>
-    /// RXUIBIND006: Expression contains unsupported path segment (indexer, field, or method call).
-    /// </summary>
+    /// <summary>RXUIBIND009: The generated dispatch for this call site is out of reach.</summary>
+    internal static readonly DiagnosticDescriptor DispatchOutOfReach = new(
+        "RXUIBIND009",
+        "Generated binding dispatch is out of reach here",
+        "This binding falls back to runtime observation. The assembly exposes its internals, so on C# 9 and "
+        + "below the generated dispatch has to live in the root namespace '{0}' to stay unambiguous, and this "
+        + "file's namespace '{1}' is not under it. Move the file under the root namespace, or raise the "
+        + "language version to 10 or later.",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        DispatchOutOfReachDescription);
+
+    /// <summary>RXUIBIND006: Expression contains unsupported path segment (indexer, field, or method call).</summary>
     internal static readonly DiagnosticDescriptor UnsupportedPathSegment = new(
         "RXUIBIND006",
         "Expression contains unsupported path segment",
@@ -90,9 +91,7 @@ internal static class DiagnosticWarnings
         true,
         UnsupportedPathSegmentDescription);
 
-    /// <summary>
-    /// RXUIBIND007: BindCommand control has no bindable event.
-    /// </summary>
+    /// <summary>RXUIBIND007: BindCommand control has no bindable event.</summary>
     internal static readonly DiagnosticDescriptor NoBindableEvent = new(
         "RXUIBIND007",
         "Control has no bindable event",
@@ -102,9 +101,7 @@ internal static class DiagnosticWarnings
         true,
         NoBindableEventDescription);
 
-    /// <summary>
-    /// RXUIBIND008: Property does not implement IInteraction.
-    /// </summary>
+    /// <summary>RXUIBIND008: Property does not implement IInteraction.</summary>
     internal static readonly DiagnosticDescriptor InvalidInteractionType = new(
         "RXUIBIND008",
         "Property is not an IInteraction",
@@ -114,41 +111,49 @@ internal static class DiagnosticWarnings
         true,
         InvalidInteractionTypeDescription);
 
+    /// <summary>The string description of the out-of-reach dispatch warning.</summary>
+    private const string DispatchOutOfReachDescription =
+        "Compile-time dispatch is chosen by extension-method lookup, which only reaches an overload declared "
+        + "in a namespace enclosing the call site. Before C# 10 there is no global using to widen that, and an "
+        + "assembly that exposes its internals cannot leave the overloads in the shared namespace without "
+        + "risking an ambiguous call against the assembly it exposes them to. Files outside the root namespace "
+        + "therefore bind to the runtime stub instead.";
+
     /// <summary>The string description of the none inline lambda.</summary>
     private const string NoneInlineLambdaDescription =
-        "The source generator can only optimize inline lambda expressions (e.g., x => x.Property). " +
-        "Variable references, method calls, or other non-inline expressions will fall back to runtime expression-tree analysis.";
+        "The source generator can only optimize inline lambda expressions (e.g., x => x.Property). "
+        + "Variable references, method calls, or other non-inline expressions will fall back to runtime expression-tree analysis.";
 
     /// <summary>The string description of the no observable properties warning.</summary>
     private const string NoObservablePropertiesDescription =
-        "The type used in the binding expression does not implement INotifyPropertyChanged, INotifyPropertyChanging, " +
-        "IReactiveObject, or inherit from any known observable base type.";
+        "The type used in the binding expression does not implement INotifyPropertyChanged, INotifyPropertyChanging, "
+        + "IReactiveObject, or inherit from any known observable base type.";
 
     /// <summary>The string description of the private member warning.</summary>
     private const string PrivateMemberDescription =
-        "The source generator generates extension methods which cannot access private or protected members. " +
-        "The binding will fall back to runtime reflection.";
+        "The source generator generates extension methods which cannot access private or protected members. "
+        + "The binding will fall back to runtime reflection.";
 
     /// <summary>The string description of the no before-change support warning.</summary>
     private const string NoBeforeChangeSupportDescription =
-        "The notification mechanism for this type does not provide before-change events. " +
-        "WPF DependencyObjects, WinForms Components, and Android Views only support after-change notifications.";
+        "The notification mechanism for this type does not provide before-change events. "
+        + "WPF DependencyObjects, WinForms Components, and Android Views only support after-change notifications.";
 
     /// <summary>The string description of the validation not generated warning.</summary>
     private const string ValidationNotGeneratedDescription =
-        "The generated bindings handle value binding only. " +
-        "Validation state propagation from INotifyDataErrorInfo requires the runtime ReactiveUI binding engine " +
-        "or a manual ErrorsChanged subscription.";
+        "The generated bindings handle value binding only. "
+        + "Validation state propagation from INotifyDataErrorInfo requires the runtime ReactiveUI binding engine "
+        + "or a manual ErrorsChanged subscription.";
 
     /// <summary>The string description of the unsupported path segment warning.</summary>
     private const string UnsupportedPathSegmentDescription =
-        "The source generator can only observe simple property access chains (e.g., x => x.Foo.Bar). " +
-        "Indexers, fields, and method calls in the path require runtime expression analysis.";
+        "The source generator can only observe simple property access chains (e.g., x => x.Foo.Bar). "
+        + "Indexers, fields, and method calls in the path require runtime expression analysis.";
 
     /// <summary>The string description of the no bindable event warning.</summary>
     private const string NoBindableEventDescription =
-        "The source generator could not find a default event to bind on the control type. " +
-        "Specify the 'toEvent' parameter explicitly.";
+        "The source generator could not find a default event to bind on the control type. "
+        + "Specify the 'toEvent' parameter explicitly.";
 
     /// <summary>The string description of the invalid interaction type warning.</summary>
     private const string InvalidInteractionTypeDescription =

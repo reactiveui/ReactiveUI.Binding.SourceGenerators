@@ -4,19 +4,13 @@
 
 namespace ReactiveUI.Binding.Tests.Bindings.TypeConverters;
 
-/// <summary>
-/// Tests for converting Guid to strings.
-/// </summary>
+/// <summary>Tests for converting Guid to strings.</summary>
 public class GuidToStringTypeConverterTests
 {
-    /// <summary>
-    /// Expected affinity returned for matched converter type pairs.
-    /// </summary>
+    /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
-    /// <summary>
-    ///     Verifies GetAffinityForObjects Returns2.
-    /// </summary>
+    /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task GetAffinityForObjects_Returns2()
@@ -26,9 +20,7 @@ public class GuidToStringTypeConverterTests
         await Assert.That(affinity).IsEqualTo(ExpectedAffinity);
     }
 
-    /// <summary>
-    ///     Verifies TryConvert Guid Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert Guid Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_Guid_Succeeds()
@@ -42,9 +34,7 @@ public class GuidToStringTypeConverterTests
         await Assert.That(output).IsEqualTo("12345678-1234-1234-1234-123456789abc");
     }
 
-    /// <summary>
-    ///     Verifies TryConvert EmptyGuid Succeeds.
-    /// </summary>
+    /// <summary>Verifies TryConvert EmptyGuid Succeeds.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TryConvert_EmptyGuid_Succeeds()

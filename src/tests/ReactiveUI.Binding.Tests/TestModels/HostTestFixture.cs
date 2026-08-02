@@ -13,88 +13,69 @@ namespace ReactiveUI.Binding.Tests.TestModels;
 /// </summary>
 public class HostTestFixture : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    /// <summary>The backing field for <see cref="Child"/>.</summary>
-    private TestFixture? _child;
-
-    /// <summary>The backing field for <see cref="SomeOtherParam"/>.</summary>
-    private int _someOtherParam;
-
-    /// <summary>The backing field for <see cref="PocoChild"/>.</summary>
-    private NonObservableTestFixture? _pocoChild;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <inheritdoc/>
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    /// <summary>
-    /// Gets or sets the child test fixture.
-    /// </summary>
+    /// <summary>Gets or sets the child test fixture.</summary>
     public TestFixture? Child
     {
-        get => _child;
+        get => field;
         set
         {
-            if (ReferenceEquals(_child, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
             OnPropertyChanging();
-            _child = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
-    /// <summary>
-    /// Gets or sets some other parameter.
-    /// </summary>
+    /// <summary>Gets or sets some other parameter.</summary>
     public int SomeOtherParam
     {
-        get => _someOtherParam;
+        get => field;
         set
         {
-            if (_someOtherParam == value)
+            if (field == value)
             {
                 return;
             }
 
             OnPropertyChanging();
-            _someOtherParam = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
-    /// <summary>
-    /// Gets or sets the non-observable child.
-    /// </summary>
+    /// <summary>Gets or sets the non-observable child.</summary>
     public NonObservableTestFixture? PocoChild
     {
-        get => _pocoChild;
+        get => field;
         set
         {
-            if (ReferenceEquals(_pocoChild, value))
+            if (ReferenceEquals(field, value))
             {
                 return;
             }
 
             OnPropertyChanging();
-            _pocoChild = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
-    /// <summary>
-    /// Raises the PropertyChanging event.
-    /// </summary>
+    /// <summary>Raises the PropertyChanging event.</summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanging([CallerMemberName] string? propertyName = null) =>
         PropertyChanging?.Invoke(this, new(propertyName));
 
-    /// <summary>
-    /// Raises the PropertyChanged event.
-    /// </summary>
+    /// <summary>Raises the PropertyChanged event.</summary>
     /// <param name="propertyName">The property name.</param>
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new(propertyName));

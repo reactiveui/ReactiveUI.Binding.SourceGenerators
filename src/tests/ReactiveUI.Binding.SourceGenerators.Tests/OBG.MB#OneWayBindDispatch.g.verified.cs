@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -16,23 +16,23 @@ namespace ReactiveUI.Binding
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, string> OneWayBind(
             this global::SharedScenarios.OneWayBind.MultipleBindings.MyView view,
             global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel viewModel,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel, string?>> vmProperty,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel, string?>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, string?>> viewProperty,
-            [global::System.Runtime.CompilerServices.CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+            [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (vmPropertyExpression == "x => x.Name"
+            if (viewModelPropertyExpression == "x => x.Name"
                 && viewPropertyExpression == "x => x.NameText")
             {
-                return __OneWayBind_00002D734282E96E(viewModel, view);
+                return __OneWayBind_00002D734282E686(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, string> __OneWayBind_00002D734282E96E(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.MultipleBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, string> __OneWayBind_00002D734282E686(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.MultipleBindings.MyView view)
         {
             // OneWayBind: Name -> NameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -60,23 +60,23 @@ namespace ReactiveUI.Binding
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, int> OneWayBind(
             this global::SharedScenarios.OneWayBind.MultipleBindings.MyView view,
             global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel viewModel,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel, int>> vmProperty,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel, int>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, int>> viewProperty,
-            [global::System.Runtime.CompilerServices.CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+            [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (vmPropertyExpression == "x => x.Age"
+            if (viewModelPropertyExpression == "x => x.Age"
                 && viewPropertyExpression == "x => x.AgeText")
             {
-                return __OneWayBind_00002D72E431FE2D(viewModel, view);
+                return __OneWayBind_00002D72E431FB45(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, int> __OneWayBind_00002D72E431FE2D(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.MultipleBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, int> __OneWayBind_00002D72E431FB45(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.MultipleBindings.MyView view)
         {
             // OneWayBind: Age -> AgeText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(

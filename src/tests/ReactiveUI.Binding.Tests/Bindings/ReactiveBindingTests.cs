@@ -2,22 +2,20 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 namespace ReactiveUI.Binding.Tests.Bindings;
 
-/// <summary>
-/// Tests for <see cref="ReactiveBinding{TView, TValue}"/>.
-/// </summary>
+/// <summary>Tests for <see cref="ReactiveBinding{TView, TValue}"/>.</summary>
 public class ReactiveBindingTests
 {
-    /// <summary>
-    /// Verifies that Dispose disposes the underlying subscription.
-    /// </summary>
+    /// <summary>Verifies that Dispose disposes the underlying subscription.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Dispose_DisposesSubscription()
     {
-        var disposed = false;
-        var subscription = Disposable.Create(() => disposed = true);
+        var disposed = new StrongBox<bool>(false);
+        var subscription = Disposable.Create(disposed, static state => state.Value = true);
         var view = new FakeView();
         var changed = Observable.Empty<string>();
 
@@ -29,18 +27,16 @@ public class ReactiveBindingTests
 
         binding.Dispose();
 
-        await Assert.That(disposed).IsTrue();
+        await Assert.That(disposed.Value).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that double-disposal does not throw.
-    /// </summary>
+    /// <summary>Verifies that double-disposal does not throw.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Dispose_Twice_DoesNotThrow()
     {
-        var disposeCount = 0;
-        var subscription = Disposable.Create(() => disposeCount++);
+        var disposeCount = new StrongBox<int>(0);
+        var subscription = Disposable.Create(disposeCount, static state => state.Value++);
         var view = new FakeView();
         var changed = Observable.Empty<string>();
 
@@ -53,12 +49,10 @@ public class ReactiveBindingTests
         binding.Dispose();
         binding.Dispose();
 
-        await Assert.That(disposeCount).IsEqualTo(1);
+        await Assert.That(disposeCount.Value).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that constructor values are returned by properties.
-    /// </summary>
+    /// <summary>Verifies that constructor values are returned by properties.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Properties_ReturnConstructorValues()
@@ -80,9 +74,7 @@ public class ReactiveBindingTests
         await Assert.That(binding.ViewExpression).IsNull();
     }
 
-    /// <summary>
-    /// A minimal fake view for testing.
-    /// </summary>
+    /// <summary>A minimal fake view for testing.</summary>
     private sealed class FakeView : IViewFor
     {
         /// <inheritdoc/>

@@ -12,36 +12,30 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 /// </summary>
 public static class BindInteractionScenarios
 {
-    /// <summary>
-    /// Binds a task-based handler that always sets output to <see langword="true"/>.
-    /// </summary>
+    /// <summary>Binds a task-based handler that always sets output to <see langword="true"/>.</summary>
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
     public static IDisposable TaskHandler(
         SharedScenarios.BindInteraction.TaskHandler.MyViewModel vm,
-        SharedScenarios.BindInteraction.TaskHandler.MyView view)
-        => SharedScenarios.BindInteraction.TaskHandler.Scenario.Execute(vm, view);
+        SharedScenarios.BindInteraction.TaskHandler.MyView view) =>
+        SharedScenarios.BindInteraction.TaskHandler.Scenario.Execute(vm, view);
 
-    /// <summary>
-    /// Binds an observable-based handler that always sets output to <see langword="true"/>.
-    /// </summary>
+    /// <summary>Binds an observable-based handler that always sets output to <see langword="true"/>.</summary>
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
     public static IDisposable ObservableHandler(
         SharedScenarios.BindInteraction.ObservableHandler.MyViewModel vm,
-        SharedScenarios.BindInteraction.ObservableHandler.MyView view)
-        => SharedScenarios.BindInteraction.ObservableHandler.Scenario.Execute(vm, view);
+        SharedScenarios.BindInteraction.ObservableHandler.MyView view) =>
+        SharedScenarios.BindInteraction.ObservableHandler.Scenario.Execute(vm, view);
 
-    /// <summary>
-    /// Binds a task-based handler to a deep property path (nested interaction).
-    /// </summary>
+    /// <summary>Binds a task-based handler to a deep property path (nested interaction).</summary>
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
     public static IDisposable DeepPropertyPath(
         SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel vm,
-        SharedScenarios.BindInteraction.DeepPropertyPath.MyView view)
-        => SharedScenarios.BindInteraction.DeepPropertyPath.Scenario.Execute(vm, view);
+        SharedScenarios.BindInteraction.DeepPropertyPath.MyView view) =>
+        SharedScenarios.BindInteraction.DeepPropertyPath.Scenario.Execute(vm, view);
 }

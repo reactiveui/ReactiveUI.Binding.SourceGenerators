@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -16,28 +16,28 @@ namespace ReactiveUI.Binding
         public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? view, bool isViewModel)> Bind(
             this global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view,
             global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel,
-            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel, string?>> vmProperty,
+            global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel, string?>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, string?>> viewProperty,
-            [global::System.Runtime.CompilerServices.CallerArgumentExpression("vmProperty")] string vmPropertyExpression = "",
+            [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (vmPropertyExpression == "x => x.FirstName"
+            if (viewModelPropertyExpression == "x => x.FirstName"
                 && viewPropertyExpression == "x => x.FirstNameText")
             {
-                return __Bind_7FFFE38A2E1A46F6(viewModel, view);
+                return __Bind_7FFFE38A2E1A448A(viewModel, view);
             }
-            else if (vmPropertyExpression == "x => x.LastName"
+            else if (viewModelPropertyExpression == "x => x.LastName"
                 && viewPropertyExpression == "x => x.LastNameText")
             {
-                return __Bind_7FFFE389FC4EED6D(viewModel, view);
+                return __Bind_7FFFE389FC4EEB01(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? view, bool isViewModel)> __Bind_7FFFE38A2E1A46F6(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? view, bool isViewModel)> __Bind_7FFFE38A2E1A448A(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
         {
             // Bind: FirstName <-> FirstNameText
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -75,7 +75,7 @@ namespace ReactiveUI.Binding
                 disposable);
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? view, bool isViewModel)> __Bind_7FFFE389FC4EED6D(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? view, bool isViewModel)> __Bind_7FFFE389FC4EEB01(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
         {
             // Bind: LastName <-> LastNameText
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

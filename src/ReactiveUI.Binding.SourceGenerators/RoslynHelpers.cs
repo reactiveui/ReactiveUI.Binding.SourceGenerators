@@ -14,104 +14,82 @@ namespace ReactiveUI.Binding.SourceGenerators;
 /// </summary>
 internal static class RoslynHelpers
 {
-    /// <summary>
-    /// Pipeline A predicate: detects class declarations with a base list (potential INPC, IRO, DP, etc.).
-    /// </summary>
+    /// <summary>Pipeline A predicate: detects class declarations with a base list (potential INPC, IRO, DP, etc.).</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a class with a base list; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsClassWithBaseList(SyntaxNode node, CancellationToken ct)
-        => node is ClassDeclarationSyntax { BaseList.Types.Count: > 0 };
+    internal static bool IsClassWithBaseList(SyntaxNode node, CancellationToken ct) =>
+        node is ClassDeclarationSyntax { BaseList.Types.Count: > 0 };
 
-    /// <summary>
-    /// Pipeline B predicate: detects WhenChanged invocations.
-    /// </summary>
+    /// <summary>Pipeline B predicate: detects WhenChanged invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a WhenChanged invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsWhenChangedInvocation(SyntaxNode node, CancellationToken ct)
-        => node is InvocationExpressionSyntax
+    internal static bool IsWhenChangedInvocation(SyntaxNode node, CancellationToken ct) =>
+        node is InvocationExpressionSyntax invocation
+        && invocation.Expression is MemberAccessExpressionSyntax
         {
-            Expression: MemberAccessExpressionSyntax
-            {
-                Name.Identifier.Text: Constants.WhenChangedMethodName
-            }
+            Name.Identifier.Text: Constants.WhenChangedMethodName
         };
 
-    /// <summary>
-    /// Pipeline B predicate: detects WhenChanging invocations.
-    /// </summary>
+    /// <summary>Pipeline B predicate: detects WhenChanging invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a WhenChanging invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsWhenChangingInvocation(SyntaxNode node, CancellationToken ct)
-        => node is InvocationExpressionSyntax
+    internal static bool IsWhenChangingInvocation(SyntaxNode node, CancellationToken ct) =>
+        node is InvocationExpressionSyntax invocation
+        && invocation.Expression is MemberAccessExpressionSyntax
         {
-            Expression: MemberAccessExpressionSyntax
-            {
-                Name.Identifier.Text: Constants.WhenChangingMethodName
-            }
+            Name.Identifier.Text: Constants.WhenChangingMethodName
         };
 
-    /// <summary>
-    /// Pipeline B predicate: detects BindOneWay or BindTwoWay invocations.
-    /// </summary>
+    /// <summary>Pipeline B predicate: detects BindOneWay or BindTwoWay invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a bind invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindInvocation(SyntaxNode node, CancellationToken ct)
-        => node is InvocationExpressionSyntax
+    internal static bool IsBindInvocation(SyntaxNode node, CancellationToken ct) =>
+        node is InvocationExpressionSyntax invocation
+        && invocation.Expression is MemberAccessExpressionSyntax
         {
-            Expression: MemberAccessExpressionSyntax
-            {
-                Name.Identifier.Text: Constants.BindOneWayMethodName or Constants.BindTwoWayMethodName
-                or Constants.OneWayBindMethodName or Constants.BindMethodName
-            }
+            Name.Identifier.Text: Constants.BindOneWayMethodName or Constants.BindTwoWayMethodName
+            or Constants.OneWayBindMethodName or Constants.BindMethodName
         };
 
-    /// <summary>
-    /// Checks if a syntax node is a Bind (view-first two-way) invocation specifically.
-    /// </summary>
+    /// <summary>Checks if a syntax node is a Bind (view-first two-way) invocation specifically.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a Bind invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindSpecificInvocation(SyntaxNode node, CancellationToken ct)
-        => IsBindInvocation(node, ct) && GetMemberAccessName(node) == Constants.BindMethodName;
+    internal static bool IsBindSpecificInvocation(SyntaxNode node, CancellationToken ct) =>
+        IsBindInvocation(node, ct) && GetMemberAccessName(node) == Constants.BindMethodName;
 
-    /// <summary>
-    /// Checks if a syntax node is a BindOneWay invocation specifically.
-    /// </summary>
+    /// <summary>Checks if a syntax node is a BindOneWay invocation specifically.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a BindOneWay invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindOneWaySpecificInvocation(SyntaxNode node, CancellationToken ct)
-        => IsBindInvocation(node, ct) && GetMemberAccessName(node) == Constants.BindOneWayMethodName;
+    internal static bool IsBindOneWaySpecificInvocation(SyntaxNode node, CancellationToken ct) =>
+        IsBindInvocation(node, ct) && GetMemberAccessName(node) == Constants.BindOneWayMethodName;
 
-    /// <summary>
-    /// Checks if a syntax node is a BindTwoWay invocation specifically.
-    /// </summary>
+    /// <summary>Checks if a syntax node is a BindTwoWay invocation specifically.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a BindTwoWay invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindTwoWaySpecificInvocation(SyntaxNode node, CancellationToken ct)
-        => IsBindInvocation(node, ct) && GetMemberAccessName(node) == Constants.BindTwoWayMethodName;
+    internal static bool IsBindTwoWaySpecificInvocation(SyntaxNode node, CancellationToken ct) =>
+        IsBindInvocation(node, ct) && GetMemberAccessName(node) == Constants.BindTwoWayMethodName;
 
-    /// <summary>
-    /// Checks if a syntax node is a OneWayBind invocation specifically.
-    /// </summary>
+    /// <summary>Checks if a syntax node is a OneWayBind invocation specifically.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a OneWayBind invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsOneWayBindSpecificInvocation(SyntaxNode node, CancellationToken ct)
-        => IsBindInvocation(node, ct) && GetMemberAccessName(node) == Constants.OneWayBindMethodName;
+    internal static bool IsOneWayBindSpecificInvocation(SyntaxNode node, CancellationToken ct) =>
+        IsBindInvocation(node, ct) && GetMemberAccessName(node) == Constants.OneWayBindMethodName;
 
     /// <summary>
     /// Extracts the method name from a member access invocation expression.
@@ -120,109 +98,80 @@ internal static class RoslynHelpers
     /// <param name="node">The syntax node (expected to be an InvocationExpressionSyntax).</param>
     /// <returns>The method name, or null.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static string? GetMemberAccessName(SyntaxNode node)
-    {
-        if (node is not InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax memberAccess })
-        {
-            return null;
-        }
+    internal static string? GetMemberAccessName(SyntaxNode node) =>
+        node is not InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax memberAccess }
+            ? null
+            : memberAccess.Name.Identifier.Text;
 
-        return memberAccess.Name.Identifier.Text;
-    }
-
-    /// <summary>
-    /// Pipeline B predicate: detects WhenAnyValue invocations only.
-    /// </summary>
+    /// <summary>Pipeline B predicate: detects WhenAnyValue invocations only.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a WhenAnyValue invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsWhenAnyValueInvocation(SyntaxNode node, CancellationToken ct)
-        => node is InvocationExpressionSyntax
+    internal static bool IsWhenAnyValueInvocation(SyntaxNode node, CancellationToken ct) =>
+        node is InvocationExpressionSyntax invocation
+        && invocation.Expression is MemberAccessExpressionSyntax
         {
-            Expression: MemberAccessExpressionSyntax
-            {
-                Name.Identifier.Text: Constants.WhenAnyValueMethodName
-            }
+            Name.Identifier.Text: Constants.WhenAnyValueMethodName
         };
 
-    /// <summary>
-    /// Pipeline B predicate: detects WhenAny invocations (with IObservedChange selector).
-    /// </summary>
+    /// <summary>Pipeline B predicate: detects WhenAny invocations (with IObservedChange selector).</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a WhenAny invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsWhenAnyInvocation(SyntaxNode node, CancellationToken ct)
-        => node is InvocationExpressionSyntax
+    internal static bool IsWhenAnyInvocation(SyntaxNode node, CancellationToken ct) =>
+        node is InvocationExpressionSyntax invocation
+        && invocation.Expression is MemberAccessExpressionSyntax
         {
-            Expression: MemberAccessExpressionSyntax
-            {
-                Name.Identifier.Text: Constants.WhenAnyMethodName
-            }
+            Name.Identifier.Text: Constants.WhenAnyMethodName
         };
 
-    /// <summary>
-    /// Pipeline B predicate: detects WhenAnyObservable invocations.
-    /// </summary>
+    /// <summary>Pipeline B predicate: detects WhenAnyObservable invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a WhenAnyObservable invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsWhenAnyObservableInvocation(SyntaxNode node, CancellationToken ct)
-        => node is InvocationExpressionSyntax
+    internal static bool IsWhenAnyObservableInvocation(SyntaxNode node, CancellationToken ct) =>
+        node is InvocationExpressionSyntax invocation
+        && invocation.Expression is MemberAccessExpressionSyntax
         {
-            Expression: MemberAccessExpressionSyntax
-            {
-                Name.Identifier.Text: Constants.WhenAnyObservableMethodName
-            }
+            Name.Identifier.Text: Constants.WhenAnyObservableMethodName
         };
 
-    /// <summary>
-    /// Pipeline B predicate: detects BindInteraction invocations.
-    /// </summary>
+    /// <summary>Pipeline B predicate: detects BindInteraction invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a BindInteraction invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindInteractionInvocation(SyntaxNode node, CancellationToken ct)
-        => node is InvocationExpressionSyntax
+    internal static bool IsBindInteractionInvocation(SyntaxNode node, CancellationToken ct) =>
+        node is InvocationExpressionSyntax invocation
+        && invocation.Expression is MemberAccessExpressionSyntax
         {
-            Expression: MemberAccessExpressionSyntax
-            {
-                Name.Identifier.Text: Constants.BindInteractionMethodName
-            }
+            Name.Identifier.Text: Constants.BindInteractionMethodName
         };
 
-    /// <summary>
-    /// Pipeline B predicate: detects BindCommand invocations.
-    /// </summary>
+    /// <summary>Pipeline B predicate: detects BindCommand invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a BindCommand invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindCommandInvocation(SyntaxNode node, CancellationToken ct)
-        => node is InvocationExpressionSyntax
+    internal static bool IsBindCommandInvocation(SyntaxNode node, CancellationToken ct) =>
+        node is InvocationExpressionSyntax invocation
+        && invocation.Expression is MemberAccessExpressionSyntax
         {
-            Expression: MemberAccessExpressionSyntax
-            {
-                Name.Identifier.Text: Constants.BindCommandMethodName
-            }
+            Name.Identifier.Text: Constants.BindCommandMethodName
         };
 
-    /// <summary>
-    /// Pipeline B predicate: detects BindTo invocations (observable stream to target property).
-    /// </summary>
+    /// <summary>Pipeline B predicate: detects BindTo invocations (observable stream to target property).</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a BindTo invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindToInvocation(SyntaxNode node, CancellationToken ct)
-        => node is InvocationExpressionSyntax
+    internal static bool IsBindToInvocation(SyntaxNode node, CancellationToken ct) =>
+        node is InvocationExpressionSyntax invocation
+        && invocation.Expression is MemberAccessExpressionSyntax
         {
-            Expression: MemberAccessExpressionSyntax
-            {
-                Name.Identifier.Text: Constants.BindToMethodName
-            }
+            Name.Identifier.Text: Constants.BindToMethodName
         };
 }

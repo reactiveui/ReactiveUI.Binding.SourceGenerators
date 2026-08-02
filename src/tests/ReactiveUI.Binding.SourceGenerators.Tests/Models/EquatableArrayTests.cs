@@ -7,14 +7,22 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Models;
 
-/// <summary>
-/// Tests for <see cref="EquatableArray{T}"/> methods.
-/// </summary>
+/// <summary>Tests for <see cref="EquatableArray{T}"/> methods.</summary>
 public class EquatableArrayTests
 {
-    /// <summary>
-    /// Verifies ComputeHashCode returns 0 for null array.
-    /// </summary>
+    /// <summary>The fully qualified name of the <c>Int32</c> type used by these tests.</summary>
+    private const string Int32TypeName = "global::System.Int32";
+
+    /// <summary>The fully qualified name of the <c>String</c> type used by these tests.</summary>
+    private const string StringTypeName = "global::System.String";
+
+    /// <summary>The fully qualified name of the <c>global::T</c> type used by these tests.</summary>
+    private const string GlobalTTypeName = "global::T";
+
+    /// <summary>The fully qualified name of the <c>VM</c> type used by these tests.</summary>
+    private const string VMTypeName = "global::TestApp.VM";
+
+    /// <summary>Verifies ComputeHashCode returns 0 for null array.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputeHashCode_NullArray_ReturnsZero()
@@ -24,30 +32,27 @@ public class EquatableArrayTests
         await Assert.That(result).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies ComputeHashCode returns consistent hash for empty array.
-    /// </summary>
+    /// <summary>Verifies ComputeHashCode returns consistent hash for empty array.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputeHashCode_EmptyArray_ReturnsConsistentHash()
     {
+        const int Expected = 17;
         var hash1 = EquatableArray<PropertyPathSegment>.ComputeHashCode([]);
         var hash2 = EquatableArray<PropertyPathSegment>.ComputeHashCode([]);
 
         await Assert.That(hash1).IsEqualTo(hash2);
-        await Assert.That(hash1).IsEqualTo(17); // Hash seed with no elements
+        await Assert.That(hash1).IsEqualTo(Expected); // Hash seed with no elements
     }
 
-    /// <summary>
-    /// Verifies ComputeHashCode returns same hash for same content in different arrays.
-    /// </summary>
+    /// <summary>Verifies ComputeHashCode returns same hash for same content in different arrays.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputeHashCode_SameContent_ReturnsSameHash()
     {
-        var seg = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM", true);
+        var seg = new PropertyPathSegment("Name", StringTypeName, VMTypeName, true);
         var arr1 = new[] { seg };
-        var arr2 = new[] { new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM", true) };
+        var arr2 = new[] { new PropertyPathSegment("Name", StringTypeName, VMTypeName, true) };
 
         var hash1 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr1);
         var hash2 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr2);
@@ -55,15 +60,13 @@ public class EquatableArrayTests
         await Assert.That(hash1).IsEqualTo(hash2);
     }
 
-    /// <summary>
-    /// Verifies ComputeHashCode returns different hash for different content.
-    /// </summary>
+    /// <summary>Verifies ComputeHashCode returns different hash for different content.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ComputeHashCode_DifferentContent_ReturnsDifferentHash()
     {
-        var arr1 = new[] { new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM", true) };
-        var arr2 = new[] { new PropertyPathSegment("Age", "global::System.Int32", "global::TestApp.VM", false) };
+        var arr1 = new[] { new PropertyPathSegment("Name", StringTypeName, VMTypeName, true) };
+        var arr2 = new[] { new PropertyPathSegment("Age", Int32TypeName, VMTypeName, false) };
 
         var hash1 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr1);
         var hash2 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr2);
@@ -71,14 +74,12 @@ public class EquatableArrayTests
         await Assert.That(hash1).IsNotEqualTo(hash2);
     }
 
-    /// <summary>
-    /// Verifies EquatableArray constructor caches hash code matching ComputeHashCode.
-    /// </summary>
+    /// <summary>Verifies EquatableArray constructor caches hash code matching ComputeHashCode.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Constructor_CachesHashCode_MatchesComputeHashCode()
     {
-        var seg = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM", true);
+        var seg = new PropertyPathSegment("Name", StringTypeName, VMTypeName, true);
         var arr = new[] { seg };
 
         var equatable = new EquatableArray<PropertyPathSegment>(arr);
@@ -87,9 +88,7 @@ public class EquatableArrayTests
         await Assert.That(equatable.GetHashCode()).IsEqualTo(expected);
     }
 
-    /// <summary>
-    /// Verifies default-constructed EquatableArray has hash code 0.
-    /// </summary>
+    /// <summary>Verifies default-constructed EquatableArray has hash code 0.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task DefaultConstructed_HashCode_ReturnsZero()
@@ -99,39 +98,33 @@ public class EquatableArrayTests
         await Assert.That(defaultArray.GetHashCode()).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies equal arrays are equal via Equals method.
-    /// </summary>
+    /// <summary>Verifies equal arrays are equal via Equals method.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Equals_SameContent_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+            [new("Name", StringTypeName, VMTypeName, true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+            [new("Name", StringTypeName, VMTypeName, true)]);
 
         await Assert.That(arr1.Equals(arr2)).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies different arrays are not equal via Equals method.
-    /// </summary>
+    /// <summary>Verifies different arrays are not equal via Equals method.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Equals_DifferentContent_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+            [new("Name", StringTypeName, VMTypeName, true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new("Age", "global::System.Int32", "global::TestApp.VM", false)]);
+            [new("Age", Int32TypeName, VMTypeName, false)]);
 
         await Assert.That(arr1.Equals(arr2)).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies default arrays are equal to each other.
-    /// </summary>
+    /// <summary>Verifies default arrays are equal to each other.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Equals_BothDefault_ReturnsTrue()
@@ -142,24 +135,21 @@ public class EquatableArrayTests
         await Assert.That(arr1.Equals(arr2)).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies Length returns the number of elements.
-    /// </summary>
+    /// <summary>Verifies Length returns the number of elements.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Length_MultipleElements_ReturnsCount()
     {
+        const int ExpectedArrCount = 2;
         var arr = new EquatableArray<PropertyPathSegment>([
-            new("A", "global::System.String", "global::T", true),
-            new("B", "global::System.Int32", "global::T", false)
+            new("A", StringTypeName, GlobalTTypeName, true),
+            new("B", Int32TypeName, GlobalTTypeName, false)
         ]);
 
-        await Assert.That(arr.Length).IsEqualTo(2);
+        await Assert.That(arr.Length).IsEqualTo(ExpectedArrCount);
     }
 
-    /// <summary>
-    /// Verifies Length returns 0 for default-constructed array.
-    /// </summary>
+    /// <summary>Verifies Length returns 0 for default-constructed array.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Length_DefaultConstructed_ReturnsZero()
@@ -177,7 +167,7 @@ public class EquatableArrayTests
     [Test]
     public async Task ComputeHashCode_NullElements_UsesZeroForNullHashCode()
     {
-        var arr = new PropertyPathSegment?[] { null!, new("Name", "global::System.String", "global::T", true), null! };
+        var arr = new PropertyPathSegment?[] { null!, new("Name", StringTypeName, GlobalTTypeName, true), null! };
 
         // The hash should incorporate 0 for null elements and the actual hash for non-null
         var hash = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr!);
@@ -189,155 +179,136 @@ public class EquatableArrayTests
         // Verify it differs from an array with all non-null elements
         var nonNullArr = new[]
         {
-            new PropertyPathSegment("A", "global::System.String", "global::T", true),
-            new PropertyPathSegment("Name", "global::System.String", "global::T", true),
-            new PropertyPathSegment("B", "global::System.String", "global::T", true)
+            new PropertyPathSegment("A", StringTypeName, GlobalTTypeName, true),
+            new PropertyPathSegment("Name", StringTypeName, GlobalTTypeName, true),
+            new PropertyPathSegment("B", StringTypeName, GlobalTTypeName, true)
         };
 
         var nonNullHash = EquatableArray<PropertyPathSegment>.ComputeHashCode(nonNullArr);
         await Assert.That(hash).IsNotEqualTo(nonNullHash);
     }
 
-    /// <summary>
-    /// Verifies operator== returns true for equal arrays.
-    /// </summary>
+    /// <summary>Verifies operator== returns true for equal arrays.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OperatorEquals_SameContent_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::T", true)]);
+            [new("Name", StringTypeName, GlobalTTypeName, true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::T", true)]);
+            [new("Name", StringTypeName, GlobalTTypeName, true)]);
 
         await Assert.That(arr1 == arr2).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies operator!= returns true for different arrays.
-    /// </summary>
+    /// <summary>Verifies operator!= returns true for different arrays.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OperatorNotEquals_DifferentContent_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::T", true)]);
+            [new("Name", StringTypeName, GlobalTTypeName, true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new("Age", "global::System.Int32", "global::T", false)]);
+            [new("Age", Int32TypeName, GlobalTTypeName, false)]);
 
         await Assert.That(arr1 != arr2).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies the indexer returns the correct element at each position.
-    /// </summary>
+    /// <summary>Verifies the indexer returns the correct element at each position.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Indexer_ReturnsCorrectElement()
     {
-        var seg0 = new PropertyPathSegment("Name", "global::System.String", "global::TestApp.VM", true);
-        var seg1 = new PropertyPathSegment("Age", "global::System.Int32", "global::TestApp.VM", false);
+        var seg0 = new PropertyPathSegment("Name", StringTypeName, VMTypeName, true);
+        var seg1 = new PropertyPathSegment("Age", Int32TypeName, VMTypeName, false);
         var arr = new EquatableArray<PropertyPathSegment>([seg0, seg1]);
 
         await Assert.That(arr[0]).IsEqualTo(seg0);
         await Assert.That(arr[1]).IsEqualTo(seg1);
     }
 
-    /// <summary>
-    /// Verifies Equals(object) returns true when passed an equal EquatableArray boxed as object.
-    /// </summary>
+    /// <summary>Verifies Equals(object) returns true when passed an equal EquatableArray boxed as object.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Equals_ObjectOverload_WithSameType_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+            [new("Name", StringTypeName, VMTypeName, true)]);
         object obj = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+            [new("Name", StringTypeName, VMTypeName, true)]);
 
         await Assert.That(arr1.Equals(obj)).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies Equals(object) returns false when passed a different type.
-    /// </summary>
+    /// <summary>Verifies Equals(object) returns false when passed a different type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Equals_ObjectOverload_WithDifferentType_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+            [new("Name", StringTypeName, VMTypeName, true)]);
 
         await Assert.That(arr1.Equals("not an array")).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies Equals(object) returns false when passed null.
-    /// </summary>
+    /// <summary>Verifies Equals(object) returns false when passed null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Equals_ObjectOverload_WithNull_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+            [new("Name", StringTypeName, VMTypeName, true)]);
 
         await Assert.That(arr1.Equals((object?)null)).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies a default array is not equal to a non-default array.
-    /// </summary>
+    /// <summary>Verifies a default array is not equal to a non-default array.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Equals_DefaultVsNonDefault_ReturnsFalse()
     {
         var defaultArr = default(EquatableArray<PropertyPathSegment>);
         var nonDefaultArr = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+            [new("Name", StringTypeName, VMTypeName, true)]);
 
         await Assert.That(defaultArr.Equals(nonDefaultArr)).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies arrays with different lengths are not equal.
-    /// </summary>
+    /// <summary>Verifies arrays with different lengths are not equal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Equals_DifferentLengths_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+            [new("Name", StringTypeName, VMTypeName, true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>([
-            new("Name", "global::System.String", "global::TestApp.VM", true),
-            new("Age", "global::System.Int32", "global::TestApp.VM", false)
+            new("Name", StringTypeName, VMTypeName, true),
+            new("Age", Int32TypeName, VMTypeName, false)
         ]);
 
         await Assert.That(arr1.Equals(arr2)).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies the generic enumerator iterates all elements in order.
-    /// </summary>
+    /// <summary>Verifies the generic enumerator iterates all elements in order.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetEnumerator_IteratesAllElements()
     {
-        var seg0 = new PropertyPathSegment("A", "global::System.String", "global::TestApp.VM", true);
-        var seg1 = new PropertyPathSegment("B", "global::System.Int32", "global::TestApp.VM", false);
-        var seg2 = new PropertyPathSegment("C", "global::System.Boolean", "global::TestApp.VM", false);
+        const int ExpectedListCount = 3;
+        var seg0 = new PropertyPathSegment("A", StringTypeName, VMTypeName, true);
+        var seg1 = new PropertyPathSegment("B", Int32TypeName, VMTypeName, false);
+        var seg2 = new PropertyPathSegment("C", "global::System.Boolean", VMTypeName, false);
         var arr = new EquatableArray<PropertyPathSegment>([seg0, seg1, seg2]);
 
         var list = arr.ToList();
 
-        await Assert.That(list.Count).IsEqualTo(3);
+        await Assert.That(list.Count).IsEqualTo(ExpectedListCount);
         await Assert.That(list[0]).IsEqualTo(seg0);
         await Assert.That(list[1]).IsEqualTo(seg1);
         await Assert.That(list[2]).IsEqualTo(seg2);
     }
 
-    /// <summary>
-    /// Verifies iterating a default-constructed array yields no elements.
-    /// </summary>
+    /// <summary>Verifies iterating a default-constructed array yields no elements.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GetEnumerator_DefaultArray_IteratesNothing()
@@ -353,16 +324,15 @@ public class EquatableArrayTests
         await Assert.That(count).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies the non-generic IEnumerable.GetEnumerator works correctly.
-    /// </summary>
+    /// <summary>Verifies the non-generic IEnumerable.GetEnumerator works correctly.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NonGenericGetEnumerator_Works()
     {
+        const int Expected = 2;
         var arr = new EquatableArray<PropertyPathSegment>([
-            new("Name", "global::System.String", "global::TestApp.VM", true),
-            new("Age", "global::System.Int32", "global::TestApp.VM", false)
+            new("Name", StringTypeName, VMTypeName, true),
+            new("Age", Int32TypeName, VMTypeName, false)
         ]);
 
         var enumerator = ((IEnumerable)arr).GetEnumerator();
@@ -372,12 +342,10 @@ public class EquatableArrayTests
             count++;
         }
 
-        await Assert.That(count).IsEqualTo(2);
+        await Assert.That(count).IsEqualTo(Expected);
     }
 
-    /// <summary>
-    /// Verifies operator== returns true for two default-constructed instances.
-    /// </summary>
+    /// <summary>Verifies operator== returns true for two default-constructed instances.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OperatorEquals_BothDefault_ReturnsTrue()
@@ -388,17 +356,15 @@ public class EquatableArrayTests
         await Assert.That(arr1 == arr2).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies operator!= returns false for arrays with the same content.
-    /// </summary>
+    /// <summary>Verifies operator!= returns false for arrays with the same content.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OperatorNotEquals_SameContent_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+            [new("Name", StringTypeName, VMTypeName, true)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", "global::System.String", "global::TestApp.VM", true)]);
+            [new("Name", StringTypeName, VMTypeName, true)]);
 
         await Assert.That(arr1 != arr2).IsFalse();
     }

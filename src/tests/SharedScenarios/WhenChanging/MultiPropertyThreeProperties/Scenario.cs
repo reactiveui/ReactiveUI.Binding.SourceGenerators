@@ -7,16 +7,12 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenChanging.MultiPropertyThreeProperties;
 
-/// <summary>
-/// Exercises WhenChanging with three properties returning a tuple.
-/// </summary>
+/// <summary>Exercises WhenChanging with three properties returning a tuple.</summary>
 public static class Scenario
 {
-    /// <summary>
-    /// Creates a WhenChanging observable for Name, Age, and Score.
-    /// </summary>
+    /// <summary>Creates a WhenChanging observable for Name, Age, and Score.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of (name, age, score) tuples (before change).</returns>
-    public static IObservable<(string Name, int Age, double Score)> Execute(MyViewModel vm)
-        => vm.WhenChanging(x => x.Name, x => x.Age, x => x.Score);
+    public static IObservable<(string Name, int Age, double Score)> Execute(MyViewModel vm) =>
+        vm.WhenChanging(x => x.Name, x => x.Age, x => x.Score);
 }

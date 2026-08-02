@@ -20,7 +20,12 @@ jobs:
             sonarOrganization: reactiveui
             sonarExclusions: '**/tests/**,**/benchmarks/**,**/TestResults/**'
             sonarCoverageExclusions: '**/tests/**,**/benchmarks/**,**/*Tests/**,**/*Tests.cs,**/*TestModels/**'
-            sonarCpdExclusions: '**/tests/**,**/benchmarks/**'
+            # Copy-paste detection is switched off for the arity-expanded surface and the platform packages.
+            # A *.WideArity.cs file is the same operator written once per type-parameter count, and the
+            # CombineLatest observables are one class per arity; each repetition is what makes the call site
+            # allocation-free and reflection-free, so collapsing them is not an option. The platform packages
+            # implement the same small abstractions against different UI frameworks.
+            sonarCpdExclusions: '**/tests/**,**/benchmarks/**,**/*.WideArity.cs,**/Observables/CombineLatest*Observable.cs,**/ReactiveUI.Binding.Maui.Shared/**,**/ReactiveUI.Binding.Wpf.Shared/**,**/ReactiveUI.Binding.WinForms.Shared/**,**/ReactiveUI.Binding.Platform.Shared/**'
             sonarTestExclusions: '**/tests/**,**/benchmarks/**'
             # Matches ci-build.yml: the MTP/TUnit suite is far slower on Windows net10
             # than on net8/9, so allow generous headroom for the coverage run.

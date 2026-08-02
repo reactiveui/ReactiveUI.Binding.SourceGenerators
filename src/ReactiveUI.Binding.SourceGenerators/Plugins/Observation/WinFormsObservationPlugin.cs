@@ -67,12 +67,12 @@ internal sealed class WinFormsObservationPlugin : IObservationPlugin
     {
         if (isBeforeChange)
         {
-            sb.Append(
+            _ = sb.Append(
                 $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}))");
             return;
         }
 
-        sb.Append($"new global::ReactiveUI.Binding.Observables.EventObservable<{segment.PropertyTypeFullName}>(")
+        _ = sb.Append($"new global::ReactiveUI.Binding.Observables.EventObservable<{segment.PropertyTypeFullName}>(")
             .Append($"__h => (({castTypeName}){rootVar}).{segment.PropertyName}Changed += __h, ")
             .Append($"__h => (({castTypeName}){rootVar}).{segment.PropertyName}Changed -= __h, ")
             .Append($"() => (({castTypeName}){rootVar}).{segment.PropertyName}, ")
@@ -91,12 +91,12 @@ internal sealed class WinFormsObservationPlugin : IObservationPlugin
     {
         if (isBeforeChange)
         {
-            sb.Append(
+            _ = sb.Append(
                 $"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
             return;
         }
 
-        sb.Append($"""
+        _ = sb.Append($"""
                                var {varName} = new global::ReactiveUI.Binding.Observables.EventObservable<{segment.PropertyTypeFullName}>(
                                    __h => (({castTypeName}){rootVar}).{segment.PropertyName}Changed += __h,
                                    __h => (({castTypeName}){rootVar}).{segment.PropertyName}Changed -= __h,
@@ -116,13 +116,13 @@ internal sealed class WinFormsObservationPlugin : IObservationPlugin
     {
         if (isBeforeChange)
         {
-            sb.AppendLine(
-                $"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>" +
-                $")new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
+            _ = sb
+                .Append($"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>")
+                .AppendLine($")new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
             return;
         }
 
-        sb.AppendLine($"""
+        _ = sb.AppendLine($"""
             var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.EventObservable<{segment.PropertyTypeFullName}>(
                 __h => (({castTypeName}){rootVar}).{segment.PropertyName}Changed += __h,
                 __h => (({castTypeName}){rootVar}).{segment.PropertyName}Changed -= __h,
@@ -145,7 +145,7 @@ internal sealed class WinFormsObservationPlugin : IObservationPlugin
 
         if (isBeforeChange)
         {
-            sb.AppendLine()
+            _ = sb.AppendLine()
                 .AppendLine($"""
                                      var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
                                          global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
@@ -155,7 +155,7 @@ internal sealed class WinFormsObservationPlugin : IObservationPlugin
             return;
         }
 
-        sb.AppendLine()
+        _ = sb.AppendLine()
             .AppendLine($"""
                                  var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
                                      global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},

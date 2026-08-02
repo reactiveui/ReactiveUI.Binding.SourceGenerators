@@ -6,18 +6,12 @@ using System.Windows.Input;
 
 namespace SharedScenarios.BindCommand.CommandPropertyObsParam;
 
-/// <summary>
-/// A WPF-like button with Command and CommandParameter properties.
-/// </summary>
+/// <summary>A WPF-like button with Command and CommandParameter properties.</summary>
 public class WpfLikeButton
 {
-    /// <summary>
-    /// Gets or sets the command.
-    /// </summary>
+    /// <summary>Gets or sets the command.</summary>
     public ICommand? Command { get; set; }
 
-    /// <summary>
-    /// Gets or sets the command parameter.
-    /// </summary>
+    /// <summary>Gets or sets the command parameter.</summary>
     public object? CommandParameter { get; set; }
 }

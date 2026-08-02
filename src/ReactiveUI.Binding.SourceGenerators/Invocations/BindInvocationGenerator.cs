@@ -4,34 +4,24 @@
 
 using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
-using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Invocations;
 
-/// <summary>
-/// Detects Bind (view-first two-way binding) invocations and generates per-invocation binding code.
-/// </summary>
+/// <summary>Detects Bind (view-first two-way binding) invocations and generates per-invocation binding code.</summary>
 internal static class BindInvocationGenerator
 {
-    /// <summary>
-    /// Registers the Bind invocation detection pipeline.
-    /// </summary>
+    /// <summary>Registers the Bind invocation detection pipeline.</summary>
     /// <param name="context">The generator initialization context.</param>
+    /// <param name="invocations">The detected invocations of this API.</param>
     /// <param name="allClasses">The shared type detection pipeline.</param>
     /// <param name="languageFeatures">The consumer compilation's C# language-feature snapshot.</param>
     internal static void Register(
-        IncrementalGeneratorInitializationContext context,
+        in IncrementalGeneratorInitializationContext context,
+        IncrementalValuesProvider<BindingInvocationInfo> invocations,
         IncrementalValuesProvider<ClassBindingInfo> allClasses,
         IncrementalValueProvider<LanguageFeatures> languageFeatures)
     {
-        var invocations = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                static (node, ct) => RoslynHelpers.IsBindSpecificInvocation(node, ct),
-                BindingExtractor.ExtractBindInvocation)
-            .Where(static x => x is not null)
-            .Select(static (x, _) => x!);
-
         var combined = invocations.Collect()
             .Combine(allClasses.Collect())
             .Combine(languageFeatures);
@@ -41,12 +31,12 @@ internal static class BindInvocationGenerator
             static (ctx, data) =>
             {
                 var source = BindCodeGenerator.Generate(data.Left.Left, data.Left.Right, data.Right);
-                if (source == null)
+                if (source is null)
                 {
                     return;
                 }
 
-                ctx.AddSource("BindDispatch.g.cs", source);
+                CodeGeneration.CodeGeneratorHelpers.AddGeneratedSource(ctx, "BindDispatch.g.cs", source, data.Right);
             });
     }
 }

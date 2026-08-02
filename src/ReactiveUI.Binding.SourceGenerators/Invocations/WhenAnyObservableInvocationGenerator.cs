@@ -4,7 +4,6 @@
 
 using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
-using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Invocations;
@@ -16,24 +15,17 @@ namespace ReactiveUI.Binding.SourceGenerators.Invocations;
 /// </summary>
 internal static class WhenAnyObservableInvocationGenerator
 {
-    /// <summary>
-    /// Registers the WhenAnyObservable invocation detection pipeline.
-    /// </summary>
+    /// <summary>Registers the WhenAnyObservable invocation detection pipeline.</summary>
     /// <param name="context">The generator initialization context.</param>
+    /// <param name="invocations">The detected invocations of this API.</param>
     /// <param name="allClasses">The shared type detection pipeline.</param>
     /// <param name="languageFeatures">The consumer compilation's C# language-feature snapshot.</param>
     internal static void Register(
-        IncrementalGeneratorInitializationContext context,
+        in IncrementalGeneratorInitializationContext context,
+        IncrementalValuesProvider<WhenAnyObservableInvocationInfo> invocations,
         IncrementalValuesProvider<ClassBindingInfo> allClasses,
         IncrementalValueProvider<LanguageFeatures> languageFeatures)
     {
-        var invocations = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                RoslynHelpers.IsWhenAnyObservableInvocation,
-                WhenAnyObservableExtractor.ExtractWhenAnyObservableInvocation)
-            .Where(static x => x is not null)
-            .Select(static (x, _) => x!);
-
         var combined = invocations.Collect()
             .Combine(allClasses.Collect())
             .Combine(languageFeatures);
@@ -43,12 +35,12 @@ internal static class WhenAnyObservableInvocationGenerator
             static (ctx, data) =>
             {
                 var source = WhenAnyObservableCodeGenerator.Generate(data.Left.Left, data.Left.Right, data.Right);
-                if (source == null)
+                if (source is null)
                 {
                     return;
                 }
 
-                ctx.AddSource("WhenAnyObservableDispatch.g.cs", source);
+                CodeGeneration.CodeGeneratorHelpers.AddGeneratedSource(ctx, "WhenAnyObservableDispatch.g.cs", source, data.Right);
             });
     }
 }

@@ -9,14 +9,10 @@ using ReactiveUI.Binding.Analyzer.Analyzers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
-/// <summary>
-/// Tests for <see cref="AnalyzerHelpers"/>.
-/// </summary>
+/// <summary>Tests for <see cref="AnalyzerHelpers"/>.</summary>
 public class AnalyzerHelpersTests
 {
-    /// <summary>
-    /// Verifies that ExtractFirstTypeArgument returns null when the method has no type arguments.
-    /// </summary>
+    /// <summary>Verifies that ExtractFirstTypeArgument returns null when the method has no type arguments.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractFirstTypeArgument_NoTypeArguments_ReturnsNull()
@@ -47,9 +43,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that ExtractFirstTypeArgument returns the type when the method has a named type argument.
-    /// </summary>
+    /// <summary>Verifies that ExtractFirstTypeArgument returns the type when the method has a named type argument.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractFirstTypeArgument_WithNamedTypeArgument_ReturnsType()
@@ -86,31 +80,26 @@ public class AnalyzerHelpersTests
         await Assert.That(result!.Name).IsEqualTo("String");
     }
 
-    /// <summary>
-    /// Verifies that IsBindingExtensionMethod returns false when ContainingType is null.
-    /// </summary>
+    /// <summary>Verifies that IsBindingExtensionMethod returns false when ContainingType is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsBindingExtensionMethod_NullContainingType_ReturnsFalse()
     {
         var methodSymbol = Substitute.For<IMethodSymbol>();
-        methodSymbol.ContainingType.Returns((INamedTypeSymbol?)null);
+        _ = methodSymbol.ContainingType.Returns((INamedTypeSymbol?)null);
 
         var result = AnalyzerHelpers.IsBindingExtensionMethod(methodSymbol);
 
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that ExtractFirstTypeArgument returns null when TypeArguments is empty
-    /// (using a substitute method symbol).
-    /// </summary>
+    /// <summary>Verifies that ExtractFirstTypeArgument returns null when TypeArguments is empty (using a substitute method symbol).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractFirstTypeArgument_EmptyTypeArguments_ReturnsNull_Substitute()
     {
         var methodSymbol = Substitute.For<IMethodSymbol>();
-        methodSymbol.TypeArguments.Returns([]);
+        _ = methodSymbol.TypeArguments.Returns([]);
 
         var result = AnalyzerHelpers.ExtractFirstTypeArgument(methodSymbol);
 
@@ -151,9 +140,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that IsBindingExtensionMethod returns true for a method on the generated extension class.
-    /// </summary>
+    /// <summary>Verifies that IsBindingExtensionMethod returns true for a method on the generated extension class.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsBindingExtensionMethod_GeneratedClass_ReturnsTrue()
@@ -184,9 +171,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that IsBindingExtensionMethod returns true for a method on the stub extension class.
-    /// </summary>
+    /// <summary>Verifies that IsBindingExtensionMethod returns true for a method on the stub extension class.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsBindingExtensionMethod_StubClass_ReturnsTrue()
@@ -217,9 +202,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that IsInlineLambda returns true for a SimpleLambdaExpressionSyntax.
-    /// </summary>
+    /// <summary>Verifies that IsInlineLambda returns true for a SimpleLambdaExpressionSyntax.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsInlineLambda_SimpleLambda_ReturnsTrue()
@@ -230,9 +213,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that IsInlineLambda returns true for a ParenthesizedLambdaExpressionSyntax.
-    /// </summary>
+    /// <summary>Verifies that IsInlineLambda returns true for a ParenthesizedLambdaExpressionSyntax.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsInlineLambda_ParenthesizedLambda_ReturnsTrue()
@@ -243,9 +224,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that IsInlineLambda returns false for a non-lambda expression.
-    /// </summary>
+    /// <summary>Verifies that IsInlineLambda returns false for a non-lambda expression.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsInlineLambda_Identifier_ReturnsFalse()
@@ -256,9 +235,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that ImplementsInterface returns false when the type does not implement the interface.
-    /// </summary>
+    /// <summary>Verifies that ImplementsInterface returns false when the type does not implement the interface.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ImplementsInterface_DoesNotImplement_ReturnsFalse()
@@ -288,9 +265,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that ImplementsInterface returns true when the type implements the interface.
-    /// </summary>
+    /// <summary>Verifies that ImplementsInterface returns true when the type implements the interface.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ImplementsInterface_Implements_ReturnsTrue()
@@ -323,9 +298,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that InheritsFrom returns false when the type does not inherit from the base type.
-    /// </summary>
+    /// <summary>Verifies that InheritsFrom returns false when the type does not inherit from the base type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task InheritsFrom_DoesNotInherit_ReturnsFalse()
@@ -355,9 +328,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that InheritsFrom returns true when the type inherits from the base type.
-    /// </summary>
+    /// <summary>Verifies that InheritsFrom returns true when the type inherits from the base type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task InheritsFrom_Inherits_ReturnsTrue()
@@ -387,10 +358,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that LacksObservableMechanism returns false for a non-generic method
-    /// (no type arguments to extract).
-    /// </summary>
+    /// <summary>Verifies that LacksObservableMechanism returns false for a non-generic method (no type arguments to extract).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task LacksObservableMechanism_NonGenericMethod_ReturnsFalse()
@@ -403,10 +371,7 @@ public class AnalyzerHelpersTests
         await Assert.That(sourceType).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that LacksObservableMechanism returns false for a generic method
-    /// whose first type argument implements INPC.
-    /// </summary>
+    /// <summary>Verifies that LacksObservableMechanism returns false for a generic method whose first type argument implements INPC.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task LacksObservableMechanism_GenericWithINPC_ReturnsFalse()
@@ -465,10 +430,7 @@ public class AnalyzerHelpersTests
         await Assert.That(sourceType!.Name).IsEqualTo("PlainVm");
     }
 
-    /// <summary>
-    /// Verifies that LacksBeforeChangeSupport returns false for a non-generic method
-    /// (no type arguments to extract).
-    /// </summary>
+    /// <summary>Verifies that LacksBeforeChangeSupport returns false for a non-generic method (no type arguments to extract).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task LacksBeforeChangeSupport_NonGenericMethod_ReturnsFalse()
@@ -526,10 +488,7 @@ public class AnalyzerHelpersTests
         await Assert.That(mechanism).Contains("INotifyPropertyChanged");
     }
 
-    /// <summary>
-    /// Verifies that ImplementsDataErrorInfo returns false for a non-generic method
-    /// (no type arguments to extract).
-    /// </summary>
+    /// <summary>Verifies that ImplementsDataErrorInfo returns false for a non-generic method (no type arguments to extract).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ImplementsDataErrorInfo_NonGenericMethod_ReturnsFalse()
@@ -641,9 +600,7 @@ public class AnalyzerHelpersTests
         await Assert.That(sourceType!.Name).IsEqualTo("MyVm");
     }
 
-    /// <summary>
-    /// Verifies that HasObservableMechanism returns true when the type implements IReactiveObject.
-    /// </summary>
+    /// <summary>Verifies that HasObservableMechanism returns true when the type implements IReactiveObject.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasObservableMechanism_IReactiveObject_ReturnsTrue()
@@ -703,7 +660,7 @@ public class AnalyzerHelpersTests
         var classDecl = (await tree.GetRootAsync())
             .DescendantNodes()
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
-            .First(c => c.Identifier.Text == "MyVm");
+            .First(static c => c.Identifier.Text == "MyVm");
 
         var typeSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
 
@@ -712,9 +669,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Gets a named type symbol from a compilation by class name.
-    /// </summary>
+    /// <summary>Gets a named type symbol from a compilation by class name.</summary>
     /// <param name="compilation">The compilation.</param>
     /// <param name="className">The class name to find.</param>
     /// <returns>The named type symbol.</returns>
@@ -731,17 +686,13 @@ public class AnalyzerHelpersTests
         return (INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
     }
 
-    /// <summary>
-    /// Creates a compilation from the specified source code.
-    /// </summary>
+    /// <summary>Creates a compilation from the specified source code.</summary>
     /// <param name="source">The source code.</param>
     /// <returns>A CSharpCompilation.</returns>
     private static CSharpCompilation CreateCompilation(string source) =>
         AnalyzerTestHelper.CreateCompilation(source);
 
-    /// <summary>
-    /// Gets a non-generic method symbol and its compilation.
-    /// </summary>
+    /// <summary>Gets a non-generic method symbol and its compilation.</summary>
     /// <returns>The method symbol and compilation.</returns>
     private static (IMethodSymbol MethodSymbol, Compilation Compilation) GetNonGenericMethodSymbol()
     {
@@ -767,9 +718,7 @@ public class AnalyzerHelpersTests
         return (model.GetDeclaredSymbol(methodDecl)!, compilation);
     }
 
-    /// <summary>
-    /// Gets the resolved method symbol from the first invocation in the source.
-    /// </summary>
+    /// <summary>Gets the resolved method symbol from the first invocation in the source.</summary>
     /// <param name="source">The source code containing an invocation.</param>
     /// <returns>The method symbol and compilation.</returns>
     private static (IMethodSymbol MethodSymbol, Compilation Compilation) GetInvocationMethodSymbol(string source)
@@ -813,9 +762,10 @@ public class AnalyzerHelpersTests
         AddReference(typeof(object).Assembly);
 
         // Add System.Runtime by name
-        var systemRuntime = AppDomain.CurrentDomain.GetAssemblies()
-            .FirstOrDefault(a => a.GetName().Name == "System.Runtime");
-        if (systemRuntime != null)
+        var systemRuntime = Array.Find(
+            AppDomain.CurrentDomain.GetAssemblies(),
+            static a => a.GetName().Name == "System.Runtime");
+        if (systemRuntime is not null)
         {
             AddReference(systemRuntime);
         }

@@ -11,16 +11,13 @@ using ReactiveUI.Binding.SourceGenerators;
 
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
 
-/// <summary>
-/// Analyzes types used in binding invocations to detect types with no observable properties.
-/// Reports RXUIBIND002.
-/// </summary>
+/// <summary>Analyzes types used in binding invocations to detect types with no observable properties. Reports RXUIBIND002.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class TypeAnalyzer : DiagnosticAnalyzer
 {
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        [DiagnosticWarnings.NoObservableProperties];
+        ImmutableArray.Create(DiagnosticWarnings.NoObservableProperties);
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
@@ -28,7 +25,7 @@ public class TypeAnalyzer : DiagnosticAnalyzer
         ArgumentExceptionHelper.ThrowIfNull(context);
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
+        context.RegisterOperationAction(static operationContext => AnalyzeInvocation(in operationContext), OperationKind.Invocation);
     }
 
     /// <summary>
@@ -36,7 +33,7 @@ public class TypeAnalyzer : DiagnosticAnalyzer
     /// has any observable property notification mechanism.
     /// </summary>
     /// <param name="context">The operation analysis context.</param>
-    internal static void AnalyzeInvocation(OperationAnalysisContext context)
+    internal static void AnalyzeInvocation(in OperationAnalysisContext context)
     {
         var invocationOp = (IInvocationOperation)context.Operation;
 
@@ -117,7 +114,7 @@ public class TypeAnalyzer : DiagnosticAnalyzer
         ];
 
         var current = typeSymbol.BaseType;
-        while (current != null)
+        while (current is not null)
         {
             if (MatchesAny(current, baseTypes))
             {
@@ -130,9 +127,7 @@ public class TypeAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
-    /// <summary>
-    /// Determines whether <paramref name="symbol"/> equals any of the (possibly null) candidate symbols.
-    /// </summary>
+    /// <summary>Determines whether <paramref name="symbol"/> equals any of the (possibly null) candidate symbols.</summary>
     /// <param name="symbol">The symbol to compare.</param>
     /// <param name="candidates">The candidate symbols; null entries are skipped.</param>
     /// <returns><c>true</c> if <paramref name="symbol"/> matches a non-null candidate; otherwise, <c>false</c>.</returns>
@@ -140,7 +135,7 @@ public class TypeAnalyzer : DiagnosticAnalyzer
     {
         for (var i = 0; i < candidates.Length; i++)
         {
-            if (candidates[i] != null && SymbolEqualityComparer.Default.Equals(symbol, candidates[i]))
+            if (candidates[i] is not null && SymbolEqualityComparer.Default.Equals(symbol, candidates[i]))
             {
                 return true;
             }

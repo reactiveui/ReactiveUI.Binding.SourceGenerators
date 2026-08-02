@@ -7,9 +7,7 @@ using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindInteraction.NonINPCViewModel;
 
-/// <summary>
-/// View that binds an interaction handler.
-/// </summary>
+/// <summary>View that binds an interaction handler.</summary>
 #pragma warning disable CS0067 // Event is never used
 public class MyView : IViewFor, INotifyPropertyChanged
 {

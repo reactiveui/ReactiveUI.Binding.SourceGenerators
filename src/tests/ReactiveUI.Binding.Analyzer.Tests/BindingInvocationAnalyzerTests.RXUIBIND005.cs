@@ -7,14 +7,13 @@ using ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
-/// <summary>
-/// Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND005 (INotifyDataErrorInfo validation).
-/// </summary>
+/// <summary>Tests for <see cref="BindingInvocationAnalyzer"/> — RXUIBIND005 (INotifyDataErrorInfo validation).</summary>
 public partial class BindingInvocationAnalyzerTests
 {
-    /// <summary>
-    /// Verifies RXUIBIND005 is reported when BindOneWay source type implements INotifyDataErrorInfo.
-    /// </summary>
+    /// <summary>The diagnostic id reported when validation binding requires the runtime engine.</summary>
+    private const string ValidationNotGeneratedDiagnosticId = "RXUIBIND005";
+
+    /// <summary>Verifies RXUIBIND005 is reported when BindOneWay source type implements INotifyDataErrorInfo.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND005_BindOneWay_WithDataErrorInfo_ReportsDiagnostic()
@@ -51,13 +50,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var validationDiags = diagnostics.Where(d => d.Id == "RXUIBIND005").ToArray();
+        var validationDiags = diagnostics.Where(static d => d.Id == ValidationNotGeneratedDiagnosticId).ToArray();
         await Assert.That(validationDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND005 is reported for BindTwoWay when source implements INotifyDataErrorInfo.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND005 is reported for BindTwoWay when source implements INotifyDataErrorInfo.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND005_BindTwoWay_WithDataErrorInfo_ReportsDiagnostic()
@@ -94,13 +91,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var validationDiags = diagnostics.Where(d => d.Id == "RXUIBIND005").ToArray();
+        var validationDiags = diagnostics.Where(static d => d.Id == ValidationNotGeneratedDiagnosticId).ToArray();
         await Assert.That(validationDiags.Length).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND005 is NOT reported when source type does not implement INotifyDataErrorInfo.
-    /// </summary>
+    /// <summary>Verifies RXUIBIND005 is NOT reported when source type does not implement INotifyDataErrorInfo.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND005_NoDataErrorInfo_NoDiagnostic()
@@ -134,13 +129,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var validationDiags = diagnostics.Where(d => d.Id == "RXUIBIND005").ToArray();
+        var validationDiags = diagnostics.Where(static d => d.Id == ValidationNotGeneratedDiagnosticId).ToArray();
         await Assert.That(validationDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies RXUIBIND005 is NOT reported for WhenChanged (only applies to binding methods).
-    /// </summary>
+    /// <summary>Verifies RXUIBIND005 is NOT reported for WhenChanged (only applies to binding methods).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND005_WhenChanged_NoDiagnostic()
@@ -170,13 +163,11 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var validationDiags = diagnostics.Where(d => d.Id == "RXUIBIND005").ToArray();
+        var validationDiags = diagnostics.Where(static d => d.Id == ValidationNotGeneratedDiagnosticId).ToArray();
         await Assert.That(validationDiags.Length).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that RXUIBIND005 is NOT reported for WhenChanging (only applies to BindOneWay/BindTwoWay).
-    /// </summary>
+    /// <summary>Verifies that RXUIBIND005 is NOT reported for WhenChanging (only applies to BindOneWay/BindTwoWay).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task RXUIBIND005_WhenChanging_NoDiagnostic()
@@ -207,7 +198,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var validationDiags = diagnostics.Where(d => d.Id == "RXUIBIND005").ToArray();
+        var validationDiags = diagnostics.Where(static d => d.Id == ValidationNotGeneratedDiagnosticId).ToArray();
         await Assert.That(validationDiags.Length).IsEqualTo(0);
     }
 
@@ -256,7 +247,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var validationDiags = diagnostics.Where(d => d.Id == "RXUIBIND005").ToArray();
+        var validationDiags = diagnostics.Where(static d => d.Id == ValidationNotGeneratedDiagnosticId).ToArray();
         await Assert.That(validationDiags.Length).IsEqualTo(1);
     }
 
@@ -298,7 +289,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var validationDiags = diagnostics.Where(d => d.Id == "RXUIBIND005").ToArray();
+        var validationDiags = diagnostics.Where(static d => d.Id == ValidationNotGeneratedDiagnosticId).ToArray();
         await Assert.That(validationDiags.Length).IsEqualTo(0);
     }
 
@@ -342,7 +333,7 @@ public partial class BindingInvocationAnalyzerTests
                                          """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var validationDiags = diagnostics.Where(d => d.Id == "RXUIBIND005").ToArray();
+        var validationDiags = diagnostics.Where(static d => d.Id == ValidationNotGeneratedDiagnosticId).ToArray();
         await Assert.That(validationDiags.Length).IsEqualTo(1);
         var message = validationDiags[0].GetMessage();
         await Assert.That(message).Contains("ValidatingViewModel");
@@ -402,7 +393,7 @@ public partial class BindingInvocationAnalyzerTests
                               """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<BindingInvocationAnalyzer>(Source);
-        var validationDiags = diagnostics.Where(d => d.Id == "RXUIBIND005").ToArray();
+        var validationDiags = diagnostics.Where(static d => d.Id == ValidationNotGeneratedDiagnosticId).ToArray();
         await Assert.That(validationDiags.Length).IsEqualTo(0);
     }
 }

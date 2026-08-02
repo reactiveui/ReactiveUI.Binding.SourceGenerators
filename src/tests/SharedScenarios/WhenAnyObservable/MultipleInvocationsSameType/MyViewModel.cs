@@ -7,27 +7,19 @@ using System.ComponentModel;
 
 namespace SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType;
 
-/// <summary>
-/// ViewModel with two observable string properties for testing multiple same-type WhenAnyObservable invocations.
-/// </summary>
+/// <summary>ViewModel with two observable string properties for testing multiple same-type WhenAnyObservable invocations.</summary>
 public class MyViewModel : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The backing field for <see cref="Command1"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Command1"/>.</summary>
     private IObservable<string>? _command1;
 
-    /// <summary>
-    /// The backing field for <see cref="Command2"/>.
-    /// </summary>
+    /// <summary>The backing field for <see cref="Command2"/>.</summary>
     private IObservable<string>? _command2;
 
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Gets or sets the first command observable.
-    /// </summary>
+    /// <summary>Gets or sets the first command observable.</summary>
     public IObservable<string>? Command1
     {
         get => _command1;
@@ -43,9 +35,7 @@ public class MyViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Gets or sets the second command observable.
-    /// </summary>
+    /// <summary>Gets or sets the second command observable.</summary>
     public IObservable<string>? Command2
     {
         get => _command2;

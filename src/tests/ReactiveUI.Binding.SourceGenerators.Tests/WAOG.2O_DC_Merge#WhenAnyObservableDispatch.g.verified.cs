@@ -5,7 +5,7 @@
 
 using System;
 
-namespace ReactiveUI.Binding
+namespace ReactiveUI.Binding.Generated.TestAssembly
 {
     internal static partial class __ReactiveUIGeneratedBindings
     {
@@ -26,12 +26,12 @@ namespace ReactiveUI.Binding
 
             if (obs1Expression == "x => x.Child.Command1" && obs2Expression == "x => x.Child.Command2")
             {
-                return __WhenAnyObservable_000031E1E650E5C2(objectToMonitor);
+                return __WhenAnyObservable_000031E1E650E356(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
         }
 
-        private static global::System.IObservable<string> __WhenAnyObservable_000031E1E650E5C2(global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ParentViewModel obj)
+        private static global::System.IObservable<string> __WhenAnyObservable_000031E1E650E356(global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ParentViewModel obj)
         {
             var __obsProperty0_s0 = (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>(
                 obj,

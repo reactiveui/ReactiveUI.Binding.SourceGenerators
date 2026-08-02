@@ -13,52 +13,40 @@ namespace ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 /// </summary>
 public static class WhenChangingScenarios
 {
-    /// <summary>
-    /// Single property before-change observation on TestViewModel.Name.
-    /// </summary>
+    /// <summary>Single property before-change observation on TestViewModel.Name.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the Name property value before changes.</returns>
-    public static IObservable<string> SingleProperty_Name(TestViewModel vm)
-        => vm.WhenChanging(x => x.Name);
+    public static IObservable<string> SingleProperty_Name(TestViewModel vm) =>
+        vm.WhenChanging(x => x.Name);
 
-    /// <summary>
-    /// Single property before-change observation on BigViewModel.Prop1.
-    /// </summary>
+    /// <summary>Single property before-change observation on BigViewModel.Prop1.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the Prop1 property value before changes.</returns>
-    public static IObservable<string> SingleProperty_Prop1(BigViewModel vm)
-        => vm.WhenChanging(x => x.Prop1);
+    public static IObservable<string> SingleProperty_Prop1(BigViewModel vm) =>
+        vm.WhenChanging(x => x.Prop1);
 
-    /// <summary>
-    /// Two-property before-change observation returning a tuple.
-    /// </summary>
+    /// <summary>Two-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
-    public static IObservable<(string property1, int property2)> TwoProperties(BigViewModel vm)
-        => vm.WhenChanging(x => x.Prop1, x => x.Prop2);
+    public static IObservable<(string property1, int property2)> TwoProperties(BigViewModel vm) =>
+        vm.WhenChanging(x => x.Prop1, x => x.Prop2);
 
-    /// <summary>
-    /// Three-property before-change observation returning a tuple.
-    /// </summary>
+    /// <summary>Three-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
-    public static IObservable<(string property1, int property2, double property3)> ThreeProperties(BigViewModel vm)
-        => vm.WhenChanging(x => x.Prop1, x => x.Prop2, x => x.Prop3);
+    public static IObservable<(string property1, int property2, double property3)> ThreeProperties(BigViewModel vm) =>
+        vm.WhenChanging(x => x.Prop1, x => x.Prop2, x => x.Prop3);
 
-    /// <summary>
-    /// Four-property before-change observation returning a tuple.
-    /// </summary>
+    /// <summary>Four-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
     public static IObservable<(string property1, int property2, double property3, bool property4)> FourProperties(
-        BigViewModel vm)
-        => vm.WhenChanging(x => x.Prop1, x => x.Prop2, x => x.Prop3, x => x.Prop4);
+        BigViewModel vm) =>
+        vm.WhenChanging(x => x.Prop1, x => x.Prop2, x => x.Prop3, x => x.Prop4);
 
-    /// <summary>
-    /// Deep property chain before-change observation on BigViewModel.Address.City.
-    /// </summary>
+    /// <summary>Deep property chain before-change observation on BigViewModel.Address.City.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the nested City property value before changes.</returns>
-    public static IObservable<string> DeepChain_AddressCity(BigViewModel vm)
-        => vm.WhenChanging(x => x.Address.City);
+    public static IObservable<string> DeepChain_AddressCity(BigViewModel vm) =>
+        vm.WhenChanging(x => x.Address.City);
 }
