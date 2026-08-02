@@ -68,6 +68,13 @@ public sealed class PropertyObservable<T> : IObservable<T>
         /// <summary>The equality comparer used for distinct-until-changed filtering.</summary>
         private readonly EqualityComparer<T> _comparer;
 
+        /// <summary>
+        /// Serializes the initial emit in the constructor with concurrent <see cref="OnPropertyChanged"/>
+        /// invocations on other threads, so the handler always sees a consistent
+        /// <see cref="_hasValue"/> / <see cref="_lastValue"/> snapshot regardless of timing.
+        /// </summary>
+        private readonly Lock _gate = new();
+
         /// <summary>The downstream observer. Set to <see langword="null"/> on disposal.</summary>
         private IObserver<T>? _observer;
 
@@ -90,12 +97,7 @@ public sealed class PropertyObservable<T> : IObservable<T>
             _comparer = EqualityComparer<T>.Default;
 
             parent._source.PropertyChanged += OnPropertyChanged;
-
-            // Emit initial (StartWith) value
-            var initial = parent._getter(parent._source);
-            _lastValue = initial;
-            _hasValue = true;
-            observer.OnNext(initial!);
+            EmitCurrent();
         }
 
         /// <inheritdoc/>
@@ -129,22 +131,37 @@ public sealed class PropertyObservable<T> : IObservable<T>
                 return;
             }
 
-            var observer = Volatile.Read(ref _observer);
-            if (observer is null)
+            EmitCurrent();
+        }
+
+        /// <summary>
+        /// Reads the current property value under <see cref="_gate"/> and forwards it to the downstream
+        /// observer when the distinct-until-changed gate allows. Holding <see cref="_gate"/> across the
+        /// read-decision-emit sequence ensures the constructor's initial emit and any concurrent
+        /// <see cref="OnPropertyChanged"/> invocation cannot interleave on the downstream observer or
+        /// publish a duplicate when both see the same current value.
+        /// </summary>
+        private void EmitCurrent()
+        {
+            lock (_gate)
             {
-                return;
+                var observer = Volatile.Read(ref _observer);
+                if (observer is null)
+                {
+                    return;
+                }
+
+                var value = _parent._getter(_parent._source);
+
+                if (_parent._distinctUntilChanged && _hasValue && _comparer.Equals(value!, _lastValue!))
+                {
+                    return;
+                }
+
+                _lastValue = value;
+                _hasValue = true;
+                observer.OnNext(value!);
             }
-
-            var value = _parent._getter(_parent._source);
-
-            if (_parent._distinctUntilChanged && _hasValue && _comparer.Equals(value!, _lastValue!))
-            {
-                return;
-            }
-
-            _lastValue = value;
-            _hasValue = true;
-            observer.OnNext(value!);
         }
     }
 }
