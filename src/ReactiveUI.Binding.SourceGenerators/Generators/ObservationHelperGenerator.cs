@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
@@ -87,15 +88,26 @@ internal static class ObservationHelperGenerator
 
         var sb = PooledBuilder.Rent(helperKinds.Length * PerKindBufferCapacity);
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
-
-        for (var i = 0; i < helperKinds.Length; i++)
-        {
-            ObservationPluginRegistry.GetPluginByKind(helperKinds[i])?.EmitHelperClasses(sb);
-        }
-
+        AppendHelperDeclarations(sb, helperKinds);
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
         _ = sb.AppendLine();
 
         CodeGeneratorHelpers.AddGeneratedSource(context, HintName, PooledBuilder.ToStringAndReturn(sb), features);
+    }
+
+    /// <summary>Appends the declarations for each of the given observation kinds, in the order given.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="helperKinds">The observation kinds requiring helper declarations.</param>
+    /// <remarks>
+    /// A kind no plugin answers to contributes nothing. <see cref="SelectHelperKinds"/> only ever yields kinds
+    /// it read off a plugin, so the pipeline cannot produce one - but a generator that threw on an unexpected
+    /// kind would fail the consumer's build rather than merely generate less, which is the worse of the two.
+    /// </remarks>
+    internal static void AppendHelperDeclarations(StringBuilder sb, EquatableArray<string> helperKinds)
+    {
+        for (var i = 0; i < helperKinds.Length; i++)
+        {
+            ObservationPluginRegistry.GetPluginByKind(helperKinds[i])?.EmitHelperClasses(sb);
+        }
     }
 }
