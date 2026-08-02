@@ -318,6 +318,65 @@ public class ReactiveNotifyPropertyChangedMixinTests
         await Assert.That(receivedValue).IsEqualTo("Test");
     }
 
+    /// <summary>
+    /// Verifies that a lookup made while no <see cref="ICreatesObservableForProperty"/> is registered
+    /// does not stop the same sender and property from resolving once registration has happened.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObservableForProperty_ByName_LookupBeforeRegistration_ResolvesAfterRegistration()
+    {
+        RxBindingBuilder.ResetForTesting();
+
+        var vm = new LateRegistrationFixture { Name = InitialValue };
+
+        await Assert.That(() => vm.ObservableForProperty<LateRegistrationFixture, string>(
+                nameof(LateRegistrationFixture.Name),
+                skipInitial: false))
+            .ThrowsExactly<InvalidOperationException>();
+
+        EnsureInitialized();
+
+        var values = new List<IObservedChange<LateRegistrationFixture, string>>();
+        using var sub = vm.ObservableForProperty<LateRegistrationFixture, string>(
+                nameof(LateRegistrationFixture.Name),
+                skipInitial: false)
+            .Subscribe(values.Add);
+
+        vm.Name = ChangedValue;
+
+        await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
+    }
+
+    /// <summary>
+    /// Verifies that a nested-chain lookup made while no <see cref="ICreatesObservableForProperty"/>
+    /// is registered does not stop the same sender and property from resolving once registration
+    /// has happened.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NotifyForProperty_LookupBeforeRegistration_ResolvesAfterRegistration()
+    {
+        RxBindingBuilder.ResetForTesting();
+
+        var vm = new LateRegistrationFixture { Title = InitialValue };
+        Expression<Func<LateRegistrationFixture, string>> expr = x => x.Title;
+        var body = Reflection.Rewrite(expr.Body);
+
+        await Assert.That(() => ReactiveNotifyPropertyChangedMixins.NotifyForProperty(vm, body, false))
+            .ThrowsExactly<InvalidOperationException>();
+
+        EnsureInitialized();
+
+        var results = new List<IObservedChange<object?, object?>>();
+        using var sub = ReactiveNotifyPropertyChangedMixins.NotifyForProperty(vm, body, false)
+            .Subscribe(results.Add);
+
+        vm.Title = ChangedValue;
+
+        await Assert.That(results.Count).IsGreaterThanOrEqualTo(1);
+    }
+
     /// <summary>Resets and initializes the ReactiveUI binding infrastructure for testing.</summary>
     private static void EnsureInitialized()
     {

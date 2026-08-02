@@ -29,27 +29,20 @@ public static class ReactiveNotifyPropertyChangedMixins
         "This should never happen, your service locator is probably broken. Please make sure you have registered ICreatesObservableForProperty implementations.";
 
     /// <summary>MRU cache that maps (sender type, property name, before-change flag) to the best <see cref="ICreatesObservableForProperty"/> implementation for that combination.</summary>
+    /// <remarks>
+    /// The entry is supplied through the context argument rather than looked up here, so only a
+    /// resolution that actually found an implementation is ever stored. A failure is deliberately not
+    /// stored: the locator can still be empty the first time a property is observed — an observation
+    /// running ahead of application startup, or a test suite whose registration belongs to a later
+    /// test — and a stored failure would outlive the registration that fixes it, leaving that sender
+    /// and property permanently unobservable.
+    /// </remarks>
     private static readonly MemoizingMRUCache<
         (Type senderType, string propertyName, bool beforeChange),
-        ICreatesObservableForProperty?>
+        ICreatesObservableForProperty>
         NotifyFactoryCache =
             new(
-                static (t, _) =>
-                {
-                    var bestScore = 0;
-                    ICreatesObservableForProperty? best = null;
-                    foreach (var candidate in AppLocator.Current.GetServices<ICreatesObservableForProperty>())
-                    {
-                        var score = candidate.GetAffinityForObject(t.senderType, t.propertyName, t.beforeChange);
-                        if (score > bestScore)
-                        {
-                            bestScore = score;
-                            best = candidate;
-                        }
-                    }
-
-                    return best;
-                },
+                static (_, resolved) => (ICreatesObservableForProperty)resolved!,
                 NotifyFactoryCacheSize);
 
     /// <summary>Provides ObservableForProperty extension members for <paramref name="item"/>.</summary>
@@ -115,7 +108,7 @@ public static class ReactiveNotifyPropertyChangedMixins
                 expr = parameter;
             }
 
-            var factory = NotifyFactoryCache.Get((item!.GetType(), propertyName, beforeChange))
+            var factory = ResolveNotifyFactory((item!.GetType(), propertyName, beforeChange))
                           ?? throw new InvalidOperationException(
                               $"Could not find a ICreatesObservableForProperty for {item.GetType()} property {propertyName}. {BrokenLocatorAdvice}");
 
@@ -290,7 +283,7 @@ public static class ReactiveNotifyPropertyChangedMixins
             "The expression does not have valid member info",
             nameof(expression));
         var propertyName = memberInfo.Name;
-        var result = NotifyFactoryCache.Get((sender.GetType(), propertyName, beforeChange));
+        var result = ResolveNotifyFactory((sender.GetType(), propertyName, beforeChange));
 
         return result switch
         {
@@ -298,5 +291,34 @@ public static class ReactiveNotifyPropertyChangedMixins
                 $"Could not find a ICreatesObservableForProperty for {sender.GetType()} property {propertyName}. {BrokenLocatorAdvice}"),
             _ => result.GetNotificationForProperty(sender, expression, propertyName, beforeChange)
         };
+    }
+
+    /// <summary>
+    /// Gets the highest-affinity <see cref="ICreatesObservableForProperty"/> for a sender type and
+    /// property, consulting the service locator only when the combination has not already resolved.
+    /// </summary>
+    /// <param name="key">The sender type, property name and before-change flag being resolved.</param>
+    /// <returns>The best implementation, or <see langword="null"/> when nothing bids a positive affinity.</returns>
+    private static ICreatesObservableForProperty? ResolveNotifyFactory(
+        (Type senderType, string propertyName, bool beforeChange) key)
+    {
+        if (NotifyFactoryCache.TryGet(key, out var memoized))
+        {
+            return memoized;
+        }
+
+        var bestScore = 0;
+        ICreatesObservableForProperty? best = null;
+        foreach (var candidate in AppLocator.Current.GetServices<ICreatesObservableForProperty>())
+        {
+            var score = candidate.GetAffinityForObject(key.senderType, key.propertyName, key.beforeChange);
+            if (score > bestScore)
+            {
+                bestScore = score;
+                best = candidate;
+            }
+        }
+
+        return best is null ? null : NotifyFactoryCache.Get(key, best);
     }
 }
