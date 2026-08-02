@@ -174,8 +174,9 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
                 _disposed = true;
                 for (var i = 0; i < _levels.Length; i++)
                 {
-                    // Null when disposed before Run built the chain.
-                    _levels[i]?.Dispose();
+                    // Every slot is filled: Run takes this same lock and populates them all before the
+                    // sink is handed out, so there is no window where one is still null here.
+                    _levels[i].Dispose();
                 }
             }
         }

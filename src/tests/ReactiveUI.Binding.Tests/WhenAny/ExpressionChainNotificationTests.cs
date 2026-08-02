@@ -56,6 +56,21 @@ public class ExpressionChainNotificationTests
         await Assert.That(context.Recorder.Completed).IsFalse();
     }
 
+    /// <summary>Verifies that a notification whose sender is gone yields the default rather than throwing.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NotificationWithNoSender_YieldsTheDefaultValue()
+    {
+        using var context = Arrange();
+        var before = context.Recorder.Values.Count;
+
+        context.Notifier.PushChange(null);
+
+        await Assert.That(context.Recorder.Values.Count).IsGreaterThan(before);
+        await Assert.That(context.Recorder.Values[^1].Value).IsNull();
+        await Assert.That(context.Recorder.Error).IsNull();
+    }
+
     /// <summary>Verifies that a notification still in flight when the chain is disposed is dropped.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -156,10 +171,10 @@ public class ExpressionChainNotificationTests
         }
 
         /// <summary>Delivers a change notification for the given sender to the chain.</summary>
-        /// <param name="sender">The sender to report.</param>
-        public void PushChange(object sender)
+        /// <param name="sender">The sender to report, or null to report that it is gone.</param>
+        public void PushChange(object? sender)
         {
-            var change = new ObservedChange<object, object?>(sender, _expression, null);
+            var change = new ObservedChange<object, object?>(sender!, _expression, null);
             foreach (var observer in _observers.ToArray())
             {
                 observer.OnNext(change);
