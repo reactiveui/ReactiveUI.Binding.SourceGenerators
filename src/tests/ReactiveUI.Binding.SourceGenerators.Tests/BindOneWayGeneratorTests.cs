@@ -332,4 +332,21 @@ public class BindOneWayGeneratorTests
         await result.HasNoGeneratorDiagnostics();
         await result.DoesNotHaveGeneratedSource(BindOneWayDispatchgcsName);
     }
+
+    /// <summary>
+    /// Verifies BindOneWay from an NSObject source, whose observation instantiates the KVO helper
+    /// classes. Those helpers are declared in a file of their own, so a compilation that reaches them
+    /// only through a binding - never through WhenChanged - still compiles.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task KVO_NSObject_Source()
+    {
+        var source = ApplePlatformSource.BindingScenario("view.BindOneWay(vm, x => x.Text, x => x.Name)");
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindOneWayGeneratorTests), LanguageVersion.CSharp10);
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+        await result.GeneratedSourceContains(ApplePlatformSource.HelperHintName, "__KVOObservable<T>");
+    }
 }

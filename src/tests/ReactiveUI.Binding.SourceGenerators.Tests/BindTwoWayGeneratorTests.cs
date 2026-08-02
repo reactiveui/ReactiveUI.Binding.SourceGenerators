@@ -147,4 +147,21 @@ public class BindTwoWayGeneratorTests
             TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
     }
+
+    /// <summary>
+    /// Verifies BindTwoWay against an NSObject target, whose observation instantiates the KVO helper
+    /// classes. Those helpers are declared in a file of their own, so a compilation that reaches them
+    /// only through a binding - never through WhenChanged - still compiles.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task KVO_NSObject_Target()
+    {
+        var source = ApplePlatformSource.BindingScenario("vm.BindTwoWay(view, x => x.Name, x => x.Text)");
+        var result =
+            await TestHelper.TestPassWithResult(source, typeof(BindTwoWayGeneratorTests), LanguageVersion.CSharp10);
+        await result.CompilationSucceeds();
+        await result.HasNoGeneratorDiagnostics();
+        await result.GeneratedSourceContains(ApplePlatformSource.HelperHintName, "__KVOObservable<T>");
+    }
 }

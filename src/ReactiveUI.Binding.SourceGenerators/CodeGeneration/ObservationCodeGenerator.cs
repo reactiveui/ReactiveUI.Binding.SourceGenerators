@@ -78,18 +78,13 @@ internal static class ObservationCodeGenerator
         CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
         _ = sb.AppendLine();
 
-        // Track which plugins with helper classes are used, so we emit them once
-        var usedPluginKinds = new HashSet<string>();
-
         // Group invocations by their method signature
         var groups = GroupByTypeSignature(invocations);
 
         for (var g = 0; g < groups.Count; g++)
         {
-            GenerateGroup(sb, groups[g], allClasses, supportsCallerArgExpr, features.StubHasExpressionParameters, methodPrefix, usedPluginKinds);
+            GenerateGroup(sb, groups[g], allClasses, supportsCallerArgExpr, features.StubHasExpressionParameters, methodPrefix);
         }
-
-        EmitUsedHelperClasses(sb, usedPluginKinds);
 
         CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
         _ = sb.AppendLine();
@@ -905,25 +900,20 @@ internal static class ObservationCodeGenerator
             0,
             string.Join("|", inv.ExpressionTexts));
 
-    /// <summary>
-    /// Generates the concrete overload and per-invocation observation methods for a single type group,
-    /// tracking which plugins require helper-class emission.
-    /// </summary>
+    /// <summary>Generates the concrete overload and per-invocation observation methods for a single type group.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The type group to generate code for.</param>
     /// <param name="allClasses">All detected class binding info for type mechanism lookup.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
-    /// <param name="usedPluginKinds">Accumulates the observation kinds of plugins that require helper classes.</param>
     private static void GenerateGroup(
         StringBuilder sb,
         TypeGroup group,
         ImmutableArray<ClassBindingInfo> allClasses,
         bool supportsCallerArgExpr,
         bool stubHasExpressionParameters,
-        string methodPrefix,
-        HashSet<string> usedPluginKinds)
+        string methodPrefix)
     {
         // Resolve the plugin affinity for the source type to emit the runtime override check
         var groupClassInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, group.SourceTypeFullName);
@@ -951,31 +941,7 @@ internal static class ObservationCodeGenerator
 
             var classInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.SourceTypeFullName);
 
-            // Track plugin usage for helper class emission
-            if (classInfo is not null)
-            {
-                var plugin = ObservationPluginRegistry.GetBestPlugin(classInfo);
-                if (plugin?.RequiresHelperClasses == true)
-                {
-                    _ = usedPluginKinds.Add(plugin.ObservationKind);
-                }
-            }
-
             GenerateObservationMethod(sb, inv, classInfo, suffix, inv.IsBeforeChange, methodPrefix);
-        }
-    }
-
-    /// <summary>Emits helper classes for all used plugins that require them, sorted for deterministic output order.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="usedPluginKinds">The observation kinds of plugins requiring helper classes.</param>
-    private static void EmitUsedHelperClasses(StringBuilder sb, HashSet<string> usedPluginKinds)
-    {
-        var sortedKinds = new List<string>(usedPluginKinds);
-        sortedKinds.Sort(StringComparer.Ordinal);
-        for (var k = 0; k < sortedKinds.Count; k++)
-        {
-            var plugin = ObservationPluginRegistry.GetPluginByKind(sortedKinds[k]);
-            plugin?.EmitHelperClasses(sb);
         }
     }
 
