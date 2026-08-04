@@ -19,8 +19,8 @@
   <ItemGroup>
     <!-- Testing Framework -->
     <PackageVersion Include="NSubstitute" Version="6.0.0"/>
-    <PackageVersion Include="TUnit" Version="1.62.0"/>
-    <PackageVersion Include="Verify.TUnit" Version="31.27.0"/>
+    <PackageVersion Include="TUnit" Version="1.63.0"/>
+    <PackageVersion Include="Verify.TUnit" Version="31.28.0"/>
     <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0"/>
 
     <!--
