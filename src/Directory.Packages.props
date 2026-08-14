@@ -55,7 +55,7 @@
 
     <!-- Dependencies -->
     <PackageVersion Include="Splat" Version="21.0.0"/>
-    <PackageVersion Include="ReactiveUI.Primitives" Version="7.1.0"/>
+    <PackageVersion Include="ReactiveUI.Primitives" Version="7.1.1"/>
     <PackageVersion Include="System.Reactive" Version="7.0.0"/>
 
     <!-- Build Tools -->
