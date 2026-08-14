@@ -147,20 +147,20 @@ public class WhenChangedEdgeCaseTests
     {
         var vm = new BigViewModel { Prop1 = HelloValue };
         vm.Address.City = Seattle;
-        var values = new List<(string city, string prop1)>();
+        var values = new List<(string City, string Prop1)>();
 
         using var sub = WhenChangedScenarios.MultiProperty_WithDeepChain(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].city).IsEqualTo(Seattle);
-        await Assert.That(values[0].prop1).IsEqualTo(HelloValue);
+        await Assert.That(values[0].City).IsEqualTo(Seattle);
+        await Assert.That(values[0].Prop1).IsEqualTo(HelloValue);
 
         // Change the nested property
         vm.Address.City = Portland;
 
-        await Assert.That(values[^1].city).IsEqualTo(Portland);
-        await Assert.That(values[^1].prop1).IsEqualTo(HelloValue);
+        await Assert.That(values[^1].City).IsEqualTo(Portland);
+        await Assert.That(values[^1].Prop1).IsEqualTo(HelloValue);
     }
 
     /// <summary>Verifies that multi-property observation with a deep chain emits when the simple property changes.</summary>
@@ -170,7 +170,7 @@ public class WhenChangedEdgeCaseTests
     {
         var vm = new BigViewModel { Prop1 = HelloValue };
         vm.Address.City = Seattle;
-        var values = new List<(string city, string prop1)>();
+        var values = new List<(string City, string Prop1)>();
 
         using var sub = WhenChangedScenarios.MultiProperty_WithDeepChain(vm)
             .Subscribe(values.Add);
@@ -178,8 +178,8 @@ public class WhenChangedEdgeCaseTests
         // Change the simple property
         vm.Prop1 = "World";
 
-        await Assert.That(values[^1].city).IsEqualTo(Seattle);
-        await Assert.That(values[^1].prop1).IsEqualTo("World");
+        await Assert.That(values[^1].City).IsEqualTo(Seattle);
+        await Assert.That(values[^1].Prop1).IsEqualTo("World");
     }
 
     /// <summary>Verifies that multi-property observation with a deep chain re-subscribes when the intermediate object is replaced.</summary>
@@ -189,7 +189,7 @@ public class WhenChangedEdgeCaseTests
     {
         var vm = new BigViewModel { Prop1 = HelloValue };
         vm.Address.City = Seattle;
-        var values = new List<(string city, string prop1)>();
+        var values = new List<(string City, string Prop1)>();
 
         using var sub = WhenChangedScenarios.MultiProperty_WithDeepChain(vm)
             .Subscribe(values.Add);
@@ -197,12 +197,12 @@ public class WhenChangedEdgeCaseTests
         // Replace the intermediate object
         vm.Address = new() { City = Portland };
 
-        await Assert.That(values[^1].city).IsEqualTo(Portland);
+        await Assert.That(values[^1].City).IsEqualTo(Portland);
 
         // Change the new object's property
         vm.Address.City = Eugene;
 
-        await Assert.That(values[^1].city).IsEqualTo(Eugene);
+        await Assert.That(values[^1].City).IsEqualTo(Eugene);
     }
 
     /// <summary>Verifies that multiple subscriptions to the same WhenChanged observable each receive independent emissions.</summary>

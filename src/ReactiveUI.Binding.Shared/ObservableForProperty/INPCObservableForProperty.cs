@@ -19,11 +19,10 @@ public class INPCObservableForProperty : ICreatesObservableForProperty
 
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Uses reflection over runtime types which is not trim- or AOT-safe.")]
-    public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
-    {
-        var target = beforeChanged ? typeof(INotifyPropertyChanging) : typeof(INotifyPropertyChanged);
-        return target.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) ? SupportedAffinity : 0;
-    }
+    public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged) =>
+        (beforeChanged ? typeof(INotifyPropertyChanging) : typeof(INotifyPropertyChanged)).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo())
+            ? SupportedAffinity
+            : 0;
 
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Uses reflection over runtime types which is not trim- or AOT-safe.")]

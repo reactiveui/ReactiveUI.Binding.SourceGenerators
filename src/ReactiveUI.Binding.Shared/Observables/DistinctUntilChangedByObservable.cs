@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
@@ -16,6 +17,7 @@ namespace ReactiveUI.Binding.Observables;
 /// </summary>
 /// <typeparam name="TSource">The element type.</typeparam>
 /// <typeparam name="TKey">The key type used for comparison.</typeparam>
+[DebuggerDisplay("Source = {_source}, KeySelector = {_keySelector}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class DistinctUntilChangedByObservable<TSource, TKey> : IObservable<TSource>
 {
@@ -94,9 +96,11 @@ public sealed class DistinctUntilChangedByObservable<TSource, TKey> : IObservabl
         }
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnError(Exception error) => _observer.OnError(error);
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnCompleted() => _observer.OnCompleted();
     }
 }

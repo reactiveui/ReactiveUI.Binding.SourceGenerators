@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// Concrete typed overload for Bind from global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel to global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView.
         /// Uses CallerArgumentExpression for dispatch.
         /// </summary>
-        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? view, bool isViewModel)> Bind(
+        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? View, bool IsViewModel)> Bind(
             this global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView view,
             global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel, int>> viewModelProperty,
@@ -29,13 +29,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountText")
             {
-                return __Bind_7FFFD53F494404E1(viewModel, view, viewModelToViewConverter, viewToViewModelConverter, scheduler);
+                return __Bind_7FFFD53F4944055D(viewModel, view, viewModelToViewConverter, viewToViewModelConverter, scheduler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? view, bool isViewModel)> __Bind_7FFFD53F494404E1(global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView view, global::System.Func<int, string> viewModelToViewConverter, global::System.Func<string, int> viewToViewModelConverter, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? View, bool IsViewModel)> __Bind_7FFFD53F4944055D(global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView view, global::System.Func<int, string> viewModelToViewConverter, global::System.Func<string, int> viewToViewModelConverter, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // Bind: Count <-> CountText (with conversion) (with scheduler)
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
@@ -70,7 +70,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var disposable = new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
 
-            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? view, bool isViewModel)>(
+            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? View, bool IsViewModel)>(
                 view,
                 changed,
                 global::ReactiveUI.Binding.BindingDirection.TwoWay,

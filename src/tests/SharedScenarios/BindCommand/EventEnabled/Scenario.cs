@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindCommand.EventEnabled;
@@ -17,6 +18,7 @@ public static class Scenario
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable Execute(MyViewModel vm, MyView view) =>
         view.BindCommand(vm, x => x.Save, x => x.SaveButton);
 }

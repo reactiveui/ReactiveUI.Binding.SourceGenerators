@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
@@ -296,6 +297,7 @@ internal sealed class CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -317,6 +319,7 @@ internal sealed class CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -338,6 +341,7 @@ internal sealed class CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -359,6 +363,7 @@ internal sealed class CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -380,6 +385,7 @@ internal sealed class CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -401,6 +407,7 @@ internal sealed class CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -422,6 +429,7 @@ internal sealed class CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -443,6 +451,7 @@ internal sealed class CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -464,6 +473,7 @@ internal sealed class CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>

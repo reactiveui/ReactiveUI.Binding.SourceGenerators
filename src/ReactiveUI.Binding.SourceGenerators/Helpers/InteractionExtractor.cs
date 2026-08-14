@@ -158,15 +158,17 @@ internal static class InteractionExtractor
             var param = methodSymbol.Parameters[i];
 
             // Observable handler: Func<IInteractionContext<TInput, TOutput>, IObservable<TDontCare>>
-            if (param is { Name: "handler", Type: INamedTypeSymbol handlerType }
-                && handlerType.TypeArguments.Length == 2
-                && handlerType.TypeArguments[1] is INamedTypeSymbol returnType
-                && SymbolHelpers.IsIObservable(returnType))
+            if (param is not { Name: "handler", Type: INamedTypeSymbol handlerType }
+                || handlerType.TypeArguments.Length != 2
+                || handlerType.TypeArguments[1] is not INamedTypeSymbol returnType
+                || !SymbolHelpers.IsIObservable(returnType))
             {
-                dontCareTypeFullName = returnType.TypeArguments[0]
-                    .ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                return false;
+                continue;
             }
+
+            dontCareTypeFullName = returnType.TypeArguments[0]
+                .ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            return false;
         }
 
         return true;

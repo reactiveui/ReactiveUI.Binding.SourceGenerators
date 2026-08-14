@@ -149,8 +149,7 @@ public class ExtractorValidationTests
     [Test]
     public async Task HasItems_DefaultArray_ReturnsFalse()
     {
-        var items = default(ImmutableArray<string>);
-        var result = ExtractorValidation.HasItems(items);
+        var result = ExtractorValidation.HasItems(default(ImmutableArray<string>));
         await Assert.That(result).IsFalse();
     }
 

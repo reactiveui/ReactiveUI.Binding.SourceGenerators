@@ -12,8 +12,8 @@ namespace ReactiveUI.Binding.Observables;
 /// Runs a teardown action against a state value exactly once. Carrying the state lets the platform
 /// observers unhook with a non-capturing lambda, so no closure is allocated per subscription.
 /// </summary>
-/// <remarks>Each platform assembly compiles its own internal copy; nothing here touches the seam.</remarks>
 /// <typeparam name="TState">The type of the state handed to the teardown action.</typeparam>
+/// <remarks>Each platform assembly compiles its own internal copy; nothing here touches the seam.</remarks>
 internal sealed class ActionDisposable<TState> : IDisposable
 {
     /// <summary>The state handed to <see cref="_action"/> on disposal.</summary>

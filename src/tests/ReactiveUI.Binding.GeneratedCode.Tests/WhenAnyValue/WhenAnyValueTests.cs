@@ -48,14 +48,14 @@ public class WhenAnyValueTests
     public async Task TwoProperties_EmitsTuples()
     {
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B" };
-        var values = new List<(string property1, string property2)>();
+        var values = new List<(string Property1, string Property2)>();
 
         using var sub = WhenAnyValueScenarios.TwoProperties(fixture)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("A");
-        await Assert.That(values[0].property2).IsEqualTo("B");
+        await Assert.That(values[0].Property1).IsEqualTo("A");
+        await Assert.That(values[0].Property2).IsEqualTo("B");
     }
 
     /// <summary>Verifies that three-property WhenAnyValue emits tuples.</summary>
@@ -64,15 +64,15 @@ public class WhenAnyValueTests
     public async Task ThreeProperties_EmitsTuples()
     {
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C" };
-        var values = new List<(string property1, string property2, string property3)>();
+        var values = new List<(string Property1, string Property2, string Property3)>();
 
         using var sub = WhenAnyValueScenarios.ThreeProperties(fixture)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("A");
-        await Assert.That(values[0].property2).IsEqualTo("B");
-        await Assert.That(values[0].property3).IsEqualTo("C");
+        await Assert.That(values[0].Property1).IsEqualTo("A");
+        await Assert.That(values[0].Property2).IsEqualTo("B");
+        await Assert.That(values[0].Property3).IsEqualTo("C");
     }
 
     /// <summary>Verifies that WhenAnyValue with a selector projects values correctly.</summary>

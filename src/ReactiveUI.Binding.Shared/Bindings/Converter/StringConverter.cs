@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive;
 #else
@@ -13,6 +15,7 @@ namespace ReactiveUI.Binding;
 /// This converter provides a fast path for string-to-string bindings without
 /// requiring reflection or TypeDescriptor.
 /// </remarks>
+[DebuggerDisplay("string -> string identity (affinity {Affinity})")]
 public sealed class StringConverter : IBindingTypeConverter
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
@@ -25,6 +28,7 @@ public sealed class StringConverter : IBindingTypeConverter
     public Type ToType => typeof(string);
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>

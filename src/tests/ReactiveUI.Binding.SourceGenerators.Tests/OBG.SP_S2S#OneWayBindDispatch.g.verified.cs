@@ -26,13 +26,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (viewModelPropertyExpression == "x => x.Name"
                 && viewPropertyExpression == "x => x.NameText")
             {
-                return __OneWayBind_7FFFC4A056D62A34(viewModel, view);
+                return __OneWayBind_7FFFC4A056D62A91(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView, string> __OneWayBind_7FFFC4A056D62A34(global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView, string> __OneWayBind_7FFFC4A056D62A91(global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView view)
         {
             // OneWayBind: Name -> NameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

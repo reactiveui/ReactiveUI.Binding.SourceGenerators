@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI.Binding.SourceGenerators.Models;
@@ -15,6 +16,7 @@ internal static class ObservationExtractor
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static InvocationInfo? ExtractWhenChangedInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
         ExtractInvocationInfo(context, false, Constants.WhenChangedMethodName, ct);
 
@@ -22,6 +24,7 @@ internal static class ObservationExtractor
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static InvocationInfo? ExtractWhenChangingInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
         ExtractInvocationInfo(context, true, Constants.WhenChangingMethodName, ct);
 
@@ -29,6 +32,7 @@ internal static class ObservationExtractor
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static InvocationInfo? ExtractWhenAnyValueInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
         ExtractInvocationInfo(context, false, Constants.WhenAnyValueMethodName, ct);
 
@@ -36,6 +40,7 @@ internal static class ObservationExtractor
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An InvocationInfo POCO, or null if the invocation is not analyzable.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static InvocationInfo? ExtractWhenAnyInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
         ExtractInvocationInfo(context, false, Constants.WhenAnyMethodName, ct);
 

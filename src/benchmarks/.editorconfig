@@ -1,0 +1,10 @@
+[*.cs]
+
+###################
+# Benchmark harness relaxations
+#
+# A benchmark class is a harness the runner instantiates and drives; nobody stops on one in a
+# debugger to read a summary of it. The models these benchmarks observe still carry a display
+# attribute where it earns its place.
+###################
+dotnet_diagnostic.SST2334.severity = none # Harness types are driven by the runner, not inspected

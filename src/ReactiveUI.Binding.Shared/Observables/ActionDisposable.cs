@@ -14,6 +14,7 @@ namespace ReactiveUI.Binding.Observables;
 /// A thread-safe <see cref="IDisposable"/> that invokes a delegate exactly once on disposal.
 /// Lightweight replacement for <c>System.Reactive.Disposables.Disposable.Create(Action)</c>.
 /// </summary>
+[DebuggerDisplay("Disposed = {_action == null}, Action = {_action}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ActionDisposable : IDisposable
 {

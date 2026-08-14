@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding
         /// Concrete typed overload for Bind from global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel to global::SharedScenarios.Bind.SinglePropertyStringToString.MyView.
         /// Uses CallerFilePath + CallerLineNumber for dispatch.
         /// </summary>
-        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? view, bool isViewModel)> Bind(
+        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? View, bool IsViewModel)> Bind(
             this global::SharedScenarios.Bind.SinglePropertyStringToString.MyView view,
             global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel, string?>> viewModelProperty,
@@ -23,16 +23,16 @@ namespace ReactiveUI.Binding
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 74
+            if (callerLineNumber == 77
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __Bind_000011908961B60B(viewModel, view);
+                return __Bind_000011908961B668(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? view, bool isViewModel)> __Bind_000011908961B60B(global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyStringToString.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? View, bool IsViewModel)> __Bind_000011908961B668(global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyStringToString.MyView view)
         {
             // Bind: Name <-> NameText
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -63,7 +63,7 @@ namespace ReactiveUI.Binding
 
             var disposable = new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
 
-            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? view, bool isViewModel)>(
+            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? View, bool IsViewModel)>(
                 view,
                 changed,
                 global::ReactiveUI.Binding.BindingDirection.TwoWay,

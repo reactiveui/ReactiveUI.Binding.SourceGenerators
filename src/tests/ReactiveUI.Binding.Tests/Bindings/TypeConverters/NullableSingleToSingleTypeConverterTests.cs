@@ -32,9 +32,7 @@ public class NullableSingleToSingleTypeConverterTests
     public async Task TryConvert_WithValue_Succeeds()
     {
         var converter = new NullableSingleToSingleTypeConverter();
-        float? value = 123.45F;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(SampleSingle, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo(SampleSingle);
@@ -46,8 +44,7 @@ public class NullableSingleToSingleTypeConverterTests
     public async Task TryConvert_Null_ReturnsFalse()
     {
         var converter = new NullableSingleToSingleTypeConverter();
-        float? value = null;
-        var result = converter.TryConvert(value, null, out _);
+        var result = converter.TryConvert(null, null, out _);
 
         await Assert.That(result).IsFalse();
     }
@@ -76,9 +73,7 @@ public class NullableSingleToSingleTypeConverterTests
     public async Task TryConvertTyped_WithValidValue_ReturnsTrueAndOutput()
     {
         var converter = new NullableSingleToSingleTypeConverter();
-        float? value = 42.5F;
-
-        var success = converter.TryConvertTyped(value, null, out var result);
+        var success = converter.TryConvertTyped(RoundedSingle, null, out var result);
 
         await Assert.That(success).IsTrue();
         await Assert.That(result).IsEqualTo(RoundedSingle);

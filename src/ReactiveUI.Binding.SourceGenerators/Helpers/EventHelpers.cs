@@ -21,11 +21,13 @@ internal static class EventHelpers
         for (var i = 0; i < defaultEvents.Length; i++)
         {
             var argsType = FindEventArgsType(controlType, defaultEvents[i]);
-            if (argsType is not null)
+            if (argsType is null)
             {
-                eventArgsType = argsType;
-                return defaultEvents[i];
+                continue;
             }
+
+            eventArgsType = argsType;
+            return defaultEvents[i];
         }
 
         return null;

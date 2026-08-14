@@ -12,11 +12,11 @@ namespace ReactiveUI.Binding;
 public enum BindingDirection
 {
     /// <summary>One-way binding from source to target.</summary>
-    OneWay,
+    OneWay = 0,
 
     /// <summary>Two-way binding between source and target.</summary>
-    TwoWay,
+    TwoWay = 1,
 
     /// <summary>One-way asynchronous binding from source to target.</summary>
-    AsyncOneWay
+    AsyncOneWay = 2,
 }

@@ -33,13 +33,15 @@ public sealed class BooleanToVisibilityTypeConverter : BindingTypeConverter<bool
             ? visibilityHint
             : BooleanToVisibilityHints.None;
 
-        var value = (hint & BooleanToVisibilityHints.Inverse) != 0 ? !from : from;
+        if ((hint & BooleanToVisibilityHints.Inverse) != 0 ? !from : from)
+        {
+            result = Visibility.Visible;
+            return true;
+        }
 
-        var notVisible = (hint & BooleanToVisibilityHints.UseHidden) != 0
+        result = (hint & BooleanToVisibilityHints.UseHidden) != 0
             ? Visibility.Hidden
             : Visibility.Collapsed;
-
-        result = value ? Visibility.Visible : notVisible;
         return true;
     }
 }

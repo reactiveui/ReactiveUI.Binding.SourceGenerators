@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -33,6 +34,7 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
         inv.ResolvedEventName is not null;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitBinding(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
@@ -52,6 +54,7 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
     /// <param name="controlAccess">The control access chain.</param>
     /// <param name="eventArgsType">The event args type.</param>
     /// <param name="supportsNullable">There can be a null type.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitWithObservableParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
@@ -98,6 +101,7 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
     /// <param name="eventArgsType">The event args type.</param>
     /// <param name="paramAccess">The parameter access chain.</param>
     /// <param name="supportsNullable">There can be a null type.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitWithExpressionParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
@@ -139,6 +143,7 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
     /// <param name="controlAccess">The control access chain.</param>
     /// <param name="eventArgsType">The event args type.</param>
     /// <param name="supportsNullable">There can be a null type.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitWithNoParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,

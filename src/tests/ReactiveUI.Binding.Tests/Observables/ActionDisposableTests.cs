@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
@@ -38,6 +39,7 @@ public class ActionDisposableTests
 
     /// <summary>Verifies that constructor throws ArgumentNullException when action is null.</summary>
     [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Constructor_NullAction_ThrowsArgumentNullException() =>
         Assert.Throws<ArgumentNullException>(static () => _ = new ActionDisposable(null!));
 }

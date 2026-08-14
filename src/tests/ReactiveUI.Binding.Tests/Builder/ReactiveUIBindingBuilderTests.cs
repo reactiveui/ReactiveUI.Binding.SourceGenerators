@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.Tests.TestModels;
 
@@ -275,8 +276,7 @@ public class ReactiveUIBindingBuilderTests
 
         _ = builder.BuildApp();
 
-        var action = RxBindingBuilder.EnsureInitialized;
-        await Assert.That(action).ThrowsNothing();
+        await Assert.That(RxBindingBuilder.EnsureInitialized).ThrowsNothing();
     }
 
     /// <summary>Verifies that multiple converters of different types can be registered and all appear in their respective registries.</summary>
@@ -370,6 +370,7 @@ public class ReactiveUIBindingBuilderTests
     private sealed class TestModule(Action onConfigure) : Splat.Builder.IModule
     {
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Configure(IMutableDependencyResolver resolver) => onConfigure();
     }
 
@@ -378,10 +379,12 @@ public class ReactiveUIBindingBuilderTests
     {
         /// <inheritdoc/>
         [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetAffinityForObject<T>(bool hasEventTarget) => 0;
 
         /// <inheritdoc/>
         [RequiresUnreferencedCode("Test stub")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable? BindCommandToObject<T>(
             System.Windows.Input.ICommand? command,
             T? target,
@@ -391,6 +394,7 @@ public class ReactiveUIBindingBuilderTests
         /// <inheritdoc/>
         [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         [RequiresUnreferencedCode("Test stub")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable? BindCommandToObject<T, TEventArgs>(
             System.Windows.Input.ICommand? command,
             T? target,
@@ -399,6 +403,7 @@ public class ReactiveUIBindingBuilderTests
             where T : class => null;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable? BindCommandToObject<T, TEventArgs>(
             System.Windows.Input.ICommand? command,
             T? target,

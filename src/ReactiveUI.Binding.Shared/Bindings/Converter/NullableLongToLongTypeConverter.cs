@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive;
 #else
@@ -12,6 +14,7 @@ namespace ReactiveUI.Binding;
 /// <remarks>
 /// When the nullable value is null, the conversion fails and returns false.
 /// </remarks>
+[DebuggerDisplay("long? -> long (affinity {Affinity})")]
 public sealed class NullableLongToLongTypeConverter : IBindingTypeConverter<long?, long>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
@@ -24,6 +27,7 @@ public sealed class NullableLongToLongTypeConverter : IBindingTypeConverter<long
     public Type ToType => typeof(long);
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>

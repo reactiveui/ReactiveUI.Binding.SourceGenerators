@@ -73,7 +73,7 @@ public static partial class ReactiveUIBindingExtensions
             property1,
             property2,
             callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.property1, t.property2));
+            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.Property1, t.Property2));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -143,7 +143,7 @@ public static partial class ReactiveUIBindingExtensions
             property2,
             property3,
             callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.property1, t.property2, t.property3));
+            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -224,7 +224,7 @@ public static partial class ReactiveUIBindingExtensions
             property3,
             property4,
             callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.property1, t.property2, t.property3, t.property4));
+            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -316,7 +316,7 @@ public static partial class ReactiveUIBindingExtensions
             property4,
             property5,
             callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.property1, t.property2, t.property3, t.property4, t.property5));
+            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -418,7 +418,7 @@ public static partial class ReactiveUIBindingExtensions
             property5,
             property6,
             callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.property1, t.property2, t.property3, t.property4, t.property5, t.property6));
+            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5, t.Property6));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -531,13 +531,13 @@ public static partial class ReactiveUIBindingExtensions
             property7,
             callerFilePath: callerFilePath,
             callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.property1,
-                t.property2,
-                t.property3,
-                t.property4,
-                t.property5,
-                t.property6,
-                t.property7));
+                t.Property1,
+                t.Property2,
+                t.Property3,
+                t.Property4,
+                t.Property5,
+                t.Property6,
+                t.Property7));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -660,14 +660,14 @@ public static partial class ReactiveUIBindingExtensions
             property8,
             callerFilePath: callerFilePath,
             callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.property1,
-                t.property2,
-                t.property3,
-                t.property4,
-                t.property5,
-                t.property6,
-                t.property7,
-                t.property8));
+                t.Property1,
+                t.Property2,
+                t.Property3,
+                t.Property4,
+                t.Property5,
+                t.Property6,
+                t.Property7,
+                t.Property8));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -800,15 +800,15 @@ public static partial class ReactiveUIBindingExtensions
             property9,
             callerFilePath: callerFilePath,
             callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.property1,
-                t.property2,
-                t.property3,
-                t.property4,
-                t.property5,
-                t.property6,
-                t.property7,
-                t.property8,
-                t.property9));
+                t.Property1,
+                t.Property2,
+                t.Property3,
+                t.Property4,
+                t.Property5,
+                t.Property6,
+                t.Property7,
+                t.Property8,
+                t.Property9));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -951,16 +951,16 @@ public static partial class ReactiveUIBindingExtensions
             property10,
             callerFilePath: callerFilePath,
             callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.property1,
-                t.property2,
-                t.property3,
-                t.property4,
-                t.property5,
-                t.property6,
-                t.property7,
-                t.property8,
-                t.property9,
-                t.property10));
+                t.Property1,
+                t.Property2,
+                t.Property3,
+                t.Property4,
+                t.Property5,
+                t.Property6,
+                t.Property7,
+                t.Property8,
+                t.Property9,
+                t.Property10));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1113,17 +1113,17 @@ public static partial class ReactiveUIBindingExtensions
             property11,
             callerFilePath: callerFilePath,
             callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.property1,
-                t.property2,
-                t.property3,
-                t.property4,
-                t.property5,
-                t.property6,
-                t.property7,
-                t.property8,
-                t.property9,
-                t.property10,
-                t.property11));
+                t.Property1,
+                t.Property2,
+                t.Property3,
+                t.Property4,
+                t.Property5,
+                t.Property6,
+                t.Property7,
+                t.Property8,
+                t.Property9,
+                t.Property10,
+                t.Property11));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1286,18 +1286,18 @@ public static partial class ReactiveUIBindingExtensions
             property12,
             callerFilePath: callerFilePath,
             callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.property1,
-                t.property2,
-                t.property3,
-                t.property4,
-                t.property5,
-                t.property6,
-                t.property7,
-                t.property8,
-                t.property9,
-                t.property10,
-                t.property11,
-                t.property12));
+                t.Property1,
+                t.Property2,
+                t.Property3,
+                t.Property4,
+                t.Property5,
+                t.Property6,
+                t.Property7,
+                t.Property8,
+                t.Property9,
+                t.Property10,
+                t.Property11,
+                t.Property12));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1485,19 +1485,19 @@ public static partial class ReactiveUIBindingExtensions
             property13,
             callerFilePath: callerFilePath,
             callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.property1,
-                t.property2,
-                t.property3,
-                t.property4,
-                t.property5,
-                t.property6,
-                t.property7,
-                t.property8,
-                t.property9,
-                t.property10,
-                t.property11,
-                t.property12,
-                t.property13));
+                t.Property1,
+                t.Property2,
+                t.Property3,
+                t.Property4,
+                t.Property5,
+                t.Property6,
+                t.Property7,
+                t.Property8,
+                t.Property9,
+                t.Property10,
+                t.Property11,
+                t.Property12,
+                t.Property13));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1696,20 +1696,20 @@ public static partial class ReactiveUIBindingExtensions
             property14,
             callerFilePath: callerFilePath,
             callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.property1,
-                t.property2,
-                t.property3,
-                t.property4,
-                t.property5,
-                t.property6,
-                t.property7,
-                t.property8,
-                t.property9,
-                t.property10,
-                t.property11,
-                t.property12,
-                t.property13,
-                t.property14));
+                t.Property1,
+                t.Property2,
+                t.Property3,
+                t.Property4,
+                t.Property5,
+                t.Property6,
+                t.Property7,
+                t.Property8,
+                t.Property9,
+                t.Property10,
+                t.Property11,
+                t.Property12,
+                t.Property13,
+                t.Property14));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1919,21 +1919,21 @@ public static partial class ReactiveUIBindingExtensions
             property15,
             callerFilePath: callerFilePath,
             callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.property1,
-                t.property2,
-                t.property3,
-                t.property4,
-                t.property5,
-                t.property6,
-                t.property7,
-                t.property8,
-                t.property9,
-                t.property10,
-                t.property11,
-                t.property12,
-                t.property13,
-                t.property14,
-                t.property15));
+                t.Property1,
+                t.Property2,
+                t.Property3,
+                t.Property4,
+                t.Property5,
+                t.Property6,
+                t.Property7,
+                t.Property8,
+                t.Property9,
+                t.Property10,
+                t.Property11,
+                t.Property12,
+                t.Property13,
+                t.Property14,
+                t.Property15));
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -2154,20 +2154,20 @@ public static partial class ReactiveUIBindingExtensions
             property16,
             callerFilePath: callerFilePath,
             callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.property1,
-                t.property2,
-                t.property3,
-                t.property4,
-                t.property5,
-                t.property6,
-                t.property7,
-                t.property8,
-                t.property9,
-                t.property10,
-                t.property11,
-                t.property12,
-                t.property13,
-                t.property14,
-                t.property15,
-                t.property16));
+                t.Property1,
+                t.Property2,
+                t.Property3,
+                t.Property4,
+                t.Property5,
+                t.Property6,
+                t.Property7,
+                t.Property8,
+                t.Property9,
+                t.Property10,
+                t.Property11,
+                t.Property12,
+                t.Property13,
+                t.Property14,
+                t.Property15,
+                t.Property16));
 }

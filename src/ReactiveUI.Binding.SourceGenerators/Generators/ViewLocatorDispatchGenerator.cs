@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -152,6 +153,7 @@ internal static class ViewLocatorDispatchGenerator
     /// </summary>
     /// <param name="sb">The string builder to write to.</param>
     /// <param name="nullable">The nullable annotation to emit, or an empty string when unsupported.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitRegistrationHook(StringBuilder sb, string nullable) =>
         sb.AppendLine().Append($$"""
                                        /// <summary>
@@ -315,18 +317,20 @@ internal static class ViewLocatorDispatchGenerator
         {
             var idx = indices[j];
             var reg = registrations[idx];
-            if (reg.Contract is not null)
+            if (reg.Contract is null)
             {
-                var escapedLiteral = SymbolDisplay.FormatLiteral(reg.Contract, true);
-                var resolverMethodName = ResolverMethodNamePrefix + idx;
-                _ = sb.AppendLine().Append($$"""
-                                                     // -> {{reg.ViewFullyQualifiedName}} [contract: {{escapedLiteral}}]
-                                                     if (contract == {{escapedLiteral}})
-                                                     {
-                                                         return {{resolverMethodName}}(contract);
-                                                     }
-                                         """);
+                continue;
             }
+
+            var escapedLiteral = SymbolDisplay.FormatLiteral(reg.Contract, true);
+            var resolverMethodName = ResolverMethodNamePrefix + idx;
+            _ = sb.AppendLine().Append($$"""
+                                                 // -> {{reg.ViewFullyQualifiedName}} [contract: {{escapedLiteral}}]
+                                                 if (contract == {{escapedLiteral}})
+                                                 {
+                                                     return {{resolverMethodName}}(contract);
+                                                 }
+                                     """);
         }
 
         // Default (no-contract) branch last
@@ -334,15 +338,17 @@ internal static class ViewLocatorDispatchGenerator
         {
             var idx = indices[j];
             var reg = registrations[idx];
-            if (reg.Contract is null)
+            if (reg.Contract is not null)
             {
-                var resolverMethodName = ResolverMethodNamePrefix + idx;
-                _ = sb.AppendLine().Append($$"""
-                                                     // -> {{reg.ViewFullyQualifiedName}} (default)
-                                                     return {{resolverMethodName}}(contract);
-                                         """);
-                break; // Only one default per VM (deduplicated earlier)
+                continue;
             }
+
+            var resolverMethodName = ResolverMethodNamePrefix + idx;
+            _ = sb.AppendLine().Append($$"""
+                                                 // -> {{reg.ViewFullyQualifiedName}} (default)
+                                                 return {{resolverMethodName}}(contract);
+                                     """);
+            break; // Only one default per VM (deduplicated earlier)
         }
 
         _ = sb.AppendLine().Append("""

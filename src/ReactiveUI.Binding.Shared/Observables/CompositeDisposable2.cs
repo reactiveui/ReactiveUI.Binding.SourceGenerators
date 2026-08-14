@@ -14,6 +14,7 @@ namespace ReactiveUI.Binding.Observables;
 /// A fixed two-slot composite disposable. Disposes both contained disposables exactly once.
 /// Lightweight replacement for <c>System.Reactive.Disposables.CompositeDisposable(d1, d2)</c>.
 /// </summary>
+[DebuggerDisplay("Disposed = {_disposed == 1}, First = {_d1}, Second = {_d2}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class CompositeDisposable2 : IDisposable
 {

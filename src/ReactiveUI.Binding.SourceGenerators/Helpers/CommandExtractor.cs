@@ -384,11 +384,15 @@ internal static class CommandExtractor
             // Find matching argument
             for (var a = 0; a < args.Count; a++)
             {
-                if (IsToEventArgument(args[a], a, i))
+                if (!IsToEventArgument(args[a], a, i))
                 {
-                    var constant = semanticModel.GetConstantValue(args[a].Expression, ct);
-                    return constant is { HasValue: true, Value: string eventName } && !string.IsNullOrEmpty(eventName) ? eventName : null;
+                    continue;
                 }
+
+                var constant = semanticModel.GetConstantValue(args[a].Expression, ct);
+                return constant is { HasValue: true, Value: string eventName } && !string.IsNullOrEmpty(eventName)
+                    ? eventName
+                    : null;
             }
 
             return null;

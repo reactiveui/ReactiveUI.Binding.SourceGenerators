@@ -33,8 +33,6 @@ public class ViewLocatorTests
         // Reset without rebuilding to ensure no IViewLocator is registered
         RxBindingBuilder.ResetForTesting();
 
-        var action = ViewLocator.GetCurrent;
-
-        await Assert.That(action).ThrowsException();
+        await Assert.That(ViewLocator.GetCurrent).ThrowsException();
     }
 }

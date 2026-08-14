@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace SharedScenarios.BindCommand.ObservableParam;
 
@@ -13,5 +14,6 @@ public class MyButton
     public event EventHandler? Click;
 
     /// <summary>Simulates a button click.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void PerformClick() => Click?.Invoke(this, EventArgs.Empty);
 }

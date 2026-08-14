@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
@@ -36,12 +37,14 @@ public static class RxBindingExtensions
     /// <param name="source">The source observable.</param>
     /// <param name="count">The number of elements to skip.</param>
     /// <returns>An observable that skips elements.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<T> Skip<T>(IObservable<T> source, int count) => new SkipObservable<T>(source, count);
 
     /// <summary>Merges multiple observables into one.</summary>
     /// <typeparam name="T">The element type.</typeparam>
     /// <param name="sources">The source observables.</param>
     /// <returns>A merged observable.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<T> Merge<T>(params IObservable<T>[] sources) => new MergeObservable<T>(sources);
 
     /// <summary>Provides Switch extension members for <paramref name="source"/>.</summary>
@@ -51,6 +54,7 @@ public static class RxBindingExtensions
     {
         /// <summary>Flattens an observable of observables by subscribing to the most recent inner observable.</summary>
         /// <returns>A flattened observable.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<T> Switch() => new SwitchObservable<T>(source);
     }
 
@@ -63,11 +67,13 @@ public static class RxBindingExtensions
         /// <typeparam name="TResult">The projected element type.</typeparam>
         /// <param name="selector">The projection function.</param>
         /// <returns>A projected observable.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<TResult> Select<TResult>(Func<T, TResult> selector) =>
             new SelectObservable<T, TResult>(source, selector);
 
         /// <summary>Suppresses consecutive duplicate values.</summary>
         /// <returns>An observable with distinct consecutive values.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<T> DistinctUntilChanged() =>
             new DistinctUntilChangedObservable<T>(source);
     }
@@ -85,6 +91,7 @@ public static class RxBindingExtensions
         public ActionObserver(Action<T> onNext) => _onNext = onNext;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnNext(T value) => _onNext(value);
 
         /// <inheritdoc/>

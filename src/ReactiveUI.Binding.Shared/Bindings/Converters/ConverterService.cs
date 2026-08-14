@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive;
 #else
@@ -44,6 +46,7 @@ namespace ReactiveUI.Binding;
 /// </description></item>
 /// </list>
 /// </remarks>
+[DebuggerDisplay("Typed: {TypedConverters}; fallback: {FallbackConverters}; set-method: {SetMethodConverters}")]
 public sealed class ConverterService
 {
     /// <summary>Initializes a new instance of the <see cref="ConverterService"/> class.</summary>
@@ -101,6 +104,7 @@ public sealed class ConverterService
     /// <returns>
     /// The best set-method converter for the type pair, or <see langword="null"/> if no converter is available.
     /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ISetMethodBindingConverter? ResolveSetMethodConverter(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         Type? fromType,

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
@@ -458,6 +459,7 @@ internal static class ObservationCodeGenerator
     /// <param name="methodPrefix">The method name prefix.</param>
     /// <param name="propCount">The number of property expressions (unused, kept for API compatibility).</param>
     /// <param name="hasSelector">Whether a selector function is present (unused, kept for API compatibility).</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GenerateRuntimeFallback(
     StringBuilder sb,
     string methodPrefix,
@@ -945,6 +947,7 @@ internal static class ObservationCodeGenerator
     /// </summary>
     /// <param name="inv">The invocation info.</param>
     /// <returns>The stable, call-site-independent method-name suffix.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string MethodSuffix(InvocationInfo inv) =>
         CodeGeneratorHelpers.ComputeStableMethodSuffix(
             inv.SourceTypeFullName,
@@ -1016,7 +1019,7 @@ internal static class ObservationCodeGenerator
         _ = sb.Append(") => (");
         for (var i = 0; i < propertyCount; i++)
         {
-            _ = sb.Append("property").Append(i + 1).Append(": p").Append(i + 1);
+            _ = sb.Append("Property").Append(i + 1).Append(": p").Append(i + 1);
             if (i < propertyCount - 1)
             {
                 _ = sb.Append(", ");

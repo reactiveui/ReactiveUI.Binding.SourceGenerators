@@ -331,8 +331,7 @@ public class CommandExtractorHelperTests
     private static Microsoft.CodeAnalysis.CSharp.Syntax.ArgumentSyntax ParseFirstArgument(string expression)
     {
         var parsed = SyntaxFactory.ParseExpression(expression);
-        var invocation = (Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax)parsed;
-        return invocation.ArgumentList.Arguments[0];
+        return ((Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax)parsed).ArgumentList.Arguments[0];
     }
 
     /// <summary>Gets the first class symbol from a syntax tree.</summary>

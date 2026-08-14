@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
 /// <summary>A fluent string builder for short generated fragments, backed by thread-local pooled buffers.</summary>
@@ -107,6 +109,7 @@ internal sealed class PooledStringBuilder
     /// Matches the framework rendering exactly, because these appends land in the grouping keys that decide
     /// which invocations share a generated overload.
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal PooledStringBuilder Append(bool value) => Append(value ? "True" : "False");
 
     /// <summary>Appends the invariant decimal rendering of an integer.</summary>
@@ -180,13 +183,15 @@ internal sealed class PooledStringBuilder
             for (var i = _pooledCount - 1; i >= 0; i--)
             {
                 var candidate = pool[i];
-                if (candidate.Length >= minimumLength)
+                if (candidate.Length < minimumLength)
                 {
-                    _pooledCount--;
-                    pool[i] = pool[_pooledCount];
-                    pool[_pooledCount] = null!;
-                    return candidate;
+                    continue;
                 }
+
+                _pooledCount--;
+                pool[i] = pool[_pooledCount];
+                pool[_pooledCount] = null!;
+                return candidate;
             }
         }
 
@@ -233,12 +238,9 @@ internal sealed class PooledStringBuilder
     /// <param name="start">The index the digits start at.</param>
     private void ReverseDigits(int start)
     {
-        var end = _position - 1;
-        while (start < end)
+        for (var end = _position - 1; start < end; start++, end--)
         {
             (_buffer[end], _buffer[start]) = (_buffer[start], _buffer[end]);
-            start++;
-            end--;
         }
     }
 }

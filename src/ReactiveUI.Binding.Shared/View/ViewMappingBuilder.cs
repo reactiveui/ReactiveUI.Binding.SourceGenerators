@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive;
 #else
@@ -9,6 +11,7 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Fluent builder for registering view-to-view-model mappings on a <see cref="DefaultViewLocator"/>.</summary>
+[DebuggerDisplay("Locator = {_locator}")]
 public sealed class ViewMappingBuilder
 {
     /// <summary>The view locator to register mappings on.</summary>
@@ -23,6 +26,7 @@ public sealed class ViewMappingBuilder
     /// <typeparam name="TView">The view type. Must have a parameterless constructor.</typeparam>
     /// <returns>This builder for chaining.</returns>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ViewMappingBuilder Map<TViewModel, TView>()
         where TViewModel : class
         where TView : IViewFor, new() => Map<TViewModel, TView>(null);
@@ -46,6 +50,7 @@ public sealed class ViewMappingBuilder
     /// <param name="factory">A factory function that creates the view.</param>
     /// <returns>This builder for chaining.</returns>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ViewMappingBuilder Map<TViewModel>(Func<IViewFor> factory)
         where TViewModel : class => Map<TViewModel>(factory, null);
 

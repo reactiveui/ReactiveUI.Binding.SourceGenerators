@@ -193,8 +193,7 @@ public class BindInteractionTests
         var binding = BindInteractionScenarios.TaskHandler(vm, view);
         binding.Dispose();
 
-        var action = binding.Dispose;
-        await Assert.That(action).ThrowsNothing();
+        await Assert.That((Action)binding.Dispose).ThrowsNothing();
     }
 
     /// <summary>Verifies that the interaction binding handles multiple sequential Handle calls correctly.</summary>

@@ -7,11 +7,6 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
 /// <summary>The call sites that share one generated property-binding overload.</summary>
-/// <remarks>
-/// <c>BindOneWay</c>, <c>BindTwoWay</c>, <c>OneWayBind</c> and <c>Bind</c> differ in argument order, parameter
-/// names and direction, but they all group their call sites by the same signature: the two types, the two
-/// property types, and whether a conversion and a scheduler are present. One record serves all four.
-/// </remarks>
 /// <param name="SourceTypeFullName">The type the value is read from.</param>
 /// <param name="TargetTypeFullName">The type the value is written to.</param>
 /// <param name="SourcePropertyTypeFullName">The source property's type.</param>
@@ -19,6 +14,11 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// <param name="HasConversion">Whether the call sites pass a conversion or selector.</param>
 /// <param name="HasScheduler">Whether the call sites pass a scheduler.</param>
 /// <param name="Invocations">The call sites in this group.</param>
+/// <remarks>
+/// <c>BindOneWay</c>, <c>BindTwoWay</c>, <c>OneWayBind</c> and <c>Bind</c> differ in argument order, parameter
+/// names and direction, but they all group their call sites by the same signature: the two types, the two
+/// property types, and whether a conversion and a scheduler are present. One record serves all four.
+/// </remarks>
 internal sealed record BindingTypeGroup(
     string SourceTypeFullName,
     string TargetTypeFullName,

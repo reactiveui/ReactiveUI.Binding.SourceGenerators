@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -636,5 +637,6 @@ public class ModelEqualityTests
     /// to a constant (CA1508).
     /// </summary>
     /// <returns>A null object reference.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static object? NullReference() => null;
 }

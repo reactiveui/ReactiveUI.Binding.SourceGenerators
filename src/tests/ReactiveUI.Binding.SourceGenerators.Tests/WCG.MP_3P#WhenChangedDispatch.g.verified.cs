@@ -64,7 +64,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 __propObs0,
                 __propObs1,
                 __propObs2,
-                (p1, p2, p3) => (property1: p1, property2: p2, property3: p3));
+                (p1, p2, p3) => (Property1: p1, Property2: p2, Property3: p3));
         }
 
     }

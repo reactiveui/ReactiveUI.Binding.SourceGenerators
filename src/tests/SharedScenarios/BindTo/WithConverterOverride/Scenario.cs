@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindTo.WithConverterOverride;
@@ -15,6 +16,7 @@ public static class Scenario
     /// <param name="view">The target view.</param>
     /// <param name="converter">The explicit converter to use.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable Execute(IObservable<int> source, MyView view, IBindingTypeConverter converter) =>
         source.BindTo(view, x => x.Caption, converter);
 }

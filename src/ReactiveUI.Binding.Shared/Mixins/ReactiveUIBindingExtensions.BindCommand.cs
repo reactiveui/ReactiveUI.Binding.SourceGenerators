@@ -30,6 +30,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
+    /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl>(
@@ -60,6 +62,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
+    /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo defaults must stay optional; overloads would shadow the generated overloads")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl>(
@@ -97,6 +101,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
+    /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl, TParam>(
@@ -130,6 +136,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
+    /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo defaults must stay optional; overloads would shadow the generated overloads")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
@@ -170,6 +178,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
+    /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl, TParam>(
@@ -204,6 +214,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
+    /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo defaults must stay optional; overloads would shadow the generated overloads")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]

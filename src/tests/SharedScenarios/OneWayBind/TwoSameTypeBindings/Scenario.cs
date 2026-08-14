@@ -19,7 +19,7 @@ public static class Scenario
     /// <param name="view">The target view.</param>
     /// <param name="vm">The source view model.</param>
     /// <returns>A tuple of bindings.</returns>
-    public static (IReactiveBinding<MyView, string> first, IReactiveBinding<MyView, string> last) Execute(
+    public static (IReactiveBinding<MyView, string> First, IReactiveBinding<MyView, string> Last) Execute(
         MyView view,
         MyViewModel vm) =>
         (view.OneWayBind(vm, x => x.FirstName, x => x.FirstNameText),

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenChanged.NullForgivingDeepChain;
@@ -16,6 +17,7 @@ public static class Scenario
     /// <summary>Creates a WhenChanged observable for Child!.Name using the null-forgiving operator.</summary>
     /// <param name="vm">The parent view model to observe.</param>
     /// <returns>An observable of name values from the child.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> Execute(ParentViewModel vm) =>
         vm.WhenChanged(x => x.Child!.Name);
 }

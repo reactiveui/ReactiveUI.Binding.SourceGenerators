@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace SharedScenarios.BindCommand.EventEnabledObsParam;
 
@@ -16,5 +17,6 @@ public class WinFormsLikeButton
     public bool Enabled { get; set; }
 
     /// <summary>Simulates a button click.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void PerformClick() => Click?.Invoke(this, EventArgs.Empty);
 }

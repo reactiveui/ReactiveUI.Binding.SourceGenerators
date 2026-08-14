@@ -43,9 +43,7 @@ public class DateTimeOffsetToStringTypeConverterTests
     public async Task TryConvert_MinValue_Succeeds()
     {
         var converter = new DateTimeOffsetToStringTypeConverter();
-        var value = DateTimeOffset.MinValue;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(DateTimeOffset.MinValue, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo(DateTimeOffset.MinValue.ToString());
@@ -57,9 +55,7 @@ public class DateTimeOffsetToStringTypeConverterTests
     public async Task TryConvert_MaxValue_Succeeds()
     {
         var converter = new DateTimeOffsetToStringTypeConverter();
-        var value = DateTimeOffset.MaxValue;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(DateTimeOffset.MaxValue, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo(DateTimeOffset.MaxValue.ToString());

@@ -58,7 +58,7 @@ public class WhenChangedBenchmark
     [Benchmark(Description = "Two Properties")]
     public void TwoProperties()
     {
-        (string name, int age) last = default;
+        (string Name, int Age) last = default;
         using var sub = _vm.WhenChanged(x => x.Name, x => x.Age)
             .Subscribe(v => last = v);
 

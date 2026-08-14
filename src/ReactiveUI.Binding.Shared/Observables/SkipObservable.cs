@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
@@ -12,6 +13,7 @@ namespace ReactiveUI.Binding.Observables;
 
 /// <summary>Lightweight Skip operator that suppresses the first N elements. Replacement for <c>System.Reactive.Linq.Observable.Skip</c>.</summary>
 /// <typeparam name="T">The element type.</typeparam>
+[DebuggerDisplay("Source = {_source}, Skipping = {_count}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class SkipObservable<T> : IObservable<T>
 {
@@ -63,9 +65,11 @@ public sealed class SkipObservable<T> : IObservable<T>
         }
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnError(Exception error) => _observer.OnError(error);
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnCompleted() => _observer.OnCompleted();
     }
 }

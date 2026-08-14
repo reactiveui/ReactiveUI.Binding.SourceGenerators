@@ -35,12 +35,14 @@ public static class TestHelper
     /// <summary>Creates a compilation from source code, targeting C# 7.3 to verify generated output compatibility.</summary>
     /// <param name="source">The source code to compile.</param>
     /// <returns>A compilation ready for testing.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Compilation CreateCompilation(string source) => CreateCompilation(source, null);
 
     /// <summary>Creates a compilation from source code with appropriate references. Includes ReactiveUI for IReactiveObject testing.</summary>
     /// <param name="source">The source code to compile.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <returns>A compilation ready for testing.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Compilation CreateCompilation(string source, LanguageVersion? languageVersion) =>
         CreateCompilation(source, languageVersion, false);
 
@@ -83,13 +85,13 @@ public static class TestHelper
             : new[]
             {
                 typeof(ReactiveUIBindingExtensions).Assembly,
-                typeof(ReactiveUI.Primitives.Concurrency.ISequencer).Assembly
+                typeof(ReactiveUI.Primitives.Concurrency.ISequencer).Assembly,
             };
 
         var seedAssemblies = new[]
         {
             typeof(ReactiveObject).Assembly, typeof(IReactiveObject).Assembly,
-            typeof(System.Reactive.Linq.Observable).Assembly
+            typeof(System.Reactive.Linq.Observable).Assembly,
         }.Concat(runtimeSeeds).ToArray();
 
         var allReferences = references.Concat(GetTransitiveReferences(seedAssemblies));
@@ -107,6 +109,7 @@ public static class TestHelper
     /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>A task representing the asynchronous verification operation.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Task TestPass(
         string source,
         Type callerType,
@@ -163,6 +166,7 @@ public static class TestHelper
     /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>The generator test result for additional assertions.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Task<GeneratorTestResult> TestPassWithResult(
         string source,
         Type callerType,
@@ -219,12 +223,14 @@ public static class TestHelper
     /// <summary>Runs the source generator on the provided source code and returns the result.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static GeneratorTestResult RunGenerator(string source) => RunGenerator(source, null);
 
     /// <summary>Runs the source generator on the provided source code, targeting a specific language version.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static GeneratorTestResult RunGenerator(string source, LanguageVersion? languageVersion) =>
         RunGenerator(source, languageVersion, null);
 
@@ -239,6 +245,7 @@ public static class TestHelper
     /// other overload does, because an in-memory compilation carries no MSBuild properties.
     /// </param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static GeneratorTestResult RunGenerator(
         string source,
         LanguageVersion? languageVersion,
@@ -346,6 +353,7 @@ public static class TestHelper
     /// </summary>
     /// <param name="methodName">The test method name.</param>
     /// <returns>An abbreviated method name string.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string AbbreviateMethodName(string methodName) => methodName
         .Replace("MultipleSameTypeBindings", "MSTB", StringComparison.Ordinal)
         .Replace("TwoSameTypeBindings", "2STB", StringComparison.Ordinal)

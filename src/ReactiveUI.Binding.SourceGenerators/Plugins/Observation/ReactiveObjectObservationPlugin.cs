@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -32,6 +33,7 @@ internal sealed class ReactiveObjectObservationPlugin : IObservationPlugin
     public bool RequiresHelperClasses => false;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.ImplementsIReactiveObject;
 
@@ -68,6 +70,7 @@ internal sealed class ReactiveObjectObservationPlugin : IObservationPlugin
     }
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitShallowObservationVariable(
         StringBuilder sb,
         string rootVar,
@@ -91,6 +94,7 @@ internal sealed class ReactiveObjectObservationPlugin : IObservationPlugin
                """);
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitDeepChainRootSegment(
         StringBuilder sb,
         string rootVar,
@@ -154,6 +158,7 @@ internal sealed class ReactiveObjectObservationPlugin : IObservationPlugin
     }
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitInlineObservationVariable(
         StringBuilder sb,
         string rootVar,

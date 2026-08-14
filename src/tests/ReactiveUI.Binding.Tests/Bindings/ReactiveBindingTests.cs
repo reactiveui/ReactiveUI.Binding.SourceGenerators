@@ -59,13 +59,12 @@ public class ReactiveBindingTests
     {
         var view = new FakeView();
         var changed = Observable.Empty<int>();
-        var subscription = Disposable.Empty;
 
         var binding = new ReactiveBinding<FakeView, int>(
             view,
             changed,
             BindingDirection.TwoWay,
-            subscription);
+            Disposable.Empty);
 
         await Assert.That(binding.View).IsEqualTo(view);
         await Assert.That(binding.Direction).IsEqualTo(BindingDirection.TwoWay);

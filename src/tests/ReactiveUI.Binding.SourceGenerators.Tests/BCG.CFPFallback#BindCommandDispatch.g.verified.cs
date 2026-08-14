@@ -24,16 +24,16 @@ namespace ReactiveUI.Binding
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 73
+            if (callerLineNumber == 76
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __BindCommand_7FFFF69B2C59DF23(view, viewModel);
+                return __BindCommand_7FFFF69B2C59DF80(view, viewModel);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindCommand_7FFFF69B2C59DF23(
+        private static global::System.IDisposable __BindCommand_7FFFF69B2C59DF80(
             global::SharedScenarios.BindCommand.BasicNoParam.MyView view,
             global::SharedScenarios.BindCommand.BasicNoParam.MyViewModel viewModel)
         {

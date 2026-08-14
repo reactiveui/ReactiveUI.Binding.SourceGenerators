@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using ReactiveUI.Primitives.Concurrency;
@@ -86,6 +87,7 @@ public class BindTwoWayBenchmark
     /// </summary>
     /// <param name="view">The instance of <see cref="BenchmarkView"/> whose <see cref="BenchmarkView.DisplayName"/> property changes are observed.</param>
     /// <returns>An observable sequence of <see cref="string"/> values that represent the changes to the <see cref="BenchmarkView.DisplayName"/> property.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IObservable<string> TriggerViewGeneration(BenchmarkView view) =>
         view.WhenChanged(x => x.DisplayName);
 }

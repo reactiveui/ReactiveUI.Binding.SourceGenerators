@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ReactiveUI.Binding.Fallback;
 
@@ -175,6 +176,7 @@ public class CommandBindingAffinityCheckerTests
     }
 
     /// <summary>Restores default plugins by re-initializing the binding infrastructure.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void RestoreDefaultPlugins() =>
         RuntimeObservationFallbackTests.EnsureInitialized();
 

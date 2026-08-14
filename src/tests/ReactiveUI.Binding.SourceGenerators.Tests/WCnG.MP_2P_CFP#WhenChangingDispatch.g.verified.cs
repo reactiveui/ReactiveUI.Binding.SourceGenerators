@@ -27,7 +27,7 @@ namespace ReactiveUI.Binding
                 return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanging(objectToMonitor, property1, property2);
             }
 
-            if (callerLineNumber == 69 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
+            if (callerLineNumber == 71 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
                 return __WhenChanging_000011A95039C09F(objectToMonitor);
             }
@@ -49,7 +49,7 @@ namespace ReactiveUI.Binding
             return global::ReactiveUI.Binding.Observables.CombineLatestObservable.Create(
                 __propObs0,
                 __propObs1,
-                (p1, p2) => (property1: p1, property2: p2));
+                (p1, p2) => (Property1: p1, Property2: p2));
         }
 
     }

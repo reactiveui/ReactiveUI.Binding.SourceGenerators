@@ -214,7 +214,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(CombineLatestName);
-        await Assert.That(result).Contains("property1: p1");
-        await Assert.That(result).Contains("property2: p2");
+        await Assert.That(result).Contains("Property1: p1");
+        await Assert.That(result).Contains("Property2: p2");
     }
 }

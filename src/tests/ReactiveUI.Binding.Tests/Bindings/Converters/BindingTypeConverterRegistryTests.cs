@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 
 /// <summary>Tests for the internal <see cref="BindingTypeConverterRegistry.CloneRegistryShallow"/> method.</summary>
@@ -12,7 +14,7 @@ public class BindingTypeConverterRegistryTests
     [Test]
     public async Task CloneRegistryShallow_EmptyDictionary_ReturnsEmpty()
     {
-        var source = new Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>>();
+        var source = new Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>>();
 
         var clone = BindingTypeConverterRegistry.CloneRegistryShallow(source);
 
@@ -26,7 +28,7 @@ public class BindingTypeConverterRegistryTests
     {
         var converter = new TestConverter(typeof(string), typeof(int));
         var list = new List<IBindingTypeConverter> { converter };
-        var source = new Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>> { [(typeof(string), typeof(int))] = list };
+        var source = new Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>> { [(typeof(string), typeof(int))] = list };
 
         var clone = BindingTypeConverterRegistry.CloneRegistryShallow(source);
 
@@ -45,7 +47,7 @@ public class BindingTypeConverterRegistryTests
     {
         var converter = new TestConverter(typeof(string), typeof(int));
         var list = new List<IBindingTypeConverter> { converter };
-        var source = new Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>> { [(typeof(string), typeof(int))] = list };
+        var source = new Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>> { [(typeof(string), typeof(int))] = list };
 
         var clone = BindingTypeConverterRegistry.CloneRegistryShallow(source);
 
@@ -79,6 +81,7 @@ public class BindingTypeConverterRegistryTests
         public Type ToType { get; } = toType;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetAffinityForObjects() => StubAffinity;
 
         /// <inheritdoc/>

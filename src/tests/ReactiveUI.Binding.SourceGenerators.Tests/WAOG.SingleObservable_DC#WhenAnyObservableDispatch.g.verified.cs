@@ -23,12 +23,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             if (obs1Expression == "x => x.Child.MyCommand")
             {
-                return __WhenAnyObservable_7FFFD9447DB2ED7A(objectToMonitor);
+                return __WhenAnyObservable_7FFFD9447DB2EDB8(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
         }
 
-        private static global::System.IObservable<string> __WhenAnyObservable_7FFFD9447DB2ED7A(global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ParentViewModel obj)
+        private static global::System.IObservable<string> __WhenAnyObservable_7FFFD9447DB2EDB8(global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ParentViewModel obj)
         {
             var __obsProperty_s0 = (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel>(
                 obj,

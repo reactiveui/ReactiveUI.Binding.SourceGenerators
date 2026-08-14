@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
@@ -67,5 +68,6 @@ internal static class ObservationPluginRegistry
     /// <summary>Gets the plugin at the specified index.</summary>
     /// <param name="index">The zero-based index.</param>
     /// <returns>The plugin at the specified index.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IObservationPlugin GetPlugin(int index) => Plugins[index];
 }

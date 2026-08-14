@@ -29,13 +29,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (sourcePropertyExpression == "x => x.Name"
                 && targetPropertyExpression == "x => x.NameText")
             {
-                return __BindTwoWay_000022F0C1901D5C(source, target);
+                return __BindTwoWay_000022F0C1901D9A(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_000022F0C1901D5C(global::SharedScenarios.BindTwoWay.ReactiveObjectBoth.MyViewModel source, global::SharedScenarios.BindTwoWay.ReactiveObjectBoth.MyView target)
+        private static global::System.IDisposable __BindTwoWay_000022F0C1901D9A(global::SharedScenarios.BindTwoWay.ReactiveObjectBoth.MyViewModel source, global::SharedScenarios.BindTwoWay.ReactiveObjectBoth.MyView target)
         {
             // BindTwoWay: Name <-> NameText
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(

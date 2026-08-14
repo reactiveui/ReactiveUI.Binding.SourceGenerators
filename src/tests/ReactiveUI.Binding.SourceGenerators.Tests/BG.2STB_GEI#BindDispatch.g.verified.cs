@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// Concrete typed overload for Bind from global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel to global::SharedScenarios.Bind.TwoSameTypeBindings.MyView.
         /// Uses CallerArgumentExpression for dispatch.
         /// </summary>
-        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? view, bool isViewModel)> Bind(
+        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? View, bool IsViewModel)> Bind(
             this global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view,
             global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel, string?>> viewModelProperty,
@@ -37,7 +37,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? view, bool isViewModel)> __Bind_7FFFE38A2E1A448A(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? View, bool IsViewModel)> __Bind_7FFFE38A2E1A448A(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
         {
             // Bind: FirstName <-> FirstNameText
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -68,14 +68,14 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var disposable = new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
 
-            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? view, bool isViewModel)>(
+            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? View, bool IsViewModel)>(
                 view,
                 changed,
                 global::ReactiveUI.Binding.BindingDirection.TwoWay,
                 disposable);
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? view, bool isViewModel)> __Bind_7FFFE389FC4EEB01(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? View, bool IsViewModel)> __Bind_7FFFE389FC4EEB01(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
         {
             // Bind: LastName <-> LastNameText
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -106,7 +106,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var disposable = new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
 
-            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? view, bool isViewModel)>(
+            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? View, bool IsViewModel)>(
                 view,
                 changed,
                 global::ReactiveUI.Binding.BindingDirection.TwoWay,

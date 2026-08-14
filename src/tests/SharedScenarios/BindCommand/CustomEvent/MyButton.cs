@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace SharedScenarios.BindCommand.CustomEvent;
 
@@ -13,5 +14,6 @@ public class MyButton
     public event EventHandler? MouseUp;
 
     /// <summary>Simulates a mouse up event.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void PerformMouseUp() => MouseUp?.Invoke(this, EventArgs.Empty);
 }

@@ -42,9 +42,7 @@ public class DateTimeToStringTypeConverterTests
     public async Task TryConvert_MinValue_Succeeds()
     {
         var converter = new DateTimeToStringTypeConverter();
-        var value = DateTime.MinValue;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(DateTime.MinValue, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo(DateTime.MinValue.ToString(CultureInfo.CurrentCulture));
@@ -56,9 +54,7 @@ public class DateTimeToStringTypeConverterTests
     public async Task TryConvert_MaxValue_Succeeds()
     {
         var converter = new DateTimeToStringTypeConverter();
-        var value = DateTime.MaxValue;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(DateTime.MaxValue, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo(DateTime.MaxValue.ToString(CultureInfo.CurrentCulture));

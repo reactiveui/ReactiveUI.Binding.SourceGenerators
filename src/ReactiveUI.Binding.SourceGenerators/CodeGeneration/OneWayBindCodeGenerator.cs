@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
@@ -72,6 +73,7 @@ internal static class OneWayBindCodeGenerator
     /// <summary>Groups OneWayBind invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The OneWayBind invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations) =>
         BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
@@ -288,29 +290,30 @@ internal static class OneWayBindCodeGenerator
     /// <summary>Appends extra parameters (selector, scheduler) to the concrete overload signature.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group) =>
         BindingEmitterHelpers.AppendExtraParameters(sb, group, ConversionParameterName);
 
     /// <summary>Formats extra arguments (selector, scheduler) for forwarding to the binding method.</summary>
     /// <param name="group">The binding type group.</param>
     /// <returns>Extra arguments string or empty.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string FormatExtraArgs(BindingTypeGroup group) =>
         BindingEmitterHelpers.FormatExtraArgs(group, ConversionParameterName);
 
     /// <summary>Formats extra method parameters for the private binding method signature.</summary>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>Extra parameters string for selector and scheduler parameters.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string FormatExtraMethodParams(BindingInvocationInfo inv) =>
         BindingEmitterHelpers.FormatExtraMethodParams(inv, ConversionParameterName);
 
     /// <summary>Formats the return type for a concrete OneWayBind overload.</summary>
     /// <param name="group">The binding type group.</param>
     /// <returns>The fully qualified return type string.</returns>
-    internal static string FormatReturnType(BindingTypeGroup group)
-    {
-        var valueType = group.HasConversion ? group.TargetPropertyTypeFullName : group.SourcePropertyTypeFullName;
-        return $"global::ReactiveUI.Binding.IReactiveBinding<{group.TargetTypeFullName}, {valueType}>";
-    }
+    internal static string FormatReturnType(BindingTypeGroup group) =>
+        $"global::ReactiveUI.Binding.IReactiveBinding<{group.TargetTypeFullName}, "
+        + $"{(group.HasConversion ? group.TargetPropertyTypeFullName : group.SourcePropertyTypeFullName)}>";
 
     /// <summary>Formats the return type for a private OneWayBind method.</summary>
     /// <param name="inv">The binding invocation info.</param>

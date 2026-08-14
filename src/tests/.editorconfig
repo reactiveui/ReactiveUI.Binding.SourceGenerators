@@ -13,6 +13,7 @@ dotnet_diagnostic.CA2213.severity = none # Disposable fields should be disposed
 # PerformanceSharp / StyleSharp test relaxations imported from Primitives
 ###################
 dotnet_diagnostic.SST1432.severity = none # Test fixtures need not be static
+dotnet_diagnostic.SST2334.severity = none # Fixtures and models are read through assertions, not a debugger summary
 dotnet_diagnostic.SST2410.severity = none # A test creates the disposable it is asserting about; the test process owns it and exits
 performancesharp.avoid_linq_on_hot_path = false
 dotnet_diagnostic.PSH1100.severity = none # Tests can use LINQ for clarity

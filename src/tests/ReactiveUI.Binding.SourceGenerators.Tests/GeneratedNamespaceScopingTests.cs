@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis.CSharp;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -187,6 +188,7 @@ public class GeneratedNamespaceScopingTests
     /// <summary>Renders the consumer source in the given namespace.</summary>
     /// <param name="consumerNamespace">The namespace the consumer's own code is declared in.</param>
     /// <returns>The source code.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string SourceIn(string consumerNamespace) =>
         SourceTemplate.Replace(NamespaceToken, consumerNamespace, StringComparison.Ordinal);
 

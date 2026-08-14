@@ -15,6 +15,7 @@ namespace ReactiveUI.Binding.Observables;
 /// composite is already disposed are disposed immediately rather than retained, so a producer
 /// racing disposal cannot leak the resource it was mid-way through handing over.
 /// </summary>
+[DebuggerDisplay("Disposed = {_disposables == null}, Resources = {_disposables}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class GrowableCompositeDisposable : IDisposable
 {

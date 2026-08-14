@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
@@ -26,6 +27,7 @@ public static class CombineLatestObservable
     /// <param name="source2">Source observable 2.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -42,6 +44,7 @@ public static class CombineLatestObservable
     /// <param name="source3">Source observable 3.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -61,6 +64,7 @@ public static class CombineLatestObservable
     /// <param name="source4">Source observable 4.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -83,6 +87,7 @@ public static class CombineLatestObservable
     /// <param name="source5">Source observable 5.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -114,6 +119,7 @@ public static class CombineLatestObservable
     /// <param name="source6">Source observable 6.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -150,6 +156,7 @@ public static class CombineLatestObservable
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -190,6 +197,7 @@ public static class CombineLatestObservable
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -234,6 +242,7 @@ public static class CombineLatestObservable
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -282,6 +291,7 @@ public static class CombineLatestObservable
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -334,6 +344,7 @@ public static class CombineLatestObservable
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -390,6 +401,7 @@ public static class CombineLatestObservable
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -450,6 +462,7 @@ public static class CombineLatestObservable
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -514,6 +527,7 @@ public static class CombineLatestObservable
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(
         IObservable<T1> source1,
         IObservable<T2> source2,
@@ -582,6 +596,7 @@ public static class CombineLatestObservable
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<
         T1,
         T2,
@@ -670,6 +685,7 @@ public static class CombineLatestObservable
     /// <param name="resultSelector">The function to combine the latest values.</param>
     /// <returns>An observable of combined results.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<
         T1,
         T2,

@@ -458,22 +458,13 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>Extracts the body expression from a lambda expression syntax node.</summary>
-    /// <remarks>Only <see cref="SimpleLambdaExpressionSyntax"/> and <see cref="ParenthesizedLambdaExpressionSyntax"/> exist in Roslyn's C# syntax model.</remarks>
     /// <param name="lambda">The lambda expression syntax node to extract the body from.</param>
     /// <returns>
     /// The body as an <see cref="ExpressionSyntax"/>, or <c>null</c> if the lambda body is a block statement.
     /// </returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    internal static ExpressionSyntax? GetLambdaBody(LambdaExpressionSyntax lambda)
-    {
-        if (lambda is SimpleLambdaExpressionSyntax simple)
-        {
-            return simple.Body as ExpressionSyntax;
-        }
-
-        var parenthesized = (ParenthesizedLambdaExpressionSyntax)lambda;
-        return parenthesized.Body as ExpressionSyntax;
-    }
+    internal static ExpressionSyntax? GetLambdaBody(LambdaExpressionSyntax lambda) =>
+        lambda.Body as ExpressionSyntax;
 
     /// <summary>Determines whether a non-empty constant <c>toEvent</c> argument was explicitly supplied.</summary>
     /// <param name="arguments">The invocation arguments to inspect.</param>

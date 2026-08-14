@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindTo.WithConversionHint;
@@ -14,6 +15,7 @@ public static class Scenario
     /// <param name="source">The source observable stream.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable Execute(IObservable<int> source, MyView view) =>
         source.BindTo(view, x => x.Caption, (object)"D2");
 }

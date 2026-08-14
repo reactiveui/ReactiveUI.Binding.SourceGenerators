@@ -19,5 +19,5 @@ public enum BooleanToVisibilityHints
     Inverse = 1 << 1,
 
     /// <summary>Use Visibility.Hidden rather than Visibility.Collapsed for false values.</summary>
-    UseHidden = 1 << 2
+    UseHidden = 1 << 2,
 }

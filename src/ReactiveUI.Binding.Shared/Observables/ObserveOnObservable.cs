@@ -15,6 +15,7 @@ namespace ReactiveUI.Binding.Observables;
 /// Forwards all notifications from the source to observers on the specified scheduler.
 /// </summary>
 /// <typeparam name="T">The type of elements in the observable sequence.</typeparam>
+[DebuggerDisplay("Source = {_source}, Scheduler = {_scheduler}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ObserveOnObservable<T> : IObservable<T>
 {
@@ -75,10 +76,10 @@ public sealed class ObserveOnObservable<T> : IObservable<T>
             // the notification out of a closure. Its return value is the handle for any recursive work
             // the callback schedules; there is none, so it hands back the empty disposable.
             var d = _scheduler.Schedule(
-                (observer: _observer, error),
+                (Observer: _observer, Error: error),
                 static (_, state) =>
                 {
-                    state.observer.OnError(state.error);
+                    state.Observer.OnError(state.Error);
                     return EmptyDisposable.Instance;
                 });
             _disposable.Add(d);
@@ -88,10 +89,10 @@ public sealed class ObserveOnObservable<T> : IObservable<T>
         public void OnNext(T value)
         {
             var d = _scheduler.Schedule(
-                (observer: _observer, value),
+                (Observer: _observer, Value: value),
                 static (_, state) =>
                 {
-                    state.observer.OnNext(state.value);
+                    state.Observer.OnNext(state.Value);
                     return EmptyDisposable.Instance;
                 });
             _disposable.Add(d);

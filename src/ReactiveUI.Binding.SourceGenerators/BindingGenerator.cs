@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -117,6 +118,7 @@ public class BindingGenerator : IIncrementalGenerator
     /// reaches for it. Collapsing the per-type kinds to a distinct set first means adding another type of an
     /// already-seen kind leaves this output cached.
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void RegisterObservationHelperOutput(
         in IncrementalGeneratorInitializationContext context,
         IncrementalValuesProvider<ObservableTypeInfo> observableTypes,
@@ -135,6 +137,7 @@ public class BindingGenerator : IIncrementalGenerator
     /// <param name="predicate">The syntactic filter for this API.</param>
     /// <param name="transform">The semantic extraction for this API.</param>
     /// <returns>The extracted call sites, with the unanalyzable ones dropped.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IncrementalValuesProvider<T> Detect<T>(
         in IncrementalGeneratorInitializationContext context,
         Func<SyntaxNode, CancellationToken, bool> predicate,
@@ -157,6 +160,7 @@ public class BindingGenerator : IIncrementalGenerator
     /// it is not <c>AllowMultiple</c>, so repeating it across the dispatch files would be a duplicate-attribute
     /// error.
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void RegisterSharedAttributeOutput(
         in IncrementalGeneratorInitializationContext context,
         IncrementalValueProvider<LanguageFeatures> languageFeatures) =>
@@ -197,6 +201,7 @@ public class BindingGenerator : IIncrementalGenerator
     /// </summary>
     /// <param name="context">The generator initialization context.</param>
     /// <returns>A provider yielding the consumer's language-feature snapshot.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IncrementalValueProvider<LanguageFeatures> SelectLanguageFeatures(
         in IncrementalGeneratorInitializationContext context) =>
         context.ParseOptionsProvider

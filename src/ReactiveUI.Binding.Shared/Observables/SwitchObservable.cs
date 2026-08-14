@@ -16,6 +16,7 @@ namespace ReactiveUI.Binding.Observables;
 /// Replacement for <c>System.Reactive.Linq.Observable.Switch</c>.
 /// </summary>
 /// <typeparam name="T">The element type of the inner observables.</typeparam>
+[DebuggerDisplay("Source = {_source}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class SwitchObservable<T> : IObservable<T>
 {

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections;
+using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -42,6 +43,7 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnu
     /// <param name="left">The first array to compare.</param>
     /// <param name="right">The second array to compare.</param>
     /// <returns>true if the arrays are equal; otherwise, false.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(EquatableArray<T> left, EquatableArray<T> right) => left.Equals(right);
 
     /// <summary>Determines whether two arrays are not equal.</summary>
@@ -92,10 +94,12 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnu
 
     /// <summary>Returns an enumerator that iterates through the array.</summary>
     /// <returns>An enumerator for the array.</returns>
-    public IEnumerator<T> GetEnumerator() => ((_array ?? []) as IEnumerable<T>).GetEnumerator();
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public IEnumerator<T> GetEnumerator() => ((IEnumerable<T>)(_array ?? [])).GetEnumerator();
 
     /// <summary>Returns an enumerator that iterates through the array.</summary>
     /// <returns>An enumerator for the array.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>Computes a deterministic hash code for the given array.</summary>

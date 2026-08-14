@@ -20,14 +20,14 @@ namespace ReactiveUI.Binding
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            if (callerLineNumber == 45 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
+            if (callerLineNumber == 47 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __WhenAny_00002E2F49F1247B(objectToMonitor, selector);
+                return __WhenAny_00002E2F49F124B9(objectToMonitor, selector);
             }
             throw new global::System.InvalidOperationException("No generated WhenAny dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<string> __WhenAny_00002E2F49F1247B(global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel obj, global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel, string>, string> selector)
+        private static global::System.IObservable<string> __WhenAny_00002E2F49F124B9(global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel obj, global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel, string>, string> selector)
         {
             var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,

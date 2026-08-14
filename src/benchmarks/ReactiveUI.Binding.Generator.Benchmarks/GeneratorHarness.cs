@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using ReactiveUI.Binding.SourceGenerators;
@@ -26,7 +27,7 @@ internal static class GeneratorHarness
         {
             MetadataReference.CreateFromFile(typeof(ReactiveUIBindingExtensions).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(ReactiveUI.Primitives.Concurrency.ISequencer).Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(Splat.IEnableLogger).Assembly.Location)
+            MetadataReference.CreateFromFile(typeof(Splat.IEnableLogger).Assembly.Location),
         };
 
         return CSharpCompilation.Create(
@@ -38,6 +39,7 @@ internal static class GeneratorHarness
 
     /// <summary>Creates a cold generator driver, carrying no caches from a previous run.</summary>
     /// <returns>The generator driver.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static GeneratorDriver CreateDriver() =>
         CSharpGeneratorDriver.Create(
             [new BindingGenerator().AsSourceGenerator()],

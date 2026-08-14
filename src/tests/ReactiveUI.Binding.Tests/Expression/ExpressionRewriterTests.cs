@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Expressions;
 
 namespace ReactiveUI.Binding.Tests.Expression;
@@ -71,8 +72,7 @@ public class ExpressionRewriterTests
 
         // ArrayLength should be rewritten to MemberAccess of Length property
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.MemberAccess);
-        var memberExpr = (MemberExpression)result;
-        await Assert.That(memberExpr.Member.Name).IsEqualTo(LengthPropertyName);
+        await Assert.That(((MemberExpression)result).Member.Name).IsEqualTo(LengthPropertyName);
     }
 
     /// <summary>Verifies that constant expressions pass through unchanged.</summary>
@@ -185,6 +185,7 @@ public class ExpressionRewriterTests
 
     /// <summary>Verifies that null expression throws.</summary>
     [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Rewrite_WithNullExpression_Throws() =>
         Assert.Throws<ArgumentNullException>(static () => Reflection.Rewrite(null));
 
@@ -247,8 +248,7 @@ public class ExpressionRewriterTests
         var result = Reflection.Rewrite(convert);
 
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.MemberAccess);
-        var memberExpr = (MemberExpression)result;
-        await Assert.That(memberExpr.Member.Name).IsEqualTo(PropertyName);
+        await Assert.That(((MemberExpression)result).Member.Name).IsEqualTo(PropertyName);
     }
 
     /// <summary>Verifies that a static method call (non-special-name) throws NotSupportedException.</summary>
@@ -306,10 +306,9 @@ public class ExpressionRewriterTests
 
         // After rewrite, it should be an IndexExpression with NodeType == Index
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.Index);
-        var indexExpr = (IndexExpression)result;
 
         // The object type should be int[] (array type)
-        await Assert.That(indexExpr.Object!.Type.IsArray).IsTrue();
+        await Assert.That(((IndexExpression)result).Object!.Type.IsArray).IsTrue();
     }
 
     /// <summary>
@@ -510,8 +509,7 @@ public class ExpressionRewriterTests
         var result = Reflection.Rewrite(outerConvert);
 
         await Assert.That(result.NodeType).IsEqualTo(ExpressionType.MemberAccess);
-        var memberExpr = (MemberExpression)result;
-        await Assert.That(memberExpr.Member.Name).IsEqualTo(PropertyName);
+        await Assert.That(((MemberExpression)result).Member.Name).IsEqualTo(PropertyName);
     }
 
     /// <summary>
@@ -621,6 +619,7 @@ public class ExpressionRewriterTests
 
         /// <summary>Gets the value of <see cref="Property"/>. Used to test non-special-name method call rewriting.</summary>
         /// <returns>The current value of the <see cref="Property"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string? GetValue() => Property;
     }
 }

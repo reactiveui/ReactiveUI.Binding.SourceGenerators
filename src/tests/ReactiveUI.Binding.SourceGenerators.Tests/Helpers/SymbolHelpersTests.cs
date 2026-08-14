@@ -62,9 +62,8 @@ public class SymbolHelpersTests
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
         var prop = typeSymbol.GetMembers("Obs").OfType<IPropertySymbol>().First();
-        var obsPropType = (INamedTypeSymbol)prop.Type;
 
-        var result = SymbolHelpers.IsIObservable(obsPropType);
+        var result = SymbolHelpers.IsIObservable((INamedTypeSymbol)prop.Type);
 
         await Assert.That(result).IsTrue();
     }
@@ -84,9 +83,8 @@ public class SymbolHelpersTests
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
         var prop = typeSymbol.GetMembers("Name").OfType<IPropertySymbol>().First();
-        var stringType = (INamedTypeSymbol)prop.Type;
 
-        var result = SymbolHelpers.IsIObservable(stringType);
+        var result = SymbolHelpers.IsIObservable((INamedTypeSymbol)prop.Type);
 
         await Assert.That(result).IsFalse();
     }
@@ -107,9 +105,8 @@ public class SymbolHelpersTests
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
         var prop = typeSymbol.GetMembers("Confirm").OfType<IPropertySymbol>().First();
-        var interactionType = (INamedTypeSymbol)prop.Type;
 
-        var result = SymbolHelpers.IsInteractionType(interactionType);
+        var result = SymbolHelpers.IsInteractionType((INamedTypeSymbol)prop.Type);
 
         await Assert.That(result).IsTrue();
     }
@@ -129,9 +126,8 @@ public class SymbolHelpersTests
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
         var prop = typeSymbol.GetMembers("Name").OfType<IPropertySymbol>().First();
-        var stringType = (INamedTypeSymbol)prop.Type;
 
-        var result = SymbolHelpers.IsInteractionType(stringType);
+        var result = SymbolHelpers.IsInteractionType((INamedTypeSymbol)prop.Type);
 
         await Assert.That(result).IsFalse();
     }

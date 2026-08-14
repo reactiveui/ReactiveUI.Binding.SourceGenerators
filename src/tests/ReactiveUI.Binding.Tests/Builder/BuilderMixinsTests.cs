@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.Mixins;
 using ReactiveUI.Binding.Tests.TestModels;
@@ -24,8 +25,7 @@ public class BuilderMixinsTests
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         _ = builder.WithCoreServices();
 
-        IAppBuilder appBuilder = builder;
-        var instance = appBuilder.BuildApp();
+        var instance = ((IAppBuilder)builder).BuildApp();
 
         await Assert.That(instance).IsNotNull();
     }
@@ -51,8 +51,7 @@ public class BuilderMixinsTests
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         var registered = false;
 
-        IAppBuilder appBuilder = builder;
-        var result = appBuilder.WithPlatformModule(new TestModule(() => registered = true));
+        var result = ((IAppBuilder)builder).WithPlatformModule(new TestModule(() => registered = true));
 
         _ = builder.BuildApp();
 
@@ -81,8 +80,7 @@ public class BuilderMixinsTests
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         var executed = false;
 
-        IAppBuilder appBuilder = builder;
-        var result = appBuilder.WithRegistration(_ => executed = true);
+        var result = ((IAppBuilder)builder).WithRegistration(_ => executed = true);
 
         await Assert.That(executed).IsTrue();
         await Assert.That(result).IsNotNull();
@@ -112,8 +110,7 @@ public class BuilderMixinsTests
             typeof(bool),
             static (_, _) => (true, true));
 
-        IAppBuilder appBuilder = builder;
-        var result = appBuilder.WithConverter(converter);
+        var result = ((IAppBuilder)builder).WithConverter(converter);
 
         var resolved = builder.ConverterService.TypedConverters.TryGetConverter(typeof(int), typeof(bool));
 
@@ -147,8 +144,7 @@ public class BuilderMixinsTests
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         var converter = new StubFallbackConverter(static (_, _, _, _) => (true, "converted"));
 
-        IAppBuilder appBuilder = builder;
-        var result = appBuilder.WithFallbackConverter(converter);
+        var result = ((IAppBuilder)builder).WithFallbackConverter(converter);
 
         var allConverters = builder.ConverterService.FallbackConverters.GetAllConverters().ToList();
 
@@ -178,8 +174,7 @@ public class BuilderMixinsTests
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         var converter = new StubSetMethodBindingConverter();
 
-        IAppBuilder appBuilder = builder;
-        var result = appBuilder.WithSetMethodConverter(converter);
+        var result = ((IAppBuilder)builder).WithSetMethodConverter(converter);
 
         var allConverters = builder.ConverterService.SetMethodConverters.GetAllConverters().ToList();
 
@@ -214,8 +209,7 @@ public class BuilderMixinsTests
         var fallbackConverter = new StubFallbackConverter(static (_, _, _, _) => (true, "fallback"));
         var setConverter = new StubSetMethodBindingConverter();
 
-        IAppBuilder appBuilder = builder;
-        var result = appBuilder
+        var result = ((IAppBuilder)builder)
             .WithConverter(converter)
             .WithFallbackConverter(fallbackConverter)
             .WithSetMethodConverter(setConverter);
@@ -288,6 +282,7 @@ public class BuilderMixinsTests
 
         /// <summary>Uses the current Splat locator.</summary>
         /// <returns>The builder instance.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IAppBuilder UseCurrentSplatLocator() => WithCoreServices();
 
         /// <summary>Registers a module.</summary>
@@ -304,6 +299,7 @@ public class BuilderMixinsTests
 
         /// <summary>Builds the application instance.</summary>
         /// <returns>The application instance.</returns>
+        /// <exception cref="NotSupportedException">Always; the fake exists only to fail the builder type check.</exception>
         public IAppInstance Build() => throw new NotSupportedException();
     }
 
@@ -318,6 +314,7 @@ public class BuilderMixinsTests
         public TestModule(Action onConfigure) => _onConfigure = onConfigure;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Configure(IMutableDependencyResolver resolver) => _onConfigure();
     }
 }

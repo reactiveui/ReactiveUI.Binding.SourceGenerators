@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 #if REACTIVE_SHIM
@@ -23,6 +24,7 @@ public static class Reflection
     /// <summary>Uses the expression re-writer to simplify the expression down to its simplest expression.</summary>
     /// <param name="expression">The expression to rewrite.</param>
     /// <returns>The rewritten expression.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Expression Rewrite(Expression? expression) => ExpressionRewriterInstance.Visit(expression);
 
     /// <summary>Converts an expression that points to a property chain into a dotted path string.</summary>
@@ -98,6 +100,8 @@ public static class Reflection
     /// <summary>Converts a <see cref="MemberInfo"/> into a delegate which fetches the value for the member. Throws if the member is not a field or property.</summary>
     /// <param name="member">The member info to convert.</param>
     /// <returns>A delegate that fetches the value.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="member"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="member"/> is neither a <see cref="FieldInfo"/> nor a <see cref="PropertyInfo"/>, so no fetcher can be built for it.</exception>
     public static Func<object?, object?[]?, object?> GetValueFetcherOrThrow(MemberInfo? member)
     {
         ArgumentExceptionHelper.ThrowIfNull(member);
@@ -125,6 +129,8 @@ public static class Reflection
     /// <summary>Converts a <see cref="MemberInfo"/> into a delegate which sets the value for the member. Throws if the member is not a field or property.</summary>
     /// <param name="member">The member info to convert.</param>
     /// <returns>A delegate that sets the value.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="member"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="member"/> is neither a <see cref="FieldInfo"/> nor a <see cref="PropertyInfo"/>, so no setter can be built for it.</exception>
     public static Action<object?, object?, object?[]?> GetValueSetterOrThrow(MemberInfo? member)
     {
         ArgumentExceptionHelper.ThrowIfNull(member);
@@ -140,6 +146,7 @@ public static class Reflection
     /// <param name="current">The object that starts the property chain.</param>
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
     /// <returns>True if the value was successfully retrieved; otherwise false.</returns>
+    /// <exception cref="InvalidOperationException"><paramref name="expressionChain"/> is empty, so there is no member to read a value from.</exception>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     public static bool TryGetValueForPropertyChain<TValue>(
         out TValue changeValue,
@@ -185,6 +192,7 @@ public static class Reflection
     /// <param name="current">The object that starts the property chain.</param>
     /// <param name="expressionChain">A sequence of expressions that point to properties/fields.</param>
     /// <returns>True if all values were successfully retrieved; otherwise false.</returns>
+    /// <exception cref="InvalidOperationException"><paramref name="expressionChain"/> is empty, so there is no member to read a value from.</exception>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     public static bool TryGetAllValuesForPropertyChain(
         out IObservedChange<object, object?>[] changeValues,
@@ -239,6 +247,7 @@ public static class Reflection
     /// <param name="value">The value to set on the last property in the chain.</param>
     /// <returns>True if the value was successfully set; otherwise false.</returns>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool TrySetValueToPropertyChain<TValue>(
         object? target,
         IEnumerable<Expression> expressionChain,
@@ -252,6 +261,8 @@ public static class Reflection
     /// <param name="value">The value to set on the last property in the chain.</param>
     /// <param name="shouldThrow">If true, throw when reflection members are missing.</param>
     /// <returns>True if the value was successfully set; otherwise false.</returns>
+    /// <exception cref="InvalidOperationException"><paramref name="expressionChain"/> is empty, so there is no member to set a value on.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="target"/> is <see langword="null"/> at a link of the chain that still has to be read through.</exception>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     public static bool TrySetValueToPropertyChain<TValue>(
         object? target,

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Observables;
 using ReactiveUI.Binding.Tests.TestModels;
 
@@ -97,10 +98,12 @@ public class PropertyChangingObservableInitialEmitSerializationTests
         var second = new EmissionRecorder<int>();
 
         using (observable.Subscribe(first))
-        using (observable.Subscribe(second))
         {
-            await AssertSequence(first.Snapshot(), 0);
-            await AssertSequence(second.Snapshot(), 0);
+            using (observable.Subscribe(second))
+            {
+                await AssertSequence(first.Snapshot(), 0);
+                await AssertSequence(second.Snapshot(), 0);
+            }
         }
     }
 
@@ -137,20 +140,22 @@ public class PropertyChangingObservableInitialEmitSerializationTests
         /// <summary>The thread performing the competing writes.</summary>
         private readonly Thread _thread;
 
-        /// <summary>Whether the contention has been driven already, so later reads run plainly.</summary>
-        private bool _contended;
+        /// <summary>
+        /// The latch claiming the right to drive the contention: zero until a caller claims it, one
+        /// afterwards, so later reads run plainly. It is an interlocked integer rather than a boolean
+        /// because the read it guards is the very code a subscription that stopped serializing would let
+        /// two threads into at once, where a check-then-set would start the thread twice.
+        /// </summary>
+        private int _contended;
 
         /// <summary>Initializes a new instance of the <see cref="InitialEmitCompetitor"/> class.</summary>
         /// <param name="write">Writes the observed property.</param>
-        public InitialEmitCompetitor(Action<int> write)
+        public InitialEmitCompetitor(Action<int> write) => _thread = new(() =>
         {
-            _thread = new(() =>
-            {
-                _started.Set();
-                write(1);
-                write(SecondWrite);
-            }) { IsBackground = true };
-        }
+            _started.Set();
+            write(1);
+            write(SecondWrite);
+        }) { IsBackground = true };
 
         /// <summary>
         /// Builds a property read that, the first time it runs, releases the competing thread and holds
@@ -162,12 +167,11 @@ public class PropertyChangingObservableInitialEmitSerializationTests
         {
             var valueOnEntry = read();
 
-            if (_contended)
+            if (Interlocked.Exchange(ref _contended, 1) != 0)
             {
                 return valueOnEntry;
             }
 
-            _contended = true;
             _thread.Start();
             _started.Wait();
             _ = _thread.Join(InterleaveWindowMilliseconds);
@@ -176,9 +180,11 @@ public class PropertyChangingObservableInitialEmitSerializationTests
         };
 
         /// <summary>Waits for the competing writes to finish.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WaitForCompletion() => _thread.Join();
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose() => _started.Dispose();
     }
 

@@ -11,6 +11,7 @@ namespace ReactiveUI.Binding;
 /// <summary>Indicates that an interaction has gone unhandled.</summary>
 /// <typeparam name="TInput">The type of the interaction's input.</typeparam>
 /// <typeparam name="TOutput">The type of the interaction's output.</typeparam>
+[DebuggerDisplay("Input = {Input}, Interaction = {Interaction}")]
 public class UnhandledInteractionException<TInput, TOutput> : Exception
 {
     /// <summary>Initializes a new instance of the <see cref="UnhandledInteractionException{TInput, TOutput}"/> class.</summary>

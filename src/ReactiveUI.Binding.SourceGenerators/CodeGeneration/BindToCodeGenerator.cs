@@ -292,13 +292,10 @@ internal static class BindToCodeGenerator
         }
         else
         {
-            var hintArg = inv.HasConversionHint ? "conversionHint" : "null";
-            var converterArg = inv.HasConverterOverride ? "converterOverride" : "null";
-
             _ = sb.AppendLine($$"""
             return {{RxBindingExtensions}}.Subscribe(source, value =>
             {
-                if ({{RuntimeBindingConverter}}.TryConvert<{{inv.SourceValueTypeFullName}}, {{inv.TargetPropertyTypeFullName}}>(value, {{hintArg}}, {{converterArg}}, out var __converted))
+                if ({{RuntimeBindingConverter}}.TryConvert<{{inv.SourceValueTypeFullName}}, {{inv.TargetPropertyTypeFullName}}>(value, {{FormatConversionArguments(inv)}}, out var __converted))
                 {
                     {{targetAccess}} = __converted;
                 }
@@ -364,6 +361,12 @@ internal static class BindToCodeGenerator
 
         return sb.ToStringAndReturn();
     }
+
+    /// <summary>Formats the conversion-hint and converter-override arguments handed to the runtime converter.</summary>
+    /// <param name="inv">The invocation info.</param>
+    /// <returns>The two arguments, comma separated.</returns>
+    private static string FormatConversionArguments(BindToInvocationInfo inv) =>
+        $"{(inv.HasConversionHint ? "conversionHint" : "null")}, {(inv.HasConverterOverride ? "converterOverride" : "null")}";
 
     /// <summary>Groups <c>BindTo</c> invocations sharing source value type, target type, target property type, and overload shape.</summary>
     /// <param name="SourceValueTypeFullName">The fully qualified observable value type.</param>

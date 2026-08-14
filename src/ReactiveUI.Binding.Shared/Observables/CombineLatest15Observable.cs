@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
@@ -466,6 +467,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -487,6 +489,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -508,6 +511,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -529,6 +533,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -550,6 +555,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -571,6 +577,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -592,6 +599,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -613,6 +621,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -634,6 +643,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -655,6 +665,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -676,6 +687,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -697,6 +709,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -718,6 +731,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -739,6 +753,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>
@@ -760,6 +775,7 @@ internal sealed class CombineLatest15Observable<
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnError(Exception error) => parent._observer?.OnError(error);
 
             /// <inheritdoc/>

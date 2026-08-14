@@ -32,13 +32,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (propertyNameExpression == "x => x.Save"
                 && controlNameExpression == "x => x.SaveButton")
             {
-                return __BindCommand_7FFFEA737737D1B3(view, viewModel);
+                return __BindCommand_7FFFEA737737D210(view, viewModel);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindCommand_7FFFEA737737D1B3(
+        private static global::System.IDisposable __BindCommand_7FFFEA737737D210(
             global::SharedScenarios.BindCommand.ExpressionParam.MyView view,
             global::SharedScenarios.BindCommand.ExpressionParam.MyViewModel viewModel)
         {

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Observables;
 using ReactiveUI.Primitives.Concurrency;
 
@@ -106,11 +107,13 @@ public class ObserveOnObservableTests
 
     /// <summary>Verifies that the constructor rejects a null source.</summary>
     [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Constructor_NullSource_ThrowsArgumentNullException() =>
         Assert.Throws<ArgumentNullException>(static () => _ = new ObserveOnObservable<int>(null!, ImmediateSequencer.Instance));
 
     /// <summary>Verifies that the constructor rejects a null sequencer.</summary>
     [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Constructor_NullSequencer_ThrowsArgumentNullException() =>
         Assert.Throws<ArgumentNullException>(static () => _ = new ObserveOnObservable<int>(new Subject<int>(), null!));
 }

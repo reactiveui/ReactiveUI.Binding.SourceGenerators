@@ -26,13 +26,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             if (propertyNameExpression == "x => x.Confirm")
             {
-                return __BindInteraction_000025C4B6C67EA9(viewModel, handler);
+                return __BindInteraction_000025C4B6C67EE7(viewModel, handler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindInteraction_000025C4B6C67EA9(
+        private static global::System.IDisposable __BindInteraction_000025C4B6C67EE7(
             global::SharedScenarios.BindInteraction.TaskHandler.MyViewModel viewModel,
             global::System.Func<global::ReactiveUI.Binding.IInteractionContext<string, bool>, global::System.Threading.Tasks.Task> handler)
         {

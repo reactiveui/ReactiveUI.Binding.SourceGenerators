@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Observables;
 
 namespace ReactiveUI.Binding.Tests.Observables;
@@ -28,6 +29,7 @@ public class EmptyObservableTests
 
     /// <summary>Verifies that EmptyObservable throws ArgumentNullException for null observer.</summary>
     [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Subscribe_NullObserver_ThrowsArgumentNullException() =>
         Assert.Throws<ArgumentNullException>(static () => EmptyObservable<int>.Instance.Subscribe(null!));
 
@@ -50,12 +52,15 @@ public class EmptyObservableTests
     private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted) : IObserver<T>
     {
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnCompleted() => onCompleted();
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnError(Exception error) => onError(error);
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnNext(T value) => onNext(value);
     }
 }

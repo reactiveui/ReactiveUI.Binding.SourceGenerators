@@ -12,6 +12,7 @@ namespace ReactiveUI.Binding.Observables;
 
 /// <summary>An observable that emits a single value and then completes. Lightweight replacement for <c>Observable.Return&lt;T&gt;(value)</c>.</summary>
 /// <typeparam name="T">The type of the value.</typeparam>
+[DebuggerDisplay("Value = {_value}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ReturnObservable<T> : IObservable<T>
 {

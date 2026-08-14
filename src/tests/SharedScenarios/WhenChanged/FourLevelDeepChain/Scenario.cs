@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenChanged.FourLevelDeepChain;
@@ -13,6 +14,7 @@ public static class Scenario
     /// <summary>Creates a WhenChanged observable for Model.Model.Model.Value.</summary>
     /// <param name="chain">The top-level object in the chain.</param>
     /// <returns>An observable of value strings from the leaf.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> Execute(Level1 chain) =>
         chain.WhenChanged(x => x.Model.Model.Model.Value);
 }

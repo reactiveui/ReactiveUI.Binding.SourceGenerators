@@ -108,14 +108,14 @@ public class WhenChangingTests
     public async Task TwoProperties_EmitsInitialTuple()
     {
         var vm = new BigViewModel { Prop1 = "Hello", Prop2 = TwoPropIntValue };
-        var values = new List<(string property1, int property2)>();
+        var values = new List<(string Property1, int Property2)>();
 
         using var sub = WhenChangingScenarios.TwoProperties(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("Hello");
-        await Assert.That(values[0].property2).IsEqualTo(TwoPropIntValue);
+        await Assert.That(values[0].Property1).IsEqualTo("Hello");
+        await Assert.That(values[0].Property2).IsEqualTo(TwoPropIntValue);
     }
 
     /// <summary>Verifies that three-property WhenChanging emits initial values.</summary>
@@ -124,15 +124,15 @@ public class WhenChangingTests
     public async Task ThreeProperties_EmitsInitialValues()
     {
         var vm = new BigViewModel { Prop1 = "X", Prop2 = ThreePropIntValue, Prop3 = ThreePropDoubleValue };
-        var values = new List<(string property1, int property2, double property3)>();
+        var values = new List<(string Property1, int Property2, double Property3)>();
 
         using var sub = WhenChangingScenarios.ThreeProperties(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("X");
-        await Assert.That(values[0].property2).IsEqualTo(ThreePropIntValue);
-        await Assert.That(values[0].property3).IsEqualTo(ThreePropDoubleValue);
+        await Assert.That(values[0].Property1).IsEqualTo("X");
+        await Assert.That(values[0].Property2).IsEqualTo(ThreePropIntValue);
+        await Assert.That(values[0].Property3).IsEqualTo(ThreePropDoubleValue);
     }
 
     /// <summary>Verifies that four-property WhenChanging emits initial values.</summary>
@@ -141,16 +141,16 @@ public class WhenChangingTests
     public async Task FourProperties_EmitsInitialValues()
     {
         var vm = new BigViewModel { Prop1 = "Y", Prop2 = FourPropIntValue, Prop3 = FourPropDoubleValue, Prop4 = true };
-        var values = new List<(string property1, int property2, double property3, bool property4)>();
+        var values = new List<(string Property1, int Property2, double Property3, bool Property4)>();
 
         using var sub = WhenChangingScenarios.FourProperties(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("Y");
-        await Assert.That(values[0].property2).IsEqualTo(FourPropIntValue);
-        await Assert.That(values[0].property3).IsEqualTo(FourPropDoubleValue);
-        await Assert.That(values[0].property4).IsTrue();
+        await Assert.That(values[0].Property1).IsEqualTo("Y");
+        await Assert.That(values[0].Property2).IsEqualTo(FourPropIntValue);
+        await Assert.That(values[0].Property3).IsEqualTo(FourPropDoubleValue);
+        await Assert.That(values[0].Property4).IsTrue();
     }
 
     /// <summary>Verifies that disposing the subscription stops listening for changes.</summary>

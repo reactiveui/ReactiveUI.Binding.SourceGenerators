@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
@@ -16,24 +17,27 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Five-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
-    public static IObservable<(string property1, int property2, double property3, bool property4, string property5)>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5)>
         FiveProperties(BigViewModel vm) =>
         vm.WhenChanging(x => x.Prop1, x => x.Prop2, x => x.Prop3, x => x.Prop4, x => x.Prop5);
 
     /// <summary>Six-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string property1, int property2, double property3, bool property4, string property5, int property6)>
+        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6)>
         SixProperties(BigViewModel vm) =>
         vm.WhenChanging(x => x.Prop1, x => x.Prop2, x => x.Prop3, x => x.Prop4, x => x.Prop5, x => x.Prop6);
 
     /// <summary>Seven-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string property1, int property2, double property3, bool property4, string property5, int property6,
-            double property7)> SevenProperties(BigViewModel vm) =>
+        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
+            double Property7)> SevenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
             x => x.Prop2,
@@ -46,9 +50,10 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Eight-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string property1, int property2, double property3, bool property4, string property5, int property6,
-            double property7, bool property8)> EightProperties(BigViewModel vm) =>
+        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
+            double Property7, bool Property8)> EightProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
             x => x.Prop2,
@@ -62,9 +67,10 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Nine-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string property1, int property2, double property3, bool property4, string property5, int property6,
-            double property7, bool property8, string property9)> NineProperties(BigViewModel vm) =>
+        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
+            double Property7, bool Property8, string Property9)> NineProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
             x => x.Prop2,
@@ -79,9 +85,10 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Ten-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string property1, int property2, double property3, bool property4, string property5, int property6,
-            double property7, bool property8, string property9, int property10)> TenProperties(BigViewModel vm) =>
+        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
+            double Property7, bool Property8, string Property9, int Property10)> TenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
             x => x.Prop2,
@@ -97,9 +104,10 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Eleven-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string property1, int property2, double property3, bool property4, string property5, int property6,
-            double property7, bool property8, string property9, int property10, double property11)> ElevenProperties(
+        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
+            double Property7, bool Property8, string Property9, int Property10, double Property11)> ElevenProperties(
             BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -117,9 +125,10 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Twelve-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string property1, int property2, double property3, bool property4, string property5, int property6,
-            double property7, bool property8, string property9, int property10, double property11, bool property12)>
+        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
+            double Property7, bool Property8, string Property9, int Property10, double Property11, bool Property12)>
         TwelveProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -138,9 +147,10 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Thirteen-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
-    public static IObservable<(string property1, int property2, double property3, bool property4, string property5, int
-        property6, double property7, bool property8, string property9, int property10, double property11, bool
-        property12, string property13)> ThirteenProperties(BigViewModel vm) =>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int
+        Property6, double Property7, bool Property8, string Property9, int Property10, double Property11, bool
+        Property12, string Property13)> ThirteenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
             x => x.Prop2,
@@ -159,9 +169,10 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Fourteen-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
-    public static IObservable<(string property1, int property2, double property3, bool property4, string property5, int
-        property6, double property7, bool property8, string property9, int property10, double property11, bool
-        property12, string property13, int property14)> FourteenProperties(BigViewModel vm) =>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int
+        Property6, double Property7, bool Property8, string Property9, int Property10, double Property11, bool
+        Property12, string Property13, int Property14)> FourteenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
             x => x.Prop2,
@@ -181,9 +192,10 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Fifteen-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
-    public static IObservable<(string property1, int property2, double property3, bool property4, string property5, int
-        property6, double property7, bool property8, string property9, int property10, double property11, bool
-        property12, string property13, int property14, double property15)> FifteenProperties(BigViewModel vm) =>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int
+        Property6, double Property7, bool Property8, string Property9, int Property10, double Property11, bool
+        Property12, string Property13, int Property14, double Property15)> FifteenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
             x => x.Prop2,
@@ -204,9 +216,10 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Sixteen-property before-change observation returning a tuple.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple before changes.</returns>
-    public static IObservable<(string property1, int property2, double property3, bool property4, string property5, int
-        property6, double property7, bool property8, string property9, int property10, double property11, bool
-        property12, string property13, int property14, double property15, bool property16)> SixteenProperties(
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int
+        Property6, double Property7, bool Property8, string Property9, int Property10, double Property11, bool
+        Property12, string Property13, int Property14, double Property15, bool Property16)> SixteenProperties(
         BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -229,6 +242,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Five-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_FiveProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -241,6 +255,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Six-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_SixProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -254,6 +269,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Seven-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_SevenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -268,6 +284,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Eight-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_EightProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -283,6 +300,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Nine-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_NineProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -299,6 +317,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Ten-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_TenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -316,6 +335,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Eleven-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_ElevenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -335,6 +355,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Twelve-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_TwelveProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -355,6 +376,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Thirteen-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_ThirteenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -376,6 +398,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Fourteen-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_FourteenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -398,6 +421,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Fifteen-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_FifteenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -421,6 +445,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Sixteen-property before-change observation with a selector function.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the combined string value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> WithSelector_SixteenProperties(BigViewModel vm) =>
         vm.WhenChanging(
             x => x.Prop1,
@@ -445,6 +470,7 @@ public static class WhenChangingExtendedScenarios
     /// <summary>Deep property chain before-change observation on BigViewModel.Address.City.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the nested City property value before changes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<string> DeepChain_AddressCity(BigViewModel vm) =>
         vm.WhenChanging(x => x.Address.City);
 }

@@ -91,12 +91,14 @@ internal static class TypeDetectionExtractor
             var isDependencyProperty = false;
             for (var j = 0; j < members.Length; j++)
             {
-                if (members[j] is IFieldSymbol { IsStatic: true } field
-                    && field.Name == $"{property.Name}Property")
+                if (members[j] is not IFieldSymbol { IsStatic: true } field
+                    || field.Name != $"{property.Name}Property")
                 {
-                    isDependencyProperty = true;
-                    break;
+                    continue;
                 }
+
+                isDependencyProperty = true;
+                break;
             }
 
             properties.Add(new(

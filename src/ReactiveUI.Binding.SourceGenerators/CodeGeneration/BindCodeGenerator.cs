@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
@@ -79,6 +80,7 @@ internal static class BindCodeGenerator
     /// <summary>Groups Bind invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The Bind invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations) =>
         BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
@@ -299,32 +301,35 @@ internal static class BindCodeGenerator
     /// <summary>Appends extra parameters (converters, scheduler) to the concrete overload signature.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group) =>
         BindingEmitterHelpers.AppendTwoWayExtraParameters(sb, group, ForwardConverterName, ReverseConverterName);
 
     /// <summary>Formats extra arguments (converters, scheduler) for forwarding to the binding method.</summary>
     /// <param name="group">The binding type group.</param>
     /// <returns>Extra arguments string or empty.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string FormatExtraArgs(BindingTypeGroup group) =>
         BindingEmitterHelpers.FormatTwoWayExtraArgs(group, ForwardConverterName, ReverseConverterName);
 
     /// <summary>Formats extra method parameters for the private binding method signature.</summary>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>Extra parameters string for converter and scheduler parameters.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string FormatExtraMethodParams(BindingInvocationInfo inv) =>
         BindingEmitterHelpers.FormatTwoWayExtraMethodParams(inv, ForwardConverterName, ReverseConverterName);
 
     /// <summary>Formats the return type for a concrete Bind overload.</summary>
     /// <param name="group">The binding type group.</param>
-    /// <returns>The fully qualified return type string.</returns>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <returns>The fully qualified return type string.</returns>
     internal static string FormatReturnType(BindingTypeGroup group, bool supportsNullable) =>
         $"global::ReactiveUI.Binding.IReactiveBinding<{group.TargetTypeFullName}, {BindReturnValueType(supportsNullable)}>";
 
     /// <summary>Formats the return type for a private Bind method.</summary>
     /// <param name="inv">The binding invocation info.</param>
-    /// <returns>The fully qualified return type string.</returns>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <returns>The fully qualified return type string.</returns>
     internal static string FormatMethodReturnType(BindingInvocationInfo inv, bool supportsNullable) =>
         $"global::ReactiveUI.Binding.IReactiveBinding<{inv.TargetTypeFullName}, {BindReturnValueType(supportsNullable)}>";
 
@@ -422,5 +427,5 @@ internal static class BindCodeGenerator
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <returns>The value-tuple type string.</returns>
     private static string BindReturnValueType(bool supportsNullable) =>
-        supportsNullable ? "(object? view, bool isViewModel)" : "(object view, bool isViewModel)";
+        supportsNullable ? "(object? View, bool IsViewModel)" : "(object View, bool IsViewModel)";
 }

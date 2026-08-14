@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 
@@ -12,6 +13,7 @@ namespace ReactiveUI.Binding.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [MemoryDiagnoser]
 [MarkdownExporterAttribute.GitHub]
+[DebuggerDisplay("Expression-tree binding over {PropertyChangeCount} changes")]
 public class ReactiveUIBindingBenchmark
 {
     /// <summary>The number of property changes to fire during each benchmark iteration.</summary>

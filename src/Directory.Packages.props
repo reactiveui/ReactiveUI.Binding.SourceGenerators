@@ -7,13 +7,13 @@
   <!-- MAUI version varies by target framework -->
   <PropertyGroup>
     <MauiVersion Condition="$(TargetFramework.StartsWith('net10'))">10.0.90</MauiVersion>
-    <MauiVersion Condition="$(TargetFramework.StartsWith('net11'))">11.0.0-preview.6.26360.8</MauiVersion>
+    <MauiVersion Condition="$(TargetFramework.StartsWith('net11'))">11.0.0-preview.7.26406.9</MauiVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <!-- StyleSharp.Analyzers, PerformanceSharp.Analyzers and SecuritySharp.Analyzers ship from the
          same release pipeline and always share a version. -->
-    <RoslynCommonAnalyzersVersion>3.39.2</RoslynCommonAnalyzersVersion>
+    <RoslynCommonAnalyzersVersion>3.43.2</RoslynCommonAnalyzersVersion>
   </PropertyGroup>
 
   <ItemGroup>

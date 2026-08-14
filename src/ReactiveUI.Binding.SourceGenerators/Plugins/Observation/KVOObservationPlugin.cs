@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -48,6 +49,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
     public bool RequiresHelperClasses => true;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.InheritsNSObject;
 
@@ -195,6 +197,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
 
     /// <summary>Emits the <c>__KVOObserver</c> NSObject subclass that forwards ObserveValue callbacks.</summary>
     /// <param name="sb">The string builder.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitObserverClass(StringBuilder sb) =>
         sb.AppendLine("""
 
@@ -276,6 +279,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
 
     /// <summary>Emits the subscription's fields and constructor, which registers the KVO observer.</summary>
     /// <param name="sb">The string builder to append to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitSubscriptionClassHead(StringBuilder sb) =>
         sb.AppendLine("""
 
@@ -314,6 +318,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
 
     /// <summary>Emits the subscription's value-changed callback and disposal.</summary>
     /// <param name="sb">The string builder to append to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitSubscriptionClassCallbacks(StringBuilder sb) =>
         sb.AppendLine("""
 

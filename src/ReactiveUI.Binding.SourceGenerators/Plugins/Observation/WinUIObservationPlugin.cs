@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -40,6 +41,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
     public bool RequiresHelperClasses => true;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.InheritsWinUIDependencyObject;
 
@@ -171,6 +173,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
     }
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitInlineObservationVariable(
         StringBuilder sb,
         string rootVar,
@@ -187,6 +190,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
 
     /// <summary>Emits the <c>__WinUIDPObservable&lt;T&gt;</c> class header (fields and constructor).</summary>
     /// <param name="sb">The string builder.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitObservableHeader(StringBuilder sb) =>
         sb.AppendLine("""
 
@@ -228,6 +232,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
 
     /// <summary>Emits the Subscribe method plus the subscription's fields and constructor.</summary>
     /// <param name="sb">The string builder to append to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitSubscriptionClassHead(StringBuilder sb) =>
         sb.AppendLine("""
 
@@ -262,6 +267,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
 
     /// <summary>Emits the subscription's change callback and disposal, closing the observable class.</summary>
     /// <param name="sb">The string builder to append to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitSubscriptionClassCallbacks(StringBuilder sb) =>
         sb.AppendLine("""
 

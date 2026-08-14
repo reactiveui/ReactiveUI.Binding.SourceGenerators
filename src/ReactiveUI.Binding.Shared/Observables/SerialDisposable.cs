@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
@@ -14,6 +15,7 @@ namespace ReactiveUI.Binding.Observables;
 /// A thread-safe serial disposable that disposes the previous inner disposable when a new one is assigned.
 /// Lightweight replacement for <c>System.Reactive.Disposables.SerialDisposable</c>.
 /// </summary>
+[DebuggerDisplay("Disposed = {_disposed == 1}, Current = {_current}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class SerialDisposable : IDisposable
 {
@@ -80,5 +82,6 @@ public sealed class SerialDisposable : IDisposable
     /// <see cref="TakeCurrent"/> to return null because <see cref="Dispose"/> already took it.
     /// </summary>
     [ExcludeFromCodeCoverage]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void DisposeCurrentIfRace() => TakeCurrent()?.Dispose();
 }

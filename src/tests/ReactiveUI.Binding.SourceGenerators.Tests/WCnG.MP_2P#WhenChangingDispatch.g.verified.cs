@@ -52,7 +52,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             return global::ReactiveUI.Binding.Observables.CombineLatestObservable.Create(
                 __propObs0,
                 __propObs1,
-                (p1, p2) => (property1: p1, property2: p2));
+                (p1, p2) => (Property1: p1, Property2: p2));
         }
 
     }

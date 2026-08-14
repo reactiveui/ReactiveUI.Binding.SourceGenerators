@@ -44,14 +44,14 @@ public class WhenAnyValueMultiPropertyTests
         EnsureInitialized();
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B" };
-        var values = new List<(string property1, string property2)>();
+        var values = new List<(string Property1, string Property2)>();
 
         using var sub = fixture.WhenAnyValue(x => x.Value1, x => x.Value2)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("A");
-        await Assert.That(values[0].property2).IsEqualTo("B");
+        await Assert.That(values[0].Property1).IsEqualTo("A");
+        await Assert.That(values[0].Property2).IsEqualTo("B");
     }
 
     /// <summary>Verifies that WhenAnyValue with 3 properties emits tuples.</summary>
@@ -62,15 +62,15 @@ public class WhenAnyValueMultiPropertyTests
         EnsureInitialized();
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C" };
-        var values = new List<(string property1, string property2, string property3)>();
+        var values = new List<(string Property1, string Property2, string Property3)>();
 
         using var sub = fixture.WhenAnyValue(x => x.Value1, x => x.Value2, x => x.Value3)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("A");
-        await Assert.That(values[0].property2).IsEqualTo("B");
-        await Assert.That(values[0].property3).IsEqualTo("C");
+        await Assert.That(values[0].Property1).IsEqualTo("A");
+        await Assert.That(values[0].Property2).IsEqualTo("B");
+        await Assert.That(values[0].Property3).IsEqualTo("C");
     }
 
     /// <summary>Verifies that WhenAnyValue with 4 properties emits tuples.</summary>
@@ -81,7 +81,7 @@ public class WhenAnyValueMultiPropertyTests
         EnsureInitialized();
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C", Value4 = "D" };
-        var values = new List<(string property1, string property2, string property3, string property4)>();
+        var values = new List<(string Property1, string Property2, string Property3, string Property4)>();
 
         using var sub = fixture.WhenAnyValue(
                 x => x.Value1,
@@ -91,8 +91,8 @@ public class WhenAnyValueMultiPropertyTests
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("A");
-        await Assert.That(values[0].property4).IsEqualTo("D");
+        await Assert.That(values[0].Property1).IsEqualTo("A");
+        await Assert.That(values[0].Property4).IsEqualTo("D");
     }
 
     /// <summary>Verifies that WhenAnyValue with 5 properties emits tuples.</summary>
@@ -104,7 +104,7 @@ public class WhenAnyValueMultiPropertyTests
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C", Value4 = "D", Value5 = "E" };
         var values =
-            new List<(string property1, string property2, string property3, string property4, string property5)>();
+            new List<(string Property1, string Property2, string Property3, string Property4, string Property5)>();
 
         using var sub = fixture.WhenAnyValue(
                 x => x.Value1,
@@ -115,8 +115,8 @@ public class WhenAnyValueMultiPropertyTests
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("A");
-        await Assert.That(values[0].property5).IsEqualTo("E");
+        await Assert.That(values[0].Property1).IsEqualTo("A");
+        await Assert.That(values[0].Property5).IsEqualTo("E");
     }
 
     /// <summary>Verifies that WhenAnyValue with 6 properties emits tuples.</summary>
@@ -128,8 +128,8 @@ public class WhenAnyValueMultiPropertyTests
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C", Value4 = "D", Value5 = "E", Value6 = "F" };
         var values =
-            new List<(string property1, string property2, string property3, string property4, string property5, string
-                property6)>();
+            new List<(string Property1, string Property2, string Property3, string Property4, string Property5, string
+                Property6)>();
 
         using var sub = fixture.WhenAnyValue(
                 x => x.Value1,
@@ -141,8 +141,8 @@ public class WhenAnyValueMultiPropertyTests
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("A");
-        await Assert.That(values[0].property6).IsEqualTo("F");
+        await Assert.That(values[0].Property1).IsEqualTo("A");
+        await Assert.That(values[0].Property6).IsEqualTo("F");
     }
 
     /// <summary>Verifies that WhenAnyValue with 7 properties emits tuples.</summary>
@@ -154,8 +154,8 @@ public class WhenAnyValueMultiPropertyTests
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C", Value4 = "D", Value5 = "E", Value6 = "F", Value7 = "G" };
         var values =
-            new List<(string property1, string property2, string property3, string property4, string property5, string
-                property6, string property7)>();
+            new List<(string Property1, string Property2, string Property3, string Property4, string Property5, string
+                Property6, string Property7)>();
 
         using var sub = fixture.WhenAnyValue(
                 x => x.Value1,
@@ -168,7 +168,7 @@ public class WhenAnyValueMultiPropertyTests
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property7).IsEqualTo("G");
+        await Assert.That(values[0].Property7).IsEqualTo("G");
     }
 
     /// <summary>Verifies that WhenAnyValue with 8 properties emits tuples.</summary>
@@ -191,7 +191,7 @@ public class WhenAnyValueMultiPropertyTests
                 x => x.Value6,
                 x => x.Value7,
                 x => x.Value8)
-            .Subscribe(v => lastItem8 = v.property8);
+            .Subscribe(v => lastItem8 = v.Property8);
 
         await Assert.That(lastItem8).IsEqualTo("H");
     }
@@ -217,7 +217,7 @@ public class WhenAnyValueMultiPropertyTests
                 x => x.Value7,
                 x => x.Value8,
                 x => x.Value9)
-            .Subscribe(v => lastItem9 = v.property9);
+            .Subscribe(v => lastItem9 = v.Property9);
 
         await Assert.That(lastItem9).IsEqualTo("I");
     }
@@ -244,7 +244,7 @@ public class WhenAnyValueMultiPropertyTests
                 x => x.Value8,
                 x => x.Value9,
                 x => x.Value10)
-            .Subscribe(v => lastItem10 = v.property10);
+            .Subscribe(v => lastItem10 = v.Property10);
 
         await Assert.That(lastItem10).IsEqualTo("J");
     }
@@ -268,7 +268,7 @@ public class WhenAnyValueMultiPropertyTests
             Value8 = "H",
             Value9 = "I",
             Value10 = "J",
-            Value11 = "K"
+            Value11 = "K",
         };
 
         string? lastItem11 = null;
@@ -285,7 +285,7 @@ public class WhenAnyValueMultiPropertyTests
                 x => x.Value9,
                 x => x.Value10,
                 x => x.Value11)
-            .Subscribe(v => lastItem11 = v.property11);
+            .Subscribe(v => lastItem11 = v.Property11);
 
         await Assert.That(lastItem11).IsEqualTo("K");
     }
@@ -310,7 +310,7 @@ public class WhenAnyValueMultiPropertyTests
             Value9 = "I",
             Value10 = "J",
             Value11 = "K",
-            Value12 = "L"
+            Value12 = "L",
         };
 
         string? lastItem12 = null;
@@ -328,7 +328,7 @@ public class WhenAnyValueMultiPropertyTests
                 x => x.Value10,
                 x => x.Value11,
                 x => x.Value12)
-            .Subscribe(v => lastItem12 = v.property12);
+            .Subscribe(v => lastItem12 = v.Property12);
 
         await Assert.That(lastItem12).IsEqualTo("L");
     }

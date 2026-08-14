@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
@@ -32,6 +33,7 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
     public bool RequiresCustomBinderFallback => false;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanHandle(BindCommandInvocationInfo inv) =>
         inv.HasCommandProperty;
 

@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.AotValidation;
 
@@ -87,12 +88,12 @@ internal static class Program
     private static void ValidateWhenChangedTwoProperties()
     {
         var vm = new AotViewModel { Name = Alice, Age = InitialAge };
-        (string name, int age) last = default;
+        (string Name, int Age) last = default;
         using var sub = vm.WhenChanged(x => x.Name, x => x.Age).Subscribe(v => last = v);
-        AssertEqual("WhenChanged two-prop name", Alice, last.name);
-        AssertEqual("WhenChanged two-prop age", InitialAge, last.age);
+        AssertEqual("WhenChanged two-prop name", Alice, last.Name);
+        AssertEqual("WhenChanged two-prop age", InitialAge, last.Age);
         vm.Age = UpdatedAge;
-        AssertEqual("WhenChanged two-prop age update", UpdatedAge, last.age);
+        AssertEqual("WhenChanged two-prop age update", UpdatedAge, last.Age);
     }
 
     /// <summary>WhenChanged on the view type produces a dispatch entry required by BindTwoWay.</summary>
@@ -163,5 +164,6 @@ internal static class Program
 
     /// <summary>Writes a single line of the validation report to the process output stream.</summary>
     /// <param name="message">The line to write.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void Report(string message) => _output.WriteLine(message);
 }

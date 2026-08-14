@@ -16,6 +16,7 @@ namespace ReactiveUI.Binding;
 /// object-based shim (<see cref="TryConvertTyped(object?, object?, out object?)"/>), allowing the dispatch
 /// layer to avoid reflection.
 /// </remarks>
+[DebuggerDisplay("{FromType.Name,nq} -> {ToType.Name,nq} converter")]
 public abstract class BindingTypeConverter<TFrom, TTo> : IBindingTypeConverter<TFrom, TTo>
 {
     /// <inheritdoc/>
