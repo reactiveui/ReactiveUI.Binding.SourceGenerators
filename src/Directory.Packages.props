@@ -63,9 +63,9 @@
     <PackageVersion Include="StyleSharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
     <PackageVersion Include="PerformanceSharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
     <PackageVersion Include="SecuritySharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0"/>
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.16.0"/>
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.301"/>
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.31.0.145097"/>
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.32.0.713"/>
     <PackageVersion Include="Blazor.Common.Analyzers" Version="2.1.0"/>
 
     <!-- MAUI -->
