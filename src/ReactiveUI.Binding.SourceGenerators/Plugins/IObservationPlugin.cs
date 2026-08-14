@@ -102,13 +102,15 @@ internal interface IObservationPlugin
     /// <param name="lambdaParam">The lambda parameter name for the parent value.</param>
     /// <param name="segment">The current property path segment.</param>
     /// <param name="isBeforeChange">True for WhenChanging (before-change).</param>
+    /// <param name="nullParentBehavior">The behavior to use while the parent segment is null.</param>
     void EmitDeepChainInnerSegment(
         StringBuilder sb,
         string prevVar,
         string curVar,
         string lambdaParam,
         PropertyPathSegment segment,
-        bool isBeforeChange);
+        bool isBeforeChange,
+        NullParentObservationBehavior nullParentBehavior);
 
     /// <summary>Emits an inline observation variable for binding generators. Used by BindOneWay/BindTwoWay for direct observation code.</summary>
     /// <param name="sb">The string builder to append to.</param>

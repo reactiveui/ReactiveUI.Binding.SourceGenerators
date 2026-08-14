@@ -133,10 +133,14 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
         string curVar,
         string lambdaParam,
         PropertyPathSegment segment,
-        bool isBeforeChange)
+        bool isBeforeChange,
+        NullParentObservationBehavior nullParentBehavior)
     {
         var segType = segment.PropertyTypeFullName;
         var declType = segment.DeclaringTypeFullName;
+        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
+            ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
 
         if (isBeforeChange)
         {
@@ -144,8 +148,10 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
                 .AppendLine($"""
                                      var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
                                          global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                             {lambdaParam} => (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(
-                                                 {lambdaParam} != null ? (({declType}){lambdaParam}).{segment.PropertyName} : default({segType}))));
+                                             {lambdaParam} => {lambdaParam} != null
+                                                 ? (global::System.IObservable<{segType}>)
+                                                     new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
+                                                 : (global::System.IObservable<{segType}>){nullParentObservable}));
                              """);
             return;
         }
@@ -160,7 +166,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
                                                  {declType}.{segment.PropertyName}Property,
                                                  (global::Microsoft.UI.Xaml.DependencyObject __o) => (({declType})__o).{segment.PropertyName},
                                                  false)
-                                             : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))));
+                                             : (global::System.IObservable<{segType}>){nullParentObservable}));
                          """);
     }
 

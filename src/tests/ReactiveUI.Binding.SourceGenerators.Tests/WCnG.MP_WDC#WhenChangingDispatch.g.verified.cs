@@ -54,7 +54,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                         (global::System.ComponentModel.INotifyPropertyChanging)__propObs0_p1,
                         "City",
                         (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel)__o).City)
-                    : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.ReturnObservable<string>(default(string))));
+                    : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
             var __propObs0 = __propObs0_s1;
 
 

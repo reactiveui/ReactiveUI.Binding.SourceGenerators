@@ -331,10 +331,10 @@ public class WhenChangedEdgeCaseTests
         await Assert.That(values).Contains("Bob");
     }
 
-    /// <summary>Verifies that deep chain with null-forgiving operator emits default when the intermediate object is null.</summary>
+    /// <summary>Verifies that deep chain with null-forgiving operator does not emit when the intermediate object is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task DeepChain_NullForgiving_EmitsDefaultWhenChildNull()
+    public async Task DeepChain_NullForgiving_DoesNotEmitWhenChildNull()
     {
         var host = new HostTestFixture { Child = null };
         var values = new List<string>();
@@ -342,8 +342,7 @@ public class WhenChangedEdgeCaseTests
         using var sub = WhenChangedScenarios.DeepChain_ChildName(host)
             .Subscribe(values.Add);
 
-        // When Child is null, should emit default (null for string)
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
+        await Assert.That(values.Count).IsEqualTo(0);
     }
 
     /// <summary>Verifies that deep chain with null-forgiving operator re-subscribes when the intermediate object is replaced.</summary>

@@ -102,17 +102,23 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         string curVar,
         string lambdaParam,
         PropertyPathSegment segment,
-        bool isBeforeChange)
+        bool isBeforeChange,
+        NullParentObservationBehavior nullParentBehavior)
     {
         var segType = segment.PropertyTypeFullName;
         var declType = segment.DeclaringTypeFullName;
+        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
+            ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
 
         _ = sb.AppendLine()
             .AppendLine($"""
                                  var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
                                      global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                         {lambdaParam} => (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(
-                                             {lambdaParam} != null ? (({declType}){lambdaParam}).{segment.PropertyName} : default({segType}))));
+                                         {lambdaParam} => {lambdaParam} != null
+                                             ? (global::System.IObservable<{segType}>)
+                                                 new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
+                                             : (global::System.IObservable<{segType}>){nullParentObservable}));
                          """);
     }
 

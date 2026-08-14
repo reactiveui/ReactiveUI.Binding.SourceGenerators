@@ -66,7 +66,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                         (global::System.ComponentModel.INotifyPropertyChanging)__parent3,
                         "Value",
                         (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model)__o).Value)
-                    : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.ReturnObservable<string>(default(string))));
+                    : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
             return __obs3;
         }
 

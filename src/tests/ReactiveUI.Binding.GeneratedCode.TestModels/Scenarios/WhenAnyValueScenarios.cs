@@ -43,4 +43,25 @@ public static class WhenAnyValueScenarios
     /// <returns>An observable of the nested City property value.</returns>
     public static IObservable<string> DeepChain_AddressCity(BigViewModel vm) =>
         vm.WhenAnyValue(x => x.Address.City);
+
+    /// <summary>
+    /// Deep property chain observation on HostTestFixture.Child!.Name.
+    /// Uses the null-forgiving operator to test generator support for nullable intermediates.
+    /// </summary>
+    /// <param name="host">The host fixture to observe.</param>
+    /// <returns>An observable of the nested Name property value.</returns>
+    public static IObservable<string> DeepChain_ChildName(HostTestFixture host) =>
+        host.WhenAnyValue(x => x.Child!.Name);
+
+    /// <summary>Three-link property chain observation on HostTestFixture.Child!.Child!.Name.</summary>
+    /// <param name="host">The host fixture to observe.</param>
+    /// <returns>An observable of the nested grandchild Name property value.</returns>
+    public static IObservable<string> DeepChain_GrandchildName(HostTestFixture host) =>
+        host.WhenAnyValue(x => x.Child!.Child!.Name);
+
+    /// <summary>Deep property chain observation on HostTestFixture.Child!.Age.</summary>
+    /// <param name="host">The host fixture to observe.</param>
+    /// <returns>An observable of the nested Age property value.</returns>
+    public static IObservable<int> DeepChain_ChildAge(HostTestFixture host) =>
+        host.WhenAnyValue(x => x.Child!.Age);
 }

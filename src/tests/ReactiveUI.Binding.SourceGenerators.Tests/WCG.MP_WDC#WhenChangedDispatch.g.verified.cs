@@ -56,7 +56,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                         "City",
                         (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultiPropertyWithDeepChains.AddressModel)__o).City,
                         false)
-                    : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.ReturnObservable<string>(default(string))));
+                    : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
             var __propObs0 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__propObs0_s1);
 
 

@@ -70,7 +70,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                         "Value",
                         (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model)__o).Value,
                         false)
-                    : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.ReturnObservable<string>(default(string))));
+                    : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
             return global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__obs3);
         }
 

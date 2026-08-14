@@ -146,10 +146,14 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
         string curVar,
         string lambdaParam,
         PropertyPathSegment segment,
-        bool isBeforeChange)
+        bool isBeforeChange,
+        NullParentObservationBehavior nullParentBehavior)
     {
         var segType = segment.PropertyTypeFullName;
         var declType = segment.DeclaringTypeFullName;
+        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
+            ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
 
         if (isBeforeChange)
         {
@@ -158,8 +162,10 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
                 .AppendLine($"""
                                      var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
                                          global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                             {lambdaParam} => (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(
-                                                 {lambdaParam} != null ? (({declType}){lambdaParam}).{segment.PropertyName} : default({segType}))));
+                                             {lambdaParam} => {lambdaParam} != null
+                                                 ? (global::System.IObservable<{segType}>)
+                                                     new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
+                                                 : (global::System.IObservable<{segType}>){nullParentObservable}));
                              """);
             return;
         }
@@ -176,7 +182,7 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
                                                      {declType}.{segment.PropertyName}Property, typeof({declType})).RemoveValueChanged({lambdaParam}, __h),
                                                  () => (({declType}){lambdaParam}).{segment.PropertyName},
                                                  false)
-                                             : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))));
+                                             : (global::System.IObservable<{segType}>){nullParentObservable}));
                          """);
     }
 

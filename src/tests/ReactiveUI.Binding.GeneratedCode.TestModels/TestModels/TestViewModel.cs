@@ -51,4 +51,21 @@ public class TestViewModel : INotifyPropertyChanged, INotifyPropertyChanging
             PropertyChanged?.Invoke(this, new(nameof(Age)));
         }
     }
+
+    /// <summary>Gets or sets the nested child used by three-link observation tests.</summary>
+    public TestViewModel? Child
+    {
+        get => field;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            PropertyChanging?.Invoke(this, new(nameof(Child)));
+            field = value;
+            PropertyChanged?.Invoke(this, new(nameof(Child)));
+        }
+    }
 }

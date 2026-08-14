@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using ReactiveUI.Binding.Fallback;
 using ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
@@ -33,6 +34,12 @@ public class WhenAnyValueEdgeCaseTests
 
     /// <summary>The value written to a property to trigger a change notification.</summary>
     private const string ChangedValue = "Changed";
+
+    /// <summary>The initial child name used in nullable deep-chain tests.</summary>
+    private const string Alice = "Alice";
+
+    /// <summary>The replacement child name used in nullable deep-chain tests.</summary>
+    private const string Charlie = "Charlie";
 
     /// <summary>Verifies that disposing the WhenAnyValue subscription stops listening for changes.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -132,6 +139,114 @@ public class WhenAnyValueEdgeCaseTests
         newAddress.City = "Eugene";
 
         await Assert.That(values).Contains("Eugene");
+    }
+
+    /// <summary>
+    /// Verifies that a nullable deep chain preserves legacy ReactiveUI WhenAnyValue semantics.
+    /// A missing intermediate suppresses emission, and replacing it reattaches the observation.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DeepChain_NullIntermediate_MatchesLegacyReactiveUISemantics()
+    {
+        var generatedHost = new HostTestFixture { Child = null };
+        var fallbackHost = new HostTestFixture { Child = null };
+        var generatedValues = new List<string>();
+        var fallbackValues = new List<string>();
+
+        using var generatedSub = WhenAnyValueScenarios.DeepChain_ChildName(generatedHost)
+            .Subscribe(generatedValues.Add);
+        using var fallbackSub = RuntimeObservationFallback
+            .WhenAnyValue(fallbackHost, x => x.Child!.Name)
+            .Subscribe(fallbackValues.Add);
+
+        generatedHost.Child = new() { Name = Alice };
+        fallbackHost.Child = new() { Name = Alice };
+        generatedHost.Child.Name = "Bob";
+        fallbackHost.Child.Name = "Bob";
+
+        generatedHost.Child = null;
+        fallbackHost.Child = null;
+
+        generatedHost.Child = new() { Name = Charlie };
+        fallbackHost.Child = new() { Name = Charlie };
+
+        var generatedTrace = string.Join('|', generatedValues);
+        var fallbackTrace = string.Join('|', fallbackValues);
+        await Assert.That(generatedTrace).IsEqualTo(fallbackTrace);
+        await Assert.That(generatedTrace).IsEqualTo("Alice|Bob|Charlie");
+    }
+
+    /// <summary>
+    /// Verifies that breaking a three-link chain detaches the generated and legacy observers from
+    /// the orphaned subtree, while repairing the chain reattaches both implementations.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DeepChain_ThreeLinks_DetachesOrphanedSubtreeLikeLegacyReactiveUI()
+    {
+        var generatedMiddle = new TestViewModel { Child = new() { Name = Alice } };
+        var fallbackMiddle = new TestViewModel { Child = new() { Name = Alice } };
+        var generatedHost = new HostTestFixture { Child = generatedMiddle };
+        var fallbackHost = new HostTestFixture { Child = fallbackMiddle };
+        var generatedValues = new List<string>();
+        var fallbackValues = new List<string>();
+
+        using var generatedSub = WhenAnyValueScenarios.DeepChain_GrandchildName(generatedHost)
+            .Subscribe(generatedValues.Add);
+        using var fallbackSub = RuntimeObservationFallback
+            .WhenAnyValue(fallbackHost, x => x.Child!.Child!.Name)
+            .Subscribe(fallbackValues.Add);
+
+        generatedHost.Child = null;
+        fallbackHost.Child = null;
+
+        generatedMiddle.Child!.Name = "Orphan mutation";
+        fallbackMiddle.Child!.Name = "Orphan mutation";
+
+        generatedHost.Child = new() { Child = new() { Name = Charlie } };
+        fallbackHost.Child = new() { Child = new() { Name = Charlie } };
+
+        var generatedTrace = string.Join('|', generatedValues);
+        var fallbackTrace = string.Join('|', fallbackValues);
+        await Assert.That(generatedTrace).IsEqualTo(fallbackTrace);
+        await Assert.That(generatedTrace).IsEqualTo("Alice|Charlie");
+    }
+
+    /// <summary>Verifies that a null leaf is still emitted when every intermediate object exists.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DeepChain_NullLeaf_StillEmits()
+    {
+        var host = new HostTestFixture { Child = new() { Name = Alice } };
+        var values = new List<string>();
+
+        using var sub = WhenAnyValueScenarios.DeepChain_ChildName(host)
+            .Subscribe(values.Add);
+
+        host.Child.Name = null!;
+
+        await Assert.That(values.Count).IsEqualTo(ExpectedEmissionCount);
+        await Assert.That(values[1]).IsNull();
+    }
+
+    /// <summary>Verifies that a missing intermediate is distinct from a legitimate default-valued leaf.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DeepChain_DefaultValueLeaf_EmitsOnlyWhenIntermediateExists()
+    {
+        var host = new HostTestFixture { Child = null };
+        var values = new List<int>();
+
+        using var sub = WhenAnyValueScenarios.DeepChain_ChildAge(host)
+            .Subscribe(values.Add);
+
+        await Assert.That(values.Count).IsEqualTo(0);
+
+        host.Child = new() { Age = 0 };
+
+        await Assert.That(values.Count).IsEqualTo(1);
+        await Assert.That(values[0]).IsEqualTo(0);
     }
 
     /// <summary>Verifies that WhenAnyValue with selector re-emits when properties change.</summary>

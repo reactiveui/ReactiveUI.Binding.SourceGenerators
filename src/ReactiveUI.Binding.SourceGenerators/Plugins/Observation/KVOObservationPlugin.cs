@@ -125,11 +125,15 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         string curVar,
         string lambdaParam,
         PropertyPathSegment segment,
-        bool isBeforeChange)
+        bool isBeforeChange,
+        NullParentObservationBehavior nullParentBehavior)
     {
         var segType = segment.PropertyTypeFullName;
         var declType = segment.DeclaringTypeFullName;
         var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
+        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
+            ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
 
         _ = sb.AppendLine()
             .AppendLine($"""
@@ -142,7 +146,7 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
                                                  (global::Foundation.NSObject __o) => (({declType})__o).{segment.PropertyName},
                                                  false,
                                                  {BoolLiteral(isBeforeChange)})
-                                             : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))));
+                                             : (global::System.IObservable<{segType}>){nullParentObservable}));
                          """);
     }
 

@@ -44,7 +44,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                         "MyCommand",
                         (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand,
                         false)
-                    : (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::System.IObservable<string>>(default(global::System.IObservable<string>))));
+                    : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Binding.Observables.EmptyObservable<global::System.IObservable<string>>.Instance));
             var __obsProperty = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__obsProperty_s1);
 
 

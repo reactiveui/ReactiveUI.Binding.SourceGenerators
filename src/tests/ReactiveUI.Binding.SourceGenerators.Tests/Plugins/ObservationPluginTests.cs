@@ -177,7 +177,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false);
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(EventObservableName);
@@ -193,7 +193,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true);
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
 
         await Assert.That(sb.ToString()).Contains(ReturnObservableName);
     }
@@ -336,7 +336,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false);
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(EventObservableName);
@@ -352,7 +352,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true);
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
 
         await Assert.That(sb.ToString()).Contains(ReturnObservableName);
     }
@@ -468,7 +468,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false);
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(WinUIDPObservableLocal);
@@ -484,7 +484,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true);
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
 
         await Assert.That(sb.ToString()).Contains(ReturnObservableName);
     }
@@ -594,7 +594,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false);
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(KVOObservableLocal);
@@ -610,7 +610,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true);
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(KVOObservableLocal);
@@ -749,7 +749,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false);
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ReturnObservableName);

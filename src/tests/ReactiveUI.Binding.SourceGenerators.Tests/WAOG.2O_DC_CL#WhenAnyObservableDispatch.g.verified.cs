@@ -48,7 +48,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                         "Count",
                         (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableCombineLatest.ChildModel)__o).Count,
                         false)
-                    : (global::System.IObservable<global::System.IObservable<int>>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::System.IObservable<int>>(default(global::System.IObservable<int>))));
+                    : (global::System.IObservable<global::System.IObservable<int>>)global::ReactiveUI.Binding.Observables.EmptyObservable<global::System.IObservable<int>>.Instance));
             var __obsProperty0 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__obsProperty0_s1);
 
 
@@ -70,7 +70,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                         "Message",
                         (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableCombineLatest.ChildModel)__o).Message,
                         false)
-                    : (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::System.IObservable<string>>(default(global::System.IObservable<string>))));
+                    : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Binding.Observables.EmptyObservable<global::System.IObservable<string>>.Instance));
             var __obsProperty1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__obsProperty1_s1);
 
 

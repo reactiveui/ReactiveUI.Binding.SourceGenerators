@@ -119,9 +119,13 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
         string curVar,
         string lambdaParam,
         PropertyPathSegment segment,
-        bool isBeforeChange)
+        bool isBeforeChange,
+        NullParentObservationBehavior nullParentBehavior)
     {
         var segType = segment.PropertyTypeFullName;
+        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
+            ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
 
         _ = sb.AppendLine()
             .AppendLine(isBeforeChange
@@ -133,7 +137,7 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
                                            (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
                                            "{segment.PropertyName}",
                                            (global::System.ComponentModel.INotifyPropertyChanging __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName})
-                                       : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))));
+                                       : (global::System.IObservable<{segType}>){nullParentObservable}));
                    """
                 : $"""
                            var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
@@ -144,7 +148,7 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
                                            "{segment.PropertyName}",
                                            (global::System.ComponentModel.INotifyPropertyChanged __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName},
                                            false)
-                                       : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))));
+                                       : (global::System.IObservable<{segType}>){nullParentObservable}));
                    """);
     }
 
