@@ -126,7 +126,7 @@ internal static class WhenAnyCodeGenerator
         EmitDispatchTable(sb, group, supportsCallerArgExpr, propCount);
 
         // Runtime fallback
-        GenerateRuntimeFallback(sb, first);
+        GenerateRuntimeFallback(sb);
 
         _ = sb.AppendLine("        }");
     }
@@ -137,9 +137,8 @@ internal static class WhenAnyCodeGenerator
     /// dispatch indicates a caching issue — never falls back to runtime reflection.
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
-    /// <param name="first">The first invocation in the type group (unused, kept for API compatibility).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateRuntimeFallback(StringBuilder sb, InvocationInfo first) => sb.AppendLine(
+    internal static void GenerateRuntimeFallback(StringBuilder sb) => sb.AppendLine(
         "            throw new global::System.InvalidOperationException(\"No generated WhenAny dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.\");");
 
     /// <summary>

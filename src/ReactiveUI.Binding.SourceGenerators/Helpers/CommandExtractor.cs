@@ -74,7 +74,7 @@ internal static class CommandExtractor
         var parameterOverload = DetectParameterOverload(methodSymbol, args, semanticModel, ct);
 
         var (resolvedEventName, resolvedEventArgsTypeFullName, capabilities) =
-            ResolveControlBinding(methodSymbol, args, controlPropertyPath, controlPropertyArg, semanticModel, ct);
+            ResolveControlBinding(methodSymbol, args, controlPropertyArg, semanticModel, ct);
 
         return new(
             invocation.SyntaxTree.FilePath,
@@ -257,7 +257,6 @@ internal static class CommandExtractor
     /// </summary>
     /// <param name="methodSymbol">The resolved BindCommand method.</param>
     /// <param name="args">The invocation arguments.</param>
-    /// <param name="controlPropertyPath">The property path to the bound control.</param>
     /// <param name="controlPropertyArg">The control selector expression.</param>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
@@ -265,18 +264,13 @@ internal static class CommandExtractor
     private static (string? EventName, string? EventArgsTypeFullName, ControlCapabilities Capabilities) ResolveControlBinding(
         IMethodSymbol methodSymbol,
         SeparatedSyntaxList<ArgumentSyntax> args,
-        PropertyPathSegment[] controlPropertyPath,
         ExpressionSyntax controlPropertyArg,
         SemanticModel semanticModel,
         CancellationToken ct)
     {
         var resolvedEventName = ResolveExplicitEventName(methodSymbol, args, semanticModel, ct);
 
-        var controlLeafType = SymbolHelpers.ResolveNamedType(
-            controlPropertyPath[^1],
-            semanticModel,
-            controlPropertyArg,
-            ct);
+        var controlLeafType = SymbolHelpers.ResolveNamedType(semanticModel, controlPropertyArg, ct);
 
         var resolvedEventArgsTypeFullName = ResolveEventArgsTypeFullName(controlLeafType, ref resolvedEventName);
 

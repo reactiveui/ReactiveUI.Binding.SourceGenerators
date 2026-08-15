@@ -102,7 +102,7 @@ public class BindingGenerator : IIncrementalGenerator
         WhenAnyObservableInvocationGenerator.Register(context, whenAnyObservable, allClasses, languageFeatures);
         BindInteractionInvocationGenerator.Register(context, bindInteraction, allClasses, languageFeatures);
         BindCommandInvocationGenerator.Register(context, bindCommand, allClasses, languageFeatures);
-        BindToInvocationGenerator.Register(context, bindTo, allClasses, languageFeatures);
+        BindToInvocationGenerator.Register(context, bindTo, languageFeatures);
     }
 
     /// <summary>

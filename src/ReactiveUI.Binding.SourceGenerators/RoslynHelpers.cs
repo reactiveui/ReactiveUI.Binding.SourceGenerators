@@ -16,18 +16,18 @@ internal static class RoslynHelpers
 {
     /// <summary>Pipeline A predicate: detects class declarations with a base list (potential INPC, IRO, DP, etc.).</summary>
     /// <param name="node">The syntax node to check.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="_">Unused; the Roslyn predicate delegate fixes this signature.</param>
     /// <returns>true if the node is a class with a base list; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsClassWithBaseList(SyntaxNode node, CancellationToken ct) =>
+    internal static bool IsClassWithBaseList(SyntaxNode node, CancellationToken _) =>
         node is ClassDeclarationSyntax { BaseList.Types.Count: > 0 };
 
     /// <summary>Pipeline B predicate: detects WhenChanged invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="_">Unused; the Roslyn predicate delegate fixes this signature.</param>
     /// <returns>true if the node is a WhenChanged invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsWhenChangedInvocation(SyntaxNode node, CancellationToken ct) =>
+    internal static bool IsWhenChangedInvocation(SyntaxNode node, CancellationToken _) =>
         node is InvocationExpressionSyntax invocation
         && invocation.Expression is MemberAccessExpressionSyntax
         {
@@ -36,10 +36,10 @@ internal static class RoslynHelpers
 
     /// <summary>Pipeline B predicate: detects WhenChanging invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="_">Unused; the Roslyn predicate delegate fixes this signature.</param>
     /// <returns>true if the node is a WhenChanging invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsWhenChangingInvocation(SyntaxNode node, CancellationToken ct) =>
+    internal static bool IsWhenChangingInvocation(SyntaxNode node, CancellationToken _) =>
         node is InvocationExpressionSyntax invocation
         && invocation.Expression is MemberAccessExpressionSyntax
         {
@@ -48,10 +48,10 @@ internal static class RoslynHelpers
 
     /// <summary>Pipeline B predicate: detects BindOneWay or BindTwoWay invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="_">Unused; the Roslyn predicate delegate fixes this signature.</param>
     /// <returns>true if the node is a bind invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindInvocation(SyntaxNode node, CancellationToken ct) =>
+    internal static bool IsBindInvocation(SyntaxNode node, CancellationToken _) =>
         node is InvocationExpressionSyntax invocation
         && invocation.Expression is MemberAccessExpressionSyntax
         {
@@ -105,10 +105,10 @@ internal static class RoslynHelpers
 
     /// <summary>Pipeline B predicate: detects WhenAnyValue invocations only.</summary>
     /// <param name="node">The syntax node to check.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="_">Unused; the Roslyn predicate delegate fixes this signature.</param>
     /// <returns>true if the node is a WhenAnyValue invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsWhenAnyValueInvocation(SyntaxNode node, CancellationToken ct) =>
+    internal static bool IsWhenAnyValueInvocation(SyntaxNode node, CancellationToken _) =>
         node is InvocationExpressionSyntax invocation
         && invocation.Expression is MemberAccessExpressionSyntax
         {
@@ -117,10 +117,10 @@ internal static class RoslynHelpers
 
     /// <summary>Pipeline B predicate: detects WhenAny invocations (with IObservedChange selector).</summary>
     /// <param name="node">The syntax node to check.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="_">Unused; the Roslyn predicate delegate fixes this signature.</param>
     /// <returns>true if the node is a WhenAny invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsWhenAnyInvocation(SyntaxNode node, CancellationToken ct) =>
+    internal static bool IsWhenAnyInvocation(SyntaxNode node, CancellationToken _) =>
         node is InvocationExpressionSyntax invocation
         && invocation.Expression is MemberAccessExpressionSyntax
         {
@@ -129,10 +129,10 @@ internal static class RoslynHelpers
 
     /// <summary>Pipeline B predicate: detects WhenAnyObservable invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="_">Unused; the Roslyn predicate delegate fixes this signature.</param>
     /// <returns>true if the node is a WhenAnyObservable invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsWhenAnyObservableInvocation(SyntaxNode node, CancellationToken ct) =>
+    internal static bool IsWhenAnyObservableInvocation(SyntaxNode node, CancellationToken _) =>
         node is InvocationExpressionSyntax invocation
         && invocation.Expression is MemberAccessExpressionSyntax
         {
@@ -141,10 +141,10 @@ internal static class RoslynHelpers
 
     /// <summary>Pipeline B predicate: detects BindInteraction invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="_">Unused; the Roslyn predicate delegate fixes this signature.</param>
     /// <returns>true if the node is a BindInteraction invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindInteractionInvocation(SyntaxNode node, CancellationToken ct) =>
+    internal static bool IsBindInteractionInvocation(SyntaxNode node, CancellationToken _) =>
         node is InvocationExpressionSyntax invocation
         && invocation.Expression is MemberAccessExpressionSyntax
         {
@@ -153,10 +153,10 @@ internal static class RoslynHelpers
 
     /// <summary>Pipeline B predicate: detects BindCommand invocations.</summary>
     /// <param name="node">The syntax node to check.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="_">Unused; the Roslyn predicate delegate fixes this signature.</param>
     /// <returns>true if the node is a BindCommand invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindCommandInvocation(SyntaxNode node, CancellationToken ct) =>
+    internal static bool IsBindCommandInvocation(SyntaxNode node, CancellationToken _) =>
         node is InvocationExpressionSyntax invocation
         && invocation.Expression is MemberAccessExpressionSyntax
         {
@@ -165,10 +165,10 @@ internal static class RoslynHelpers
 
     /// <summary>Pipeline B predicate: detects BindTo invocations (observable stream to target property).</summary>
     /// <param name="node">The syntax node to check.</param>
-    /// <param name="ct">Cancellation token.</param>
+    /// <param name="_">Unused; the Roslyn predicate delegate fixes this signature.</param>
     /// <returns>true if the node is a BindTo invocation; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindToInvocation(SyntaxNode node, CancellationToken ct) =>
+    internal static bool IsBindToInvocation(SyntaxNode node, CancellationToken _) =>
         node is InvocationExpressionSyntax invocation
         && invocation.Expression is MemberAccessExpressionSyntax
         {

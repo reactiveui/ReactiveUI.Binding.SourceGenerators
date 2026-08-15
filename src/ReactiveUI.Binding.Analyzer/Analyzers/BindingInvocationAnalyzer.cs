@@ -57,7 +57,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         var arguments = invocationOp.Arguments;
 
         // Check RXUIBIND001: Non-inline lambda
-        CheckNonInlineLambda(context, arguments, methodName);
+        CheckNonInlineLambda(context, arguments);
 
         // Check RXUIBIND003: Private/protected member access
         CheckPrivateMember(context, arguments);
@@ -95,11 +95,9 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     /// <summary>Checks for RXUIBIND001: Expression arguments that are not inline lambdas.</summary>
     /// <param name="context">The operation analysis context.</param>
     /// <param name="arguments">The invocation arguments to inspect.</param>
-    /// <param name="methodName">The name of the method being invoked.</param>
     internal static void CheckNonInlineLambda(
         in OperationAnalysisContext context,
-        ImmutableArray<IArgumentOperation> arguments,
-        string methodName)
+        ImmutableArray<IArgumentOperation> arguments)
     {
         // Find the Expression<Func<...>> arguments
         for (var i = 0; i < arguments.Length; i++)

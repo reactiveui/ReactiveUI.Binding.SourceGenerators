@@ -152,13 +152,11 @@ internal static class SymbolHelpers
             .EndsWith("IBindingTypeConverter", StringComparison.Ordinal);
 
     /// <summary>Resolves a PropertyPathSegment leaf type to its INamedTypeSymbol using the semantic model.</summary>
-    /// <param name="segment">The property path segment.</param>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="lambdaExpression">The lambda expression.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The resolved named type symbol, or null if it could not be resolved.</returns>
     internal static INamedTypeSymbol? ResolveNamedType(
-        Models.PropertyPathSegment segment,
         SemanticModel semanticModel,
         Microsoft.CodeAnalysis.CSharp.Syntax.ExpressionSyntax lambdaExpression,
         CancellationToken ct)

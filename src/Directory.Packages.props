@@ -13,7 +13,7 @@
   <PropertyGroup>
     <!-- StyleSharp.Analyzers, PerformanceSharp.Analyzers and SecuritySharp.Analyzers ship from the
          same release pipeline and always share a version. -->
-    <RoslynCommonAnalyzersVersion>3.43.2</RoslynCommonAnalyzersVersion>
+    <RoslynCommonAnalyzersVersion>3.44.0</RoslynCommonAnalyzersVersion>
   </PropertyGroup>
 
   <ItemGroup>

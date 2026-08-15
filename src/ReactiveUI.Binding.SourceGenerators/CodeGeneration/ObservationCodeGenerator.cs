@@ -445,7 +445,7 @@ internal static class ObservationCodeGenerator
 
         EmitDispatchTable(sb, group, supportsCallerArgExpr, methodPrefix, propCount, hasSelector);
 
-        GenerateRuntimeFallback(sb, methodPrefix, propCount, hasSelector);
+        GenerateRuntimeFallback(sb, methodPrefix);
 
         _ = sb.AppendLine("        }");
     }
@@ -457,14 +457,8 @@ internal static class ObservationCodeGenerator
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
-    /// <param name="propCount">The number of property expressions (unused, kept for API compatibility).</param>
-    /// <param name="hasSelector">Whether a selector function is present (unused, kept for API compatibility).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateRuntimeFallback(
-    StringBuilder sb,
-    string methodPrefix,
-    int propCount,
-    bool hasSelector) =>
+    internal static void GenerateRuntimeFallback(StringBuilder sb, string methodPrefix) =>
     sb.AppendLine(
     $"            throw new global::System.InvalidOperationException(\"No generated {methodPrefix} dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.\");");
 
