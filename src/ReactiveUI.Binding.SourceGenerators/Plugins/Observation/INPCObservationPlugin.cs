@@ -38,34 +38,19 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
     /// <inheritdoc/>
     public void EmitHelperClasses(StringBuilder sb)
     {
-        // No helper classes needed — uses PropertyObservable/PropertyChangingObservable from runtime library.
+        // No helper classes needed - uses PropertyObservable/PropertyChangingObservable from runtime library.
     }
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitShallowObservation(
         StringBuilder sb,
         string rootVar,
         PropertyPathSegment segment,
         string castTypeName,
         bool isBeforeChange,
-        bool includeStartWith)
-    {
-        if (isBeforeChange)
-        {
-            _ = sb
-                .Append($"new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>((")
-                .Append($"""global::System.ComponentModel.INotifyPropertyChanging){rootVar}, "{segment.PropertyName}", (""")
-                .Append($"global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName})");
-        }
-        else
-        {
-            _ = sb
-                .Append($"""new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>({rootVar}, "{segment.PropertyName}", (""")
-                .Append($"global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName}, ")
-                .Append(includeStartWith ? "true" : "false")
-                .Append(')');
-        }
-    }
+        bool includeStartWith) =>
+        NotifyPropertyEmitter.EmitShallowObservation(sb, rootVar, segment, castTypeName, isBeforeChange, includeStartWith);
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,20 +61,7 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
         string castTypeName,
         bool isBeforeChange,
         string varName) =>
-        sb.Append(isBeforeChange
-            ? $"""
-                           var {varName} = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>(
-                               (global::System.ComponentModel.INotifyPropertyChanging){rootVar},
-                               "{segment.PropertyName}",
-                               (global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName});
-               """
-            : $"""
-                           var {varName} = new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>(
-                               {rootVar},
-                               "{segment.PropertyName}",
-                               (global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName},
-                               true);
-               """);
+        NotifyPropertyEmitter.EmitShallowObservationVariable(sb, rootVar, segment, castTypeName, isBeforeChange, varName);
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -100,22 +72,10 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
         string castTypeName,
         bool isBeforeChange,
         string obsVarName) =>
-        sb.AppendLine(isBeforeChange
-            ? $"""
-            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>(
-                (global::System.ComponentModel.INotifyPropertyChanging){rootVar},
-                "{segment.PropertyName}",
-                (global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName});
-"""
-            : $"""
-                           var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>(
-                               {rootVar},
-                               "{segment.PropertyName}",
-                               (global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName},
-                               false);
-               """);
+        NotifyPropertyEmitter.EmitDeepChainRootSegment(sb, rootVar, segment, castTypeName, isBeforeChange, obsVarName);
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitDeepChainInnerSegment(
         StringBuilder sb,
         string prevVar,
@@ -123,37 +83,8 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
         string lambdaParam,
         PropertyPathSegment segment,
         bool isBeforeChange,
-        NullParentObservationBehavior nullParentBehavior)
-    {
-        var segType = segment.PropertyTypeFullName;
-        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-            ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
-            : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
-
-        _ = sb.AppendLine()
-            .AppendLine(isBeforeChange
-                ? $"""
-                           var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                               global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                   {lambdaParam} => {lambdaParam} != null
-                                       ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segType}>(
-                                           (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
-                                           "{segment.PropertyName}",
-                                           (global::System.ComponentModel.INotifyPropertyChanging __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName})
-                                       : (global::System.IObservable<{segType}>){nullParentObservable}));
-                   """
-                : $"""
-                           var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                               global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                   {lambdaParam} => {lambdaParam} != null
-                                       ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{segType}>(
-                                           {lambdaParam},
-                                           "{segment.PropertyName}",
-                                           (global::System.ComponentModel.INotifyPropertyChanged __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName},
-                                           false)
-                                       : (global::System.IObservable<{segType}>){nullParentObservable}));
-                   """);
-    }
+        NullParentObservationBehavior nullParentBehavior) =>
+        NotifyPropertyEmitter.EmitDeepChainInnerSegment(sb, prevVar, curVar, lambdaParam, segment, isBeforeChange, nullParentBehavior);
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -163,11 +94,5 @@ internal sealed class INPCObservationPlugin : IObservationPlugin
         PropertyPathSegment segment,
         string castTypeName,
         string varName) =>
-        sb.AppendLine($"""
-                               var {varName} = new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>(
-                                   {rootVar},
-                                   "{segment.PropertyName}",
-                                   (global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName},
-                                   true);
-                       """);
+        NotifyPropertyEmitter.EmitInlineObservationVariable(sb, rootVar, segment, castTypeName, varName);
 }

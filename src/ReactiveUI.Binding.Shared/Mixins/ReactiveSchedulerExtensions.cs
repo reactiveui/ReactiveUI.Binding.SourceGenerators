@@ -44,8 +44,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IDisposable BindOneWay<TTarget, TProperty>(
             TTarget target,
             Expression<Func<TSource, TProperty>> sourceProperty,
@@ -69,8 +69,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IDisposable BindOneWay<TTarget, TProperty>(
             TTarget target,
             Expression<Func<TSource, TProperty>> sourceProperty,
@@ -101,8 +101,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IDisposable BindOneWay<TSourceProp, TTarget, TTargetProp>(
             TTarget target,
             Expression<Func<TSource, TSourceProp>> sourceProperty,
@@ -131,8 +131,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IDisposable BindOneWay<TSourceProp, TTarget, TTargetProp>(
             TTarget target,
             Expression<Func<TSource, TSourceProp>> sourceProperty,
@@ -160,8 +160,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         [SuppressMessage(
             "Design",
             "SST2309:Optional parameters should be overloads",
@@ -191,8 +191,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IDisposable BindTwoWay<TTarget, TProperty>(
             TTarget target,
             Expression<Func<TSource, TProperty>> sourceProperty,
@@ -216,8 +216,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IDisposable BindTwoWay<TTarget, TProperty>(
             TTarget target,
             Expression<Func<TSource, TProperty>> sourceProperty,
@@ -249,8 +249,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IDisposable BindTwoWay<TSourceProp, TTarget, TTargetProp>(
             TTarget target,
             Expression<Func<TSource, TSourceProp>> sourceProperty,
@@ -281,8 +281,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IDisposable BindTwoWay<TSourceProp, TTarget, TTargetProp>(
             TTarget target,
             Expression<Func<TSource, TSourceProp>> sourceProperty,
@@ -312,8 +312,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         [SuppressMessage(
             "Design",
             "SST2309:Optional parameters should be overloads",
@@ -354,8 +354,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TProp, TOut>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TProp>> viewModelProperty,
@@ -382,8 +382,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TProp, TOut>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TProp>> viewModelProperty,
@@ -411,8 +411,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         [SuppressMessage(
             "Design",
             "SST2309:Optional parameters should be overloads",
@@ -447,8 +447,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IReactiveBinding<TView, (object? View, bool IsViewModel)> Bind<TViewModel, TVMProp, TVProp>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,
@@ -479,8 +479,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         public IReactiveBinding<TView, (object? View, bool IsViewModel)> Bind<TViewModel, TVMProp, TVProp>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,
@@ -510,8 +510,8 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated binding matched this call site; the
-        /// expressions must be inline lambdas for the source generator to emit a concrete overload.</exception>
+        /// <exception cref="InvalidOperationException">No generated binding dispatch matched this call
+        /// site; the expressions must be inline lambdas for the generator to emit a concrete overload.</exception>
         [SuppressMessage(
             "Design",
             "SST2309:Optional parameters should be overloads",
