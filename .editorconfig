@@ -362,7 +362,7 @@ dotnet_diagnostic.CA2025.severity = error # Do not pass 'IDisposable' instances 
 dotnet_diagnostic.CA2026.severity = error # A [RequiresDynamicCode] member is used from code that also requires it
 
 # Usage
-dotnet_diagnostic.CA1801.severity = none # Review unused parameters — covered by SST2337
+dotnet_diagnostic.CA1801.severity = none # Review unused parameters — covered by SST1461
 dotnet_code_quality.CA1801.api_surface = private, internal # only flag non-public APIs so we don't break public signatures
 dotnet_diagnostic.CA1816.severity = error # Call GC.SuppressFinalize correctly
 dotnet_diagnostic.CA2200.severity = none # Rethrow to preserve stack details — covered by SST1430
@@ -737,7 +737,7 @@ dotnet_diagnostic.IDE0026.severity = none # Use expression body for indexers —
 dotnet_diagnostic.IDE0048.severity = none # Add parentheses for clarity — preference not enforced
 dotnet_diagnostic.IDE0055.severity = none # Formatting — StyleCop SA rules own formatting
 dotnet_diagnostic.IDE0058.severity = none # Remove unnecessary expression value — covered by SST2221
-dotnet_diagnostic.IDE0060.severity = none # Remove unused parameter — covered by SST2337
+dotnet_diagnostic.IDE0060.severity = none # Remove unused parameter — covered by SST1461
 dotnet_diagnostic.IDE0061.severity = none # Use expression body for local function — covered by SST2281
 dotnet_diagnostic.IDE0079.severity = none # Remove unnecessary suppression — can misfire on multi-TFM suppressions
 dotnet_diagnostic.IDE0130.severity = none # Namespace does not match folder structure — we don't enforce strict mirror
@@ -1352,7 +1352,7 @@ dotnet_diagnostic.SST1457.severity = error # Global suppressions should point at
 dotnet_diagnostic.SST1458.severity = error # Global suppression targets should use declaration ids directly
 dotnet_diagnostic.SST1459.severity = error # Grouping parentheses the parent syntax already isolates
 dotnet_diagnostic.SST1460.severity = error # Non-mutating struct members should be readonly
-dotnet_diagnostic.SST1461.severity = none # Private parameters that are never read — SST2337 covers these and more
+dotnet_diagnostic.SST1461.severity = error # A parameter is never read anywhere in the member body
 dotnet_diagnostic.SST1462.severity = error # Suppressions for diagnostics already disabled by config should be removed
 dotnet_diagnostic.SST1463.severity = error # Symbol-name strings should use nameof
 dotnet_diagnostic.SST1464.severity = error # An else clause follows a branch that always jumps and can be unwrapped
@@ -1664,7 +1664,6 @@ dotnet_diagnostic.SST2333.severity = error # A generic equality contract lacks i
 dotnet_diagnostic.SST2334.severity = error # A publicly visible type has no `[DebuggerDisplay]`
 dotnet_diagnostic.SST2335.severity = error # Parts of a partial type disagree on the `static` modifier
 dotnet_diagnostic.SST2336.severity = error # A concrete attribute type declares no [AttributeUsage]
-dotnet_diagnostic.SST2337.severity = error # A parameter is never read anywhere in the member body
 
 # Correctness
 dotnet_diagnostic.SST2400.severity = error # Two arguments name each other's parameters and have been transposed

@@ -14,7 +14,7 @@ namespace ReactiveUI.Binding.Wpf.Tests;
 /// </summary>
 /// <remarks>
 /// Serialized: these share one static <see cref="DependencyProperty"/>, and the value-changed
-/// subscription <see cref="DependencyPropertyDescriptor.AddValueChanged"/> installs lives in a
+/// subscription that <c>DependencyPropertyDescriptor.AddValueChanged</c> installs lives in a
 /// process-wide table keyed by that property. Run in parallel they race on it, which shows up as an
 /// occasional failure rather than a consistent one.
 /// </remarks>
