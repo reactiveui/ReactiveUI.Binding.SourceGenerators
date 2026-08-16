@@ -18,6 +18,19 @@ internal static class GeneratedTypeNames
     /// <summary><c>System.IObservable</c> (open generic; use <see cref="ObservableOf"/>).</summary>
     internal const string IObservable = "global::System.IObservable";
 
+    /// <summary>The projection sink, which maps each value of a source sequence (open generic).</summary>
+    internal const string MapSignal = "global::ReactiveUI.Primitives.Signals.MapSignal";
+
+    /// <summary>
+    /// The projecting flattening sink, which maps each value onto an inner sequence and follows only the most
+    /// recent one (open generic). Fuses the projection into the switch, so a chain stage costs one sink rather
+    /// than a map feeding a separate switch.
+    /// </summary>
+    internal const string SwitchMapSignal = "global::ReactiveUI.Primitives.Advanced.SwitchMapSignal";
+
+    /// <summary>The interleaving sink, which relays every source sequence at once (open generic).</summary>
+    internal const string MergeSignal = "global::ReactiveUI.Primitives.Advanced.MergeSignal";
+
     /// <summary><c>System.Func</c> (open generic; use <see cref="FuncOf"/>).</summary>
     internal const string Func = "global::System.Func";
 
@@ -66,8 +79,8 @@ internal static class GeneratedTypeNames
     /// <summary><c>ReactiveUI.Binding.Observables.ObserveOnObservable</c> (open generic).</summary>
     internal const string ObserveOnObservable = "global::ReactiveUI.Binding.Observables.ObserveOnObservable";
 
-    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Observables.RxBindingExtensions</c>.</summary>
-    internal const string RxBindingExtensions = "global::ReactiveUI.Binding.Observables.RxBindingExtensions";
+    /// <summary>The fully qualified name of <c>ReactiveUI.Primitives.SubscribeExtensions</c>.</summary>
+    internal const string RxBindingExtensions = "global::ReactiveUI.Primitives.SubscribeExtensions";
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.RuntimeBindingConverter</c>.</summary>
     internal const string RuntimeBindingConverter = "global::ReactiveUI.Binding.Fallback.RuntimeBindingConverter";
@@ -99,4 +112,23 @@ internal static class GeneratedTypeNames
     /// <returns>The property-selector expression type name.</returns>
     internal static string PropertyExpression(string declaringType, string propertyType) =>
         $"{Expression}<{FuncOf(declaringType, propertyType)}>";
+
+    /// <summary>
+    /// Opens the stage that projects each value of a deep chain's parent onto the observable of its next stage
+    /// and follows the latest one, ready for the projection lambda and the closing parenthesis.
+    /// </summary>
+    /// <param name="segment">The chain segment being observed, whose declaring type is the parent's type.</param>
+    /// <param name="segmentTypeName">The fully-qualified type of the segment's property.</param>
+    /// <param name="parentVariable">The variable holding the parent stage's observable.</param>
+    /// <returns>The opening text of the stage construction.</returns>
+    /// <remarks>
+    /// The parent stage is typed as the segment's declaring type. <see cref="IObservable"/> is covariant, so a
+    /// parent observable of a more derived type still converts, and the projection lambda's parameter arrives
+    /// typed rather than inferred.
+    /// </remarks>
+    internal static string OpenChainSwitchMap(
+        Models.PropertyPathSegment segment,
+        string segmentTypeName,
+        string parentVariable) =>
+        $"new {SwitchMapSignal}<{segment.DeclaringTypeFullName}, {segmentTypeName}>({parentVariable},";
 }

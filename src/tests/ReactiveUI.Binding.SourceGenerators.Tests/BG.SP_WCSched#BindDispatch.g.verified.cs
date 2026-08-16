@@ -48,27 +48,27 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             "CountText",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView)__o).CountText,
             true);
-        var __vmSelected = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmObs, viewModelToViewConverter);
-        var __viewSelected = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(viewObs, viewToViewModelConverter);
+        var __vmSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(vmObs, viewModelToViewConverter);
+        var __viewSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(viewObs, viewToViewModelConverter);
         var vmBind = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<string>(__vmSelected, scheduler);
         var viewBind = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<int>(__viewSelected, scheduler);
 
-            var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(vmBind, value =>
+            var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(vmBind, value =>
             {
                 view.CountText = value;
             });
 
-            var __viewSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(viewBind, 1);
-            var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__viewSkipped, value =>
+            var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewBind, 1);
+            var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__viewSkipped, value =>
             {
                 viewModel.Count = value;
             });
 
-            var __vmTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmBind, v => ((object?)v, true));
-            var __viewTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__viewSkipped, v => ((object?)v, false));
-            var changed = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(__vmTagged, __viewTagged);
+            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, (object?, bool)>(vmBind, v => ((object?)v, true));
+            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<int, (object?, bool)>(__viewSkipped, v => ((object?)v, false));
+            var changed = new global::ReactiveUI.Primitives.Advanced.MergeSignal<(object?, bool)>(__vmTagged, __viewTagged);
 
-            var disposable = new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
+            var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? View, bool IsViewModel)>(
                 view,

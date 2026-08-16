@@ -92,7 +92,7 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
 
             var dependencyProperty = dependencyPropertyFetcher();
             var token = depSender.RegisterPropertyChangedCallback(dependencyProperty, handler);
-            return new ActionDisposable<(DependencyObject Sender, DependencyProperty Property, long Token)>(
+            return Scope.Create<(DependencyObject Sender, DependencyProperty Property, long Token)>(
                 (depSender, dependencyProperty, token),
                 static state => state.Sender.UnregisterPropertyChangedCallback(state.Property, state.Token));
         });

@@ -36,21 +36,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ParentViewModel)__o).Child,
                 false);
 
-        var __obsProperty_s1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty_s0,
-                __obsProperty_p1 => __obsProperty_p1 != null
-                    ? (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
-                        __obsProperty_p1,
-                        "MyCommand",
-                        (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand,
-                        false)
-                    : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Binding.Observables.EmptyObservable<global::System.IObservable<string>>.Instance));
-            var __obsProperty = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__obsProperty_s1);
+        var __obsProperty_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel, global::System.IObservable<string>>(__obsProperty_s0,
+            __obsProperty_p1 => __obsProperty_p1 != null
+                ? (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
+                    (global::System.ComponentModel.INotifyPropertyChanged)__obsProperty_p1,
+                    "MyCommand",
+                    (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand,
+                    false)
+                : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Binding.Observables.EmptyObservable<global::System.IObservable<string>>.Instance);
+            var __obsProperty = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obsProperty_s1);
 
 
-            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty,
-                    __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
+            return new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty,
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
         }
 
     }

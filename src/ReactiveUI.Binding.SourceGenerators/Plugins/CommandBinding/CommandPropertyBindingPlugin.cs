@@ -55,14 +55,14 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
                 CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value);
             _ = sb.AppendLine($$"""
 
-                                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
+                                        var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
+                                        var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
                                         {
-                                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                            serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                                             {{controlAccess}}.Command = cmd;
                                             {{controlAccess}}.CommandParameter = {{paramAccess}};
                                         });
-                                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, serial);
+                                        return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial);
                                     }
                             """);
         }
@@ -71,13 +71,13 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
             // Command only (no parameter, or no CommandParameter property)
             _ = sb.AppendLine($$"""
 
-                                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
+                                        var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
+                                        var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
                                         {
-                                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                            serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                                             {{controlAccess}}.Command = cmd;
                                         });
-                                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, serial);
+                                        return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial);
                                     }
                             """);
         }
@@ -99,19 +99,19 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
         _ = sb.AppendLine($$"""
 
                                         {{inv.ParameterTypeFullName}}{{(supportsNullable && inv.ParameterIsReferenceType ? "?" : string.Empty)}} __latestParam = default;
-                                        var __paramSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(
+                                        var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
                                             withParameter, p => System.Threading.Volatile.Write(ref __latestParam, p));
 
-                                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
+                                        var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
+                                        var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
                                         {
-                                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                            serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                                             {{controlAccess}}.Command = cmd;
                                             var param = System.Threading.Volatile.Read(ref __latestParam);
                                             {{controlAccess}}.CommandParameter = param;
                                             if (cmd != null)
                                             {
-                                                serial.Disposable = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(
+                                                serial.Disposable = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
                                                     withParameter, p =>
                                                     {
                                                         System.Threading.Volatile.Write(ref __latestParam, p);
@@ -119,8 +119,8 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
                                                     });
                                             }
                                         });
-                                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(
-                                            new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, __paramSub), serial);
+                                        return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(
+                                            new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, __paramSub), serial);
                                     }
                             """);
 }

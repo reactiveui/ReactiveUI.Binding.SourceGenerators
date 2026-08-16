@@ -4,6 +4,7 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -153,27 +154,25 @@ internal sealed class WinFormsObservationPlugin : IObservationPlugin
         {
             _ = sb.AppendLine()
                 .AppendLine($"""
-                                     var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                         global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                             {lambdaParam} => {lambdaParam} != null
-                                                 ? (global::System.IObservable<{segType}>)
-                                                     new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
-                                                 : (global::System.IObservable<{segType}>){nullParentObservable}));
+                                     var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
+                                         {lambdaParam} => {lambdaParam} != null
+                                             ? (global::System.IObservable<{segType}>)
+                                                 new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
+                                             : (global::System.IObservable<{segType}>){nullParentObservable});
                              """);
             return;
         }
 
         _ = sb.AppendLine()
             .AppendLine($"""
-                                 var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                     global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                         {lambdaParam} => {lambdaParam} != null
-                                             ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.EventObservable<{segType}>(
-                                                 __h => (({declType}){lambdaParam}).{segment.PropertyName}Changed += __h,
-                                                 __h => (({declType}){lambdaParam}).{segment.PropertyName}Changed -= __h,
-                                                 () => (({declType}){lambdaParam}).{segment.PropertyName},
-                                                 false)
-                                             : (global::System.IObservable<{segType}>){nullParentObservable}));
+                                 var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
+                                     {lambdaParam} => {lambdaParam} != null
+                                         ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.EventObservable<{segType}>(
+                                             __h => (({declType}){lambdaParam}).{segment.PropertyName}Changed += __h,
+                                             __h => (({declType}){lambdaParam}).{segment.PropertyName}Changed -= __h,
+                                             () => (({declType}){lambdaParam}).{segment.PropertyName},
+                                             false)
+                                         : (global::System.IObservable<{segType}>){nullParentObservable});
                          """);
     }
 

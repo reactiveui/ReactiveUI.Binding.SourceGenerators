@@ -71,6 +71,12 @@ internal static class Constants
     /// <summary>Metadata name of the runtime stub class in the System.Reactive runtime package.</summary>
     internal const string ReactiveStubMetadataName = "ReactiveUI.Binding.Reactive.ReactiveUIBindingExtensions";
 
+    /// <summary>
+    /// Metadata name of a type the System.Reactive flavour of ReactiveUI.Primitives declares, used to reach that
+    /// namespace and read the names it offers.
+    /// </summary>
+    internal const string PrimitivesReactiveAnchorMetadataName = "ReactiveUI.Primitives.Reactive.LinqExtensions";
+
     /// <summary>The scheduler abstraction the lean runtime library schedules on.</summary>
     internal const string LeanSchedulerTypeName = "global::ReactiveUI.Primitives.Concurrency.ISequencer";
 

@@ -130,7 +130,7 @@ internal static class ObservationCodeGenerator
 
                 if (inv.HasSelector)
                 {
-                    _ = sb.Append("            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(");
+                    _ = sb.Append("            return global::ReactiveUI.Primitives.LinqExtensions.Select(");
                     GenerateShallowPathObservation(sb, path, classInfo, isBeforeChange);
                     _ = sb.AppendLine(", selector);");
                 }
@@ -209,7 +209,7 @@ internal static class ObservationCodeGenerator
                 .AppendLine();
         }
 
-        _ = sb.AppendLine("            return global::ReactiveUI.Binding.Observables.CombineLatestObservable.Create(");
+        _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             _ = sb.Append("                __propObs").Append(i);
@@ -359,7 +359,7 @@ internal static class ObservationCodeGenerator
         var lastObsVar = $"{varName}_s{path.Length - 1}";
         _ = sb.AppendLine(isBeforeChange
             ? $"            var {varName} = {lastObsVar};"
-            : $"            var {varName} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged({lastObsVar});");
+            : $"            var {varName} = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged({lastObsVar});");
     }
 
     /// <summary>
@@ -659,7 +659,7 @@ internal static class ObservationCodeGenerator
         var lastObs = $"__obs{path.Length - 1}";
         _ = sb.Append(isBeforeChange
             ? $"            return {lastObs};"
-            : $"            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged({lastObs});");
+            : $"            return global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged({lastObs});");
     }
 
     /// <summary>
@@ -759,26 +759,24 @@ internal static class ObservationCodeGenerator
             {
                 _ = sb.AppendLine()
                     .AppendLine($"""
-                                         var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                             global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                                 {lambdaParam} => {lambdaParam} != null
-                                                     ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segType}>(
-                                                         (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
-                                                         "{seg.PropertyName}",
-                                                         (global::System.ComponentModel.INotifyPropertyChanging __o) => (({seg.DeclaringTypeFullName})__o).{seg.PropertyName})
-                                                     : (global::System.IObservable<{segType}>){nullParentObservable}));
+                                         var {curVar} = {OpenChainSwitchMap(seg, segType, prevVar)}
+                                             {lambdaParam} => {lambdaParam} != null
+                                                 ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segType}>(
+                                                     (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
+                                                     "{seg.PropertyName}",
+                                                     (global::System.ComponentModel.INotifyPropertyChanging __o) => (({seg.DeclaringTypeFullName})__o).{seg.PropertyName})
+                                                 : (global::System.IObservable<{segType}>){nullParentObservable});
                                  """);
             }
             else
             {
                 _ = sb.AppendLine()
                     .AppendLine($"""
-                                         var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                             global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                                 {lambdaParam} => {lambdaParam} != null
-                                                     ? (global::System.IObservable<{segType}>)
-                                                         new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({seg.DeclaringTypeFullName}){lambdaParam}).{seg.PropertyName})
-                                                     : (global::System.IObservable<{segType}>){nullParentObservable}));
+                                         var {curVar} = {OpenChainSwitchMap(seg, segType, prevVar)}
+                                             {lambdaParam} => {lambdaParam} != null
+                                                 ? (global::System.IObservable<{segType}>)
+                                                     new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({seg.DeclaringTypeFullName}){lambdaParam}).{seg.PropertyName})
+                                                 : (global::System.IObservable<{segType}>){nullParentObservable});
                                  """);
             }
         }
@@ -839,26 +837,24 @@ internal static class ObservationCodeGenerator
             {
                 _ = sb.AppendLine()
                     .AppendLine($"""
-                                         var {curObsVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                             global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevObsVar},
-                                                 {lambdaParam} => {lambdaParam} != null
-                                                     ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segType}>(
-                                                         (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
-                                                         "{seg.PropertyName}",
-                                                         (global::System.ComponentModel.INotifyPropertyChanging __o) => (({seg.DeclaringTypeFullName})__o).{seg.PropertyName})
-                                                     : (global::System.IObservable<{segType}>){nullParentObservable}));
+                                         var {curObsVar} = {OpenChainSwitchMap(seg, segType, prevObsVar)}
+                                             {lambdaParam} => {lambdaParam} != null
+                                                 ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segType}>(
+                                                     (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
+                                                     "{seg.PropertyName}",
+                                                     (global::System.ComponentModel.INotifyPropertyChanging __o) => (({seg.DeclaringTypeFullName})__o).{seg.PropertyName})
+                                                 : (global::System.IObservable<{segType}>){nullParentObservable});
                                  """);
             }
             else
             {
                 _ = sb.AppendLine()
                     .AppendLine($"""
-                  var {curObsVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                      global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevObsVar},
-                          {lambdaParam} => {lambdaParam} != null
-                              ? (global::System.IObservable<{segType}>)
-                                  new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({seg.DeclaringTypeFullName}){lambdaParam}).{seg.PropertyName})
-                              : (global::System.IObservable<{segType}>){nullParentObservable}));
+                  var {curObsVar} = {OpenChainSwitchMap(seg, segType, prevObsVar)}
+                      {lambdaParam} => {lambdaParam} != null
+                          ? (global::System.IObservable<{segType}>)
+                              new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({seg.DeclaringTypeFullName}){lambdaParam}).{seg.PropertyName})
+                          : (global::System.IObservable<{segType}>){nullParentObservable});
           """);
             }
         }
@@ -920,18 +916,17 @@ internal static class ObservationCodeGenerator
             var declType = seg.DeclaringTypeFullName;
             _ = sb.AppendLine()
                 .AppendLine($"""
-                                 var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                     global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                         {lambdaParam} => {lambdaParam} != null
-                                             ? (global::System.IObservable<{segType}>)
-                                                 new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{seg.PropertyName})
-                                             : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))));
+                                 var {curVar} = {OpenChainSwitchMap(seg, segType, prevVar)}
+                                     {lambdaParam} => {lambdaParam} != null
+                                         ? (global::System.IObservable<{segType}>)
+                                             new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{seg.PropertyName})
+                                         : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType})));
                              """);
         }
 
         var lastSeg = $"__{variableName}_s{propertyPath.Length - 1}";
         _ = sb.AppendLine(
-            $"        var {variableName} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged({lastSeg});");
+            $"        var {variableName} = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged({lastSeg});");
     }
 
     /// <summary>

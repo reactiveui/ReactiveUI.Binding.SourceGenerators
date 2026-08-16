@@ -63,7 +63,7 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
                 subj.OnNext(new ObservedChange<object, object?>(sender, expression, default)));
 
             ei.AddEventHandler(sender, handler);
-            return new ActionDisposable<(EventInfo EventInfo, object Sender, EventHandler Handler)>(
+            return Scope.Create<(EventInfo EventInfo, object Sender, EventHandler Handler)>(
                 (ei, sender, handler),
                 static state => state.EventInfo.RemoveEventHandler(state.Sender, state.Handler));
         });

@@ -24,6 +24,10 @@
   <!-- The shifted counterparts of the lean leaf's imports: the same shared files, recompiled here
        under the ReactiveUI.Binding.Reactive.* namespaces. -->
   <ItemGroup>
+    <Using Include="ReactiveUI.Primitives.Reactive"/>
+    <Using Include="ReactiveUI.Primitives.Reactive.Advanced"/>
+    <Using Include="ReactiveUI.Primitives.Reactive.Signals"/>
+    <Using Include="ReactiveUI.Primitives.Disposables"/>
     <Using Include="ReactiveUI.Binding.Reactive.Builder"/>
     <Using Include="ReactiveUI.Binding.Reactive.Expressions"/>
     <Using Include="ReactiveUI.Binding.Reactive.Fallback"/>
@@ -34,7 +38,7 @@
 
   <ItemGroup>
     <PackageReference Include="Splat"/>
-    <PackageReference Include="System.Reactive"/>
+    <PackageReference Include="ReactiveUI.Primitives.Reactive"/>
   </ItemGroup>
 
   <!-- The runtime library is useless on its own: every API it exposes is a stub that throws unless the

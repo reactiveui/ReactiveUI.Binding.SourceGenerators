@@ -69,7 +69,7 @@ public partial class ObservationCodeGeneratorHelperTests
         var result = sb.ToString();
         await Assert.That(result).Contains("__propObs0");
         await Assert.That(result).Contains("__propObs1");
-        await Assert.That(result).Contains("RxBindingExtensions.Switch(");
+        await Assert.That(result).Contains("SwitchMapSignal<");
         await Assert.That(result).Contains(CombineLatestName);
     }
 

@@ -187,7 +187,7 @@ public class InteractionTests
         public IDisposable Subscribe(IObserver<T> observer)
         {
             observer.OnError(error);
-            return Binding.Observables.EmptyDisposable.Instance;
+            return EmptyDisposable.Instance;
         }
     }
 }

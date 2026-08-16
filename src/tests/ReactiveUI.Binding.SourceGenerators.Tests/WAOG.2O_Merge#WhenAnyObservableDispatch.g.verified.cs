@@ -39,9 +39,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel)__o).Command1,
                 true);
 
-            var __switched0 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty0,
-                    __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
+            var __switched0 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty0,
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
 
             var __obsProperty1 = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,
@@ -49,11 +48,10 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel)__o).Command2,
                 true);
 
-            var __switched1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty1,
-                    __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
+            var __switched1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty1,
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
 
-            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(
+            return global::ReactiveUI.Primitives.LinqExtensions.Merge(
                 __switched0,
                 __switched1);
         }

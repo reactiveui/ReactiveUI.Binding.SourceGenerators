@@ -244,7 +244,7 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
             private readonly bool _isLeaf;
 
             /// <summary>The current link-notification subscription; swapped on each re-parent.</summary>
-            private readonly SerialDisposable _subscription = new();
+            private readonly SwapDisposable _subscription = new();
 
             /// <summary>This link's value fetcher, compiled once, or <see langword="null"/> for an unsupported member.</summary>
             private readonly Func<object?, object?[]?, object?>? _getter;

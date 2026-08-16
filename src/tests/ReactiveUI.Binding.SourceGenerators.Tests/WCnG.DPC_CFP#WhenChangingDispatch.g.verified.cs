@@ -39,14 +39,13 @@ namespace ReactiveUI.Binding
                 "Child",
                 (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel)__o).Child);
 
-        var __obs1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obs0,
-                __parent1 => __parent1 != null
-                    ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
-                        (global::System.ComponentModel.INotifyPropertyChanging)__parent1,
-                        "Name",
-                        (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel)__o).Name)
-                    : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
+        var __obs1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel, string>(__obs0,
+            __parent1 => __parent1 != null
+                ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
+                    (global::System.ComponentModel.INotifyPropertyChanging)__parent1,
+                    "Name",
+                    (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel)__o).Name)
+                : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
             return __obs1;
         }
 

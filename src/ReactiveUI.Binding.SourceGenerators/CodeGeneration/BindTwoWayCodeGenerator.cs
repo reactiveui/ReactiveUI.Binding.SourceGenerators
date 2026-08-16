@@ -28,33 +28,6 @@ internal static class BindTwoWayCodeGenerator
     /// <summary>Name of the generated local holding the target side observable.</summary>
     private const string TargetObservableName = "targetObs";
 
-    /// <summary>Generates concrete typed overloads and binding methods for BindTwoWay invocations.</summary>
-    /// <param name="invocations">All detected BindTwoWay invocations.</param>
-    /// <param name="allClasses">All detected class binding info.</param>
-    /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
-    /// <returns>Generated source code string, or null if no invocations.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static string? Generate(
-        ImmutableArray<BindingInvocationInfo> invocations,
-        ImmutableArray<ClassBindingInfo> allClasses,
-        in LanguageFeatures features) =>
-        BindingEmitterHelpers.Generate(
-            invocations,
-            allClasses,
-            features,
-            static (sb, group, f) => GenerateConcreteOverload(
-                sb,
-                group,
-                f.SupportsCallerArgExpr,
-                f.SupportsNullable,
-                f.StubHasExpressionParameters),
-            static (sb, ctx) => GenerateBindTwoWayMethod(
-                sb,
-                ctx.Invocation,
-                ctx.SourceClassInfo,
-                ctx.TargetClassInfo,
-                ctx.Suffix));
-
     /// <summary>Groups BindTwoWay invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The BindTwoWay invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
@@ -312,8 +285,8 @@ internal static class BindTwoWayCodeGenerator
             var srcNext = inv.HasScheduler ? "__srcSelected" : "sourceBind";
             var tgtNext = inv.HasScheduler ? "__tgtSelected" : "targetBind";
             _ = sb.AppendLine($"""
-                                   var {srcNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({sourceVar}, sourceToTargetConv);
-                                   var {tgtNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({targetVar}, targetToSourceConv);
+                                   var {srcNext} = new {MapSignal}<{inv.SourcePropertyTypeFullName}, {inv.TargetPropertyTypeFullName}>({sourceVar}, sourceToTargetConv);
+                                   var {tgtNext} = new {MapSignal}<{inv.TargetPropertyTypeFullName}, {inv.SourcePropertyTypeFullName}>({targetVar}, targetToSourceConv);
                            """);
             sourceVar = srcNext;
             targetVar = tgtNext;
@@ -332,7 +305,7 @@ internal static class BindTwoWayCodeGenerator
         return (sourceVar, targetVar);
     }
 
-    /// <summary>Emits the two-way subscription and <c>CompositeDisposable2</c> return block.</summary>
+    /// <summary>Emits the two-way subscription and <c>MultipleDisposable</c> return block.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="sourceVar">The source observable variable name to subscribe to.</param>
     /// <param name="targetVar">The target observable variable name to subscribe to.</param>
@@ -345,18 +318,18 @@ internal static class BindTwoWayCodeGenerator
         string targetAccess,
         string sourceSetAccess) => _ = sb.AppendLine($$"""
 
-                                    var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe({{sourceVar}}, value =>
+                                    var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe({{sourceVar}}, value =>
                                     {
                                         {{targetAccess}} = value;
                                     });
 
-                                    var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip({{targetVar}}, 1);
-                                    var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
+                                    var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip({{targetVar}}, 1);
+                                    var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__targetSkipped, value =>
                                     {
                                         {{sourceSetAccess}} = value;
                                     });
 
-                                    return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
+                                    return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
                                 }
                         """)
             .AppendLine();

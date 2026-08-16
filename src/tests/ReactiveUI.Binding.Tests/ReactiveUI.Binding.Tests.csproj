@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Using Include="ReactiveUI.Primitives.Disposables"/>
     <Using Include="ReactiveUI.Binding"/>
     <Using Include="TUnit.Core"/>
     <Using Include="Splat"/>

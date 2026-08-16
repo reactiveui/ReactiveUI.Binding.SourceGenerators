@@ -22,28 +22,6 @@ internal static class OneWayBindCodeGenerator
     /// <summary>Name of the emitted local holding the source property observation, before conversion or scheduling.</summary>
     private const string SourceObservableVariable = "sourceObs";
 
-    /// <summary>Generates concrete typed overloads and binding methods for OneWayBind invocations.</summary>
-    /// <param name="invocations">All detected OneWayBind invocations.</param>
-    /// <param name="allClasses">All detected class binding info.</param>
-    /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
-    /// <returns>Generated source code string, or null if no invocations.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static string? Generate(
-        ImmutableArray<BindingInvocationInfo> invocations,
-        ImmutableArray<ClassBindingInfo> allClasses,
-        in LanguageFeatures features) =>
-        BindingEmitterHelpers.Generate(
-            invocations,
-            allClasses,
-            features,
-            static (sb, group, f) => GenerateConcreteOverload(
-                sb,
-                group,
-                f.SupportsCallerArgExpr,
-                f.SupportsNullable,
-                f.StubHasExpressionParameters),
-            static (sb, ctx) => GenerateOneWayBindMethod(sb, ctx.Invocation, ctx.SourceClassInfo, ctx.Suffix));
-
     /// <summary>Groups OneWayBind invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The OneWayBind invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
@@ -246,7 +224,7 @@ internal static class OneWayBindCodeGenerator
 
         _ = sb.AppendLine($$"""
 
-                                        var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe({{currentVar}}, value =>
+                                        var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe({{currentVar}}, value =>
                                         {
                                             {{viewPropertyAccess}} = value;
                                         });
@@ -307,7 +285,7 @@ internal static class OneWayBindCodeGenerator
         {
             var nextVar = inv.HasScheduler ? "__selected" : "bindObs";
             _ = sb.AppendLine(
-                $"        var {nextVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({currentVar}, selector);");
+                $"        var {nextVar} = new {MapSignal}<{inv.SourcePropertyTypeFullName}, {inv.TargetPropertyTypeFullName}>({currentVar}, selector);");
             currentVar = nextVar;
         }
 

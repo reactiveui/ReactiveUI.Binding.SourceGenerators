@@ -86,7 +86,7 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains("Volatile.Write(ref __latestParam, p)");
         await Assert.That(result).Contains(ViewSaveButtonCommandCmdFragment);
         await Assert.That(result).Contains("view.SaveButton.CommandParameter = param");
-        await Assert.That(result).Contains("CompositeDisposable2");
+        await Assert.That(result).Contains("MultipleDisposable");
     }
 
     /// <summary>Verifies CommandPropertyBindingPlugin emits Command+CommandParameter+expression parameter code.</summary>

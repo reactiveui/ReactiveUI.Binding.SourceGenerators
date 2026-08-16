@@ -30,7 +30,22 @@ internal static class OneWayBindInvocationGenerator
             combined,
             static (ctx, data) =>
             {
-                var source = OneWayBindCodeGenerator.Generate(data.Left.Left, data.Left.Right, data.Right);
+                var source = BindingEmitterHelpers.Generate(
+                    data.Left.Left,
+                    data.Left.Right,
+                    data.Right,
+                    static (sb, group, f) => OneWayBindCodeGenerator.GenerateConcreteOverload(
+                        sb,
+                        group,
+                        f.SupportsCallerArgExpr,
+                        f.SupportsNullable,
+                        f.StubHasExpressionParameters),
+                    static (sb, c) => OneWayBindCodeGenerator.GenerateOneWayBindMethod(
+                        sb,
+                        c.Invocation,
+                        c.SourceClassInfo,
+                        c.Suffix));
+
                 if (source is null)
                 {
                     return;

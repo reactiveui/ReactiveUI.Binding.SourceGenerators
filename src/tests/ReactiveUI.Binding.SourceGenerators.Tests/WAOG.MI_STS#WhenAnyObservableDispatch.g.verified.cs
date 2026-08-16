@@ -40,9 +40,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel)__o).Command1,
                 true);
 
-            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty,
-                    __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
+            return new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty,
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
         }
 
         private static global::System.IObservable<string> __WhenAnyObservable_7FFFC6DF47F56865(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel obj)
@@ -53,9 +52,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel)__o).Command2,
                 true);
 
-            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty,
-                    __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
+            return new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty,
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
         }
 
     }

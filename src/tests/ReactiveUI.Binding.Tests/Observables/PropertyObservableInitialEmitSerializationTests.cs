@@ -312,7 +312,7 @@ public class PropertyObservableInitialEmitSerializationTests
     {
         var source = new ConventionalRaiseOrderViewModel { Name = InitialName };
         var recorder = new EmissionRecorder<string?>();
-        using var subscriptions = new GrowableCompositeDisposable();
+        using var subscriptions = new DisposableBag();
 
         source.BeforeRaise = () => subscriptions.Add(new PropertyObservable<string?>(
             source,
@@ -337,7 +337,7 @@ public class PropertyObservableInitialEmitSerializationTests
     {
         var source = new RaiseBeforeWriteViewModel { Name = InitialName };
         var recorder = new EmissionRecorder<string?>();
-        using var subscriptions = new GrowableCompositeDisposable();
+        using var subscriptions = new DisposableBag();
 
         source.BeforeRaise = () => subscriptions.Add(new PropertyObservable<string?>(
             source,

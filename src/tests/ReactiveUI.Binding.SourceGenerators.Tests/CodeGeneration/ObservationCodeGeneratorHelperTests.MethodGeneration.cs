@@ -94,7 +94,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.GenerateObservationMethod(sb, inv, classInfo, "DEADBEEF", false, WhenChangedName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("RxBindingExtensions.Switch(");
+        await Assert.That(result).Contains("SwitchMapSignal<");
         await Assert.That(result).Contains("__WhenChanged_DEADBEEF");
     }
 
@@ -112,7 +112,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.GenerateObservationMethod(sb, inv, classInfo, "CAFEBABE", false, WhenChangedName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("RxBindingExtensions.Select(");
+        await Assert.That(result).Contains("LinqExtensions.Select(");
         await Assert.That(result).Contains("selector");
     }
 

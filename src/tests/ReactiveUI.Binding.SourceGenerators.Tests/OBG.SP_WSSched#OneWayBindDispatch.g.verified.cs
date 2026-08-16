@@ -42,10 +42,10 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             "Count",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel)__o).Count,
             true);
-        var __selected = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(sourceObs, selector);
+        var __selected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, selector);
         var bindObs = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<string>(__selected, scheduler);
 
-            var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(bindObs, value =>
+            var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(bindObs, value =>
             {
                 view.CountText = value;
             });

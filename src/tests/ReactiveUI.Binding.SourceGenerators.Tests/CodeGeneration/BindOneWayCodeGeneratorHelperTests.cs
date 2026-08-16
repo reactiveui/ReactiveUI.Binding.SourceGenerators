@@ -254,7 +254,7 @@ public class BindOneWayCodeGeneratorHelperTests
     /// <summary>Verifies GenerateBindOneWayMethod with conversion includes .Select chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateBindOneWayMethod_WithConversion_IncludesSelectChain()
+    public async Task GenerateBindOneWayMethod_WithConversion_IncludesMapChain()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(hasConversion: true);
@@ -263,7 +263,7 @@ public class BindOneWayCodeGeneratorHelperTests
         BindOneWayCodeGenerator.GenerateBindOneWayMethod(sb, inv, classInfo, TEST00000000TESTName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("RxBindingExtensions.Select");
+        await Assert.That(result).Contains("MapSignal<");
         await Assert.That(result).Contains(ConversionFuncName);
     }
 

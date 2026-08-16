@@ -203,7 +203,7 @@ internal static class WhenAnyCodeGenerator
 
         // Wrap in ObservedChange and apply selector
         _ = sb.Append($"""
-                               return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__propObs0,
+                               return global::ReactiveUI.Primitives.LinqExtensions.Select(__propObs0,
                                    value => selector(new global::ReactiveUI.Binding.ObservedChange<{inv.SourceTypeFullName}, {leafType}>(obj, null, value)));
                    """);
     }
@@ -239,7 +239,7 @@ internal static class WhenAnyCodeGenerator
                 .AppendLine();
         }
 
-        _ = sb.AppendLine("            return global::ReactiveUI.Binding.Observables.CombineLatestObservable.Create(");
+        _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             _ = sb.Append("                __propObs").Append(i);

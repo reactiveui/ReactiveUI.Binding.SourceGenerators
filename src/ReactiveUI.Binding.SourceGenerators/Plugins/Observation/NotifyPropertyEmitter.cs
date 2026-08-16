@@ -4,6 +4,7 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -134,28 +135,28 @@ internal static class NotifyPropertyEmitter
             ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
             : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
 
+        var stageOpen = GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar);
+
         _ = sb.AppendLine()
             .AppendLine(isBeforeChange
                 ? $"""
-                           var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                               global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                   {lambdaParam} => {lambdaParam} != null
-                                       ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segType}>(
-                                           (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
-                                           "{segment.PropertyName}",
-                                           (global::System.ComponentModel.INotifyPropertyChanging __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName})
-                                       : (global::System.IObservable<{segType}>){nullParentObservable}));
+                           var {curVar} = {stageOpen}
+                               {lambdaParam} => {lambdaParam} != null
+                                   ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segType}>(
+                                       (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
+                                       "{segment.PropertyName}",
+                                       (global::System.ComponentModel.INotifyPropertyChanging __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName})
+                                   : (global::System.IObservable<{segType}>){nullParentObservable});
                    """
                 : $"""
-                           var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                               global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                   {lambdaParam} => {lambdaParam} != null
-                                       ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{segType}>(
-                                           {lambdaParam},
-                                           "{segment.PropertyName}",
-                                           (global::System.ComponentModel.INotifyPropertyChanged __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName},
-                                           false)
-                                       : (global::System.IObservable<{segType}>){nullParentObservable}));
+                           var {curVar} = {stageOpen}
+                               {lambdaParam} => {lambdaParam} != null
+                                   ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{segType}>(
+                                       (global::System.ComponentModel.INotifyPropertyChanged){lambdaParam},
+                                       "{segment.PropertyName}",
+                                       (global::System.ComponentModel.INotifyPropertyChanged __o) => (({segment.DeclaringTypeFullName})__o).{segment.PropertyName},
+                                       false)
+                                   : (global::System.IObservable<{segType}>){nullParentObservable});
                    """);
     }
 

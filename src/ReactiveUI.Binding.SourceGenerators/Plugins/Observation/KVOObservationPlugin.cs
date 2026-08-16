@@ -4,6 +4,7 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -139,16 +140,15 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
 
         _ = sb.AppendLine()
             .AppendLine($"""
-                                 var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                     global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                         {lambdaParam} => {lambdaParam} != null
-                                             ? (global::System.IObservable<{segType}>)new __KVOObservable<{segType}>(
-                                                 (global::Foundation.NSObject){lambdaParam},
-                                                 "{keyPath}",
-                                                 (global::Foundation.NSObject __o) => (({declType})__o).{segment.PropertyName},
-                                                 false,
-                                                 {BoolLiteral(isBeforeChange)})
-                                             : (global::System.IObservable<{segType}>){nullParentObservable}));
+                                 var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
+                                     {lambdaParam} => {lambdaParam} != null
+                                         ? (global::System.IObservable<{segType}>)new __KVOObservable<{segType}>(
+                                             (global::Foundation.NSObject){lambdaParam},
+                                             "{keyPath}",
+                                             (global::Foundation.NSObject __o) => (({declType})__o).{segment.PropertyName},
+                                             false,
+                                             {BoolLiteral(isBeforeChange)})
+                                         : (global::System.IObservable<{segType}>){nullParentObservable});
                          """);
     }
 

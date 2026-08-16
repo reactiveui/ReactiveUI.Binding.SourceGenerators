@@ -274,7 +274,7 @@ internal static class BindInteractionCodeGenerator
                                     {{handlerType}} handler)
                                 {
                                     // BindInteraction: {{pathComment}}
-                                    var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+                                    var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
 
                         """);
 
@@ -285,13 +285,13 @@ internal static class BindInteractionCodeGenerator
 
         _ = sb.AppendLine($$"""
 
-                                    var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(interactionObs, interaction =>
+                                    var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(interactionObs, interaction =>
                                     {
                                         serial.Disposable = interaction != null
                                             ? {{registerCall}}
-                                            : global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                            : global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                                     });
-                                    return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(sub, serial);
+                                    return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(sub, serial);
                                 }
                         """)
             .AppendLine();

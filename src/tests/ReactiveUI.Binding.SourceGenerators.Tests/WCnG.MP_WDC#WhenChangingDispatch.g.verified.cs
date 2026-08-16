@@ -47,14 +47,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 "Address",
                 (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel)__o).Address);
 
-        var __propObs0_s1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__propObs0_s0,
-                __propObs0_p1 => __propObs0_p1 != null
-                    ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
-                        (global::System.ComponentModel.INotifyPropertyChanging)__propObs0_p1,
-                        "City",
-                        (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel)__o).City)
-                    : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
+        var __propObs0_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel, string>(__propObs0_s0,
+            __propObs0_p1 => __propObs0_p1 != null
+                ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
+                    (global::System.ComponentModel.INotifyPropertyChanging)__propObs0_p1,
+                    "City",
+                    (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel)__o).City)
+                : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
             var __propObs0 = __propObs0_s1;
 
 
@@ -63,7 +62,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 "Name",
                 (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel)__o).Name);
 
-            return global::ReactiveUI.Binding.Observables.CombineLatestObservable.Create(
+            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
                 __propObs0,
                 __propObs1,
                 selector);

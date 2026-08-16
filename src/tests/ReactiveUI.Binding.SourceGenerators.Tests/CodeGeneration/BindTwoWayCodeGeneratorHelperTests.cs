@@ -191,7 +191,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     /// <summary>Verifies GenerateBindTwoWayMethod generates PropertyObservable + CompositeDisposable pattern.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateBindTwoWayMethod_StandardInvocation_GeneratesCompositeDisposable()
+    public async Task GenerateBindTwoWayMethod_StandardInvocation_GeneratesMultipleDisposable()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true, methodName: BindTwoWayName);
@@ -207,7 +207,7 @@ public class BindTwoWayCodeGeneratorHelperTests
         await Assert.That(result).Contains("__BindTwoWay_TEST00000000TEST");
         await Assert.That(result).Contains("PropertyObservable");
         await Assert.That(result).Contains("INotifyPropertyChanged");
-        await Assert.That(result).Contains("CompositeDisposable");
+        await Assert.That(result).Contains("MultipleDisposable");
         await Assert.That(result).Contains("target.Text = value");
         await Assert.That(result).Contains("source.Name = value");
     }
@@ -306,7 +306,7 @@ public class BindTwoWayCodeGeneratorHelperTests
     /// <summary>Verifies GenerateBindTwoWayMethod with conversion includes .Select chains.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateBindTwoWayMethod_WithConversion_IncludesSelectChains()
+    public async Task GenerateBindTwoWayMethod_WithConversion_IncludesMapChains()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(
@@ -322,7 +322,7 @@ public class BindTwoWayCodeGeneratorHelperTests
         BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, TEST00000000TESTName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("RxBindingExtensions.Select");
+        await Assert.That(result).Contains("MapSignal<");
         await Assert.That(result).Contains(SourceToTargetConvName);
         await Assert.That(result).Contains(TargetToSourceConvName);
     }
