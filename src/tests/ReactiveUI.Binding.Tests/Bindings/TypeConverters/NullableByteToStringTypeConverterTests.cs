@@ -13,6 +13,15 @@ public class NullableByteToStringTypeConverterTests
     /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
+    /// <summary>Byte value converted with the hexadecimal format hint.</summary>
+    private const byte HexByte = 255;
+
+    /// <summary>Byte value narrow enough for the width hint to show its zero padding.</summary>
+    private const byte PaddedByte = 5;
+
+    /// <summary>Sample byte value used for conversion round-trips.</summary>
+    private const byte SampleByte = 123;
+
     /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
@@ -29,9 +38,7 @@ public class NullableByteToStringTypeConverterTests
     public async Task TryConvert_ByteNullableToString_Succeeds()
     {
         var converter = new NullableByteToStringTypeConverter();
-        byte? value = 123;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(SampleByte, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("123");
@@ -84,9 +91,7 @@ public class NullableByteToStringTypeConverterTests
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new NullableByteToStringTypeConverter();
-        byte? value = 5;
-
-        var result = converter.TryConvert(value, ConversionHint, out var output);
+        var result = converter.TryConvert(PaddedByte, ConversionHint, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("005");
@@ -98,9 +103,7 @@ public class NullableByteToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
     {
         var converter = new NullableByteToStringTypeConverter();
-        byte? value = 255;
-
-        var result = converter.TryConvert(value, "X", out var output);
+        var result = converter.TryConvert(HexByte, "X", out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("FF");

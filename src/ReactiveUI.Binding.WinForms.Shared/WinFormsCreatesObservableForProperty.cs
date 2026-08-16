@@ -4,6 +4,7 @@
 
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.WinForms;
@@ -62,9 +63,9 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
                 subj.OnNext(new ObservedChange<object, object?>(sender, expression, default)));
 
             ei.AddEventHandler(sender, handler);
-            return new ActionDisposable<(EventInfo ei, object sender, EventHandler handler)>(
+            return Scope.Create<(EventInfo EventInfo, object Sender, EventHandler Handler)>(
                 (ei, sender, handler),
-                static state => state.ei.RemoveEventHandler(state.sender, state.handler));
+                static state => state.EventInfo.RemoveEventHandler(state.Sender, state.Handler));
         });
     }
 
@@ -74,6 +75,7 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
     /// <returns>
     /// An <see cref="EventInfo"/> object if the {PropertyName}Changed event is found; otherwise, null.
     /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static EventInfo? GetEventInfo(Type type, string propertyName) =>
         EventInfoCache.GetOrAdd(
             (type, propertyName),

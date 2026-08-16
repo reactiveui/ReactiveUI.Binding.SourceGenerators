@@ -10,6 +10,9 @@ public class NullableSingleToStringTypeConverterTests
     /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
+    /// <summary>Single-precision value converted with a width hint that pads it to two decimal places.</summary>
+    private const float FormattedSingle = 42.5F;
+
     /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
@@ -93,9 +96,7 @@ public class NullableSingleToStringTypeConverterTests
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new NullableSingleToStringTypeConverter();
-        float? value = 42.5F;
-
-        var result = converter.TryConvert(value, ExpectedAffinity, out var output);
+        var result = converter.TryConvert(FormattedSingle, ExpectedAffinity, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("42.50");

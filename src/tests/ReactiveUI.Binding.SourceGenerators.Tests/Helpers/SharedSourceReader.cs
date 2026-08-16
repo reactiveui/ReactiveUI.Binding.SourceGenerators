@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -83,8 +84,6 @@ internal static partial class SharedSourceReader
         return sb.ToString();
     }
 
-    /// <summary>Finds the root directory of the SharedScenarios.</summary>
-    /// <returns>The path to the SharedScenarios directory.</returns>
     /// <summary>Lists every shared scenario, so a test can sweep all of them without a hand-kept list.</summary>
     /// <returns>The scenario paths, relative to the shared scenario root, in a stable order.</returns>
     internal static IReadOnlyList<string> EnumerateScenarioPaths()
@@ -106,6 +105,7 @@ internal static partial class SharedSourceReader
 
     /// <summary>Locates the shared scenario root in the test output directory.</summary>
     /// <returns>The absolute path to the shared scenario root.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string FindRoot() =>
         Path.Combine(Path.GetDirectoryName(typeof(SharedSourceReader).Assembly.Location)!, "SharedScenarios");
 
@@ -269,11 +269,13 @@ internal static partial class SharedSourceReader
         while (i < lines.Length && braceDepth > 0)
         {
             braceDepth = UpdateBraceDepth(lines[i], braceDepth);
-            if (braceDepth > 0)
+            if (braceDepth <= 0)
             {
-                bodyEnd = i;
-                i++;
+                continue;
             }
+
+            bodyEnd = i;
+            i++;
         }
 
         while (bodyStart <= bodyEnd && string.IsNullOrWhiteSpace(lines[bodyStart]))
@@ -366,9 +368,11 @@ internal static partial class SharedSourceReader
         public List<T> ToList() => [.. _list];
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

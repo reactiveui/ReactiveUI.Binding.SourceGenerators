@@ -8,8 +8,8 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins;
 internal enum NullParentObservationBehavior
 {
     /// <summary>Suppresses values until the parent becomes non-null.</summary>
-    SuppressEmission,
+    SuppressEmission = 0,
 
     /// <summary>Emits the leaf type's default value so binding consumers can clear their target.</summary>
-    EmitDefault,
+    EmitDefault = 1,
 }

@@ -32,6 +32,7 @@ namespace ReactiveUI.Binding;
 /// application startup, then looked up many times during binding operations.
 /// </para>
 /// </remarks>
+[DebuggerDisplay("Typed converters for {_snapshot.ConvertersByTypePair.Count} type pairs")]
 public sealed class BindingTypeConverterRegistry
 {
     /// <summary>Synchronization gate for serializing write operations.</summary>
@@ -122,11 +123,13 @@ public sealed class BindingTypeConverterRegistry
         {
             var converter = list[i];
             var score = converter.GetAffinityForObjects();
-            if (score > bestScore && score > 0)
+            if (score <= bestScore || score <= 0)
             {
-                bestScore = score;
-                best = converter;
+                continue;
             }
+
+            bestScore = score;
+            best = converter;
         }
 
         return best;
@@ -162,12 +165,12 @@ public sealed class BindingTypeConverterRegistry
     /// <param name="source">The source dictionary to clone.</param>
     /// <returns>A new dictionary with the same entries as <paramref name="source"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>> CloneRegistryShallow(
-        Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>> source)
+    internal static Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>> CloneRegistryShallow(
+        Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>> source)
     {
         ArgumentExceptionHelper.ThrowIfNull(source);
 
-        var clone = new Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>>(source.Count);
+        var clone = new Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>>(source.Count);
         foreach (var kvp in source)
         {
             clone[kvp.Key] = kvp.Value;
@@ -179,5 +182,5 @@ public sealed class BindingTypeConverterRegistry
     /// <summary>Immutable snapshot of the registry state for lock-free reads.</summary>
     /// <param name="ConvertersByTypePair">The converters indexed by source and target type pair.</param>
     private sealed record Snapshot(
-        Dictionary<(Type fromType, Type toType), List<IBindingTypeConverter>> ConvertersByTypePair);
+        Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>> ConvertersByTypePair);
 }

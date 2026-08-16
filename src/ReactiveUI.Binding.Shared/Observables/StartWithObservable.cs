@@ -15,6 +15,7 @@ namespace ReactiveUI.Binding.Observables;
 /// relaying the source. Lightweight replacement for <c>System.Reactive.Linq.Observable.StartWith</c>.
 /// </summary>
 /// <typeparam name="T">The element type.</typeparam>
+[DebuggerDisplay("Prepended = {_value}, Source = {_source}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class StartWithObservable<T> : IObservable<T>
 {

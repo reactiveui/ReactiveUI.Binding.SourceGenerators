@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.Models;
@@ -82,6 +83,7 @@ internal static class CodeGeneratorHelpers
     /// <param name="param">The lambda parameter name.</param>
     /// <param name="path">The property path segments.</param>
     /// <returns>A dotted access chain like "x.Address.City".</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string BuildPropertyAccessLambda(string param, EquatableArray<PropertyPathSegment> path) =>
         BuildPropertyAccessChain(param, path);
 
@@ -89,6 +91,7 @@ internal static class CodeGeneratorHelpers
     /// <param name="root">The root variable name.</param>
     /// <param name="path">The property path segments.</param>
     /// <returns>A dotted access chain suitable for the left side of an assignment.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string BuildPropertySetterChain(string root, EquatableArray<PropertyPathSegment> path) =>
         BuildPropertyAccessChain(root, path);
 
@@ -156,11 +159,13 @@ internal static class CodeGeneratorHelpers
         for (var i = 0; i < value.Length; i++)
         {
             var c = value[i];
-            if (c is '\\' or '"')
+            if (c is not ('\\' or '"'))
             {
-                needsEscape = true;
-                break;
+                continue;
             }
+
+            needsEscape = true;
+            break;
         }
 
         if (!needsEscape)
@@ -214,6 +219,7 @@ internal static class CodeGeneratorHelpers
     /// Every generated file goes out through here so no emitter can forget the retargeting, which would only
     /// show up as generated code that does not compile for consumers of the System.Reactive flavour.
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void AddGeneratedSource(
         in SourceProductionContext context,
         string hintName,
@@ -295,6 +301,7 @@ internal static class CodeGeneratorHelpers
 
     /// <summary>Appends the closing braces for the extension partial class and namespace.</summary>
     /// <param name="sb">The string builder to append to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void AppendExtensionClassFooter(StringBuilder sb) =>
         sb.Append("""
                       }

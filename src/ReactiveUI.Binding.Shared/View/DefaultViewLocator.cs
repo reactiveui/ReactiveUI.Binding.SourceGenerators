@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive;
@@ -15,6 +16,7 @@ namespace ReactiveUI.Binding;
 /// using a three-tier resolution strategy: source-generated AOT-safe dispatch, explicit runtime
 /// mappings, and service locator fallback.
 /// </summary>
+[DebuggerDisplay("Mappings = {_mappings.Count}")]
 public sealed class DefaultViewLocator : IViewLocator
 {
     /// <summary>
@@ -48,6 +50,7 @@ public sealed class DefaultViewLocator : IViewLocator
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <typeparam name="TView">The view type. Must implement <see cref="IViewFor"/>.</typeparam>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Map<TViewModel, TView>()
         where TViewModel : class
         where TView : IViewFor, new() => Map<TViewModel, TView>(null);
@@ -72,6 +75,7 @@ public sealed class DefaultViewLocator : IViewLocator
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <param name="factory">A factory function that creates the view.</param>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Map<TViewModel>(Func<IViewFor> factory)
         where TViewModel : class => Map<TViewModel>(factory, null);
 
@@ -96,6 +100,7 @@ public sealed class DefaultViewLocator : IViewLocator
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <returns><see langword="true"/> if the mapping was removed; otherwise, <see langword="false"/>.</returns>
     [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the mapping.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Unmap<TViewModel>()
         where TViewModel : class => Unmap<TViewModel>(null);
 
@@ -218,8 +223,7 @@ public sealed class DefaultViewLocator : IViewLocator
         {
             var viewModelType = viewModel.GetType();
             var viewForType = typeof(IViewFor<>).MakeGenericType(viewModelType);
-            var svcContract = contract.Length == 0 ? null : contract;
-            var view = AppLocator.Current.GetService(viewForType, svcContract) as IViewFor;
+            var view = AppLocator.Current.GetService(viewForType, contract.Length == 0 ? null : contract) as IViewFor;
             if (view is not null)
             {
                 SetViewModelOnView(view, viewModel);
@@ -239,9 +243,6 @@ public sealed class DefaultViewLocator : IViewLocator
     /// <param name="viewModelType">The type of the view model.</param>
     /// <param name="contract">The normalized contract string.</param>
     /// <returns>The resolved view, or <see langword="null"/>.</returns>
-    private IViewFor? TryResolveFromMappings(Type viewModelType, string contract)
-    {
-        var mappings = _mappings;
-        return !mappings.TryGetValue((viewModelType, contract), out var factory) ? null : factory();
-    }
+    private IViewFor? TryResolveFromMappings(Type viewModelType, string contract) =>
+        !_mappings.TryGetValue((viewModelType, contract), out var factory) ? null : factory();
 }

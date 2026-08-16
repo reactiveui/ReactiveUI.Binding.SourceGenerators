@@ -73,7 +73,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2)> WhenAnyValue<TSender, T1, T2>(
+    public static IObservable<(T1 Property1, T2 Property2)> WhenAnyValue<TSender, T1, T2>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -97,7 +97,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2)> WhenAnyValue<TSender, T1, T2>(
+    public static IObservable<(T1 Property1, T2 Property2)> WhenAnyValue<TSender, T1, T2>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -135,7 +135,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    public static IObservable<(T1 property1, T2 property2, T3 property3)> WhenAnyValue<TSender, T1, T2, T3>(
+    public static IObservable<(T1 Property1, T2 Property2, T3 Property3)> WhenAnyValue<TSender, T1, T2, T3>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -164,7 +164,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3)> WhenAnyValue<TSender, T1, T2, T3>(
+    public static IObservable<(T1 Property1, T2 Property2, T3 Property3)> WhenAnyValue<TSender, T1, T2, T3>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -209,7 +209,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4)> WhenAnyValue<
+    public static IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4)> WhenAnyValue<
         TSender,
         T1,
         T2,
@@ -248,7 +248,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4)> WhenAnyValue<TSender, T1, T2, T3, T4>(
+    public static IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4)> WhenAnyValue<TSender, T1, T2, T3, T4>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -299,7 +299,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5)> WhenAnyValue<
+    public static IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5)> WhenAnyValue<
         TSender,
         T1,
         T2,
@@ -345,7 +345,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5)> WhenAnyValue<TSender, T1, T2, T3, T4, T5>(
+    public static IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5)> WhenAnyValue<TSender, T1, T2, T3, T4, T5>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -402,7 +402,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6)>
+    public static IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6)>
         WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6>(
             this TSender sender,
             Expression<Func<TSender, T1>> property1,
@@ -448,7 +448,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6>(
+    public static IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -512,7 +512,7 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
-        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7)>
+        IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7)>
         WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7>(
             this TSender sender,
             Expression<Func<TSender, T1>> property1,
@@ -563,7 +563,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7>(
+    public static IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -633,9 +633,9 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
-        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+        IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7,
             T8
-            property8)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8>(
+            Property8)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8>(
             this TSender sender,
             Expression<Func<TSender, T1>> property1,
             Expression<Func<TSender, T2>> property2,
@@ -690,7 +690,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    public static IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7, T8 property8)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8>(
+    public static IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7, T8 Property8)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -766,9 +766,9 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
-        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+        IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7,
             T8
-            property8, T9 property9)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+            Property8, T9 Property9)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
             this TSender sender,
             Expression<Func<TSender, T1>> property1,
             Expression<Func<TSender, T2>> property2,
@@ -829,15 +829,15 @@ public static partial class ReactiveUIBindingExtensions
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
-        T1 property1,
-        T2 property2,
-        T3 property3,
-        T4 property4,
-        T5 property5,
-        T6 property6,
-        T7 property7,
-        T8 property8,
-        T9 property9)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+        T1 Property1,
+        T2 Property2,
+        T3 Property3,
+        T4 Property4,
+        T5 Property5,
+        T6 Property6,
+        T7 Property7,
+        T8 Property8,
+        T9 Property9)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -919,9 +919,9 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
-        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+        IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7,
             T8
-            property8, T9 property9, T10 property10)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+            Property8, T9 Property9, T10 Property10)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
             this TSender sender,
             Expression<Func<TSender, T1>> property1,
             Expression<Func<TSender, T2>> property2,
@@ -987,16 +987,16 @@ public static partial class ReactiveUIBindingExtensions
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
-        T1 property1,
-        T2 property2,
-        T3 property3,
-        T4 property4,
-        T5 property5,
-        T6 property6,
-        T7 property7,
-        T8 property8,
-        T9 property9,
-        T10 property10)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+        T1 Property1,
+        T2 Property2,
+        T3 Property3,
+        T4 Property4,
+        T5 Property5,
+        T6 Property6,
+        T7 Property7,
+        T8 Property8,
+        T9 Property9,
+        T10 Property10)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -1084,9 +1084,9 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
-        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+        IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7,
             T8
-            property8, T9 property9, T10 property10, T11 property11)> WhenAnyValue<
+            Property8, T9 Property9, T10 Property10, T11 Property11)> WhenAnyValue<
                 TSender,
                 T1,
                 T2,
@@ -1169,17 +1169,17 @@ public static partial class ReactiveUIBindingExtensions
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
-        T1 property1,
-        T2 property2,
-        T3 property3,
-        T4 property4,
-        T5 property5,
-        T6 property6,
-        T7 property7,
-        T8 property8,
-        T9 property9,
-        T10 property10,
-        T11 property11)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
+        T1 Property1,
+        T2 Property2,
+        T3 Property3,
+        T4 Property4,
+        T5 Property5,
+        T6 Property6,
+        T7 Property7,
+        T8 Property8,
+        T9 Property9,
+        T10 Property10,
+        T11 Property11)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -1273,9 +1273,9 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
-        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+        IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7,
             T8
-            property8, T9 property9, T10 property10, T11 property11, T12 property12)> WhenAnyValue<
+            Property8, T9 Property9, T10 Property10, T11 Property11, T12 Property12)> WhenAnyValue<
                 TSender,
                 T1,
                 T2,
@@ -1365,18 +1365,18 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
-        T1 property1,
-        T2 property2,
-        T3 property3,
-        T4 property4,
-        T5 property5,
-        T6 property6,
-        T7 property7,
-        T8 property8,
-        T9 property9,
-        T10 property10,
-        T11 property11,
-        T12 property12)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
+        T1 Property1,
+        T2 Property2,
+        T3 Property3,
+        T4 Property4,
+        T5 Property5,
+        T6 Property6,
+        T7 Property7,
+        T8 Property8,
+        T9 Property9,
+        T10 Property10,
+        T11 Property11,
+        T12 Property12)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -1476,9 +1476,9 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
-        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+        IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7,
             T8
-            property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13)> WhenAnyValue<
+            Property8, T9 Property9, T10 Property10, T11 Property11, T12 Property12, T13 Property13)> WhenAnyValue<
                 TSender,
                 T1,
                 T2,
@@ -1574,19 +1574,19 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
-        T1 property1,
-        T2 property2,
-        T3 property3,
-        T4 property4,
-        T5 property5,
-        T6 property6,
-        T7 property7,
-        T8 property8,
-        T9 property9,
-        T10 property10,
-        T11 property11,
-        T12 property12,
-        T13 property13)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
+        T1 Property1,
+        T2 Property2,
+        T3 Property3,
+        T4 Property4,
+        T5 Property5,
+        T6 Property6,
+        T7 Property7,
+        T8 Property8,
+        T9 Property9,
+        T10 Property10,
+        T11 Property11,
+        T12 Property12,
+        T13 Property13)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -1693,9 +1693,9 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
-        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+        IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7,
             T8
-            property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14)>
+            Property8, T9 Property9, T10 Property10, T11 Property11, T12 Property12, T13 Property13, T14 Property14)>
         WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
             this TSender sender,
             Expression<Func<TSender, T1>> property1,
@@ -1783,20 +1783,20 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
-        T1 property1,
-        T2 property2,
-        T3 property3,
-        T4 property4,
-        T5 property5,
-        T6 property6,
-        T7 property7,
-        T8 property8,
-        T9 property9,
-        T10 property10,
-        T11 property11,
-        T12 property12,
-        T13 property13,
-        T14 property14)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
+        T1 Property1,
+        T2 Property2,
+        T3 Property3,
+        T4 Property4,
+        T5 Property5,
+        T6 Property6,
+        T7 Property7,
+        T8 Property8,
+        T9 Property9,
+        T10 Property10,
+        T11 Property11,
+        T12 Property12,
+        T13 Property13,
+        T14 Property14)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -1909,10 +1909,10 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
-        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+        IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7,
             T8
-            property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14, T15
-            property15)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
+            Property8, T9 Property9, T10 Property10, T11 Property11, T12 Property12, T13 Property13, T14 Property14, T15
+            Property15)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
             this TSender sender,
             Expression<Func<TSender, T1>> property1,
             Expression<Func<TSender, T2>> property2,
@@ -2004,21 +2004,21 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
-        T1 property1,
-        T2 property2,
-        T3 property3,
-        T4 property4,
-        T5 property5,
-        T6 property6,
-        T7 property7,
-        T8 property8,
-        T9 property9,
-        T10 property10,
-        T11 property11,
-        T12 property12,
-        T13 property13,
-        T14 property14,
-        T15 property15)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
+        T1 Property1,
+        T2 Property2,
+        T3 Property3,
+        T4 Property4,
+        T5 Property5,
+        T6 Property6,
+        T7 Property7,
+        T8 Property8,
+        T9 Property9,
+        T10 Property10,
+        T11 Property11,
+        T12 Property12,
+        T13 Property13,
+        T14 Property14,
+        T15 Property15)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -2137,10 +2137,10 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
-        IObservable<(T1 property1, T2 property2, T3 property3, T4 property4, T5 property5, T6 property6, T7 property7,
+        IObservable<(T1 Property1, T2 Property2, T3 Property3, T4 Property4, T5 Property5, T6 Property6, T7 Property7,
             T8
-            property8, T9 property9, T10 property10, T11 property11, T12 property12, T13 property13, T14 property14, T15
-            property15, T16 property16)> WhenAnyValue<
+            Property8, T9 Property9, T10 Property10, T11 Property11, T12 Property12, T13 Property13, T14 Property14, T15
+            Property15, T16 Property16)> WhenAnyValue<
                 TSender,
                 T1,
                 T2,
@@ -2254,22 +2254,22 @@ public static partial class ReactiveUIBindingExtensions
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<(
-        T1 property1,
-        T2 property2,
-        T3 property3,
-        T4 property4,
-        T5 property5,
-        T6 property6,
-        T7 property7,
-        T8 property8,
-        T9 property9,
-        T10 property10,
-        T11 property11,
-        T12 property12,
-        T13 property13,
-        T14 property14,
-        T15 property15,
-        T16 property16)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(
+        T1 Property1,
+        T2 Property2,
+        T3 Property3,
+        T4 Property4,
+        T5 Property5,
+        T6 Property6,
+        T7 Property7,
+        T8 Property8,
+        T9 Property9,
+        T10 Property10,
+        T11 Property11,
+        T12 Property12,
+        T13 Property13,
+        T14 Property14,
+        T15 Property15,
+        T16 Property16)> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,

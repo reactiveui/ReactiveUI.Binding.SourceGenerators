@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -125,7 +126,7 @@ internal static class WhenAnyCodeGenerator
         EmitDispatchTable(sb, group, supportsCallerArgExpr, propCount);
 
         // Runtime fallback
-        GenerateRuntimeFallback(sb, first);
+        GenerateRuntimeFallback(sb);
 
         _ = sb.AppendLine("        }");
     }
@@ -136,8 +137,8 @@ internal static class WhenAnyCodeGenerator
     /// dispatch indicates a caching issue — never falls back to runtime reflection.
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
-    /// <param name="first">The first invocation in the type group (unused, kept for API compatibility).</param>
-    internal static void GenerateRuntimeFallback(StringBuilder sb, InvocationInfo first) => sb.AppendLine(
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void GenerateRuntimeFallback(StringBuilder sb) => sb.AppendLine(
         "            throw new global::System.InvalidOperationException(\"No generated WhenAny dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.\");");
 
     /// <summary>
@@ -202,7 +203,7 @@ internal static class WhenAnyCodeGenerator
 
         // Wrap in ObservedChange and apply selector
         _ = sb.Append($"""
-                               return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__propObs0,
+                               return global::ReactiveUI.Primitives.LinqExtensions.Select(__propObs0,
                                    value => selector(new global::ReactiveUI.Binding.ObservedChange<{inv.SourceTypeFullName}, {leafType}>(obj, null, value)));
                    """);
     }
@@ -238,7 +239,7 @@ internal static class WhenAnyCodeGenerator
                 .AppendLine();
         }
 
-        _ = sb.AppendLine("            return global::ReactiveUI.Binding.Observables.CombineLatestObservable.Create(");
+        _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             _ = sb.Append("                __propObs").Append(i);

@@ -17,6 +17,7 @@ namespace ReactiveUI.Binding.Observables;
 /// when <see cref="INotifyPropertyChanging.PropertyChanging"/> fires.
 /// </summary>
 /// <typeparam name="T">The type of the property value.</typeparam>
+[DebuggerDisplay("Property = {_propertyName}, Source = {_source}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class PropertyChangingObservable<T> : IObservable<T>
 {

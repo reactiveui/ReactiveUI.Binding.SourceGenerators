@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.ObservableForProperty;
@@ -20,6 +21,7 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 /// </summary>
 /// <typeparam name="TSender">The root sender type surfaced on the emitted change.</typeparam>
 /// <typeparam name="TValue">The leaf value type.</typeparam>
+[DebuggerDisplay("{_expression}, Links = {_links.Length}, BeforeChange = {_beforeChange}, SkipInitial = {_skipInitial}, Distinct = {_isDistinct}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
 public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObservedChange<TSender, TValue>>
@@ -184,6 +186,7 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
         /// <summary>Sets the parent value of the level after <paramref name="level"/>.</summary>
         /// <param name="level">The level index that produced the value.</param>
         /// <param name="value">The value the link produced (the parent for the next level).</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SetNextParent(int level, object? value) => _levels[level + 1].SetParent(value);
 
         /// <summary>Handles a leaf raw emission: applies skip-initial, the non-null-parent filter, the cast and the distinct gate.</summary>
@@ -241,7 +244,7 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
             private readonly bool _isLeaf;
 
             /// <summary>The current link-notification subscription; swapped on each re-parent.</summary>
-            private readonly SerialDisposable _subscription = new();
+            private readonly SwapDisposable _subscription = new();
 
             /// <summary>This link's value fetcher, compiled once, or <see langword="null"/> for an unsupported member.</summary>
             private readonly Func<object?, object?[]?, object?>? _getter;
@@ -291,6 +294,7 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
             }
 
             /// <inheritdoc/>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Dispose() => _subscription.Dispose();
 
             /// <summary>Handles a notification for this link by re-reading the value and propagating it.</summary>
@@ -310,11 +314,13 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
 
             /// <summary>Forwards a link-subscription error to the downstream observer.</summary>
             /// <param name="error">The error to forward.</param>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private void ForwardError(Exception error) => _sink._downstream.OnError(error);
 
             /// <summary>Reads the current value of this link from a parent using the cached fetcher.</summary>
             /// <param name="parent">The object the link is read from.</param>
             /// <returns>The link's current value, or the default when the parent is null.</returns>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private object? ReadValue(object? parent) =>
                 ChainLinkReader.ReadValue(parent, _getter, _arguments, _sink._links[_index]);
 
@@ -343,9 +349,11 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
                 public Observer(Level level) => _level = level;
 
                 /// <inheritdoc/>
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public void OnNext(IObservedChange<object?, object?> value) => _level.OnNotification(value);
 
                 /// <inheritdoc/>
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public void OnError(Exception error) => _level.ForwardError(error);
 
                 /// <inheritdoc/>

@@ -28,6 +28,7 @@ namespace ReactiveUI.Binding.Builder;
 /// </code>
 /// </example>
 /// </remarks>
+[DebuggerDisplay("CoreServicesRegistered = {_coreRegistered}")]
 public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBuilder, IReactiveUIBindingInstance
 {
     /// <summary>Tracks whether core services have already been registered to prevent duplicate registration.</summary>
@@ -182,6 +183,7 @@ public sealed class ReactiveUIBindingBuilder : AppBuilder, IReactiveUIBindingBui
     /// <see cref="AppBuilder.Build"/> always sets Current.
     /// </summary>
     /// <param name="appInstance">The built app instance to validate.</param>
+    /// <exception cref="InvalidOperationException"><paramref name="appInstance"/> has no Current resolver, so the build did not produce a usable instance.</exception>
     [ExcludeFromCodeCoverage]
     private static void ThrowIfCurrentNull(IReactiveUIBindingInstance appInstance)
     {

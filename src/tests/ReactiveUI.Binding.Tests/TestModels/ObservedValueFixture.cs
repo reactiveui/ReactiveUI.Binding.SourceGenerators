@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.Tests.TestModels;
 
@@ -35,5 +36,6 @@ public class ObservedValueFixture : INotifyPropertyChanged
     = string.Empty;
 
     /// <summary>Raises a change notification for <see cref="Value"/> without altering it.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RaiseValueChanged() => PropertyChanged?.Invoke(this, new(nameof(Value)));
 }

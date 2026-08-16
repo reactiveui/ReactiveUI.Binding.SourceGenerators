@@ -18,6 +18,7 @@ namespace ReactiveUI.Binding.Observables;
 /// <c>{PropertyName}Changed</c> event observation.
 /// </summary>
 /// <typeparam name="T">The type of the property value.</typeparam>
+[DebuggerDisplay("Getter = {_getter}, DistinctUntilChanged = {_distinctUntilChanged}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class EventObservable<T> : IObservable<T>
 {

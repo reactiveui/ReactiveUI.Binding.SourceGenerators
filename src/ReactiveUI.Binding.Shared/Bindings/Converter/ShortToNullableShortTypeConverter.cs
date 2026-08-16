@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive;
 #else
@@ -9,6 +11,7 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Converts <see cref="short"/> to a nullable <see cref="short"/>.</summary>
+[DebuggerDisplay("short -> short? (affinity {Affinity})")]
 public sealed class ShortToNullableShortTypeConverter : IBindingTypeConverter<short, short?>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
@@ -21,6 +24,7 @@ public sealed class ShortToNullableShortTypeConverter : IBindingTypeConverter<sh
     public Type ToType => typeof(short?);
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>

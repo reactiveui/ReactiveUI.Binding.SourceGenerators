@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 
@@ -66,8 +67,7 @@ public class BindCommandTests
 
         using var binding = BindCommandScenarios.BasicNoParam(vm, view);
 
-        var action = view.SaveButton.PerformClick;
-        await Assert.That(action).ThrowsNothing();
+        await Assert.That((Action)view.SaveButton.PerformClick).ThrowsNothing();
     }
 
     /// <summary>Verifies that when the command changes, the new command is executed on click.</summary>
@@ -220,8 +220,7 @@ public class BindCommandTests
         using var binding = BindCommandScenarios.BasicNoParam(vm, view);
 
         vm.Save = null;
-        var action = view.SaveButton.PerformClick;
-        await Assert.That(action).ThrowsNothing();
+        await Assert.That((Action)view.SaveButton.PerformClick).ThrowsNothing();
         await Assert.That(command.ExecuteCount).IsEqualTo(0);
     }
 
@@ -315,8 +314,7 @@ public class BindCommandTests
         var binding = BindCommandScenarios.BasicNoParam(vm, view);
         binding.Dispose();
 
-        var action = binding.Dispose;
-        await Assert.That(action).ThrowsNothing();
+        await Assert.That((Action)binding.Dispose).ThrowsNothing();
     }
 
     // ── EventEnabled (Click + Enabled, no Command property) ─────────────
@@ -587,6 +585,7 @@ public class BindCommandTests
         public object? LastParameter { get; private set; }
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool CanExecute(object? parameter) => CanExecuteResult;
 
         /// <inheritdoc/>

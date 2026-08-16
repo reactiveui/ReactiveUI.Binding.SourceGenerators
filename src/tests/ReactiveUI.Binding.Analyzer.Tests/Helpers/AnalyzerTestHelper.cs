@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -20,6 +21,7 @@ public static class AnalyzerTestHelper
     /// <param name="source">The source code to analyze.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the diagnostics.</returns>
     [SuppressMessage("Design", "SST2307:Type parameter is not inferable", Justification = "the analyzer under test is specified explicitly by the caller")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync<TAnalyzer>(string source)
         where TAnalyzer : DiagnosticAnalyzer, new() =>
         GetDiagnosticsAsync<TAnalyzer>(source, null, null);
@@ -62,6 +64,7 @@ public static class AnalyzerTestHelper
     /// <summary>Creates a CSharpCompilation from the specified source code with required assembly references.</summary>
     /// <param name="source">The source code to compile into a CSharpCompilation.</param>
     /// <returns>A CSharpCompilation object representing the compiled source code.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static CSharpCompilation CreateCompilation(string source) => CreateCompilation(source, null);
 
     /// <summary>Creates a compilation from source at a given language version.</summary>
@@ -101,7 +104,7 @@ public static class AnalyzerTestHelper
         // Add runtime assemblies by name for any that typeof didn't cover
         var assemblyNames = new[]
         {
-            "System.Runtime", "System.ComponentModel.Primitives", "System.ObjectModel", "System.Collections"
+            "System.Runtime", "System.ComponentModel.Primitives", "System.ObjectModel", "System.Collections",
         };
 
         var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();

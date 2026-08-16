@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
@@ -15,6 +16,7 @@ namespace ReactiveUI.Binding.Observables;
 /// Replacement for <c>System.Reactive.Linq.Observable.DistinctUntilChanged</c>.
 /// </summary>
 /// <typeparam name="T">The element type.</typeparam>
+[DebuggerDisplay("Source = {_source}, Comparer = {_comparer}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class DistinctUntilChangedObservable<T> : IObservable<T>
 {
@@ -81,9 +83,11 @@ public sealed class DistinctUntilChangedObservable<T> : IObservable<T>
         }
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnError(Exception error) => _observer.OnError(error);
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnCompleted() => _observer.OnCompleted();
     }
 }

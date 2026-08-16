@@ -40,9 +40,8 @@ internal static class WhenAnyObservableExtractor
             return null;
         }
 
-        var args = invocation.ArgumentList.Arguments;
         var (propertyPaths, expressionTexts, innerObservableTypes, hasSelector) =
-            CollectObservableArguments(methodSymbol, args, semanticModel, ct);
+            CollectObservableArguments(methodSymbol, invocation.ArgumentList.Arguments, semanticModel, ct);
 
         if (propertyPaths.Count == 0)
         {
@@ -55,7 +54,7 @@ internal static class WhenAnyObservableExtractor
             "source type display name");
 
         // Compute return type
-        string returnTypeFullName = hasSelector
+        var returnTypeFullName = hasSelector
             ? ExtractorValidation.FindSelectorReturnType(
                 methodSymbol.Parameters,
                 "selector")!

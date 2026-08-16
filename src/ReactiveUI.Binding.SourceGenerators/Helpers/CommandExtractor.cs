@@ -74,7 +74,7 @@ internal static class CommandExtractor
         var parameterOverload = DetectParameterOverload(methodSymbol, args, semanticModel, ct);
 
         var (resolvedEventName, resolvedEventArgsTypeFullName, capabilities) =
-            ResolveControlBinding(methodSymbol, args, controlPropertyPath, controlPropertyArg, semanticModel, ct);
+            ResolveControlBinding(methodSymbol, args, controlPropertyArg, semanticModel, ct);
 
         return new(
             invocation.SyntaxTree.FilePath,
@@ -228,13 +228,52 @@ internal static class CommandExtractor
         return nameColon is not null ? nameColon.Name.Identifier.Text == "toEvent" : argumentIndex == parameterIndex;
     }
 
+    /// <summary>Resolves an explicit <c>toEvent</c> event name from the invocation arguments, if present.</summary>
+    /// <param name="methodSymbol">The resolved method symbol.</param>
+    /// <param name="args">The invocation argument list.</param>
+    /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The explicit event name, or null when none is supplied.</returns>
+    internal static string? ResolveExplicitEventName(
+        IMethodSymbol methodSymbol,
+        SeparatedSyntaxList<ArgumentSyntax> args,
+        SemanticModel semanticModel,
+        CancellationToken ct)
+    {
+        for (var i = 0; i < methodSymbol.Parameters.Length; i++)
+        {
+            if (methodSymbol.Parameters[i].Name != "toEvent")
+            {
+                continue;
+            }
+
+            // Find matching argument
+            for (var a = 0; a < args.Count; a++)
+            {
+                if (!IsToEventArgument(args[a], a, i))
+                {
+                    continue;
+                }
+
+                var constant = semanticModel.GetConstantValue(args[a].Expression, ct);
+                return constant is { HasValue: true, Value: string eventName } && !string.IsNullOrEmpty(eventName)
+                    ? eventName
+                    : null;
+            }
+
+            return null;
+        }
+
+        return null;
+    }
+
     /// <summary>Resolves the view and view model types the invocation binds between.</summary>
     /// <param name="memberAccess">The member access the invocation hangs off.</param>
     /// <param name="args">The invocation arguments.</param>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The fully qualified view and view model type names.</returns>
-    private static (string ViewTypeFullName, string ViewModelTypeFullName) ResolveBindCommandSides(
+    internal static (string ViewTypeFullName, string ViewModelTypeFullName) ResolveBindCommandSides(
         MemberAccessExpressionSyntax memberAccess,
         SeparatedSyntaxList<ArgumentSyntax> args,
         SemanticModel semanticModel,
@@ -257,26 +296,20 @@ internal static class CommandExtractor
     /// </summary>
     /// <param name="methodSymbol">The resolved BindCommand method.</param>
     /// <param name="args">The invocation arguments.</param>
-    /// <param name="controlPropertyPath">The property path to the bound control.</param>
     /// <param name="controlPropertyArg">The control selector expression.</param>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The event name, its argument type, and the control's binding capabilities.</returns>
-    private static (string? EventName, string? EventArgsTypeFullName, ControlCapabilities Capabilities) ResolveControlBinding(
+    internal static (string? EventName, string? EventArgsTypeFullName, ControlCapabilities Capabilities) ResolveControlBinding(
         IMethodSymbol methodSymbol,
         SeparatedSyntaxList<ArgumentSyntax> args,
-        PropertyPathSegment[] controlPropertyPath,
         ExpressionSyntax controlPropertyArg,
         SemanticModel semanticModel,
         CancellationToken ct)
     {
         var resolvedEventName = ResolveExplicitEventName(methodSymbol, args, semanticModel, ct);
 
-        var controlLeafType = SymbolHelpers.ResolveNamedType(
-            controlPropertyPath[^1],
-            semanticModel,
-            controlPropertyArg,
-            ct);
+        var controlLeafType = SymbolHelpers.ResolveNamedType(semanticModel, controlPropertyArg, ct);
 
         var resolvedEventArgsTypeFullName = ResolveEventArgsTypeFullName(controlLeafType, ref resolvedEventName);
 
@@ -286,7 +319,7 @@ internal static class CommandExtractor
     /// <summary>Determines whether a property is a settable public instance <c>Command</c> property typed as ICommand.</summary>
     /// <param name="property">The property to inspect.</param>
     /// <returns><see langword="true"/> if the property is a settable ICommand-typed Command property.</returns>
-    private static bool IsSettableICommandProperty(IPropertySymbol property)
+    internal static bool IsSettableICommandProperty(IPropertySymbol property)
     {
         if (property.Name != "Command" || property.IsReadOnly || property.IsStatic
             || property.DeclaredAccessibility != Accessibility.Public)
@@ -301,7 +334,7 @@ internal static class CommandExtractor
     /// <summary>Determines whether a property is a settable public instance <c>CommandParameter</c> property.</summary>
     /// <param name="property">The property to inspect.</param>
     /// <returns><see langword="true"/> if the property is a settable CommandParameter property.</returns>
-    private static bool IsSettableCommandParameterProperty(IPropertySymbol property) =>
+    internal static bool IsSettableCommandParameterProperty(IPropertySymbol property) =>
         property.Name == "CommandParameter" && !property.IsReadOnly && !property.IsStatic
         && property.DeclaredAccessibility == Accessibility.Public;
 
@@ -315,7 +348,7 @@ internal static class CommandExtractor
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The detected parameter overload information.</returns>
-    private static ParameterOverloadInfo DetectParameterOverload(
+    internal static ParameterOverloadInfo DetectParameterOverload(
         IMethodSymbol methodSymbol,
         SeparatedSyntaxList<ArgumentSyntax> args,
         SemanticModel semanticModel,
@@ -362,41 +395,6 @@ internal static class CommandExtractor
         return result;
     }
 
-    /// <summary>Resolves an explicit <c>toEvent</c> event name from the invocation arguments, if present.</summary>
-    /// <param name="methodSymbol">The resolved method symbol.</param>
-    /// <param name="args">The invocation argument list.</param>
-    /// <param name="semanticModel">The semantic model.</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns>The explicit event name, or null when none is supplied.</returns>
-    private static string? ResolveExplicitEventName(
-        IMethodSymbol methodSymbol,
-        SeparatedSyntaxList<ArgumentSyntax> args,
-        SemanticModel semanticModel,
-        CancellationToken ct)
-    {
-        for (var i = 0; i < methodSymbol.Parameters.Length; i++)
-        {
-            if (methodSymbol.Parameters[i].Name != "toEvent")
-            {
-                continue;
-            }
-
-            // Find matching argument
-            for (var a = 0; a < args.Count; a++)
-            {
-                if (IsToEventArgument(args[a], a, i))
-                {
-                    var constant = semanticModel.GetConstantValue(args[a].Expression, ct);
-                    return constant is { HasValue: true, Value: string eventName } && !string.IsNullOrEmpty(eventName) ? eventName : null;
-                }
-            }
-
-            return null;
-        }
-
-        return null;
-    }
-
     /// <summary>
     /// Resolves the event args type for the control. When no explicit event name was supplied,
     /// resolves the control's default event (updating <paramref name="resolvedEventName"/>);
@@ -405,7 +403,7 @@ internal static class CommandExtractor
     /// <param name="controlLeafType">The resolved control leaf type, or null.</param>
     /// <param name="resolvedEventName">The explicit event name (updated to the default event when null).</param>
     /// <returns>The fully qualified event args type name, or null.</returns>
-    private static string? ResolveEventArgsTypeFullName(
+    internal static string? ResolveEventArgsTypeFullName(
         INamedTypeSymbol? controlLeafType,
         ref string? resolvedEventName)
     {
@@ -428,7 +426,7 @@ internal static class CommandExtractor
     /// <summary>Detects command/command-parameter/enabled property capabilities on the control leaf type.</summary>
     /// <param name="controlLeafType">The resolved control leaf type, or null.</param>
     /// <returns>The detected control capabilities (all false when <paramref name="controlLeafType"/> is null).</returns>
-    private static ControlCapabilities DetectControlCapabilities(INamedTypeSymbol? controlLeafType)
+    internal static ControlCapabilities DetectControlCapabilities(INamedTypeSymbol? controlLeafType)
     {
         if (controlLeafType is null)
         {
@@ -444,13 +442,13 @@ internal static class CommandExtractor
     /// <param name="HasCommand">Whether the control exposes a settable <c>ICommand</c> property.</param>
     /// <param name="HasCommandParameter">Whether the control exposes a settable command-parameter property.</param>
     /// <param name="HasEnabled">Whether the control exposes a settable enabled property.</param>
-    private readonly record struct ControlCapabilities(
+    internal readonly record struct ControlCapabilities(
         bool HasCommand,
         bool HasCommandParameter,
         bool HasEnabled);
 
     /// <summary>Holds the detected <c>withParameter</c> overload information for a BindCommand invocation.</summary>
-    private sealed class ParameterOverloadInfo
+    internal sealed class ParameterOverloadInfo
     {
         /// <summary>Gets or sets a value indicating whether the overload has an IObservable withParameter.</summary>
         public bool HasObservableParameter { get; set; }

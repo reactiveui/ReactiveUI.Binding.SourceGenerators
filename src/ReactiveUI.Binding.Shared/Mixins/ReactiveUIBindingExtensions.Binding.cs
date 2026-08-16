@@ -25,6 +25,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindOneWay<TSource, TTarget, TProperty>(
         this TSource source,
@@ -51,6 +52,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
     public static IDisposable BindOneWay<TSource, TTarget, TProperty>(
         this TSource source,
         TTarget target,
@@ -81,6 +83,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindOneWay<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
@@ -110,6 +113,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
     public static IDisposable BindOneWay<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
         TTarget target,
@@ -139,6 +143,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindTwoWay<TSource, TTarget, TProperty>(
         this TSource source,
@@ -165,6 +170,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
     public static IDisposable BindTwoWay<TSource, TTarget, TProperty>(
         this TSource source,
         TTarget target,
@@ -196,6 +202,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindTwoWay<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
@@ -227,6 +234,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindTwoWay<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
@@ -259,6 +267,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, TVProp> OneWayBind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
@@ -286,6 +295,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
     public static IReactiveBinding<TView, TVProp> OneWayBind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
         TViewModel viewModel,
@@ -316,6 +326,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TView, TProp, TOut>(
         this TView view,
@@ -345,6 +356,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
     public static IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TView, TProp, TOut>(
         this TView view,
         TViewModel viewModel,
@@ -375,8 +387,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    public static IReactiveBinding<TView, (object? view, bool isViewModel)> Bind<TViewModel, TView, TVMProp, TVProp>(
+    public static IReactiveBinding<TView, (object? View, bool IsViewModel)> Bind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
         TViewModel viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
@@ -402,7 +415,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    public static IReactiveBinding<TView, (object? view, bool isViewModel)> Bind<TViewModel, TView, TVMProp, TVProp>(
+    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+    public static IReactiveBinding<TView, (object? View, bool IsViewModel)> Bind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
         TViewModel viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
@@ -433,8 +447,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    public static IReactiveBinding<TView, (object? view, bool isViewModel)> Bind<TViewModel, TView, TVMProp, TVProp>(
+    public static IReactiveBinding<TView, (object? View, bool IsViewModel)> Bind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
         TViewModel viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,
@@ -464,8 +479,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    public static IReactiveBinding<TView, (object? view, bool isViewModel)> Bind<TViewModel, TView, TVMProp, TVProp>(
+    public static IReactiveBinding<TView, (object? View, bool IsViewModel)> Bind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
         TViewModel viewModel,
         Expression<Func<TViewModel, TVMProp>> viewModelProperty,

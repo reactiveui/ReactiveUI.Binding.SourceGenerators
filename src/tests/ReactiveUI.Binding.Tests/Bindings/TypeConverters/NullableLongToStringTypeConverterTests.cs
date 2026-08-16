@@ -13,6 +13,15 @@ public class NullableLongToStringTypeConverterTests
     /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
+    /// <summary>Long value converted with the hexadecimal format hint.</summary>
+    private const long HexLong = 255L;
+
+    /// <summary>Long value narrow enough for the width hint to show its zero padding.</summary>
+    private const long PaddedLong = 42L;
+
+    /// <summary>Sample long value used for conversion round-trips.</summary>
+    private const long SampleLong = 123_456_789_012L;
+
     /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
@@ -29,9 +38,7 @@ public class NullableLongToStringTypeConverterTests
     public async Task TryConvert_LongNullableToString_Succeeds()
     {
         var converter = new NullableLongToStringTypeConverter();
-        long? value = 123_456_789_012;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(SampleLong, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("123456789012");
@@ -82,9 +89,7 @@ public class NullableLongToStringTypeConverterTests
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new NullableLongToStringTypeConverter();
-        long? value = 42;
-
-        var result = converter.TryConvert(value, ConversionHint, out var output);
+        var result = converter.TryConvert(PaddedLong, ConversionHint, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("0000000042");
@@ -96,9 +101,7 @@ public class NullableLongToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
     {
         var converter = new NullableLongToStringTypeConverter();
-        long? value = 255;
-
-        var result = converter.TryConvert(value, "X", out var output);
+        var result = converter.TryConvert(HexLong, "X", out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("FF");

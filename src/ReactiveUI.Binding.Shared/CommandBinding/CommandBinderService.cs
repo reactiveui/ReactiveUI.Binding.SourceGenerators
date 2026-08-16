@@ -28,8 +28,7 @@ public static class CommandBinderService
                                     | DynamicallyAccessedMemberTypes.PublicProperties)]
     T>(bool hasEventTarget)
     {
-        var resolver = Locator.Current;
-        var binders = resolver.GetServices<ICreatesCommandBinding>();
+        var binders = Locator.Current.GetServices<ICreatesCommandBinding>();
 
         ICreatesCommandBinding? bestBinder = null;
         var bestAffinity = 0;
@@ -37,11 +36,13 @@ public static class CommandBinderService
         foreach (var binder in binders)
         {
             var affinity = binder.GetAffinityForObject<T>(hasEventTarget);
-            if (affinity > bestAffinity)
+            if (affinity <= bestAffinity)
             {
-                bestAffinity = affinity;
-                bestBinder = binder;
+                continue;
             }
+
+            bestAffinity = affinity;
+            bestBinder = binder;
         }
 
         return bestBinder;

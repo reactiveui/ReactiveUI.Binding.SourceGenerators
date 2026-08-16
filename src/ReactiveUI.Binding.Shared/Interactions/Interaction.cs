@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive;
 #else
@@ -9,6 +11,8 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Represents an interaction between collaborating application components.</summary>
+/// <typeparam name="TInput">The interaction's input type.</typeparam>
+/// <typeparam name="TOutput">The interaction's output type.</typeparam>
 /// <remarks>
 /// <para>
 /// Interactions allow collaborating components in an application to ask each other questions. Typically,
@@ -25,8 +29,7 @@ namespace ReactiveUI.Binding;
 /// <see cref="UnhandledInteractionException{TInput, TOutput}"/> if no handler handles the interaction.
 /// </para>
 /// </remarks>
-/// <typeparam name="TInput">The interaction's input type.</typeparam>
-/// <typeparam name="TOutput">The interaction's output type.</typeparam>
+[DebuggerDisplay("Handlers = {_handlers.Count}")]
 public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
 {
     /// <summary>The list of registered interaction handlers, invoked in reverse order during <see cref="Handle"/>.</summary>
@@ -139,9 +142,11 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
         public ObservableToTaskObserver(TaskCompletionSource<bool> tcs) => _tcs = tcs;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnCompleted() => _tcs.TrySetResult(true);
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnError(Exception error) => _tcs.TrySetException(error);
 
         /// <inheritdoc/>

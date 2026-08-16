@@ -9,6 +9,8 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Represents an interaction between collaborating application components.</summary>
+/// <typeparam name="TInput">The interaction's input type.</typeparam>
+/// <typeparam name="TOutput">The interaction's output type.</typeparam>
 /// <remarks>
 /// <para>
 /// Interactions allow collaborating components in an application to ask each other questions. Typically,
@@ -21,8 +23,6 @@ namespace ReactiveUI.Binding;
 /// they require to ask a question. The handler then provides the interaction with an output as the answer.
 /// </para>
 /// </remarks>
-/// <typeparam name="TInput">The interaction's input type.</typeparam>
-/// <typeparam name="TOutput">The interaction's output type.</typeparam>
 public interface IInteraction<TInput, TOutput>
 {
     /// <summary>Registers a synchronous interaction handler.</summary>

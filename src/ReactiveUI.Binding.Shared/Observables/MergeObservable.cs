@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
@@ -15,6 +16,7 @@ namespace ReactiveUI.Binding.Observables;
 /// Replacement for <c>System.Reactive.Linq.Observable.Merge</c>.
 /// </summary>
 /// <typeparam name="T">The element type.</typeparam>
+[DebuggerDisplay("Sources = {_sources.Length}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class MergeObservable<T> : IObservable<T>
 {
@@ -56,9 +58,11 @@ public sealed class MergeObservable<T> : IObservable<T>
         public MergeObserver(IObserver<T> observer) => _observer = observer;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnNext(T value) => _observer.OnNext(value);
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnError(Exception error) => _observer.OnError(error);
 
         /// <inheritdoc/>

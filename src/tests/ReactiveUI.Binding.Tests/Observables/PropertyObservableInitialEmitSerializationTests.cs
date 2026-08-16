@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Observables;
 using ReactiveUI.Binding.Tests.TestModels;
 
@@ -185,11 +186,13 @@ public class PropertyObservableInitialEmitSerializationTests
             distinctUntilChanged);
 
         using (nameObservable.Subscribe(nameRecorder))
-        using (countObservable.Subscribe(countRecorder))
         {
-            await Assert.That(nameRecorder.Snapshot()).Count().IsEqualTo(1);
-            await Assert.That(nameRecorder.Snapshot()[0]).IsNull();
-            await AssertSequence(countRecorder.Snapshot(), 0);
+            using (countObservable.Subscribe(countRecorder))
+            {
+                await Assert.That(nameRecorder.Snapshot()).Count().IsEqualTo(1);
+                await Assert.That(nameRecorder.Snapshot()[0]).IsNull();
+                await AssertSequence(countRecorder.Snapshot(), 0);
+            }
         }
     }
 
@@ -217,10 +220,12 @@ public class PropertyObservableInitialEmitSerializationTests
         var afterDisposal = new EmissionRecorder<string?>();
 
         using (observable.Subscribe(first))
-        using (observable.Subscribe(second))
         {
-            await AssertSequence(first.Snapshot(), InitialName);
-            await AssertSequence(second.Snapshot(), InitialName);
+            using (observable.Subscribe(second))
+            {
+                await AssertSequence(first.Snapshot(), InitialName);
+                await AssertSequence(second.Snapshot(), InitialName);
+            }
         }
 
         using (observable.Subscribe(afterDisposal))
@@ -307,7 +312,7 @@ public class PropertyObservableInitialEmitSerializationTests
     {
         var source = new ConventionalRaiseOrderViewModel { Name = InitialName };
         var recorder = new EmissionRecorder<string?>();
-        using var subscriptions = new GrowableCompositeDisposable();
+        using var subscriptions = new DisposableBag();
 
         source.BeforeRaise = () => subscriptions.Add(new PropertyObservable<string?>(
             source,
@@ -332,7 +337,7 @@ public class PropertyObservableInitialEmitSerializationTests
     {
         var source = new RaiseBeforeWriteViewModel { Name = InitialName };
         var recorder = new EmissionRecorder<string?>();
-        using var subscriptions = new GrowableCompositeDisposable();
+        using var subscriptions = new DisposableBag();
 
         source.BeforeRaise = () => subscriptions.Add(new PropertyObservable<string?>(
             source,
@@ -441,6 +446,7 @@ public class PropertyObservableInitialEmitSerializationTests
 
         /// <summary>Raises <see cref="PropertyChanged"/> without writing anything.</summary>
         /// <param name="propertyName">The property to report.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RaisePropertyChanged(string propertyName) => _handlers?.Invoke(this, new(propertyName));
     }
 

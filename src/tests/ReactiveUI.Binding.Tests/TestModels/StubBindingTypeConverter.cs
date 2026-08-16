@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 namespace ReactiveUI.Binding.Tests.TestModels;
 
 /// <summary>A stub implementation of <see cref="IBindingTypeConverter"/> for testing.</summary>
@@ -11,7 +13,7 @@ public class StubBindingTypeConverter : IBindingTypeConverter
     private const int StubAffinity = 10;
 
     /// <summary>The conversion logic.</summary>
-    private readonly Func<object?, object?, (bool success, object? result)> _tryConvert;
+    private readonly Func<object?, object?, (bool Success, object? Result)> _tryConvert;
 
     /// <summary>Initializes a new instance of the <see cref="StubBindingTypeConverter"/> class.</summary>
     /// <param name="fromType">The source type.</param>
@@ -20,7 +22,7 @@ public class StubBindingTypeConverter : IBindingTypeConverter
     public StubBindingTypeConverter(
         Type fromType,
         Type toType,
-        Func<object?, object?, (bool success, object? result)> tryConvert)
+        Func<object?, object?, (bool Success, object? Result)> tryConvert)
     {
         FromType = fromType;
         ToType = toType;
@@ -34,6 +36,7 @@ public class StubBindingTypeConverter : IBindingTypeConverter
     public Type ToType { get; }
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetAffinityForObjects() => StubAffinity;
 
     /// <inheritdoc/>

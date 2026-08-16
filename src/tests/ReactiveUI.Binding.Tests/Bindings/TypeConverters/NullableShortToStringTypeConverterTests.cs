@@ -13,6 +13,15 @@ public class NullableShortToStringTypeConverterTests
     /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
+    /// <summary>Short value converted with the hexadecimal format hint.</summary>
+    private const short HexShort = 255;
+
+    /// <summary>Short value narrow enough for the width hint to show its zero padding.</summary>
+    private const short PaddedShort = 42;
+
+    /// <summary>Sample short value used for conversion round-trips.</summary>
+    private const short SampleShort = 12_345;
+
     /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
@@ -68,9 +77,7 @@ public class NullableShortToStringTypeConverterTests
     public async Task TryConvert_ShortNullableToString_Succeeds()
     {
         var converter = new NullableShortToStringTypeConverter();
-        short? value = 12_345;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(SampleShort, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("12345");
@@ -82,9 +89,7 @@ public class NullableShortToStringTypeConverterTests
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new NullableShortToStringTypeConverter();
-        short? value = 42;
-
-        var result = converter.TryConvert(value, ConversionHint, out var output);
+        var result = converter.TryConvert(PaddedShort, ConversionHint, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("00042");
@@ -96,9 +101,7 @@ public class NullableShortToStringTypeConverterTests
     public async Task TryConvert_WithStringFormatHint_FormatsCorrectly()
     {
         var converter = new NullableShortToStringTypeConverter();
-        short? value = 255;
-
-        var result = converter.TryConvert(value, "X", out var output);
+        var result = converter.TryConvert(HexShort, "X", out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("FF");

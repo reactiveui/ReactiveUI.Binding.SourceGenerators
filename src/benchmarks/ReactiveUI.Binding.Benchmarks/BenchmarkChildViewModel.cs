@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>A child view model for deep chain benchmarks.</summary>
+[DebuggerDisplay("Value = {Value}")]
 public class BenchmarkChildViewModel : INotifyPropertyChanged
 {
     /// <inheritdoc/>

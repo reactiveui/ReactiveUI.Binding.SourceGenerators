@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// Concrete typed overload for Bind from global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel to global::SharedScenarios.Bind.SinglePropertyStringToString.MyView.
         /// Uses CallerArgumentExpression for dispatch.
         /// </summary>
-        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? view, bool isViewModel)> Bind(
+        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? View, bool IsViewModel)> Bind(
             this global::SharedScenarios.Bind.SinglePropertyStringToString.MyView view,
             global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel, string?>> viewModelProperty,
@@ -26,13 +26,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (viewModelPropertyExpression == "x => x.Name"
                 && viewPropertyExpression == "x => x.NameText")
             {
-                return __Bind_000011908961B60B(viewModel, view);
+                return __Bind_000011908961B668(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? view, bool isViewModel)> __Bind_000011908961B60B(global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyStringToString.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? View, bool IsViewModel)> __Bind_000011908961B668(global::SharedScenarios.Bind.SinglePropertyStringToString.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyStringToString.MyView view)
         {
             // Bind: Name <-> NameText
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
@@ -46,24 +46,24 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyStringToString.MyView)__o).NameText,
             true);
 
-            var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(vmObs, value =>
+            var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(vmObs, value =>
             {
                 view.NameText = value;
             });
 
-            var __viewSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(viewObs, 1);
-            var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__viewSkipped, value =>
+            var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewObs, 1);
+            var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__viewSkipped, value =>
             {
                 viewModel.Name = value;
             });
 
-            var __vmTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmObs, v => ((object?)v, true));
-            var __viewTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__viewSkipped, v => ((object?)v, false));
-            var changed = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(__vmTagged, __viewTagged);
+            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, (object?, bool)>(vmObs, v => ((object?)v, true));
+            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, (object?, bool)>(__viewSkipped, v => ((object?)v, false));
+            var changed = new global::ReactiveUI.Primitives.Advanced.MergeSignal<(object?, bool)>(__vmTagged, __viewTagged);
 
-            var disposable = new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
+            var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
 
-            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? view, bool isViewModel)>(
+            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, (object? View, bool IsViewModel)>(
                 view,
                 changed,
                 global::ReactiveUI.Binding.BindingDirection.TwoWay,

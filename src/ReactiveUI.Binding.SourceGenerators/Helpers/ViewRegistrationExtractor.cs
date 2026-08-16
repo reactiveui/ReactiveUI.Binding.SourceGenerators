@@ -37,34 +37,36 @@ internal static class ViewRegistrationExtractor
             ct.ThrowIfCancellationRequested();
             var iface = allInterfaces[i];
 
-            if (viewForGenericInterface is not null
-                && iface.IsGenericType
-                && SymbolEqualityComparer.Default.Equals(iface.OriginalDefinition, viewForGenericInterface)
-                && iface.TypeArguments.Length == 1)
+            if (viewForGenericInterface is null
+                || !iface.IsGenericType
+                || !SymbolEqualityComparer.Default.Equals(iface.OriginalDefinition, viewForGenericInterface)
+                || iface.TypeArguments.Length != 1)
             {
-                // Check [ExcludeFromViewRegistration] only after confirming IViewFor<T> is
-                // resolvable, so attribute resolution via EnsureNotNull cannot throw in
-                // compilations that don't reference ReactiveUI.Binding.
-                if (HasAttribute(
-                    typeSymbol,
-                    Constants.ExcludeFromViewRegistrationAttributeMetadataName,
-                    semanticModel.Compilation))
-                {
-                    return null;
-                }
-
-                var viewModelType = iface.TypeArguments[0];
-                var viewModelFqn = viewModelType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                var viewFqn = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                var hasParameterlessCtor = HasAccessibleParameterlessConstructor(typeSymbol);
-                var contract = ExtractViewContract(typeSymbol, semanticModel.Compilation);
-                var isSingleInstance = HasAttribute(
-                    typeSymbol,
-                    Constants.SingleInstanceViewAttributeMetadataName,
-                    semanticModel.Compilation);
-
-                return new(viewModelFqn, viewFqn, hasParameterlessCtor, contract, isSingleInstance);
+                continue;
             }
+
+            // Check [ExcludeFromViewRegistration] only after confirming IViewFor<T> is
+            // resolvable, so attribute resolution via EnsureNotNull cannot throw in
+            // compilations that don't reference ReactiveUI.Binding.
+            if (HasAttribute(
+                typeSymbol,
+                Constants.ExcludeFromViewRegistrationAttributeMetadataName,
+                semanticModel.Compilation))
+            {
+                return null;
+            }
+
+            var viewModelType = iface.TypeArguments[0];
+            var viewModelFqn = viewModelType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var viewFqn = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var hasParameterlessCtor = HasAccessibleParameterlessConstructor(typeSymbol);
+            var contract = ExtractViewContract(typeSymbol, semanticModel.Compilation);
+            var isSingleInstance = HasAttribute(
+                typeSymbol,
+                Constants.SingleInstanceViewAttributeMetadataName,
+                semanticModel.Compilation);
+
+            return new(viewModelFqn, viewFqn, hasParameterlessCtor, contract, isSingleInstance);
         }
 
         return null;

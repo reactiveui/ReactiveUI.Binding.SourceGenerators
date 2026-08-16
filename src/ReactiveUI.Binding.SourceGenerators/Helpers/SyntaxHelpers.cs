@@ -82,20 +82,11 @@ internal static class SyntaxHelpers
     }
 
     /// <summary>Extracts the body expression from a <see cref="LambdaExpressionSyntax"/>.</summary>
-    /// <remarks>Handles both <see cref="SimpleLambdaExpressionSyntax"/> and <see cref="ParenthesizedLambdaExpressionSyntax"/>.</remarks>
     /// <param name="lambda">The lambda expression.</param>
     /// <returns>The body as an <see cref="ExpressionSyntax"/>, or null if the body is a block or unsupported form.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static ExpressionSyntax? GetLambdaBody(LambdaExpressionSyntax lambda)
-    {
-        if (lambda is SimpleLambdaExpressionSyntax simple)
-        {
-            return simple.Body as ExpressionSyntax;
-        }
-
-        var parenthesized = (ParenthesizedLambdaExpressionSyntax)lambda;
-        return parenthesized.Body as ExpressionSyntax;
-    }
+    internal static ExpressionSyntax? GetLambdaBody(LambdaExpressionSyntax lambda) =>
+        lambda.Body as ExpressionSyntax;
 
     /// <summary>
     /// Unwraps null-forgiving operators (!) from an expression.

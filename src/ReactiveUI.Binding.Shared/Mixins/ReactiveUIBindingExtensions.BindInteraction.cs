@@ -25,6 +25,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site.</exception>
     public static IDisposable BindInteraction<TViewModel, TView, TInput, TOutput>(
         this TView view,
         TViewModel? viewModel,
@@ -49,6 +50,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site.</exception>
     public static IDisposable BindInteraction<TViewModel, TView, TInput, TOutput>(
         this TView view,
         TViewModel? viewModel,
@@ -78,6 +80,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site.</exception>
     public static IDisposable BindInteraction<TViewModel, TView, TInput, TOutput, TDontCare>(
         this TView view,
         TViewModel? viewModel,
@@ -103,6 +106,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site.</exception>
     public static IDisposable BindInteraction<TViewModel, TView, TInput, TOutput, TDontCare>(
         this TView view,
         TViewModel? viewModel,

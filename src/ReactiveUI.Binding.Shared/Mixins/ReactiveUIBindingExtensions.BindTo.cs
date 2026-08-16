@@ -27,6 +27,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site.</exception>
     public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
         TTarget? target,
@@ -46,6 +47,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site.</exception>
     public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
         TTarget? target,
@@ -74,6 +76,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site.</exception>
     public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
         TTarget? target,
@@ -98,6 +101,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site.</exception>
     public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
         TTarget? target,
@@ -127,6 +131,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site.</exception>
     public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
         TTarget? target,
@@ -151,6 +156,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site.</exception>
     public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
         TTarget? target,
@@ -181,6 +187,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
@@ -208,6 +215,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    /// <exception cref="InvalidOperationException">No generated BindTo dispatch matched this call site.</exception>
     public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
         TTarget? target,

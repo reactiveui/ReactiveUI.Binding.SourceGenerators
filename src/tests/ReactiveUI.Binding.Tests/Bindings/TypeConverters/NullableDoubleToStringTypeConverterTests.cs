@@ -10,6 +10,9 @@ public class NullableDoubleToStringTypeConverterTests
     /// <summary>Expected affinity returned for matched converter type pairs.</summary>
     private const int ExpectedAffinity = 2;
 
+    /// <summary>Double value converted with a width hint that pads it to two decimal places.</summary>
+    private const double FormattedDouble = 42.5;
+
     /// <summary>Verifies GetAffinityForObjects Returns2.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
@@ -93,9 +96,7 @@ public class NullableDoubleToStringTypeConverterTests
     public async Task TryConvert_WithConversionHint_FormatsCorrectly()
     {
         var converter = new NullableDoubleToStringTypeConverter();
-        double? value = 42.5;
-
-        var result = converter.TryConvert(value, ExpectedAffinity, out var output);
+        var result = converter.TryConvert(FormattedDouble, ExpectedAffinity, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo("42.50");

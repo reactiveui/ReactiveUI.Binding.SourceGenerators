@@ -41,32 +41,29 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 "Model",
                 (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level1)__o).Model);
 
-        var __obs1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obs0,
-                __parent1 => __parent1 != null
-                    ? (global::System.IObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>(
-                        (global::System.ComponentModel.INotifyPropertyChanging)__parent1,
-                        "Model",
-                        (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level2)__o).Model)
-                    : (global::System.IObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>(default(global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3))));
+        var __obs1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level2, global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>(__obs0,
+            __parent1 => __parent1 != null
+                ? (global::System.IObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>(
+                    (global::System.ComponentModel.INotifyPropertyChanging)__parent1,
+                    "Model",
+                    (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level2)__o).Model)
+                : (global::System.IObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>(default(global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3)));
 
-        var __obs2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obs1,
-                __parent2 => __parent2 != null
-                    ? (global::System.IObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>(
-                        (global::System.ComponentModel.INotifyPropertyChanging)__parent2,
-                        "Model",
-                        (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3)__o).Model)
-                    : (global::System.IObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>(default(global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model))));
+        var __obs2 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3, global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>(__obs1,
+            __parent2 => __parent2 != null
+                ? (global::System.IObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>(
+                    (global::System.ComponentModel.INotifyPropertyChanging)__parent2,
+                    "Model",
+                    (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3)__o).Model)
+                : (global::System.IObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>(default(global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model)));
 
-        var __obs3 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obs2,
-                __parent3 => __parent3 != null
-                    ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
-                        (global::System.ComponentModel.INotifyPropertyChanging)__parent3,
-                        "Value",
-                        (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model)__o).Value)
-                    : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
+        var __obs3 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model, string>(__obs2,
+            __parent3 => __parent3 != null
+                ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
+                    (global::System.ComponentModel.INotifyPropertyChanging)__parent3,
+                    "Value",
+                    (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model)__o).Value)
+                : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
             return __obs3;
         }
 

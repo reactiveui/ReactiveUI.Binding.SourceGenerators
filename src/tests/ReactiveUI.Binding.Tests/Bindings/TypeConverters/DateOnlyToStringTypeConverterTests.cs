@@ -47,9 +47,7 @@ public class DateOnlyToStringTypeConverterTests
     public async Task TryConvert_MinValue_Succeeds()
     {
         var converter = new DateOnlyToStringTypeConverter();
-        var value = DateOnly.MinValue;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(DateOnly.MinValue, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo(DateOnly.MinValue.ToString());
@@ -61,9 +59,7 @@ public class DateOnlyToStringTypeConverterTests
     public async Task TryConvert_MaxValue_Succeeds()
     {
         var converter = new DateOnlyToStringTypeConverter();
-        var value = DateOnly.MaxValue;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(DateOnly.MaxValue, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo(DateOnly.MaxValue.ToString());

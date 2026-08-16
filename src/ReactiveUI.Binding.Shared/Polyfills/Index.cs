@@ -22,6 +22,7 @@ internal readonly struct Index : IEquatable<Index>
     /// <summary>Initializes a new instance of the <see cref="Index"/> struct.</summary>
     /// <param name="value">The index value. Must be zero or positive.</param>
     /// <param name="fromEnd">Indicates whether the index is counted from the start or the end.</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
     public Index(int value, bool fromEnd = false)
     {
         if (value < 0)

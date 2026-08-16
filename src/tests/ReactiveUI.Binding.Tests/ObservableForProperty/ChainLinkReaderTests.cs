@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Tests.TestModels;
 using LinqExpression = System.Linq.Expressions.Expression;
@@ -86,6 +87,7 @@ public class ChainLinkReaderTests
 
     /// <summary>Builds an array index link, whose expression carries no indexer.</summary>
     /// <returns>The link expression.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IndexExpression ArrayIndexLink() =>
         LinqExpression.ArrayAccess(LinqExpression.Constant(IndexedValues), LinqExpression.Constant(0));
 }

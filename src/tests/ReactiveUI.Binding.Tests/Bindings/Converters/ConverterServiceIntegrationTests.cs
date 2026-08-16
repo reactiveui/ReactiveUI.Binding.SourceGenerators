@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 
 /// <summary>
@@ -229,6 +231,7 @@ public class ConverterServiceIntegrationTests
     private sealed class TestFallbackConverter(int baseAffinity) : IBindingFallbackConverter
     {
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetAffinityForObjects(
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
             Type fromType,
@@ -255,9 +258,11 @@ public class ConverterServiceIntegrationTests
     private sealed class TestSetMethodConverter(int baseAffinity) : ISetMethodBindingConverter
     {
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetAffinityForObjects(Type? fromType, Type? toType) => baseAffinity;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object? PerformSet(object? toTarget, object? newValue, object?[]? arguments) => newValue;
     }
 

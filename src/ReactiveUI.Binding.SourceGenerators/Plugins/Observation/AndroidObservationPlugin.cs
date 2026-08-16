@@ -2,7 +2,9 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -49,6 +51,7 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
     public bool RequiresHelperClasses => false;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.InheritsAndroidView;
 
@@ -59,6 +62,7 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
     }
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitShallowObservation(
         StringBuilder sb,
         string rootVar,
@@ -66,13 +70,13 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         string castTypeName,
         bool isBeforeChange,
         bool includeStartWith) =>
-
         // Android View does not implement INPC. Emit ReturnObservable as POCO fallback.
         // Returns the current property value once, no ongoing observation.
         sb.Append(
             $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName})");
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitShallowObservationVariable(
         StringBuilder sb,
         string rootVar,
@@ -84,6 +88,7 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
             $"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitDeepChainRootSegment(
         StringBuilder sb,
         string rootVar,
@@ -113,16 +118,16 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
 
         _ = sb.AppendLine()
             .AppendLine($"""
-                                 var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                     global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                         {lambdaParam} => {lambdaParam} != null
-                                             ? (global::System.IObservable<{segType}>)
-                                                 new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
-                                             : (global::System.IObservable<{segType}>){nullParentObservable}));
+                                 var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
+                                     {lambdaParam} => {lambdaParam} != null
+                                         ? (global::System.IObservable<{segType}>)
+                                             new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
+                                         : (global::System.IObservable<{segType}>){nullParentObservable});
                          """);
     }
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitInlineObservationVariable(
         StringBuilder sb,
         string rootVar,

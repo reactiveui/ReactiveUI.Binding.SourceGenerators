@@ -56,6 +56,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// leaves alone a consumer type that merely happens to sit under the same root. Empty for a lean consumer,
 /// where nothing is retargeted.
 /// </param>
+/// <param name="PrimitivesNamespaceMembers">
+/// The names the System.Reactive flavour of ReactiveUI.Primitives declares. Generated code names the lean
+/// Primitives types, and only the ones that flavour actually offers are shifted onto it - the parts that ship in
+/// the shared core, the disposables among them, keep their names in both. Empty for a lean consumer.
+/// </param>
 internal readonly record struct LanguageFeatures(
     bool SupportsCallerArgExpr,
     bool SupportsNullable,
@@ -64,4 +69,5 @@ internal readonly record struct LanguageFeatures(
     bool EmitGeneratedNamespaceImport = false,
     bool StubHasExpressionParameters = false,
     bool UsesReactiveRuntime = false,
-    EquatableArray<string> RuntimeNamespaceMembers = default);
+    EquatableArray<string> RuntimeNamespaceMembers = default,
+    EquatableArray<string> PrimitivesNamespaceMembers = default);

@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace ReactiveUI.Binding.Generator.Benchmarks;
@@ -54,6 +55,7 @@ internal static class GeneratorCorpus
     /// <summary>Appends the view model, child, button, and view for one pair.</summary>
     /// <param name="sb">The builder to append to.</param>
     /// <param name="index">The index that makes the emitted names unique.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void AppendTypes(StringBuilder sb, int index) =>
         sb.Append($$"""
                         public class Child{{index}} : INotifyPropertyChanged
@@ -103,6 +105,7 @@ internal static class GeneratorCorpus
     /// <summary>Appends the call sites for one pair, spread across the observation and binding APIs.</summary>
     /// <param name="sb">The builder to append to.</param>
     /// <param name="index">The index that makes the emitted names unique.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void AppendUsage(StringBuilder sb, int index) =>
         sb.Append($$"""
                         public static class Usage{{index}}

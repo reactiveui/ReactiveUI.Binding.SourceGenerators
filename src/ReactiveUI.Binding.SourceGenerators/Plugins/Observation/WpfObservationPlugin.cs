@@ -2,7 +2,9 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -47,6 +49,7 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
     public bool RequiresHelperClasses => false;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.InheritsWpfDependencyObject;
 
@@ -160,33 +163,32 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
             // WPF DP does not support before-change; emit ReturnObservable for inner segments too
             _ = sb.AppendLine()
                 .AppendLine($"""
-                                     var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                         global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                             {lambdaParam} => {lambdaParam} != null
-                                                 ? (global::System.IObservable<{segType}>)
-                                                     new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
-                                                 : (global::System.IObservable<{segType}>){nullParentObservable}));
+                                     var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
+                                         {lambdaParam} => {lambdaParam} != null
+                                             ? (global::System.IObservable<{segType}>)
+                                                 new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
+                                             : (global::System.IObservable<{segType}>){nullParentObservable});
                              """);
             return;
         }
 
         _ = sb.AppendLine()
             .AppendLine($"""
-                                 var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                     global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                         {lambdaParam} => {lambdaParam} != null
-                                             ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.EventObservable<{segType}>(
-                                                 __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
-                                                     {declType}.{segment.PropertyName}Property, typeof({declType})).AddValueChanged({lambdaParam}, __h),
-                                                 __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
-                                                     {declType}.{segment.PropertyName}Property, typeof({declType})).RemoveValueChanged({lambdaParam}, __h),
-                                                 () => (({declType}){lambdaParam}).{segment.PropertyName},
-                                                 false)
-                                             : (global::System.IObservable<{segType}>){nullParentObservable}));
+                                 var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
+                                     {lambdaParam} => {lambdaParam} != null
+                                         ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.EventObservable<{segType}>(
+                                             __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
+                                                 {declType}.{segment.PropertyName}Property, typeof({declType})).AddValueChanged({lambdaParam}, __h),
+                                             __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
+                                                 {declType}.{segment.PropertyName}Property, typeof({declType})).RemoveValueChanged({lambdaParam}, __h),
+                                             () => (({declType}){lambdaParam}).{segment.PropertyName},
+                                             false)
+                                         : (global::System.IObservable<{segType}>){nullParentObservable});
                          """);
     }
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitInlineObservationVariable(
         StringBuilder sb,
         string rootVar,

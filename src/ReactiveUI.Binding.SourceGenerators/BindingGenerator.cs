@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -101,7 +102,7 @@ public class BindingGenerator : IIncrementalGenerator
         WhenAnyObservableInvocationGenerator.Register(context, whenAnyObservable, allClasses, languageFeatures);
         BindInteractionInvocationGenerator.Register(context, bindInteraction, allClasses, languageFeatures);
         BindCommandInvocationGenerator.Register(context, bindCommand, allClasses, languageFeatures);
-        BindToInvocationGenerator.Register(context, bindTo, allClasses, languageFeatures);
+        BindToInvocationGenerator.Register(context, bindTo, languageFeatures);
     }
 
     /// <summary>
@@ -117,6 +118,7 @@ public class BindingGenerator : IIncrementalGenerator
     /// reaches for it. Collapsing the per-type kinds to a distinct set first means adding another type of an
     /// already-seen kind leaves this output cached.
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void RegisterObservationHelperOutput(
         in IncrementalGeneratorInitializationContext context,
         IncrementalValuesProvider<ObservableTypeInfo> observableTypes,
@@ -135,6 +137,7 @@ public class BindingGenerator : IIncrementalGenerator
     /// <param name="predicate">The syntactic filter for this API.</param>
     /// <param name="transform">The semantic extraction for this API.</param>
     /// <returns>The extracted call sites, with the unanalyzable ones dropped.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IncrementalValuesProvider<T> Detect<T>(
         in IncrementalGeneratorInitializationContext context,
         Func<SyntaxNode, CancellationToken, bool> predicate,
@@ -157,6 +160,7 @@ public class BindingGenerator : IIncrementalGenerator
     /// it is not <c>AllowMultiple</c>, so repeating it across the dispatch files would be a duplicate-attribute
     /// error.
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void RegisterSharedAttributeOutput(
         in IncrementalGeneratorInitializationContext context,
         IncrementalValueProvider<LanguageFeatures> languageFeatures) =>
@@ -197,6 +201,7 @@ public class BindingGenerator : IIncrementalGenerator
     /// </summary>
     /// <param name="context">The generator initialization context.</param>
     /// <returns>A provider yielding the consumer's language-feature snapshot.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IncrementalValueProvider<LanguageFeatures> SelectLanguageFeatures(
         in IncrementalGeneratorInitializationContext context) =>
         context.ParseOptionsProvider
@@ -237,6 +242,16 @@ public class BindingGenerator : IIncrementalGenerator
                     ? CollectNamespaceMemberNames(reactiveStub!.ContainingNamespace)
                     : default;
 
+                // The Primitives stack ships the same two flavours, so the same shift applies to the operators
+                // and signal factories the generated code calls. Anchored on what the reactive flavour offers,
+                // which is what leaves the shared core - the disposables among it - unshifted.
+                var primitivesAnchor = usesReactiveRuntime
+                    ? compilation.GetTypeByMetadataName(Constants.PrimitivesReactiveAnchorMetadataName)
+                    : null;
+                var primitivesNamespaceMembers = primitivesAnchor is not null
+                    ? CollectTypePaths(primitivesAnchor.ContainingNamespace)
+                    : default;
+
                 // A global using is scoped to the compilation that declares it and is never exported to a
                 // referencing assembly, so it is what lets each assembly reach its own generated overloads
                 // and nobody else's. It needs C# 10; older consumers share the runtime library's namespace.
@@ -256,7 +271,8 @@ public class BindingGenerator : IIncrementalGenerator
                     supportsGlobalUsings,
                     callerArgExprAvailable,
                     usesReactiveRuntime,
-                    runtimeNamespaceMembers);
+                    runtimeNamespaceMembers,
+                    primitivesNamespaceMembers);
             });
 
     /// <summary>
@@ -339,6 +355,44 @@ public class BindingGenerator : IIncrementalGenerator
         foreach (var member in runtimeNamespace.GetMembers())
         {
             _ = names.Add(member.Name);
+        }
+
+        var ordered = new string[names.Count];
+        names.CopyTo(ordered);
+        return new(ordered);
+    }
+
+    /// <summary>
+    /// Collects every public type a namespace offers, keyed by its path below that namespace, so a generated
+    /// reference can be matched as a whole rather than by its leading segment.
+    /// </summary>
+    /// <param name="root">The namespace to walk.</param>
+    /// <returns>The type paths, ordered so the pipeline sees a stable value.</returns>
+    /// <remarks>
+    /// The Primitives stack splits a single namespace across two assemblies: the shared core contributes types
+    /// that keep their names in both flavours, while the flavoured package contributes the ones that shift. Only
+    /// the whole path tells the two apart, so the leading segment is not enough to decide.
+    /// </remarks>
+    private static EquatableArray<string> CollectTypePaths(INamespaceSymbol root)
+    {
+        var names = new SortedSet<string>(System.StringComparer.Ordinal);
+        var pending = new Stack<(INamespaceSymbol Namespace, string Prefix)>();
+        pending.Push((root, string.Empty));
+
+        while (pending.Count > 0)
+        {
+            var (current, prefix) = pending.Pop();
+            foreach (var member in current.GetMembers())
+            {
+                if (member is INamespaceSymbol child)
+                {
+                    pending.Push((child, $"{prefix}{child.Name}."));
+                }
+                else if (member is INamedTypeSymbol { DeclaredAccessibility: Accessibility.Public } type)
+                {
+                    _ = names.Add(prefix + type.Name);
+                }
+            }
         }
 
         var ordered = new string[names.Count];

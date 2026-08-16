@@ -245,8 +245,7 @@ public class ReflectionTests
 
         // After rewriting, the Convert should be stripped, leaving MemberAccess
         await Assert.That(rewritten.NodeType).IsEqualTo(ExpressionType.MemberAccess);
-        var member = (MemberExpression)rewritten;
-        await Assert.That(member.Member.Name).IsEqualTo("Age");
+        await Assert.That(((MemberExpression)rewritten).Member.Name).IsEqualTo("Age");
     }
 
     /// <summary>

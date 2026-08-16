@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 
@@ -16,6 +17,7 @@ public static class BindCommandScenarios
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable BasicNoParam(
         SharedScenarios.BindCommand.BasicNoParam.MyViewModel vm,
         SharedScenarios.BindCommand.BasicNoParam.MyView view) =>
@@ -25,6 +27,7 @@ public static class BindCommandScenarios
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable ExpressionParam(
         SharedScenarios.BindCommand.ExpressionParam.MyViewModel vm,
         SharedScenarios.BindCommand.ExpressionParam.MyView view) =>
@@ -35,6 +38,7 @@ public static class BindCommandScenarios
     /// <param name="view">The target view.</param>
     /// <param name="parameter">An observable producing command parameters.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable ObservableParam(
         SharedScenarios.BindCommand.ObservableParam.MyViewModel vm,
         SharedScenarios.BindCommand.ObservableParam.MyView view,
@@ -45,6 +49,7 @@ public static class BindCommandScenarios
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable CustomEvent(
         SharedScenarios.BindCommand.CustomEvent.MyViewModel vm,
         SharedScenarios.BindCommand.CustomEvent.MyView view) =>
@@ -54,6 +59,7 @@ public static class BindCommandScenarios
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable DeepCommandPath(
         SharedScenarios.BindCommand.DeepCommandPath.MyViewModel vm,
         SharedScenarios.BindCommand.DeepCommandPath.MyView view) =>
@@ -63,6 +69,7 @@ public static class BindCommandScenarios
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable EventEnabled(
         SharedScenarios.BindCommand.EventEnabled.MyViewModel vm,
         SharedScenarios.BindCommand.EventEnabled.MyView view) =>
@@ -75,6 +82,7 @@ public static class BindCommandScenarios
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable EventEnabledExprParam(
         SharedScenarios.BindCommand.EventEnabledExprParam.MyViewModel vm,
         SharedScenarios.BindCommand.EventEnabledExprParam.MyView view) =>
@@ -88,6 +96,7 @@ public static class BindCommandScenarios
     /// <param name="view">The target view.</param>
     /// <param name="parameter">An observable producing command parameters.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable EventEnabledObsParam(
         SharedScenarios.BindCommand.EventEnabledObsParam.MyViewModel vm,
         SharedScenarios.BindCommand.EventEnabledObsParam.MyView view,
@@ -98,6 +107,7 @@ public static class BindCommandScenarios
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable CommandProperty(
         SharedScenarios.BindCommand.CommandProperty.MyViewModel vm,
         SharedScenarios.BindCommand.CommandProperty.MyView view) =>
@@ -110,6 +120,7 @@ public static class BindCommandScenarios
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable CommandPropertyExprParam(
         SharedScenarios.BindCommand.CommandPropertyExprParam.MyViewModel vm,
         SharedScenarios.BindCommand.CommandPropertyExprParam.MyView view) =>
@@ -123,6 +134,7 @@ public static class BindCommandScenarios
     /// <param name="view">The target view.</param>
     /// <param name="parameter">An observable producing command parameters.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable CommandPropertyObsParam(
         SharedScenarios.BindCommand.CommandPropertyObsParam.MyViewModel vm,
         SharedScenarios.BindCommand.CommandPropertyObsParam.MyView view,
@@ -133,6 +145,7 @@ public static class BindCommandScenarios
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable NoEvent(
         SharedScenarios.BindCommand.NoEvent.MyViewModel vm,
         SharedScenarios.BindCommand.NoEvent.MyView view) =>

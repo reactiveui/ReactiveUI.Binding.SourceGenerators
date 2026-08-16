@@ -15,18 +15,9 @@ internal static class AnalyzerHelpers
     /// <param name="methodSymbol">The method symbol to check.</param>
     /// <returns>true if the method is from our generated extension class.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsBindingExtensionMethod(IMethodSymbol methodSymbol)
-    {
-        var containingType = methodSymbol.ContainingType;
-        if (containingType is null)
-        {
-            return false;
-        }
-
-        var name = containingType.Name;
-        return name is SourceGenerators.Constants.GeneratedExtensionClassName
+    internal static bool IsBindingExtensionMethod(IMethodSymbol methodSymbol) =>
+        methodSymbol.ContainingType?.Name is SourceGenerators.Constants.GeneratedExtensionClassName
             or SourceGenerators.Constants.StubExtensionClassName;
-    }
 
     /// <summary>Checks if an expression is an inline lambda (not a variable reference or method call).</summary>
     /// <param name="expression">The expression to check.</param>
@@ -125,7 +116,7 @@ internal static class AnalyzerHelpers
         out INamedTypeSymbol? sourceType)
     {
         sourceType = ExtractFirstTypeArgument(methodSymbol);
-        return sourceType is null ? false : !TypeAnalyzer.HasObservableMechanism(sourceType, compilation);
+        return sourceType is not null && !TypeAnalyzer.HasObservableMechanism(sourceType, compilation);
     }
 
     /// <summary>
@@ -145,7 +136,7 @@ internal static class AnalyzerHelpers
     {
         mechanism = string.Empty;
         receiverType = ExtractFirstTypeArgument(methodSymbol);
-        return receiverType is null ? false : !HasBeforeChangeSupport(receiverType, compilation, out mechanism);
+        return receiverType is not null && !HasBeforeChangeSupport(receiverType, compilation, out mechanism);
     }
 
     /// <summary>
@@ -171,7 +162,7 @@ internal static class AnalyzerHelpers
 
         var dataErrorInfo =
             compilation.GetTypeByMetadataName(SourceGenerators.Constants.INotifyDataErrorInfoMetadataName);
-        return dataErrorInfo is null ? false : ImplementsInterface(sourceType, dataErrorInfo);
+        return dataErrorInfo is not null && ImplementsInterface(sourceType, dataErrorInfo);
     }
 
     /// <summary>Determines whether a type implements a specific interface.</summary>

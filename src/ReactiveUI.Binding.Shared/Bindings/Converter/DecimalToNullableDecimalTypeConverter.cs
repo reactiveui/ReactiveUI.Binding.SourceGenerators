@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive;
 #else
@@ -9,6 +11,7 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Converts <see cref="decimal"/> to a nullable <see cref="decimal"/>.</summary>
+[DebuggerDisplay("decimal -> decimal? (affinity {Affinity})")]
 public sealed class DecimalToNullableDecimalTypeConverter : IBindingTypeConverter<decimal, decimal?>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>
@@ -21,6 +24,7 @@ public sealed class DecimalToNullableDecimalTypeConverter : IBindingTypeConverte
     public Type ToType => typeof(decimal?);
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetAffinityForObjects() => Affinity;
 
     /// <inheritdoc/>

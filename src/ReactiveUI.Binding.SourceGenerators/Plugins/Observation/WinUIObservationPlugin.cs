@@ -2,7 +2,9 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -40,6 +42,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
     public bool RequiresHelperClasses => true;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.InheritsWinUIDependencyObject;
 
@@ -146,31 +149,30 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
         {
             _ = sb.AppendLine()
                 .AppendLine($"""
-                                     var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                         global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                             {lambdaParam} => {lambdaParam} != null
-                                                 ? (global::System.IObservable<{segType}>)
-                                                     new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
-                                                 : (global::System.IObservable<{segType}>){nullParentObservable}));
+                                     var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
+                                         {lambdaParam} => {lambdaParam} != null
+                                             ? (global::System.IObservable<{segType}>)
+                                                 new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
+                                             : (global::System.IObservable<{segType}>){nullParentObservable});
                              """);
             return;
         }
 
         _ = sb.AppendLine()
             .AppendLine($"""
-                                 var {curVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                     global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({prevVar},
-                                         {lambdaParam} => {lambdaParam} != null
-                                             ? (global::System.IObservable<{segType}>)new __WinUIDPObservable<{segType}>(
-                                                 (global::Microsoft.UI.Xaml.DependencyObject){lambdaParam},
-                                                 {declType}.{segment.PropertyName}Property,
-                                                 (global::Microsoft.UI.Xaml.DependencyObject __o) => (({declType})__o).{segment.PropertyName},
-                                                 false)
-                                             : (global::System.IObservable<{segType}>){nullParentObservable}));
+                                 var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
+                                     {lambdaParam} => {lambdaParam} != null
+                                         ? (global::System.IObservable<{segType}>)new __WinUIDPObservable<{segType}>(
+                                             (global::Microsoft.UI.Xaml.DependencyObject){lambdaParam},
+                                             {declType}.{segment.PropertyName}Property,
+                                             (global::Microsoft.UI.Xaml.DependencyObject __o) => (({declType})__o).{segment.PropertyName},
+                                             false)
+                                         : (global::System.IObservable<{segType}>){nullParentObservable});
                          """);
     }
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitInlineObservationVariable(
         StringBuilder sb,
         string rootVar,
@@ -187,6 +189,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
 
     /// <summary>Emits the <c>__WinUIDPObservable&lt;T&gt;</c> class header (fields and constructor).</summary>
     /// <param name="sb">The string builder.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitObservableHeader(StringBuilder sb) =>
         sb.AppendLine("""
 
@@ -228,6 +231,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
 
     /// <summary>Emits the Subscribe method plus the subscription's fields and constructor.</summary>
     /// <param name="sb">The string builder to append to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitSubscriptionClassHead(StringBuilder sb) =>
         sb.AppendLine("""
 
@@ -262,6 +266,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
 
     /// <summary>Emits the subscription's change callback and disposal, closing the observable class.</summary>
     /// <param name="sb">The string builder to append to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitSubscriptionClassCallbacks(StringBuilder sb) =>
         sb.AppendLine("""
 

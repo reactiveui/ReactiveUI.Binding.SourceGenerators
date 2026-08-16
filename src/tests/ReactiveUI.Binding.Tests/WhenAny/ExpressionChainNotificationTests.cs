@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Tests.TestModels;
@@ -127,6 +128,7 @@ public class ExpressionChainNotificationTests
         public bool Completed { get; private set; }
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnNext(IObservedChange<ObservedValueFixture, string> value) => Values.Add(value);
 
         /// <inheritdoc/>
@@ -156,6 +158,7 @@ public class ExpressionChainNotificationTests
             type == typeof(ObservedValueFixture) ? WinningAffinity : 0;
 
         /// <summary>Forgets the previous test's subscribers so each starts from an empty stream.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reset() => _observers.Clear();
 
         /// <inheritdoc/>
@@ -239,6 +242,7 @@ public class ExpressionChainNotificationTests
         IDisposable Subscription) : IDisposable
     {
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose() => Subscription.Dispose();
     }
 }

@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 
 /// <summary>
@@ -299,18 +301,23 @@ public class ConverterMigrationHelperTests
         /// <summary>Registers a service instance for later resolution.</summary>
         /// <typeparam name="T">The service type to register.</typeparam>
         /// <param name="service">The service instance to register.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RegisterService<T>(T? service) => _services.Add(service!);
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object? GetService(Type? serviceType) => _services.FirstOrDefault();
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object? GetService(Type? serviceType, string? contract) => _services.FirstOrDefault();
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T? GetService<T>() => _services.OfType<T>().FirstOrDefault();
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T? GetService<T>(string? contract) => _services.OfType<T>().FirstOrDefault();
 
         /// <inheritdoc/>
@@ -321,9 +328,11 @@ public class ConverterMigrationHelperTests
             _services.Where(static s => s is not null)!;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetServices<T>() => _services.OfType<T>();
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetServices<T>(string? contract) => _services.OfType<T>();
     }
 
@@ -349,6 +358,7 @@ public class ConverterMigrationHelperTests
     private sealed class TestFallbackConverter(int affinity) : IBindingFallbackConverter
     {
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetAffinityForObjects(Type fromType, Type toType) => affinity;
 
         /// <inheritdoc/>
@@ -376,9 +386,11 @@ public class ConverterMigrationHelperTests
         private readonly int _affinity = affinity;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetAffinityForObjects(Type? fromType, Type? toType) => _affinity;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object? PerformSet(object? toTarget, object? newValue, object?[]? arguments) => null;
     }
 }

@@ -305,7 +305,7 @@ internal static class BindCommandCodeGenerator
                                     // BindCommand: {{cmdPathComment}} -> {{ctrlPathComment}} (event: {{inv.ResolvedEventName ?? "none"}})
                                     if (viewModel == null)
                                     {
-                                        return global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                        return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                                     }
 
                         """);
@@ -378,16 +378,16 @@ internal static class BindCommandCodeGenerator
                                             .GetBinder<{{inv.ControlTypeFullName}}>({{(hasEvent ? "true" : "false")}});
                                         if (__customBinder != null)
                                         {
-                                            var __serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                                            var __binderCmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, __cmd =>
+                                            var __serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
+                                            var __binderCmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, __cmd =>
                                             {
-                                                __serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                                __serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                                                 global::System.IObservable<object> __paramObs = {{paramObsExpr}};
                                                 __serial.Disposable = __customBinder.BindCommandToObject<{{inv.ControlTypeFullName}}>(
                                                     __cmd, {{controlAccess}}, __paramObs)
-                                                    ?? global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                                    ?? global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                                             });
-                                            return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__binderCmdSub, __serial);
+                                            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__binderCmdSub, __serial);
                                         }
                                     }
 

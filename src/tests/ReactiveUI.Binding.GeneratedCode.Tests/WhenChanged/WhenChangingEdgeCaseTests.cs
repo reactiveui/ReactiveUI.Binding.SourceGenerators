@@ -67,15 +67,15 @@ public class WhenChangingEdgeCaseTests
     public async Task TwoProperties_EmitsOnEitherChange()
     {
         var vm = new BigViewModel { Prop1 = "A", Prop2 = 1 };
-        var values = new List<(string property1, int property2)>();
+        var values = new List<(string Property1, int Property2)>();
 
         using var sub = WhenChangingScenarios.TwoProperties(vm)
             .Subscribe(values.Add);
 
         // Initial emission
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].property1).IsEqualTo("A");
-        await Assert.That(values[0].property2).IsEqualTo(1);
+        await Assert.That(values[0].Property1).IsEqualTo("A");
+        await Assert.That(values[0].Property2).IsEqualTo(1);
 
         // Change Prop1 — should emit before-change values
         vm.Prop1 = "B";
@@ -83,8 +83,8 @@ public class WhenChangingEdgeCaseTests
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterChange);
 
         // The before-change value for Prop1 should still be "A"
-        await Assert.That(values[1].property1).IsEqualTo("A");
-        await Assert.That(values[1].property2).IsEqualTo(1);
+        await Assert.That(values[1].Property1).IsEqualTo("A");
+        await Assert.That(values[1].Property2).IsEqualTo(1);
     }
 
     /// <summary>Verifies that disposing the WhenChanging deep chain subscription stops listening.</summary>
@@ -113,7 +113,7 @@ public class WhenChangingEdgeCaseTests
     public async Task TwoProperties_SequentialChanges()
     {
         var vm = new BigViewModel { Prop1 = "A", Prop2 = 1 };
-        var values = new List<(string property1, int property2)>();
+        var values = new List<(string Property1, int Property2)>();
 
         using var sub = WhenChangingScenarios.TwoProperties(vm)
             .Subscribe(values.Add);

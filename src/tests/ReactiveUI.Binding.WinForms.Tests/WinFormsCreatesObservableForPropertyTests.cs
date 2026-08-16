@@ -4,6 +4,7 @@
 
 using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.WinForms.Tests;
 
@@ -170,6 +171,7 @@ public class WinFormsCreatesObservableForPropertyTests
         public void OnError(Exception error) => throw error;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnNext(IObservedChange<object, object?> value) => onNext();
     }
 }

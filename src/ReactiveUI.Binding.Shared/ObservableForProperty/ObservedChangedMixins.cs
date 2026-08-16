@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.ObservableForProperty;
 #else
@@ -23,6 +25,7 @@ public static class ObservedChangedMixins
         /// </summary>
         /// <returns>An Observable representing the stream of current values.</returns>
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<TValue> Value() =>
             new SelectObservable<IObservedChange<TSender, TValue>, TValue>(stream, GetValue);
     }
@@ -43,6 +46,8 @@ public static class ObservedChangedMixins
 
         /// <summary>Returns the current value of a property given a notification that it has changed.</summary>
         /// <returns>The current value of the property.</returns>
+        /// <exception cref="ArgumentNullException">The observed change is <see langword="null"/>.</exception>
+        /// <exception cref="InvalidOperationException">A property partway along the observed change's expression is <see langword="null"/>, so the chain cannot be followed to the value.</exception>
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
         public TValue GetValue()
         {

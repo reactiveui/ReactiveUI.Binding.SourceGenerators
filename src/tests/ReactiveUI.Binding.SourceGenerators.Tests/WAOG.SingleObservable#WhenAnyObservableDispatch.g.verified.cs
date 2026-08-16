@@ -23,12 +23,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             if (obs1Expression == "x => x.MyCommand")
             {
-                return __WhenAnyObservable_7FFFCD9779338708(objectToMonitor);
+                return __WhenAnyObservable_7FFFCD9779338746(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
         }
 
-        private static global::System.IObservable<string> __WhenAnyObservable_7FFFCD9779338708(global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel obj)
+        private static global::System.IObservable<string> __WhenAnyObservable_7FFFCD9779338746(global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel obj)
         {
             var __obsProperty = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,
@@ -36,9 +36,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel)__o).MyCommand,
                 true);
 
-            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty,
-                    __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
+            return new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty,
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
         }
 
     }

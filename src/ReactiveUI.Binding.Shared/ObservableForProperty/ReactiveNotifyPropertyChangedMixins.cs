@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.ObservableForProperty;
@@ -38,7 +39,7 @@ public static class ReactiveNotifyPropertyChangedMixins
     /// and property permanently unobservable.
     /// </remarks>
     private static readonly MemoizingMRUCache<
-        (Type senderType, string propertyName, bool beforeChange),
+        (Type SenderType, string PropertyName, bool BeforeChange),
         ICreatesObservableForProperty>
         NotifyFactoryCache =
             new(
@@ -57,6 +58,7 @@ public static class ReactiveNotifyPropertyChangedMixins
         [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the observed shape.")]
         [RequiresUnreferencedCode(
             "Creating Expressions requires unreferenced code because the members being referenced by the Expression may be trimmed.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TValue>(
             string propertyName) =>
             ObservableForProperty<TSender, TValue>(item, propertyName, false, true, true);
@@ -69,6 +71,7 @@ public static class ReactiveNotifyPropertyChangedMixins
         [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the observed shape.")]
         [RequiresUnreferencedCode(
             "Creating Expressions requires unreferenced code because the members being referenced by the Expression may be trimmed.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TValue>(
             string propertyName,
             bool skipInitial) =>
@@ -85,6 +88,11 @@ public static class ReactiveNotifyPropertyChangedMixins
         /// <param name="skipInitial">If true, the Observable will not notify with the initial value.</param>
         /// <param name="isDistinct">If set to true, values are filtered with DistinctUntilChanged.</param>
         /// <returns>An Observable representing the property change notifications for the given property name.</returns>
+        /// <exception cref="ArgumentNullException">The source object or <paramref name="propertyName"/> is <see langword="null"/>.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// No registered <see cref="ICreatesObservableForProperty"/> bids a positive affinity for
+        /// <paramref name="propertyName"/> on the source object's type.
+        /// </exception>
         [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the observed shape.")]
         [RequiresUnreferencedCode(
             "Creating Expressions requires unreferenced code because the members being referenced by the Expression may be trimmed.")]
@@ -149,6 +157,7 @@ public static class ReactiveNotifyPropertyChangedMixins
         /// <param name="property">An Expression representing the property.</param>
         /// <returns>An Observable representing the property change notifications for the given property.</returns>
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TValue>(
             Expression<Func<TSender, TValue>> property) =>
             ObservableForProperty(item, property, false, true, true);
@@ -159,6 +168,7 @@ public static class ReactiveNotifyPropertyChangedMixins
         /// <param name="skipInitial">If true, the Observable will not notify with the initial value.</param>
         /// <returns>An Observable representing the property change notifications for the given property.</returns>
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TValue>(
             Expression<Func<TSender, TValue>> property,
             bool skipInitial) =>
@@ -198,6 +208,7 @@ public static class ReactiveNotifyPropertyChangedMixins
         /// <returns>An observable which notifies about observed changes.</returns>
         [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the observed shape.")]
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<IObservedChange<TSender, TValue>> SubscribeToExpressionChain<TValue>(
             Expression? expression) =>
             SubscribeToExpressionChain<TSender, TValue>(item, expression, false, true, true);
@@ -209,6 +220,7 @@ public static class ReactiveNotifyPropertyChangedMixins
         /// <returns>An observable which notifies about observed changes.</returns>
         [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the observed shape.")]
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<IObservedChange<TSender, TValue>> SubscribeToExpressionChain<TValue>(
             Expression? expression,
             bool skipInitial) =>
@@ -271,6 +283,9 @@ public static class ReactiveNotifyPropertyChangedMixins
     /// <param name="expression">The expression identifying the property to observe.</param>
     /// <param name="beforeChange">If <see langword="true"/>, subscribes to before-change notifications.</param>
     /// <returns>An observable of observed changes for the property.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="expression"/> does not point at a member, so no property name can be resolved from it.</exception>
+    /// <exception cref="InvalidOperationException">No registered <see cref="ICreatesObservableForProperty"/> bids a positive affinity for the property on <paramref name="sender"/>'s type.</exception>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     internal static IObservable<IObservedChange<object?, object?>> NotifyForProperty(
         object sender,
@@ -300,7 +315,7 @@ public static class ReactiveNotifyPropertyChangedMixins
     /// <param name="key">The sender type, property name and before-change flag being resolved.</param>
     /// <returns>The best implementation, or <see langword="null"/> when nothing bids a positive affinity.</returns>
     private static ICreatesObservableForProperty? ResolveNotifyFactory(
-        (Type senderType, string propertyName, bool beforeChange) key)
+        (Type SenderType, string PropertyName, bool BeforeChange) key)
     {
         if (NotifyFactoryCache.TryGet(key, out var memoized))
         {
@@ -311,12 +326,14 @@ public static class ReactiveNotifyPropertyChangedMixins
         ICreatesObservableForProperty? best = null;
         foreach (var candidate in AppLocator.Current.GetServices<ICreatesObservableForProperty>())
         {
-            var score = candidate.GetAffinityForObject(key.senderType, key.propertyName, key.beforeChange);
-            if (score > bestScore)
+            var score = candidate.GetAffinityForObject(key.SenderType, key.PropertyName, key.BeforeChange);
+            if (score <= bestScore)
             {
-                bestScore = score;
-                best = candidate;
+                continue;
             }
+
+            bestScore = score;
+            best = candidate;
         }
 
         return best is null ? null : NotifyFactoryCache.Get(key, best);

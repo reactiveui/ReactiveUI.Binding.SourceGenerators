@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>A view model used for benchmarking source-generated property observation and binding.</summary>
+[DebuggerDisplay("Name = {Name}, Age = {Age}")]
 public class BenchmarkViewModel : INotifyPropertyChanged, INotifyPropertyChanging
 {
     /// <inheritdoc/>

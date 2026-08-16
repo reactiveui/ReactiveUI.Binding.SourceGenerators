@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ReactiveUI.Binding.Builder;
 using ReactiveUI.Binding.CommandBinding;
@@ -89,16 +90,19 @@ public class CommandBinderServiceTests
 
         /// <inheritdoc/>
         [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetAffinityForObject<T>(bool hasEventTarget) => HighAffinity;
 
         /// <inheritdoc/>
         [RequiresUnreferencedCode("Test stub")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable? BindCommandToObject<T>(ICommand? command, T? target, IObservable<object?> commandParameter)
             where T : class => null;
 
         /// <inheritdoc/>
         [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
         [RequiresUnreferencedCode("Test stub")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable? BindCommandToObject<T, TEventArgs>(
             ICommand? command,
             T? target,
@@ -107,6 +111,7 @@ public class CommandBinderServiceTests
             where T : class => null;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable? BindCommandToObject<T, TEventArgs>(
             ICommand? command,
             T? target,

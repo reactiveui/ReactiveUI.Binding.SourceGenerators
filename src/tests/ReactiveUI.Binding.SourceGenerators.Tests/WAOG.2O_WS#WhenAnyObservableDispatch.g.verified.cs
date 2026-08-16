@@ -27,12 +27,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             if (obs1Expression == "x => x.Count" && obs2Expression == "x => x.Message")
             {
-                return __WhenAnyObservable_7FFFE3651E3C40A1(objectToMonitor, selector);
+                return __WhenAnyObservable_7FFFE3651E3C40DF(objectToMonitor, selector);
             }
             throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
         }
 
-        private static global::System.IObservable<string> __WhenAnyObservable_7FFFE3651E3C40A1(global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel obj, global::System.Func<int, string, string> selector)
+        private static global::System.IObservable<string> __WhenAnyObservable_7FFFE3651E3C40DF(global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel obj, global::System.Func<int, string, string> selector)
         {
             var __obsProperty0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<int>>(
                 obj,
@@ -40,9 +40,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel)__o).Count,
                 true);
 
-            var __switched0 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty0,
-                    __obs => __obs ?? (global::System.IObservable<int>)global::ReactiveUI.Binding.Observables.EmptyObservable<int>.Instance));
+            var __switched0 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<int>, int>(__obsProperty0,
+                __obs => __obs ?? (global::System.IObservable<int>)global::ReactiveUI.Binding.Observables.EmptyObservable<int>.Instance);
 
             var __obsProperty1 = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,
@@ -50,11 +49,10 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel)__o).Message,
                 true);
 
-            var __switched1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty1,
-                    __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
+            var __switched1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty1,
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
 
-            return global::ReactiveUI.Binding.Observables.CombineLatestObservable.Create(
+            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
                 __switched0,
                 __switched1,
                 selector);

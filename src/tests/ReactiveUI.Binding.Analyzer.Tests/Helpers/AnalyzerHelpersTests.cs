@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NSubstitute;
@@ -689,6 +690,7 @@ public class AnalyzerHelpersTests
     /// <summary>Creates a compilation from the specified source code.</summary>
     /// <param name="source">The source code.</param>
     /// <returns>A CSharpCompilation.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static CSharpCompilation CreateCompilation(string source) =>
         AnalyzerTestHelper.CreateCompilation(source);
 

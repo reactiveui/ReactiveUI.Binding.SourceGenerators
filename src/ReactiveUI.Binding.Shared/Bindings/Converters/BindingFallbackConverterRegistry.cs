@@ -34,6 +34,7 @@ namespace ReactiveUI.Binding;
 /// They provide runtime type checking and conversion using techniques like reflection or type descriptors.
 /// </para>
 /// </remarks>
+[DebuggerDisplay("{_snapshot.Converters.Count} fallback converters registered")]
 public sealed class BindingFallbackConverterRegistry
 {
     /// <summary>Synchronization gate for serializing write operations.</summary>
@@ -103,11 +104,13 @@ public sealed class BindingFallbackConverterRegistry
         {
             var converter = converters[i];
             var score = converter.GetAffinityForObjects(fromType, toType);
-            if (score > bestScore && score > 0)
+            if (score <= bestScore || score <= 0)
             {
-                bestScore = score;
-                best = converter;
+                continue;
             }
+
+            bestScore = score;
+            best = converter;
         }
 
         return best;

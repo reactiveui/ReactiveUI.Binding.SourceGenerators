@@ -12,10 +12,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests.CodeGeneration;
 /// <summary>Tests for <see cref="ObservationCodeGenerator"/> — deep-chain and inline observation.</summary>
 public partial class ObservationCodeGeneratorHelperTests
 {
-    /// <summary>Verifies GenerateDeepChainObservation generates Select/Switch pattern for two-level chain.</summary>
+    /// <summary>Verifies GenerateDeepChainObservation generates a switch-map stage per segment of a two-level chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateDeepChainObservation_TwoLevelChain_GeneratesSelectSwitch()
+    public async Task GenerateDeepChainObservation_TwoLevelChain_GeneratesSwitchMapStages()
     {
         var sb = new StringBuilder();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
@@ -34,9 +34,8 @@ public partial class ObservationCodeGeneratorHelperTests
         var result = sb.ToString();
         await Assert.That(result).Contains("__obs0");
         await Assert.That(result).Contains("__obs1");
-        await Assert.That(result).Contains("RxBindingExtensions.Select(");
-        await Assert.That(result).Contains(RxBindingExtensionsSwitchFragment);
-        await Assert.That(result).Contains(RxBindingExtensionsDistinctUntilChangedFragment);
+        await Assert.That(result).Contains(SwitchSinkFragment);
+        await Assert.That(result).Contains(DistinctUntilChangedFragment);
     }
 
     /// <summary>Verifies GenerateDeepChainObservation for before-change does not add DistinctUntilChanged.</summary>
@@ -82,8 +81,8 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("var __propObs0_s0");
         await Assert.That(result).Contains("var __propObs0_s1");
         await Assert.That(result).Contains("var __propObs0");
-        await Assert.That(result).Contains(RxBindingExtensionsSwitchFragment);
-        await Assert.That(result).Contains(RxBindingExtensionsDistinctUntilChangedFragment);
+        await Assert.That(result).Contains(SwitchSinkFragment);
+        await Assert.That(result).Contains(DistinctUntilChangedFragment);
     }
 
     /// <summary>
@@ -153,10 +152,10 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains(ReturnObservableName);
     }
 
-    /// <summary>Verifies EmitInlineObservation with deep chain generates Select/Switch pattern.</summary>
+    /// <summary>Verifies EmitInlineObservation with a deep chain generates a switch-map stage.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitInlineObservation_DeepChain_GeneratesSelectSwitchPattern()
+    public async Task EmitInlineObservation_DeepChain_GeneratesSwitchMapStage()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>([
@@ -174,8 +173,8 @@ public partial class ObservationCodeGeneratorHelperTests
             SourceObsName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(RxBindingExtensionsSwitchFragment);
-        await Assert.That(result).Contains(RxBindingExtensionsDistinctUntilChangedFragment);
+        await Assert.That(result).Contains(SwitchSinkFragment);
+        await Assert.That(result).Contains(DistinctUntilChangedFragment);
         await Assert.That(result).Contains(SourceObsDeclaration);
     }
 
@@ -321,7 +320,7 @@ public partial class ObservationCodeGeneratorHelperTests
             SourceObsName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(RxBindingExtensionsSwitchFragment);
+        await Assert.That(result).Contains(SwitchSinkFragment);
         await Assert.That(result).Contains(PropertyObservableName);
     }
 

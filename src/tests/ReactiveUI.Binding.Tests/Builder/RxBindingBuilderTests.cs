@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Builder;
 
 namespace ReactiveUI.Binding.Tests.Builder;
@@ -137,17 +138,21 @@ public class RxBindingBuilderTests
     private sealed class MutableOnlyResolver : IMutableDependencyResolver
     {
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasRegistration(Type? serviceType) => false;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasRegistration(Type? serviceType, string? contract) => false;
 
         /// <inheritdoc/>
         [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasRegistration<T>() => false;
 
         /// <inheritdoc/>
         [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasRegistration<T>(string? contract) => false;
 
         /// <inheritdoc/>
@@ -231,21 +236,25 @@ public class RxBindingBuilderTests
         }
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable ServiceRegistrationCallback(Type serviceType, Action<IDisposable> callback) =>
             Disposable.Empty;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable
             ServiceRegistrationCallback(Type serviceType, string? contract, Action<IDisposable> callback) =>
             Disposable.Empty;
 
         /// <inheritdoc/>
         [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable ServiceRegistrationCallback<T>(Action<IDisposable> callback) =>
             Disposable.Empty;
 
         /// <inheritdoc/>
         [SuppressMessage("Design", "SST1452:Unused type parameter", Justification = "Dictated by the interface this test stub implements.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IDisposable ServiceRegistrationCallback<T>(string? contract, Action<IDisposable> callback) =>
             Disposable.Empty;
 

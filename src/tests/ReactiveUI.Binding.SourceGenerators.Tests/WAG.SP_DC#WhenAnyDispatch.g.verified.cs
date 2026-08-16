@@ -24,12 +24,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             if (property1Expression == "x => x.Child.Name")
             {
-                return __WhenAny_0000044C01973E4E(objectToMonitor, selector);
+                return __WhenAny_0000044C01973E8C(objectToMonitor, selector);
             }
             throw new global::System.InvalidOperationException("No generated WhenAny dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<string> __WhenAny_0000044C01973E4E(global::SharedScenarios.WhenAny.DeepPropertyChain.ParentViewModel obj, global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.DeepPropertyChain.ParentViewModel, string>, string> selector)
+        private static global::System.IObservable<string> __WhenAny_0000044C01973E8C(global::SharedScenarios.WhenAny.DeepPropertyChain.ParentViewModel obj, global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.DeepPropertyChain.ParentViewModel, string>, string> selector)
         {
             var __propObs0_s0 = (global::System.IObservable<global::SharedScenarios.WhenAny.DeepPropertyChain.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenAny.DeepPropertyChain.ChildModel>(
                 obj,
@@ -37,19 +37,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAny.DeepPropertyChain.ParentViewModel)__o).Child,
                 false);
 
-        var __propObs0_s1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__propObs0_s0,
-                __propObs0_p1 => __propObs0_p1 != null
-                    ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                        __propObs0_p1,
-                        "Name",
-                        (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAny.DeepPropertyChain.ChildModel)__o).Name,
-                        false)
-                    : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
-            var __propObs0 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__propObs0_s1);
+        var __propObs0_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAny.DeepPropertyChain.ChildModel, string>(__propObs0_s0,
+            __propObs0_p1 => __propObs0_p1 != null
+                ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+                    (global::System.ComponentModel.INotifyPropertyChanged)__propObs0_p1,
+                    "Name",
+                    (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAny.DeepPropertyChain.ChildModel)__o).Name,
+                    false)
+                : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
+            var __propObs0 = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__propObs0_s1);
 
 
-            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__propObs0,
+            return global::ReactiveUI.Primitives.LinqExtensions.Select(__propObs0,
                 value => selector(new global::ReactiveUI.Binding.ObservedChange<global::SharedScenarios.WhenAny.DeepPropertyChain.ParentViewModel, string>(obj, null, value)));
         }
 

@@ -207,6 +207,7 @@ public class WhenAnyTestFixture : INotifyPropertyChanged
 
     /// <summary>Raises the PropertyChanged event.</summary>
     /// <param name="propertyName">The property name.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new(propertyName));
 }

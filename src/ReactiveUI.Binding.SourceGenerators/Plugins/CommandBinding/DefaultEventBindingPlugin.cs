@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -17,42 +18,21 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 /// Platforms covered: Any control with a Click/TouchUpInside/Pressed event
 /// that does not have Command or Enabled properties.
 /// </remarks>
-internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
+internal sealed class DefaultEventBindingPlugin : EventCommandBindingPlugin
 {
     /// <summary>The affinity score for the default-event binder (lowest priority among command binding plugins).</summary>
     private static readonly int DefaultEventAffinity = BindingAffinity.DefaultEvent;
 
     /// <inheritdoc/>
-    public int Affinity => DefaultEventAffinity;
+    public override int Affinity => DefaultEventAffinity;
 
     /// <inheritdoc/>
-    public bool RequiresCustomBinderFallback => true;
-
-    /// <inheritdoc/>
-    public bool CanHandle(BindCommandInvocationInfo inv) =>
+    public override bool CanHandle(BindCommandInvocationInfo inv) =>
         inv.ResolvedEventName is not null;
 
     /// <inheritdoc/>
-    public void EmitBinding(
-        StringBuilder sb,
-        BindCommandInvocationInfo inv,
-        string controlAccess,
-        bool supportsNullable) => CommandEventBindingEmitter.EmitByParameterKind(
-            sb,
-            inv,
-            controlAccess,
-            supportsNullable,
-            EmitWithObservableParameter,
-            EmitWithExpressionParameter,
-            EmitWithNoParameter);
-
-    /// <summary>Emits event-only command binding with an observable parameter.</summary>
-    /// <param name="sb">The string builder.</param>
-    /// <param name="inv">The BindCommand invocation info.</param>
-    /// <param name="controlAccess">The control access chain.</param>
-    /// <param name="eventArgsType">The event args type.</param>
-    /// <param name="supportsNullable">There can be a null type.</param>
-    private static void EmitWithObservableParameter(
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected override void EmitWithObservableParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
@@ -61,13 +41,13 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
         sb.AppendLine($$"""
 
                                         {{inv.ParameterTypeFullName}}{{(supportsNullable && inv.ParameterIsReferenceType ? "?" : string.Empty)}} __latestParam = default;
-                                        var __paramSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(
+                                        var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
                                             withParameter, p => System.Threading.Volatile.Write(ref __latestParam, p));
 
-                                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
+                                        var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
+                                        var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
                                         {
-                                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                            serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                                             if (cmd == null)
                                             {
                                                 return;
@@ -83,22 +63,17 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
                                             }
 
                                             {{controlAccess}}.{{inv.ResolvedEventName}} += __Handler;
-                                            serial.Disposable = new global::ReactiveUI.Binding.Observables.ActionDisposable(() =>
+                                            serial.Disposable = new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>
                                                 {{controlAccess}}.{{inv.ResolvedEventName}} -= __Handler);
                                         });
-                                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(
-                                            new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, __paramSub), serial);
+                                        return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(
+                                            new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, __paramSub), serial);
                                     }
                             """);
 
-    /// <summary>Emits event-only command binding with an expression parameter.</summary>
-    /// <param name="sb">The string builder.</param>
-    /// <param name="inv">The BindCommand invocation info.</param>
-    /// <param name="controlAccess">The control access chain.</param>
-    /// <param name="eventArgsType">The event args type.</param>
-    /// <param name="paramAccess">The parameter access chain.</param>
-    /// <param name="supportsNullable">There can be a null type.</param>
-    private static void EmitWithExpressionParameter(
+    /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected override void EmitWithExpressionParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
@@ -107,10 +82,10 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
         bool supportsNullable) =>
         sb.AppendLine($$"""
 
-                                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
+                                        var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
+                                        var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
                                         {
-                                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                            serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                                             if (cmd == null)
                                             {
                                                 return;
@@ -126,20 +101,16 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
                                             }
 
                                             {{controlAccess}}.{{inv.ResolvedEventName}} += __Handler;
-                                            serial.Disposable = new global::ReactiveUI.Binding.Observables.ActionDisposable(() =>
+                                            serial.Disposable = new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>
                                                 {{controlAccess}}.{{inv.ResolvedEventName}} -= __Handler);
                                         });
-                                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, serial);
+                                        return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial);
                                     }
                             """);
 
-    /// <summary>Emits event-only command binding with no parameter.</summary>
-    /// <param name="sb">The string builder.</param>
-    /// <param name="inv">The BindCommand invocation info.</param>
-    /// <param name="controlAccess">The control access chain.</param>
-    /// <param name="eventArgsType">The event args type.</param>
-    /// <param name="supportsNullable">There can be a null type.</param>
-    private static void EmitWithNoParameter(
+    /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected override void EmitWithNoParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
@@ -147,10 +118,10 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
         bool supportsNullable) =>
         sb.AppendLine($$"""
 
-                                        var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
-                                        var __cmdSub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(commandObs, cmd =>
+                                        var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
+                                        var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
                                         {
-                                            serial.Disposable = global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                                            serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                                             if (cmd == null)
                                             {
                                                 return;
@@ -165,10 +136,10 @@ internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
                                             }
 
                                             {{controlAccess}}.{{inv.ResolvedEventName}} += __Handler;
-                                            serial.Disposable = new global::ReactiveUI.Binding.Observables.ActionDisposable(() =>
+                                            serial.Disposable = new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>
                                                 {{controlAccess}}.{{inv.ResolvedEventName}} -= __Handler);
                                         });
-                                        return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(__cmdSub, serial);
+                                        return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial);
                                     }
                             """);
 }

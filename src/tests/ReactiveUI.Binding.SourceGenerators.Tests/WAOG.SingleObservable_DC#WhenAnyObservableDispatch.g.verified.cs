@@ -23,12 +23,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             if (obs1Expression == "x => x.Child.MyCommand")
             {
-                return __WhenAnyObservable_7FFFD9447DB2ED7A(objectToMonitor);
+                return __WhenAnyObservable_7FFFD9447DB2EDB8(objectToMonitor);
             }
             throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
         }
 
-        private static global::System.IObservable<string> __WhenAnyObservable_7FFFD9447DB2ED7A(global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ParentViewModel obj)
+        private static global::System.IObservable<string> __WhenAnyObservable_7FFFD9447DB2EDB8(global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ParentViewModel obj)
         {
             var __obsProperty_s0 = (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel>(
                 obj,
@@ -36,21 +36,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ParentViewModel)__o).Child,
                 false);
 
-        var __obsProperty_s1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty_s0,
-                __obsProperty_p1 => __obsProperty_p1 != null
-                    ? (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
-                        __obsProperty_p1,
-                        "MyCommand",
-                        (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand,
-                        false)
-                    : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Binding.Observables.EmptyObservable<global::System.IObservable<string>>.Instance));
-            var __obsProperty = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__obsProperty_s1);
+        var __obsProperty_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel, global::System.IObservable<string>>(__obsProperty_s0,
+            __obsProperty_p1 => __obsProperty_p1 != null
+                ? (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
+                    (global::System.ComponentModel.INotifyPropertyChanged)__obsProperty_p1,
+                    "MyCommand",
+                    (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand,
+                    false)
+                : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Binding.Observables.EmptyObservable<global::System.IObservable<string>>.Instance);
+            var __obsProperty = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obsProperty_s1);
 
 
-            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty,
-                    __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance));
+            return new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty,
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
         }
 
     }

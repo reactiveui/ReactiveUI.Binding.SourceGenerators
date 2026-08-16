@@ -72,11 +72,13 @@ public class HostTestFixture : INotifyPropertyChanged, INotifyPropertyChanging
 
     /// <summary>Raises the PropertyChanging event.</summary>
     /// <param name="propertyName">The property name.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void OnPropertyChanging([CallerMemberName] string? propertyName = null) =>
         PropertyChanging?.Invoke(this, new(propertyName));
 
     /// <summary>Raises the PropertyChanged event.</summary>
     /// <param name="propertyName">The property name.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new(propertyName));
 }

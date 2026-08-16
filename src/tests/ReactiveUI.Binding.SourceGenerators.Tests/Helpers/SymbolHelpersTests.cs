@@ -62,9 +62,8 @@ public class SymbolHelpersTests
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
         var prop = typeSymbol.GetMembers("Obs").OfType<IPropertySymbol>().First();
-        var obsPropType = (INamedTypeSymbol)prop.Type;
 
-        var result = SymbolHelpers.IsIObservable(obsPropType);
+        var result = SymbolHelpers.IsIObservable((INamedTypeSymbol)prop.Type);
 
         await Assert.That(result).IsTrue();
     }
@@ -84,9 +83,8 @@ public class SymbolHelpersTests
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
         var prop = typeSymbol.GetMembers("Name").OfType<IPropertySymbol>().First();
-        var stringType = (INamedTypeSymbol)prop.Type;
 
-        var result = SymbolHelpers.IsIObservable(stringType);
+        var result = SymbolHelpers.IsIObservable((INamedTypeSymbol)prop.Type);
 
         await Assert.That(result).IsFalse();
     }
@@ -107,9 +105,8 @@ public class SymbolHelpersTests
         var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
         var prop = typeSymbol.GetMembers("Confirm").OfType<IPropertySymbol>().First();
-        var interactionType = (INamedTypeSymbol)prop.Type;
 
-        var result = SymbolHelpers.IsInteractionType(interactionType);
+        var result = SymbolHelpers.IsInteractionType((INamedTypeSymbol)prop.Type);
 
         await Assert.That(result).IsTrue();
     }
@@ -129,9 +126,8 @@ public class SymbolHelpersTests
         var compilation = TestHelper.CreateCompilation(source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
         var prop = typeSymbol.GetMembers("Name").OfType<IPropertySymbol>().First();
-        var stringType = (INamedTypeSymbol)prop.Type;
 
-        var result = SymbolHelpers.IsInteractionType(stringType);
+        var result = SymbolHelpers.IsInteractionType((INamedTypeSymbol)prop.Type);
 
         await Assert.That(result).IsFalse();
     }
@@ -364,37 +360,11 @@ public class SymbolHelpersTests
         var tree = compilation.SyntaxTrees.First();
         var semanticModel = compilation.GetSemanticModel(tree);
 
-        // Get a valid segment from a separate compilation with expression-body lambda
-        const string simpleLambdaSource = """
-                                          using System;
-                                          using System.Linq.Expressions;
-                                          namespace TestApp
-                                          {
-                                              public class MyVm2 { public string Name { get; set; } = ""; }
-                                              public class Usage2
-                                              {
-                                                  public void Test()
-                                                  {
-                                                      Expression<Func<MyVm2, string>> expr = x => x.Name;
-                                                  }
-                                              }
-                                          }
-                                          """;
-
-        var compilation2 = TestHelper.CreateCompilation(simpleLambdaSource, LanguageVersion.CSharp10);
-        var tree2 = compilation2.SyntaxTrees.First();
-        var semanticModel2 = compilation2.GetSemanticModel(tree2);
-        var refLambda = (await tree2.GetRootAsync()).DescendantNodes().OfType<SimpleLambdaExpressionSyntax>().First();
-        var path = SyntaxHelpers.ExtractPropertyPathFromLambda(refLambda, semanticModel2, default);
-        await Assert.That(path).IsNotNull();
-        var segment = path![0];
-
-        // Now get the block-body parenthesized lambda from original source
         var blockLambda = (await tree.GetRootAsync()).DescendantNodes()
             .OfType<ParenthesizedLambdaExpressionSyntax>()
             .First();
 
-        var result = SymbolHelpers.ResolveNamedType(segment, semanticModel, blockLambda, default);
+        var result = SymbolHelpers.ResolveNamedType(semanticModel, blockLambda, default);
 
         await Assert.That(result).IsNull();
     }
@@ -430,8 +400,7 @@ public class SymbolHelpersTests
         await Assert.That(path).IsNotNull();
 
         // Pass the lambda BODY (a member access expression, not a lambda) as argExpression
-        var memberAccess = (ExpressionSyntax)lambda.Body;
-        var result = SymbolHelpers.ResolveNamedType(path![0], semanticModel, memberAccess, default);
+        var result = SymbolHelpers.ResolveNamedType(semanticModel, (ExpressionSyntax)lambda.Body, default);
 
         await Assert.That(result).IsNull();
     }

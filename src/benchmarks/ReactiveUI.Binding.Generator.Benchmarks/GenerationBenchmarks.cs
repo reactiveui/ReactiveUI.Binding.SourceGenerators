@@ -33,6 +33,7 @@ public class GenerationBenchmarks
 
     /// <summary>Runs a whole cold generation: syntax scan, extraction, and emission.</summary>
     /// <returns>The number of generated characters, returned so the work cannot be optimized away.</returns>
+    /// <exception cref="InvalidOperationException">The corpus generated nothing, so there is no result to report.</exception>
     [Benchmark]
     public int Generate()
     {

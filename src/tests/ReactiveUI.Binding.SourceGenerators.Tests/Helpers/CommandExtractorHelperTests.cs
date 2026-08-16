@@ -10,6 +10,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 /// <summary>Tests for <see cref="CommandExtractor"/> internal helper methods.</summary>
 public class CommandExtractorHelperTests
 {
+    /// <summary>The event name used by the explicit-event tests.</summary>
+    private const string ClickEventName = "Click";
+
     /// <summary>Verifies that IsToEventArgument returns true for a named argument with "toEvent".</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -325,14 +328,358 @@ public class CommandExtractorHelperTests
         await Assert.That(result).IsNull();
     }
 
+    /// <summary>Verifies that an empty toEvent string resolves to no event name.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveExplicitEventName_EmptyString_ReturnsNull() =>
+        await Assert.That(await ResolveToEventAsync("\"\"")).IsNull();
+
+    /// <summary>Verifies that a toEvent argument with no compile-time value resolves to no event name.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveExplicitEventName_NonConstant_ReturnsNull() =>
+        await Assert.That(await ResolveToEventAsync("System.Environment.MachineName")).IsNull();
+
+    /// <summary>Verifies that a non-empty constant toEvent string resolves to that event name.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveExplicitEventName_ConstantString_ReturnsTheEventName() =>
+        await Assert.That(await ResolveToEventAsync("\"Click\"")).IsEqualTo(ClickEventName);
+
+    /// <summary>Verifies that a method with no toEvent parameter resolves no event name.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveExplicitEventName_NoToEventParameter_ReturnsNull()
+    {
+        const string source = """
+                              namespace TestApp
+                              {
+                                  public class Caller
+                                  {
+                                      public void Go() => Method("cmd");
+
+                                      public void Method(string command) { }
+                                  }
+                              }
+                              """;
+
+        var compilation = TestHelper.CreateCompilation(source);
+        var tree = compilation.SyntaxTrees.First();
+        var model = compilation.GetSemanticModel(tree);
+        var invocation = await FirstInvocationAsync(tree);
+        var methodSymbol = (Microsoft.CodeAnalysis.IMethodSymbol)model.GetSymbolInfo(invocation).Symbol!;
+
+        var result = CommandExtractor.ResolveExplicitEventName(
+            methodSymbol,
+            invocation.ArgumentList.Arguments,
+            model,
+            CancellationToken.None);
+
+        await Assert.That(result).IsNull();
+    }
+
+    /// <summary>Verifies that the view and view model sides are read from the receiver and first argument.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveBindCommandSides_ReadsReceiverAndFirstArgument()
+    {
+        const string source = """
+                              namespace TestApp
+                              {
+                                  public class Vm { }
+                                  public class View { public void Method(Vm vm) { } }
+
+                                  public class Caller
+                                  {
+                                      public void Go() => new View().Method(new Vm());
+                                  }
+                              }
+                              """;
+
+        var compilation = TestHelper.CreateCompilation(source);
+        var tree = compilation.SyntaxTrees.First();
+        var model = compilation.GetSemanticModel(tree);
+        var invocation = await FirstInvocationAsync(tree);
+        var memberAccess = (Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax)invocation.Expression;
+
+        var (view, viewModel) = CommandExtractor.ResolveBindCommandSides(
+            memberAccess,
+            invocation.ArgumentList.Arguments,
+            model,
+            CancellationToken.None);
+
+        await Assert.That(view).IsEqualTo("global::TestApp.View");
+        await Assert.That(viewModel).IsEqualTo("global::TestApp.Vm");
+    }
+
+    /// <summary>Verifies that the control binding resolves the explicit event, its args type and the capabilities.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveControlBinding_ExplicitEvent_ResolvesEventArgsAndCapabilities()
+    {
+        const string source = """
+                              using System;
+                              using System.Windows.Input;
+                              namespace TestApp
+                              {
+                                  public class ButtonControl
+                                  {
+                                      public event EventHandler Click;
+                                      public ICommand Command { get; set; }
+                                      public object CommandParameter { get; set; }
+                                      public bool Enabled { get; set; }
+                                  }
+
+                                  public class View { public ButtonControl Button { get; set; } }
+
+                                  public class Caller
+                                  {
+                                      public void Go() => Method(v => v.Button, "Click");
+
+                                      public void Method(System.Linq.Expressions.Expression<Func<View, ButtonControl>> controlName, string toEvent) { }
+                                  }
+                              }
+                              """;
+
+        var compilation = TestHelper.CreateCompilation(source);
+        var tree = compilation.SyntaxTrees.First();
+        var model = compilation.GetSemanticModel(tree);
+        var invocation = await FirstInvocationAsync(tree);
+        var methodSymbol = (Microsoft.CodeAnalysis.IMethodSymbol)model.GetSymbolInfo(invocation).Symbol!;
+
+        var (eventName, eventArgs, capabilities) = CommandExtractor.ResolveControlBinding(
+            methodSymbol,
+            invocation.ArgumentList.Arguments,
+            invocation.ArgumentList.Arguments[0].Expression,
+            model,
+            CancellationToken.None);
+
+        await Assert.That(eventName).IsEqualTo(ClickEventName);
+        await Assert.That(eventArgs).IsNotNull();
+        await Assert.That(capabilities.HasCommand).IsTrue();
+        await Assert.That(capabilities.HasCommandParameter).IsTrue();
+        await Assert.That(capabilities.HasEnabled).IsTrue();
+    }
+
+    /// <summary>Verifies that a settable ICommand-typed Command property is recognized.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsSettableICommandProperty_SettableCommand_ReturnsTrue() =>
+        await Assert.That(CommandExtractor.IsSettableICommandProperty(
+            await PropertyAsync("public ICommand Command { get; set; }", "Command"))).IsTrue();
+
+    /// <summary>Verifies that a read-only Command property is rejected.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsSettableICommandProperty_ReadOnlyCommand_ReturnsFalse() =>
+        await Assert.That(CommandExtractor.IsSettableICommandProperty(
+            await PropertyAsync("public ICommand Command { get; }", "Command"))).IsFalse();
+
+    /// <summary>Verifies that a settable CommandParameter property is recognized.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsSettableCommandParameterProperty_Settable_ReturnsTrue() =>
+        await Assert.That(CommandExtractor.IsSettableCommandParameterProperty(
+            await PropertyAsync("public object CommandParameter { get; set; }", "CommandParameter"))).IsTrue();
+
+    /// <summary>Verifies that a differently named property is not treated as the command parameter.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsSettableCommandParameterProperty_OtherName_ReturnsFalse() =>
+        await Assert.That(CommandExtractor.IsSettableCommandParameterProperty(
+            await PropertyAsync("public object Tag { get; set; }", "Tag"))).IsFalse();
+
+    /// <summary>Verifies that a method with no withParameter reports neither overload shape.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DetectParameterOverload_NoWithParameter_ReportsNeitherShape()
+    {
+        const string source = """
+                              namespace TestApp
+                              {
+                                  public class Caller
+                                  {
+                                      public void Go() => Method("cmd");
+
+                                      public void Method(string command) { }
+                                  }
+                              }
+                              """;
+
+        var compilation = TestHelper.CreateCompilation(source);
+        var tree = compilation.SyntaxTrees.First();
+        var model = compilation.GetSemanticModel(tree);
+        var invocation = await FirstInvocationAsync(tree);
+        var methodSymbol = (Microsoft.CodeAnalysis.IMethodSymbol)model.GetSymbolInfo(invocation).Symbol!;
+
+        var result = CommandExtractor.DetectParameterOverload(
+            methodSymbol,
+            invocation.ArgumentList.Arguments,
+            model,
+            CancellationToken.None);
+
+        await Assert.That(result.HasExpressionParameter).IsFalse();
+        await Assert.That(result.HasObservableParameter).IsFalse();
+        await Assert.That(result.ParameterTypeFullName).IsNull();
+    }
+
+    /// <summary>Verifies that a null control type resolves no event args type.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveEventArgsTypeFullName_NullControlType_ReturnsNull()
+    {
+        var eventName = (string?)ClickEventName;
+
+        await Assert.That(CommandExtractor.ResolveEventArgsTypeFullName(null, ref eventName)).IsNull();
+    }
+
+    /// <summary>Verifies that an explicit event name resolves that event's args type.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveEventArgsTypeFullName_ExplicitEvent_ResolvesItsArgsType()
+    {
+        const string source = """
+                              using System;
+                              namespace TestApp
+                              {
+                                  public class ButtonControl { public event EventHandler Click; }
+                              }
+                              """;
+
+        var compilation = TestHelper.CreateCompilation(source);
+        var tree = compilation.SyntaxTrees.First();
+        var model = compilation.GetSemanticModel(tree);
+        var eventName = (string?)ClickEventName;
+
+        var result = CommandExtractor.ResolveEventArgsTypeFullName(GetFirstClassSymbol(tree, model), ref eventName);
+
+        await Assert.That(result).IsNotNull();
+        await Assert.That(eventName).IsEqualTo(ClickEventName);
+    }
+
+    /// <summary>Verifies that a null control type reports no capabilities.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DetectControlCapabilities_NullControlType_ReportsNone()
+    {
+        var result = CommandExtractor.DetectControlCapabilities(null);
+
+        await Assert.That(result.HasCommand).IsFalse();
+        await Assert.That(result.HasCommandParameter).IsFalse();
+        await Assert.That(result.HasEnabled).IsFalse();
+    }
+
+    /// <summary>Verifies that a fully featured control reports every capability.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task DetectControlCapabilities_FullControl_ReportsAll()
+    {
+        const string source = """
+                              using System.Windows.Input;
+                              namespace TestApp
+                              {
+                                  public class ButtonControl
+                                  {
+                                      public ICommand Command { get; set; }
+                                      public object CommandParameter { get; set; }
+                                      public bool Enabled { get; set; }
+                                  }
+                              }
+                              """;
+
+        var compilation = TestHelper.CreateCompilation(source);
+        var tree = compilation.SyntaxTrees.First();
+        var model = compilation.GetSemanticModel(tree);
+
+        var result = CommandExtractor.DetectControlCapabilities(GetFirstClassSymbol(tree, model));
+
+        await Assert.That(result.HasCommand).IsTrue();
+        await Assert.That(result.HasCommandParameter).IsTrue();
+        await Assert.That(result.HasEnabled).IsTrue();
+    }
+
+    /// <summary>Compiles a control declaring the given member and returns one of its properties.</summary>
+    /// <param name="memberDeclaration">The property declaration to place on the control.</param>
+    /// <param name="propertyName">The name of the property to return.</param>
+    /// <returns>The property symbol.</returns>
+    private static async Task<Microsoft.CodeAnalysis.IPropertySymbol> PropertyAsync(
+        string memberDeclaration,
+        string propertyName)
+    {
+        var source = $$"""
+                       using System.Windows.Input;
+                       namespace TestApp
+                       {
+                           public class ButtonControl
+                           {
+                               {{memberDeclaration}}
+                           }
+                       }
+                       """;
+
+        var compilation = TestHelper.CreateCompilation(source);
+        var tree = compilation.SyntaxTrees.First();
+        var model = compilation.GetSemanticModel(tree);
+        await Task.CompletedTask;
+
+        return GetFirstClassSymbol(tree, model)
+            .GetMembers(propertyName)
+            .OfType<Microsoft.CodeAnalysis.IPropertySymbol>()
+            .First();
+    }
+
+    /// <summary>Returns the first invocation expression in a syntax tree.</summary>
+    /// <param name="tree">The tree to search.</param>
+    /// <returns>The first invocation expression.</returns>
+    private static async Task<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax> FirstInvocationAsync(
+        Microsoft.CodeAnalysis.SyntaxTree tree) =>
+        (await tree.GetRootAsync())
+            .DescendantNodes()
+            .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()
+            .First();
+
+    /// <summary>Resolves the explicit event name for a call passing the given toEvent argument.</summary>
+    /// <param name="toEventArgument">The argument expression to pass as <c>toEvent</c>.</param>
+    /// <returns>The resolved event name, or null.</returns>
+    private static async Task<string?> ResolveToEventAsync(string toEventArgument)
+    {
+        var source = $$"""
+                       namespace TestApp
+                       {
+                           public class Caller
+                           {
+                               public void Go() => Method("cmd", {{toEventArgument}});
+
+                               public void Method(string command, string toEvent) { }
+                           }
+                       }
+                       """;
+
+        var compilation = TestHelper.CreateCompilation(source);
+        var tree = compilation.SyntaxTrees.First();
+        var model = compilation.GetSemanticModel(tree);
+
+        var invocation = (await tree.GetRootAsync())
+            .DescendantNodes()
+            .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()
+            .First();
+
+        var methodSymbol = (Microsoft.CodeAnalysis.IMethodSymbol)model.GetSymbolInfo(invocation).Symbol!;
+
+        return CommandExtractor.ResolveExplicitEventName(
+            methodSymbol,
+            invocation.ArgumentList.Arguments,
+            model,
+            CancellationToken.None);
+    }
+
     /// <summary>Parses an invocation expression and returns the first argument.</summary>
     /// <param name="expression">The invocation expression text to parse.</param>
     /// <returns>The first argument syntax node.</returns>
     private static Microsoft.CodeAnalysis.CSharp.Syntax.ArgumentSyntax ParseFirstArgument(string expression)
     {
         var parsed = SyntaxFactory.ParseExpression(expression);
-        var invocation = (Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax)parsed;
-        return invocation.ArgumentList.Arguments[0];
+        return ((Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax)parsed).ArgumentList.Arguments[0];
     }
 
     /// <summary>Gets the first class symbol from a syntax tree.</summary>

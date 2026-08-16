@@ -14,12 +14,10 @@ internal static class BindToInvocationGenerator
     /// <summary>Registers the <c>BindTo</c> invocation detection pipeline.</summary>
     /// <param name="context">The generator initialization context.</param>
     /// <param name="invocations">The detected invocations of this API.</param>
-    /// <param name="allClasses">The shared type detection pipeline (unused; kept for signature consistency).</param>
     /// <param name="languageFeatures">The consumer compilation's C# language-feature snapshot.</param>
     internal static void Register(
         in IncrementalGeneratorInitializationContext context,
         IncrementalValuesProvider<BindToInvocationInfo> invocations,
-        IncrementalValuesProvider<ClassBindingInfo> allClasses,
         IncrementalValueProvider<LanguageFeatures> languageFeatures)
     {
         var combined = invocations.Collect().Combine(languageFeatures);

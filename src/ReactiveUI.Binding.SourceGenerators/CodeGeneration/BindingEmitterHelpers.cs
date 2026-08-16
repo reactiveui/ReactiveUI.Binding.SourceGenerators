@@ -23,6 +23,68 @@ internal static class BindingEmitterHelpers
     /// <summary>Opens a delegate parameter, ready for the two type arguments and the parameter name.</summary>
     private const string FuncParameterPrefix = ", global::System.Func<";
 
+    /// <summary>
+    /// Emits a whole binding dispatch file: the extension class, one concrete overload per group of
+    /// call sites, and one binding method per call site.
+    /// </summary>
+    /// <param name="invocations">The detected call sites for this API.</param>
+    /// <param name="allClasses">All detected class binding info.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    /// <param name="emitOverload">Emits the concrete typed overload for one group.</param>
+    /// <param name="emitMethod">Emits the binding method for one call site.</param>
+    /// <returns>The generated source, or null when there are no call sites.</returns>
+    internal static string? Generate(
+        ImmutableArray<BindingInvocationInfo> invocations,
+        ImmutableArray<ClassBindingInfo> allClasses,
+        in LanguageFeatures features,
+        Action<StringBuilder, BindingTypeGroup, LanguageFeatures> emitOverload,
+        Action<StringBuilder, BindEmitContext> emitMethod)
+    {
+        if (invocations.IsDefaultOrEmpty)
+        {
+            return null;
+        }
+
+        var snapshot = features;
+        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
+        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, snapshot);
+        _ = sb.AppendLine();
+
+        var groups = GroupByTypeSignature(invocations);
+
+        for (var g = 0; g < groups.Count; g++)
+        {
+            var group = groups[g];
+
+            emitOverload(sb, group, snapshot);
+            _ = sb.AppendLine();
+
+            for (var i = 0; i < group.Invocations.Length; i++)
+            {
+                var inv = group.Invocations[i];
+                var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
+                    inv.SourceTypeFullName,
+                    inv.CallerFilePath,
+                    inv.CallerLineNumber,
+                    $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
+
+                emitMethod(
+                    sb,
+                    new(
+                        inv,
+                        CodeGeneratorHelpers.FindClassInfo(allClasses, inv.SourceTypeFullName),
+                        CodeGeneratorHelpers.FindClassInfo(allClasses, inv.TargetTypeFullName),
+                        suffix,
+                        snapshot));
+            }
+        }
+
+        CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
+        _ = sb.AppendLine();
+
+        return PooledBuilder.ToStringAndReturn(sb);
+    }
+
     /// <summary>Groups call sites that can share one generated overload.</summary>
     /// <param name="invocations">The detected call sites.</param>
     /// <returns>The groups, in the order their signatures were first seen.</returns>
@@ -237,4 +299,17 @@ internal static class BindingEmitterHelpers
 
         return sb.ToStringAndReturn();
     }
+
+    /// <summary>Everything a per-call-site binding emitter needs about one resolved call site.</summary>
+    /// <param name="Invocation">The call site being emitted.</param>
+    /// <param name="SourceClassInfo">The source type's binding info, when it was detected.</param>
+    /// <param name="TargetClassInfo">The target type's binding info, when it was detected.</param>
+    /// <param name="Suffix">The stable method-name suffix for this call site.</param>
+    /// <param name="Features">The consumer compilation's language-feature snapshot.</param>
+    internal readonly record struct BindEmitContext(
+        BindingInvocationInfo Invocation,
+        ClassBindingInfo? SourceClassInfo,
+        ClassBindingInfo? TargetClassInfo,
+        string Suffix,
+        LanguageFeatures Features);
 }

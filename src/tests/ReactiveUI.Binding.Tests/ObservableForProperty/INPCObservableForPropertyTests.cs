@@ -4,6 +4,7 @@
 
 using System.ComponentModel;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Expressions;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Tests.TestModels;
@@ -592,20 +593,24 @@ public class INPCObservableForPropertyTests
         }
 
         /// <summary>Raises PropertyChanged with null property name (all properties changed).</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RaiseAllPropertiesChanged() =>
             PropertyChanged?.Invoke(this, new(null));
 
         /// <summary>Raises PropertyChanged with a specific property name.</summary>
         /// <param name="propertyName">The property name to raise.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RaisePropertyChangedWithName(string? propertyName) =>
             PropertyChanged?.Invoke(this, new(propertyName));
 
         /// <summary>Raises PropertyChanging with null property name (all properties changing).</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RaiseAllPropertyChanging() =>
             PropertyChanging?.Invoke(this, new(null));
 
         /// <summary>Raises PropertyChanging with a specific property name.</summary>
         /// <param name="propertyName">The property name to raise.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RaisePropertyChangingWithName(string? propertyName) =>
             PropertyChanging?.Invoke(this, new(propertyName));
     }
@@ -651,6 +656,7 @@ public class INPCObservableForPropertyTests
         public string Name { get; set; } = string.Empty;
 
         /// <summary>Raises PropertyChanged with null property name (all properties changed).</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RaiseAllPropertiesChanged() =>
             PropertyChanged?.Invoke(this, new(null));
     }

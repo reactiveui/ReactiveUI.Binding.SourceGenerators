@@ -6,6 +6,8 @@ using System.Collections.Immutable;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
+using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
+
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
 /// <summary>
@@ -197,9 +199,8 @@ internal static class WhenAnyObservableCodeGenerator
 
         // Switch pattern: take the observable property value, replace null with Empty, and switch
         _ = sb.Append($"""
-                               return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                   global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__obsProperty,
-                                       __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance));
+                               return new {SwitchMapSignal}<{ObservableOf(innerType)}, {innerType}>(__obsProperty,
+                                   __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance);
                    """);
     }
 
@@ -232,14 +233,13 @@ internal static class WhenAnyObservableCodeGenerator
             _ = sb.AppendLine()
                 .AppendLine()
                 .AppendLine($"""
-                                         var {switchedVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                             global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({rawVar},
-                                                 __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance));
+                                         var {switchedVar} = new {SwitchMapSignal}<{ObservableOf(innerType)}, {innerType}>({rawVar},
+                                             __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance);
                              """)
                 .AppendLine();
         }
 
-        _ = sb.AppendLine("            return global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(");
+        _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.Merge(");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             _ = sb.Append("                __switched").Append(i);
@@ -284,14 +284,13 @@ internal static class WhenAnyObservableCodeGenerator
             _ = sb.AppendLine()
                 .AppendLine()
                 .AppendLine($"""
-                                         var {switchedVar} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-                                             global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({rawVar},
-                                                 __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance));
+                                         var {switchedVar} = new {SwitchMapSignal}<{ObservableOf(innerType)}, {innerType}>({rawVar},
+                                             __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance);
                              """)
                 .AppendLine();
         }
 
-        _ = sb.AppendLine("            return global::ReactiveUI.Binding.Observables.CombineLatestObservable.Create(");
+        _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             _ = sb.Append("                __switched").Append(i).AppendLine(",");

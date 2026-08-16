@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
@@ -17,6 +18,7 @@ namespace ReactiveUI.Binding.Observables;
 /// <c>FromEvent + Where + Select</c> operator chain with one allocation-light class. Before-change versus
 /// after-change is selected per instance, so a single type serves the whole purpose.
 /// </summary>
+[DebuggerDisplay("Property = {_observedPropertyName}, Sender = {_sender}, BeforeChanged = {_beforeChanged}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChange<object, object?>>
 {
@@ -143,11 +145,13 @@ public sealed class NotifyPropertyChangedObservable : IObservable<IObservedChang
         /// <summary>Handles <see cref="INotifyPropertyChanged.PropertyChanged"/>, forwarding the change when the name matches.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The property-changed event arguments.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e) => Forward(e.PropertyName);
 
         /// <summary>Handles <see cref="INotifyPropertyChanging.PropertyChanging"/>, forwarding the change when the name matches.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The property-changing event arguments.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void OnPropertyChanging(object? sender, PropertyChangingEventArgs e) => Forward(e.PropertyName);
 
         /// <summary>Forwards the change to the observer when the notified name matches the observed property.</summary>

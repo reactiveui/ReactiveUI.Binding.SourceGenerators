@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Observables;
 using ReactiveUI.Binding.Tests.TestModels;
 
@@ -305,6 +306,7 @@ public class PropertyObservableTests
 
         /// <summary>Raises the <see cref="PropertyChanged"/> event for the specified property.</summary>
         /// <param name="propertyName">The name of the property that changed.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RaisePropertyChanged(string? propertyName) =>
             PropertyChanged?.Invoke(this, new(propertyName));
     }
@@ -320,6 +322,7 @@ public class PropertyObservableTests
 
         /// <summary>Raises the <see cref="PropertyChanged"/> event for the specified property.</summary>
         /// <param name="propertyName">The name of the property that changed.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RaisePropertyChanged(string? propertyName) =>
             PropertyChanged?.Invoke(this, new(propertyName));
     }
@@ -332,12 +335,15 @@ public class PropertyObservableTests
     private sealed class AnonymousObserver<T>(Action<T> onNext, Action<Exception> onError, Action onCompleted) : IObserver<T>
     {
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnCompleted() => onCompleted();
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnError(Exception error) => onError(error);
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnNext(T value) => onNext(value);
     }
 }

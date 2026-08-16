@@ -12,11 +12,11 @@ namespace ReactiveUI.Binding.Observables;
 /// An observable whose subscription logic is supplied as a delegate, for the platform observers that
 /// hook an event on subscribe and hand back the unhook as the subscription.
 /// </summary>
+/// <typeparam name="T">The type of the elements in the sequence.</typeparam>
 /// <remarks>
 /// Each platform assembly compiles its own internal copy, so this stays off the public surface of every
 /// package and out of the seam: it names no scheduler and no notification type.
 /// </remarks>
-/// <typeparam name="T">The type of the elements in the sequence.</typeparam>
 internal sealed class AnonymousObservable<T> : IObservable<T>
 {
     /// <summary>Produces the subscription for an observer, returning the resource that tears it down.</summary>

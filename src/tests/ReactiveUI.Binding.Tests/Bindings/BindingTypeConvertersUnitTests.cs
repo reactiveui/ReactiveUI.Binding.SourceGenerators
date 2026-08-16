@@ -79,7 +79,7 @@ public class BindingTypeConvertersUnitTests
     public async Task NullableByteToStringTypeConverter_Converts_Correctly()
     {
         var converter = new NullableByteToStringTypeConverter();
-        byte? val = 123;
+        const byte val = 123;
 
         // Byte? to String
         var result = converter.TryConvert(val, null, out var output);
@@ -119,7 +119,7 @@ public class BindingTypeConvertersUnitTests
     public async Task NullableIntegerToStringTypeConverter_Converts_Correctly()
     {
         var converter = new NullableIntegerToStringTypeConverter();
-        int? val = 123_456_789;
+        const int val = 123_456_789;
 
         var result = converter.TryConvert(val, null, out var output);
         await Assert.That(result).IsTrue();
@@ -132,7 +132,7 @@ public class BindingTypeConvertersUnitTests
     public async Task NullableLongToStringTypeConverter_Converts_Correctly()
     {
         var converter = new NullableLongToStringTypeConverter();
-        long? val = 1_234_567_890_123_456_789;
+        const long val = 1_234_567_890_123_456_789;
 
         var result = converter.TryConvert(val, null, out var output);
         await Assert.That(result).IsTrue();
@@ -145,7 +145,7 @@ public class BindingTypeConvertersUnitTests
     public async Task NullableShortToStringTypeConverter_Converts_Correctly()
     {
         var converter = new NullableShortToStringTypeConverter();
-        short? val = 12_345;
+        const short val = 12_345;
 
         var result = converter.TryConvert(val, null, out var output);
         await Assert.That(result).IsTrue();

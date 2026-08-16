@@ -16,6 +16,7 @@ namespace ReactiveUI.Binding.Observables;
 /// Emits the current value on subscription, then emits new values when the property changes.
 /// </summary>
 /// <typeparam name="T">The type of the property value.</typeparam>
+[DebuggerDisplay("Property = {_propertyName}, Source = {_source}, DistinctUntilChanged = {_distinctUntilChanged}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class PropertyObservable<T> : IObservable<T>
 {

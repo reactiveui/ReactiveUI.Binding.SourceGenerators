@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive;
 #else
@@ -19,6 +21,7 @@ namespace ReactiveUI.Binding;
 /// Example: Convert an enum value to bool by comparing with a specific enum member.
 /// </para>
 /// </remarks>
+[DebuggerDisplay("{FromType.Name,nq} -> {ToType.Name,nq} by equality with the conversion hint")]
 public sealed class EqualityTypeConverter : IBindingTypeConverter
 {
     /// <inheritdoc/>
@@ -28,6 +31,7 @@ public sealed class EqualityTypeConverter : IBindingTypeConverter
     public Type ToType => typeof(bool);
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetAffinityForObjects() => 1;
 
     /// <inheritdoc/>

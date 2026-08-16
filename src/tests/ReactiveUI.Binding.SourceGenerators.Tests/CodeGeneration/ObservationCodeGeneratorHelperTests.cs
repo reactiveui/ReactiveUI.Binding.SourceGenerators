@@ -85,11 +85,11 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>The <c>x =&gt; x.Address.City</c> property selector these tests bind against.</summary>
     private const string CitySelector = "x => x.Address.City";
 
-    /// <summary>The <c>RxBindingExtensions.DistinctUntilChanged(</c> fragment these tests expect in the generated source.</summary>
-    private const string RxBindingExtensionsDistinctUntilChangedFragment = "RxBindingExtensions.DistinctUntilChanged(";
+    /// <summary>The <c>DistinctUntilChanged(</c> fragment these tests expect in the generated source.</summary>
+    private const string DistinctUntilChangedFragment = "LinqExtensions.DistinctUntilChanged(";
 
-    /// <summary>The <c>RxBindingExtensions.Switch(</c> fragment these tests expect in the generated source.</summary>
-    private const string RxBindingExtensionsSwitchFragment = "RxBindingExtensions.Switch(";
+    /// <summary>The projecting flattening sink these tests expect in the generated source.</summary>
+    private const string SwitchSinkFragment = "SwitchMapSignal<";
 
     /// <summary>The <c>throw new global::System.InvalidOperationException</c> fragment these tests expect in the generated source.</summary>
     private const string ThrowNewGlobalSystemInvalidOperationExceptionFragment = "throw new global::System.InvalidOperationException";

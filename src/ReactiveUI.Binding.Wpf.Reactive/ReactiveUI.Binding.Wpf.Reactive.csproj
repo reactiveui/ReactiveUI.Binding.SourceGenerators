@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="ReactiveUI.Primitives.Disposables"/>
     <Using Include="System"/>
     <Using Include="System.ComponentModel"/>
     <Using Include="System.Diagnostics"/>

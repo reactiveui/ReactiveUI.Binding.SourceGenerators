@@ -147,8 +147,7 @@ public class ExpressionMixinsTests
 
         await Assert.That(parent).IsNotNull();
         await Assert.That(parent!.NodeType).IsEqualTo(ExpressionType.MemberAccess);
-        var parentMember = (MemberExpression)parent;
-        await Assert.That(parentMember.Member.Name).IsEqualTo("Address");
+        await Assert.That(((MemberExpression)parent).Member.Name).IsEqualTo("Address");
     }
 
     /// <summary>Verifies that GetExpressionChain throws NotSupportedException for a ConstantExpression with a helpful message.</summary>

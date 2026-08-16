@@ -29,9 +29,7 @@ public class NullableDoubleToDoubleTypeConverterTests
     public async Task TryConvert_WithValue_Succeeds()
     {
         var converter = new NullableDoubleToDoubleTypeConverter();
-        double? value = 123.456789;
-
-        var result = converter.TryConvert(value, null, out var output);
+        var result = converter.TryConvert(SampleDouble, null, out var output);
 
         await Assert.That(result).IsTrue();
         await Assert.That(output).IsEqualTo(SampleDouble);
@@ -43,8 +41,7 @@ public class NullableDoubleToDoubleTypeConverterTests
     public async Task TryConvert_Null_ReturnsFalse()
     {
         var converter = new NullableDoubleToDoubleTypeConverter();
-        double? value = null;
-        var result = converter.TryConvert(value, null, out _);
+        var result = converter.TryConvert(null, null, out _);
 
         await Assert.That(result).IsFalse();
     }

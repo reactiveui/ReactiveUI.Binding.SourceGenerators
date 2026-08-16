@@ -31,13 +31,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
             {
-                return __BindTwoWay_000013957A2E9404(source, target, sourceToTargetConv, targetToSourceConv);
+                return __BindTwoWay_000013957A2E9442(source, target, sourceToTargetConv, targetToSourceConv);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindTwoWay_000013957A2E9404(global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyView target, global::System.Func<int, string> sourceToTargetConv, global::System.Func<string, int> targetToSourceConv)
+        private static global::System.IDisposable __BindTwoWay_000013957A2E9442(global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyView target, global::System.Func<int, string> sourceToTargetConv, global::System.Func<string, int> targetToSourceConv)
         {
             // BindTwoWay: Count <-> CountText (with conversion)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
@@ -50,21 +50,21 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             "CountText",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyView)__o).CountText,
             true);
-        var sourceBind = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(sourceObs, sourceToTargetConv);
-        var targetBind = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(targetObs, targetToSourceConv);
+        var sourceBind = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, sourceToTargetConv);
+        var targetBind = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(targetObs, targetToSourceConv);
 
-            var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(sourceBind, value =>
+            var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(sourceBind, value =>
             {
                 target.CountText = value;
             });
 
-            var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(targetBind, 1);
-            var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
+            var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(targetBind, 1);
+            var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__targetSkipped, value =>
             {
                 source.Count = value;
             });
 
-            return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
+            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
         }
 
     }

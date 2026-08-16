@@ -19,5 +19,5 @@ public enum BooleanToVisibilityHints
     Inverse = 1 << 1,
 
     /// <summary>Use the Hidden value rather than Collapsed (MAUI only; ignored on WinUI where Hidden is not available).</summary>
-    UseHidden = 1 << 2
+    UseHidden = 1 << 2,
 }

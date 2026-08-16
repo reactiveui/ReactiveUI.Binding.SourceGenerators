@@ -11,6 +11,7 @@ namespace ReactiveUI.Binding;
 /// <summary>Concrete implementation of <see cref="IObservedChange{TSender, TValue}"/>.</summary>
 /// <typeparam name="TSender">The type of the object that raised the change.</typeparam>
 /// <typeparam name="TValue">The type of the property value.</typeparam>
+[DebuggerDisplay("Expression = {Expression}, Sender = {Sender}, Value = {Value}")]
 public class ObservedChange<TSender, TValue> : IObservedChange<TSender, TValue>
 {
     /// <summary>Initializes a new instance of the <see cref="ObservedChange{TSender, TValue}"/> class.</summary>

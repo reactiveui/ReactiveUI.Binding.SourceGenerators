@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// Concrete typed overload for Bind from global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel to global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView.
         /// Uses CallerArgumentExpression for dispatch.
         /// </summary>
-        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, (object? view, bool isViewModel)> Bind(
+        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, (object? View, bool IsViewModel)> Bind(
             this global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView view,
             global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel, int>> viewModelProperty,
@@ -28,13 +28,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountText")
             {
-                return __Bind_0000102A67853C5B(viewModel, view, viewModelToViewConverter, viewToViewModelConverter);
+                return __Bind_0000102A67853CB8(viewModel, view, viewModelToViewConverter, viewToViewModelConverter);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, (object? view, bool isViewModel)> __Bind_0000102A67853C5B(global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView view, global::System.Func<int, string> viewModelToViewConverter, global::System.Func<string, int> viewToViewModelConverter)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, (object? View, bool IsViewModel)> __Bind_0000102A67853CB8(global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView view, global::System.Func<int, string> viewModelToViewConverter, global::System.Func<string, int> viewToViewModelConverter)
         {
             // Bind: Count <-> CountText (with conversion)
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
@@ -47,27 +47,27 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             "CountText",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView)__o).CountText,
             true);
-        var vmBind = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmObs, viewModelToViewConverter);
-        var viewBind = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(viewObs, viewToViewModelConverter);
+        var vmBind = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(vmObs, viewModelToViewConverter);
+        var viewBind = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(viewObs, viewToViewModelConverter);
 
-            var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(vmBind, value =>
+            var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(vmBind, value =>
             {
                 view.CountText = value;
             });
 
-            var __viewSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip(viewBind, 1);
-            var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__viewSkipped, value =>
+            var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewBind, 1);
+            var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__viewSkipped, value =>
             {
                 viewModel.Count = value;
             });
 
-            var __vmTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(vmBind, v => ((object?)v, true));
-            var __viewTagged = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__viewSkipped, v => ((object?)v, false));
-            var changed = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Merge(__vmTagged, __viewTagged);
+            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, (object?, bool)>(vmBind, v => ((object?)v, true));
+            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<int, (object?, bool)>(__viewSkipped, v => ((object?)v, false));
+            var changed = new global::ReactiveUI.Primitives.Advanced.MergeSignal<(object?, bool)>(__vmTagged, __viewTagged);
 
-            var disposable = new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
+            var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
 
-            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, (object? view, bool isViewModel)>(
+            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, (object? View, bool IsViewModel)>(
                 view,
                 changed,
                 global::ReactiveUI.Binding.BindingDirection.TwoWay,

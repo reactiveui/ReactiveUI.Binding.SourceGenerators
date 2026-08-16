@@ -44,57 +44,28 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("callerFilePath.EndsWith");
     }
 
-    /// <summary>Verifies GenerateRuntimeFallback for single property generates throw (no runtime reflection fallback).</summary>
+    /// <summary>Verifies GenerateRuntimeFallback throws rather than falling back to runtime reflection.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateRuntimeFallback_SingleProperty_GeneratesThrow()
+    public async Task GenerateRuntimeFallback_GeneratesThrowNamingTheMethod()
     {
         var sb = new StringBuilder();
 
-        ObservationCodeGenerator.GenerateRuntimeFallback(sb, WhenChangedName, 1, false);
+        ObservationCodeGenerator.GenerateRuntimeFallback(sb, WhenChangedName);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ThrowNewGlobalSystemInvalidOperationExceptionFragment);
         await Assert.That(result).Contains(WhenChangedName);
     }
 
-    /// <summary>Verifies GenerateRuntimeFallback for multi-property generates throw (no runtime reflection fallback).</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task GenerateRuntimeFallback_MultiPropertyWithSelector_GeneratesThrow()
-    {
-        const int PropCount = 2;
-        var sb = new StringBuilder();
-
-        ObservationCodeGenerator.GenerateRuntimeFallback(sb, WhenChangedName, PropCount, true);
-
-        var result = sb.ToString();
-        await Assert.That(result).Contains(ThrowNewGlobalSystemInvalidOperationExceptionFragment);
-        await Assert.That(result).Contains(WhenChangedName);
-    }
-
-    /// <summary>Verifies GenerateRuntimeFallback for multi-property without selector generates throw.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task GenerateRuntimeFallback_MultiPropertyNoSelector_GeneratesThrow()
-    {
-        const int PropCount = 2;
-        var sb = new StringBuilder();
-
-        ObservationCodeGenerator.GenerateRuntimeFallback(sb, WhenChangedName, PropCount, false);
-
-        var result = sb.ToString();
-        await Assert.That(result).Contains(ThrowNewGlobalSystemInvalidOperationExceptionFragment);
-    }
-
-    /// <summary>Verifies GenerateRuntimeFallback for WhenChanging includes correct method prefix in error message.</summary>
+    /// <summary>Verifies the method prefix is interpolated into the message rather than hard-coded.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateRuntimeFallback_WhenChanging_IncludesMethodPrefixInErrorMessage()
     {
         var sb = new StringBuilder();
 
-        ObservationCodeGenerator.GenerateRuntimeFallback(sb, WhenChangingName, 1, false);
+        ObservationCodeGenerator.GenerateRuntimeFallback(sb, WhenChangingName);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ThrowNewGlobalSystemInvalidOperationExceptionFragment);
@@ -123,7 +94,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.GenerateObservationMethod(sb, inv, classInfo, "DEADBEEF", false, WhenChangedName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("RxBindingExtensions.Switch(");
+        await Assert.That(result).Contains("SwitchMapSignal<");
         await Assert.That(result).Contains("__WhenChanged_DEADBEEF");
     }
 
@@ -141,7 +112,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.GenerateObservationMethod(sb, inv, classInfo, "CAFEBABE", false, WhenChangedName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("RxBindingExtensions.Select(");
+        await Assert.That(result).Contains("LinqExtensions.Select(");
         await Assert.That(result).Contains("selector");
     }
 

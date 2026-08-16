@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
@@ -13,6 +14,7 @@ namespace ReactiveUI.Binding.Observables;
 /// <summary>Lightweight Select (map/projection) operator. Replacement for <c>System.Reactive.Linq.Observable.Select</c>.</summary>
 /// <typeparam name="TSource">The source element type.</typeparam>
 /// <typeparam name="TResult">The projected element type.</typeparam>
+[DebuggerDisplay("Source = {_source}, Selector = {_selector}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class SelectObservable<TSource, TResult> : IObservable<TResult>
 {
@@ -53,12 +55,15 @@ public sealed class SelectObservable<TSource, TResult> : IObservable<TResult>
         private readonly Func<TSource, TResult> _selector = selector;
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnNext(TSource value) => _observer.OnNext(_selector(value));
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnError(Exception error) => _observer.OnError(error);
 
         /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnCompleted() => _observer.OnCompleted();
     }
 }

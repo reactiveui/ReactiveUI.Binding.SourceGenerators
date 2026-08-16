@@ -15,6 +15,7 @@ namespace ReactiveUI.Binding;
 /// contract, enabling selection between different Views for a single ViewModel.
 /// </summary>
 /// <param name="contract">The contract value for view resolution.</param>
+[DebuggerDisplay("Contract = {Contract}")]
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class ViewContractAttribute(string contract) : Attribute
 {

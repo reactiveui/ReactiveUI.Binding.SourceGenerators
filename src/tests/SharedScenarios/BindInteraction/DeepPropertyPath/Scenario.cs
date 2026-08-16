@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ReactiveUI.Binding;
 
@@ -15,6 +16,7 @@ public static class Scenario
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable Execute(MyViewModel vm, MyView view) =>
         view.BindInteraction(vm, x => x.Child!.Confirm, ctx =>
         {

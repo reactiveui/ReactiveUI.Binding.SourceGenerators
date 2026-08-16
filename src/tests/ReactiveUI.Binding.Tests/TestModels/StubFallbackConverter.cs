@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 namespace ReactiveUI.Binding.Tests.TestModels;
 
 /// <summary>A stub implementation of <see cref="IBindingFallbackConverter"/> for testing.</summary>
@@ -11,14 +13,15 @@ public class StubFallbackConverter : IBindingFallbackConverter
     private const int StubAffinity = 5;
 
     /// <summary>The conversion logic.</summary>
-    private readonly Func<Type, object, Type, object?, (bool success, object? result)> _tryConvert;
+    private readonly Func<Type, object, Type, object?, (bool Success, object? Result)> _tryConvert;
 
     /// <summary>Initializes a new instance of the <see cref="StubFallbackConverter"/> class.</summary>
     /// <param name="tryConvert">The conversion logic.</param>
-    public StubFallbackConverter(Func<Type, object, Type, object?, (bool success, object? result)> tryConvert) =>
+    public StubFallbackConverter(Func<Type, object, Type, object?, (bool Success, object? Result)> tryConvert) =>
         _tryConvert = tryConvert;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetAffinityForObjects(Type fromType, Type toType) => StubAffinity;
 
     /// <inheritdoc/>

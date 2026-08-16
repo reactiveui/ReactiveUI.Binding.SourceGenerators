@@ -32,7 +32,11 @@
        leaves, so this leaf imports the unshifted forms. ReactiveUI.Primitives.Concurrency supplies
        ISequencer itself along with the Schedule(...) extensions the shared source calls on it. -->
   <ItemGroup>
+    <Using Include="ReactiveUI.Primitives"/>
+    <Using Include="ReactiveUI.Primitives.Advanced"/>
     <Using Include="ReactiveUI.Primitives.Concurrency"/>
+    <Using Include="ReactiveUI.Primitives.Disposables"/>
+    <Using Include="ReactiveUI.Primitives.Signals"/>
     <Using Include="ReactiveUI.Binding.Builder"/>
     <Using Include="ReactiveUI.Binding.Expressions"/>
     <Using Include="ReactiveUI.Binding.Fallback"/>

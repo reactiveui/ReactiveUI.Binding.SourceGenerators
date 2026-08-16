@@ -26,18 +26,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             if (propertyNameExpression == "x => x.Child!.Confirm")
             {
-                return __BindInteraction_7FFFEF09AD5AF2CD(viewModel, handler);
+                return __BindInteraction_7FFFEF09AD5AF30B(viewModel, handler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindInteraction_7FFFEF09AD5AF2CD(
+        private static global::System.IDisposable __BindInteraction_7FFFEF09AD5AF30B(
             global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel viewModel,
             global::System.Func<global::ReactiveUI.Binding.IInteractionContext<string, bool>, global::System.Threading.Tasks.Task> handler)
         {
             // BindInteraction: Child.Confirm
-            var serial = new global::ReactiveUI.Binding.Observables.SerialDisposable();
+            var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
 
         if (viewModel == null)
         {
@@ -49,24 +49,23 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel)__o).Child,
                 false);
 
-        var __interactionObs_s1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Switch(
-            global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(__interactionObs_s0,
-                __p1 => __p1 != null
-                    ? (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(
-                        __p1,
-                        "Confirm",
-                        (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm,
-                        false)
-                    : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(default(global::ReactiveUI.Binding.Interaction<string, bool>))));
-        var interactionObs = global::ReactiveUI.Binding.Observables.RxBindingExtensions.DistinctUntilChanged(__interactionObs_s1);
+        var __interactionObs_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>(__interactionObs_s0,
+            __p1 => __p1 != null
+                ? (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(
+                    (global::System.ComponentModel.INotifyPropertyChanged)__p1,
+                    "Confirm",
+                    (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm,
+                    false)
+                : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(default(global::ReactiveUI.Binding.Interaction<string, bool>)));
+        var interactionObs = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__interactionObs_s1);
 
-            var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(interactionObs, interaction =>
+            var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(interactionObs, interaction =>
             {
                 serial.Disposable = interaction != null
                     ? interaction.RegisterHandler(handler)
-                    : global::ReactiveUI.Binding.Observables.EmptyDisposable.Instance;
+                    : global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
             });
-            return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(sub, serial);
+            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(sub, serial);
         }
 
     }

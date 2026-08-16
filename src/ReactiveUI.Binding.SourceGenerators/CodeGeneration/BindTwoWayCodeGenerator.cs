@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
@@ -27,61 +28,10 @@ internal static class BindTwoWayCodeGenerator
     /// <summary>Name of the generated local holding the target side observable.</summary>
     private const string TargetObservableName = "targetObs";
 
-    /// <summary>Generates concrete typed overloads and binding methods for BindTwoWay invocations.</summary>
-    /// <param name="invocations">All detected BindTwoWay invocations.</param>
-    /// <param name="allClasses">All detected class binding info.</param>
-    /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
-    /// <returns>Generated source code string, or null if no invocations.</returns>
-    internal static string? Generate(
-        ImmutableArray<BindingInvocationInfo> invocations,
-        ImmutableArray<ClassBindingInfo> allClasses,
-        in LanguageFeatures features)
-    {
-        if (invocations.IsDefaultOrEmpty)
-        {
-            return null;
-        }
-
-        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
-        var supportsCallerArgExpr = features.SupportsCallerArgExpr;
-        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
-        _ = sb.AppendLine();
-
-        // Group invocations by (SourceType, TargetType, SourcePropertyType, TargetPropertyType, HasConversion, HasScheduler)
-        var groups = GroupByTypeSignature(invocations);
-
-        for (var g = 0; g < groups.Count; g++)
-        {
-            var group = groups[g];
-
-            // Generate the concrete typed extension method overload
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
-            _ = sb.AppendLine();
-
-            // Generate binding methods
-            for (var i = 0; i < group.Invocations.Length; i++)
-            {
-                var inv = group.Invocations[i];
-                var sourceClassInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.SourceTypeFullName);
-                var targetClassInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.TargetTypeFullName);
-                var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                    inv.SourceTypeFullName,
-                    inv.CallerFilePath,
-                    inv.CallerLineNumber,
-                    $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
-                GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, suffix);
-            }
-        }
-
-        CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
-        _ = sb.AppendLine();
-
-        return PooledBuilder.ToStringAndReturn(sb);
-    }
-
     /// <summary>Groups BindTwoWay invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The BindTwoWay invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations) =>
         BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
@@ -298,18 +248,21 @@ internal static class BindTwoWayCodeGenerator
     /// <summary>Appends extra parameters (converters, scheduler) to the concrete overload signature.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group) =>
         BindingEmitterHelpers.AppendTwoWayExtraParameters(sb, group, ForwardConverterName, ReverseConverterName);
 
     /// <summary>Formats extra arguments (converters, scheduler) for forwarding to the binding method.</summary>
     /// <param name="group">The binding type group.</param>
     /// <returns>Extra arguments string like ", sourceToTargetConv, targetToSourceConv, scheduler" or empty.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string FormatExtraArgs(BindingTypeGroup group) =>
         BindingEmitterHelpers.FormatTwoWayExtraArgs(group, ForwardConverterName, ReverseConverterName);
 
     /// <summary>Formats extra method parameters for the private binding method signature.</summary>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>Extra parameters string for two-way converter and scheduler parameters.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string FormatExtraMethodParams(BindingInvocationInfo inv) =>
         BindingEmitterHelpers.FormatTwoWayExtraMethodParams(inv, ForwardConverterName, ReverseConverterName);
 
@@ -332,8 +285,8 @@ internal static class BindTwoWayCodeGenerator
             var srcNext = inv.HasScheduler ? "__srcSelected" : "sourceBind";
             var tgtNext = inv.HasScheduler ? "__tgtSelected" : "targetBind";
             _ = sb.AppendLine($"""
-                                   var {srcNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({sourceVar}, sourceToTargetConv);
-                                   var {tgtNext} = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select({targetVar}, targetToSourceConv);
+                                   var {srcNext} = new {MapSignal}<{inv.SourcePropertyTypeFullName}, {inv.TargetPropertyTypeFullName}>({sourceVar}, sourceToTargetConv);
+                                   var {tgtNext} = new {MapSignal}<{inv.TargetPropertyTypeFullName}, {inv.SourcePropertyTypeFullName}>({targetVar}, targetToSourceConv);
                            """);
             sourceVar = srcNext;
             targetVar = tgtNext;
@@ -352,7 +305,7 @@ internal static class BindTwoWayCodeGenerator
         return (sourceVar, targetVar);
     }
 
-    /// <summary>Emits the two-way subscription and <c>CompositeDisposable2</c> return block.</summary>
+    /// <summary>Emits the two-way subscription and <c>MultipleDisposable</c> return block.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="sourceVar">The source observable variable name to subscribe to.</param>
     /// <param name="targetVar">The target observable variable name to subscribe to.</param>
@@ -365,18 +318,18 @@ internal static class BindTwoWayCodeGenerator
         string targetAccess,
         string sourceSetAccess) => _ = sb.AppendLine($$"""
 
-                                    var d1 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe({{sourceVar}}, value =>
+                                    var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe({{sourceVar}}, value =>
                                     {
                                         {{targetAccess}} = value;
                                     });
 
-                                    var __targetSkipped = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Skip({{targetVar}}, 1);
-                                    var d2 = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(__targetSkipped, value =>
+                                    var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip({{targetVar}}, 1);
+                                    var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__targetSkipped, value =>
                                     {
                                         {{sourceSetAccess}} = value;
                                     });
 
-                                    return new global::ReactiveUI.Binding.Observables.CompositeDisposable2(d1, d2);
+                                    return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
                                 }
                         """)
             .AppendLine();

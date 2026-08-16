@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
@@ -17,6 +18,7 @@ public static class BindTwoWayScenarios
     /// <param name="source">The source view model.</param>
     /// <param name="target">The target view.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable StringProperty(BigViewModel source, BigView target) =>
         source.BindTwoWay(target, x => x.Prop1, x => x.ViewProp1);
 
@@ -24,6 +26,7 @@ public static class BindTwoWayScenarios
     /// <param name="source">The source view model.</param>
     /// <param name="target">The target view.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable IntProperty(BigViewModel source, BigView target) =>
         source.BindTwoWay(target, x => x.Prop2, x => x.ViewProp2);
 
@@ -31,6 +34,7 @@ public static class BindTwoWayScenarios
     /// <param name="source">The source view model.</param>
     /// <param name="target">The target view.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable DoubleProperty(BigViewModel source, BigView target) =>
         source.BindTwoWay(target, x => x.Prop3, x => x.ViewProp3);
 
@@ -38,6 +42,7 @@ public static class BindTwoWayScenarios
     /// <param name="source">The source view model.</param>
     /// <param name="target">The target view.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable BoolProperty(BigViewModel source, BigView target) =>
         source.BindTwoWay(target, x => x.Prop4, x => x.ViewProp4);
 }

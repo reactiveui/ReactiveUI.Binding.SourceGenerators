@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties;
@@ -13,6 +14,7 @@ public static class Scenario
     /// <summary>Creates a WhenAnyValue observable for twelve properties.</summary>
     /// <param name="fixture">The fixture to observe.</param>
     /// <returns>An observable of twelve-property tuples.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
         IObservable<(string V1, string V2, string V3, string V4, string V5, string V6, string V7, string V8, string V9,
             string V10, string V11, string V12)> Execute(WhenAnyFixture fixture) =>

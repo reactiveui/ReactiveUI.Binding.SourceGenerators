@@ -19,6 +19,7 @@ internal static class SymbolHelpers
     /// <summary>Gets the well-known symbols for a compilation.</summary>
     /// <param name="compilation">The compilation.</param>
     /// <returns>The well-known symbols box.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static WellKnownSymbolsBox GetWellKnownSymbols(Compilation compilation) =>
         SymbolCache.GetValue(
             compilation,
@@ -31,7 +32,7 @@ internal static class SymbolHelpers
                 WinUIDependencyObject = c.GetTypeByMetadataName(Constants.WinUIDependencyObjectMetadataName),
                 NSObject = c.GetTypeByMetadataName(Constants.NSObjectMetadataName),
                 WinFormsComponent = c.GetTypeByMetadataName(Constants.WinFormsComponentMetadataName),
-                AndroidView = c.GetTypeByMetadataName(Constants.AndroidViewMetadataName)
+                AndroidView = c.GetTypeByMetadataName(Constants.AndroidViewMetadataName),
             });
 
     /// <summary>
@@ -121,12 +122,14 @@ internal static class SymbolHelpers
         for (var i = 0; i < namedType.AllInterfaces.Length; i++)
         {
             var iface = namedType.AllInterfaces[i];
-            if (IsInteractionType(iface))
+            if (!IsInteractionType(iface))
             {
-                inputType = iface.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                outputType = iface.TypeArguments[1].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                return true;
+                continue;
             }
+
+            inputType = iface.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            outputType = iface.TypeArguments[1].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            return true;
         }
 
         return false;
@@ -149,13 +152,11 @@ internal static class SymbolHelpers
             .EndsWith("IBindingTypeConverter", StringComparison.Ordinal);
 
     /// <summary>Resolves a PropertyPathSegment leaf type to its INamedTypeSymbol using the semantic model.</summary>
-    /// <param name="segment">The property path segment.</param>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="lambdaExpression">The lambda expression.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The resolved named type symbol, or null if it could not be resolved.</returns>
     internal static INamedTypeSymbol? ResolveNamedType(
-        Models.PropertyPathSegment segment,
         SemanticModel semanticModel,
         Microsoft.CodeAnalysis.CSharp.Syntax.ExpressionSyntax lambdaExpression,
         CancellationToken ct)

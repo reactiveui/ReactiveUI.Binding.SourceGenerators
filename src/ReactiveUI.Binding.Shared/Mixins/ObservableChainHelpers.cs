@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive;
@@ -28,12 +29,12 @@ internal static class ObservableChainHelpers
     /// <param name="observable">An expression selecting the observable-valued property.</param>
     /// <returns>An observable that switches to the latest non-null inner observable.</returns>
     [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IObservable<T> SwitchLatest<TSender, T>(
         TSender sender,
         Expression<Func<TSender, IObservable<T>?>> observable)
         where TSender : class =>
-        new SwitchObservable<T>(
-            new SelectObservable<IObservedChange<TSender, IObservable<T>?>, IObservable<T>>(
-                sender.SubscribeToExpressionChain<TSender, IObservable<T>?>(observable.Body, skipInitial: false),
-                static x => x.Value ?? EmptyObservable<T>.Instance));
+        new SwitchMapSignal<IObservedChange<TSender, IObservable<T>?>, T>(
+            sender.SubscribeToExpressionChain<TSender, IObservable<T>?>(observable.Body, skipInitial: false),
+            static x => x.Value ?? EmptyObservable<T>.Instance);
 }

@@ -91,12 +91,8 @@ public class EquatableArrayTests
     /// <summary>Verifies default-constructed EquatableArray has hash code 0.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task DefaultConstructed_HashCode_ReturnsZero()
-    {
-        var defaultArray = default(EquatableArray<PropertyPathSegment>);
-
-        await Assert.That(defaultArray.GetHashCode()).IsEqualTo(0);
-    }
+    public async Task DefaultConstructed_HashCode_ReturnsZero() =>
+        await Assert.That(default(EquatableArray<PropertyPathSegment>).GetHashCode()).IsEqualTo(0);
 
     /// <summary>Verifies equal arrays are equal via Equals method.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -127,13 +123,10 @@ public class EquatableArrayTests
     /// <summary>Verifies default arrays are equal to each other.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task Equals_BothDefault_ReturnsTrue()
-    {
-        var arr1 = default(EquatableArray<PropertyPathSegment>);
-        var arr2 = default(EquatableArray<PropertyPathSegment>);
-
-        await Assert.That(arr1.Equals(arr2)).IsTrue();
-    }
+    public async Task Equals_BothDefault_ReturnsTrue() =>
+        await Assert.That(default(EquatableArray<PropertyPathSegment>)
+                .Equals(default(EquatableArray<PropertyPathSegment>)))
+            .IsTrue();
 
     /// <summary>Verifies Length returns the number of elements.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -152,12 +145,8 @@ public class EquatableArrayTests
     /// <summary>Verifies Length returns 0 for default-constructed array.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task Length_DefaultConstructed_ReturnsZero()
-    {
-        var arr = default(EquatableArray<PropertyPathSegment>);
-
-        await Assert.That(arr.Length).IsEqualTo(0);
-    }
+    public async Task Length_DefaultConstructed_ReturnsZero() =>
+        await Assert.That(default(EquatableArray<PropertyPathSegment>).Length).IsEqualTo(0);
 
     /// <summary>
     /// Verifies ComputeHashCode handles null elements in the array by using 0 for their hash code.
@@ -181,7 +170,7 @@ public class EquatableArrayTests
         {
             new PropertyPathSegment("A", StringTypeName, GlobalTTypeName, true),
             new PropertyPathSegment("Name", StringTypeName, GlobalTTypeName, true),
-            new PropertyPathSegment("B", StringTypeName, GlobalTTypeName, true)
+            new PropertyPathSegment("B", StringTypeName, GlobalTTypeName, true),
         };
 
         var nonNullHash = EquatableArray<PropertyPathSegment>.ComputeHashCode(nonNullArr);
@@ -348,13 +337,9 @@ public class EquatableArrayTests
     /// <summary>Verifies operator== returns true for two default-constructed instances.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task OperatorEquals_BothDefault_ReturnsTrue()
-    {
-        var arr1 = default(EquatableArray<PropertyPathSegment>);
-        var arr2 = default(EquatableArray<PropertyPathSegment>);
-
-        await Assert.That(arr1 == arr2).IsTrue();
-    }
+    public async Task OperatorEquals_BothDefault_ReturnsTrue() =>
+        await Assert.That(default(EquatableArray<PropertyPathSegment>) == default(EquatableArray<PropertyPathSegment>))
+            .IsTrue();
 
     /// <summary>Verifies operator!= returns false for arrays with the same content.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>

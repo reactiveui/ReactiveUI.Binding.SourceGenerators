@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis.CSharp;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -41,6 +42,7 @@ public class ReactiveRuntimeFlavourTests
 
     /// <summary>Lists the shared scenarios for the sweep.</summary>
     /// <returns>Every shared scenario path.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IEnumerable<string> Scenarios() => SharedSourceReader.EnumerateScenarioPaths();
 
     /// <summary>Generated output for a System.Reactive consumer compiles against that package.</summary>
@@ -96,6 +98,7 @@ public class ReactiveRuntimeFlavourTests
     /// </summary>
     /// <param name="source">The scenario source, written against the lean package.</param>
     /// <returns>The same source, importing the System.Reactive package.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string ShiftToReactiveRuntime(string source) =>
         source
             .Replace(LeanSchedulerImport, ReactiveSchedulerImport, StringComparison.Ordinal)

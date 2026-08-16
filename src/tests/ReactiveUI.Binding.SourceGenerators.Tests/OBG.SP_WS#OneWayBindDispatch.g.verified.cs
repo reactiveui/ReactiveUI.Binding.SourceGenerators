@@ -27,13 +27,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountText")
             {
-                return __OneWayBind_0000321BF9FDEB10(viewModel, view, selector);
+                return __OneWayBind_0000321BF9FDEB6D(viewModel, view, selector);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView, string> __OneWayBind_0000321BF9FDEB10(global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView view, global::System.Func<int, string> selector)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView, string> __OneWayBind_0000321BF9FDEB6D(global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView view, global::System.Func<int, string> selector)
         {
             // OneWayBind: Count -> CountText (with conversion)
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
@@ -41,9 +41,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             "Count",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyViewModel)__o).Count,
             true);
-        var bindObs = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Select(sourceObs, selector);
+        var bindObs = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, selector);
 
-            var sub = global::ReactiveUI.Binding.Observables.RxBindingExtensions.Subscribe(bindObs, value =>
+            var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(bindObs, value =>
             {
                 view.CountText = value;
             });

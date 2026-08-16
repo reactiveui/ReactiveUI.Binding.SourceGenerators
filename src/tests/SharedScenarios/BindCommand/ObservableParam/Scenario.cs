@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding;
 
 namespace SharedScenarios.BindCommand.ObservableParam;
@@ -15,6 +16,7 @@ public static class Scenario
     /// <param name="view">The target view.</param>
     /// <param name="parameter">An observable producing command parameters.</param>
     /// <returns>A disposable representing the binding.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable Execute(MyViewModel vm, MyView view, IObservable<string> parameter) =>
         view.BindCommand(vm, x => x.Save, x => x.SaveButton, parameter);
 }

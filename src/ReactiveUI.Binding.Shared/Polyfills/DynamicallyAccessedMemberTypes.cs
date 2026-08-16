@@ -14,52 +14,58 @@ namespace System.Diagnostics.CodeAnalysis;
 /// </summary>
 [Flags]
 [SuppressMessage("Design", "SST2303:Flags enum members should be distinct bit values", Justification = "Mirrors the framework enum bit-for-bit, including its composite members.")]
+[SuppressMessage(
+    "Correctness",
+    "SST2461:A combined flags value should only set bits the enum defines",
+    Justification = "Bit 1 is only ever set as part of PublicConstructors, exactly as in the BCL type this mirrors."
+                    + " Every value must stay numerically identical because the newer targets type-forward to the real"
+                    + " enum, and naming that bit would invent a member the BCL does not have.")]
 internal enum DynamicallyAccessedMemberTypes
 {
     /// <summary>Specifies no members.</summary>
     None = 0,
 
     /// <summary>Specifies the default, parameterless public constructor.</summary>
-    PublicParameterlessConstructor = 0x_0001,
+    PublicParameterlessConstructor = 1 << 0,
 
     /// <summary>Specifies all public constructors.</summary>
-    PublicConstructors = 0x_0002 | PublicParameterlessConstructor,
+    PublicConstructors = 0x0002 | PublicParameterlessConstructor,
 
     /// <summary>Specifies all non-public constructors.</summary>
-    NonPublicConstructors = 0x_0004,
+    NonPublicConstructors = 1 << 2,
 
     /// <summary>Specifies all public methods.</summary>
-    PublicMethods = 0x_0008,
+    PublicMethods = 1 << 3,
 
     /// <summary>Specifies all non-public methods.</summary>
-    NonPublicMethods = 0x_0010,
+    NonPublicMethods = 1 << 4,
 
     /// <summary>Specifies all public fields.</summary>
-    PublicFields = 0x_0020,
+    PublicFields = 1 << 5,
 
     /// <summary>Specifies all non-public fields.</summary>
-    NonPublicFields = 0x_0040,
+    NonPublicFields = 1 << 6,
 
     /// <summary>Specifies all public nested types.</summary>
-    PublicNestedTypes = 0x_0080,
+    PublicNestedTypes = 1 << 7,
 
     /// <summary>Specifies all non-public nested types.</summary>
-    NonPublicNestedTypes = 0x_0100,
+    NonPublicNestedTypes = 1 << 8,
 
     /// <summary>Specifies all public properties.</summary>
-    PublicProperties = 0x_0200,
+    PublicProperties = 1 << 9,
 
     /// <summary>Specifies all non-public properties.</summary>
-    NonPublicProperties = 0x_0400,
+    NonPublicProperties = 1 << 10,
 
     /// <summary>Specifies all public events.</summary>
-    PublicEvents = 0x_0800,
+    PublicEvents = 1 << 11,
 
     /// <summary>Specifies all non-public events.</summary>
-    NonPublicEvents = 0x_1000,
+    NonPublicEvents = 1 << 12,
 
     /// <summary>Specifies all interfaces implemented by the type.</summary>
-    Interfaces = 0x_2000,
+    Interfaces = 1 << 13,
 
     /// <summary>Specifies all members.</summary>
     All = ~None,

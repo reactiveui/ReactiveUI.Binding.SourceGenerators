@@ -9,6 +9,8 @@ namespace ReactiveUI.Binding;
 #endif
 
 /// <summary>Contains contextual information for an interaction.</summary>
+/// <typeparam name="TInput">The type of the interaction's input.</typeparam>
+/// <typeparam name="TOutput">The type of the interaction's output.</typeparam>
 /// <remarks>
 /// <para>
 /// Instances of this interface are passed into interaction handlers. The <see cref="Input"/> property exposes
@@ -20,8 +22,6 @@ namespace ReactiveUI.Binding;
 /// throw. Check <see cref="IsHandled"/> before invoking long-running logic if only one handler should respond.
 /// </para>
 /// </remarks>
-/// <typeparam name="TInput">The type of the interaction's input.</typeparam>
-/// <typeparam name="TOutput">The type of the interaction's output.</typeparam>
 public interface IInteractionContext<out TInput, in TOutput>
 {
     /// <summary>Gets the input for the interaction.</summary>
