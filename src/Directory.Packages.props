@@ -43,7 +43,7 @@
       (the RS#### authoring rules) with no impact on the end-user-facing Roslyn
       version, so it tracks the latest stable release independently.
     -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.6.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
 
