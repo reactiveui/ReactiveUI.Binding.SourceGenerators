@@ -20,7 +20,7 @@
     <!-- Testing Framework -->
     <PackageVersion Include="NSubstitute" Version="6.2.0"/>
     <PackageVersion Include="TUnit" Version="1.65.0"/>
-    <PackageVersion Include="Verify.TUnit" Version="31.28.0"/>
+    <PackageVersion Include="Verify.TUnit" Version="32.0.0"/>
     <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0"/>
 
     <!--
