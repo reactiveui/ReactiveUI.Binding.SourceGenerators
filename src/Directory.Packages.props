@@ -6,21 +6,21 @@
 
   <!-- MAUI version varies by target framework -->
   <PropertyGroup>
-    <MauiVersion Condition="$(TargetFramework.StartsWith('net10'))">10.0.90</MauiVersion>
+    <MauiVersion Condition="$(TargetFramework.StartsWith('net10'))">10.0.100</MauiVersion>
     <MauiVersion Condition="$(TargetFramework.StartsWith('net11'))">11.0.0-preview.7.26406.9</MauiVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <!-- StyleSharp.Analyzers, PerformanceSharp.Analyzers and SecuritySharp.Analyzers ship from the
          same release pipeline and always share a version. -->
-    <RoslynCommonAnalyzersVersion>3.45.0</RoslynCommonAnalyzersVersion>
+    <RoslynCommonAnalyzersVersion>3.46.0</RoslynCommonAnalyzersVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Testing Framework -->
     <PackageVersion Include="NSubstitute" Version="6.2.0"/>
-    <PackageVersion Include="TUnit" Version="1.65.0"/>
-    <PackageVersion Include="Verify.TUnit" Version="31.28.0"/>
+    <PackageVersion Include="TUnit" Version="1.66.8"/>
+    <PackageVersion Include="Verify.TUnit" Version="32.0.0"/>
     <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0"/>
 
     <!--
@@ -55,8 +55,8 @@
 
     <!-- Dependencies -->
     <PackageVersion Include="Splat" Version="21.0.0"/>
-    <PackageVersion Include="ReactiveUI.Primitives" Version="7.2.0"/>
-    <PackageVersion Include="ReactiveUI.Primitives.Reactive" Version="7.2.0"/>
+    <PackageVersion Include="ReactiveUI.Primitives" Version="7.3.0"/>
+    <PackageVersion Include="ReactiveUI.Primitives.Reactive" Version="7.3.0"/>
     <PackageVersion Include="System.Reactive" Version="7.0.0"/>
 
     <!-- Build Tools -->
@@ -64,9 +64,9 @@
     <PackageVersion Include="StyleSharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
     <PackageVersion Include="PerformanceSharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
     <PackageVersion Include="SecuritySharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.16.1"/>
+    <PackageVersion Include="Roslynator.Analyzers" Version="5.0.0"/>
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.400"/>
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.32.0.713"/>
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.33.0.1635"/>
     <PackageVersion Include="Blazor.Common.Analyzers" Version="2.1.0"/>
 
     <!-- MAUI -->
@@ -78,7 +78,7 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8"/>
 
     <!-- Test App Dependencies-->
-    <PackageVersion Include="ReactiveUI" Version="24.1.0"/>
+    <PackageVersion Include="ReactiveUI" Version="24.2.0"/>
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="3.2.0"/>
   </ItemGroup>
 </Project>
