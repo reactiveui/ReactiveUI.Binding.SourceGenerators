@@ -25,8 +25,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ") ? sourcePropertyExpression.Substring(7) : sourcePropertyExpression;
-            targetPropertyExpression = targetPropertyExpression.StartsWith("static ") ? targetPropertyExpression.Substring(7) : targetPropertyExpression;
+            sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                ? sourcePropertyExpression.Substring(7)
+                : sourcePropertyExpression;
+            targetPropertyExpression = targetPropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                ? targetPropertyExpression.Substring(7)
+                : targetPropertyExpression;
+
+            // A registered plugin that outranks the generated one drives the binding instead
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel), 5, false))
+            {
+                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindOneWay(
+                    source, target, sourceProperty, targetProperty, conversionFunc, scheduler, targetPropertyExpression);
+            }
 
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
@@ -40,18 +51,34 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindOneWay_7FFFED3E0F13A581(global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyView target, global::System.Func<int, string> conversionFunc, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // BindOneWay: Count -> CountText (with conversion) (with scheduler)
+        if (global::ReactiveUI.Binding.BindingHooks.Any
+            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                source,
+                target,
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(source, null, source),
+                },
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(target, null, target),
+                },
+                global::ReactiveUI.Binding.BindingDirection.OneWay))
+        {
+            return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+        }
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             source,
             "Count",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel)__o).Count,
             true);
         var __selected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, conversionFunc);
-        var bindObs = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<string>(__selected, scheduler);
+        var bindObs = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<string>(__selected, scheduler);
 
-            return global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(bindObs, value =>
+            return global::ReactiveUI.Binding.BindingErrors.Subscribe(bindObs, value =>
             {
                 target.CountText = value;
-            });
+            }, "x => x.CountText");
         }
 
     }

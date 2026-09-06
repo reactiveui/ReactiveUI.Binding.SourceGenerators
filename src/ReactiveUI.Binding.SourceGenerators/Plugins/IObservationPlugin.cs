@@ -39,6 +39,19 @@ internal interface IObservationPlugin
     /// <returns>True if this plugin can generate observation code for this type.</returns>
     bool IsAMatch(ClassBindingInfo classInfo);
 
+    /// <summary>Determines whether this plugin's mechanism reaches one particular property of a matched type.</summary>
+    /// <param name="classInfo">The type-level binding info, which lists the properties the type declares.</param>
+    /// <param name="propertyName">The property being observed.</param>
+    /// <returns>True when the mechanism can observe that property.</returns>
+    /// <remarks>
+    /// A type advertises a mechanism; a property participates in it or does not. A dependency object can declare
+    /// a plain CLR property and a component can declare one with no change event, and emitting the mechanism's
+    /// code for those names a member that does not exist. A property the type does not declare - an inherited
+    /// one - is unknown rather than absent, and stays observable so nothing regresses on the strength of a
+    /// question this cannot answer.
+    /// </remarks>
+    bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName);
+
     /// <summary>
     /// Emits any helper class definitions needed by this plugin's generated code.
     /// Called at most once per generated output file, inside the

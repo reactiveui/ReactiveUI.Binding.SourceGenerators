@@ -13,7 +13,7 @@ public class StubBindingTypeConverter : IBindingTypeConverter
     private const int StubAffinity = 10;
 
     /// <summary>The conversion logic.</summary>
-    private readonly Func<object?, object?, (bool Success, object? Result)> _tryConvert;
+    private readonly Func<object?, object?, StubConversionResult> _tryConvert;
 
     /// <summary>Initializes a new instance of the <see cref="StubBindingTypeConverter"/> class.</summary>
     /// <param name="fromType">The source type.</param>
@@ -22,7 +22,7 @@ public class StubBindingTypeConverter : IBindingTypeConverter
     public StubBindingTypeConverter(
         Type fromType,
         Type toType,
-        Func<object?, object?, (bool Success, object? Result)> tryConvert)
+        Func<object?, object?, StubConversionResult> tryConvert)
     {
         FromType = fromType;
         ToType = toType;

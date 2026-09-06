@@ -19,7 +19,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            obs1Expression = obs1Expression.StartsWith("static ") ? obs1Expression.Substring(7) : obs1Expression;
+            obs1Expression = obs1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? obs1Expression.Substring(7) : obs1Expression;
 
             if (obs1Expression == "x => x.Command1")
             {
@@ -41,7 +41,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 true);
 
             return new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty,
-                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
         }
 
         private static global::System.IObservable<string> __WhenAnyObservable_7FFFC6DF47F56865(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel obj)
@@ -53,7 +53,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 true);
 
             return new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty,
-                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
         }
 
     }

@@ -13,7 +13,7 @@ public static class Scenario
     /// <summary>Creates three separate WhenChanged observables for different properties.</summary>
     /// <param name="vm">The view model to observe.</param>
     /// <returns>A tuple of observables for name, age, and score.</returns>
-    public static (IObservable<string> NameObs, IObservable<int> AgeObs, IObservable<double> ScoreObs) Execute(
+    public static ScenarioResult Execute(
         MyViewModel vm) =>
-        (vm.WhenChanged(x => x.Name), vm.WhenChanged(x => x.Age), vm.WhenChanged(x => x.Score));
+        new(vm.WhenChanged(x => x.Name), vm.WhenChanged(x => x.Age), vm.WhenChanged(x => x.Score));
 }

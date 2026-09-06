@@ -44,6 +44,17 @@ internal static class ObservationExtractor
     internal static InvocationInfo? ExtractWhenAnyInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
         ExtractInvocationInfo(context, false, Constants.WhenAnyMethodName, ct);
 
+    /// <summary>Determines whether a parameter is the overload's projection over the observed values.</summary>
+    /// <param name="parameterName">The parameter name to test.</param>
+    /// <returns><see langword="true"/> when the parameter carries the projection.</returns>
+    /// <remarks>
+    /// The observation APIs spell it two ways: <c>WhenChanged</c> and <c>WhenChanging</c> take a
+    /// <c>conversionFunc</c>, while <c>WhenAny</c> and <c>WhenAnyValue</c> take a <c>selector</c>. Either one
+    /// means the same thing to the emitters - the overload returns the projection rather than the values.
+    /// </remarks>
+    internal static bool IsSelectorParameterName(string parameterName) =>
+        parameterName is "conversionFunc" or "selector";
+
     /// <summary>Extracts the invocation info from the generator syntax context.</summary>
     /// <param name="context">The generator syntax context.</param>
     /// <param name="isBeforeChange">A value indicating whether the invocation is before a change.</param>
@@ -68,7 +79,7 @@ internal static class ObservationExtractor
         }
 
         // Verify this is our stub or generated method
-        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType.Name))
+        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType))
         {
             return null;
         }
@@ -137,6 +148,15 @@ internal static class ObservationExtractor
         {
             var parameter = methodSymbol.Parameters[i];
 
+            // The parameter list is walked by position, so a call that supplies fewer arguments than the
+            // resolved method declares - the trailing caller-info ones are always omitted - has nothing at
+            // this position. Reading past the arguments would throw out of the transform, and a generator
+            // that throws contributes no source at all, taking every unrelated file down with it.
+            if (i >= args.Count)
+            {
+                break;
+            }
+
             // Check if parameter type is Expression<Func<...>>
             if (parameter.Type is INamedTypeSymbol { Name: "Expression" })
             {
@@ -148,7 +168,7 @@ internal static class ObservationExtractor
                         CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
                 }
             }
-            else if (parameter.Name is "conversionFunc" or "selector")
+            else if (IsSelectorParameterName(parameter.Name))
             {
                 hasSelector = true;
             }
@@ -189,20 +209,20 @@ internal static class ObservationExtractor
             return singlePath[singlePath.Length - 1].PropertyTypeFullName;
         }
 
-        // Multiple properties: return type is a named value tuple.
-        var tupleBuilder = new System.Text.StringBuilder("(");
+        // Multiple properties: the emission carries every value, so the return type names them as one.
+        var valuesBuilder = new System.Text.StringBuilder(CodeGeneration.GeneratedTypeNames.PropertyValues).Append('<');
         for (var i = 0; i < propertyPaths.Count; i++)
         {
             var path = propertyPaths[i];
             var leafType = path[path.Length - 1].PropertyTypeFullName;
-            _ = tupleBuilder.Append(leafType).Append(" property").Append(i + 1);
+            _ = valuesBuilder.Append(leafType);
             if (i < propertyPaths.Count - 1)
             {
-                _ = tupleBuilder.Append(", ");
+                _ = valuesBuilder.Append(", ");
             }
         }
 
-        _ = tupleBuilder.Append(')');
-        return tupleBuilder.ToString();
+        _ = valuesBuilder.Append('>');
+        return valuesBuilder.ToString();
     }
 }

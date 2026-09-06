@@ -102,7 +102,7 @@ public class RuntimeObservationFallbackTests
         EnsureInitialized();
 
         var vm = new TestViewModel { Name = SampleName, Age = SampleAge };
-        var values = new List<(string Value1, int Value2)>();
+        var values = new List<PropertyValues<string, int>>();
 
         using var sub = RuntimeObservationFallback.WhenChanged(
                 vm,
@@ -111,8 +111,8 @@ public class RuntimeObservationFallbackTests
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].Value1).IsEqualTo(SampleName);
-        await Assert.That(values[0].Value2).IsEqualTo(SampleAge);
+        await Assert.That(values[0].Property1).IsEqualTo(SampleName);
+        await Assert.That(values[0].Property2).IsEqualTo(SampleAge);
     }
 
     /// <summary>Verifies that WhenChanged with three properties emits tuples.</summary>
@@ -123,7 +123,7 @@ public class RuntimeObservationFallbackTests
         EnsureInitialized();
 
         var vm = new TestViewModel { Name = SampleName, Age = SampleAge, Address = new() { City = SampleCity } };
-        var values = new List<(string Value1, int Value2, string? Value3)>();
+        var values = new List<PropertyValues<string, int, string>>();
 
         using var sub = RuntimeObservationFallback.WhenChanged(
                 vm,
@@ -133,9 +133,9 @@ public class RuntimeObservationFallbackTests
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].Value1).IsEqualTo(SampleName);
-        await Assert.That(values[0].Value2).IsEqualTo(SampleAge);
-        await Assert.That(values[0].Value3).IsEqualTo(SampleCity);
+        await Assert.That(values[0].Property1).IsEqualTo(SampleName);
+        await Assert.That(values[0].Property2).IsEqualTo(SampleAge);
+        await Assert.That(values[0].Property3).IsEqualTo(SampleCity);
     }
 
     /// <summary>Verifies that WhenChanged emits after property changes with three properties.</summary>
@@ -146,7 +146,7 @@ public class RuntimeObservationFallbackTests
         EnsureInitialized();
 
         var vm = new TestViewModel { Name = SampleName, Age = SampleAge, Address = new() { City = SampleCity } };
-        var values = new List<(string Value1, int Value2, string? Value3)>();
+        var values = new List<PropertyValues<string, int, string>>();
 
         using var sub = RuntimeObservationFallback.WhenChanged(
                 vm,
@@ -158,7 +158,7 @@ public class RuntimeObservationFallbackTests
         vm.Name = "Bob";
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
-        await Assert.That(values[^1].Value1).IsEqualTo("Bob");
+        await Assert.That(values[^1].Property1).IsEqualTo("Bob");
     }
 
     /// <summary>Verifies that WhenChanging with two properties emits tuples.</summary>
@@ -169,7 +169,7 @@ public class RuntimeObservationFallbackTests
         EnsureInitialized();
 
         var vm = new TestViewModel { Name = SampleName, Age = SampleAge };
-        var values = new List<(string Value1, int Value2)>();
+        var values = new List<PropertyValues<string, int>>();
 
         using var sub = RuntimeObservationFallback.WhenChanging(
                 vm,
@@ -190,7 +190,7 @@ public class RuntimeObservationFallbackTests
         EnsureInitialized();
 
         var vm = new TestViewModel { Name = SampleName, Age = SampleAge, Address = new() { City = SampleCity } };
-        var values = new List<(string Value1, int Value2, string? Value3)>();
+        var values = new List<PropertyValues<string, int, string>>();
 
         using var sub = RuntimeObservationFallback.WhenChanging(
                 vm,
@@ -212,7 +212,7 @@ public class RuntimeObservationFallbackTests
         EnsureInitialized();
 
         var vm = new TestViewModel { Name = SampleName, Age = SampleAge };
-        var values = new List<(string Value1, int Value2)>();
+        var values = new List<PropertyValues<string, int>>();
 
         using var sub = RuntimeObservationFallback.WhenAnyValue(
                 vm,
@@ -221,8 +221,8 @@ public class RuntimeObservationFallbackTests
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].Value1).IsEqualTo(SampleName);
-        await Assert.That(values[0].Value2).IsEqualTo(SampleAge);
+        await Assert.That(values[0].Property1).IsEqualTo(SampleName);
+        await Assert.That(values[0].Property2).IsEqualTo(SampleAge);
     }
 
     /// <summary>Verifies that WhenAnyValue with three properties emits tuples.</summary>
@@ -233,7 +233,7 @@ public class RuntimeObservationFallbackTests
         EnsureInitialized();
 
         var vm = new TestViewModel { Name = SampleName, Age = SampleAge, Address = new() { City = SampleCity } };
-        var values = new List<(string Value1, int Value2, string? Value3)>();
+        var values = new List<PropertyValues<string, int, string>>();
 
         using var sub = RuntimeObservationFallback.WhenAnyValue(
                 vm,
@@ -243,9 +243,9 @@ public class RuntimeObservationFallbackTests
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].Value1).IsEqualTo(SampleName);
-        await Assert.That(values[0].Value2).IsEqualTo(SampleAge);
-        await Assert.That(values[0].Value3).IsEqualTo(SampleCity);
+        await Assert.That(values[0].Property1).IsEqualTo(SampleName);
+        await Assert.That(values[0].Property2).IsEqualTo(SampleAge);
+        await Assert.That(values[0].Property3).IsEqualTo(SampleCity);
     }
 
     /// <summary>Verifies that WhenAnyValue with two properties updates on change.</summary>
@@ -256,7 +256,7 @@ public class RuntimeObservationFallbackTests
         EnsureInitialized();
 
         var vm = new TestViewModel { Name = SampleName, Age = SampleAge };
-        var values = new List<(string Value1, int Value2)>();
+        var values = new List<PropertyValues<string, int>>();
 
         using var sub = RuntimeObservationFallback.WhenAnyValue(
                 vm,
@@ -267,7 +267,7 @@ public class RuntimeObservationFallbackTests
         vm.Name = "Bob";
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
-        await Assert.That(values[^1].Value1).IsEqualTo("Bob");
+        await Assert.That(values[^1].Property1).IsEqualTo("Bob");
     }
 
     /// <summary>Resets and initializes the ReactiveUI binding infrastructure for testing.</summary>

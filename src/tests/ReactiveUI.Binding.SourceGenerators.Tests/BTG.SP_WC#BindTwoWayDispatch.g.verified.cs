@@ -25,8 +25,20 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ") ? sourcePropertyExpression.Substring(7) : sourcePropertyExpression;
-            targetPropertyExpression = targetPropertyExpression.StartsWith("static ") ? targetPropertyExpression.Substring(7) : targetPropertyExpression;
+            sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                ? sourcePropertyExpression.Substring(7)
+                : sourcePropertyExpression;
+            targetPropertyExpression = targetPropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                ? targetPropertyExpression.Substring(7)
+                : targetPropertyExpression;
+
+            // A registered plugin that outranks the generated one drives the binding instead
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyViewModel), 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyView), 5, false))
+            {
+                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindTwoWay(
+                    source, target, sourceProperty, targetProperty, global::ReactiveUI.Binding.Fallback.TwoWayConverters.Create(sourceToTargetConv, targetToSourceConv), null, targetPropertyExpression);
+            }
 
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
@@ -40,6 +52,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindTwoWay_000013957A2E9442(global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyViewModel source, global::SharedScenarios.BindTwoWay.SinglePropertyWithConverters.MyView target, global::System.Func<int, string> sourceToTargetConv, global::System.Func<string, int> targetToSourceConv)
         {
             // BindTwoWay: Count <-> CountText (with conversion)
+        if (global::ReactiveUI.Binding.BindingHooks.Any
+            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                source,
+                target,
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(source, null, source),
+                },
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(target, null, target),
+                },
+                global::ReactiveUI.Binding.BindingDirection.TwoWay))
+        {
+            return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+        }
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             source,
             "Count",
@@ -52,17 +80,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             true);
         var sourceBind = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, sourceToTargetConv);
         var targetBind = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(targetObs, targetToSourceConv);
+            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceBind);
 
-            var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(sourceBind, value =>
+            var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
                 target.CountText = value;
-            });
+            }, "x => x.CountText");
 
             var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(targetBind, 1);
-            var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__targetSkipped, value =>
+            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__targetSkipped, value =>
             {
                 source.Count = value;
-            });
+            }, "x => x.Count");
 
             return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
         }

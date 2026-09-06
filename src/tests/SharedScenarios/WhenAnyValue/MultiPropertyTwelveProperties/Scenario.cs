@@ -16,8 +16,7 @@ public static class Scenario
     /// <returns>An observable of twelve-property tuples.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string V1, string V2, string V3, string V4, string V5, string V6, string V7, string V8, string V9,
-            string V10, string V11, string V12)> Execute(WhenAnyFixture fixture) =>
+        IObservable<PropertyValues<string, string, string, string, string, string, string, string, string, string, string, string>> Execute(WhenAnyFixture fixture) =>
         fixture.WhenAnyValue(
             x => x.Value1,
             x => x.Value2,

@@ -759,7 +759,7 @@ public class ReflectionTests
     public sealed class TrueMultiArgIndexedModel
     {
         /// <summary>Backing dictionary for the multi-parameter indexer.</summary>
-        private readonly Dictionary<(int Row, int Col), int> _data = [];
+        private readonly Dictionary<GridCell, int> _data = [];
 
         /// <summary>Gets or sets the value at the specified row and column.</summary>
         /// <param name="row">The row index.</param>
@@ -768,9 +768,14 @@ public class ReflectionTests
         [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Used for testing")]
         public int this[int row, int col]
         {
-            get => _data.TryGetValue((row, col), out var val) ? val : 0;
-            set => _data[(row, col)] = value;
+            get => _data.TryGetValue(new(row, col), out var val) ? val : 0;
+            set => _data[new GridCell(row, col)] = value;
         }
+
+        /// <summary>One addressable cell of the model's grid.</summary>
+        /// <param name="Row">The row index.</param>
+        /// <param name="Col">The column index.</param>
+        internal readonly record struct GridCell(int Row, int Col);
     }
 
     /// <summary>A test model with an indexed property for testing index expressions.</summary>

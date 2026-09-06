@@ -27,7 +27,7 @@ public static class ObservedChangedMixins
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<TValue> Value() =>
-            new SelectObservable<IObservedChange<TSender, TValue>, TValue>(stream, GetValue);
+            new MapSignal<IObservedChange<TSender, TValue>, TValue>(stream, GetValue);
     }
 
     /// <summary>Provides value-access extension members for <paramref name="item"/>.</summary>

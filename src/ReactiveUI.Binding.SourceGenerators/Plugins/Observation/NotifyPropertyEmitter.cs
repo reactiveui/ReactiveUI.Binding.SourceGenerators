@@ -132,8 +132,8 @@ internal static class NotifyPropertyEmitter
     {
         var segType = segment.PropertyTypeFullName;
         var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-            ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
-            : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
+            ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
 
         var stageOpen = GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar);
 

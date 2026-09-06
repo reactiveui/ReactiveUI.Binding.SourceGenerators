@@ -27,7 +27,7 @@ internal static class ModelFactory
         string type = StringTypeName,
         string declaringType = MyViewModelTypeName,
         bool isReferenceType = true) =>
-        new(name, type, declaringType, isReferenceType);
+        new(name, type, declaringType, isReferenceType, null);
 
     /// <summary>Creates an <see cref="InvocationInfo"/> with sensible defaults for a single-property WhenChanged invocation.</summary>
     /// <param name="callerFilePath">The caller file path.</param>
@@ -255,17 +255,20 @@ internal static class ModelFactory
     /// <param name="hasPublicGetter">Whether the property has a public getter.</param>
     /// <param name="isIndexer">Whether the property is an indexer.</param>
     /// <param name="isDependencyProperty">Whether the property is a dependency property.</param>
+    /// <param name="hasChangeEvent">Whether the declaring type declares a companion change event.</param>
     /// <returns>A new observable property info.</returns>
     internal static ObservablePropertyInfo CreateObservablePropertyInfo(
         string propertyName = "Name",
         string propertyTypeFullName = StringTypeName,
         bool hasPublicGetter = true,
         bool isIndexer = false,
-        bool isDependencyProperty = false) =>
+        bool isDependencyProperty = false,
+        bool hasChangeEvent = false) =>
         new(
             propertyName,
             propertyTypeFullName,
             hasPublicGetter,
             isIndexer,
-            isDependencyProperty);
+            isDependencyProperty,
+            hasChangeEvent);
 }

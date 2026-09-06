@@ -22,7 +22,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// <c>CompoundButton.CheckedChange</c>, <c>RatingBar.RatingBarChange</c>).
 /// </para>
 /// <para>
-/// Currently emits <c>ReturnObservable</c> (returns current value, no ongoing observation)
+/// Currently emits <c>ImmediateReturnSignal</c> (returns current value, no ongoing observation)
 /// as a safe fallback. This matches ReactiveUI's POCO fallback behavior for unknown
 /// widget/property combinations.
 /// </para>
@@ -56,6 +56,10 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         classInfo.InheritsAndroidView;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) => true;
+
+    /// <inheritdoc/>
     public void EmitHelperClasses(StringBuilder sb)
     {
         // No helper classes needed. Future: may emit event-based observable.
@@ -70,10 +74,10 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         string castTypeName,
         bool isBeforeChange,
         bool includeStartWith) =>
-        // Android View does not implement INPC. Emit ReturnObservable as POCO fallback.
+        // Android View does not implement INPC. Emit ImmediateReturnSignal as POCO fallback.
         // Returns the current property value once, no ongoing observation.
         sb.Append(
-            $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName})");
+            $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName})");
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,7 +89,7 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         bool isBeforeChange,
         string varName) =>
         sb.Append(
-            $"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
+            $"            var {varName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,7 +102,7 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         string obsVarName) =>
         sb
             .Append($"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>")
-            .AppendLine($")new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
+            .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
 
     /// <inheritdoc/>
     public void EmitDeepChainInnerSegment(
@@ -113,15 +117,15 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         var segType = segment.PropertyTypeFullName;
         var declType = segment.DeclaringTypeFullName;
         var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-            ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
-            : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
+            ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
 
         _ = sb.AppendLine()
             .AppendLine($"""
                                  var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
                                      {lambdaParam} => {lambdaParam} != null
                                          ? (global::System.IObservable<{segType}>)
-                                             new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
+                                             new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
                                          : (global::System.IObservable<{segType}>){nullParentObservable});
                          """);
     }
@@ -135,5 +139,5 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         string castTypeName,
         string varName) =>
         sb.AppendLine(
-            $"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
+            $"            var {varName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
 }

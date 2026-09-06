@@ -55,7 +55,10 @@ internal static class WhenAnyObservableCodeGenerator
             for (var i = 0; i < group.Invocations.Length; i++)
             {
                 var inv = group.Invocations[i];
-                var classInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.SourceTypeFullName);
+                var classInfo = CodeGeneratorHelpers.ResolveObservedTypeInfo(
+                    allClasses,
+                    inv.SourceTypeFullName,
+                    inv.PropertyPaths[0]);
                 var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
                     inv.SourceTypeFullName,
                     inv.CallerFilePath,
@@ -200,7 +203,7 @@ internal static class WhenAnyObservableCodeGenerator
         // Switch pattern: take the observable property value, replace null with Empty, and switch
         _ = sb.Append($"""
                                return new {SwitchMapSignal}<{ObservableOf(innerType)}, {innerType}>(__obsProperty,
-                                   __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance);
+                                   __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{innerType}>.Instance);
                    """);
     }
 
@@ -234,7 +237,7 @@ internal static class WhenAnyObservableCodeGenerator
                 .AppendLine()
                 .AppendLine($"""
                                          var {switchedVar} = new {SwitchMapSignal}<{ObservableOf(innerType)}, {innerType}>({rawVar},
-                                             __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance);
+                                             __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{innerType}>.Instance);
                              """)
                 .AppendLine();
         }
@@ -285,7 +288,7 @@ internal static class WhenAnyObservableCodeGenerator
                 .AppendLine()
                 .AppendLine($"""
                                          var {switchedVar} = new {SwitchMapSignal}<{ObservableOf(innerType)}, {innerType}>({rawVar},
-                                             __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Binding.Observables.EmptyObservable<{innerType}>.Instance);
+                                             __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{innerType}>.Instance);
                              """)
                 .AppendLine();
         }
@@ -373,7 +376,7 @@ internal static class WhenAnyObservableCodeGenerator
         {
             var paramName = $"obs{i + 1}Expression";
             _ = sb.AppendLine(
-                $"""            {paramName} = {paramName}.StartsWith("static ") ? {paramName}.Substring(7) : {paramName};""");
+                $"""            {paramName} = {paramName}.StartsWith("static ", global::System.StringComparison.Ordinal) ? {paramName}.Substring(7) : {paramName};""");
         }
 
         _ = sb.AppendLine();

@@ -34,7 +34,7 @@ internal static class InteractionExtractor
         }
 
         // Verify this is our stub or generated method
-        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType.Name))
+        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType))
         {
             return null;
         }
@@ -115,19 +115,12 @@ internal static class InteractionExtractor
         inputTypeFullName = string.Empty;
         outputTypeFullName = string.Empty;
 
-        if (propertyNameArg is not LambdaExpressionSyntax lambda)
-        {
-            return;
-        }
-
-        var body = SyntaxHelpers.GetLambdaBody(lambda);
-        if (body is null)
-        {
-            return;
-        }
-
-        body = SyntaxHelpers.UnwrapNullForgiving(body);
-        if (body is not MemberAccessExpressionSyntax leafMemberAccess
+        // The lambda and body tests are folded in rather than standing alone: the caller only reaches here
+        // once it has resolved a property path from this same argument, which fails unless it is a lambda
+        // with a body, so a separate guard for either could never be taken.
+        if (propertyNameArg is not LambdaExpressionSyntax lambda
+            || SyntaxHelpers.GetLambdaBody(lambda) is not ExpressionSyntax body
+            || SyntaxHelpers.UnwrapNullForgiving(body) is not MemberAccessExpressionSyntax leafMemberAccess
             || semanticModel.GetSymbolInfo(leafMemberAccess, ct).Symbol is not IPropertySymbol propertySymbol
             || !SymbolHelpers.ExtractInteractionTypeArguments(propertySymbol.Type, out var input, out var output))
         {

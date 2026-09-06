@@ -26,7 +26,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(int),
-            static (from, _) => (true, int.Parse((string)from!)));
+            static (from, _) => new(true, int.Parse((string)from!)));
 
         var success = BindingTypeConverterDispatch.TryConvert(converter, "42", typeof(int), null, out var result);
 
@@ -42,7 +42,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(int),
-            static (_, _) => (true, ConvertedInteger));
+            static (_, _) => new(true, ConvertedInteger));
 
         var success = BindingTypeConverterDispatch.TryConvert(converter, true, typeof(int), null, out var result);
 
@@ -58,7 +58,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(int),
-            static (_, _) => (true, ConvertedInteger));
+            static (_, _) => new(true, ConvertedInteger));
 
         var success = BindingTypeConverterDispatch.TryConvert(converter, "42", typeof(bool), null, out var result);
 
@@ -74,7 +74,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(double),
             typeof(double?),
-            static (from, _) => (true, (double?)from));
+            static (from, _) => new(true, (double?)from));
 
         var success = BindingTypeConverterDispatch.TryConvert(converter, ConvertedDouble, typeof(double?), null, out var result);
 
@@ -90,7 +90,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(int?),
             typeof(string),
-            static (from, _) => (true, from?.ToString() ?? "null"));
+            static (from, _) => new(true, from?.ToString() ?? "null"));
 
         var success = BindingTypeConverterDispatch.TryConvert(converter, ConvertedInteger, typeof(string), null, out var result);
 
@@ -106,7 +106,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(string),
-            static (_, _) => (true, "42"));
+            static (_, _) => new(true, "42"));
 
         var success = BindingTypeConverterDispatch.TryConvert(converter, null, typeof(string), null, out var result);
 
@@ -123,7 +123,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(string),
-            static (_, hint) => (true, hint));
+            static (_, hint) => new(true, hint));
 
         var success =
             BindingTypeConverterDispatch.TryConvert(converter, "input", typeof(string), hintValue, out var result);
@@ -137,7 +137,7 @@ public class BindingTypeConverterDispatchTests
     [Test]
     public async Task TryConvertFallback_Success_ReturnsTrue()
     {
-        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, "fallback-result"));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => new(true, "fallback-result"));
 
         var success =
             BindingTypeConverterDispatch.TryConvertFallback(
@@ -157,7 +157,7 @@ public class BindingTypeConverterDispatchTests
     [Test]
     public async Task TryConvertFallback_NullResult_ReturnsFalse()
     {
-        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, null));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => new(true, null));
 
         var success =
             BindingTypeConverterDispatch.TryConvertFallback(
@@ -177,7 +177,7 @@ public class BindingTypeConverterDispatchTests
     [Test]
     public async Task TryConvertFallback_ConverterFails_ReturnsFalse()
     {
-        var converter = new StubFallbackConverter(static (_, _, _, _) => (false, null));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => new(false, null));
 
         var success =
             BindingTypeConverterDispatch.TryConvertFallback(
@@ -200,7 +200,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(int),
-            static (_, _) => (true, ConvertedInteger));
+            static (_, _) => new(true, ConvertedInteger));
 
         var success =
             BindingTypeConverterDispatch.TryConvertAny(
@@ -220,7 +220,7 @@ public class BindingTypeConverterDispatchTests
     [Test]
     public async Task TryConvertAny_RoutesToFallbackConverter()
     {
-        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, FallbackResult));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => new(true, FallbackResult));
 
         var success =
             BindingTypeConverterDispatch.TryConvertAny(
@@ -240,7 +240,7 @@ public class BindingTypeConverterDispatchTests
     [Test]
     public async Task TryConvertAny_NullInputWithFallback_ReturnsFalse()
     {
-        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, FallbackResult));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => new(true, FallbackResult));
 
         var success =
             BindingTypeConverterDispatch.TryConvertAny(
@@ -291,7 +291,7 @@ public class BindingTypeConverterDispatchTests
         var converter = new StubBindingTypeConverter(
             typeof(int?),
             typeof(string),
-            static (from, _) => (true, from?.ToString() ?? "null"));
+            static (from, _) => new(true, from?.ToString() ?? "null"));
 
         // Pass null as `from` value. Since FromType (int?) is a nullable value type,
         // Nullable.GetUnderlyingType returns typeof(int), so the null check allows it through.

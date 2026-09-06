@@ -22,15 +22,15 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            property1Expression = property1Expression.StartsWith("static ") ? property1Expression.Substring(7) : property1Expression;
-            property2Expression = property2Expression.StartsWith("static ") ? property2Expression.Substring(7) : property2Expression;
+            property1Expression = property1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property1Expression.Substring(7) : property1Expression;
+            property2Expression = property2Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property2Expression.Substring(7) : property2Expression;
 
             // Allow user-registered plugins with higher affinity to override generated observation
             if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.MultiPropertyWithDeepChains.MyViewModel), 5, false))
             {
-                return new global::ReactiveUI.Binding.Observables.SelectObservable<global::System.ValueTuple<string, string>, string>(
+                return new global::ReactiveUI.Primitives.Signals.MapSignal<global::ReactiveUI.Binding.PropertyValues<string, string>, string>(
                     global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanged(objectToMonitor, property1, property2),
-                    __t => selector(__t.Item1, __t.Item2));
+                    __t => selector(__t.Property1, __t.Property2));
             }
 
             if (property1Expression == "x => x.Address.City" && property2Expression == "x => x.Name")
@@ -55,7 +55,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     "City",
                     (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultiPropertyWithDeepChains.AddressModel)__o).City,
                     false)
-                : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
+                : (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
             var __propObs0 = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__propObs0_s1);
 
 

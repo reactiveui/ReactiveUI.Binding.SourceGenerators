@@ -12,10 +12,13 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
 /// <summary>
 /// Generates concrete typed extension method overloads and binding methods for Bind (view-first two-way) invocations.
-/// The generated methods return <c>IReactiveBinding&lt;TView, (object?, bool)&gt;</c> and use view-first parameter ordering.
+/// The generated methods return <c>IReactiveBinding&lt;TView, BindingChange&gt;</c> and use view-first parameter ordering.
 /// </summary>
 internal static class BindCodeGenerator
 {
+    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
+    private const string SubscriptionBodyIndent = "                ";
+
     /// <summary>What this API calls the view-model-to-view converter in its generated signatures.</summary>
     private const string ForwardConverterName = "viewModelToViewConverter";
 
@@ -69,7 +72,7 @@ internal static class BindCodeGenerator
     {
         var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
         var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
-        var returnType = FormatReturnType(group, supportsNullable);
+        var returnType = FormatReturnType(group);
 
         _ = sb.AppendLine($"""
                                /// <summary>
@@ -92,6 +95,8 @@ internal static class BindCodeGenerator
                                   [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
                               {
                       """);
+
+        EmitAffinityOverride(sb, group, "viewPropertyExpression");
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -134,7 +139,7 @@ internal static class BindCodeGenerator
     {
         var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
         var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
-        var returnType = FormatReturnType(group, supportsNullable);
+        var returnType = FormatReturnType(group);
 
         _ = sb.AppendLine($"""
                                /// <summary>
@@ -161,6 +166,11 @@ internal static class BindCodeGenerator
                                   [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
                               {
                       """);
+
+        EmitAffinityOverride(
+            sb,
+            group,
+            $"\"{CodeGeneratorHelpers.EscapeString(group.Invocations[0].TargetExpressionText)}\"");
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -195,24 +205,34 @@ internal static class BindCodeGenerator
     /// <param name="sourceClassInfo">The source type class binding info.</param>
     /// <param name="targetClassInfo">The target type class binding info.</param>
     /// <param name="suffix">The stable method name suffix.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void GenerateBindMethod(
         StringBuilder sb,
         BindingInvocationInfo inv,
         ClassBindingInfo? sourceClassInfo,
         ClassBindingInfo? targetClassInfo,
-        string suffix,
-        bool supportsNullable)
+        string suffix)
     {
-        var viewPropertyAccess = CodeGeneratorHelpers.BuildPropertySetterChain("view", inv.TargetPropertyPath);
-        var viewModelSetAccess = CodeGeneratorHelpers.BuildPropertySetterChain("viewModel", inv.SourcePropertyPath);
+        var viewPropertyAccess = CodeGeneratorHelpers.BuildGuardedAssignment(
+            "view",
+            inv.TargetPropertyPath,
+            "value",
+            SubscriptionBodyIndent);
+
+        // Both directions follow the view's current view model, so the write walks the same re-rooted path the
+        // observation does and its guard drops the write while the view holds none.
+        var observation = BindingEmitterHelpers.ResolveViewModelObservation(inv, sourceClassInfo, targetClassInfo);
+        var viewModelSetAccess = CodeGeneratorHelpers.BuildGuardedAssignment(
+            observation.RootVariable,
+            observation.Path,
+            "value",
+            SubscriptionBodyIndent);
         var viewModelPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath);
         var viewPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
 
         var extraParams = FormatExtraMethodParams(inv);
         var conversionComment = inv.HasConversion ? " (with conversion)" : string.Empty;
         var schedulerComment = inv.HasScheduler ? " (with scheduler)" : string.Empty;
-        var returnType = FormatMethodReturnType(inv, supportsNullable);
+        var returnType = FormatMethodReturnType(inv);
 
         _ = sb.AppendLine($$"""
                                 private static {{returnType}} __Bind_{{suffix}}({{inv.SourceTypeFullName}} viewModel, {{inv.TargetTypeFullName}} view{{extraParams}})
@@ -220,13 +240,15 @@ internal static class BindCodeGenerator
                                     // Bind: {{viewModelPathComment}} <-> {{viewPathComment}}{{conversionComment}}{{schedulerComment}}
                         """);
 
+        BindingEmitterHelpers.EmitBindingHookGuard(sb, "viewModel", "view", "TwoWay", "null");
+
         // Emit inline observation code instead of delegating to WhenChanged dispatch
         ObservationCodeGenerator.EmitInlineObservation(
             sb,
-            "viewModel",
-            inv.SourcePropertyPath,
+            observation.RootVariable,
+            observation.Path,
             inv.SourcePropertyTypeFullName,
-            sourceClassInfo,
+            observation.RootClassInfo,
             ViewModelObservableName);
 
         ObservationCodeGenerator.EmitInlineObservation(
@@ -240,12 +262,18 @@ internal static class BindCodeGenerator
         if (inv.HasConversion || inv.HasScheduler)
         {
             var (viewModelVar, viewVar) = EmitConversionAndSchedulerStages(sb, inv);
+            (viewModelVar, viewVar) = EmitRegistryConversionStages(sb, inv, viewModelVar, viewVar);
+            viewModelVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, viewModelVar, "viewThreadObs");
 
-            EmitTwoWaySubscription(sb, inv, viewModelVar, viewVar, viewPropertyAccess, viewModelSetAccess, supportsNullable);
+            EmitTwoWaySubscription(sb, inv, viewModelVar, viewVar, viewPropertyAccess, viewModelSetAccess);
         }
         else
         {
-            EmitTwoWaySubscription(sb, inv, ViewModelObservableName, ViewObservableName, viewPropertyAccess, viewModelSetAccess, supportsNullable);
+            var (viewModelVar, viewVar) =
+                EmitRegistryConversionStages(sb, inv, ViewModelObservableName, ViewObservableName);
+            viewModelVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, viewModelVar, "viewThreadObs");
+
+            EmitTwoWaySubscription(sb, inv, viewModelVar, viewVar, viewPropertyAccess, viewModelSetAccess);
         }
     }
 
@@ -272,17 +300,15 @@ internal static class BindCodeGenerator
 
     /// <summary>Formats the return type for a concrete Bind overload.</summary>
     /// <param name="group">The binding type group.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <returns>The fully qualified return type string.</returns>
-    internal static string FormatReturnType(BindingTypeGroup group, bool supportsNullable) =>
-        $"global::ReactiveUI.Binding.IReactiveBinding<{group.TargetTypeFullName}, {BindReturnValueType(supportsNullable)}>";
+    internal static string FormatReturnType(BindingTypeGroup group) =>
+        $"global::ReactiveUI.Binding.IReactiveBinding<{group.TargetTypeFullName}, {BindingChange}>";
 
     /// <summary>Formats the return type for a private Bind method.</summary>
     /// <param name="inv">The binding invocation info.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <returns>The fully qualified return type string.</returns>
-    internal static string FormatMethodReturnType(BindingInvocationInfo inv, bool supportsNullable) =>
-        $"global::ReactiveUI.Binding.IReactiveBinding<{inv.TargetTypeFullName}, {BindReturnValueType(supportsNullable)}>";
+    internal static string FormatMethodReturnType(BindingInvocationInfo inv) =>
+        $"global::ReactiveUI.Binding.IReactiveBinding<{inv.TargetTypeFullName}, {BindingChange}>";
 
     /// <summary>
     /// Emits the conversion and scheduler stages that sit between the raw observations and the
@@ -291,7 +317,7 @@ internal static class BindCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>The view model and view observable variable names after the stages are applied.</returns>
-    private static (string ViewModelVar, string ViewVar) EmitConversionAndSchedulerStages(
+    private static BindingObservables EmitConversionAndSchedulerStages(
         StringBuilder sb,
         BindingInvocationInfo inv)
     {
@@ -313,14 +339,14 @@ internal static class BindCodeGenerator
         if (inv.HasScheduler)
         {
             _ = sb.AppendLine($"""
-                                   var vmBind = new {ObserveOnObservable}<{inv.TargetPropertyTypeFullName}>({viewModelVar}, scheduler);
-                                   var viewBind = new {ObserveOnObservable}<{inv.SourcePropertyTypeFullName}>({viewVar}, scheduler);
+                                   var vmBind = {LinqExtensions}.ObserveOn<{inv.TargetPropertyTypeFullName}>({viewModelVar}, scheduler);
+                                   var viewBind = {LinqExtensions}.ObserveOn<{inv.SourcePropertyTypeFullName}>({viewVar}, scheduler);
                            """);
             viewModelVar = "vmBind";
             viewVar = "viewBind";
         }
 
-        return (viewModelVar, viewVar);
+        return new(viewModelVar, viewVar);
     }
 
     /// <summary>Emits the two-way subscription, change-stream merge, and <c>ReactiveBinding</c> return block.</summary>
@@ -330,37 +356,32 @@ internal static class BindCodeGenerator
     /// <param name="viewVar">The view observable variable name to subscribe to.</param>
     /// <param name="viewPropertyAccess">The view property setter access chain.</param>
     /// <param name="viewModelSetAccess">The view model property setter access chain.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     private static void EmitTwoWaySubscription(
         StringBuilder sb,
         BindingInvocationInfo inv,
         string viewModelVar,
         string viewVar,
         string viewPropertyAccess,
-        string viewModelSetAccess,
-        bool supportsNullable)
-    {
-        var nullable = supportsNullable ? "?" : string.Empty;
-        _ = sb.AppendLine($$"""
+        string viewModelSetAccess) => _ = sb.AppendLine($$"""
 
-                                    var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe({{viewModelVar}}, value =>
+                                    var d1 = {{BindingErrors}}.Subscribe({{viewModelVar}}, value =>
                                     {
-                                        {{viewPropertyAccess}} = value;
-                                    });
+                                        {{viewPropertyAccess}}
+                                    }, "{{CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)}}");
 
                                     var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip({{viewVar}}, 1);
-                                    var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__viewSkipped, value =>
+                                    var d2 = {{BindingErrors}}.Subscribe(__viewSkipped, value =>
                                     {
-                                        {{viewModelSetAccess}} = value;
-                                    });
+                                        {{viewModelSetAccess}}
+                                    }, "{{CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText)}}");
 
-                                    var __vmTagged = new {{MapSignal}}<{{inv.TargetPropertyTypeFullName}}, (object{{nullable}}, bool)>({{viewModelVar}}, v => ((object{{nullable}})v, true));
-                                    var __viewTagged = new {{MapSignal}}<{{inv.SourcePropertyTypeFullName}}, (object{{nullable}}, bool)>(__viewSkipped, v => ((object{{nullable}})v, false));
-                                    var changed = new {{MergeSignal}}<(object{{nullable}}, bool)>(__vmTagged, __viewTagged);
+                                    var __vmTagged = new {{MapSignal}}<{{inv.TargetPropertyTypeFullName}}, {{BindingChange}}>({{viewModelVar}}, v => new {{BindingChange}}(v, true));
+                                    var __viewTagged = new {{MapSignal}}<{{inv.SourcePropertyTypeFullName}}, {{BindingChange}}>(__viewSkipped, v => new {{BindingChange}}(v, false));
+                                    var changed = new {{MergeSignal}}<{{BindingChange}}>(__vmTagged, __viewTagged);
 
                                     var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
 
-                                    return new global::ReactiveUI.Binding.ReactiveBinding<{{inv.TargetTypeFullName}}, {{BindReturnValueType(supportsNullable)}}>(
+                                    return new global::ReactiveUI.Binding.ReactiveBinding<{{inv.TargetTypeFullName}}, {{BindingChange}}>(
                                         view,
                                         changed,
                                         global::ReactiveUI.Binding.BindingDirection.TwoWay,
@@ -368,15 +389,88 @@ internal static class BindCodeGenerator
                                 }
                         """)
             .AppendLine();
+
+    /// <summary>Emits the stages that convert each direction to the type the other side declares.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="inv">The binding invocation info.</param>
+    /// <param name="viewModelVar">The variable holding the view model side's values.</param>
+    /// <param name="viewVar">The variable holding the view side's values.</param>
+    /// <returns>The variables to subscribe each direction to.</returns>
+    /// <remarks>
+    /// Two-way needs both: each direction assigns across the same type gap, in opposite directions.
+    /// </remarks>
+    private static BindingObservables EmitRegistryConversionStages(
+        StringBuilder sb,
+        BindingInvocationInfo inv,
+        string viewModelVar,
+        string viewVar)
+    {
+        if (!BindingEmitterHelpers.RequiresRegistryConversion(inv))
+        {
+            return new(viewModelVar, viewVar);
+        }
+
+        const string convertedViewModelVar = "convertedVmObs";
+        const string convertedViewVar = "convertedViewObs";
+
+        BindingEmitterHelpers.EmitRegistryConversion(
+            sb,
+            viewModelVar,
+            convertedViewModelVar,
+            inv.SourcePropertyTypeFullName,
+            inv.TargetPropertyTypeFullName);
+
+        BindingEmitterHelpers.EmitRegistryConversion(
+            sb,
+            viewVar,
+            convertedViewVar,
+            inv.TargetPropertyTypeFullName,
+            inv.SourcePropertyTypeFullName);
+
+        return new(convertedViewModelVar, convertedViewVar);
     }
 
-    /// <summary>
-    /// The <c>IReactiveBinding</c> value-tuple type emitted for two-way bindings. Annotated nullable
-    /// (<c>object?</c>) when the target supports nullable reference types so the bound value (which may be
-    /// null for reference types) is correctly typed; plain <c>object</c> on C# 7.3.
-    /// </summary>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    /// <returns>The value-tuple type string.</returns>
-    private static string BindReturnValueType(bool supportsNullable) =>
-        supportsNullable ? "(object? View, bool IsViewModel)" : "(object View, bool IsViewModel)";
+    /// <summary>Names the conversions the fallback needs, matching whatever the generated body would apply.</summary>
+    /// <param name="group">The binding type group.</param>
+    /// <returns>The converter-pair argument, trailed by a comma, or empty when both sides share a type.</returns>
+    private static string FormatFallbackConverters(BindingTypeGroup group)
+    {
+        if (group.HasConversion)
+        {
+            return $"{TwoWayConverters}.Create({ForwardConverterName}, {ReverseConverterName}), ";
+        }
+
+        if (!BindingEmitterHelpers.RequiresRegistryConversion(group))
+        {
+            return string.Empty;
+        }
+
+        var forward = CodeGeneratorHelpers.FormatRegistryConversionLambda(
+            group.SourcePropertyTypeFullName,
+            group.TargetPropertyTypeFullName);
+        var reverse = CodeGeneratorHelpers.FormatRegistryConversionLambda(
+            group.TargetPropertyTypeFullName,
+            group.SourcePropertyTypeFullName);
+
+        // Both arguments are lambdas, which cannot drive inference, so the pair names its types outright.
+        return
+            $"{TwoWayConverters}.Create<{group.SourcePropertyTypeFullName}, {group.TargetPropertyTypeFullName}>({forward}, {reverse}), ";
+    }
+
+    /// <summary>Emits the check that hands the binding to the runtime engine when a registered plugin outranks the generated one.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group, which fixes both bound types for the whole overload.</param>
+    /// <param name="bindingExpression">The C# expression naming the bound view property, used when a write faults.</param>
+    private static void EmitAffinityOverride(StringBuilder sb, BindingTypeGroup group, string bindingExpression)
+    {
+        var convertersArg = FormatFallbackConverters(group);
+        var schedulerArg = group.HasScheduler ? "scheduler" : "null";
+
+        BindingEmitterHelpers.EmitAffinityOverride(
+            sb,
+            group,
+            "Bind",
+            $"view, viewModel, viewModelProperty, viewProperty, {convertersArg}{schedulerArg}, {bindingExpression}",
+            true);
+    }
 }

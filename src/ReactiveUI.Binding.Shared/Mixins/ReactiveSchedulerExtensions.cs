@@ -435,7 +435,7 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
-        public IReactiveBinding<TView, (object? View, bool IsViewModel)> Bind<TViewModel, TVMProp, TVProp>(
+        public IReactiveBinding<TView, BindingChange> Bind<TViewModel, TVMProp, TVProp>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,
             Expression<Func<TView, TVProp>> viewProperty,
@@ -466,7 +466,7 @@ public static class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
-        public IReactiveBinding<TView, (object? View, bool IsViewModel)> Bind<TViewModel, TVMProp, TVProp>(
+        public IReactiveBinding<TView, BindingChange> Bind<TViewModel, TVMProp, TVProp>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,
             Expression<Func<TView, TVProp>> viewProperty,
@@ -500,7 +500,7 @@ public static class ReactiveSchedulerExtensions
             "Design",
             "SST2309:Optional parameters should be overloads",
             Justification = "Part of the CallerInfo dispatch contract; overloads would exceed the parameter limit.")]
-        public IReactiveBinding<TView, (object? View, bool IsViewModel)> Bind<TViewModel, TVMProp, TVProp>(
+        public IReactiveBinding<TView, BindingChange> Bind<TViewModel, TVMProp, TVProp>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,
             Expression<Func<TView, TVProp>> viewProperty,

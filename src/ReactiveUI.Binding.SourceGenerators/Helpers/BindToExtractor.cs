@@ -33,7 +33,7 @@ internal static class BindToExtractor
             return null;
         }
 
-        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType.Name))
+        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType))
         {
             return null;
         }
@@ -55,14 +55,12 @@ internal static class BindToExtractor
 
         var targetPropertyArg = args[1].Expression;
         var targetPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(targetPropertyArg, semanticModel, ct);
-        if (targetPropertyPath is null || targetPropertyPath.Length == 0)
-        {
-            return null;
-        }
-
         var targetTypeName =
             ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
-        if (targetTypeName is null)
+
+        // One guard for both: a target the model could not name is as unusable as a property path it could
+        // not read, and the target type is only reachable through an argument the path check already covers.
+        if (targetPropertyPath is null || targetPropertyPath.Length == 0 || targetTypeName is null)
         {
             return null;
         }
@@ -95,7 +93,7 @@ internal static class BindToExtractor
     /// </summary>
     /// <param name="receiver">The receiver type symbol.</param>
     /// <returns>The observable value type, or null if the receiver is not an observable.</returns>
-    private static ITypeSymbol? GetObservableValueType(ITypeSymbol? receiver)
+    internal static ITypeSymbol? GetObservableValueType(ITypeSymbol? receiver)
     {
         if (receiver is INamedTypeSymbol { Name: "IObservable", TypeArguments.Length: 1 } direct
             && direct.ContainingNamespace?.ToDisplayString() == "System")
@@ -103,12 +101,9 @@ internal static class BindToExtractor
             return direct.TypeArguments[0];
         }
 
-        if (receiver is null)
-        {
-            return null;
-        }
-
-        foreach (var iface in receiver.AllInterfaces)
+        // A null receiver simply has no interfaces to walk, so it falls through to the same result as one
+        // that implements nothing; a separate guard for it could never be taken from the only caller.
+        foreach (var iface in receiver?.AllInterfaces ?? System.Collections.Immutable.ImmutableArray<INamedTypeSymbol>.Empty)
         {
             if (iface is { Name: "IObservable", TypeArguments.Length: 1 }
                 && iface.ContainingNamespace?.ToDisplayString() == "System")

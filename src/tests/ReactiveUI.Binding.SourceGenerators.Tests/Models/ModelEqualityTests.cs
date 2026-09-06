@@ -159,8 +159,8 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_Equals_SameValues_ReturnsTrue()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false);
-        var b = new ObservablePropertyInfo("Name", StringTypeName, true, false, false);
+        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var b = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
         await Assert.That(a.Equals(b)).IsTrue();
     }
@@ -170,8 +170,8 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_Equals_DifferentValues_ReturnsFalse()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false);
-        var b = new ObservablePropertyInfo("Age", Int32TypeName, true, false, false);
+        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var b = new ObservablePropertyInfo("Age", Int32TypeName, true, false, false, false);
 
         await Assert.That(a.Equals(b)).IsFalse();
     }
@@ -181,7 +181,7 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_Equals_ObjectNull_ReturnsFalse()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false);
+        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
         await Assert.That(a.Equals(NullReference())).IsFalse();
     }
@@ -191,7 +191,7 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_Equals_ObjectWrongType_ReturnsFalse()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false);
+        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
         await Assert.That(a.Equals(StringName)).IsFalse();
     }
@@ -201,8 +201,8 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_GetHashCode_SameValues_AreEqual()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false);
-        var b = new ObservablePropertyInfo("Name", StringTypeName, true, false, false);
+        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var b = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
         await Assert.That(a.GetHashCode()).IsEqualTo(b.GetHashCode());
     }
@@ -212,8 +212,8 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_OperatorEquals_SameValues_ReturnsTrue()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false);
-        var b = new ObservablePropertyInfo("Name", StringTypeName, true, false, false);
+        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var b = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
         await Assert.That(a == b).IsTrue();
     }
@@ -223,8 +223,8 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_OperatorNotEquals_DifferentValues_ReturnsTrue()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false);
-        var b = new ObservablePropertyInfo("Name", StringTypeName, false, false, false);
+        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var b = new ObservablePropertyInfo("Name", StringTypeName, false, false, false, false);
 
         await Assert.That(a != b).IsTrue();
     }
@@ -234,7 +234,7 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_ToString_ContainsTypeName()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false);
+        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
         await Assert.That(a.ToString()).Contains("ObservablePropertyInfo");
     }
@@ -423,8 +423,8 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_SameValues_ReturnsTrue()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true);
-        var b = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true);
+        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var b = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
         await Assert.That(a.Equals(b)).IsTrue();
     }
@@ -434,8 +434,8 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_DifferentValues_ReturnsFalse()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true);
-        var b = new PropertyPathSegment("Age", Int32TypeName, MyViewModelTypeName, false);
+        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var b = new PropertyPathSegment("Age", Int32TypeName, MyViewModelTypeName, false, null);
 
         await Assert.That(a.Equals(b)).IsFalse();
     }
@@ -445,7 +445,7 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_ObjectNull_ReturnsFalse()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true);
+        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
         await Assert.That(a.Equals(NullReference())).IsFalse();
     }
@@ -455,7 +455,7 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_ObjectWrongType_ReturnsFalse()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true);
+        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
         await Assert.That(a.Equals(StringName)).IsFalse();
     }
@@ -465,8 +465,8 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_GetHashCode_SameValues_AreEqual()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true);
-        var b = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true);
+        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var b = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
         await Assert.That(a.GetHashCode()).IsEqualTo(b.GetHashCode());
     }
@@ -476,8 +476,8 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_OperatorEquals_SameValues_ReturnsTrue()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true);
-        var b = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true);
+        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var b = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
         await Assert.That(a == b).IsTrue();
     }
@@ -487,8 +487,8 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_OperatorNotEquals_DifferentValues_ReturnsTrue()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true);
-        var b = new PropertyPathSegment("Name", StringTypeName, "global::TestApp.OtherType", true);
+        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var b = new PropertyPathSegment("Name", StringTypeName, "global::TestApp.OtherType", true, null);
 
         await Assert.That(a != b).IsTrue();
     }
@@ -498,7 +498,7 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_ToString_ContainsTypeName()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true);
+        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
         await Assert.That(a.ToString()).Contains("PropertyPathSegment");
     }

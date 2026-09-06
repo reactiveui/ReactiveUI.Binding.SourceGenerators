@@ -17,6 +17,12 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class BindToCodeGenerator
 {
+    /// <summary>The indentation the direct-assignment subscription body sits at.</summary>
+    private const string DirectSubscriptionBodyIndent = "                ";
+
+    /// <summary>The indentation the converted-assignment subscription body sits at, one block deeper.</summary>
+    private const string ConvertedSubscriptionBodyIndent = "                    ";
+
     /// <summary>Generates concrete typed overloads and binding methods for <c>BindTo</c> invocations.</summary>
     /// <param name="invocations">All detected <c>BindTo</c> invocations.</param>
     /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
@@ -39,7 +45,14 @@ internal static class BindToCodeGenerator
 
         for (var g = 0; g < groups.Count; g++)
         {
-            var group = groups[g];
+            var group = supportsCallerArgExpr
+                ? groups[g] with
+                {
+                    Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
+                        groups[g].Invocations,
+                        static x => x.TargetExpressionText),
+                }
+                : groups[g];
 
             GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
             _ = sb.AppendLine();
@@ -163,7 +176,7 @@ internal static class BindToCodeGenerator
                                   [{{CallerFilePath}}] string callerFilePath = "",
                                   [{{CallerLineNumber}}] int callerLineNumber = 0)
                               {
-                                  propertyExpression = propertyExpression.StartsWith("static ") ? propertyExpression.Substring(7) : propertyExpression;
+                                  propertyExpression = propertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal) ? propertyExpression.Substring(7) : propertyExpression;
 
                       """);
 
@@ -265,7 +278,16 @@ internal static class BindToCodeGenerator
     /// <param name="suffix">The stable method-name suffix.</param>
     internal static void GenerateBindToMethod(StringBuilder sb, BindToInvocationInfo inv, string suffix)
     {
-        var targetAccess = CodeGeneratorHelpers.BuildPropertySetterChain("target", inv.TargetPropertyPath);
+        var directAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
+            "target",
+            inv.TargetPropertyPath,
+            "value",
+            DirectSubscriptionBodyIndent);
+        var convertedAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
+            "target",
+            inv.TargetPropertyPath,
+            "__converted",
+            ConvertedSubscriptionBodyIndent);
         var targetPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
         var extraParams = FormatExtraMethodParams(inv);
 
@@ -282,10 +304,10 @@ internal static class BindToCodeGenerator
         if (directAssign)
         {
             _ = sb.AppendLine($$"""
-                                        return {{RxBindingExtensions}}.Subscribe(source, value =>
+                                        return {{BindingErrors}}.Subscribe(source, value =>
                                         {
-                                            {{targetAccess}} = value;
-                                        });
+                                            {{directAssignment}}
+                                        }, "{{CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)}}");
                                     }
                             """)
                 .AppendLine();
@@ -293,13 +315,13 @@ internal static class BindToCodeGenerator
         else
         {
             _ = sb.AppendLine($$"""
-            return {{RxBindingExtensions}}.Subscribe(source, value =>
+            return {{BindingErrors}}.Subscribe(source, value =>
             {
                 if ({{RuntimeBindingConverter}}.TryConvert<{{inv.SourceValueTypeFullName}}, {{inv.TargetPropertyTypeFullName}}>(value, {{FormatConversionArguments(inv)}}, out var __converted))
                 {
-                    {{targetAccess}} = __converted;
+                    {{convertedAssignment}}
                 }
-            });
+            }, "{{CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)}}");
         }
 """)
                 .AppendLine();

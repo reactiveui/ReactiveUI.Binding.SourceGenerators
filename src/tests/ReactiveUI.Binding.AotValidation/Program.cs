@@ -88,12 +88,12 @@ internal static class Program
     private static void ValidateWhenChangedTwoProperties()
     {
         var vm = new AotViewModel { Name = Alice, Age = InitialAge };
-        (string Name, int Age) last = default;
+        PropertyValues<string, int> last = default;
         using var sub = vm.WhenChanged(x => x.Name, x => x.Age).Subscribe(v => last = v);
-        AssertEqual("WhenChanged two-prop name", Alice, last.Name);
-        AssertEqual("WhenChanged two-prop age", InitialAge, last.Age);
+        AssertEqual("WhenChanged two-prop name", Alice, last.Property1);
+        AssertEqual("WhenChanged two-prop age", InitialAge, last.Property2);
         vm.Age = UpdatedAge;
-        AssertEqual("WhenChanged two-prop age update", UpdatedAge, last.Age);
+        AssertEqual("WhenChanged two-prop age update", UpdatedAge, last.Property2);
     }
 
     /// <summary>WhenChanged on the view type produces a dispatch entry required by BindTwoWay.</summary>

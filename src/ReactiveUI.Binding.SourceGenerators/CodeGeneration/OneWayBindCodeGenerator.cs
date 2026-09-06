@@ -16,6 +16,9 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class OneWayBindCodeGenerator
 {
+    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
+    private const string SubscriptionBodyIndent = "                    ";
+
     /// <summary>What this API calls the projection argument in its generated signatures.</summary>
     private const string ConversionParameterName = "selector";
 
@@ -87,6 +90,8 @@ internal static class OneWayBindCodeGenerator
                               {
                       """);
 
+        EmitAffinityOverride(sb, group, "viewPropertyExpression");
+
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
@@ -156,6 +161,11 @@ internal static class OneWayBindCodeGenerator
                               {
                       """);
 
+        EmitAffinityOverride(
+            sb,
+            group,
+            $"\"{CodeGeneratorHelpers.EscapeString(group.Invocations[0].TargetExpressionText)}\"");
+
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
@@ -187,14 +197,20 @@ internal static class OneWayBindCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
     /// <param name="sourceClassInfo">The source type class binding info.</param>
+    /// <param name="targetClassInfo">The view type class binding info, which says whether it exposes a view model.</param>
     /// <param name="suffix">The stable method name suffix.</param>
     internal static void GenerateOneWayBindMethod(
         StringBuilder sb,
         BindingInvocationInfo inv,
         ClassBindingInfo? sourceClassInfo,
+        ClassBindingInfo? targetClassInfo,
         string suffix)
     {
-        var viewPropertyAccess = CodeGeneratorHelpers.BuildPropertySetterChain("view", inv.TargetPropertyPath);
+        var viewAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
+            "view",
+            inv.TargetPropertyPath,
+            "value",
+            SubscriptionBodyIndent);
         var viewModelPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath);
         var viewPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
 
@@ -209,25 +225,36 @@ internal static class OneWayBindCodeGenerator
                                     // OneWayBind: {{viewModelPathComment}} -> {{viewPathComment}}{{conversionComment}}{{schedulerComment}}
                         """);
 
+        BindingEmitterHelpers.EmitBindingHookGuard(sb, "viewModel", "view", "OneWay", "null");
+
         // Emit inline observation code instead of delegating to WhenChanged dispatch
+        var observation = BindingEmitterHelpers.ResolveViewModelObservation(inv, sourceClassInfo, targetClassInfo);
+
         ObservationCodeGenerator.EmitInlineObservation(
             sb,
-            "viewModel",
-            inv.SourcePropertyPath,
+            observation.RootVariable,
+            observation.Path,
             inv.SourcePropertyTypeFullName,
-            sourceClassInfo,
+            observation.RootClassInfo,
             SourceObservableVariable);
 
         var currentVar = inv.HasConversion || inv.HasScheduler
             ? EmitConversionAndSchedulerStages(sb, inv)
             : SourceObservableVariable;
 
+        if (BindingEmitterHelpers.RequiresRegistryConversion(inv))
+        {
+            currentVar = EmitRegistryConversionStage(sb, inv, currentVar);
+        }
+
+        currentVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, currentVar, "viewThreadObs");
+
         _ = sb.AppendLine($$"""
 
-                                        var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe({{currentVar}}, value =>
+                                        var sub = {{BindingErrors}}.Subscribe({{currentVar}}, value =>
                                         {
-                                            {{viewPropertyAccess}} = value;
-                                        });
+                                            {{viewAssignment}}
+                                        }, "{{CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)}}");
 
                                         return new global::ReactiveUI.Binding.ReactiveBinding<{{inv.TargetTypeFullName}}, {{inv.TargetPropertyTypeFullName}}>(
                                             view,
@@ -237,6 +264,28 @@ internal static class OneWayBindCodeGenerator
                                     }
                             """)
             .AppendLine();
+    }
+
+    /// <summary>Emits the stage that converts the observed values to the target property's type.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="inv">The binding invocation info.</param>
+    /// <param name="sourceVar">The variable holding the values to convert.</param>
+    /// <returns>The name of the variable holding the converted values.</returns>
+    internal static string EmitRegistryConversionStage(
+        StringBuilder sb,
+        BindingInvocationInfo inv,
+        string sourceVar)
+    {
+        const string convertedVar = "convertedObs";
+
+        BindingEmitterHelpers.EmitRegistryConversion(
+            sb,
+            sourceVar,
+            convertedVar,
+            inv.SourcePropertyTypeFullName,
+            inv.TargetPropertyTypeFullName);
+
+        return convertedVar;
     }
 
     /// <summary>Appends extra parameters (selector, scheduler) to the concrete overload signature.</summary>
@@ -263,9 +312,12 @@ internal static class OneWayBindCodeGenerator
     /// <summary>Formats the return type for a concrete OneWayBind overload.</summary>
     /// <param name="group">The binding type group.</param>
     /// <returns>The fully qualified return type string.</returns>
+    /// <remarks>
+    /// Always the view property's type, which is what the runtime stub declares. Using the source type when no
+    /// converter was supplied only agrees with the stub while the two sides happen to match.
+    /// </remarks>
     internal static string FormatReturnType(BindingTypeGroup group) =>
-        $"global::ReactiveUI.Binding.IReactiveBinding<{group.TargetTypeFullName}, "
-        + $"{(group.HasConversion ? group.TargetPropertyTypeFullName : group.SourcePropertyTypeFullName)}>";
+        $"global::ReactiveUI.Binding.IReactiveBinding<{group.TargetTypeFullName}, {group.TargetPropertyTypeFullName}>";
 
     /// <summary>Formats the return type for a private OneWayBind method.</summary>
     /// <param name="inv">The binding invocation info.</param>
@@ -292,10 +344,42 @@ internal static class OneWayBindCodeGenerator
         if (inv.HasScheduler)
         {
             _ = sb.AppendLine(
-                $"        var bindObs = new {ObserveOnObservable}<{inv.TargetPropertyTypeFullName}>({currentVar}, scheduler);");
+                $"        var bindObs = {LinqExtensions}.ObserveOn<{inv.TargetPropertyTypeFullName}>({currentVar}, scheduler);");
             currentVar = "bindObs";
         }
 
         return currentVar;
+    }
+
+    /// <summary>Names the conversion the fallback needs, matching whatever the generated body would apply.</summary>
+    /// <param name="group">The binding type group.</param>
+    /// <returns>The conversion argument, trailed by a comma, or empty when the two sides share a type.</returns>
+    private static string FormatFallbackConversion(BindingTypeGroup group)
+    {
+        if (group.HasConversion)
+        {
+            return $"{ConversionParameterName}, ";
+        }
+
+        return BindingEmitterHelpers.RequiresRegistryConversion(group)
+            ? $"{CodeGeneratorHelpers.FormatRegistryConversionLambda(group.SourcePropertyTypeFullName, group.TargetPropertyTypeFullName)}, "
+            : string.Empty;
+    }
+
+    /// <summary>Emits the check that hands the binding to the runtime engine when a registered plugin outranks the generated one.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group, which fixes the observed type for the whole overload.</param>
+    /// <param name="bindingExpression">The C# expression naming the bound view property, used when a write faults.</param>
+    private static void EmitAffinityOverride(StringBuilder sb, BindingTypeGroup group, string bindingExpression)
+    {
+        var conversionArg = FormatFallbackConversion(group);
+        var schedulerArg = group.HasScheduler ? "scheduler" : "null";
+
+        BindingEmitterHelpers.EmitAffinityOverride(
+            sb,
+            group,
+            "OneWayBind",
+            $"view, viewModel, viewModelProperty, viewProperty, {conversionArg}{schedulerArg}, {bindingExpression}",
+            false);
     }
 }

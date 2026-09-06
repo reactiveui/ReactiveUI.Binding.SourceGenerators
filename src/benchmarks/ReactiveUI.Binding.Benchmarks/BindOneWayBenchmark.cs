@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 using ReactiveUI.Primitives.Concurrency;
 
@@ -13,6 +14,7 @@ namespace ReactiveUI.Binding.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [SimpleJob(RuntimeMoniker.NativeAot10_0, id: nameof(RuntimeMoniker.NativeAot10_0))]
 [MemoryDiagnoser]
+[EventPipeProfiler(EventPipeProfile.GcVerbose)]
 [MarkdownExporterAttribute.GitHub]
 public class BindOneWayBenchmark
 {
@@ -48,7 +50,7 @@ public class BindOneWayBenchmark
         }
     }
 
-    /// <summary>One-way binding with ImmediateSequencer: measures ObserveOnObservable overhead.</summary>
+    /// <summary>One-way binding with ImmediateSequencer: measures the scheduler-carrying overload's overhead.</summary>
     [Benchmark(Description = "BindOneWay + Scheduler")]
     public void WithScheduler()
     {

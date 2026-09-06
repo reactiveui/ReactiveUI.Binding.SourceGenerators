@@ -10,6 +10,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests;
 /// <summary>Snapshot tests for BindInteraction invocation generation.</summary>
 public class BindInteractionGeneratorTests
 {
+    /// <summary>The <c>BindInteractionDispatch.g.cs</c> name these tests generate against.</summary>
+    private const string BindInteractionDispatchgcsName = "BindInteractionDispatch.g.cs";
+
     /// <summary>Verifies BindInteraction with a task-based handler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -133,5 +136,84 @@ public class BindInteractionGeneratorTests
             typeof(BindInteractionGeneratorTests),
             TestHelper.FallbackLanguageVersion(nullableEnabled: true));
         await result.HasNoGeneratorDiagnostics();
+    }
+
+    /// <summary>A BindInteraction whose property argument is not a lambda resolves no interaction types.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindInteraction_PropertyArgumentNotALambda_GeneratesNoDispatch()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using System.Linq.Expressions;
+                              using System.Threading.Tasks;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                                      public object? Confirm { get; set; }
+                                  }
+
+                                  public class MyView : IViewFor
+                                  {
+                                      public object? ViewModel { get; set; }
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyView view, MyViewModel vm, Expression<Func<MyViewModel, object?>> property)
+                                      {
+                                          view.BindInteraction(vm, property, x => Task.CompletedTask);
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
+        await result.DoesNotHaveGeneratedSource(BindInteractionDispatchgcsName);
+    }
+
+    /// <summary>A BindInteraction whose property lambda has a statement body resolves no interaction types.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindInteraction_PropertyLambdaWithStatementBody_GeneratesNoDispatch()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using System.Threading.Tasks;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                                      public object? Confirm { get; set; }
+                                  }
+
+                                  public class MyView : IViewFor
+                                  {
+                                      public object? ViewModel { get; set; }
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyView view, MyViewModel vm)
+                                      {
+                                          view.BindInteraction(vm, x => { throw new NotSupportedException(); }, x => Task.CompletedTask);
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
+        await result.DoesNotHaveGeneratedSource(BindInteractionDispatchgcsName);
     }
 }

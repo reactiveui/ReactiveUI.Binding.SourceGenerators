@@ -15,6 +15,6 @@ public static class Scenario
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of five-property tuples.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IObservable<(string Prop1, int Prop2, double Prop3, bool Prop4, string Prop5)> Execute(MyViewModel vm) =>
+    public static IObservable<PropertyValues<string, int, double, bool, string>> Execute(MyViewModel vm) =>
         vm.WhenAnyValue(x => x.Prop1, x => x.Prop2, x => x.Prop3, x => x.Prop4, x => x.Prop5);
 }

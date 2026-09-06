@@ -36,7 +36,14 @@ internal static class BindCommandCodeGenerator
 
         for (var g = 0; g < groups.Count; g++)
         {
-            var group = groups[g];
+            var group = supportsCallerArgExpr
+                ? groups[g] with
+                {
+                    Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
+                        groups[g].Invocations,
+                        static x => $"{x.CommandExpressionText}|{x.ControlExpressionText}"),
+                }
+                : groups[g];
 
             GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
             _ = sb.AppendLine();
@@ -195,8 +202,12 @@ internal static class BindCommandCodeGenerator
                                   [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
                                   [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
                               {
-                                  propertyNameExpression = propertyNameExpression.StartsWith("static ") ? propertyNameExpression.Substring(7) : propertyNameExpression;
-                                  controlNameExpression = controlNameExpression.StartsWith("static ") ? controlNameExpression.Substring(7) : controlNameExpression;
+                                  propertyNameExpression = propertyNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                                      ? propertyNameExpression.Substring(7)
+                                      : propertyNameExpression;
+                                  controlNameExpression = controlNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                                      ? controlNameExpression.Substring(7)
+                                      : controlNameExpression;
 
                       """);
 
@@ -402,7 +413,7 @@ internal static class BindCommandCodeGenerator
         if (inv.HasObservableParameter)
         {
             // Cast the typed observable to IObservable<object> via Select
-            return $"new global::ReactiveUI.Binding.Observables.SelectObservable<{inv.ParameterTypeFullName}, object>(withParameter, __p => __p)";
+            return $"new global::ReactiveUI.Primitives.Signals.MapSignal<{inv.ParameterTypeFullName}, object>(withParameter, __p => __p)";
         }
 
         if (inv is { HasExpressionParameter: true, ParameterPropertyPath: not null })
@@ -410,10 +421,10 @@ internal static class BindCommandCodeGenerator
             // Read the parameter property at call time
             var paramAccess =
                 CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value);
-            return $"new global::ReactiveUI.Binding.Observables.ReturnObservable<object>({paramAccess})";
+            return $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<object>({paramAccess})";
         }
 
-        return "global::ReactiveUI.Binding.Observables.EmptyObservable<object>.Instance";
+        return "global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<object>.Instance";
     }
 
     /// <summary>Emits one expression-text comparison branch per call site in the group.</summary>

@@ -35,7 +35,7 @@ internal static class BindingExtractor
         }
 
         // Verify this is our stub or generated method
-        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType.Name))
+        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType))
         {
             return null;
         }
@@ -96,7 +96,7 @@ internal static class BindingExtractor
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The fully qualified source and target type names.</returns>
-    private static (string SourceTypeFullName, string TargetTypeFullName) ResolveBindingSides(
+    private static BindingSides ResolveBindingSides(
         MemberAccessExpressionSyntax memberAccess,
         SeparatedSyntaxList<ArgumentSyntax> args,
         string methodName,
@@ -113,8 +113,8 @@ internal static class BindingExtractor
 
         var isViewFirst = methodName is Constants.OneWayBindMethodName or Constants.BindMethodName;
         return isViewFirst
-            ? (firstArgTypeName, receiverTypeName)
-            : (receiverTypeName, firstArgTypeName);
+            ? new BindingSides(firstArgTypeName, receiverTypeName)
+            : new BindingSides(receiverTypeName, firstArgTypeName);
     }
 
     /// <summary>

@@ -44,6 +44,6 @@ public class INPCObservableForProperty : ICreatesObservableForProperty
             return new NotifyPropertyChangedObservable(sender, expression, expectedName, beforeChanged);
         }
 
-        return NeverObservable<IObservedChange<object, object?>>.Instance;
+        return ImmutableNeverSignal<IObservedChange<object, object?>>.Instance;
     }
 }

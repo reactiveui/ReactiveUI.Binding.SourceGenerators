@@ -17,7 +17,7 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 public sealed class POCOObservableForProperty : ICreatesObservableForProperty
 {
     /// <summary>Tracks which (type, property) pairs have already emitted a POCO warning to avoid duplicate messages.</summary>
-    private static readonly ConcurrentDictionary<(Type Type, string PropertyName), byte> HasWarned = new();
+    private static readonly ConcurrentDictionary<ObservedPropertyKey, byte> HasWarned = new();
 
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Uses reflection over runtime types which is not trim- or AOT-safe.")]
@@ -48,8 +48,8 @@ public sealed class POCOObservableForProperty : ICreatesObservableForProperty
         }
 
         // Emit the current value once, then never complete (so the binding stays alive).
-        return new StartWithObservable<IObservedChange<object, object?>>(
-            NeverObservable<IObservedChange<object, object?>>.Instance,
+        return new LeadSignal<IObservedChange<object, object?>>(
+            ImmutableNeverSignal<IObservedChange<object, object?>>.Instance,
             new ObservedChange<object, object?>(sender, expression, default));
     }
 
@@ -67,7 +67,7 @@ public sealed class POCOObservableForProperty : ICreatesObservableForProperty
     internal static void WarnOnce(object sender, string propertyName)
     {
         var type = sender.GetType();
-        if (!HasWarned.TryAdd((type, propertyName), 0))
+        if (!HasWarned.TryAdd(new(type, propertyName), 0))
         {
             return;
         }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
 using Microsoft.CodeAnalysis;
 
 namespace ReactiveUI.Binding.Generator.Benchmarks;
@@ -14,6 +15,7 @@ namespace ReactiveUI.Binding.Generator.Benchmarks;
 /// driver into setup would let one iteration's caches serve the next.
 /// </remarks>
 [MemoryDiagnoser]
+[EventPipeProfiler(EventPipeProfile.GcVerbose)]
 public class GenerationBenchmarks
 {
     /// <summary>The corpus compilation, built once per parameter set.</summary>

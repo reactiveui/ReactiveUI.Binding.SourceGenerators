@@ -19,7 +19,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            property1Expression = property1Expression.StartsWith("static ") ? property1Expression.Substring(7) : property1Expression;
+            property1Expression = property1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property1Expression.Substring(7) : property1Expression;
 
             // Allow user-registered plugins with higher affinity to override generated observation
             if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level1), 5, false))
@@ -49,7 +49,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     "Model",
                     (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level2)__o).Model,
                     false)
-                : (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3>(default(global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3)));
+                : (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3>(default(global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3)));
 
         var __obs2 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3, global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model>(__obs1,
             __parent2 => __parent2 != null
@@ -58,7 +58,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     "Model",
                     (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3)__o).Model,
                     false)
-                : (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model>(default(global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model)));
+                : (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model>(default(global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model)));
 
         var __obs3 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model, string>(__obs2,
             __parent3 => __parent3 != null
@@ -67,7 +67,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     "Value",
                     (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.FourLevelDeepChain.Model)__o).Value,
                     false)
-                : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
+                : (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
             return global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obs3);
         }
 

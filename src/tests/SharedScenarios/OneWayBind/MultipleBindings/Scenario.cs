@@ -13,9 +13,8 @@ public static class Scenario
     /// <param name="view">The target view.</param>
     /// <param name="vm">The source view model.</param>
     /// <returns>A tuple of bindings.</returns>
-    public static (IReactiveBinding<MyView, string> Name, IReactiveBinding<MyView, int> Age) Execute(
+    public static ScenarioResult Execute(
         MyView view,
         MyViewModel vm) =>
-        (view.OneWayBind(vm, x => x.Name, x => x.NameText),
-            view.OneWayBind(vm, x => x.Age, x => x.AgeText));
+        new(view.OneWayBind(vm, x => x.Name, x => x.NameText), view.OneWayBind(vm, x => x.Age, x => x.AgeText));
 }

@@ -25,14 +25,14 @@ public static class WhenAnyValueScenarios
     /// <param name="fixture">The fixture to observe.</param>
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IObservable<(string Property1, string Property2)> TwoProperties(WhenAnyTestFixture fixture) =>
+    public static IObservable<PropertyValues<string, string>> TwoProperties(WhenAnyTestFixture fixture) =>
         fixture.WhenAnyValue(x => x.Value1, x => x.Value2);
 
     /// <summary>Three-property observation using WhenAnyValue returning a tuple.</summary>
     /// <param name="fixture">The fixture to observe.</param>
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IObservable<(string Property1, string Property2, string Property3)> ThreeProperties(
+    public static IObservable<PropertyValues<string, string, string>> ThreeProperties(
         WhenAnyTestFixture fixture) =>
         fixture.WhenAnyValue(x => x.Value1, x => x.Value2, x => x.Value3);
 

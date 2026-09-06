@@ -43,6 +43,8 @@ public class ObservationAffinityCheckerTests
         AppLocator.UnregisterAll<ICreatesObservableForProperty>();
         try
         {
+            ObservationAffinityChecker.Refresh();
+
             var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
 
             await Assert.That(result).IsFalse();
@@ -62,6 +64,8 @@ public class ObservationAffinityCheckerTests
         try
         {
             AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(LowerPluginAffinity));
+
+            ObservationAffinityChecker.Refresh();
 
             var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
 
@@ -86,6 +90,8 @@ public class ObservationAffinityCheckerTests
         {
             AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(GeneratedAffinity));
 
+            ObservationAffinityChecker.Refresh();
+
             var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
 
             await Assert.That(result).IsFalse();
@@ -105,6 +111,8 @@ public class ObservationAffinityCheckerTests
         try
         {
             AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(HigherPluginAffinity));
+
+            ObservationAffinityChecker.Refresh();
 
             var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
 
@@ -126,6 +134,8 @@ public class ObservationAffinityCheckerTests
         {
             var plugin = new StubObservableForProperty(HigherPluginAffinity, 0);
             AppLocator.Register<ICreatesObservableForProperty>(() => plugin);
+
+            ObservationAffinityChecker.Refresh();
 
             var resultBeforeChanged = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, true);
             var resultAfterChanged = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
@@ -153,6 +163,8 @@ public class ObservationAffinityCheckerTests
             AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(LowerPluginAffinity));
             AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(HigherPluginAffinity));
 
+            ObservationAffinityChecker.Refresh();
+
             var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
 
             await Assert.That(result).IsTrue();
@@ -174,6 +186,8 @@ public class ObservationAffinityCheckerTests
             AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(MinorPluginAffinity));
             AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(AlternatePluginAffinity));
 
+            ObservationAffinityChecker.Refresh();
+
             var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
 
             await Assert.That(result).IsFalse();
@@ -184,10 +198,42 @@ public class ObservationAffinityCheckerTests
         }
     }
 
+    /// <summary>Verifies that a plugin registered after the first resolve is picked up once the cache is dropped.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task HasHigherAffinityPlugin_PluginRegisteredAfterFirstResolve_IsSeenAfterRefresh()
+    {
+        AppLocator.UnregisterAll<ICreatesObservableForProperty>();
+        try
+        {
+            ObservationAffinityChecker.Refresh();
+            var beforeRegistration = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+
+            AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(HigherPluginAffinity));
+
+            // The resolved set is kept, so the new registration is invisible until the cache is dropped.
+            var beforeRefresh = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+
+            ObservationAffinityChecker.Refresh();
+            var afterRefresh = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+
+            await Assert.That(beforeRegistration).IsFalse();
+            await Assert.That(beforeRefresh).IsFalse();
+            await Assert.That(afterRefresh).IsTrue();
+        }
+        finally
+        {
+            RestoreDefaultPlugins();
+        }
+    }
+
     /// <summary>Restores default plugins by re-initializing the binding infrastructure.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void RestoreDefaultPlugins() =>
+    private static void RestoreDefaultPlugins()
+    {
         RuntimeObservationFallbackTests.EnsureInitialized();
+        ObservationAffinityChecker.Refresh();
+    }
 
     /// <summary>A stub implementation of <see cref="ICreatesObservableForProperty"/> for testing.</summary>
     private sealed class StubObservableForProperty : ICreatesObservableForProperty

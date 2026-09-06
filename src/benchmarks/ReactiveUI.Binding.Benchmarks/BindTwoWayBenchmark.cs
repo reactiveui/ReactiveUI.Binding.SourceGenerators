@@ -4,6 +4,7 @@
 
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 using ReactiveUI.Primitives.Concurrency;
 
@@ -14,6 +15,7 @@ namespace ReactiveUI.Binding.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [SimpleJob(RuntimeMoniker.NativeAot10_0, id: nameof(RuntimeMoniker.NativeAot10_0))]
 [MemoryDiagnoser]
+[EventPipeProfiler(EventPipeProfile.GcVerbose)]
 [MarkdownExporterAttribute.GitHub]
 public class BindTwoWayBenchmark
 {
@@ -49,7 +51,7 @@ public class BindTwoWayBenchmark
         }
     }
 
-    /// <summary>Two-way binding with ImmediateSequencer: measures ObserveOnObservable overhead on both directions.</summary>
+    /// <summary>Two-way binding with ImmediateSequencer: measures the scheduler-carrying overload's overhead on both directions.</summary>
     [Benchmark(Description = "BindTwoWay + Scheduler")]
     public void WithScheduler()
     {

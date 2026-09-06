@@ -455,4 +455,49 @@ public class CodeGeneratorHelpersTests
         const int LaterBranchIndex = 5;
         await Assert.That(CodeGeneratorHelpers.ConditionKeyword(LaterBranchIndex)).IsEqualTo("else if");
     }
+
+    /// <summary>The declaration scan answers first when it saw the observed type.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveObservedTypeInfo_TypeWasScanned_ReturnsTheScannedInfo()
+    {
+        var scanned = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+
+        var result = CodeGeneratorHelpers.ResolveObservedTypeInfo(
+            [scanned],
+            scanned.FullyQualifiedName,
+            new([]));
+
+        await Assert.That(result).IsSameReferenceAs(scanned);
+    }
+
+    /// <summary>A type from a referenced assembly is absent from the scan, so the path answers instead.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveObservedTypeInfo_TypeNotScanned_ReadsThePathSegment()
+    {
+        var declaring = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+        var path = new EquatableArray<PropertyPathSegment>(
+            [new("Name", "global::System.String", declaring.FullyQualifiedName, true, declaring)]);
+
+        var result = CodeGeneratorHelpers.ResolveObservedTypeInfo(
+            [],
+            "global::Absent.Type",
+            path);
+
+        await Assert.That(result).IsSameReferenceAs(declaring);
+    }
+
+    /// <summary>With nothing scanned and no path to read, there is nothing to resolve.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveObservedTypeInfo_TypeNotScannedAndPathEmpty_ReturnsNull()
+    {
+        var result = CodeGeneratorHelpers.ResolveObservedTypeInfo(
+            [],
+            "global::Absent.Type",
+            new([]));
+
+        await Assert.That(result).IsNull();
+    }
 }

@@ -1,0 +1,14 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+using ReactiveUI.Binding;
+
+namespace SharedScenarios.OneWayBind.MultipleBindings;
+
+/// <summary>What this scenario hands back to the test that runs it.</summary>
+/// <param name="Name">The scenario's Name result.</param>
+/// <param name="Age">The scenario's Age result.</param>
+public sealed record ScenarioResult(
+    IReactiveBinding<MyView, string> Name,
+    IReactiveBinding<MyView, int> Age);

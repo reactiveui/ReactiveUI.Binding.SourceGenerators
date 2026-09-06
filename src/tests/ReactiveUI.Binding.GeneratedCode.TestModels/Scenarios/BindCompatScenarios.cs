@@ -15,7 +15,7 @@ public static class BindCompatScenarios
     /// <param name="vm">The source view model.</param>
     /// <returns>A reactive binding representing the binding.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IReactiveBinding<TestView, (object? View, bool IsViewModel)> StringProperty(
+    public static IReactiveBinding<TestView, BindingChange> StringProperty(
         TestView view,
         TestViewModel vm) =>
         view.Bind(vm, x => x.Name, x => x.DisplayName);

@@ -14,6 +14,6 @@ public static class Scenario
     /// <param name="vm">The source view model.</param>
     /// <param name="view">The target view.</param>
     /// <returns>A tuple of disposables representing the bindings.</returns>
-    public static (IDisposable NameBinding, IDisposable AgeBinding) Execute(MyViewModel vm, MyView view) =>
-        (vm.BindOneWay(view, x => x.Name, x => x.NameText), vm.BindOneWay(view, x => x.Age, x => x.AgeDisplay));
+    public static ScenarioResult Execute(MyViewModel vm, MyView view) =>
+        new(vm.BindOneWay(view, x => x.Name, x => x.NameText), vm.BindOneWay(view, x => x.Age, x => x.AgeDisplay));
 }

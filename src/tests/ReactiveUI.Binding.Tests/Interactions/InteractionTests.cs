@@ -56,7 +56,7 @@ public class InteractionTests
         using var registration = interaction.RegisterHandler(static ctx =>
         {
             ctx.SetOutput(SampleOutput);
-            return new Binding.Observables.ReturnObservable<int>(0);
+            return new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<int>(0);
         });
 
         var result = await interaction.Handle("test");

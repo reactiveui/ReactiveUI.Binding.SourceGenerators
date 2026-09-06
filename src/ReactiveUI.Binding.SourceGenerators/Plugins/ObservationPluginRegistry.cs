@@ -49,6 +49,28 @@ internal static class ObservationPluginRegistry
         return null;
     }
 
+    /// <summary>Gets the highest-affinity plugin whose mechanism reaches one particular property.</summary>
+    /// <param name="classInfo">The type-level binding info.</param>
+    /// <param name="propertyName">The property being observed.</param>
+    /// <returns>The best matching plugin, or <see langword="null"/> if none reaches that property.</returns>
+    /// <remarks>
+    /// A mechanism that outranks another on the type can still be the wrong one for a given property - a
+    /// component that also raises PropertyChanged declares properties with no change event - so a plugin that
+    /// cannot reach the property is passed over for the next, exactly as a zero affinity would be at runtime.
+    /// </remarks>
+    internal static IObservationPlugin? GetBestPlugin(ClassBindingInfo classInfo, string propertyName)
+    {
+        for (var i = 0; i < Plugins.Length; i++)
+        {
+            if (Plugins[i].IsAMatch(classInfo) && Plugins[i].CanObserveProperty(classInfo, propertyName))
+            {
+                return Plugins[i];
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>Gets a plugin by its observation kind identifier.</summary>
     /// <param name="observationKind">The observation kind (e.g., "INPC", "WpfDP").</param>
     /// <returns>The matching plugin, or <see langword="null"/> if not found.</returns>

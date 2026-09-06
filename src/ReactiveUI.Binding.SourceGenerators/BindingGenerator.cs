@@ -36,13 +36,7 @@ public class BindingGenerator : IIncrementalGenerator
         RegisterSharedAttributeOutput(in context, languageFeatures);
 
         // Pipeline A: Shared type detection
-        // One pass: sets flags for IRO, INPC, WpfDP, WinUIDP, KVO, etc.
-        var allClasses = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                RoslynHelpers.IsClassWithBaseList,
-                TypeDetectionExtractor.ExtractClassBindingInfo)
-            .Where(static x => x is not null)
-            .Select(static (x, _) => x!);
+        var allClasses = DetectTypes(in context);
 
         // Single plugin-based step replaces 7 separate filter calls.
         // Each type is matched against the plugin registry; the highest-affinity
@@ -77,15 +71,20 @@ public class BindingGenerator : IIncrementalGenerator
         // Pipeline B: Invocation detection, one provider per API. The scan lives here rather than inside each
         // generator so that everything this generator looks at in the consumer's syntax is visible in one
         // place; each generator is handed the invocations it asked for and only turns them into source.
+        // The four property-binding APIs differ only in which call sites they match, so one extraction
+        // delegate serves all of them rather than a conversion per scan.
+        Func<GeneratorSyntaxContext, CancellationToken, BindingInvocationInfo?> extractBinding =
+            BindingExtractor.ExtractBindInvocation;
+
         var whenChanged = Detect(in context, RoslynHelpers.IsWhenChangedInvocation, ObservationExtractor.ExtractWhenChangedInvocation);
         var whenChanging = Detect(in context, RoslynHelpers.IsWhenChangingInvocation, ObservationExtractor.ExtractWhenChangingInvocation);
         var whenAnyValue = Detect(in context, RoslynHelpers.IsWhenAnyValueInvocation, ObservationExtractor.ExtractWhenAnyValueInvocation);
         var whenAny = Detect(in context, RoslynHelpers.IsWhenAnyInvocation, ObservationExtractor.ExtractWhenAnyInvocation);
         var whenAnyObservable = Detect(in context, RoslynHelpers.IsWhenAnyObservableInvocation, WhenAnyObservableExtractor.ExtractWhenAnyObservableInvocation);
-        var bindOneWay = Detect(in context, RoslynHelpers.IsBindOneWaySpecificInvocation, BindingExtractor.ExtractBindInvocation);
-        var bindTwoWay = Detect(in context, RoslynHelpers.IsBindTwoWaySpecificInvocation, BindingExtractor.ExtractBindInvocation);
-        var oneWayBind = Detect(in context, RoslynHelpers.IsOneWayBindSpecificInvocation, BindingExtractor.ExtractBindInvocation);
-        var bind = Detect(in context, RoslynHelpers.IsBindSpecificInvocation, BindingExtractor.ExtractBindInvocation);
+        var bindOneWay = Detect(in context, RoslynHelpers.IsBindOneWaySpecificInvocation, extractBinding);
+        var bindTwoWay = Detect(in context, RoslynHelpers.IsBindTwoWaySpecificInvocation, extractBinding);
+        var oneWayBind = Detect(in context, RoslynHelpers.IsOneWayBindSpecificInvocation, extractBinding);
+        var bind = Detect(in context, RoslynHelpers.IsBindSpecificInvocation, extractBinding);
         var bindCommand = Detect(in context, RoslynHelpers.IsBindCommandInvocation, CommandExtractor.ExtractBindCommandInvocation);
         var bindInteraction = Detect(in context, RoslynHelpers.IsBindInteractionInvocation, InteractionExtractor.ExtractBindInteractionInvocation);
         var bindTo = Detect(in context, RoslynHelpers.IsBindToInvocation, BindToExtractor.ExtractBindToInvocation);
@@ -104,6 +103,54 @@ public class BindingGenerator : IIncrementalGenerator
         BindCommandInvocationGenerator.Register(context, bindCommand, allClasses, languageFeatures);
         BindToInvocationGenerator.Register(context, bindTo, languageFeatures);
     }
+
+    /// <summary>Reads the C# language version the consumer is compiling with.</summary>
+    /// <param name="parseOptions">The parse options the compilation was built with.</param>
+    /// <returns>The consumer's language version, or the compiler default when the options are not C#'s.</returns>
+    /// <remarks>
+    /// Everything downstream keys on the language version, so options belonging to another language - or none
+    /// at all - resolve to the default rather than failing the whole generation pass.
+    /// </remarks>
+    internal static LanguageVersion ReadLanguageVersion(ParseOptions? parseOptions) =>
+        (parseOptions as CSharpParseOptions)?.LanguageVersion ?? LanguageVersion.Default;
+
+    /// <summary>Determines whether generated code can apply <c>CallerArgumentExpression</c>.</summary>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <returns><see langword="true"/> when the attribute is present and the consumer can apply it.</returns>
+    /// <remarks>
+    /// The runtime stub declares its expression parameters wherever the attribute is available to it, so the
+    /// same test tells us the shape the generated overload has to match. Accessibility is part of the test: on
+    /// a target framework without the attribute, the only one in reach is the runtime library's own internal
+    /// copy, which the stub cannot expose and generated code cannot apply.
+    /// </remarks>
+    internal static bool HasAccessibleExpressionAttribute(Compilation compilation)
+    {
+        var attribute = compilation.GetTypeByMetadataName(
+            Constants.CallerArgumentExpressionAttributeMetadataName);
+
+        return attribute is not null
+            && compilation.IsSymbolAccessibleWithin(attribute, compilation.Assembly);
+    }
+
+    /// <summary>Detects every type the emitters may need a notification mechanism for.</summary>
+    /// <param name="context">The generator initialization context.</param>
+    /// <returns>One entry per detected type, from declarations and from call sites alike.</returns>
+    /// <remarks>
+    /// Only declarations are scanned here. A type the consumer merely references reaches the emitters through
+    /// the property path instead, which carries how each segment's declaring type notifies - and that costs
+    /// nothing extra, because extraction already holds the symbol. Resolving those types from the call sites
+    /// separately would mean binding every binding invocation a second time, and that binding is the single
+    /// largest allocation in a generation pass.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static IncrementalValuesProvider<ClassBindingInfo> DetectTypes(
+        in IncrementalGeneratorInitializationContext context) =>
+        context.SyntaxProvider
+            .CreateSyntaxProvider(
+                RoslynHelpers.IsClassWithBaseList,
+                TypeDetectionExtractor.ExtractClassBindingInfo)
+            .Where(static x => x is not null)
+            .Select(static (x, _) => x!);
 
     /// <summary>
     /// Declares the observation helper classes that generated observation code instantiates by name, once
@@ -213,16 +260,8 @@ public class BindingGenerator : IIncrementalGenerator
                 var compilation = data.Left.Right;
                 var configOptions = data.Right;
 
-                var languageVersion = (parseOptions as CSharpParseOptions)?.LanguageVersion ?? LanguageVersion.Default;
-
-                // The runtime stub declares its expression parameters wherever the attribute is available to it,
-                // so the same test tells us the shape the generated overload has to match. Accessibility is part
-                // of the test: on a target framework without the attribute, the only one in reach is the runtime
-                // library's own internal copy, which the stub cannot expose and generated code cannot apply.
-                var callerArgExprAttribute = compilation.GetTypeByMetadataName(
-                    Constants.CallerArgumentExpressionAttributeMetadataName);
-                var callerArgExprAvailable = callerArgExprAttribute is not null
-                    && compilation.IsSymbolAccessibleWithin(callerArgExprAttribute, compilation.Assembly);
+                var languageVersion = ReadLanguageVersion(parseOptions);
+                var callerArgExprAvailable = HasAccessibleExpressionAttribute(compilation);
                 var supportsCallerArgExpr = languageVersion >= LanguageVersion.CSharp10 && callerArgExprAvailable;
 
                 // Generated-file markers (// <auto-generated/> + #pragma warning disable) are emitted by default
@@ -376,8 +415,8 @@ public class BindingGenerator : IIncrementalGenerator
     private static EquatableArray<string> CollectTypePaths(INamespaceSymbol root)
     {
         var names = new SortedSet<string>(System.StringComparer.Ordinal);
-        var pending = new Stack<(INamespaceSymbol Namespace, string Prefix)>();
-        pending.Push((root, string.Empty));
+        var pending = new Stack<NamespacePath>();
+        pending.Push(new(root, string.Empty));
 
         while (pending.Count > 0)
         {
@@ -386,7 +425,7 @@ public class BindingGenerator : IIncrementalGenerator
             {
                 if (member is INamespaceSymbol child)
                 {
-                    pending.Push((child, $"{prefix}{child.Name}."));
+                    pending.Push(new(child, $"{prefix}{child.Name}."));
                 }
                 else if (member is INamedTypeSymbol { DeclaredAccessibility: Accessibility.Public } type)
                 {

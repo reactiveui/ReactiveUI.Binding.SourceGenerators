@@ -44,7 +44,7 @@ public class WhenAnyValueMultiPropertyTests
         EnsureInitialized();
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B" };
-        var values = new List<(string Property1, string Property2)>();
+        var values = new List<PropertyValues<string, string>>();
 
         using var sub = fixture.WhenAnyValue(x => x.Value1, x => x.Value2)
             .Subscribe(values.Add);
@@ -62,7 +62,7 @@ public class WhenAnyValueMultiPropertyTests
         EnsureInitialized();
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C" };
-        var values = new List<(string Property1, string Property2, string Property3)>();
+        var values = new List<PropertyValues<string, string, string>>();
 
         using var sub = fixture.WhenAnyValue(x => x.Value1, x => x.Value2, x => x.Value3)
             .Subscribe(values.Add);
@@ -81,7 +81,7 @@ public class WhenAnyValueMultiPropertyTests
         EnsureInitialized();
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C", Value4 = "D" };
-        var values = new List<(string Property1, string Property2, string Property3, string Property4)>();
+        var values = new List<PropertyValues<string, string, string, string>>();
 
         using var sub = fixture.WhenAnyValue(
                 x => x.Value1,
@@ -104,7 +104,7 @@ public class WhenAnyValueMultiPropertyTests
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C", Value4 = "D", Value5 = "E" };
         var values =
-            new List<(string Property1, string Property2, string Property3, string Property4, string Property5)>();
+            new List<PropertyValues<string, string, string, string, string>>();
 
         using var sub = fixture.WhenAnyValue(
                 x => x.Value1,
@@ -128,8 +128,7 @@ public class WhenAnyValueMultiPropertyTests
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C", Value4 = "D", Value5 = "E", Value6 = "F" };
         var values =
-            new List<(string Property1, string Property2, string Property3, string Property4, string Property5, string
-                Property6)>();
+            new List<PropertyValues<string, string, string, string, string, string>>();
 
         using var sub = fixture.WhenAnyValue(
                 x => x.Value1,
@@ -154,8 +153,7 @@ public class WhenAnyValueMultiPropertyTests
 
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C", Value4 = "D", Value5 = "E", Value6 = "F", Value7 = "G" };
         var values =
-            new List<(string Property1, string Property2, string Property3, string Property4, string Property5, string
-                Property6, string Property7)>();
+            new List<PropertyValues<string, string, string, string, string, string, string>>();
 
         using var sub = fixture.WhenAnyValue(
                 x => x.Value1,

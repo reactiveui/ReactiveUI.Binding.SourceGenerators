@@ -48,7 +48,7 @@ public class WhenAnyValueTests
     public async Task TwoProperties_EmitsTuples()
     {
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B" };
-        var values = new List<(string Property1, string Property2)>();
+        var values = new List<PropertyValues<string, string>>();
 
         using var sub = WhenAnyValueScenarios.TwoProperties(fixture)
             .Subscribe(values.Add);
@@ -64,7 +64,7 @@ public class WhenAnyValueTests
     public async Task ThreeProperties_EmitsTuples()
     {
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C" };
-        var values = new List<(string Property1, string Property2, string Property3)>();
+        var values = new List<PropertyValues<string, string, string>>();
 
         using var sub = WhenAnyValueScenarios.ThreeProperties(fixture)
             .Subscribe(values.Add);

@@ -17,7 +17,7 @@ public static class Scenario
     /// <param name="scheduler">The scheduler to observe on.</param>
     /// <returns>A reactive binding representing the binding.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IReactiveBinding<MyView, (object? View, bool IsViewModel)> Execute(
+    public static IReactiveBinding<MyView, BindingChange> Execute(
         MyView view,
         MyViewModel vm,
         ISequencer scheduler) => view.Bind(vm, x => x.Count, x => x.CountText, count => count.ToString(), int.Parse, scheduler);

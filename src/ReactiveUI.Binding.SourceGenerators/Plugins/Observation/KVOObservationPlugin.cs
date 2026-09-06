@@ -55,6 +55,10 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         classInfo.InheritsNSObject;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) => true;
+
+    /// <inheritdoc/>
     public void EmitHelperClasses(StringBuilder sb)
     {
         EmitObserverClass(sb);
@@ -135,8 +139,8 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         var declType = segment.DeclaringTypeFullName;
         var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
         var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-            ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
-            : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
+            ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
 
         _ = sb.AppendLine()
             .AppendLine($"""

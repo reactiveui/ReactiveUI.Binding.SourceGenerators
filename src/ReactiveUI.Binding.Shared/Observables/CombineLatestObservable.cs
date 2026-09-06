@@ -32,7 +32,7 @@ public static class CombineLatestObservable
         IObservable<T1> source1,
         IObservable<T2> source2,
         Func<T1, T2, TResult> resultSelector) =>
-        new CombineLatest2Observable<T1, T2, TResult>(source1, source2, resultSelector);
+        LinqExtensions.CombineLatest(source1, source2, resultSelector);
 
     /// <summary>Combines the latest values from three observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
@@ -50,7 +50,7 @@ public static class CombineLatestObservable
         IObservable<T2> source2,
         IObservable<T3> source3,
         Func<T1, T2, T3, TResult> resultSelector) =>
-        new CombineLatest3Observable<T1, T2, T3, TResult>(source1, source2, source3, resultSelector);
+        LinqExtensions.CombineLatest(source1, source2, source3, resultSelector);
 
     /// <summary>Combines the latest values from four observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
@@ -71,7 +71,7 @@ public static class CombineLatestObservable
         IObservable<T3> source3,
         IObservable<T4> source4,
         Func<T1, T2, T3, T4, TResult> resultSelector) =>
-        new CombineLatest4Observable<T1, T2, T3, T4, TResult>(source1, source2, source3, source4, resultSelector);
+        LinqExtensions.CombineLatest(source1, source2, source3, source4, resultSelector);
 
     /// <summary>Combines the latest values from five observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>
@@ -95,7 +95,7 @@ public static class CombineLatestObservable
         IObservable<T4> source4,
         IObservable<T5> source5,
         Func<T1, T2, T3, T4, T5, TResult> resultSelector) =>
-        new CombineLatest5Observable<T1, T2, T3, T4, T5, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,
@@ -128,7 +128,7 @@ public static class CombineLatestObservable
         IObservable<T5> source5,
         IObservable<T6> source6,
         Func<T1, T2, T3, T4, T5, T6, TResult> resultSelector) =>
-        new CombineLatest6Observable<T1, T2, T3, T4, T5, T6, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,
@@ -166,7 +166,7 @@ public static class CombineLatestObservable
         IObservable<T6> source6,
         IObservable<T7> source7,
         Func<T1, T2, T3, T4, T5, T6, T7, TResult> resultSelector) =>
-        new CombineLatest7Observable<T1, T2, T3, T4, T5, T6, T7, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,
@@ -208,7 +208,7 @@ public static class CombineLatestObservable
         IObservable<T7> source7,
         IObservable<T8> source8,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> resultSelector) =>
-        new CombineLatest8Observable<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,
@@ -254,7 +254,7 @@ public static class CombineLatestObservable
         IObservable<T8> source8,
         IObservable<T9> source9,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> resultSelector) =>
-        new CombineLatest9Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,
@@ -304,7 +304,7 @@ public static class CombineLatestObservable
         IObservable<T9> source9,
         IObservable<T10> source10,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> resultSelector) =>
-        new CombineLatest10Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,
@@ -358,7 +358,7 @@ public static class CombineLatestObservable
         IObservable<T10> source10,
         IObservable<T11> source11,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> resultSelector) =>
-        new CombineLatest11Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,
@@ -416,7 +416,7 @@ public static class CombineLatestObservable
         IObservable<T11> source11,
         IObservable<T12> source12,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> resultSelector) =>
-        new CombineLatest12Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,
@@ -478,7 +478,7 @@ public static class CombineLatestObservable
         IObservable<T12> source12,
         IObservable<T13> source13,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> resultSelector) =>
-        new CombineLatest13Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,
@@ -544,7 +544,7 @@ public static class CombineLatestObservable
         IObservable<T13> source13,
         IObservable<T14> source14,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> resultSelector) =>
-        new CombineLatest14Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,
@@ -630,7 +630,7 @@ public static class CombineLatestObservable
         IObservable<T14> source14,
         IObservable<T15> source15,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> resultSelector) =>
-        new CombineLatest15Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,
@@ -721,7 +721,7 @@ public static class CombineLatestObservable
         IObservable<T15> source15,
         IObservable<T16> source16,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> resultSelector) =>
-        new CombineLatest16Observable<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(
+        LinqExtensions.CombineLatest(
             source1,
             source2,
             source3,

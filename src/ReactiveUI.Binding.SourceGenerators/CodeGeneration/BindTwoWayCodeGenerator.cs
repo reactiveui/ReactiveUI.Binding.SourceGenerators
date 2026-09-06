@@ -16,11 +16,20 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class BindTwoWayCodeGenerator
 {
+    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
+    private const string SubscriptionBodyIndent = "                ";
+
     /// <summary>What this API calls the source-to-target converter in its generated signatures.</summary>
     private const string ForwardConverterName = "sourceToTargetConv";
 
     /// <summary>What this API calls the target-to-source converter in its generated signatures.</summary>
     private const string ReverseConverterName = "targetToSourceConv";
+
+    /// <summary>Name of the source parameter on the generated binding method.</summary>
+    private const string SourceParameterName = "source";
+
+    /// <summary>Name of the target parameter on the generated binding method.</summary>
+    private const string TargetParameterName = "target";
 
     /// <summary>Name of the generated local holding the source side observable.</summary>
     private const string SourceObservableName = "sourceObs";
@@ -89,10 +98,16 @@ internal static class BindTwoWayCodeGenerator
                                   [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
                                   [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
                               {
-                                  sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ") ? sourcePropertyExpression.Substring(7) : sourcePropertyExpression;
-                                  targetPropertyExpression = targetPropertyExpression.StartsWith("static ") ? targetPropertyExpression.Substring(7) : targetPropertyExpression;
+                                  sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                                      ? sourcePropertyExpression.Substring(7)
+                                      : sourcePropertyExpression;
+                                  targetPropertyExpression = targetPropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                                      ? targetPropertyExpression.Substring(7)
+                                      : targetPropertyExpression;
 
                       """);
+
+        EmitAffinityOverride(sb, group, "targetPropertyExpression");
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -161,6 +176,11 @@ internal static class BindTwoWayCodeGenerator
                               {
                       """);
 
+        EmitAffinityOverride(
+            sb,
+            group,
+            $"\"{CodeGeneratorHelpers.EscapeString(group.Invocations[0].TargetExpressionText)}\"");
+
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
@@ -201,8 +221,16 @@ internal static class BindTwoWayCodeGenerator
         ClassBindingInfo? targetClassInfo,
         string suffix)
     {
-        var targetAccess = CodeGeneratorHelpers.BuildPropertySetterChain("target", inv.TargetPropertyPath);
-        var sourceSetAccess = CodeGeneratorHelpers.BuildPropertySetterChain("source", inv.SourcePropertyPath);
+        var targetAccess = CodeGeneratorHelpers.BuildGuardedAssignment(
+            "target",
+            inv.TargetPropertyPath,
+            "value",
+            SubscriptionBodyIndent);
+        var sourceSetAccess = CodeGeneratorHelpers.BuildGuardedAssignment(
+            "source",
+            inv.SourcePropertyPath,
+            "value",
+            SubscriptionBodyIndent);
         var sourcePathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath);
         var targetPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
 
@@ -215,6 +243,8 @@ internal static class BindTwoWayCodeGenerator
                                 {
                                     // BindTwoWay: {{sourcePathComment}} <-> {{targetPathComment}}{{conversionComment}}{{schedulerComment}}
                         """);
+
+        BindingEmitterHelpers.EmitBindingHookGuard(sb, SourceParameterName, TargetParameterName, "TwoWay", "global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance");
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
         ObservationCodeGenerator.EmitInlineObservation(
@@ -236,12 +266,19 @@ internal static class BindTwoWayCodeGenerator
         if (inv.HasConversion || inv.HasScheduler)
         {
             var (sourceVar, targetVar) = EmitConversionAndSchedulerStages(sb, inv);
+            sourceVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, sourceVar, "targetThreadObs");
 
-            EmitTwoWaySubscription(sb, sourceVar, targetVar, targetAccess, sourceSetAccess);
+            EmitTwoWaySubscription(sb, inv, sourceVar, targetVar, targetAccess, sourceSetAccess);
         }
         else
         {
-            EmitTwoWaySubscription(sb, SourceObservableName, TargetObservableName, targetAccess, sourceSetAccess);
+            var sourceVar = BindingEmitterHelpers.EmitViewThreadStage(
+                sb,
+                inv,
+                SourceObservableName,
+                "targetThreadObs");
+
+            EmitTwoWaySubscription(sb, inv, sourceVar, TargetObservableName, targetAccess, sourceSetAccess);
         }
     }
 
@@ -273,7 +310,7 @@ internal static class BindTwoWayCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>The source and target observable variable names after the stages are applied.</returns>
-    private static (string SourceVar, string TargetVar) EmitConversionAndSchedulerStages(
+    private static BindingObservables EmitConversionAndSchedulerStages(
         StringBuilder sb,
         BindingInvocationInfo inv)
     {
@@ -295,39 +332,59 @@ internal static class BindTwoWayCodeGenerator
         if (inv.HasScheduler)
         {
             _ = sb.AppendLine($"""
-                                   var sourceBind = new {ObserveOnObservable}<{inv.TargetPropertyTypeFullName}>({sourceVar}, scheduler);
-                                   var targetBind = new {ObserveOnObservable}<{inv.SourcePropertyTypeFullName}>({targetVar}, scheduler);
+                                   var sourceBind = {LinqExtensions}.ObserveOn<{inv.TargetPropertyTypeFullName}>({sourceVar}, scheduler);
+                                   var targetBind = {LinqExtensions}.ObserveOn<{inv.SourcePropertyTypeFullName}>({targetVar}, scheduler);
                            """);
             sourceVar = "sourceBind";
             targetVar = "targetBind";
         }
 
-        return (sourceVar, targetVar);
+        return new(sourceVar, targetVar);
     }
+
+    /// <summary>Emits the check that hands the binding to the runtime engine when a registered plugin outranks the generated one.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group, which fixes both bound types for the whole overload.</param>
+    /// <param name="bindingExpression">The C# expression naming the bound target, used when a write faults.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void EmitAffinityOverride(StringBuilder sb, BindingTypeGroup group, string bindingExpression) =>
+        BindingEmitterHelpers.EmitAffinityOverride(
+            sb,
+            group,
+            "BindTwoWay",
+            "source, target, sourceProperty, targetProperty, "
+            + (group.HasConversion
+                ? $"{TwoWayConverters}.Create({ForwardConverterName}, {ReverseConverterName}), "
+                : string.Empty)
+            + (group.HasScheduler ? "scheduler" : "null")
+            + $", {bindingExpression}",
+            true);
 
     /// <summary>Emits the two-way subscription and <c>MultipleDisposable</c> return block.</summary>
     /// <param name="sb">The string builder to append to.</param>
+    /// <param name="inv">The call site, naming the expressions a faulting write is reported against.</param>
     /// <param name="sourceVar">The source observable variable name to subscribe to.</param>
     /// <param name="targetVar">The target observable variable name to subscribe to.</param>
     /// <param name="targetAccess">The target property setter access chain.</param>
     /// <param name="sourceSetAccess">The source property setter access chain.</param>
     private static void EmitTwoWaySubscription(
         StringBuilder sb,
+        BindingInvocationInfo inv,
         string sourceVar,
         string targetVar,
         string targetAccess,
         string sourceSetAccess) => _ = sb.AppendLine($$"""
 
-                                    var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe({{sourceVar}}, value =>
+                                    var d1 = {{BindingErrors}}.Subscribe({{sourceVar}}, value =>
                                     {
-                                        {{targetAccess}} = value;
-                                    });
+                                        {{targetAccess}}
+                                    }, "{{CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)}}");
 
                                     var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip({{targetVar}}, 1);
-                                    var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__targetSkipped, value =>
+                                    var d2 = {{BindingErrors}}.Subscribe(__targetSkipped, value =>
                                     {
-                                        {{sourceSetAccess}} = value;
-                                    });
+                                        {{sourceSetAccess}}
+                                    }, "{{CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText)}}");
 
                                     return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
                                 }

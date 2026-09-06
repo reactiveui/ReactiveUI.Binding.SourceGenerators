@@ -23,7 +23,7 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
     /// The key is a tuple consisting of a type and property name, and the value is the associated <see cref="EventInfo"/>
     /// if the {PropertyName}Changed event exists, or null if it does not.
     /// </summary>
-    private static readonly ConcurrentDictionary<(Type Type, string PropertyName), EventInfo?> EventInfoCache = new();
+    private static readonly ConcurrentDictionary<EventCacheKey, EventInfo?> EventInfoCache = new();
 
     /// <inheritdoc/>
     [RequiresUnreferencedCode("Uses reflection to find {PropertyName}Changed events.")]
@@ -63,8 +63,8 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
                 subj.OnNext(new ObservedChange<object, object?>(sender, expression, default)));
 
             ei.AddEventHandler(sender, handler);
-            return Scope.Create<(EventInfo EventInfo, object Sender, EventHandler Handler)>(
-                (ei, sender, handler),
+            return Scope.Create<EventSubscription>(
+                new(ei, sender, handler),
                 static state => state.EventInfo.RemoveEventHandler(state.Sender, state.Handler));
         });
     }
@@ -78,7 +78,7 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static EventInfo? GetEventInfo(Type type, string propertyName) =>
         EventInfoCache.GetOrAdd(
-            (type, propertyName),
+            new(type, propertyName),
             static key => key.Type.GetEvent(
                 $"{key.PropertyName}Changed",
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy));

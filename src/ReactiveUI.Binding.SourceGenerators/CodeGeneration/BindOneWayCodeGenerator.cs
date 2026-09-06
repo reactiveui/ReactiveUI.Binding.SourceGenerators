@@ -22,6 +22,9 @@ internal static class BindOneWayCodeGenerator
     /// <summary>Name of the emitted local holding the source property observation, before conversion or scheduling.</summary>
     private const string SourceObservableVariable = "sourceObs";
 
+    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
+    private const string SubscriptionBodyIndent = "                ";
+
     /// <summary>Groups binding invocation information by a unique type signature, producing a collection of grouped results.</summary>
     /// <param name="invocations">The collection of binding invocation details to be grouped.</param>
     /// <returns>A list of grouped binding type information, where each group shares the same type signature.</returns>
@@ -89,10 +92,16 @@ internal static class BindOneWayCodeGenerator
                                   [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
                                   [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
                               {
-                                  sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ") ? sourcePropertyExpression.Substring(7) : sourcePropertyExpression;
-                                  targetPropertyExpression = targetPropertyExpression.StartsWith("static ") ? targetPropertyExpression.Substring(7) : targetPropertyExpression;
+                                  sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                                      ? sourcePropertyExpression.Substring(7)
+                                      : sourcePropertyExpression;
+                                  targetPropertyExpression = targetPropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                                      ? targetPropertyExpression.Substring(7)
+                                      : targetPropertyExpression;
 
                       """);
+
+        EmitAffinityOverride(sb, group, "targetPropertyExpression");
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -164,6 +173,11 @@ internal static class BindOneWayCodeGenerator
                               {
                       """);
 
+        EmitAffinityOverride(
+            sb,
+            group,
+            $"\"{CodeGeneratorHelpers.EscapeString(group.Invocations[0].TargetExpressionText)}\"");
+
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
@@ -204,7 +218,11 @@ internal static class BindOneWayCodeGenerator
         ClassBindingInfo? sourceClassInfo,
         string suffix)
     {
-        var targetAccess = CodeGeneratorHelpers.BuildPropertySetterChain("target", inv.TargetPropertyPath);
+        var targetAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
+            "target",
+            inv.TargetPropertyPath,
+            "value",
+            SubscriptionBodyIndent);
         var sourcePathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath);
         var targetPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
 
@@ -217,6 +235,8 @@ internal static class BindOneWayCodeGenerator
                                 {
                                     // BindOneWay: {{sourcePathComment}} -> {{targetPathComment}}{{conversionComment}}{{schedulerComment}}
                         """);
+
+        BindingEmitterHelpers.EmitBindingHookGuard(sb, "source", "target", "OneWay", "global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance");
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
         ObservationCodeGenerator.EmitInlineObservation(
@@ -231,12 +251,14 @@ internal static class BindOneWayCodeGenerator
             ? EmitConversionAndSchedulerStages(sb, inv)
             : SourceObservableVariable;
 
+        subscribeVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, subscribeVar, "targetThreadObs");
+
         _ = sb.AppendLine($$"""
 
-                                    return global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe({{subscribeVar}}, value =>
+                                    return {{BindingErrors}}.Subscribe({{subscribeVar}}, value =>
                                     {
-                                        {{targetAccess}} = value;
-                                    });
+                                        {{targetAssignment}}
+                                    }, "{{CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)}}");
                                 }
                         """)
             .AppendLine();
@@ -263,6 +285,22 @@ internal static class BindOneWayCodeGenerator
     internal static string FormatExtraMethodParams(BindingInvocationInfo inv) =>
         BindingEmitterHelpers.FormatExtraMethodParams(inv, ConversionParameterName);
 
+    /// <summary>Emits the check that hands the binding to the runtime engine when a registered plugin outranks the generated one.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group, which fixes the observed type for the whole overload.</param>
+    /// <param name="bindingExpression">The C# expression naming the bound target, used when a write faults.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void EmitAffinityOverride(StringBuilder sb, BindingTypeGroup group, string bindingExpression) =>
+        BindingEmitterHelpers.EmitAffinityOverride(
+            sb,
+            group,
+            "BindOneWay",
+            "source, target, sourceProperty, targetProperty, "
+            + (group.HasConversion ? $"{ConversionParameterName}, " : string.Empty)
+            + (group.HasScheduler ? "scheduler" : "null")
+            + $", {bindingExpression}",
+            false);
+
     /// <summary>Emits the conversion and scheduler stages between the source observation and the subscription.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
@@ -282,7 +320,7 @@ internal static class BindOneWayCodeGenerator
         if (inv.HasScheduler)
         {
             _ = sb.AppendLine(
-                $"        var bindObs = new {ObserveOnObservable}<{inv.TargetPropertyTypeFullName}>({currentVar}, scheduler);");
+                $"        var bindObs = {LinqExtensions}.ObserveOn<{inv.TargetPropertyTypeFullName}>({currentVar}, scheduler);");
             currentVar = "bindObs";
         }
 

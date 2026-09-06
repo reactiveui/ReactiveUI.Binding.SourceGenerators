@@ -19,7 +19,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            property1Expression = property1Expression.StartsWith("static ") ? property1Expression.Substring(7) : property1Expression;
+            property1Expression = property1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property1Expression.Substring(7) : property1Expression;
 
             // Allow user-registered plugins with higher affinity to override generated observation
             if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel), 5, true))
@@ -47,7 +47,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     (global::System.ComponentModel.INotifyPropertyChanging)__parent1,
                     "Name",
                     (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel)__o).Name)
-                : (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
+                : (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
             return __obs1;
         }
 

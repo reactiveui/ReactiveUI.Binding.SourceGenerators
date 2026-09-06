@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 
 namespace ReactiveUI.Binding.Benchmarks;
@@ -12,6 +13,7 @@ namespace ReactiveUI.Binding.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net80)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [MemoryDiagnoser]
+[EventPipeProfiler(EventPipeProfile.GcVerbose)]
 [MarkdownExporterAttribute.GitHub]
 [DebuggerDisplay("Expression-tree observation over {PropertyChangeCount} changes")]
 public class ReactiveUIObservationBenchmark

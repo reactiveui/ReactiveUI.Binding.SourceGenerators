@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// Concrete typed overload for Bind from global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel to global::SharedScenarios.Bind.TwoSameTypeBindings.MyView.
         /// Uses CallerArgumentExpression for dispatch.
         /// </summary>
-        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? View, bool IsViewModel)> Bind(
+        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, global::ReactiveUI.Binding.BindingChange> Bind(
             this global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view,
             global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel, string?>> viewModelProperty,
@@ -23,23 +23,47 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
+            // A registered plugin that outranks the generated one drives the binding instead
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel), 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.TwoSameTypeBindings.MyView), 5, false))
+            {
+                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.Bind(
+                    view, viewModel, viewModelProperty, viewProperty, null, viewPropertyExpression);
+            }
+
             if (viewModelPropertyExpression == "x => x.FirstName"
                 && viewPropertyExpression == "x => x.FirstNameText")
             {
-                return __Bind_7FFFE38A2E1A448A(viewModel, view);
+                return __Bind_7FFFE38A2E1A446B(viewModel, view);
             }
             else if (viewModelPropertyExpression == "x => x.LastName"
                 && viewPropertyExpression == "x => x.LastNameText")
             {
-                return __Bind_7FFFE389FC4EEB01(viewModel, view);
+                return __Bind_7FFFE389FC4EEAC3(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? View, bool IsViewModel)> __Bind_7FFFE38A2E1A448A(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFE38A2E1A446B(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
         {
             // Bind: FirstName <-> FirstNameText
+        if (global::ReactiveUI.Binding.BindingHooks.Any
+            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                viewModel,
+                view,
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(viewModel, null, viewModel),
+                },
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(view, null, view),
+                },
+                global::ReactiveUI.Binding.BindingDirection.TwoWay))
+        {
+            return null;
+        }
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
             viewModel,
             "FirstName",
@@ -50,34 +74,51 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             "FirstNameText",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.TwoSameTypeBindings.MyView)__o).FirstNameText,
             true);
+            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(vmObs);
 
-            var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(vmObs, value =>
+            var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
                 view.FirstNameText = value;
-            });
+            }, "x => x.FirstNameText");
 
             var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewObs, 1);
-            var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__viewSkipped, value =>
+            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__viewSkipped, value =>
             {
                 viewModel.FirstName = value;
-            });
+            }, "x => x.FirstName");
 
-            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, (object?, bool)>(vmObs, v => ((object?)v, true));
-            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, (object?, bool)>(__viewSkipped, v => ((object?)v, false));
-            var changed = new global::ReactiveUI.Primitives.Advanced.MergeSignal<(object?, bool)>(__vmTagged, __viewTagged);
+            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(viewThreadObs, v => new global::ReactiveUI.Binding.BindingChange(v, true));
+            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(__viewSkipped, v => new global::ReactiveUI.Binding.BindingChange(v, false));
+            var changed = new global::ReactiveUI.Primitives.Advanced.MergeSignal<global::ReactiveUI.Binding.BindingChange>(__vmTagged, __viewTagged);
 
             var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
 
-            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? View, bool IsViewModel)>(
+            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, global::ReactiveUI.Binding.BindingChange>(
                 view,
                 changed,
                 global::ReactiveUI.Binding.BindingDirection.TwoWay,
                 disposable);
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? View, bool IsViewModel)> __Bind_7FFFE389FC4EEB01(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFE389FC4EEAC3(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
         {
             // Bind: LastName <-> LastNameText
+        if (global::ReactiveUI.Binding.BindingHooks.Any
+            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                viewModel,
+                view,
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(viewModel, null, viewModel),
+                },
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(view, null, view),
+                },
+                global::ReactiveUI.Binding.BindingDirection.TwoWay))
+        {
+            return null;
+        }
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
             viewModel,
             "LastName",
@@ -88,25 +129,26 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             "LastNameText",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.TwoSameTypeBindings.MyView)__o).LastNameText,
             true);
+            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(vmObs);
 
-            var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(vmObs, value =>
+            var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
                 view.LastNameText = value;
-            });
+            }, "x => x.LastNameText");
 
             var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewObs, 1);
-            var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__viewSkipped, value =>
+            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__viewSkipped, value =>
             {
                 viewModel.LastName = value;
-            });
+            }, "x => x.LastName");
 
-            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, (object?, bool)>(vmObs, v => ((object?)v, true));
-            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, (object?, bool)>(__viewSkipped, v => ((object?)v, false));
-            var changed = new global::ReactiveUI.Primitives.Advanced.MergeSignal<(object?, bool)>(__vmTagged, __viewTagged);
+            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(viewThreadObs, v => new global::ReactiveUI.Binding.BindingChange(v, true));
+            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(__viewSkipped, v => new global::ReactiveUI.Binding.BindingChange(v, false));
+            var changed = new global::ReactiveUI.Primitives.Advanced.MergeSignal<global::ReactiveUI.Binding.BindingChange>(__vmTagged, __viewTagged);
 
             var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
 
-            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, (object? View, bool IsViewModel)>(
+            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, global::ReactiveUI.Binding.BindingChange>(
                 view,
                 changed,
                 global::ReactiveUI.Binding.BindingDirection.TwoWay,

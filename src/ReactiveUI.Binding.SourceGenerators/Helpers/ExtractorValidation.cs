@@ -29,6 +29,25 @@ internal static class ExtractorValidation
             or Constants.SchedulerExtensionClassName
             or Constants.GeneratedExtensionClassName;
 
+    /// <summary>
+    /// Checks whether the type declaring an invoked method is one of the recognized extension classes
+    /// used by this generator (stub, scheduler, or generated).
+    /// </summary>
+    /// <param name="containingType">The type containing the invoked method.</param>
+    /// <returns><see langword="true"/> if the declaring class is recognized; otherwise <see langword="false"/>.</returns>
+    /// <remarks>
+    /// An extension block declares its members in a synthesized grouping type rather than in the static class
+    /// itself, so the class carrying the recognized name is one level further out. Which of the two a call site
+    /// resolves to is decided by the compiler that hosts the generator rather than by anything in the consumer's
+    /// project, and the two disagree across compiler versions, so both shapes are accepted. Rejecting the
+    /// grouping type drops every call site of an API declared that way while leaving the rest generating.
+    /// </remarks>
+    internal static bool IsRecognizedExtensionClass(INamedTypeSymbol? containingType) =>
+        containingType is not null
+        && (IsRecognizedExtensionClass(containingType.Name)
+            || (IsExtensionGroupingType(containingType)
+                && IsRecognizedExtensionClass(containingType.ContainingType?.Name)));
+
     /// <summary>Checks whether an invocation has at least the required number of arguments.</summary>
     /// <param name="argumentCount">The actual argument count.</param>
     /// <param name="minimumRequired">The minimum required argument count.</param>
@@ -51,6 +70,11 @@ internal static class ExtractorValidation
     /// <summary>Extracts an <see cref="IMethodSymbol"/> from a <see cref="SymbolInfo"/>, returning null if the resolved symbol is not a method.</summary>
     /// <param name="symbolInfo">The symbol info from GetSymbolInfo.</param>
     /// <returns>The method symbol, or null.</returns>
+    /// <remarks>
+    /// Only a symbol the model actually resolved is used. Candidates are deliberately not consulted: a call the
+    /// model could not narrow may have candidates of differing shape, and generating from one of those means
+    /// reading a call's arguments against the wrong parameter list.
+    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IMethodSymbol? ExtractMethodSymbol(SymbolInfo symbolInfo) =>
         symbolInfo.Symbol as IMethodSymbol;
@@ -111,4 +135,15 @@ internal static class ExtractorValidation
             ? invokeMethod.Parameters[1].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
             : "global::System.EventArgs";
     }
+
+    /// <summary>Checks whether a type is the synthesized grouping type that holds an extension block's members.</summary>
+    /// <param name="type">The type to check.</param>
+    /// <returns><see langword="true"/> if the type is an extension grouping type; otherwise <see langword="false"/>.</returns>
+    /// <remarks>
+    /// The grouping type is unnamed when the declaration is read from source and is named <c>&lt;&gt;E__N</c>
+    /// when it is read from metadata. Neither spelling is a legal C# identifier, so no type a consumer can
+    /// declare is mistaken for one.
+    /// </remarks>
+    private static bool IsExtensionGroupingType(INamedTypeSymbol type) =>
+        type.Name.Length == 0 || type.Name[0] == '<';
 }

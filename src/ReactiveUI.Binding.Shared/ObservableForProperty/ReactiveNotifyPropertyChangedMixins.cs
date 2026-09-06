@@ -39,7 +39,7 @@ public static class ReactiveNotifyPropertyChangedMixins
     /// and property permanently unobservable.
     /// </remarks>
     private static readonly MemoizingMRUCache<
-        (Type SenderType, string PropertyName, bool BeforeChange),
+        NotifyFactoryKey,
         ICreatesObservableForProperty>
         NotifyFactoryCache =
             new(
@@ -116,7 +116,7 @@ public static class ReactiveNotifyPropertyChangedMixins
                 expr = parameter;
             }
 
-            var factory = ResolveNotifyFactory((item!.GetType(), propertyName, beforeChange))
+            var factory = ResolveNotifyFactory(new(item!.GetType(), propertyName, beforeChange))
                           ?? throw new InvalidOperationException(
                               $"Could not find a ICreatesObservableForProperty for {item.GetType()} property {propertyName}. {BrokenLocatorAdvice}");
 
@@ -267,12 +267,12 @@ public static class ReactiveNotifyPropertyChangedMixins
         var kicker = new ObservedChange<object?, object?>(sourceChange.Value, expression, default);
 
         return sourceChange.Value is null
-            ? new ReturnObservable<IObservedChange<object?, object?>>(kicker)
-            : new SelectObservable<IObservedChange<object?, object?>, IObservedChange<object?, object?>>(
-            new StartWithObservable<IObservedChange<object?, object?>>(
-                NotifyForProperty(sourceChange.Value, expression, beforeChange),
-                kicker),
-            static x => new ObservedChange<object?, object?>(x.Sender, x.Expression, x.GetValueOrDefault()));
+            ? new ImmediateReturnSignal<IObservedChange<object?, object?>>(kicker)
+            : new LeadSignal<IObservedChange<object?, object?>>(
+                    NotifyForProperty(sourceChange.Value, expression, beforeChange),
+                    kicker)
+                .Select(static IObservedChange<object?, object?> (x) =>
+                    new ObservedChange<object?, object?>(x.Sender, x.Expression, x.GetValueOrDefault()));
     }
 
     /// <summary>
@@ -298,7 +298,7 @@ public static class ReactiveNotifyPropertyChangedMixins
             "The expression does not have valid member info",
             nameof(expression));
         var propertyName = memberInfo.Name;
-        var result = ResolveNotifyFactory((sender.GetType(), propertyName, beforeChange));
+        var result = ResolveNotifyFactory(new(sender.GetType(), propertyName, beforeChange));
 
         return result switch
         {
@@ -314,8 +314,12 @@ public static class ReactiveNotifyPropertyChangedMixins
     /// </summary>
     /// <param name="key">The sender type, property name and before-change flag being resolved.</param>
     /// <returns>The best implementation, or <see langword="null"/> when nothing bids a positive affinity.</returns>
+    /// <remarks>
+    /// The key is three fields wide, past the two registers the JIT would pass it in, so it travels by
+    /// reference rather than being copied onto the stack for every resolution.
+    /// </remarks>
     private static ICreatesObservableForProperty? ResolveNotifyFactory(
-        (Type SenderType, string PropertyName, bool BeforeChange) key)
+        in NotifyFactoryKey key)
     {
         if (NotifyFactoryCache.TryGet(key, out var memoized))
         {

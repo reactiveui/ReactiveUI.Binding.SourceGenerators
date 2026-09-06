@@ -66,7 +66,11 @@ internal static class SyntaxHelpers
                 propertySymbol.Name,
                 propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 propertySymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                propertySymbol.Type.IsReferenceType));
+                propertySymbol.Type.IsReferenceType,
+                TypeDetectionExtractor.ExtractFromSymbol(
+                    propertySymbol.ContainingType,
+                    semanticModel.Compilation,
+                    ct)));
 
             current = UnwrapNullForgiving(memberAccess.Expression);
         }

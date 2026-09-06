@@ -32,7 +32,7 @@ public sealed class DefaultViewLocator : IViewLocator
     /// Runtime explicit mappings from (viewModelType, contract) to view factory.
     /// Uses copy-on-write semantics for thread safety.
     /// </summary>
-    private Dictionary<(Type ViewModelType, string Contract), Func<IViewFor>> _mappings = [];
+    private Dictionary<ViewMappingKey, Func<IViewFor>> _mappings = [];
 
     /// <summary>
     /// Registers the source-generated view dispatch function.
@@ -64,7 +64,7 @@ public sealed class DefaultViewLocator : IViewLocator
         where TViewModel : class
         where TView : IViewFor, new()
     {
-        var key = (typeof(TViewModel), contract ?? string.Empty);
+        var key = new ViewMappingKey(typeof(TViewModel), contract ?? string.Empty);
         lock (_lock)
         {
             _mappings = new(_mappings) { [key] = static () => new TView() };
@@ -89,7 +89,7 @@ public sealed class DefaultViewLocator : IViewLocator
     {
         ArgumentExceptionHelper.ThrowIfNull(factory);
 
-        var key = (typeof(TViewModel), contract ?? string.Empty);
+        var key = new ViewMappingKey(typeof(TViewModel), contract ?? string.Empty);
         lock (_lock)
         {
             _mappings = new(_mappings) { [key] = factory };
@@ -112,10 +112,10 @@ public sealed class DefaultViewLocator : IViewLocator
     public bool Unmap<TViewModel>(string? contract)
         where TViewModel : class
     {
-        var key = (typeof(TViewModel), contract ?? string.Empty);
+        var key = new ViewMappingKey(typeof(TViewModel), contract ?? string.Empty);
         lock (_lock)
         {
-            var copy = new Dictionary<(Type ViewModelType, string Contract), Func<IViewFor>>(_mappings);
+            var copy = new Dictionary<ViewMappingKey, Func<IViewFor>>(_mappings);
             var removed = copy.Remove(key);
             _mappings = copy;
             return removed;
@@ -244,5 +244,5 @@ public sealed class DefaultViewLocator : IViewLocator
     /// <param name="contract">The normalized contract string.</param>
     /// <returns>The resolved view, or <see langword="null"/>.</returns>
     private IViewFor? TryResolveFromMappings(Type viewModelType, string contract) =>
-        !_mappings.TryGetValue((viewModelType, contract), out var factory) ? null : factory();
+        !_mappings.TryGetValue(new(viewModelType, contract), out var factory) ? null : factory();
 }
