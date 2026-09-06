@@ -22,6 +22,12 @@ public class GeneratedNamespaceScopingTests
     /// <summary>The token in <see cref="SourceTemplate"/> standing in for the consumer's own namespace.</summary>
     private const string NamespaceToken = "__CONSUMER_NAMESPACE__";
 
+    /// <summary>The namespace declaration a consumer sharing the runtime library's namespace gets.</summary>
+    private const string SharedNamespaceDeclaration = "namespace ReactiveUI.Binding\n";
+
+    /// <summary>The namespace declaration a consumer with no namespace of its own gets.</summary>
+    private const string AssemblyNamespaceDeclaration = "namespace ReactiveUI.Binding.Generated.TestAssembly\n";
+
     /// <summary>An assembly-level grant of internals to another assembly.</summary>
     private const string InternalsVisibleTo =
         "[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"Contoso.App.Tests\")]\n";
@@ -83,7 +89,7 @@ public class GeneratedNamespaceScopingTests
         var result = TestHelper.RunGenerator(SourceIn(UnrelatedRootNamespace), LanguageVersion.CSharp10);
 
         await result.CompilationSucceeds();
-        await result.GeneratedSourceContains(AttributesFileName, "namespace ReactiveUI.Binding.Generated.TestAssembly\n");
+        await result.GeneratedSourceContains(AttributesFileName, AssemblyNamespaceDeclaration);
     }
 
     /// <summary>
@@ -144,7 +150,7 @@ public class GeneratedNamespaceScopingTests
         var result = TestHelper.RunGenerator(SourceIn(UnrelatedRootNamespace), LanguageVersion.CSharp7_3, UnrelatedRootNamespace);
 
         await result.CompilationSucceeds();
-        await result.GeneratedSourceContains(AttributesFileName, "namespace ReactiveUI.Binding\n");
+        await result.GeneratedSourceContains(AttributesFileName, SharedNamespaceDeclaration);
         await Assert.That(result.GeneratedSources[AttributesFileName]).DoesNotContain("global using");
         await AssertCallSiteResolvesTo(result, Constants.SharedGeneratedNamespace);
     }
@@ -168,6 +174,46 @@ public class GeneratedNamespaceScopingTests
     }
 
     /// <summary>
+    /// A build that exposes no root namespace leaves nowhere else the call sites could reach, so the shared
+    /// namespace and its collision risk still beats emitting somewhere nothing can see.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BeforeGlobalUsings_GrantingInternalsVisibleToWithNoRootNamespace_KeepsTheSharedNamespace()
+    {
+        var source = SourceIn(UnrelatedRootNamespace)
+            .Replace(LastImport, LastImport + InternalsVisibleTo, StringComparison.Ordinal);
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp7_3);
+
+        await result.CompilationSucceeds();
+        await result.GeneratedSourceContains(AttributesFileName, SharedNamespaceDeclaration);
+        await AssertCallSiteResolvesTo(result, Constants.SharedGeneratedNamespace);
+    }
+
+    /// <summary>
+    /// Another assembly sharing this root namespace has already put its dispatch class where this one would go,
+    /// and both would answer the same call. Seeing it there, the overloads move to the per-assembly namespace.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RootNamespaceAlreadyCarriesADispatchClass_FallsBackToTheAssemblyNamespace()
+    {
+        var source = SourceIn(UnrelatedRootNamespace) + $$"""
+
+
+                                                          namespace {{UnrelatedRootNamespace}}
+                                                          {
+                                                              internal static class __ReactiveUIGeneratedBindings
+                                                              {
+                                                              }
+                                                          }
+                                                          """;
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10, UnrelatedRootNamespace);
+
+        await result.GeneratedSourceContains(AttributesFileName, AssemblyNamespaceDeclaration);
+    }
+
+    /// <summary>
     /// Without that exposure nothing can see the overloads, so they stay where every file reaches them without
     /// an import of its own.
     /// </summary>
@@ -181,7 +227,7 @@ public class GeneratedNamespaceScopingTests
             UnrelatedRootNamespace);
 
         await result.CompilationSucceeds();
-        await result.GeneratedSourceContains(AttributesFileName, "namespace ReactiveUI.Binding\n");
+        await result.GeneratedSourceContains(AttributesFileName, SharedNamespaceDeclaration);
         await AssertCallSiteResolvesTo(result, Constants.SharedGeneratedNamespace);
     }
 

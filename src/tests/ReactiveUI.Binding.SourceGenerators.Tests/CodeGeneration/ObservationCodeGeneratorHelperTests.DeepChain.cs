@@ -86,6 +86,30 @@ public partial class ObservationCodeGeneratorHelperTests
     }
 
     /// <summary>
+    /// Past two levels the stages differ: an intermediate parent going null pushes the leaf's default value on so
+    /// the stage below re-parents and drops its subscription, while the leaf itself suppresses instead.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateDeepChainVariable_ThreeLevelChain_OnlyTheLeafSuppressesAMissingParent()
+    {
+        var sb = new StringBuilder();
+        var path = new EquatableArray<PropertyPathSegment>([
+            ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
+            ModelFactory.CreatePropertyPathSegment("Country", CountryTypeName, AddressTypeName),
+            ModelFactory.CreatePropertyPathSegment("Name", StringTypeName, CountryTypeName)
+        ]);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+
+        ObservationCodeGenerator.GenerateDeepChainVariable(sb, path, classInfo, false, PropObs0Local);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("var __propObs0_s2");
+        await Assert.That(result).Contains($"{ImmediateReturnSignalName}<{CountryTypeName}>(default({CountryTypeName}))");
+        await Assert.That(result).Contains($"{ImmutableEmptySignalName}<{StringTypeName}>.Instance");
+    }
+
+    /// <summary>
     /// Verifies GenerateDeepChainVariable with isBeforeChange=true generates PropertyChanging code and no DistinctUntilChanged.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>

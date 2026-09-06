@@ -49,6 +49,9 @@ public class ObservationPluginTests
     /// <summary>The <c>ImmediateReturnSignal</c> name these tests generate against.</summary>
     private const string ImmediateReturnSignalName = "ImmediateReturnSignal";
 
+    /// <summary>The <c>ImmutableEmptySignal</c> name a suppressing inner segment emits for a missing parent.</summary>
+    private const string ImmutableEmptySignalName = "ImmutableEmptySignal";
+
     /// <summary>The <c>source</c> name these tests generate against.</summary>
     private const string SourceName = "source";
 
@@ -196,6 +199,22 @@ public class ObservationPluginTests
         plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
 
         await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+    }
+
+    /// <summary>A WPF inner segment that is not the leaf pushes the leaf's default value down the chain.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WpfPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
+    {
+        var plugin = new WpfObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
+
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.EmitDefault);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).DoesNotContain(ImmutableEmptySignalName);
     }
 
     /// <summary>Verifies WPF plugin inline observation variable emits EventObservable.</summary>
@@ -357,6 +376,22 @@ public class ObservationPluginTests
         await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
+    /// <summary>A WinForms inner segment that is not the leaf pushes the leaf's default value down the chain.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WinFormsPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
+    {
+        var plugin = new WinFormsObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
+
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.EmitDefault);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).DoesNotContain(ImmutableEmptySignalName);
+    }
+
     /// <summary>Verifies WinForms plugin inline observation variable emits EventObservable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -489,6 +524,22 @@ public class ObservationPluginTests
         await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
+    /// <summary>A WinUI inner segment that is not the leaf pushes the leaf's default value down the chain.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WinUIPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
+    {
+        var plugin = new WinUIObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
+
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.EmitDefault);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).DoesNotContain(ImmutableEmptySignalName);
+    }
+
     /// <summary>Verifies WinUI plugin inline observation variable emits WinUIDPObservable.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -615,6 +666,22 @@ public class ObservationPluginTests
         var result = sb.ToString();
         await Assert.That(result).Contains(KVOObservableLocal);
         await Assert.That(result).Contains(TrueFragment);
+    }
+
+    /// <summary>A KVO inner segment that is not the leaf pushes the leaf's default value down the chain.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task KVOPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
+    {
+        var plugin = new KVOObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
+
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.EmitDefault);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).DoesNotContain(ImmutableEmptySignalName);
     }
 
     /// <summary>Verifies KVO plugin inline observation variable emits KVOObservable.</summary>
@@ -754,6 +821,22 @@ public class ObservationPluginTests
         var result = sb.ToString();
         await Assert.That(result).Contains(ImmediateReturnSignalName);
         await Assert.That(result).Contains(SwitchName);
+    }
+
+    /// <summary>An Android inner segment that is not the leaf pushes the leaf's default value down the chain.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AndroidPlugin_EmitDeepChainInnerSegment_EmittingDefaults_PushesDefaultForAMissingParent()
+    {
+        var plugin = new AndroidObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
+
+        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.EmitDefault);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).DoesNotContain(ImmutableEmptySignalName);
     }
 
     /// <summary>Verifies Android plugin inline observation variable emits ImmediateReturnSignal.</summary>

@@ -27,6 +27,9 @@ public class DependencyObjectObservableForPropertyTests
     /// <summary>The value written after the subscription has been disposed.</summary>
     private const string SecondValue = "second";
 
+    /// <summary>The property name behind the dependency property another type owns.</summary>
+    private const string GhostPropertyName = "Ghost";
+
     /// <summary>Verifies that a dependency-property-backed property scores the WPF affinity.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -104,6 +107,36 @@ public class DependencyObjectObservableForPropertyTests
             .Throws<ArgumentException>();
     }
 
+    /// <summary>
+    /// A dependency property with no CLR accessor and no attached accessor has no descriptor to hook a
+    /// value-changed handler onto, so the observation is rejected rather than silently going quiet.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_UndescribedDependencyProperty_Throws()
+    {
+        var target = new Undescribed();
+
+        await Assert.That(() => new DependencyObjectObservableForProperty()
+                .GetNotificationForProperty(target, ValueExpression(), GhostPropertyName, false, false))
+            .Throws<InvalidOperationException>();
+    }
+
+    /// <summary>
+    /// The same rejection, with the diagnostic write suppressed. Suppression silences the trace the binder
+    /// writes; it never turns an unobservable property into an observable one.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetNotificationForProperty_SuppressingWarnings_StillRejectsAnUndescribedProperty()
+    {
+        var target = new Undescribed();
+
+        await Assert.That(() => new DependencyObjectObservableForProperty()
+                .GetNotificationForProperty(target, ValueExpression(), GhostPropertyName, false, true))
+            .Throws<InvalidOperationException>();
+    }
+
     /// <summary>Verifies that a null sender is rejected.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -138,6 +171,17 @@ public class DependencyObjectObservableForPropertyTests
 
         /// <summary>Gets a plain property with no dependency property behind it.</summary>
         public string Plain => nameof(Plain);
+    }
+
+    /// <summary>Registers a dependency property that neither a CLR accessor nor an attached one reaches.</summary>
+    private sealed class Undescribed : DependencyObject
+    {
+        /// <summary>Identifies a dependency property with no property or attached accessor behind it.</summary>
+        public static readonly DependencyProperty GhostProperty = DependencyProperty.Register(
+            GhostPropertyName,
+            typeof(string),
+            typeof(Undescribed),
+            new(default(string)));
     }
 
     /// <summary>Records the observed changes a subscription delivers.</summary>

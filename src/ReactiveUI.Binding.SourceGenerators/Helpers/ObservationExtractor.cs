@@ -44,6 +44,17 @@ internal static class ObservationExtractor
     internal static InvocationInfo? ExtractWhenAnyInvocation(GeneratorSyntaxContext context, CancellationToken ct) =>
         ExtractInvocationInfo(context, false, Constants.WhenAnyMethodName, ct);
 
+    /// <summary>Determines whether a parameter is the overload's projection over the observed values.</summary>
+    /// <param name="parameterName">The parameter name to test.</param>
+    /// <returns><see langword="true"/> when the parameter carries the projection.</returns>
+    /// <remarks>
+    /// The observation APIs spell it two ways: <c>WhenChanged</c> and <c>WhenChanging</c> take a
+    /// <c>conversionFunc</c>, while <c>WhenAny</c> and <c>WhenAnyValue</c> take a <c>selector</c>. Either one
+    /// means the same thing to the emitters - the overload returns the projection rather than the values.
+    /// </remarks>
+    internal static bool IsSelectorParameterName(string parameterName) =>
+        parameterName is "conversionFunc" or "selector";
+
     /// <summary>Extracts the invocation info from the generator syntax context.</summary>
     /// <param name="context">The generator syntax context.</param>
     /// <param name="isBeforeChange">A value indicating whether the invocation is before a change.</param>
@@ -157,7 +168,7 @@ internal static class ObservationExtractor
                         CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[i].Expression.ToString()));
                 }
             }
-            else if (parameter.Name is "conversionFunc" or "selector")
+            else if (IsSelectorParameterName(parameter.Name))
             {
                 hasSelector = true;
             }

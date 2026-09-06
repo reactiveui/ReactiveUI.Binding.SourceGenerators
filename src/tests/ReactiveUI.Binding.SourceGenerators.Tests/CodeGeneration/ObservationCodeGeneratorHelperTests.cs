@@ -25,6 +25,9 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>The <c>Address</c> name these tests generate against.</summary>
     private const string AddressName = "Address";
 
+    /// <summary>The fully qualified name of the <c>Country</c> type used by these tests.</summary>
+    private const string CountryTypeName = "global::TestApp.Country";
+
     /// <summary>The <c>DistinctUntilChanged</c> name these tests generate against.</summary>
     private const string DistinctUntilChangedName = "DistinctUntilChanged";
 
@@ -45,6 +48,9 @@ public partial class ObservationCodeGeneratorHelperTests
 
     /// <summary>The <c>ImmediateReturnSignal</c> name these tests generate against.</summary>
     private const string ImmediateReturnSignalName = "ImmediateReturnSignal";
+
+    /// <summary>The <c>ImmutableEmptySignal</c> name the leaf of a chain emits for a missing parent.</summary>
+    private const string ImmutableEmptySignalName = "ImmutableEmptySignal";
 
     /// <summary>The <c>WhenChanged</c> name these tests generate against.</summary>
     private const string WhenChangedName = "WhenChanged";
