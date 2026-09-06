@@ -34,13 +34,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (viewModelPropertyExpression == "x => x.Name"
                 && viewPropertyExpression == "x => x.NameText")
             {
-                return __Bind_7FFFFC09455D2B72(viewModel, view);
+                return __Bind_7FFFFC09455D2B53(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.MultipleBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFFC09455D2B72(global::SharedScenarios.Bind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.Bind.MultipleBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.MultipleBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFFC09455D2B53(global::SharedScenarios.Bind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.Bind.MultipleBindings.MyView view)
         {
             // Bind: Name <-> NameText
         if (global::ReactiveUI.Binding.BindingHooks.Any
@@ -120,13 +120,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (viewModelPropertyExpression == "x => x.Age"
                 && viewPropertyExpression == "x => x.AgeText")
             {
-                return __Bind_7FFFFC08E70C4031(viewModel, view);
+                return __Bind_7FFFFC08E70C3FF3(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.MultipleBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFFC08E70C4031(global::SharedScenarios.Bind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.Bind.MultipleBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.MultipleBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFFC08E70C3FF3(global::SharedScenarios.Bind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.Bind.MultipleBindings.MyView view)
         {
             // Bind: Age <-> AgeText
         if (global::ReactiveUI.Binding.BindingHooks.Any

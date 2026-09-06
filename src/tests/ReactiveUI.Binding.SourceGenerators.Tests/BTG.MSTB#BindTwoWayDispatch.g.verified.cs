@@ -46,7 +46,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             else if (sourcePropertyExpression == "x => x.LastName"
                 && targetPropertyExpression == "x => x.LastNameText")
             {
-                return __BindTwoWay_7FFFD5F5F103D3E1(source, target);
+                return __BindTwoWay_7FFFD5F5F103D3C2(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
@@ -97,7 +97,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
         }
 
-        private static global::System.IDisposable __BindTwoWay_7FFFD5F5F103D3E1(global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target)
+        private static global::System.IDisposable __BindTwoWay_7FFFD5F5F103D3C2(global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView target)
         {
             // BindTwoWay: LastName <-> LastNameText
         if (global::ReactiveUI.Binding.BindingHooks.Any

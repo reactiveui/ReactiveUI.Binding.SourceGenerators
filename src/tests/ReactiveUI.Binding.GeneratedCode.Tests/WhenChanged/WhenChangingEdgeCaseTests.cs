@@ -67,7 +67,7 @@ public class WhenChangingEdgeCaseTests
     public async Task TwoProperties_EmitsOnEitherChange()
     {
         var vm = new BigViewModel { Prop1 = "A", Prop2 = 1 };
-        var values = new List<(string Property1, int Property2)>();
+        var values = new List<PropertyValues<string, int>>();
 
         using var sub = WhenChangingScenarios.TwoProperties(vm)
             .Subscribe(values.Add);
@@ -113,7 +113,7 @@ public class WhenChangingEdgeCaseTests
     public async Task TwoProperties_SequentialChanges()
     {
         var vm = new BigViewModel { Prop1 = "A", Prop2 = 1 };
-        var values = new List<(string Property1, int Property2)>();
+        var values = new List<PropertyValues<string, int>>();
 
         using var sub = WhenChangingScenarios.TwoProperties(vm)
             .Subscribe(values.Add);

@@ -45,7 +45,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             else if (sourcePropertyExpression == "x => x.LastName"
                 && targetPropertyExpression == "x => x.LastNameText")
             {
-                return __BindOneWay_0000177D9FC0452B(source, target);
+                return __BindOneWay_0000177D9FC0450C(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
@@ -83,7 +83,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             }, "x => x.FirstNameText");
         }
 
-        private static global::System.IDisposable __BindOneWay_0000177D9FC0452B(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
+        private static global::System.IDisposable __BindOneWay_0000177D9FC0450C(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
         {
             // BindOneWay: LastName -> LastNameText
         if (global::ReactiveUI.Binding.BindingHooks.Any

@@ -14,7 +14,7 @@ public class BindingTypeConverterRegistryTests
     [Test]
     public async Task CloneRegistryShallow_EmptyDictionary_ReturnsEmpty()
     {
-        var source = new Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>>();
+        var source = new Dictionary<ConverterTypePair, List<IBindingTypeConverter>>();
 
         var clone = BindingTypeConverterRegistry.CloneRegistryShallow(source);
 
@@ -28,14 +28,14 @@ public class BindingTypeConverterRegistryTests
     {
         var converter = new TestConverter(typeof(string), typeof(int));
         var list = new List<IBindingTypeConverter> { converter };
-        var source = new Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>> { [(typeof(string), typeof(int))] = list };
+        var source = new Dictionary<ConverterTypePair, List<IBindingTypeConverter>> { [new ConverterTypePair(typeof(string), typeof(int))] = list };
 
         var clone = BindingTypeConverterRegistry.CloneRegistryShallow(source);
 
         await Assert.That(clone.Count).IsEqualTo(1);
-        await Assert.That(clone.ContainsKey((typeof(string), typeof(int)))).IsTrue();
+        await Assert.That(clone.ContainsKey(new(typeof(string), typeof(int)))).IsTrue();
 
-        var clonedList = clone[(typeof(string), typeof(int))];
+        var clonedList = clone[new ConverterTypePair(typeof(string), typeof(int))];
         await Assert.That(clonedList.Count).IsEqualTo(1);
         await Assert.That(ReferenceEquals(clonedList, list)).IsTrue();
     }
@@ -47,12 +47,12 @@ public class BindingTypeConverterRegistryTests
     {
         var converter = new TestConverter(typeof(string), typeof(int));
         var list = new List<IBindingTypeConverter> { converter };
-        var source = new Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>> { [(typeof(string), typeof(int))] = list };
+        var source = new Dictionary<ConverterTypePair, List<IBindingTypeConverter>> { [new ConverterTypePair(typeof(string), typeof(int))] = list };
 
         var clone = BindingTypeConverterRegistry.CloneRegistryShallow(source);
 
         // Remove entry from clone
-        _ = clone.Remove((typeof(string), typeof(int)));
+        _ = clone.Remove(new(typeof(string), typeof(int)));
 
         // Original should still have the entry
         await Assert.That(source.Count).IsEqualTo(1);

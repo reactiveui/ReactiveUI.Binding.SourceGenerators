@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// <summary>
         /// Concrete typed overload for WhenChanged on global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel.
         /// </summary>
-        public static global::System.IObservable<(string property1, int property2)> WhenChanged(
+        public static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int>> WhenChanged(
             this global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel objectToMonitor,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel, string>> property1,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel, int>> property2,
@@ -37,7 +37,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<(string property1, int property2)> __WhenChanged_7FFFFC6CDD42386A(global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel obj)
+        private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int>> __WhenChanged_7FFFFC6CDD42386A(global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel obj)
         {
             var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
@@ -54,7 +54,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
                 __propObs0,
                 __propObs1,
-                (p1, p2) => (Property1: p1, Property2: p2));
+                (p1, p2) => new global::ReactiveUI.Binding.PropertyValues<string, int>(p1, p2));
         }
 
     }

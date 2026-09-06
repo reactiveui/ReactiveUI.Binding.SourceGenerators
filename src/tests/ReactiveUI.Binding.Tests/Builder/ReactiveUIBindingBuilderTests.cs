@@ -126,7 +126,7 @@ public class ReactiveUIBindingBuilderTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(bool),
-            static (_, _) => (true, true));
+            static (_, _) => new(true, true));
 
         _ = builder.WithConverter(converter);
 
@@ -145,7 +145,7 @@ public class ReactiveUIBindingBuilderTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(string),
-            static (from, _) => (true, from?.ToString()));
+            static (from, _) => new(true, from?.ToString()));
 
         var result = builder.WithConverter(converter);
 
@@ -159,7 +159,7 @@ public class ReactiveUIBindingBuilderTests
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, "converted"));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => new(true, "converted"));
 
         _ = builder.WithFallbackConverter(converter);
 
@@ -174,7 +174,7 @@ public class ReactiveUIBindingBuilderTests
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, "converted"));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => new(true, "converted"));
 
         var result = builder.WithFallbackConverter(converter);
 
@@ -289,8 +289,8 @@ public class ReactiveUIBindingBuilderTests
         var typed = new StubBindingTypeConverter(
             typeof(double),
             typeof(string),
-            static (from, _) => (true, from?.ToString()));
-        var fallback = new StubFallbackConverter(static (_, _, _, _) => (true, "fallback"));
+            static (from, _) => new(true, from?.ToString()));
+        var fallback = new StubFallbackConverter(static (_, _, _, _) => new(true, "fallback"));
         var setMethod = new StubSetMethodBindingConverter();
 
         _ = builder.WithConverter(typed);

@@ -78,13 +78,13 @@ internal static class ViewLocatorDispatchGenerator
     /// <returns>A deduplicated list of registrations.</returns>
     private static List<ViewRegistrationInfo> Deduplicate(ImmutableArray<ViewRegistrationInfo> registrations)
     {
-        var seen = new HashSet<(string, string?)>(EqualityComparer<(string, string?)>.Default);
+        var seen = new HashSet<ViewRegistrationKey>();
         var result = new List<ViewRegistrationInfo>(registrations.Length);
 
         for (var i = 0; i < registrations.Length; i++)
         {
             var reg = registrations[i];
-            if (seen.Add((reg.ViewModelFullyQualifiedName, reg.Contract)))
+            if (seen.Add(new(reg.ViewModelFullyQualifiedName, reg.Contract)))
             {
                 result.Add(reg);
             }

@@ -317,7 +317,7 @@ internal static class BindCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>The view model and view observable variable names after the stages are applied.</returns>
-    private static (string ViewModelVar, string ViewVar) EmitConversionAndSchedulerStages(
+    private static BindingObservables EmitConversionAndSchedulerStages(
         StringBuilder sb,
         BindingInvocationInfo inv)
     {
@@ -346,7 +346,7 @@ internal static class BindCodeGenerator
             viewVar = "viewBind";
         }
 
-        return (viewModelVar, viewVar);
+        return new(viewModelVar, viewVar);
     }
 
     /// <summary>Emits the two-way subscription, change-stream merge, and <c>ReactiveBinding</c> return block.</summary>
@@ -399,7 +399,7 @@ internal static class BindCodeGenerator
     /// <remarks>
     /// Two-way needs both: each direction assigns across the same type gap, in opposite directions.
     /// </remarks>
-    private static (string ViewModelVar, string ViewVar) EmitRegistryConversionStages(
+    private static BindingObservables EmitRegistryConversionStages(
         StringBuilder sb,
         BindingInvocationInfo inv,
         string viewModelVar,
@@ -407,7 +407,7 @@ internal static class BindCodeGenerator
     {
         if (!BindingEmitterHelpers.RequiresRegistryConversion(inv))
         {
-            return (viewModelVar, viewVar);
+            return new(viewModelVar, viewVar);
         }
 
         const string convertedViewModelVar = "convertedVmObs";
@@ -427,7 +427,7 @@ internal static class BindCodeGenerator
             inv.TargetPropertyTypeFullName,
             inv.SourcePropertyTypeFullName);
 
-        return (convertedViewModelVar, convertedViewVar);
+        return new(convertedViewModelVar, convertedViewVar);
     }
 
     /// <summary>Reports whether the two sides differ with no supplied converter, so the registry supplies one.</summary>

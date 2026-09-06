@@ -34,18 +34,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (viewModelPropertyExpression == "x => x.FirstName"
                 && viewPropertyExpression == "x => x.FirstNameText")
             {
-                return __Bind_7FFFE38A2E1A448A(viewModel, view);
+                return __Bind_7FFFE38A2E1A446B(viewModel, view);
             }
             else if (viewModelPropertyExpression == "x => x.LastName"
                 && viewPropertyExpression == "x => x.LastNameText")
             {
-                return __Bind_7FFFE389FC4EEB01(viewModel, view);
+                return __Bind_7FFFE389FC4EEAC3(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFE38A2E1A448A(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFE38A2E1A446B(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
         {
             // Bind: FirstName <-> FirstNameText
         if (global::ReactiveUI.Binding.BindingHooks.Any
@@ -100,7 +100,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 disposable);
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFE389FC4EEB01(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.TwoSameTypeBindings.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFE389FC4EEAC3(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.Bind.TwoSameTypeBindings.MyView view)
         {
             // Bind: LastName <-> LastNameText
         if (global::ReactiveUI.Binding.BindingHooks.Any

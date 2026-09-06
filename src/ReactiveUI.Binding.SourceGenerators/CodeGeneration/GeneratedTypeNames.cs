@@ -107,6 +107,9 @@ internal static class GeneratedTypeNames
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingChange</c>.</summary>
     internal const string BindingChange = "global::ReactiveUI.Binding.BindingChange";
 
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.PropertyValues</c>, the multi-property emission.</summary>
+    internal const string PropertyValues = "global::ReactiveUI.Binding.PropertyValues";
+
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingErrors</c>.</summary>
     /// <remarks>
     /// A binding's write subscribes through this rather than plainly, so a faulting source is recorded and a

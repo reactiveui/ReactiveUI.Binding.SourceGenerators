@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// <summary>
         /// Concrete typed overload for WhenAnyValue on global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel.
         /// </summary>
-        public static global::System.IObservable<(string property1, int property2, double property3, bool property4, string property5)> WhenAnyValue(
+        public static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int, double, bool, string>> WhenAnyValue(
             this global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel objectToMonitor,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, string>> property1,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, int>> property2,
@@ -40,7 +40,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             throw new global::System.InvalidOperationException("No generated WhenAnyValue dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<(string property1, int property2, double property3, bool property4, string property5)> __WhenAnyValue_00003486AFD4FA6C(global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel obj)
+        private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int, double, bool, string>> __WhenAnyValue_00003486AFD4FA6C(global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel obj)
         {
             var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
@@ -78,7 +78,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 __propObs2,
                 __propObs3,
                 __propObs4,
-                (p1, p2, p3, p4, p5) => (Property1: p1, Property2: p2, Property3: p3, Property4: p4, Property5: p5));
+                (p1, p2, p3, p4, p5) => new global::ReactiveUI.Binding.PropertyValues<string, int, double, bool, string>(p1, p2, p3, p4, p5));
         }
 
     }

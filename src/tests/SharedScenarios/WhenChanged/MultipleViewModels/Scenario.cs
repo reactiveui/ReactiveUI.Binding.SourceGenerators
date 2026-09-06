@@ -14,6 +14,6 @@ public static class Scenario
     /// <param name="vm1">The first view model.</param>
     /// <param name="vm2">The second view model.</param>
     /// <returns>A tuple of observables for name and count.</returns>
-    public static (IObservable<string> NameObs, IObservable<int> CountObs) Execute(ViewModel1 vm1, ViewModel2 vm2) =>
-        (vm1.WhenChanged(x => x.Name), vm2.WhenChanged(x => x.Count));
+    public static ScenarioResult Execute(ViewModel1 vm1, ViewModel2 vm2) =>
+        new(vm1.WhenChanged(x => x.Name), vm2.WhenChanged(x => x.Count));
 }

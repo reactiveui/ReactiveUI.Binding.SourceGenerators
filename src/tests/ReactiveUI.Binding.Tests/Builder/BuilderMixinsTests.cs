@@ -108,7 +108,7 @@ public class BuilderMixinsTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(bool),
-            static (_, _) => (true, true));
+            static (_, _) => new(true, true));
 
         var result = ((IAppBuilder)builder).WithConverter(converter);
 
@@ -128,7 +128,7 @@ public class BuilderMixinsTests
         var converter = new StubBindingTypeConverter(
             typeof(int),
             typeof(bool),
-            static (_, _) => (true, true));
+            static (_, _) => new(true, true));
 
         var action = () => fakeBuilder.WithConverter(converter);
 
@@ -142,7 +142,7 @@ public class BuilderMixinsTests
     {
         RxBindingBuilder.ResetForTesting();
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
-        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, "converted"));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => new(true, "converted"));
 
         var result = ((IAppBuilder)builder).WithFallbackConverter(converter);
 
@@ -158,7 +158,7 @@ public class BuilderMixinsTests
     public async Task WithFallbackConverter_WithNonReactiveUIBuilder_ThrowsInvalidOperationException()
     {
         var fakeBuilder = new FakeAppBuilder();
-        var converter = new StubFallbackConverter(static (_, _, _, _) => (true, "converted"));
+        var converter = new StubFallbackConverter(static (_, _, _, _) => new(true, "converted"));
 
         var action = () => fakeBuilder.WithFallbackConverter(converter);
 
@@ -205,8 +205,8 @@ public class BuilderMixinsTests
         var converter = new StubBindingTypeConverter(
             typeof(string),
             typeof(int),
-            static (_, _) => (true, ConvertedValue));
-        var fallbackConverter = new StubFallbackConverter(static (_, _, _, _) => (true, "fallback"));
+            static (_, _) => new(true, ConvertedValue));
+        var fallbackConverter = new StubFallbackConverter(static (_, _, _, _) => new(true, "fallback"));
         var setConverter = new StubSetMethodBindingConverter();
 
         var result = ((IAppBuilder)builder)

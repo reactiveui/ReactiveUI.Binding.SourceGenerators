@@ -53,7 +53,7 @@ public class BeforeChangeChainTests
                                                                       return outer.WhenChanging(x => x.Child.Name);
                                                                   }
 
-                                                                  public static IObservable<(string First, string Second)> Multiple(Outer outer)
+                                                                  public static IObservable<PropertyValues<string, string>> Multiple(Outer outer)
                                                                   {
                                                                       return outer.WhenChanging(x => x.Child.Name, x => x.Title);
                                                                   }

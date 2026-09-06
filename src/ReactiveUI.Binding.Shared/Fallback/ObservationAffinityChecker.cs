@@ -27,20 +27,12 @@ namespace ReactiveUI.Binding.Fallback;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class ObservationAffinityChecker
 {
-    /// <summary>Guards <see cref="_plugins"/> while it is (re)resolved.</summary>
-    private static readonly Lock Gate = new();
-
     /// <summary>The resolved plugins, or null while none have been resolved yet.</summary>
     private static ICreatesObservableForProperty[]? _plugins;
 
     /// <summary>Re-reads the registered plugins, for a host that registers them after the first binding.</summary>
-    public static void Refresh()
-    {
-        lock (Gate)
-        {
-            _plugins = null;
-        }
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Refresh() => Interlocked.Exchange(ref _plugins, null);
 
     /// <summary>Returns <see langword="true"/> if a registered <see cref="ICreatesObservableForProperty"/> outranks <paramref name="generatedAffinity"/>.</summary>
     /// <param name="type">The type being observed.</param>
@@ -66,19 +58,22 @@ public static class ObservationAffinityChecker
 
     /// <summary>Resolves the registered plugins once and keeps them.</summary>
     /// <returns>The registered plugins, empty when none is registered.</returns>
+    /// <remarks>
+    /// Publishing with a compare-exchange rather than a lock means the read that every binding makes is a
+    /// plain field read. Two threads racing the first resolve both ask the locator and one array is discarded,
+    /// which costs less than making every later caller take a lock to avoid it.
+    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ICreatesObservableForProperty[] Resolve()
     {
-        var resolved = _plugins;
+        var resolved = Volatile.Read(ref _plugins);
         if (resolved is not null)
         {
             return resolved;
         }
 
-        lock (Gate)
-        {
-            _plugins ??= [.. AppLocator.Current.GetServices<ICreatesObservableForProperty>()];
-            return _plugins;
-        }
+        ICreatesObservableForProperty[] built = [.. AppLocator.Current.GetServices<ICreatesObservableForProperty>()];
+
+        return Interlocked.CompareExchange(ref _plugins, built, null) ?? built;
     }
 }

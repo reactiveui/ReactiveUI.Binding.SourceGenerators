@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// <summary>
         /// Concrete typed overload for WhenAnyValue on global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture.
         /// </summary>
-        public static global::System.IObservable<(string property1, string property2, string property3, string property4, string property5, string property6, string property7, string property8, string property9, string property10, string property11, string property12)> WhenAnyValue(
+        public static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, string, string, string, string, string, string, string, string, string, string, string>> WhenAnyValue(
             this global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture objectToMonitor,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>> property1,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>> property2,
@@ -61,7 +61,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             throw new global::System.InvalidOperationException("No generated WhenAnyValue dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<(string property1, string property2, string property3, string property4, string property5, string property6, string property7, string property8, string property9, string property10, string property11, string property12)> __WhenAnyValue_7FFFC43E653A6144(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture obj)
+        private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, string, string, string, string, string, string, string, string, string, string, string>> __WhenAnyValue_7FFFC43E653A6144(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture obj)
         {
             var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
@@ -148,7 +148,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 __propObs9,
                 __propObs10,
                 __propObs11,
-                (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12) => (Property1: p1, Property2: p2, Property3: p3, Property4: p4, Property5: p5, Property6: p6, Property7: p7, Property8: p8, Property9: p9, Property10: p10, Property11: p11, Property12: p12));
+                (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12) => new global::ReactiveUI.Binding.PropertyValues<string, string, string, string, string, string, string, string, string, string, string, string>(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12));
         }
 
     }

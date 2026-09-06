@@ -38,7 +38,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             else if (viewModelPropertyExpression == "x => x.LastName"
                 && viewPropertyExpression == "x => x.LastNameText")
             {
-                return __OneWayBind_7FFFC92F041A193F(viewModel, view);
+                return __OneWayBind_7FFFC92F041A1920(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
@@ -82,7 +82,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 sub);
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string> __OneWayBind_7FFFC92F041A193F(global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string> __OneWayBind_7FFFC92F041A1920(global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView view)
         {
             // OneWayBind: LastName -> LastNameText
         if (global::ReactiveUI.Binding.BindingHooks.Any

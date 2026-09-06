@@ -59,8 +59,8 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
                 subj.OnNext(new ObservedChange<object, object?>(sender, expression, default)));
 
             dependencyPropertyDescriptor.AddValueChanged(sender, handler);
-            return Scope.Create<(DependencyPropertyDescriptor Descriptor, object Sender, EventHandler Handler)>(
-                (dependencyPropertyDescriptor, sender, handler),
+            return Scope.Create<DependencyPropertySubscription>(
+                new(dependencyPropertyDescriptor, sender, handler),
                 static state => state.Descriptor.RemoveValueChanged(state.Sender, state.Handler));
         });
     }

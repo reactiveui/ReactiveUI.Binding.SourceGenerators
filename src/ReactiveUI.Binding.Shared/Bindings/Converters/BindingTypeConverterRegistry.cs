@@ -62,7 +62,7 @@ public sealed class BindingTypeConverterRegistry
         const int InitialConverterListCapacity = 4;
         const int InitialRegistryCapacity = 16;
 
-        var key = (converter.FromType, converter.ToType);
+        var key = new ConverterTypePair(converter.FromType, converter.ToType);
 
         lock (_gate)
         {
@@ -110,7 +110,7 @@ public sealed class BindingTypeConverterRegistry
             return null;
         }
 
-        if (!snap.ConvertersByTypePair.TryGetValue((fromType, toType), out var list))
+        if (!snap.ConvertersByTypePair.TryGetValue(new(fromType, toType), out var list))
         {
             return null;
         }
@@ -165,12 +165,12 @@ public sealed class BindingTypeConverterRegistry
     /// <param name="source">The source dictionary to clone.</param>
     /// <returns>A new dictionary with the same entries as <paramref name="source"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>> CloneRegistryShallow(
-        Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>> source)
+    internal static Dictionary<ConverterTypePair, List<IBindingTypeConverter>> CloneRegistryShallow(
+        Dictionary<ConverterTypePair, List<IBindingTypeConverter>> source)
     {
         ArgumentExceptionHelper.ThrowIfNull(source);
 
-        var clone = new Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>>(source.Count);
+        var clone = new Dictionary<ConverterTypePair, List<IBindingTypeConverter>>(source.Count);
         foreach (var kvp in source)
         {
             clone[kvp.Key] = kvp.Value;
@@ -182,5 +182,5 @@ public sealed class BindingTypeConverterRegistry
     /// <summary>Immutable snapshot of the registry state for lock-free reads.</summary>
     /// <param name="ConvertersByTypePair">The converters indexed by source and target type pair.</param>
     private sealed record Snapshot(
-        Dictionary<(Type FromType, Type ToType), List<IBindingTypeConverter>> ConvertersByTypePair);
+        Dictionary<ConverterTypePair, List<IBindingTypeConverter>> ConvertersByTypePair);
 }

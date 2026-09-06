@@ -13,11 +13,11 @@ public class StubFallbackConverter : IBindingFallbackConverter
     private const int StubAffinity = 5;
 
     /// <summary>The conversion logic.</summary>
-    private readonly Func<Type, object, Type, object?, (bool Success, object? Result)> _tryConvert;
+    private readonly Func<Type, object, Type, object?, StubConversionResult> _tryConvert;
 
     /// <summary>Initializes a new instance of the <see cref="StubFallbackConverter"/> class.</summary>
     /// <param name="tryConvert">The conversion logic.</param>
-    public StubFallbackConverter(Func<Type, object, Type, object?, (bool Success, object? Result)> tryConvert) =>
+    public StubFallbackConverter(Func<Type, object, Type, object?, StubConversionResult> tryConvert) =>
         _tryConvert = tryConvert;
 
     /// <inheritdoc/>

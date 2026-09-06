@@ -390,8 +390,8 @@ public class BindingGenerator : IIncrementalGenerator
     private static EquatableArray<string> CollectTypePaths(INamespaceSymbol root)
     {
         var names = new SortedSet<string>(System.StringComparer.Ordinal);
-        var pending = new Stack<(INamespaceSymbol Namespace, string Prefix)>();
-        pending.Push((root, string.Empty));
+        var pending = new Stack<NamespacePath>();
+        pending.Push(new(root, string.Empty));
 
         while (pending.Count > 0)
         {
@@ -400,7 +400,7 @@ public class BindingGenerator : IIncrementalGenerator
             {
                 if (member is INamespaceSymbol child)
                 {
-                    pending.Push((child, $"{prefix}{child.Name}."));
+                    pending.Push(new(child, $"{prefix}{child.Name}."));
                 }
                 else if (member is INamedTypeSymbol { DeclaredAccessibility: Accessibility.Public } type)
                 {

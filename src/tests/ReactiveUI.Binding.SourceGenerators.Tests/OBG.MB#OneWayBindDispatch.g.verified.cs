@@ -101,13 +101,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (viewModelPropertyExpression == "x => x.Age"
                 && viewPropertyExpression == "x => x.AgeText")
             {
-                return __OneWayBind_00002D72E431FB45(viewModel, view);
+                return __OneWayBind_00002D72E431FB26(viewModel, view);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, int> __OneWayBind_00002D72E431FB45(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.MultipleBindings.MyView view)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, int> __OneWayBind_00002D72E431FB26(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel viewModel, global::SharedScenarios.OneWayBind.MultipleBindings.MyView view)
         {
             // OneWayBind: Age -> AgeText
         if (global::ReactiveUI.Binding.BindingHooks.Any

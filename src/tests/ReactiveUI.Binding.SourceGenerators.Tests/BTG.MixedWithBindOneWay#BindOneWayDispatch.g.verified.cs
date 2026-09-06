@@ -40,13 +40,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             if (sourcePropertyExpression == "x => x.ReadOnlyCount"
                 && targetPropertyExpression == "x => x.CountDisplay")
             {
-                return __BindOneWay_7FFFF5775C63CE27(source, target);
+                return __BindOneWay_7FFFF5775C63CE08(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IDisposable __BindOneWay_7FFFF5775C63CE27(global::SharedScenarios.BindTwoWay.MixedWithBindOneWay.MyViewModel source, global::SharedScenarios.BindTwoWay.MixedWithBindOneWay.MyView target)
+        private static global::System.IDisposable __BindOneWay_7FFFF5775C63CE08(global::SharedScenarios.BindTwoWay.MixedWithBindOneWay.MyViewModel source, global::SharedScenarios.BindTwoWay.MixedWithBindOneWay.MyView target)
         {
             // BindOneWay: ReadOnlyCount -> CountDisplay
         if (global::ReactiveUI.Binding.BindingHooks.Any

@@ -226,7 +226,7 @@ internal static class ObservationCodeGenerator
         }
         else
         {
-            EmitCombineLatestTupleProjection(sb, inv.PropertyPaths.Length);
+            EmitCombineLatestValuesProjection(sb, inv);
         }
     }
 
@@ -545,25 +545,25 @@ internal static class ObservationCodeGenerator
         }
         else
         {
-            // Multi-property with selector: wrap fallback tuple with selector decomposition
-            var tupleType = new PooledStringBuilder().Append("global::System.ValueTuple<");
+            // Multi-property with selector: read the fallback's emission back out for the selector
+            var valuesType = new PooledStringBuilder().Append(PropertyValues).Append('<');
             for (var i = 0; i < propCount; i++)
             {
                 var path = first.PropertyPaths[i];
-                _ = tupleType.Append(path[path.Length - 1].PropertyTypeFullName);
+                _ = valuesType.Append(path[path.Length - 1].PropertyTypeFullName);
                 if (i < propCount - 1)
                 {
-                    _ = tupleType.Append(", ");
+                    _ = valuesType.Append(", ");
                 }
             }
 
-            _ = tupleType.Append('>');
+            _ = valuesType.Append('>');
 
-            // Build the selector decomposition lambda: __t => selector(__t.Item1, __t.Item2, ...)
+            // Build the selector decomposition lambda: __t => selector(__t.Property1, __t.Property2, ...)
             var selectorArgs = new PooledStringBuilder();
             for (var i = 0; i < propCount; i++)
             {
-                _ = selectorArgs.Append("__t.Item").Append(i + 1);
+                _ = selectorArgs.Append("__t.Property").Append(i + 1);
                 if (i < propCount - 1)
                 {
                     _ = selectorArgs.Append(", ");
@@ -571,12 +571,12 @@ internal static class ObservationCodeGenerator
             }
 
             _ = sb.AppendLine(
-            $"                return new global::ReactiveUI.Primitives.Signals.MapSignal<{tupleType}, {first.ReturnTypeFullName}>(")
+            $"                return new global::ReactiveUI.Primitives.Signals.MapSignal<{valuesType}, {first.ReturnTypeFullName}>(")
             .AppendLine(
             $"                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.{fallbackMethod}(objectToMonitor{propArgs}),")
             .AppendLine($"                    __t => selector({selectorArgs}));");
 
-            tupleType.Return();
+            valuesType.Return();
             selectorArgs.Return();
         }
 
@@ -1008,11 +1008,13 @@ internal static class ObservationCodeGenerator
         }
     }
 
-    /// <summary>Emits the trailing named-tuple projection lambda for a selector-less <c>CombineLatest</c> call.</summary>
+    /// <summary>Emits the trailing projection lambda that gathers a selector-less <c>CombineLatest</c> into one emission.</summary>
     /// <param name="sb">The string builder to append to.</param>
-    /// <param name="propertyCount">The number of property path observables being combined.</param>
-    private static void EmitCombineLatestTupleProjection(StringBuilder sb, int propertyCount)
+    /// <param name="inv">The invocation, whose return type is the emission being constructed.</param>
+    private static void EmitCombineLatestValuesProjection(StringBuilder sb, InvocationInfo inv)
     {
+        var propertyCount = inv.PropertyPaths.Length;
+
         _ = sb.AppendLine(",")
             .Append("                (");
         for (var i = 0; i < propertyCount; i++)
@@ -1024,10 +1026,10 @@ internal static class ObservationCodeGenerator
             }
         }
 
-        _ = sb.Append(") => (");
+        _ = sb.Append(") => new ").Append(inv.ReturnTypeFullName).Append('(');
         for (var i = 0; i < propertyCount; i++)
         {
-            _ = sb.Append("Property").Append(i + 1).Append(": p").Append(i + 1);
+            _ = sb.Append('p').Append(i + 1);
             if (i < propertyCount - 1)
             {
                 _ = sb.Append(", ");

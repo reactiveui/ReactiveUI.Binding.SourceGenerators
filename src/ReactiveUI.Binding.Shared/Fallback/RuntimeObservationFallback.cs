@@ -45,7 +45,7 @@ public static class RuntimeObservationFallback
     /// <param name="property1">The first property expression.</param>
     /// <param name="property2">The second property expression.</param>
     /// <returns>An observable that emits a tuple of property values when any changes.</returns>
-    public static IObservable<(T1 Value1, T2 Value2)> WhenChanged<TObj, T1, T2>(
+    public static IObservable<PropertyValues<T1, T2>> WhenChanged<TObj, T1, T2>(
         TObj obj,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2)
@@ -53,7 +53,7 @@ public static class RuntimeObservationFallback
     {
         var o1 = WhenChanged(obj, property1);
         var o2 = WhenChanged(obj, property2);
-        return CombineLatestObservable.Create(o1, o2, static (v1, v2) => (v1, v2));
+        return CombineLatestObservable.Create(o1, o2, static (v1, v2) => new PropertyValues<T1, T2>(v1, v2));
     }
 
     /// <summary>Runtime fallback for multi-property WhenChanged with 3 properties.</summary>
@@ -66,7 +66,7 @@ public static class RuntimeObservationFallback
     /// <param name="property2">The second property expression.</param>
     /// <param name="property3">The third property expression.</param>
     /// <returns>An observable that emits a tuple of property values when any changes.</returns>
-    public static IObservable<(T1 Value1, T2 Value2, T3 Value3)> WhenChanged<TObj, T1, T2, T3>(
+    public static IObservable<PropertyValues<T1, T2, T3>> WhenChanged<TObj, T1, T2, T3>(
         TObj obj,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
@@ -76,7 +76,7 @@ public static class RuntimeObservationFallback
         var o1 = WhenChanged(obj, property1);
         var o2 = WhenChanged(obj, property2);
         var o3 = WhenChanged(obj, property3);
-        return CombineLatestObservable.Create(o1, o2, o3, static (v1, v2, v3) => (v1, v2, v3));
+        return CombineLatestObservable.Create(o1, o2, o3, static (v1, v2, v3) => new PropertyValues<T1, T2, T3>(v1, v2, v3));
     }
 
     /// <summary>Runtime fallback for WhenChanging with a single property.</summary>
@@ -105,7 +105,7 @@ public static class RuntimeObservationFallback
     /// <param name="property1">The first property expression.</param>
     /// <param name="property2">The second property expression.</param>
     /// <returns>An observable that emits a tuple of property values before any changes.</returns>
-    public static IObservable<(T1 Value1, T2 Value2)> WhenChanging<TObj, T1, T2>(
+    public static IObservable<PropertyValues<T1, T2>> WhenChanging<TObj, T1, T2>(
         TObj obj,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2)
@@ -113,7 +113,7 @@ public static class RuntimeObservationFallback
     {
         var o1 = WhenChanging(obj, property1);
         var o2 = WhenChanging(obj, property2);
-        return CombineLatestObservable.Create(o1, o2, static (v1, v2) => (v1, v2));
+        return CombineLatestObservable.Create(o1, o2, static (v1, v2) => new PropertyValues<T1, T2>(v1, v2));
     }
 
     /// <summary>Runtime fallback for multi-property WhenChanging with 3 properties.</summary>
@@ -126,7 +126,7 @@ public static class RuntimeObservationFallback
     /// <param name="property2">The second property expression.</param>
     /// <param name="property3">The third property expression.</param>
     /// <returns>An observable that emits a tuple of property values before any changes.</returns>
-    public static IObservable<(T1 Value1, T2 Value2, T3 Value3)> WhenChanging<TObj, T1, T2, T3>(
+    public static IObservable<PropertyValues<T1, T2, T3>> WhenChanging<TObj, T1, T2, T3>(
         TObj obj,
         Expression<Func<TObj, T1>> property1,
         Expression<Func<TObj, T2>> property2,
@@ -136,7 +136,7 @@ public static class RuntimeObservationFallback
         var o1 = WhenChanging(obj, property1);
         var o2 = WhenChanging(obj, property2);
         var o3 = WhenChanging(obj, property3);
-        return CombineLatestObservable.Create(o1, o2, o3, static (v1, v2, v3) => (v1, v2, v3));
+        return CombineLatestObservable.Create(o1, o2, o3, static (v1, v2, v3) => new PropertyValues<T1, T2, T3>(v1, v2, v3));
     }
 
     /// <summary>Runtime fallback for WhenAnyValue with a single property.</summary>
@@ -165,7 +165,7 @@ public static class RuntimeObservationFallback
     /// <param name="property1">The first property expression.</param>
     /// <param name="property2">The second property expression.</param>
     /// <returns>An observable that emits a tuple of property values when any changes.</returns>
-    public static IObservable<(T1 Value1, T2 Value2)> WhenAnyValue<TSender, T1, T2>(
+    public static IObservable<PropertyValues<T1, T2>> WhenAnyValue<TSender, T1, T2>(
         TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2)
@@ -173,7 +173,7 @@ public static class RuntimeObservationFallback
     {
         var o1 = WhenAnyValue(sender, property1);
         var o2 = WhenAnyValue(sender, property2);
-        return CombineLatestObservable.Create(o1, o2, static (v1, v2) => (v1, v2));
+        return CombineLatestObservable.Create(o1, o2, static (v1, v2) => new PropertyValues<T1, T2>(v1, v2));
     }
 
     /// <summary>Runtime fallback for multi-property WhenAnyValue with 3 properties.</summary>
@@ -186,7 +186,7 @@ public static class RuntimeObservationFallback
     /// <param name="property2">The second property expression.</param>
     /// <param name="property3">The third property expression.</param>
     /// <returns>An observable that emits a tuple of property values when any changes.</returns>
-    public static IObservable<(T1 Value1, T2 Value2, T3 Value3)> WhenAnyValue<TSender, T1, T2, T3>(
+    public static IObservable<PropertyValues<T1, T2, T3>> WhenAnyValue<TSender, T1, T2, T3>(
         TSender sender,
         Expression<Func<TSender, T1>> property1,
         Expression<Func<TSender, T2>> property2,
@@ -196,6 +196,6 @@ public static class RuntimeObservationFallback
         var o1 = WhenAnyValue(sender, property1);
         var o2 = WhenAnyValue(sender, property2);
         var o3 = WhenAnyValue(sender, property3);
-        return CombineLatestObservable.Create(o1, o2, o3, static (v1, v2, v3) => (v1, v2, v3));
+        return CombineLatestObservable.Create(o1, o2, o3, static (v1, v2, v3) => new PropertyValues<T1, T2, T3>(v1, v2, v3));
     }
 }

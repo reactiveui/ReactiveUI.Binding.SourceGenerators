@@ -108,7 +108,7 @@ public class WhenChangingTests
     public async Task TwoProperties_EmitsInitialTuple()
     {
         var vm = new BigViewModel { Prop1 = "Hello", Prop2 = TwoPropIntValue };
-        var values = new List<(string Property1, int Property2)>();
+        var values = new List<PropertyValues<string, int>>();
 
         using var sub = WhenChangingScenarios.TwoProperties(vm)
             .Subscribe(values.Add);
@@ -124,7 +124,7 @@ public class WhenChangingTests
     public async Task ThreeProperties_EmitsInitialValues()
     {
         var vm = new BigViewModel { Prop1 = "X", Prop2 = ThreePropIntValue, Prop3 = ThreePropDoubleValue };
-        var values = new List<(string Property1, int Property2, double Property3)>();
+        var values = new List<PropertyValues<string, int, double>>();
 
         using var sub = WhenChangingScenarios.ThreeProperties(vm)
             .Subscribe(values.Add);
@@ -141,7 +141,7 @@ public class WhenChangingTests
     public async Task FourProperties_EmitsInitialValues()
     {
         var vm = new BigViewModel { Prop1 = "Y", Prop2 = FourPropIntValue, Prop3 = FourPropDoubleValue, Prop4 = true };
-        var values = new List<(string Property1, int Property2, double Property3, bool Property4)>();
+        var values = new List<PropertyValues<string, int, double, bool>>();
 
         using var sub = WhenChangingScenarios.FourProperties(vm)
             .Subscribe(values.Add);

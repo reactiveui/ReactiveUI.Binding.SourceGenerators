@@ -310,7 +310,7 @@ internal static class BindTwoWayCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
     /// <returns>The source and target observable variable names after the stages are applied.</returns>
-    private static (string SourceVar, string TargetVar) EmitConversionAndSchedulerStages(
+    private static BindingObservables EmitConversionAndSchedulerStages(
         StringBuilder sb,
         BindingInvocationInfo inv)
     {
@@ -339,7 +339,7 @@ internal static class BindTwoWayCodeGenerator
             targetVar = "targetBind";
         }
 
-        return (sourceVar, targetVar);
+        return new(sourceVar, targetVar);
     }
 
     /// <summary>Emits the check that hands the binding to the runtime engine when a registered plugin outranks the generated one.</summary>

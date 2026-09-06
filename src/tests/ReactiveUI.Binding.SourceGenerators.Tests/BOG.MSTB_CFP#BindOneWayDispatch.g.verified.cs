@@ -35,10 +35,10 @@ namespace ReactiveUI.Binding
             {
                 return __BindOneWay_0000177DD18B9EB4(source, target);
             }
-            else if (callerLineNumber == 111
+            else if (callerLineNumber == 110
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
-                return __BindOneWay_0000177D9FC0452B(source, target);
+                return __BindOneWay_0000177D9FC0450C(source, target);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
@@ -76,7 +76,7 @@ namespace ReactiveUI.Binding
             }, "x => x.FirstNameText");
         }
 
-        private static global::System.IDisposable __BindOneWay_0000177D9FC0452B(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
+        private static global::System.IDisposable __BindOneWay_0000177D9FC0450C(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel source, global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyView target)
         {
             // BindOneWay: LastName -> LastNameText
         if (global::ReactiveUI.Binding.BindingHooks.Any

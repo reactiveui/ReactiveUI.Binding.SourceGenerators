@@ -85,8 +85,7 @@ internal static class WhenAnyObservableExtractor
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The observed paths, their expression texts, their inner types, and whether a selector was supplied.</returns>
-    private static (List<EquatableArray<PropertyPathSegment>> PropertyPaths, List<string> ExpressionTexts, List<string> InnerObservableTypes, bool HasSelector)
-        CollectObservableArguments(
+    private static ObservableArguments CollectObservableArguments(
             IMethodSymbol methodSymbol,
             SeparatedSyntaxList<ArgumentSyntax> args,
             SemanticModel semanticModel,
@@ -127,6 +126,6 @@ internal static class WhenAnyObservableExtractor
                 SymbolHelpers.ExtractInnerObservableType(path[^1], semanticModel, args[i].Expression, ct));
         }
 
-        return (propertyPaths, expressionTexts, innerObservableTypes, hasSelector);
+        return new(propertyPaths, expressionTexts, innerObservableTypes, hasSelector);
     }
 }

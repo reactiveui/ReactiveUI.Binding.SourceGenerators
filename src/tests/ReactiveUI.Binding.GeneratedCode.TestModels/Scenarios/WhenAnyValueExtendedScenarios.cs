@@ -18,7 +18,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IObservable<(string Property1, int Property2, double Property3, bool Property4)> FourProperties(
+    public static IObservable<PropertyValues<string, int, double, bool>> FourProperties(
         BigViewModel vm) =>
         vm.WhenAnyValue(x => x.Prop1, x => x.Prop2, x => x.Prop3, x => x.Prop4);
 
@@ -26,7 +26,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5)>
+    public static IObservable<PropertyValues<string, int, double, bool, string>>
         FiveProperties(BigViewModel vm) =>
         vm.WhenAnyValue(x => x.Prop1, x => x.Prop2, x => x.Prop3, x => x.Prop4, x => x.Prop5);
 
@@ -35,7 +35,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6)>
+        IObservable<PropertyValues<string, int, double, bool, string, int>>
         SixProperties(BigViewModel vm) =>
         vm.WhenAnyValue(x => x.Prop1, x => x.Prop2, x => x.Prop3, x => x.Prop4, x => x.Prop5, x => x.Prop6);
 
@@ -44,8 +44,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
-            double Property7)> SevenProperties(BigViewModel vm) =>
+        IObservable<PropertyValues<string, int, double, bool, string, int, double>> SevenProperties(BigViewModel vm) =>
         vm.WhenAnyValue(
             x => x.Prop1,
             x => x.Prop2,
@@ -60,8 +59,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
-            double Property7, bool Property8)> EightProperties(BigViewModel vm) =>
+        IObservable<PropertyValues<string, int, double, bool, string, int, double, bool>> EightProperties(BigViewModel vm) =>
         vm.WhenAnyValue(
             x => x.Prop1,
             x => x.Prop2,
@@ -77,8 +75,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
-            double Property7, bool Property8, string Property9)> NineProperties(BigViewModel vm) =>
+        IObservable<PropertyValues<string, int, double, bool, string, int, double, bool, string>> NineProperties(BigViewModel vm) =>
         vm.WhenAnyValue(
             x => x.Prop1,
             x => x.Prop2,
@@ -95,8 +92,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
-            double Property7, bool Property8, string Property9, int Property10)> TenProperties(BigViewModel vm) =>
+        IObservable<PropertyValues<string, int, double, bool, string, int, double, bool, string, int>> TenProperties(BigViewModel vm) =>
         vm.WhenAnyValue(
             x => x.Prop1,
             x => x.Prop2,
@@ -114,8 +110,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
-            double Property7, bool Property8, string Property9, int Property10, double Property11)> ElevenProperties(
+        IObservable<PropertyValues<string, int, double, bool, string, int, double, bool, string, int, double>> ElevenProperties(
             BigViewModel vm) =>
         vm.WhenAnyValue(
             x => x.Prop1,
@@ -135,8 +130,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int Property6,
-            double Property7, bool Property8, string Property9, int Property10, double Property11, bool Property12)>
+        IObservable<PropertyValues<string, int, double, bool, string, int, double, bool, string, int, double, bool>>
         TwelveProperties(BigViewModel vm) =>
         vm.WhenAnyValue(
             x => x.Prop1,
@@ -156,9 +150,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int
-        Property6, double Property7, bool Property8, string Property9, int Property10, double Property11, bool
-        Property12, string Property13)> ThirteenProperties(BigViewModel vm) =>
+    public static IObservable<PropertyValues<string, int, double, bool, string, int, double, bool, string, int, double, bool, string>> ThirteenProperties(BigViewModel vm) =>
         vm.WhenAnyValue(
             x => x.Prop1,
             x => x.Prop2,
@@ -178,9 +170,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int
-        Property6, double Property7, bool Property8, string Property9, int Property10, double Property11, bool
-        Property12, string Property13, int Property14)> FourteenProperties(BigViewModel vm) =>
+    public static IObservable<PropertyValues<string, int, double, bool, string, int, double, bool, string, int, double, bool, string, int>> FourteenProperties(BigViewModel vm) =>
         vm.WhenAnyValue(
             x => x.Prop1,
             x => x.Prop2,
@@ -201,9 +191,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int
-        Property6, double Property7, bool Property8, string Property9, int Property10, double Property11, bool
-        Property12, string Property13, int Property14, double Property15)> FifteenProperties(BigViewModel vm) =>
+    public static IObservable<PropertyValues<string, int, double, bool, string, int, double, bool, string, int, double, bool, string, int, double>> FifteenProperties(BigViewModel vm) =>
         vm.WhenAnyValue(
             x => x.Prop1,
             x => x.Prop2,
@@ -225,9 +213,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of the property value tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IObservable<(string Property1, int Property2, double Property3, bool Property4, string Property5, int
-        Property6, double Property7, bool Property8, string Property9, int Property10, double Property11, bool
-        Property12, string Property13, int Property14, double Property15, bool Property16)> SixteenProperties(
+    public static IObservable<PropertyValues<string, int, double, bool, string, int, double, bool, string, int, double, bool, string, int, double, bool>> SixteenProperties(
         BigViewModel vm) =>
         vm.WhenAnyValue(
             x => x.Prop1,
@@ -502,8 +488,7 @@ public static class WhenAnyValueExtendedScenarios
     /// <returns>An observable of a 12-string tuple.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static
-        IObservable<(string V1, string V2, string V3, string V4, string V5, string V6, string V7, string V8, string V9,
-            string V10, string V11, string V12)> TwelveProperties_AllStrings(WhenAnyTestFixture fixture) =>
+        IObservable<PropertyValues<string, string, string, string, string, string, string, string, string, string, string, string>> TwelveProperties_AllStrings(WhenAnyTestFixture fixture) =>
         fixture.WhenAnyValue(
             x => x.Value1,
             x => x.Value2,

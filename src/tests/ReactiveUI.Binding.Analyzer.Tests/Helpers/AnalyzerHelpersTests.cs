@@ -696,7 +696,7 @@ public class AnalyzerHelpersTests
 
     /// <summary>Gets a non-generic method symbol and its compilation.</summary>
     /// <returns>The method symbol and compilation.</returns>
-    private static (IMethodSymbol MethodSymbol, Compilation Compilation) GetNonGenericMethodSymbol()
+    private static MethodSymbolContext GetNonGenericMethodSymbol()
     {
         const string Source = """
                               namespace TestApp
@@ -717,13 +717,13 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax>()
             .First();
 
-        return (model.GetDeclaredSymbol(methodDecl)!, compilation);
+        return new(model.GetDeclaredSymbol(methodDecl)!, compilation);
     }
 
     /// <summary>Gets the resolved method symbol from the first invocation in the source.</summary>
     /// <param name="source">The source code containing an invocation.</param>
     /// <returns>The method symbol and compilation.</returns>
-    private static (IMethodSymbol MethodSymbol, Compilation Compilation) GetInvocationMethodSymbol(string source)
+    private static MethodSymbolContext GetInvocationMethodSymbol(string source)
     {
         var compilation = CreateCompilation(source);
         var tree = compilation.SyntaxTrees[0];
@@ -734,7 +734,7 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()
             .First();
 
-        return ((IMethodSymbol)model.GetSymbolInfo(invocation).Symbol!, compilation);
+        return new((IMethodSymbol)model.GetSymbolInfo(invocation).Symbol!, compilation);
     }
 
     /// <summary>
@@ -743,7 +743,7 @@ public class AnalyzerHelpersTests
     /// </summary>
     /// <param name="source">The source code containing an invocation.</param>
     /// <returns>The method symbol and compilation.</returns>
-    private static (IMethodSymbol MethodSymbol, Compilation Compilation) GetInvocationMethodSymbolMinimal(string source)
+    private static MethodSymbolContext GetInvocationMethodSymbolMinimal(string source)
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(source);
 
@@ -786,6 +786,6 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax>()
             .First();
 
-        return ((IMethodSymbol)model.GetSymbolInfo(invocation).Symbol!, compilation);
+        return new((IMethodSymbol)model.GetSymbolInfo(invocation).Symbol!, compilation);
     }
 }

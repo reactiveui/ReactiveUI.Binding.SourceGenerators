@@ -15,6 +15,6 @@ public static class Scenario
     /// <param name="vm">The view model to observe.</param>
     /// <returns>An observable of (name, age) tuples (before change).</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IObservable<(string Name, int Age)> Execute(MyViewModel vm) =>
+    public static IObservable<PropertyValues<string, int>> Execute(MyViewModel vm) =>
         vm.WhenChanging(x => x.Name, x => x.Age);
 }

@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// <summary>
         /// Concrete typed overload for WhenChanging on global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel.
         /// </summary>
-        public static global::System.IObservable<(string property1, int property2)> WhenChanging(
+        public static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int>> WhenChanging(
             this global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel objectToMonitor,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel, string>> property1,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel, int>> property2,
@@ -37,7 +37,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             throw new global::System.InvalidOperationException("No generated WhenChanging dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<(string property1, int property2)> __WhenChanging_000011A95039C09F(global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel obj)
+        private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int>> __WhenChanging_000011A95039C09F(global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel obj)
         {
             var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
                 (global::System.ComponentModel.INotifyPropertyChanging)obj,
@@ -52,7 +52,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
                 __propObs0,
                 __propObs1,
-                (p1, p2) => (Property1: p1, Property2: p2));
+                (p1, p2) => new global::ReactiveUI.Binding.PropertyValues<string, int>(p1, p2));
         }
 
     }

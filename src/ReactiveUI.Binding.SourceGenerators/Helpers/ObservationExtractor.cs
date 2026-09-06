@@ -198,20 +198,20 @@ internal static class ObservationExtractor
             return singlePath[singlePath.Length - 1].PropertyTypeFullName;
         }
 
-        // Multiple properties: return type is a named value tuple.
-        var tupleBuilder = new System.Text.StringBuilder("(");
+        // Multiple properties: the emission carries every value, so the return type names them as one.
+        var valuesBuilder = new System.Text.StringBuilder(CodeGeneration.GeneratedTypeNames.PropertyValues).Append('<');
         for (var i = 0; i < propertyPaths.Count; i++)
         {
             var path = propertyPaths[i];
             var leafType = path[path.Length - 1].PropertyTypeFullName;
-            _ = tupleBuilder.Append(leafType).Append(" property").Append(i + 1);
+            _ = valuesBuilder.Append(leafType);
             if (i < propertyPaths.Count - 1)
             {
-                _ = tupleBuilder.Append(", ");
+                _ = valuesBuilder.Append(", ");
             }
         }
 
-        _ = tupleBuilder.Append(')');
-        return tupleBuilder.ToString();
+        _ = valuesBuilder.Append('>');
+        return valuesBuilder.ToString();
     }
 }

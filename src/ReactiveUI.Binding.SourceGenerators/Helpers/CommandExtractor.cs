@@ -109,8 +109,7 @@ internal static class CommandExtractor
     /// The parameter property path, leaf type name, and normalized expression text when a supported
     /// lambda is found; otherwise, <see langword="null"/>.
     /// </returns>
-    internal static (PropertyPathSegment[] PropertyPath, string TypeFullName, string ExpressionText)?
-        FindParameterLambda(
+    internal static ParameterLambda? FindParameterLambda(
             SeparatedSyntaxList<ArgumentSyntax> args,
             SemanticModel semanticModel,
             CancellationToken ct)
@@ -120,7 +119,7 @@ internal static class CommandExtractor
             var paramPath = SyntaxHelpers.ExtractPropertyPathFromLambda(args[a].Expression, semanticModel, ct);
             if (paramPath is not null)
             {
-                return (
+                return new ParameterLambda(
                     paramPath,
                     paramPath[^1].PropertyTypeFullName,
                     CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[a].Expression.ToString()));
@@ -273,7 +272,7 @@ internal static class CommandExtractor
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The fully qualified view and view model type names.</returns>
-    internal static (string ViewTypeFullName, string ViewModelTypeFullName) ResolveBindCommandSides(
+    internal static BindCommandSides ResolveBindCommandSides(
         MemberAccessExpressionSyntax memberAccess,
         SeparatedSyntaxList<ArgumentSyntax> args,
         SemanticModel semanticModel,
@@ -287,7 +286,7 @@ internal static class CommandExtractor
             ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type),
             "view model type display name");
 
-        return (viewTypeFullName, viewModelTypeFullName);
+        return new(viewTypeFullName, viewModelTypeFullName);
     }
 
     /// <summary>
@@ -300,7 +299,7 @@ internal static class CommandExtractor
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The event name, its argument type, and the control's binding capabilities.</returns>
-    internal static (string? EventName, string? EventArgsTypeFullName, ControlCapabilities Capabilities) ResolveControlBinding(
+    internal static ControlBinding ResolveControlBinding(
         IMethodSymbol methodSymbol,
         SeparatedSyntaxList<ArgumentSyntax> args,
         ExpressionSyntax controlPropertyArg,
@@ -313,7 +312,7 @@ internal static class CommandExtractor
 
         var resolvedEventArgsTypeFullName = ResolveEventArgsTypeFullName(controlLeafType, ref resolvedEventName);
 
-        return (resolvedEventName, resolvedEventArgsTypeFullName, DetectControlCapabilities(controlLeafType));
+        return new(resolvedEventName, resolvedEventArgsTypeFullName, DetectControlCapabilities(controlLeafType));
     }
 
     /// <summary>Determines whether a property is a settable public instance <c>Command</c> property typed as ICommand.</summary>
@@ -446,6 +445,15 @@ internal static class CommandExtractor
         bool HasCommand,
         bool HasCommandParameter,
         bool HasEnabled);
+
+    /// <summary>How a control surfaces the interaction a command binds to.</summary>
+    /// <param name="EventName">The event the binding subscribes to, or null when the control exposes none.</param>
+    /// <param name="EventArgsTypeFullName">The fully qualified argument type of that event.</param>
+    /// <param name="Capabilities">What the control can do for a command binding.</param>
+    internal readonly record struct ControlBinding(
+        string? EventName,
+        string? EventArgsTypeFullName,
+        ControlCapabilities Capabilities);
 
     /// <summary>Holds the detected <c>withParameter</c> overload information for a BindCommand invocation.</summary>
     internal sealed class ParameterOverloadInfo

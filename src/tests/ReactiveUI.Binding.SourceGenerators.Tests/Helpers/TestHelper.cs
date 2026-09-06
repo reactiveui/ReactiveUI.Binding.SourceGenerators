@@ -403,7 +403,7 @@ public static class TestHelper
         "Security",
         "SES1402:Assembly loaded from an unverifiable source",
         Justification = "loads the compilation this test just emitted, in-process, into a collectible context")]
-    public static (Assembly Assembly, CollectibleAssemblyLoadContext Context) EmitAndLoad(GeneratorTestResult result)
+    public static LoadedAssembly EmitAndLoad(GeneratorTestResult result)
     {
         ArgumentNullException.ThrowIfNull(result);
 
@@ -425,7 +425,7 @@ public static class TestHelper
         ms.Position = 0;
         var context = new CollectibleAssemblyLoadContext();
         var assembly = context.LoadFromStream(ms);
-        return (assembly, context);
+        return new(assembly, context);
     }
 
     /// <summary>

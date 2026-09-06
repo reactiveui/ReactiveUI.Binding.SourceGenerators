@@ -28,15 +28,9 @@ public static class ConverterMigrationHelper
 {
     /// <summary>Extracts all converters from a Splat dependency resolver.</summary>
     /// <param name="resolver">The Splat resolver to extract converters from. Must not be null.</param>
-    /// <returns>
-    /// A tuple containing lists of typed converters, fallback converters, and set-method converters.
-    /// </returns>
+    /// <returns>The typed, fallback, and set-method converters the resolver holds.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="resolver"/> is null.</exception>
-    public static (
-        IList<IBindingTypeConverter> TypedConverters,
-        IList<IBindingFallbackConverter> FallbackConverters,
-        IList<ISetMethodBindingConverter> SetMethodConverters)
-        ExtractConverters(IReadonlyDependencyResolver resolver)
+    public static ExtractedConverters ExtractConverters(IReadonlyDependencyResolver resolver)
     {
         ArgumentExceptionHelper.ThrowIfNull(resolver);
 
@@ -67,6 +61,6 @@ public static class ConverterMigrationHelper
             }
         }
 
-        return (typed, fallback, setMethod);
+        return new(typed, fallback, setMethod);
     }
 }

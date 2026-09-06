@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// <summary>
         /// Concrete typed overload for WhenAnyValue on global::SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties.MyViewModel.
         /// </summary>
-        public static global::System.IObservable<(string property1, int property2, double property3)> WhenAnyValue(
+        public static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int, double>> WhenAnyValue(
             this global::SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties.MyViewModel objectToMonitor,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties.MyViewModel, string>> property1,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties.MyViewModel, int>> property2,
@@ -40,7 +40,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             throw new global::System.InvalidOperationException("No generated WhenAnyValue dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::System.IObservable<(string property1, int property2, double property3)> __WhenAnyValue_7FFFD35E67D97FB8(global::SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties.MyViewModel obj)
+        private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int, double>> __WhenAnyValue_7FFFD35E67D97FB8(global::SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties.MyViewModel obj)
         {
             var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
@@ -64,7 +64,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 __propObs0,
                 __propObs1,
                 __propObs2,
-                (p1, p2, p3) => (Property1: p1, Property2: p2, Property3: p3));
+                (p1, p2, p3) => new global::ReactiveUI.Binding.PropertyValues<string, int, double>(p1, p2, p3));
         }
 
     }

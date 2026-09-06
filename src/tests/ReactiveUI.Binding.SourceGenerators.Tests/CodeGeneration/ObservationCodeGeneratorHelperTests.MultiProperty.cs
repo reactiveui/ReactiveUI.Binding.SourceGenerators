@@ -192,7 +192,7 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>Verifies GenerateMultiPropertyObservation with no selector generates tuple lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateMultiPropertyObservation_NoSelector_GeneratesTupleResult()
+    public async Task GenerateMultiPropertyObservation_NoSelector_GathersValuesIntoOneEmission()
     {
         var sb = new StringBuilder();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
@@ -205,7 +205,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
-            returnTypeFullName: "(global::System.String property1, global::System.Int32 property2)",
+            returnTypeFullName: "global::ReactiveUI.Binding.PropertyValues<global::System.String, global::System.Int32>",
             hasSelector: false,
             expressionTexts: new EquatableArray<string>([NameSelector, AgeSelector]));
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
@@ -214,7 +214,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(CombineLatestName);
-        await Assert.That(result).Contains("Property1: p1");
-        await Assert.That(result).Contains("Property2: p2");
+        await Assert.That(result).Contains(
+            "(p1, p2) => new global::ReactiveUI.Binding.PropertyValues<global::System.String, global::System.Int32>(p1, p2)");
     }
 }

@@ -389,7 +389,7 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>Verifies EmitAffinityFallbackReturn emits tuple decomposition for multi-property with selector.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitAffinityFallbackReturn_TwoPropertiesWithSelector_EmitsTupleDecomposition()
+    public async Task EmitAffinityFallbackReturn_TwoPropertiesWithSelector_ReadsBackTheEmission()
     {
         const int PropCount = 2;
         var sb = new StringBuilder();
@@ -408,8 +408,8 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result)
-            .Contains("MapSignal<global::System.ValueTuple<global::System.String, int>, global::System.String>");
-        await Assert.That(result).Contains("__t => selector(__t.Item1, __t.Item2)");
+            .Contains("MapSignal<global::ReactiveUI.Binding.PropertyValues<global::System.String, int>, global::System.String>");
+        await Assert.That(result).Contains("__t => selector(__t.Property1, __t.Property2)");
     }
 
     /// <summary>Verifies EmitAffinityFallbackReturn emits WhenChanging fallback for before-change observation.</summary>
@@ -443,7 +443,7 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>Verifies EmitAffinityFallbackReturn emits three-property tuple decomposition with selector.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitAffinityFallbackReturn_ThreePropertiesWithSelector_EmitsThreeItemDecomposition()
+    public async Task EmitAffinityFallbackReturn_ThreePropertiesWithSelector_ReadsBackAllThree()
     {
         const int PropCount = 3;
         var sb = new StringBuilder();
@@ -462,7 +462,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.EmitAffinityFallbackReturn(sb, inv, WhenChangedName, PropCount, true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("__t => selector(__t.Item1, __t.Item2, __t.Item3)");
+        await Assert.That(result).Contains("__t => selector(__t.Property1, __t.Property2, __t.Property3)");
     }
 
     /// <summary>Verifies GenerateConcreteOverload emits affinity check when generatedAffinity is provided.</summary>

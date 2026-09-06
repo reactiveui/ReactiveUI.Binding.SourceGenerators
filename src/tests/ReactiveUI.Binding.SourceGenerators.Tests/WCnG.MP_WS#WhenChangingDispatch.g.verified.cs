@@ -28,9 +28,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             // Allow user-registered plugins with higher affinity to override generated observation
             if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyWithSelector.MyViewModel), 5, true))
             {
-                return new global::ReactiveUI.Primitives.Signals.MapSignal<global::System.ValueTuple<string, string>, string>(
+                return new global::ReactiveUI.Primitives.Signals.MapSignal<global::ReactiveUI.Binding.PropertyValues<string, string>, string>(
                     global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanging(objectToMonitor, property1, property2),
-                    __t => selector(__t.Item1, __t.Item2));
+                    __t => selector(__t.Property1, __t.Property2));
             }
 
             if (property1Expression == "x => x.FirstName" && property2Expression == "x => x.LastName")
