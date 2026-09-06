@@ -19,6 +19,9 @@ public class ExtractorValidationTests
     /// <summary>The <c>string</c> name these tests generate against.</summary>
     private const string StringName = "string";
 
+    /// <summary>A class name no recognized extension class uses.</summary>
+    private const string UnknownClassName = "CustomExtensions";
+
     /// <summary>Verifies that the stub extension class name is recognized.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -51,7 +54,7 @@ public class ExtractorValidationTests
     [Test]
     public async Task IsRecognizedExtensionClass_UnknownClassName_ReturnsFalse()
     {
-        var result = ExtractorValidation.IsRecognizedExtensionClass("CustomExtensions");
+        var result = ExtractorValidation.IsRecognizedExtensionClass(UnknownClassName);
         await Assert.That(result).IsFalse();
     }
 
@@ -93,7 +96,7 @@ public class ExtractorValidationTests
     [Test]
     public async Task IsRecognizedExtensionClass_SynthesizedTypeNestedInUnknownClass_ReturnsFalse()
     {
-        var nested = SynthesizedNestedTypeIn("CustomExtensions");
+        var nested = SynthesizedNestedTypeIn(UnknownClassName);
 
         var result = ExtractorValidation.IsRecognizedExtensionClass(nested);
 
@@ -343,6 +346,42 @@ public class ExtractorValidationTests
     }
 
     /// <summary>
+    /// An extension block read from source declares its members in a grouping type with no name at all,
+    /// which is the other spelling of the shape metadata renders as <c>&lt;&gt;E__N</c>.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsRecognizedExtensionClass_UnnamedGroupingInRecognizedClass_ReturnsTrue()
+    {
+        var result = ExtractorValidation.IsRecognizedExtensionClass(
+            UnnamedGroupingIn(nameof(ReactiveSchedulerExtensions)));
+
+        await Assert.That(result).IsTrue();
+    }
+
+    /// <summary>Reaching the enclosing name of an unnamed grouping type does not make it recognized.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsRecognizedExtensionClass_UnnamedGroupingInUnknownClass_ReturnsFalse()
+    {
+        var result = ExtractorValidation.IsRecognizedExtensionClass(UnnamedGroupingIn(UnknownClassName));
+
+        await Assert.That(result).IsFalse();
+    }
+
+    /// <summary>A grouping type with nothing enclosing it has no name to be judged by.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsRecognizedExtensionClass_UnnamedGroupingWithNoEnclosingClass_ReturnsFalse()
+    {
+        var orphan = Substitute.For<INamedTypeSymbol>();
+        _ = orphan.Name.Returns(string.Empty);
+        _ = orphan.ContainingType.Returns((INamedTypeSymbol?)null);
+
+        await Assert.That(ExtractorValidation.IsRecognizedExtensionClass(orphan)).IsFalse();
+    }
+
+    /// <summary>
     /// Compiles a static class holding a closure and returns the display class the compiler synthesized inside
     /// it, which carries the same shape as the grouping type an extension block declares its members in: a name
     /// no C# identifier can spell, nested one level inside the class that names the API.
@@ -408,5 +447,23 @@ public class ExtractorValidationTests
 
         return consumer.GetTypeByMetadataName(typeName)
             ?? throw new InvalidOperationException($"'{typeName}' was not found in the emitted image.");
+    }
+
+    /// <summary>
+    /// Builds a grouping type with no name of its own, nested in a class of the given name. A source-declared
+    /// extension block takes this shape, which no compiled identifier can spell.
+    /// </summary>
+    /// <param name="className">The name to give the enclosing class.</param>
+    /// <returns>The unnamed grouping type.</returns>
+    private static INamedTypeSymbol UnnamedGroupingIn(string className)
+    {
+        var enclosing = Substitute.For<INamedTypeSymbol>();
+        _ = enclosing.Name.Returns(className);
+
+        var grouping = Substitute.For<INamedTypeSymbol>();
+        _ = grouping.Name.Returns(string.Empty);
+        _ = grouping.ContainingType.Returns(enclosing);
+
+        return grouping;
     }
 }

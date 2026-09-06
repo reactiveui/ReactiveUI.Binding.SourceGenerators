@@ -93,7 +93,7 @@ internal static class BindToExtractor
     /// </summary>
     /// <param name="receiver">The receiver type symbol.</param>
     /// <returns>The observable value type, or null if the receiver is not an observable.</returns>
-    private static ITypeSymbol? GetObservableValueType(ITypeSymbol? receiver)
+    internal static ITypeSymbol? GetObservableValueType(ITypeSymbol? receiver)
     {
         if (receiver is INamedTypeSymbol { Name: "IObservable", TypeArguments.Length: 1 } direct
             && direct.ContainingNamespace?.ToDisplayString() == "System")

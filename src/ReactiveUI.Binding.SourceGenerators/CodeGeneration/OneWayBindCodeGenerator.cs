@@ -351,17 +351,6 @@ internal static class OneWayBindCodeGenerator
         return currentVar;
     }
 
-    /// <summary>Reports whether the two sides differ with no supplied converter, so the registry supplies one.</summary>
-    /// <param name="group">The binding type group.</param>
-    /// <returns><see langword="true"/> when the registry has to convert between the two sides.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool RequiresRegistryConversion(BindingTypeGroup group) =>
-        !group.HasConversion
-        && !string.Equals(
-            group.SourcePropertyTypeFullName,
-            group.TargetPropertyTypeFullName,
-            StringComparison.Ordinal);
-
     /// <summary>Names the conversion the fallback needs, matching whatever the generated body would apply.</summary>
     /// <param name="group">The binding type group.</param>
     /// <returns>The conversion argument, trailed by a comma, or empty when the two sides share a type.</returns>
@@ -372,7 +361,7 @@ internal static class OneWayBindCodeGenerator
             return $"{ConversionParameterName}, ";
         }
 
-        return RequiresRegistryConversion(group)
+        return BindingEmitterHelpers.RequiresRegistryConversion(group)
             ? $"{CodeGeneratorHelpers.FormatRegistryConversionLambda(group.SourcePropertyTypeFullName, group.TargetPropertyTypeFullName)}, "
             : string.Empty;
     }

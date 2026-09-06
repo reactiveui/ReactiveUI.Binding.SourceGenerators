@@ -401,6 +401,21 @@ internal static class BindingEmitterHelpers
         !inv.HasConversion
         && !string.Equals(inv.SourcePropertyTypeFullName, inv.TargetPropertyTypeFullName, StringComparison.Ordinal);
 
+    /// <summary>Determines whether the two sides of a whole group differ in type with no converter supplied.</summary>
+    /// <param name="group">The binding type group.</param>
+    /// <returns><see langword="true"/> when the conversion has to come from the registry.</returns>
+    /// <remarks>
+    /// The group fixes both property types, so the affinity override can ask this once for the overload rather
+    /// than per call site.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool RequiresRegistryConversion(BindingTypeGroup group) =>
+        !group.HasConversion
+        && !string.Equals(
+            group.SourcePropertyTypeFullName,
+            group.TargetPropertyTypeFullName,
+            StringComparison.Ordinal);
+
     /// <summary>Emits a stage that converts observed values to the type the other side declares.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="sourceVar">The variable holding the values to convert.</param>

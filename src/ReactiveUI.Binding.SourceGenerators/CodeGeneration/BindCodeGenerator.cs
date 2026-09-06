@@ -430,17 +430,6 @@ internal static class BindCodeGenerator
         return new(convertedViewModelVar, convertedViewVar);
     }
 
-    /// <summary>Reports whether the two sides differ with no supplied converter, so the registry supplies one.</summary>
-    /// <param name="group">The binding type group.</param>
-    /// <returns><see langword="true"/> when the registry has to convert between the two sides.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool RequiresRegistryConversion(BindingTypeGroup group) =>
-        !group.HasConversion
-        && !string.Equals(
-            group.SourcePropertyTypeFullName,
-            group.TargetPropertyTypeFullName,
-            StringComparison.Ordinal);
-
     /// <summary>Names the conversions the fallback needs, matching whatever the generated body would apply.</summary>
     /// <param name="group">The binding type group.</param>
     /// <returns>The converter-pair argument, trailed by a comma, or empty when both sides share a type.</returns>
@@ -451,7 +440,7 @@ internal static class BindCodeGenerator
             return $"{TwoWayConverters}.Create({ForwardConverterName}, {ReverseConverterName}), ";
         }
 
-        if (!RequiresRegistryConversion(group))
+        if (!BindingEmitterHelpers.RequiresRegistryConversion(group))
         {
             return string.Empty;
         }
