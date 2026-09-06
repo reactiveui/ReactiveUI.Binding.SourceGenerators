@@ -43,8 +43,8 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>The <c>PropertyChangingObservable</c> name these tests generate against.</summary>
     private const string PropertyChangingObservableName = "PropertyChangingObservable";
 
-    /// <summary>The <c>ReturnObservable</c> name these tests generate against.</summary>
-    private const string ReturnObservableName = "ReturnObservable";
+    /// <summary>The <c>ImmediateReturnSignal</c> name these tests generate against.</summary>
+    private const string ImmediateReturnSignalName = "ImmediateReturnSignal";
 
     /// <summary>The <c>WhenChanged</c> name these tests generate against.</summary>
     private const string WhenChangedName = "WhenChanged";

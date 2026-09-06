@@ -54,6 +54,11 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
         classInfo.InheritsWpfDependencyObject;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
+        ObservedProperties.IsDependencyProperty(classInfo, propertyName);
+
+    /// <inheritdoc/>
     public void EmitHelperClasses(StringBuilder sb)
     {
         // No helper classes needed — uses EventObservable<T> from runtime library.
@@ -69,11 +74,11 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
         bool includeStartWith)
     {
         // WPF DP does not support before-change; caller should not reach here with isBeforeChange=true
-        // but we emit ReturnObservable as a safe fallback.
+        // but we emit ImmediateReturnSignal as a safe fallback.
         if (isBeforeChange)
         {
             _ = sb.Append(
-                $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}))");
+                $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}))");
             return;
         }
 
@@ -99,7 +104,7 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
         if (isBeforeChange)
         {
             _ = sb.Append(
-                $"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
+                $"            var {varName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
             return;
         }
 
@@ -127,7 +132,7 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
         {
             _ = sb
                 .Append($"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
+                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
             return;
         }
 
@@ -155,18 +160,18 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
         var segType = segment.PropertyTypeFullName;
         var declType = segment.DeclaringTypeFullName;
         var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-            ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
-            : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
+            ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
 
         if (isBeforeChange)
         {
-            // WPF DP does not support before-change; emit ReturnObservable for inner segments too
+            // WPF DP does not support before-change; emit ImmediateReturnSignal for inner segments too
             _ = sb.AppendLine()
                 .AppendLine($"""
                                      var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
                                          {lambdaParam} => {lambdaParam} != null
                                              ? (global::System.IObservable<{segType}>)
-                                                 new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
+                                                 new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
                                              : (global::System.IObservable<{segType}>){nullParentObservable});
                              """);
             return;

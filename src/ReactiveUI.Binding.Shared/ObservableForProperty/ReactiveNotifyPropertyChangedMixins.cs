@@ -267,12 +267,12 @@ public static class ReactiveNotifyPropertyChangedMixins
         var kicker = new ObservedChange<object?, object?>(sourceChange.Value, expression, default);
 
         return sourceChange.Value is null
-            ? new ReturnObservable<IObservedChange<object?, object?>>(kicker)
-            : new SelectObservable<IObservedChange<object?, object?>, IObservedChange<object?, object?>>(
-            new StartWithObservable<IObservedChange<object?, object?>>(
-                NotifyForProperty(sourceChange.Value, expression, beforeChange),
-                kicker),
-            static x => new ObservedChange<object?, object?>(x.Sender, x.Expression, x.GetValueOrDefault()));
+            ? new ImmediateReturnSignal<IObservedChange<object?, object?>>(kicker)
+            : new LeadSignal<IObservedChange<object?, object?>>(
+                    NotifyForProperty(sourceChange.Value, expression, beforeChange),
+                    kicker)
+                .Select(static IObservedChange<object?, object?> (x) =>
+                    new ObservedChange<object?, object?>(x.Sender, x.Expression, x.GetValueOrDefault()));
     }
 
     /// <summary>

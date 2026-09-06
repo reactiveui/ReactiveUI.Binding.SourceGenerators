@@ -13,7 +13,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// Concrete typed overload for Bind from global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel to global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView.
         /// Uses CallerArgumentExpression for dispatch.
         /// </summary>
-        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? View, bool IsViewModel)> Bind(
+        public static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, global::ReactiveUI.Binding.BindingChange> Bind(
             this global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView view,
             global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel, int>> viewModelProperty,
@@ -26,6 +26,14 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
+            // A registered plugin that outranks the generated one drives the binding instead
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel), 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView), 5, false))
+            {
+                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.Bind(
+                    view, viewModel, viewModelProperty, viewProperty, global::ReactiveUI.Binding.Fallback.TwoWayConverters.Create(viewModelToViewConverter, viewToViewModelConverter), scheduler, viewPropertyExpression);
+            }
+
             if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountText")
             {
@@ -35,9 +43,25 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
-        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? View, bool IsViewModel)> __Bind_7FFFD53F4944055D(global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView view, global::System.Func<int, string> viewModelToViewConverter, global::System.Func<string, int> viewToViewModelConverter, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
+        private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, global::ReactiveUI.Binding.BindingChange> __Bind_7FFFD53F4944055D(global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel viewModel, global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView view, global::System.Func<int, string> viewModelToViewConverter, global::System.Func<string, int> viewToViewModelConverter, global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler)
         {
             // Bind: Count <-> CountText (with conversion) (with scheduler)
+        if (global::ReactiveUI.Binding.BindingHooks.Any
+            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                viewModel,
+                view,
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(viewModel, null, viewModel),
+                },
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(view, null, view),
+                },
+                global::ReactiveUI.Binding.BindingDirection.TwoWay))
+        {
+            return null;
+        }
         var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             viewModel,
             "Count",
@@ -50,27 +74,27 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             true);
         var __vmSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(vmObs, viewModelToViewConverter);
         var __viewSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(viewObs, viewToViewModelConverter);
-        var vmBind = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<string>(__vmSelected, scheduler);
-        var viewBind = new global::ReactiveUI.Binding.Observables.ObserveOnObservable<int>(__viewSelected, scheduler);
+        var vmBind = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<string>(__vmSelected, scheduler);
+        var viewBind = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<int>(__viewSelected, scheduler);
 
-            var d1 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(vmBind, value =>
+            var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(vmBind, value =>
             {
                 view.CountText = value;
-            });
+            }, "x => x.CountText");
 
             var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewBind, 1);
-            var d2 = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__viewSkipped, value =>
+            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__viewSkipped, value =>
             {
                 viewModel.Count = value;
-            });
+            }, "x => x.Count");
 
-            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, (object?, bool)>(vmBind, v => ((object?)v, true));
-            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<int, (object?, bool)>(__viewSkipped, v => ((object?)v, false));
-            var changed = new global::ReactiveUI.Primitives.Advanced.MergeSignal<(object?, bool)>(__vmTagged, __viewTagged);
+            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(vmBind, v => new global::ReactiveUI.Binding.BindingChange(v, true));
+            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<int, global::ReactiveUI.Binding.BindingChange>(__viewSkipped, v => new global::ReactiveUI.Binding.BindingChange(v, false));
+            var changed = new global::ReactiveUI.Primitives.Advanced.MergeSignal<global::ReactiveUI.Binding.BindingChange>(__vmTagged, __viewTagged);
 
             var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
 
-            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, (object? View, bool IsViewModel)>(
+            return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, global::ReactiveUI.Binding.BindingChange>(
                 view,
                 changed,
                 global::ReactiveUI.Binding.BindingDirection.TwoWay,

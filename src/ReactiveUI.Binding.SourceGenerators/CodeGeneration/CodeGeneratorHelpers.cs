@@ -25,6 +25,9 @@ internal static class CodeGeneratorHelpers
     /// <summary>Buffer capacity to reserve per property-path segment when building an access chain.</summary>
     private const int PerPathSegmentCapacity = 16;
 
+    /// <summary>Room for one guarded step: the local, its null check, and the indentation each line carries.</summary>
+    private const int GuardedAssignmentSegmentCapacity = 96;
+
     /// <summary>Extra buffer capacity for the escaping a string literal adds.</summary>
     private const int EscapeOverheadCapacity = 4;
 
@@ -94,6 +97,54 @@ internal static class CodeGeneratorHelpers
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string BuildPropertySetterChain(string root, EquatableArray<PropertyPathSegment> path) =>
         BuildPropertyAccessChain(root, path);
+
+    /// <summary>Builds the statements that assign to the end of a property path, skipping the write when the path cannot be walked.</summary>
+    /// <param name="root">The root variable name.</param>
+    /// <param name="path">The property path segments.</param>
+    /// <param name="valueExpression">The expression producing the value to assign.</param>
+    /// <param name="indent">The indentation of the line the statements are emitted on.</param>
+    /// <returns>The assignment, preceded by a guard per intermediate when the path has more than one segment.</returns>
+    /// <remarks>
+    /// The read side of a chain tolerates a missing parent and still delivers a value, so a binding into a path
+    /// whose intermediate is null would otherwise assign through it and throw inside the call that established
+    /// the binding. Dropping the write instead matches what the runtime engine does when a chain getter fails.
+    /// Emitted as early returns rather than nesting so a long path stays flat, and only for a path that has an
+    /// intermediate at all.
+    /// </remarks>
+    internal static string BuildGuardedAssignment(
+        string root,
+        EquatableArray<PropertyPathSegment> path,
+        string valueExpression,
+        string indent)
+    {
+        if (path.Length <= 1)
+        {
+            return $"{BuildPropertyAccessChain(root, path)} = {valueExpression};";
+        }
+
+        var sb = new PooledStringBuilder(path.Length * GuardedAssignmentSegmentCapacity);
+        var parent = root;
+
+        for (var i = 0; i < path.Length - 1; i++)
+        {
+            var local = $"__parent{i}";
+            _ = sb.Append("var ").Append(local).Append(" = ").Append(parent).Append('.')
+                .Append(path[i].PropertyName).Append(';').Append('\n')
+                .Append(indent).Append("if (").Append(local).Append(" == null)").Append('\n')
+                .Append(indent).Append('{').Append('\n')
+                .Append(indent).Append("    return;").Append('\n')
+                .Append(indent).Append('}').Append('\n')
+                .Append('\n')
+                .Append(indent);
+
+            parent = local;
+        }
+
+        _ = sb.Append(parent).Append('.').Append(path[path.Length - 1].PropertyName)
+            .Append(" = ").Append(valueExpression).Append(';');
+
+        return sb.ToStringAndReturn();
+    }
 
     /// <summary>Builds a human-readable dotted property path string for comments.</summary>
     /// <param name="path">The property path segments.</param>
@@ -355,6 +406,24 @@ internal static class CodeGeneratorHelpers
         return null;
     }
 
+    /// <summary>Resolves the observed type's binding info, falling back to what the property path carries.</summary>
+    /// <param name="allClasses">All detected class binding infos.</param>
+    /// <param name="fullyQualifiedName">The observed type's fully qualified name.</param>
+    /// <param name="path">The property path, whose first segment names the type that declares it.</param>
+    /// <returns>The observed type's binding info, or null when nothing resolved it.</returns>
+    /// <remarks>
+    /// The declaration scan only sees types the consumer writes, so a type from a referenced assembly is absent
+    /// from it. The path's first segment was built from the property's own symbol and carries the mechanism
+    /// whatever assembly declares it, which is what keeps a referenced view model observable rather than
+    /// silently reduced to a single read.
+    /// </remarks>
+    internal static ClassBindingInfo? ResolveObservedTypeInfo(
+        ImmutableArray<ClassBindingInfo> allClasses,
+        string fullyQualifiedName,
+        EquatableArray<PropertyPathSegment> path) =>
+        FindClassInfo(allClasses, fullyQualifiedName)
+            ?? (path.Length > 0 ? path[0].DeclaringTypeInfo : null);
+
     /// <summary>Computes a deterministic hash for a string using FNV-1a. Unlike <see cref="string.GetHashCode()"/>, this is stable across processes and .NET versions.</summary>
     /// <param name="s">The string to hash.</param>
     /// <returns>A deterministic 32-bit hash code.</returns>
@@ -385,4 +454,54 @@ internal static class CodeGeneratorHelpers
     /// <returns><c>"if"</c> when <paramref name="index"/> is 0; otherwise <c>"else if"</c>.</returns>
     internal static string ConditionKeyword(int index) =>
         index == 0 ? "if" : "else if";
+
+    /// <summary>Drops the call sites that a dispatch keyed on expression text cannot tell apart.</summary>
+    /// <typeparam name="T">The per-call-site model this API detects.</typeparam>
+    /// <param name="invocations">The call sites sharing one generated overload.</param>
+    /// <param name="dispatchKey">Produces the expression text a call site is dispatched on.</param>
+    /// <returns>One call site per distinct key, or the original array when they were all distinct.</returns>
+    /// <remarks>
+    /// Expression-text dispatch keys on the lambdas as written, so call sites that spell them the same way all
+    /// produce the same condition: the first wins and every later one is unreachable, yet each still drags its
+    /// own generated method along. Calling an API on the same properties from more than one place is ordinary,
+    /// so that dead weight scales with the consumer rather than staying a curiosity.
+    /// Dropping the later ones rather than merging them is sound because a group already fixes the types
+    /// involved, so a shared key means a shared set of property paths and an identical body.
+    /// Only expression-text dispatch may do this - file-and-line dispatch reaches each call site separately and
+    /// needs every one of them, or the collapsed sites fall through to the stub's runtime throw.
+    /// </remarks>
+    internal static T[] CollapseIndistinguishableCallSites<T>(T[] invocations, Func<T, string> dispatchKey)
+    {
+        if (invocations.Length < 2)
+        {
+            return invocations;
+        }
+
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var kept = new List<T>(invocations.Length);
+
+        for (var i = 0; i < invocations.Length; i++)
+        {
+            if (seen.Add(dispatchKey(invocations[i])))
+            {
+                kept.Add(invocations[i]);
+            }
+        }
+
+        return kept.Count == invocations.Length ? invocations : [.. kept];
+    }
+
+    /// <summary>Renders the conversion a binding applies when the two sides differ and no converter was supplied.</summary>
+    /// <param name="fromTypeFullName">The fully qualified type being converted from.</param>
+    /// <param name="toTypeFullName">The fully qualified type being converted to.</param>
+    /// <returns>A lambda expression that defers to the registered binding type converters.</returns>
+    /// <remarks>
+    /// This is the same registry lookup the generated body performs, written as an expression so a binding
+    /// handed to the runtime engine keeps converting exactly as the generated one would have. Emitting it
+    /// rather than calling a generic helper keeps both type arguments inferable at the call site.
+    /// </remarks>
+    internal static string FormatRegistryConversionLambda(string fromTypeFullName, string toTypeFullName) =>
+        $"__value => {{ {toTypeFullName} __converted; "
+        + $"{GeneratedTypeNames.RuntimeBindingConverter}.TryConvert<{fromTypeFullName}, {toTypeFullName}>(__value, null, null, out __converted); "
+        + "return __converted; }";
 }

@@ -15,6 +15,6 @@ public static class Scenario
     /// <param name="vm">The source view model.</param>
     /// <returns>A reactive binding representing the binding.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IReactiveBinding<MyView, (object? View, bool IsViewModel)> Execute(MyView view, MyViewModel vm) =>
+    public static IReactiveBinding<MyView, BindingChange> Execute(MyView view, MyViewModel vm) =>
         view.Bind(vm, x => x.Count, x => x.CountText, count => count.ToString(), int.Parse);
 }

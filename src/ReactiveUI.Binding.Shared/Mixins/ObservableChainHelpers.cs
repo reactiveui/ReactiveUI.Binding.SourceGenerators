@@ -36,5 +36,5 @@ internal static class ObservableChainHelpers
         where TSender : class =>
         new SwitchMapSignal<IObservedChange<TSender, IObservable<T>?>, T>(
             sender.SubscribeToExpressionChain<TSender, IObservable<T>?>(observable.Body, skipInitial: false),
-            static x => x.Value ?? EmptyObservable<T>.Instance);
+            static x => x.Value ?? ImmutableEmptySignal<T>.Instance);
 }

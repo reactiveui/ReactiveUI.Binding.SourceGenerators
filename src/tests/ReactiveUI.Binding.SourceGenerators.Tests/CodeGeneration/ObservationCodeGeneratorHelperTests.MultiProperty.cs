@@ -166,7 +166,7 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>Verifies GenerateMultiPropertyObservation with null classInfo generates code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateMultiPropertyObservation_NullClassInfo_GeneratesReturnObservable()
+    public async Task GenerateMultiPropertyObservation_NullClassInfo_GeneratesImmediateReturnSignal()
     {
         var sb = new StringBuilder();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([

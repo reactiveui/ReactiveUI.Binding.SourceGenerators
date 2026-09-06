@@ -24,8 +24,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            propertyNameExpression = propertyNameExpression.StartsWith("static ") ? propertyNameExpression.Substring(7) : propertyNameExpression;
-            controlNameExpression = controlNameExpression.StartsWith("static ") ? controlNameExpression.Substring(7) : controlNameExpression;
+            propertyNameExpression = propertyNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                ? propertyNameExpression.Substring(7)
+                : propertyNameExpression;
+            controlNameExpression = controlNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                ? controlNameExpression.Substring(7)
+                : controlNameExpression;
 
             if (propertyNameExpression == "x => x.Child!.SaveCommand"
                 && controlNameExpression == "x => x.SaveButton")
@@ -59,7 +63,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     "SaveCommand",
                     (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel)__o).SaveCommand,
                     false)
-                : (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::System.Windows.Input.ICommand>(default(global::System.Windows.Input.ICommand)));
+                : (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::System.Windows.Input.ICommand>(default(global::System.Windows.Input.ICommand)));
         var commandObs = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__commandObs_s1);
 
             if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
@@ -73,7 +77,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     var __binderCmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, __cmd =>
                     {
                         __serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                        global::System.IObservable<object> __paramObs = global::ReactiveUI.Binding.Observables.EmptyObservable<object>.Instance;
+                        global::System.IObservable<object> __paramObs = global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<object>.Instance;
                         __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.DeepCommandPath.MyButton>(
                             __cmd, view.SaveButton, __paramObs)
                             ?? global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;

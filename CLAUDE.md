@@ -188,15 +188,23 @@ src/
 │   │   ├── ClassBindingInfo.cs                  # Type-level: notification mechanism flags
 │   │   ├── InvocationInfo.cs                    # Per-call-site: WhenChanged/WhenChanging
 │   │   ├── BindingInvocationInfo.cs             # Per-call-site: BindOneWay/BindTwoWay
+│   │   ├── PropertyPathSegment.cs               # Per-segment: name, types, and how its declaring type notifies
+│   │   ├── ObservablePropertyInfo.cs            # Per-property: DP field and change-event participation
 │   │   └── ViewRegistrationInfo.cs              # Per-IViewFor<T>: view dispatch mapping
-│   ├── Generators/                              # Per-kind fallback generators (Pipeline A)
-│   │   ├── ReactiveObjectBindingGenerator.cs    # IReactiveObject (affinity 24)
-│   │   ├── INPCBindingGenerator.cs              # INotifyPropertyChanged (affinity 21)
-│   │   ├── WpfBindingGenerator.cs               # WPF DependencyObject (affinity 20)
-│   │   ├── WinUIBindingGenerator.cs             # WinUI DependencyObject (affinity 22)
-│   │   ├── KVOBindingGenerator.cs               # Apple KVO/NSObject (affinity 25)
-│   │   ├── WinFormsBindingGenerator.cs          # WinForms Component (affinity 23)
-│   │   ├── AndroidBindingGenerator.cs           # Android View (affinity 19)
+│   ├── Plugins/                                 # Mechanism selection (Pipeline A)
+│   │   ├── ObservationPluginRegistry.cs         # Highest-affinity plugin that reaches a given property
+│   │   ├── ObservedProperties.cs                # Whether one property participates in a type's mechanism
+│   │   └── Observation/                         # One plugin per mechanism, scored from BindingAffinity
+│   │       ├── KVOObservationPlugin.cs          # Apple KVO/NSObject (Kvo, 15)
+│   │       ├── ReactiveObjectObservationPlugin.cs # IReactiveObject (ExactType, 10)
+│   │       ├── WinFormsObservationPlugin.cs     # WinForms Component (WinFormsEvent, 8)
+│   │       ├── WinUIObservationPlugin.cs        # WinUI DependencyObject (WinUiDependencyObject, 6)
+│   │       ├── INPCObservationPlugin.cs         # INotifyPropertyChanged (Explicit, 5)
+│   │       ├── AndroidObservationPlugin.cs      # Android View (Explicit, 5)
+│   │       ├── WpfObservationPlugin.cs          # WPF DependencyObject (WpfDependencyObject, 4)
+│   │       ├── NotifyPropertyObservationPlugin.cs # Base for the INPC-watching plugins above
+│   │       └── NotifyPropertyEmitter.cs         # The observation those plugins all emit
+│   ├── Generators/                              # Whole-compilation outputs
 │   │   ├── RegistrationGenerator.cs             # Consolidates all → [ModuleInitializer]
 │   │   ├── ObservationHelperGenerator.cs        # Declares the KVO/WinUI helper classes, once per compilation
 │   │   └── ViewLocatorDispatchGenerator.cs      # IViewFor<T> → AOT view dispatch (Pipeline C)
@@ -233,7 +241,24 @@ src/
 
 ### Three Pipelines
 
-**Pipeline A (Type Detection)**: Scans classes with base lists → builds `ClassBindingInfo` POCOs with boolean flags for each notification mechanism (IReactiveObject, INPC, WPF DP, WinUI DP, KVO, WinForms, Android). Per-kind generators filter from this shared pipeline. Consolidates into a single `[ModuleInitializer]` registration.
+**Pipeline A (Type Detection)**: Scans classes with base lists → builds `ClassBindingInfo` POCOs with boolean flags for each notification mechanism (IReactiveObject, INPC, WPF DP, WinUI DP, KVO, WinForms, Android) and a per-property record of which of them each declared property actually participates in. Consolidates into a single `[ModuleInitializer]` registration.
+
+Affinity values are the shared `BindingAffinity` scores the runtime library declares (`Fallback = 1` … `Kvo = 15`), the same numbers ReactiveUI's own plugins return, so a user-registered plugin and a generated one rank on one scale.
+
+### Mechanisms Travel With the Property Path
+
+A type advertises a mechanism; a *property* participates in it or does not, and each link of a chain is declared
+by its own type. So `PropertyPathSegment` carries its declaring type's `ClassBindingInfo`, and plugin selection
+takes the property name: a dependency object's plain CLR property and a component's property with no
+`{Name}Changed` event fall through to the next mechanism, exactly as a zero affinity does at runtime. A property
+the type does not declare - an inherited one - is unknown rather than absent and stays observable.
+
+The mechanism is captured during extraction, which already holds the property symbol, rather than looked up from
+the detected-type set afterwards. That is a performance constraint, not a preference: binding one of these
+invocations is the single largest allocation in a generation pass (extension-method overload resolution and
+generic type inference dominate the `GcVerbose` trace), so a second semantic pass over the same call sites is
+not affordable. It also means a type from a *referenced* assembly is observed correctly even though the
+declaration scan never sees it.
 
 **Pipeline B (Invocation Detection)**: Scans method invocations (`WhenChanged`, `WhenChanging`, `BindOneWay`, `BindTwoWay`, `WhenAnyValue`) → extracts lambda property paths → generates optimized per-call-site observation/binding code. Uses **CallerFilePath + CallerLineNumber dispatch**: API stubs capture caller info, generated dispatch table routes to compile-time generated methods.
 
@@ -299,6 +324,121 @@ assemblies emit into their own root namespace instead, which nobody else's code 
 file declared outside the root namespace falls back to the runtime path; the alternative for those assemblies
 is not universal reach but a build that does not compile (CS0121). With no root namespace to move to, the
 shared namespace is kept — nowhere else would be reachable.
+
+### Recognising the Class a Stub Was Declared In
+
+Every extractor asks the same question of a call it has matched by name: is the method one of ours? It answers
+by the declaring type's name, so the answer has to survive **how the API was declared**.
+`ReactiveSchedulerExtensions` declares its whole surface as extension blocks, and an extension block's members
+belong to a synthesized grouping type nested inside the static class, not to the class itself. The grouping type
+has no name a consumer could write — empty when read from source, `<>E__N` when read from metadata — so
+`ExtractorValidation.IsRecognizedExtensionClass` takes the symbol and reaches one level out when it finds one.
+
+**Which of the two shapes a call site resolves to is decided by the Roslyn that loads the generator, not by
+anything in the consumer's project.** The same source, the same references and the same `LangVersion` resolve
+to the static class on one compiler and to the grouping type on another. Rejecting either shape is silent:
+those call sites produce no dispatch, the runtime stub throws, and every other call site in the file still
+generates, so the build stays green and only the affected bindings go missing.
+
+There is no single version to code against. The generator is loaded by whatever compiler the consumer's SDK or
+Visual Studio ships, and that spans the whole installed base at once - an unchanged project produces one shape
+on one machine and the other shape on the next. **Accept every shape rather than the one this repository
+happens to build with**, and never narrow a symbol test to what the current compiler returns.
+
+That cuts against the suite, which pins a single `Microsoft.CodeAnalysis.CSharp` package version and so
+exercises exactly one of those compilers. Passing tests say the generator works on that one, and say nothing
+about the rest. Where behaviour could turn on the host compiler, verify against several: run the generator from
+a throwaway single-file app that pins a different `Microsoft.CodeAnalysis.CSharp` version, over a real
+project's sources, and compare the emitted files. When a call site generates in the suite but not in a real
+build, suspect this first and check a real build's `EmitCompilerGeneratedFiles` output rather than adding
+more tests that share the suite's compiler.
+
+### Where This Engine Parts Company With ReactiveUI's
+
+The generator is a replacement for `PropertyBinderImplementation`, so its behaviour is measured against that
+engine. Two of its inputs are deliberately not offered, and one behaviour is deliberately cheaper.
+
+**`TriggerUpdate` and `signalViewUpdate` are not offered.** ReactiveUI's `Bind` takes both: the first chooses
+which side wins the first emission, the second replaces the view's own change stream with a caller-supplied
+one. Neither has a generated overload, so asking for one does not compile - the divergence announces itself
+at the call site rather than at run time. They are omitted because the generator resolves a binding from the
+two lambdas alone; an overload taking a runtime stream would have to fall back to the reflection engine for
+exactly the call sites this library exists to remove from it.
+
+**Binding faults follow ReactiveUI's contract exactly.** A write that faults is logged against the bound
+expression, and rethrown as a `TargetInvocationException` only when it carries an inner exception. This is
+parity rather than divergence, and it is not optional: a setter that throws on the notifying thread has no
+caller stack to surface on, so swallowing it loses the failure entirely.
+
+**Hooks are consulted only when one is registered.** ReactiveUI asks the service locator for
+`IPropertyBindingHook` on every binding it creates. `BindingHooks.Any` is tested first here, so an
+application that registers none - which is nearly all of them - pays nothing, and one that registers a hook
+gets the same veto. That is the "better" half of the divergence: same outcome, no cost for the common case.
+
+**A registered plugin still outranks the generated observation.** The generator picks a mechanism from the
+types it can see at compile time, but `ICreatesObservableForProperty` is registered at run time and the
+highest affinity wins - which is how ReactiveUI resolves the observation behind `Bind` and `OneWayBind`, not
+just behind `WhenChanged`. Every generated binding therefore tests
+`ObservationAffinityChecker.HasHigherAffinityPlugin` against the affinity of the plugin it was generated
+from, and hands the binding to `RuntimeBindingFallback` when the registration wins. A two-way binding
+observes both sides, so either side's registration is enough to take it.
+
+Leaving that out is not a divergence anyone could see: the registration would apply to `WhenChanged` and
+silently not to a binding of the same property. The check has to be on the path of every binding, so the
+registered set is resolved once and kept rather than re-read from the locator per call - re-reading cost
+~141 B and ~1.2 us per binding created, which a view full of bindings pays for repeatedly. `Refresh()`
+drops the cache for a host that registers a plugin after its first binding.
+
+### Operators Come From Primitives
+
+`ReactiveUI.Binding.Shared/Observables/` holds only the observables this library's *domain* owns - the ones
+that turn a property notification into an `IObservedChange`. Anything that is a general reactive operator
+belongs to `ReactiveUI.Primitives`, which is already referenced, and is used from there rather than
+hand-rolled again here.
+
+Primitives exposes both a concrete type per operator under `ReactiveUI.Primitives.Advanced` and a factory or
+extension that returns it. **Prefer the concrete type** - `new LeadSignal<T>(source, value)` over
+`source.StartWith(value)` - so the generated and runtime code says exactly what it builds. Reach for the
+factory only where it is the better path: `Signal.Never<T>()`, `Signal.Empty<T>()` and `Signal.Return<T>(v)`
+hand back cached singletons or a specialised immediate form that the public constructors cannot express.
+
+Two traps when naming these:
+
+- **`ReactiveUI.Primitives.Core` does not shift.** It is one assembly shared by both runtime flavours rather
+  than one recompiled per leaf, so the types in it - `ImmutableNeverSignal<T>`, `ImmediateReturnSignal<T>` -
+  stay in `ReactiveUI.Primitives.Advanced` for the `.Reactive` leaf too. That leaf imports the unshifted
+  namespace alongside its shifted one; the two declare disjoint types, which is what lets the lean leaf merge
+  them already.
+- **Generated code calls extension classes statically**, as
+  `global::ReactiveUI.Primitives.LinqExtensions.ObserveOn(source, scheduler)`, so no import has to be emitted
+  and `RuntimeFlavourRewriter` can retarget the whole path onto the `.Reactive` flavour.
+
+What stays in `Observables/` is decided by whether the type is a general operator or something this domain
+fuses:
+
+| Type | Why it lives here |
+|------|-------------------|
+| `PropertyObservable`, `NotifyPropertyChangedObservable`, `PropertyChangingObservable` | Turn a property notification into an `IObservedChange`. The concept is this library's, so no general-purpose equivalent exists. |
+| `EventObservable` | Fuses add/remove handler, the getter, `StartWith` and `DistinctUntilChanged` into **one** allocation. Assembling the same behaviour from `Signal.FromEventPattern` and three operators costs four. |
+| `CombineLatestObservable` | A façade over `LinqExtensions.CombineLatest` that builds nothing itself, so every call site names one thing. |
+
+**A fused type is not replaced by a chain of general operators.** The point of this library is the allocation
+count, so a swap that trades one object for four is a regression however much code it removes. Measure before
+assuming a replacement is free.
+
+### One Body Per Reachable Branch
+
+The two dispatch mechanisms differ in what they can tell apart, and the emitted bodies follow. File-and-line
+dispatch keys on the call site, so every call site is distinct and each needs its own binding method.
+Expression-text dispatch keys on the two lambdas as written, so call sites that spell them the same way all
+produce the same condition — the first wins, and any later one is unreachable while still dragging a binding
+method along. Binding the same pair of properties from more than one place is ordinary rather than exotic, so
+that dead weight scales with the consumer.
+
+`BindingEmitterHelpers.Generate` therefore collapses a group to one call site per distinct pair of expression
+texts, but **only under expression-text dispatch**. Collapsing is sound there because the group already fixes
+both types, so a shared pair of expressions means a shared pair of property paths and an identical body. Doing
+the same under file-and-line dispatch would strand every collapsed call site on the stub's runtime throw.
 
 ### Generating for the Lean or the .Reactive Runtime
 
@@ -430,8 +570,9 @@ them, and two parts declaring them is a duplicate-member error.
 only ever reference the helpers; none of them declare any. Which helpers to declare is decided from the
 **detected types**, not from the call sites — a reference can only be emitted for a type
 `CodeGeneratorHelpers.FindClassInfo` matched, so the declarations are a superset of the references whichever
-binding API reaches for them. Deciding it from the call sites is what left `BindOneWay`, `BindTwoWay`, `Bind`,
-`OneWayBind`, `WhenAny` and `WhenAnyObservable` emitting references to types nobody declared.
+binding API reaches for them. Deciding it from the call sites instead leaves any API whose call sites were not
+enumerated — `BindOneWay`, `BindTwoWay`, `Bind`, `OneWayBind`, `WhenAny`, `WhenAnyObservable` — emitting
+references to types nobody declared.
 
 ### Two-Layer Language Version Constraint
 

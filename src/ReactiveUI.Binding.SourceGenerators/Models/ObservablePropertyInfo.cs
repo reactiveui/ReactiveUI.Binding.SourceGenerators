@@ -13,9 +13,14 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="HasPublicGetter">Whether the property has a public getter.</param>
 /// <param name="IsIndexer">Whether the property is an indexer.</param>
 /// <param name="IsDependencyProperty">Whether the property is a dependency property (WPF/WinUI).</param>
+/// <param name="HasChangeEvent">
+/// Whether the declaring type also declares a <c>{PropertyName}Changed</c> event, which is the convention the
+/// component mechanism observes a property through.
+/// </param>
 internal sealed record ObservablePropertyInfo(
     string PropertyName,
     string PropertyTypeFullName,
     bool HasPublicGetter,
     bool IsIndexer,
-    bool IsDependencyProperty);
+    bool IsDependencyProperty,
+    bool HasChangeEvent);

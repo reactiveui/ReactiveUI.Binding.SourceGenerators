@@ -19,8 +19,8 @@ public static class Scenario
     /// <param name="view">The target view.</param>
     /// <param name="vm">The source view model.</param>
     /// <returns>A tuple of bindings.</returns>
-    public static (IReactiveBinding<MyView, (object? View, bool IsViewModel)> First,
-        IReactiveBinding<MyView, (object? View, bool IsViewModel)> Last) Execute(MyView view, MyViewModel vm) =>
+    public static (IReactiveBinding<MyView, BindingChange> First,
+        IReactiveBinding<MyView, BindingChange> Last) Execute(MyView view, MyViewModel vm) =>
         (view.Bind(vm, x => x.FirstName, x => x.FirstNameText),
             view.Bind(vm, x => x.LastName, x => x.LastNameText));
 }

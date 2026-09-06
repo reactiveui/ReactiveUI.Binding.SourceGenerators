@@ -55,10 +55,29 @@ public static class TestHelper
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>
     /// <returns>A compilation ready for testing.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Compilation CreateCompilation(
         string source,
         LanguageVersion? languageVersion,
-        bool useReactiveRuntime)
+        bool useReactiveRuntime) =>
+        CreateCompilation(source, languageVersion, useReactiveRuntime, "TestAssembly", []);
+
+    /// <summary>
+    /// Creates a compilation that also references separately built assemblies, so a scenario can put a type
+    /// somewhere the generator cannot see a declaration for.
+    /// </summary>
+    /// <param name="source">The source code to compile.</param>
+    /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
+    /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>
+    /// <param name="assemblyName">The name to give the compilation's own assembly.</param>
+    /// <param name="additionalReferences">References to add on top of the framework and runtime ones.</param>
+    /// <returns>A compilation ready for testing.</returns>
+    public static Compilation CreateCompilation(
+        string source,
+        LanguageVersion? languageVersion,
+        bool useReactiveRuntime,
+        string assemblyName,
+        ImmutableArray<MetadataReference> additionalReferences)
     {
         var parseOptions = languageVersion.HasValue
             ? new CSharpParseOptions(languageVersion.Value)
@@ -94,13 +113,45 @@ public static class TestHelper
             typeof(System.Reactive.Linq.Observable).Assembly,
         }.Concat(runtimeSeeds).ToArray();
 
-        var allReferences = references.Concat(GetTransitiveReferences(seedAssemblies));
+        var allReferences = references
+            .Concat(GetTransitiveReferences(seedAssemblies))
+            .Concat(additionalReferences);
 
         return CSharpCompilation.Create(
-            "TestAssembly",
+            assemblyName,
             [syntaxTree],
             allReferences,
             new(OutputKind.DynamicallyLinkedLibrary));
+    }
+
+    /// <summary>
+    /// Compiles source into a metadata reference, standing in for a type the consumer references rather than
+    /// declares. A referenced type reaches the generator only as a symbol, never as a declaration.
+    /// </summary>
+    /// <param name="source">The source code of the referenced assembly.</param>
+    /// <param name="assemblyName">The name to give the referenced assembly.</param>
+    /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
+    /// <returns>A metadata reference to the compiled assembly.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the referenced source does not compile.</exception>
+    public static MetadataReference CompileToReference(
+        string source,
+        string assemblyName,
+        LanguageVersion? languageVersion)
+    {
+        var compilation = CreateCompilation(source, languageVersion, false, assemblyName, []);
+
+        var errors = compilation.GetDiagnostics()
+            .Where(static d => d.Severity == DiagnosticSeverity.Error)
+            .ToImmutableArray();
+
+        if (!errors.IsEmpty)
+        {
+            throw new InvalidOperationException(
+                $"Referenced assembly source failed to compile:{Environment.NewLine}"
+                + string.Join(Environment.NewLine, errors.Select(static d => $"  {d.Id}: {d.GetMessage()}")));
+        }
+
+        return compilation.ToMetadataReference();
     }
 
     /// <summary>Tests a source generator scenario that is expected to succeed. Verifies the generated output against a snapshot.</summary>
@@ -261,13 +312,37 @@ public static class TestHelper
     /// <param name="rootNamespace">The root namespace the build exposes, or <see langword="null"/> for none.</param>
     /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static GeneratorTestResult RunGenerator(
         string source,
         LanguageVersion? languageVersion,
         string? rootNamespace,
-        bool useReactiveRuntime)
+        bool useReactiveRuntime) =>
+        RunGenerator(source, languageVersion, rootNamespace, useReactiveRuntime, []);
+
+    /// <summary>
+    /// Runs the source generator against a compilation that also references separately built assemblies, so a
+    /// scenario can observe a type the consumer references rather than declares.
+    /// </summary>
+    /// <param name="source">The source code to compile and generate.</param>
+    /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
+    /// <param name="rootNamespace">The root namespace the build exposes, or <see langword="null"/> for none.</param>
+    /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>
+    /// <param name="additionalReferences">References to add on top of the framework and runtime ones.</param>
+    /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
+    public static GeneratorTestResult RunGenerator(
+        string source,
+        LanguageVersion? languageVersion,
+        string? rootNamespace,
+        bool useReactiveRuntime,
+        ImmutableArray<MetadataReference> additionalReferences)
     {
-        var compilation = CreateCompilation(source, languageVersion, useReactiveRuntime);
+        var compilation = CreateCompilation(
+            source,
+            languageVersion,
+            useReactiveRuntime,
+            "TestAssembly",
+            additionalReferences);
         var generator = new BindingGenerator();
         var sourceGenerator = generator.AsSourceGenerator();
 
@@ -280,6 +355,37 @@ public static class TestHelper
             null,
             parseOptions,
             rootNamespace is null ? null : new BuildPropertyOptionsProvider(rootNamespace),
+            new(
+                default,
+                true));
+
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
+
+        return new(driver, outputCompilation, diagnostics);
+    }
+
+    /// <summary>Runs the source generator over a compilation built by the caller, with the given build properties.</summary>
+    /// <param name="compilation">The compilation to generate against.</param>
+    /// <param name="languageVersion">The C# language version to parse generated code with.</param>
+    /// <param name="rootNamespace">The root namespace the build exposes, or <see langword="null"/> for none.</param>
+    /// <param name="emitGeneratedCodeMarkers">Whether the build asks for the generated-file markers.</param>
+    /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
+    public static GeneratorTestResult RunGenerator(
+        Compilation compilation,
+        LanguageVersion? languageVersion,
+        string? rootNamespace,
+        bool emitGeneratedCodeMarkers)
+    {
+        var generator = new BindingGenerator();
+        var parseOptions = languageVersion.HasValue
+            ? new CSharpParseOptions(languageVersion.Value)
+            : new CSharpParseOptions(LanguageVersion.CSharp7_3);
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [generator.AsSourceGenerator()],
+            null,
+            parseOptions,
+            new BuildPropertyOptionsProvider(rootNamespace, emitGeneratedCodeMarkers),
             new(
                 default,
                 true));
@@ -433,6 +539,9 @@ public static class TestHelper
         /// <summary>The analyzer config key a build exposes the root namespace under.</summary>
         private const string RootNamespaceKey = "build_property.RootNamespace";
 
+        /// <summary>The analyzer config key a build opts out of the generated-file markers under.</summary>
+        private const string EmitMarkersKey = "build_property.ReactiveUIBindingEmitGeneratedCodeMarkers";
+
         /// <summary>The per-file options, which nothing under test reads.</summary>
         private static readonly BuildPropertyOptions NoOptions = new(new Dictionary<string, string>(StringComparer.Ordinal));
 
@@ -441,6 +550,21 @@ public static class TestHelper
         public BuildPropertyOptionsProvider(string rootNamespace) =>
             GlobalOptions = new BuildPropertyOptions(
                 new Dictionary<string, string>(StringComparer.Ordinal) { [RootNamespaceKey] = rootNamespace });
+
+        /// <summary>Initializes a new instance of the <see cref="BuildPropertyOptionsProvider"/> class.</summary>
+        /// <param name="rootNamespace">The root namespace to report, or null to report none.</param>
+        /// <param name="emitGeneratedCodeMarkers">Whether the build asks for the generated-file markers.</param>
+        public BuildPropertyOptionsProvider(string? rootNamespace, bool emitGeneratedCodeMarkers)
+        {
+            var options = new Dictionary<string, string>(StringComparer.Ordinal) { [EmitMarkersKey] = emitGeneratedCodeMarkers ? "true" : "false" };
+
+            if (rootNamespace is not null)
+            {
+                options[RootNamespaceKey] = rootNamespace;
+            }
+
+            GlobalOptions = new BuildPropertyOptions(options);
+        }
 
         /// <inheritdoc/>
         public override AnalyzerConfigOptions GlobalOptions { get; }

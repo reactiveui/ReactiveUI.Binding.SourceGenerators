@@ -22,8 +22,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            obs1Expression = obs1Expression.StartsWith("static ") ? obs1Expression.Substring(7) : obs1Expression;
-            obs2Expression = obs2Expression.StartsWith("static ") ? obs2Expression.Substring(7) : obs2Expression;
+            obs1Expression = obs1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? obs1Expression.Substring(7) : obs1Expression;
+            obs2Expression = obs2Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? obs2Expression.Substring(7) : obs2Expression;
 
             if (obs1Expression == "x => x.Count" && obs2Expression == "x => x.Message")
             {
@@ -41,7 +41,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 true);
 
             var __switched0 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<int>, int>(__obsProperty0,
-                __obs => __obs ?? (global::System.IObservable<int>)global::ReactiveUI.Binding.Observables.EmptyObservable<int>.Instance);
+                __obs => __obs ?? (global::System.IObservable<int>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<int>.Instance);
 
             var __obsProperty1 = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,
@@ -50,7 +50,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 true);
 
             var __switched1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty1,
-                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
 
             return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
                 __switched0,

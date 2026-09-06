@@ -20,6 +20,6 @@ public static class Scenario
         view.BindInteraction(vm, x => x.Confirm, ctx =>
         {
             ctx.SetOutput(true);
-            return new ReactiveUI.Binding.Observables.ReturnObservable<int>(0);
+            return new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<int>(0);
         });
 }

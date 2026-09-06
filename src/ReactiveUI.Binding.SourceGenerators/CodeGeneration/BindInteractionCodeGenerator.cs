@@ -37,7 +37,14 @@ internal static class BindInteractionCodeGenerator
 
         for (var g = 0; g < groups.Count; g++)
         {
-            var group = groups[g];
+            var group = supportsCallerArgExpr
+                ? groups[g] with
+                {
+                    Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
+                        groups[g].Invocations,
+                        static x => x.ExpressionText),
+                }
+                : groups[g];
 
             GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.StubHasExpressionParameters);
             _ = sb.AppendLine();
@@ -156,7 +163,7 @@ internal static class BindInteractionCodeGenerator
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            propertyNameExpression = propertyNameExpression.StartsWith("static ") ? propertyNameExpression.Substring(7) : propertyNameExpression;
+            propertyNameExpression = propertyNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal) ? propertyNameExpression.Substring(7) : propertyNameExpression;
 
 """);
 
@@ -351,7 +358,7 @@ internal static class BindInteractionCodeGenerator
                             return serial;
                         }
 
-                        var interactionObs = new global::ReactiveUI.Binding.Observables.ReturnObservable<{{interactionType}}>(viewModel.{{propertyName}});
+                        var interactionObs = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{{interactionType}}>(viewModel.{{propertyName}});
                 """);
     }
 

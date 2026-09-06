@@ -45,8 +45,7 @@ internal static class BindInvocationGenerator
                         c.Invocation,
                         c.SourceClassInfo,
                         c.TargetClassInfo,
-                        c.Suffix,
-                        c.Features.SupportsNullable));
+                        c.Suffix));
 
                 if (source is null)
                 {

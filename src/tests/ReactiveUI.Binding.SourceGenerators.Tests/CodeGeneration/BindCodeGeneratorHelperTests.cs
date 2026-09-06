@@ -179,7 +179,7 @@ public class BindCodeGeneratorHelperTests
             false,
             []);
 
-        var result = BindCodeGenerator.FormatReturnType(group, false);
+        var result = BindCodeGenerator.FormatReturnType(group);
 
         await Assert.That(result).Contains(IReactiveBindingName);
         await Assert.That(result).Contains(ViewTypeName);
@@ -192,7 +192,7 @@ public class BindCodeGeneratorHelperTests
     {
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: "Bind");
 
-        var result = BindCodeGenerator.FormatMethodReturnType(inv, false);
+        var result = BindCodeGenerator.FormatMethodReturnType(inv);
 
         await Assert.That(result).Contains(IReactiveBindingName);
         await Assert.That(result).Contains(MyViewTypeName);
@@ -299,7 +299,7 @@ public class BindCodeGeneratorHelperTests
             "MyView",
             implementsINPC: true);
 
-        BindCodeGenerator.GenerateBindMethod(sb, inv, sourceClassInfo, targetClassInfo, "TEST00000000TEST", false);
+        BindCodeGenerator.GenerateBindMethod(sb, inv, sourceClassInfo, targetClassInfo, "TEST00000000TEST");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__Bind_TEST00000000TEST");

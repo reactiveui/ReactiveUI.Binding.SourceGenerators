@@ -51,7 +51,10 @@ internal static class WhenAnyCodeGenerator
             for (var i = 0; i < group.Invocations.Length; i++)
             {
                 var inv = group.Invocations[i];
-                var classInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.SourceTypeFullName);
+                var classInfo = CodeGeneratorHelpers.ResolveObservedTypeInfo(
+                    allClasses,
+                    inv.SourceTypeFullName,
+                    inv.PropertyPaths[0]);
                 var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
                     inv.SourceTypeFullName,
                     inv.CallerFilePath,
@@ -313,7 +316,7 @@ internal static class WhenAnyCodeGenerator
         {
             var paramName = $"property{i + 1}Expression";
             _ = sb.AppendLine(
-                $"""            {paramName} = {paramName}.StartsWith("static ") ? {paramName}.Substring(7) : {paramName};""");
+                $"""            {paramName} = {paramName}.StartsWith("static ", global::System.StringComparison.Ordinal) ? {paramName}.Substring(7) : {paramName};""");
         }
 
         _ = sb.AppendLine();

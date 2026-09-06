@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -20,6 +21,9 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </remarks>
 internal static class BindingEmitterHelpers
 {
+    /// <summary>The name a view exposes its view model under.</summary>
+    private const string ViewModelPropertyName = "ViewModel";
+
     /// <summary>Opens a delegate parameter, ready for the two type arguments and the parameter name.</summary>
     private const string FuncParameterPrefix = ", global::System.Func<";
 
@@ -54,7 +58,14 @@ internal static class BindingEmitterHelpers
 
         for (var g = 0; g < groups.Count; g++)
         {
-            var group = groups[g];
+            var group = snapshot.SupportsCallerArgExpr
+                ? groups[g] with
+                {
+                    Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
+                        groups[g].Invocations,
+                        static x => $"{x.SourceExpressionText}|{x.TargetExpressionText}"),
+                }
+                : groups[g];
 
             emitOverload(sb, group, snapshot);
             _ = sb.AppendLine();
@@ -83,6 +94,83 @@ internal static class BindingEmitterHelpers
         _ = sb.AppendLine();
 
         return PooledBuilder.ToStringAndReturn(sb);
+    }
+
+    /// <summary>Emits the guard that lets a registered binding hook refuse this binding.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sourceVar">The generated name of the source object.</param>
+    /// <param name="targetVar">The generated name of the target object.</param>
+    /// <param name="direction">The binding direction reported to the hook.</param>
+    /// <param name="earlyReturn">What the generated method returns when a hook refuses.</param>
+    /// <remarks>
+    /// The <c>Any</c> test comes first so the two closures are only built once a hook is registered. The
+    /// changes handed to a hook carry the bound objects with no expression, the shape ReactiveUI itself
+    /// passes when it has no expression to walk, which cannot fault on a chain whose intermediate is null.
+    /// </remarks>
+    internal static void EmitBindingHookGuard(
+        StringBuilder sb,
+        string sourceVar,
+        string targetVar,
+        string direction,
+        string earlyReturn) => _ = sb.AppendLine($$"""
+                                    if ({{GeneratedTypeNames.BindingHooks}}.Any
+                                        && !{{GeneratedTypeNames.BindingHooks}}.ShouldBind(
+                                            {{sourceVar}},
+                                            {{targetVar}},
+                                            () => new {{GeneratedTypeNames.IObservedChange}}<object, object>[]
+                                            {
+                                                new {{GeneratedTypeNames.ObservedChange}}<object, object>({{sourceVar}}, null, {{sourceVar}}),
+                                            },
+                                            () => new {{GeneratedTypeNames.IObservedChange}}<object, object>[]
+                                            {
+                                                new {{GeneratedTypeNames.ObservedChange}}<object, object>({{targetVar}}, null, {{targetVar}}),
+                                            },
+                                            {{GeneratedTypeNames.BindingDirection}}.{{direction}}))
+                                    {
+                                        return {{earlyReturn}};
+                                    }
+                            """);
+
+    /// <summary>Emits the check that hands a binding to the runtime engine when a registered plugin outranks the generated one.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group, which fixes the bound types for the whole overload.</param>
+    /// <param name="fallbackMethod">The <c>RuntimeBindingFallback</c> method that reproduces this binding.</param>
+    /// <param name="arguments">The full argument list to forward, in the fallback method's own parameter order.</param>
+    /// <param name="observesTarget">Whether the binding observes the target as well as the source.</param>
+    /// <remarks>
+    /// The generator picks each side's observation mechanism from the types it can see at compile time. A
+    /// consumer that registers a higher-affinity <c>ICreatesObservableForProperty</c> expects it to apply to
+    /// bindings as well as to <c>WhenChanged</c>, so the affinity is tested before dispatch and the binding
+    /// routes to the runtime engine when the registration wins. A two-way binding observes both sides, so
+    /// either side's registration is enough to take it.
+    /// </remarks>
+    internal static void EmitAffinityOverride(
+        StringBuilder sb,
+        BindingTypeGroup group,
+        string fallbackMethod,
+        string arguments,
+        bool observesTarget)
+    {
+        var first = group.Invocations[0];
+
+        _ = sb.AppendLine(
+            "            // A registered plugin that outranks the generated one drives the binding instead");
+
+        _ = sb.Append(
+            $"            if ({AffinityTest(group.SourceTypeFullName, first.SourcePropertyPath)}");
+
+        if (observesTarget)
+        {
+            _ = sb.AppendLine()
+                .Append($"                || {AffinityTest(group.TargetTypeFullName, first.TargetPropertyPath)}");
+        }
+
+        _ = sb.AppendLine(")")
+            .AppendLine("            {")
+            .AppendLine($"                return {GeneratedTypeNames.RuntimeBindingFallback}.{fallbackMethod}(")
+            .AppendLine($"                    {arguments});")
+            .AppendLine("            }")
+            .AppendLine();
     }
 
     /// <summary>Groups call sites that can share one generated overload.</summary>
@@ -299,6 +387,163 @@ internal static class BindingEmitterHelpers
 
         return sb.ToStringAndReturn();
     }
+
+    /// <summary>Determines whether the two sides differ in type with no converter supplied to reconcile them.</summary>
+    /// <param name="inv">The binding invocation info.</param>
+    /// <returns><see langword="true"/> when the conversion has to come from the registry.</returns>
+    /// <remarks>
+    /// A number bound to a text property is the archetypal binding, and the converter registry exists to serve
+    /// it. Assigning straight across instead is a type error inside a generated file, where the consumer can
+    /// neither see nor fix it.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool RequiresRegistryConversion(BindingInvocationInfo inv) =>
+        !inv.HasConversion
+        && !string.Equals(inv.SourcePropertyTypeFullName, inv.TargetPropertyTypeFullName, StringComparison.Ordinal);
+
+    /// <summary>Emits a stage that converts observed values to the type the other side declares.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sourceVar">The variable holding the values to convert.</param>
+    /// <param name="resultVar">The name to give the converted observable.</param>
+    /// <param name="fromTypeFullName">The type the values arrive as.</param>
+    /// <param name="toTypeFullName">The type the assignment needs.</param>
+    /// <remarks>
+    /// Converting once here rather than at the write keeps the binding's own change stream typed as the stub
+    /// declares it, and pays for the conversion once per value rather than twice.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void EmitRegistryConversion(
+        StringBuilder sb,
+        string sourceVar,
+        string resultVar,
+        string fromTypeFullName,
+        string toTypeFullName) =>
+        sb.AppendLine($$"""
+                                var {{resultVar}} = new {{GeneratedTypeNames.MapSignal}}<{{fromTypeFullName}}, {{toTypeFullName}}>(
+                                    {{sourceVar}},
+                                    __value =>
+                                    {
+                                        {{toTypeFullName}} __converted;
+                                        {{GeneratedTypeNames.RuntimeBindingConverter}}.TryConvert<{{fromTypeFullName}}, {{toTypeFullName}}>(__value, null, null, out __converted);
+                                        return __converted;
+                                    });
+                """);
+
+    /// <summary>Emits the stage that delivers a write to the view on the thread the view belongs to.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="inv">The binding invocation info.</param>
+    /// <param name="sourceVar">The variable holding the values being written to the view.</param>
+    /// <param name="resultVar">The name to give the routed observable.</param>
+    /// <returns>The variable to subscribe the write to.</returns>
+    /// <remarks>
+    /// A view model raises its notifications from whatever thread did the work, and the UI frameworks only allow
+    /// a view to be touched from the thread that owns it. Where a call site named its own scheduler the caller
+    /// has already said where the write lands, so this stays out of the way; otherwise the routing is decided at
+    /// runtime by whichever platform package is present, which is the only place that can know.
+    /// </remarks>
+    internal static string EmitViewThreadStage(
+        StringBuilder sb,
+        BindingInvocationInfo inv,
+        string sourceVar,
+        string resultVar)
+    {
+        if (inv.HasScheduler)
+        {
+            return sourceVar;
+        }
+
+        _ = sb.AppendLine(
+            $"            var {resultVar} = {GeneratedTypeNames.BindingSchedulers}.ObserveOnMainThread({sourceVar});");
+
+        return resultVar;
+    }
+
+    /// <summary>Decides what a view-first binding observes: the view model it was handed, or the view's own.</summary>
+    /// <param name="inv">The call site being emitted.</param>
+    /// <param name="sourceClassInfo">The view model type's binding info, when it was detected.</param>
+    /// <param name="targetClassInfo">The view type's binding info, which lists the properties it declares.</param>
+    /// <returns>The root to observe from, the path to walk, and the root type's binding info.</returns>
+    /// <remarks>
+    /// A view that exposes the view model is observed through that property, so the binding follows whichever
+    /// view model the view currently holds. Setting the view model after construction and replacing it later is
+    /// the ordinary view lifecycle, and a binding that captured the instance it was handed goes on driving the
+    /// view from the replaced one with nothing raised to say so.
+    /// <para>
+    /// The rewritten path is the same shape the chain emitters already handle - one more segment, whose parent
+    /// may be null - so the switch onto the current view model, and the detach from the previous one, come from
+    /// the machinery a deep chain already uses.
+    /// </para>
+    /// </remarks>
+    internal static ViewModelObservation ResolveViewModelObservation(
+        BindingInvocationInfo inv,
+        ClassBindingInfo? sourceClassInfo,
+        ClassBindingInfo? targetClassInfo)
+    {
+        if (targetClassInfo is null || !DeclaresViewModel(targetClassInfo, inv.SourceTypeFullName))
+        {
+            return new("viewModel", inv.SourcePropertyPath, sourceClassInfo);
+        }
+
+        var viewModelSegment = new PropertyPathSegment(
+            ViewModelPropertyName,
+            inv.SourceTypeFullName,
+            inv.TargetTypeFullName,
+            true,
+            sourceClassInfo);
+
+        var source = inv.SourcePropertyPath;
+        var rooted = new PropertyPathSegment[source.Length + 1];
+        rooted[0] = viewModelSegment;
+        for (var i = 0; i < source.Length; i++)
+        {
+            rooted[i + 1] = source[i];
+        }
+
+        return new("view", new(rooted), targetClassInfo);
+    }
+
+    /// <summary>Determines whether a view declares a view model property of the bound type.</summary>
+    /// <param name="targetClassInfo">The view type's binding info.</param>
+    /// <param name="viewModelTypeFullName">The view model type the call site binds from.</param>
+    /// <returns><see langword="true"/> when the view exposes that view model.</returns>
+    private static bool DeclaresViewModel(ClassBindingInfo targetClassInfo, string viewModelTypeFullName)
+    {
+        var properties = targetClassInfo.Properties;
+        for (var i = 0; i < properties.Length; i++)
+        {
+            if (string.Equals(properties[i].PropertyName, ViewModelPropertyName, StringComparison.Ordinal)
+                && string.Equals(properties[i].PropertyTypeFullName, viewModelTypeFullName, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Renders the affinity test for one side of a binding.</summary>
+    /// <param name="typeFullName">The fully qualified name of the observed type.</param>
+    /// <param name="propertyPath">The path whose first segment carries how its declaring type notifies.</param>
+    /// <returns>The rendered call, without surrounding parentheses.</returns>
+    private static string AffinityTest(string typeFullName, EquatableArray<PropertyPathSegment> propertyPath)
+    {
+        var declaringType = propertyPath[0].DeclaringTypeInfo;
+        var plugin = declaringType is null
+            ? null
+            : Plugins.ObservationPluginRegistry.GetBestPlugin(declaringType);
+
+        return
+            $"{GeneratedTypeNames.ObservationAffinityChecker}.HasHigherAffinityPlugin(typeof({typeFullName}), {plugin?.Affinity ?? 0}, false)";
+    }
+
+    /// <summary>What a view-first binding observes, and from where.</summary>
+    /// <param name="RootVariable">The generated method parameter the observation is rooted on.</param>
+    /// <param name="Path">The property path walked from that root.</param>
+    /// <param name="RootClassInfo">The root type's binding info, when it was detected.</param>
+    internal readonly record struct ViewModelObservation(
+        string RootVariable,
+        EquatableArray<PropertyPathSegment> Path,
+        ClassBindingInfo? RootClassInfo);
 
     /// <summary>Everything a per-call-site binding emitter needs about one resolved call site.</summary>
     /// <param name="Invocation">The call site being emitted.</param>

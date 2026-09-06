@@ -24,8 +24,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ") ? sourcePropertyExpression.Substring(7) : sourcePropertyExpression;
-            targetPropertyExpression = targetPropertyExpression.StartsWith("static ") ? targetPropertyExpression.Substring(7) : targetPropertyExpression;
+            sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                ? sourcePropertyExpression.Substring(7)
+                : sourcePropertyExpression;
+            targetPropertyExpression = targetPropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
+                ? targetPropertyExpression.Substring(7)
+                : targetPropertyExpression;
+
+            // A registered plugin that outranks the generated one drives the binding instead
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.SinglePropertyWithConverter.MyViewModel), 5, false))
+            {
+                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindOneWay(
+                    source, target, sourceProperty, targetProperty, conversionFunc, null, targetPropertyExpression);
+            }
 
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
@@ -39,17 +50,34 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindOneWay_7FFFE88AB8C05119(global::SharedScenarios.BindOneWay.SinglePropertyWithConverter.MyViewModel source, global::SharedScenarios.BindOneWay.SinglePropertyWithConverter.MyView target, global::System.Func<int, string> conversionFunc)
         {
             // BindOneWay: Count -> CountText (with conversion)
+        if (global::ReactiveUI.Binding.BindingHooks.Any
+            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                source,
+                target,
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(source, null, source),
+                },
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(target, null, target),
+                },
+                global::ReactiveUI.Binding.BindingDirection.OneWay))
+        {
+            return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+        }
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             source,
             "Count",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyWithConverter.MyViewModel)__o).Count,
             true);
         var bindObs = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, conversionFunc);
+            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(bindObs);
 
-            return global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(bindObs, value =>
+            return global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
                 target.CountText = value;
-            });
+            }, "x => x.CountText");
         }
 
     }

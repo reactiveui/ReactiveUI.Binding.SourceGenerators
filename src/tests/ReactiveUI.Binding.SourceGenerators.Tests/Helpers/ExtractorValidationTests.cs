@@ -4,6 +4,7 @@
 
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using NSubstitute;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 
@@ -57,9 +58,64 @@ public class ExtractorValidationTests
     /// <summary>Verifies that null is rejected as unrecognized.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task IsRecognizedExtensionClass_Null_ReturnsFalse()
+    public async Task IsRecognizedExtensionClass_NullName_ReturnsFalse()
     {
-        var result = ExtractorValidation.IsRecognizedExtensionClass(null);
+        var result = ExtractorValidation.IsRecognizedExtensionClass((string?)null);
+        await Assert.That(result).IsFalse();
+    }
+
+    /// <summary>Verifies that a null containing type is rejected as unrecognized.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsRecognizedExtensionClass_NullContainingType_ReturnsFalse()
+    {
+        var result = ExtractorValidation.IsRecognizedExtensionClass((INamedTypeSymbol?)null);
+        await Assert.That(result).IsFalse();
+    }
+
+    /// <summary>
+    /// A member declared in an extension block belongs to a synthesized type nested inside the static class
+    /// rather than to the class itself, so recognition has to reach the enclosing name.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsRecognizedExtensionClass_SynthesizedTypeNestedInRecognizedClass_ReturnsTrue()
+    {
+        var nested = SynthesizedNestedTypeIn(nameof(ReactiveSchedulerExtensions));
+
+        var result = ExtractorValidation.IsRecognizedExtensionClass(nested);
+
+        await Assert.That(result).IsTrue();
+    }
+
+    /// <summary>Reaching the enclosing name does not make an unrecognized class recognized.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsRecognizedExtensionClass_SynthesizedTypeNestedInUnknownClass_ReturnsFalse()
+    {
+        var nested = SynthesizedNestedTypeIn("CustomExtensions");
+
+        var result = ExtractorValidation.IsRecognizedExtensionClass(nested);
+
+        await Assert.That(result).IsFalse();
+    }
+
+    /// <summary>A plainly named type is judged on its own name, not on the class that encloses it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task IsRecognizedExtensionClass_NamedTypeNestedInRecognizedClass_ReturnsFalse()
+    {
+        var outer = CompiledType($$"""
+                                  public static class {{nameof(ReactiveSchedulerExtensions)}}
+                                  {
+                                      public class Inner
+                                      {
+                                      }
+                                  }
+                                  """);
+
+        var result = ExtractorValidation.IsRecognizedExtensionClass(outer.GetTypeMembers("Inner")[0]);
+
         await Assert.That(result).IsFalse();
     }
 
@@ -284,5 +340,73 @@ public class ExtractorValidationTests
         var result = ExtractorValidation.FindSelectorReturnType(parameters, SelectorName);
 
         await Assert.That(result).IsNull();
+    }
+
+    /// <summary>
+    /// Compiles a static class holding a closure and returns the display class the compiler synthesized inside
+    /// it, which carries the same shape as the grouping type an extension block declares its members in: a name
+    /// no C# identifier can spell, nested one level inside the class that names the API.
+    /// </summary>
+    /// <param name="className">The name to give the enclosing static class.</param>
+    /// <returns>The synthesized nested type.</returns>
+    /// <exception cref="InvalidOperationException">The compiler synthesized no nested type.</exception>
+    private static INamedTypeSymbol SynthesizedNestedTypeIn(string className)
+    {
+        var outer = CompiledType($$"""
+                                  public static class {{className}}
+                                  {
+                                      public static System.Func<int> Capture(int seed)
+                                      {
+                                          return () => seed;
+                                      }
+                                  }
+                                  """);
+
+        var nested = outer.GetTypeMembers();
+        for (var i = 0; i < nested.Length; i++)
+        {
+            if (nested[i].Name.Length > 0 && nested[i].Name[0] == '<')
+            {
+                return nested[i];
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"The compiler synthesized no nested type inside '{className}'.");
+    }
+
+    /// <summary>
+    /// Compiles source to an image and reads the named type back out of it. Emitting matters: the types the
+    /// compiler synthesizes exist only in the emitted assembly, not in the declaring compilation's symbols.
+    /// </summary>
+    /// <param name="source">The source declaring a single top-level type.</param>
+    /// <returns>The named type symbol as a consumer sees it.</returns>
+    /// <exception cref="InvalidOperationException">The source did not compile, or the type was not emitted.</exception>
+    private static INamedTypeSymbol CompiledType(string source)
+    {
+        var compilation = TestHelper.CreateCompilation(source, LanguageVersion.CSharp10);
+
+        using var image = new MemoryStream();
+        var emitResult = compilation.Emit(image);
+        if (!emitResult.Success)
+        {
+            throw new InvalidOperationException(
+                "The probe source failed to compile:" + Environment.NewLine
+                + string.Join(
+                    Environment.NewLine,
+                    emitResult.Diagnostics
+                        .Where(static d => d.Severity == DiagnosticSeverity.Error)
+                        .Select(static d => $"  {d.Id}: {d.GetMessage()}")));
+        }
+
+        var reference = MetadataReference.CreateFromImage(image.ToArray());
+        var consumer = TestHelper.CreateCompilation(string.Empty, LanguageVersion.CSharp10, false, "Consumer", [reference]);
+
+        var typeName = compilation.GetSymbolsWithName(
+            static _ => true,
+            SymbolFilter.Type).OfType<INamedTypeSymbol>().First().Name;
+
+        return consumer.GetTypeByMetadataName(typeName)
+            ?? throw new InvalidOperationException($"'{typeName}' was not found in the emitted image.");
     }
 }

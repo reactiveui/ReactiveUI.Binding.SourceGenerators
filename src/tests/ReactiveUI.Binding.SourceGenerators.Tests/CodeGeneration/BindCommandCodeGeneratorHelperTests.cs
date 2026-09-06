@@ -568,15 +568,15 @@ public class BindCommandCodeGeneratorHelperTests
         BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, ViewSaveButtonName, GeneratedAffinity, true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("SelectObservable<global::System.String, object>");
+        await Assert.That(result).Contains("MapSignal<global::System.String, object>");
         await Assert.That(result).Contains("HasHigherAffinityPlugin<global::TestApp.MyButton>(5, true)");
         await Assert.That(result).Contains("GetBinder<global::TestApp.MyButton>(true)");
     }
 
-    /// <summary>Verifies EmitCommandAffinityCheck with expression parameter emits ReturnObservable.</summary>
+    /// <summary>Verifies EmitCommandAffinityCheck with expression parameter emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitCommandAffinityCheck_ExpressionParam_EmitsReturnObservable()
+    public async Task EmitCommandAffinityCheck_ExpressionParam_EmitsImmediateReturnSignal()
     {
         const int GeneratedAffinity = 3;
         var paramPath = new EquatableArray<PropertyPathSegment>(
@@ -590,14 +590,14 @@ public class BindCommandCodeGeneratorHelperTests
         BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, ViewSaveButtonName, GeneratedAffinity, true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ReturnObservable<object>(viewModel.Param)");
+        await Assert.That(result).Contains("ImmediateReturnSignal<object>(viewModel.Param)");
         await Assert.That(result).Contains("HasHigherAffinityPlugin<global::TestApp.MyButton>(3, true)");
     }
 
-    /// <summary>Verifies EmitCommandAffinityCheck with no parameter emits EmptyObservable.</summary>
+    /// <summary>Verifies EmitCommandAffinityCheck with no parameter emits ImmutableEmptySignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitCommandAffinityCheck_NoParam_EmitsEmptyObservable()
+    public async Task EmitCommandAffinityCheck_NoParam_EmitsImmutableEmptySignal()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo();
@@ -605,15 +605,15 @@ public class BindCommandCodeGeneratorHelperTests
         BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, ViewSaveButtonName, -1, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("EmptyObservable<object>.Instance");
+        await Assert.That(result).Contains("ImmutableEmptySignal<object>.Instance");
         await Assert.That(result).Contains("HasHigherAffinityPlugin<global::TestApp.MyButton>(-1, false)");
         await Assert.That(result).Contains("GetBinder<global::TestApp.MyButton>(false)");
     }
 
-    /// <summary>Verifies BuildParameterObservableExpression returns SelectObservable for observable parameter.</summary>
+    /// <summary>Verifies BuildParameterObservableExpression returns MapSignal for observable parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BuildParameterObservableExpression_ObservableParam_ReturnsSelectObservable()
+    public async Task BuildParameterObservableExpression_ObservableParam_ReturnsMapSignal()
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
@@ -621,13 +621,13 @@ public class BindCommandCodeGeneratorHelperTests
 
         var result = BindCommandCodeGenerator.BuildParameterObservableExpression(inv);
 
-        await Assert.That(result).Contains("SelectObservable<global::System.String, object>");
+        await Assert.That(result).Contains("MapSignal<global::System.String, object>");
     }
 
-    /// <summary>Verifies BuildParameterObservableExpression returns ReturnObservable for expression parameter.</summary>
+    /// <summary>Verifies BuildParameterObservableExpression returns ImmediateReturnSignal for expression parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BuildParameterObservableExpression_ExpressionParam_ReturnsReturnObservable()
+    public async Task BuildParameterObservableExpression_ExpressionParam_ReturnsImmediateReturnSignal()
     {
         var paramPath = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment(ParamName)]);
@@ -638,19 +638,19 @@ public class BindCommandCodeGeneratorHelperTests
 
         var result = BindCommandCodeGenerator.BuildParameterObservableExpression(inv);
 
-        await Assert.That(result).Contains("ReturnObservable<object>(viewModel.Param)");
+        await Assert.That(result).Contains("ImmediateReturnSignal<object>(viewModel.Param)");
     }
 
-    /// <summary>Verifies BuildParameterObservableExpression returns EmptyObservable when no parameter.</summary>
+    /// <summary>Verifies BuildParameterObservableExpression returns ImmutableEmptySignal when no parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BuildParameterObservableExpression_NoParam_ReturnsEmptyObservable()
+    public async Task BuildParameterObservableExpression_NoParam_ReturnsImmutableEmptySignal()
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo();
 
         var result = BindCommandCodeGenerator.BuildParameterObservableExpression(inv);
 
-        await Assert.That(result).Contains("EmptyObservable<object>.Instance");
+        await Assert.That(result).Contains("ImmutableEmptySignal<object>.Instance");
     }
 
     /// <summary>Verifies Generate returns null when invocations are empty.</summary>
@@ -700,7 +700,7 @@ public class BindCommandCodeGeneratorHelperTests
     /// Verifies GenerateBindCommandMethod with an expression parameter reads the parameter value from the
     /// view model at call time. The <c>Expression&lt;Func&lt;...&gt;&gt;</c> parameter itself lives on the
     /// public overload (covered by <see cref="GenerateCallerArgExprOverload_WithExpressionParam_IncludesWithParameterExpr"/>);
-    /// the worker consumes the compile-time-extracted property path via a <c>ReturnObservable</c>.
+    /// the worker consumes the compile-time-extracted property path via a <c>ImmediateReturnSignal</c>.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -717,7 +717,7 @@ public class BindCommandCodeGeneratorHelperTests
         BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, TESTSUFFIXName, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ReturnObservable<object>");
+        await Assert.That(result).Contains("ImmediateReturnSignal<object>");
         await Assert.That(result).Contains("viewModel.Param");
     }
 

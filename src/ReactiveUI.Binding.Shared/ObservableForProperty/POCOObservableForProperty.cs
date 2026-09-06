@@ -48,8 +48,8 @@ public sealed class POCOObservableForProperty : ICreatesObservableForProperty
         }
 
         // Emit the current value once, then never complete (so the binding stays alive).
-        return new StartWithObservable<IObservedChange<object, object?>>(
-            NeverObservable<IObservedChange<object, object?>>.Instance,
+        return new LeadSignal<IObservedChange<object, object?>>(
+            ImmutableNeverSignal<IObservedChange<object, object?>>.Instance,
             new ObservedChange<object, object?>(sender, expression, default));
     }
 

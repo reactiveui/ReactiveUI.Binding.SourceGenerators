@@ -76,17 +76,58 @@ internal static class GeneratedTypeNames
     /// </summary>
     internal const string ISequencer = "global::ReactiveUI.Primitives.Concurrency.ISequencer";
 
-    /// <summary><c>ReactiveUI.Binding.Observables.ObserveOnObservable</c> (open generic).</summary>
-    internal const string ObserveOnObservable = "global::ReactiveUI.Binding.Observables.ObserveOnObservable";
+    /// <summary>The fully qualified name of <c>ReactiveUI.Primitives.LinqExtensions</c>.</summary>
+    /// <remarks>
+    /// Primitives owns this rather than the binding runtime because it does the job better: an immediate
+    /// sequencer is handed straight back as the source, so nothing is scheduled and nothing is allocated,
+    /// and a real scheduler queues notifications and schedules one drain per burst rather than one
+    /// scheduled action per notification. Called as a static method, so generated code needs no import.
+    /// </remarks>
+    internal const string LinqExtensions = "global::ReactiveUI.Primitives.LinqExtensions";
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Primitives.SubscribeExtensions</c>.</summary>
     internal const string RxBindingExtensions = "global::ReactiveUI.Primitives.SubscribeExtensions";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingHooks</c>.</summary>
+    /// <remarks>
+    /// Guarded by <c>Any</c> at every call site so the closures the veto needs are only built once a hook is
+    /// actually registered, which almost no application does.
+    /// </remarks>
+    internal const string BindingHooks = "global::ReactiveUI.Binding.BindingHooks";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.ObservedChange</c> (open generic).</summary>
+    internal const string ObservedChange = "global::ReactiveUI.Binding.ObservedChange";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.IObservedChange</c> (open generic).</summary>
+    internal const string IObservedChange = "global::ReactiveUI.Binding.IObservedChange";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingDirection</c>.</summary>
+    internal const string BindingDirection = "global::ReactiveUI.Binding.BindingDirection";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingChange</c>.</summary>
+    internal const string BindingChange = "global::ReactiveUI.Binding.BindingChange";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingErrors</c>.</summary>
+    /// <remarks>
+    /// A binding's write subscribes through this rather than plainly, so a faulting source is recorded and a
+    /// setter that threw is rethrown instead of being lost on whichever thread raised the notification.
+    /// </remarks>
+    internal const string BindingErrors = "global::ReactiveUI.Binding.BindingErrors";
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.RuntimeBindingConverter</c>.</summary>
     internal const string RuntimeBindingConverter = "global::ReactiveUI.Binding.Fallback.RuntimeBindingConverter";
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.ObservationAffinityChecker</c>.</summary>
     internal const string ObservationAffinityChecker = "global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.RuntimeBindingFallback</c>.</summary>
+    internal const string RuntimeBindingFallback = "global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.TwoWayConverters</c>.</summary>
+    internal const string TwoWayConverters = "global::ReactiveUI.Binding.Fallback.TwoWayConverters";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingSchedulers</c>.</summary>
+    internal const string BindingSchedulers = "global::ReactiveUI.Binding.BindingSchedulers";
 
     /// <summary>
     /// The dispatch-failure message thrown by a generated overload when no compile-time binding matches the

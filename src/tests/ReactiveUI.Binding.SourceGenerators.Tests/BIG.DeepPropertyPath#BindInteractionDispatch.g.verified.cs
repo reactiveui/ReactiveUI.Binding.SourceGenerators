@@ -22,7 +22,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            propertyNameExpression = propertyNameExpression.StartsWith("static ") ? propertyNameExpression.Substring(7) : propertyNameExpression;
+            propertyNameExpression = propertyNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal) ? propertyNameExpression.Substring(7) : propertyNameExpression;
 
             if (propertyNameExpression == "x => x.Child!.Confirm")
             {
@@ -56,7 +56,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     "Confirm",
                     (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm,
                     false)
-                : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.ReturnObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(default(global::ReactiveUI.Binding.Interaction<string, bool>)));
+                : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::ReactiveUI.Binding.Interaction<string, bool>>(default(global::ReactiveUI.Binding.Interaction<string, bool>)));
         var interactionObs = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__interactionObs_s1);
 
             var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(interactionObs, interaction =>

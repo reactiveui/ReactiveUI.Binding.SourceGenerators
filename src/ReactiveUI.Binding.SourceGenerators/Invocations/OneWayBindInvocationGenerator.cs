@@ -44,6 +44,7 @@ internal static class OneWayBindInvocationGenerator
                         sb,
                         c.Invocation,
                         c.SourceClassInfo,
+                        c.TargetClassInfo,
                         c.Suffix));
 
                 if (source is null)

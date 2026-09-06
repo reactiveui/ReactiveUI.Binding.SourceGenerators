@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 
 namespace ReactiveUI.Binding.Benchmarks;
@@ -12,6 +13,7 @@ namespace ReactiveUI.Binding.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [SimpleJob(RuntimeMoniker.NativeAot10_0, id: nameof(RuntimeMoniker.NativeAot10_0))]
 [MemoryDiagnoser]
+[EventPipeProfiler(EventPipeProfile.GcVerbose)]
 [MarkdownExporterAttribute.GitHub]
 public class WhenChangedBenchmark
 {

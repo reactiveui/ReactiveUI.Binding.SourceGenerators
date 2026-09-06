@@ -68,7 +68,7 @@ internal static class ObservationExtractor
         }
 
         // Verify this is our stub or generated method
-        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType.Name))
+        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType))
         {
             return null;
         }
@@ -136,6 +136,15 @@ internal static class ObservationExtractor
         for (var i = 0; i < methodSymbol.Parameters.Length; i++)
         {
             var parameter = methodSymbol.Parameters[i];
+
+            // The parameter list is walked by position, so a call that supplies fewer arguments than the
+            // resolved method declares - the trailing caller-info ones are always omitted - has nothing at
+            // this position. Reading past the arguments would throw out of the transform, and a generator
+            // that throws contributes no source at all, taking every unrelated file down with it.
+            if (i >= args.Count)
+            {
+                break;
+            }
 
             // Check if parameter type is Expression<Func<...>>
             if (parameter.Type is INamedTypeSymbol { Name: "Expression" })

@@ -42,7 +42,7 @@ internal static class CommandExtractor
         }
 
         // Verify this is our stub or generated method
-        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType.Name))
+        if (!ExtractorValidation.IsRecognizedExtensionClass(methodSymbol.ContainingType))
         {
             return null;
         }

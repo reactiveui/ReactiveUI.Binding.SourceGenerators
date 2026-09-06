@@ -129,10 +129,10 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains(PropertyObservableName);
     }
 
-    /// <summary>Verifies EmitInlineObservation with single property and no INPC generates ReturnObservable.</summary>
+    /// <summary>Verifies EmitInlineObservation with single property and no INPC generates ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitInlineObservation_SingleProperty_NoINPC_GeneratesReturnObservable()
+    public async Task EmitInlineObservation_SingleProperty_NoINPC_GeneratesImmediateReturnSignal()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
@@ -149,7 +149,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(SourceObsDeclaration);
-        await Assert.That(result).Contains(ReturnObservableName);
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies EmitInlineObservation with a deep chain generates a switch-map stage.</summary>
@@ -178,7 +178,7 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains(SourceObsDeclaration);
     }
 
-    /// <summary>Verifies GenerateDeepChainVariable with null classInfo generates after-change code with ReturnObservable fallback.</summary>
+    /// <summary>Verifies GenerateDeepChainVariable with null classInfo generates after-change code with ImmediateReturnSignal fallback.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateDeepChainVariable_NullClassInfo_GeneratesAfterChangeCode()
@@ -193,7 +193,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains("var __propObs0_s0");
-        await Assert.That(result).Contains(ReturnObservableName);
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies GenerateDeepChainVariable with IReactiveObject after-change.</summary>
@@ -215,7 +215,7 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains(DistinctUntilChangedName);
     }
 
-    /// <summary>Verifies GenerateDeepChainObservation with null classInfo generates after-change code with ReturnObservable fallback.</summary>
+    /// <summary>Verifies GenerateDeepChainObservation with null classInfo generates after-change code with ImmediateReturnSignal fallback.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateDeepChainObservation_NullClassInfo_GeneratesCode()
@@ -234,7 +234,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.GenerateDeepChainObservation(sb, inv, null, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ReturnObservableName);
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
         await Assert.That(result).Contains("Switch");
     }
 
@@ -324,10 +324,10 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains(PropertyObservableName);
     }
 
-    /// <summary>Verifies EmitInlineObservation with deep chain and null classInfo generates ReturnObservable fallback.</summary>
+    /// <summary>Verifies EmitInlineObservation with deep chain and null classInfo generates ImmediateReturnSignal fallback.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitInlineObservation_DeepChain_NullClassInfo_GeneratesReturnObservable()
+    public async Task EmitInlineObservation_DeepChain_NullClassInfo_GeneratesImmediateReturnSignal()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>([
@@ -338,7 +338,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.EmitInlineObservation(sb, SourceName, path, StringTypeName, null, SourceObsName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ReturnObservableName);
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
         await Assert.That(result).Contains("__sourceObs_s0");
         await Assert.That(result).Contains("__sourceObs_s1");
         await Assert.That(result).Contains("Switch");

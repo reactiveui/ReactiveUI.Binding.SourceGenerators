@@ -46,8 +46,8 @@ public class ObservationPluginTests
     /// <summary>The <c>__obs1</c> local the generated code is expected to emit.</summary>
     private const string Obs1Local = "__obs1";
 
-    /// <summary>The <c>ReturnObservable</c> name these tests generate against.</summary>
-    private const string ReturnObservableName = "ReturnObservable";
+    /// <summary>The <c>ImmediateReturnSignal</c> name these tests generate against.</summary>
+    private const string ImmediateReturnSignalName = "ImmediateReturnSignal";
 
     /// <summary>The <c>source</c> name these tests generate against.</summary>
     private const string SourceName = "source";
@@ -94,10 +94,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains("TextProperty");
     }
 
-    /// <summary>Verifies WPF plugin shallow observation before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WPF plugin shallow observation before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WpfPlugin_EmitShallowObservation_BeforeChange_EmitsReturnObservable()
+    public async Task WpfPlugin_EmitShallowObservation_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WpfObservationPlugin();
         var sb = new StringBuilder();
@@ -105,7 +105,7 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, true, true);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies WPF plugin shallow observation variable emits EventObservable.</summary>
@@ -124,10 +124,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(EventObservableName);
     }
 
-    /// <summary>Verifies WPF plugin shallow observation variable before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WPF plugin shallow observation variable before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WpfPlugin_EmitShallowObservationVariable_BeforeChange_EmitsReturnObservable()
+    public async Task WpfPlugin_EmitShallowObservationVariable_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WpfObservationPlugin();
         var sb = new StringBuilder();
@@ -135,7 +135,7 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies WPF plugin deep chain root segment after-change emits EventObservable.</summary>
@@ -154,10 +154,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(Obs0Declaration);
     }
 
-    /// <summary>Verifies WPF plugin deep chain root segment before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WPF plugin deep chain root segment before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WpfPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsReturnObservable()
+    public async Task WpfPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WpfObservationPlugin();
         var sb = new StringBuilder();
@@ -165,7 +165,7 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies WPF plugin deep chain inner segment after-change emits EventObservable with Switch.</summary>
@@ -184,10 +184,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(SwitchName);
     }
 
-    /// <summary>Verifies WPF plugin deep chain inner segment before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WPF plugin deep chain inner segment before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WpfPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsReturnObservable()
+    public async Task WpfPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WpfObservationPlugin();
         var sb = new StringBuilder();
@@ -195,7 +195,7 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies WPF plugin inline observation variable emits EventObservable.</summary>
@@ -269,10 +269,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(TextChangedName);
     }
 
-    /// <summary>Verifies WinForms plugin shallow observation variable before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WinForms plugin shallow observation variable before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinFormsPlugin_EmitShallowObservationVariable_BeforeChange_EmitsReturnObservable()
+    public async Task WinFormsPlugin_EmitShallowObservationVariable_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
@@ -280,13 +280,13 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyTextBoxTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
-    /// <summary>Verifies WinForms plugin shallow observation before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WinForms plugin shallow observation before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinFormsPlugin_EmitShallowObservation_BeforeChange_EmitsReturnObservable()
+    public async Task WinFormsPlugin_EmitShallowObservation_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
@@ -294,7 +294,7 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyTextBoxTypeName, true, true);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies WinForms plugin deep chain root segment after-change emits EventObservable.</summary>
@@ -313,10 +313,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(TextChangedName);
     }
 
-    /// <summary>Verifies WinForms plugin deep chain root segment before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WinForms plugin deep chain root segment before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinFormsPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsReturnObservable()
+    public async Task WinFormsPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
@@ -324,7 +324,7 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyTextBoxTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies WinForms plugin deep chain inner segment after-change emits EventObservable.</summary>
@@ -343,10 +343,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(SwitchName);
     }
 
-    /// <summary>Verifies WinForms plugin deep chain inner segment before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WinForms plugin deep chain inner segment before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinFormsPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsReturnObservable()
+    public async Task WinFormsPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
@@ -354,7 +354,7 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies WinForms plugin inline observation variable emits EventObservable.</summary>
@@ -387,10 +387,10 @@ public class ObservationPluginTests
     }
 
     // ========== WinUIObservationPlugin ==========
-    /// <summary>Verifies WinUI plugin shallow observation before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WinUI plugin shallow observation before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinUIPlugin_EmitShallowObservation_BeforeChange_EmitsReturnObservable()
+    public async Task WinUIPlugin_EmitShallowObservation_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
@@ -398,7 +398,7 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, true, true);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies WinUI plugin shallow observation variable after-change emits WinUIDPObservable.</summary>
@@ -417,10 +417,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(Obs0Declaration);
     }
 
-    /// <summary>Verifies WinUI plugin shallow observation variable before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WinUI plugin shallow observation variable before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinUIPlugin_EmitShallowObservationVariable_BeforeChange_EmitsReturnObservable()
+    public async Task WinUIPlugin_EmitShallowObservationVariable_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
@@ -428,7 +428,7 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies WinUI plugin deep chain root segment after-change emits WinUIDPObservable.</summary>
@@ -445,10 +445,10 @@ public class ObservationPluginTests
         await Assert.That(sb.ToString()).Contains(WinUIDPObservableLocal);
     }
 
-    /// <summary>Verifies WinUI plugin deep chain root segment before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WinUI plugin deep chain root segment before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinUIPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsReturnObservable()
+    public async Task WinUIPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
@@ -456,7 +456,7 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies WinUI plugin deep chain inner segment after-change emits WinUIDPObservable.</summary>
@@ -475,10 +475,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(SwitchName);
     }
 
-    /// <summary>Verifies WinUI plugin deep chain inner segment before-change emits ReturnObservable.</summary>
+    /// <summary>Verifies WinUI plugin deep chain inner segment before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinUIPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsReturnObservable()
+    public async Task WinUIPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsImmediateReturnSignal()
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
@@ -486,7 +486,7 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     /// <summary>Verifies WinUI plugin inline observation variable emits WinUIDPObservable.</summary>
@@ -708,10 +708,10 @@ public class ObservationPluginTests
     }
 
     // ========== AndroidObservationPlugin ==========
-    /// <summary>Verifies Android plugin shallow observation variable emits ReturnObservable.</summary>
+    /// <summary>Verifies Android plugin shallow observation variable emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task AndroidPlugin_EmitShallowObservationVariable_EmitsReturnObservable()
+    public async Task AndroidPlugin_EmitShallowObservationVariable_EmitsImmediateReturnSignal()
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
@@ -720,14 +720,14 @@ public class ObservationPluginTests
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ReturnObservableName);
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
         await Assert.That(result).Contains(Obs0Declaration);
     }
 
-    /// <summary>Verifies Android plugin deep chain root segment emits ReturnObservable.</summary>
+    /// <summary>Verifies Android plugin deep chain root segment emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task AndroidPlugin_EmitDeepChainRootSegment_EmitsReturnObservable()
+    public async Task AndroidPlugin_EmitDeepChainRootSegment_EmitsImmediateReturnSignal()
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
@@ -736,14 +736,14 @@ public class ObservationPluginTests
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ReturnObservableName);
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
         await Assert.That(result).Contains(Obs0Declaration);
     }
 
-    /// <summary>Verifies Android plugin deep chain inner segment emits ReturnObservable with Switch.</summary>
+    /// <summary>Verifies Android plugin deep chain inner segment emits ImmediateReturnSignal with Switch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task AndroidPlugin_EmitDeepChainInnerSegment_EmitsReturnObservable()
+    public async Task AndroidPlugin_EmitDeepChainInnerSegment_EmitsImmediateReturnSignal()
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
@@ -752,14 +752,14 @@ public class ObservationPluginTests
         plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ReturnObservableName);
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
         await Assert.That(result).Contains(SwitchName);
     }
 
-    /// <summary>Verifies Android plugin inline observation variable emits ReturnObservable.</summary>
+    /// <summary>Verifies Android plugin inline observation variable emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task AndroidPlugin_EmitInlineObservationVariable_EmitsReturnObservable()
+    public async Task AndroidPlugin_EmitInlineObservationVariable_EmitsImmediateReturnSignal()
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
@@ -768,7 +768,7 @@ public class ObservationPluginTests
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyAndroidViewTypeName, SourceObsName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ReturnObservableName);
+        await Assert.That(result).Contains(ImmediateReturnSignalName);
         await Assert.That(result).Contains(SourceObsDeclaration);
     }
 
@@ -884,10 +884,10 @@ public class ObservationPluginTests
         await Assert.That(sb.ToString()).Contains("false, false)");
     }
 
-    /// <summary>Verifies Android plugin shallow observation emits ReturnObservable.</summary>
+    /// <summary>Verifies Android plugin shallow observation emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task AndroidPlugin_EmitShallowObservation_EmitsReturnObservable()
+    public async Task AndroidPlugin_EmitShallowObservation_EmitsImmediateReturnSignal()
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
@@ -895,7 +895,7 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, true);
 
-        await Assert.That(sb.ToString()).Contains(ReturnObservableName);
+        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
     }
 
     // ========== INPCObservationPlugin ==========

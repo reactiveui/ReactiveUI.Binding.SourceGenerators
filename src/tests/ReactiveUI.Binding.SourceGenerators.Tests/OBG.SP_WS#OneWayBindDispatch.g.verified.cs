@@ -24,6 +24,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
+            // A registered plugin that outranks the generated one drives the binding instead
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyViewModel), 5, false))
+            {
+                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.OneWayBind(
+                    view, viewModel, viewModelProperty, viewProperty, selector, null, viewPropertyExpression);
+            }
+
             if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountText")
             {
@@ -36,21 +43,38 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::ReactiveUI.Binding.IReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView, string> __OneWayBind_0000321BF9FDEB6D(global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyViewModel viewModel, global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView view, global::System.Func<int, string> selector)
         {
             // OneWayBind: Count -> CountText (with conversion)
+        if (global::ReactiveUI.Binding.BindingHooks.Any
+            && !global::ReactiveUI.Binding.BindingHooks.ShouldBind(
+                viewModel,
+                view,
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(viewModel, null, viewModel),
+                },
+                () => new global::ReactiveUI.Binding.IObservedChange<object, object>[]
+                {
+                    new global::ReactiveUI.Binding.ObservedChange<object, object>(view, null, view),
+                },
+                global::ReactiveUI.Binding.BindingDirection.OneWay))
+        {
+            return null;
+        }
         var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             viewModel,
             "Count",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyViewModel)__o).Count,
             true);
         var bindObs = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, selector);
+            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(bindObs);
 
-            var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(bindObs, value =>
+            var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
                 view.CountText = value;
-            });
+            }, "x => x.CountText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelector.MyView, string>(
                 view,
-                bindObs,
+                viewThreadObs,
                 global::ReactiveUI.Binding.BindingDirection.OneWay,
                 sub);
         }

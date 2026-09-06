@@ -32,7 +32,7 @@ public static class RuntimeObservationFallback
     {
         ArgumentExceptionHelper.ThrowIfNull(property);
 
-        return new SelectObservable<IObservedChange<TObj, TValue>, TValue>(
+        return new MapSignal<IObservedChange<TObj, TValue>, TValue>(
             obj.SubscribeToExpressionChain<TObj, TValue>(property.Body, skipInitial: false),
             static x => x.Value);
     }
@@ -92,7 +92,7 @@ public static class RuntimeObservationFallback
     {
         ArgumentExceptionHelper.ThrowIfNull(property);
 
-        return new SelectObservable<IObservedChange<TObj, TValue>, TValue>(
+        return new MapSignal<IObservedChange<TObj, TValue>, TValue>(
             obj.SubscribeToExpressionChain<TObj, TValue>(property.Body, true, false, true),
             static x => x.Value);
     }
@@ -152,7 +152,7 @@ public static class RuntimeObservationFallback
     {
         ArgumentExceptionHelper.ThrowIfNull(property);
 
-        return new SelectObservable<IObservedChange<TSender, TValue>, TValue>(
+        return new MapSignal<IObservedChange<TSender, TValue>, TValue>(
             sender.SubscribeToExpressionChain<TSender, TValue>(property.Body, skipInitial: false),
             static x => x.Value);
     }

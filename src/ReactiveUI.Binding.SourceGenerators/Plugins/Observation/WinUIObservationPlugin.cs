@@ -47,6 +47,11 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
         classInfo.InheritsWinUIDependencyObject;
 
     /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
+        ObservedProperties.IsDependencyProperty(classInfo, propertyName);
+
+    /// <inheritdoc/>
     public void EmitHelperClasses(StringBuilder sb)
     {
         EmitObservableHeader(sb);
@@ -65,7 +70,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
         if (isBeforeChange)
         {
             _ = sb.Append(
-                $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}))");
+                $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}))");
             return;
         }
 
@@ -90,7 +95,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
         if (isBeforeChange)
         {
             _ = sb.Append(
-                $"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
+                $"            var {varName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
             return;
         }
 
@@ -116,7 +121,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
         {
             _ = sb
                 .Append($"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
+                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
             return;
         }
 
@@ -142,8 +147,8 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
         var segType = segment.PropertyTypeFullName;
         var declType = segment.DeclaringTypeFullName;
         var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-            ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
-            : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
+            ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
 
         if (isBeforeChange)
         {
@@ -152,7 +157,7 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
                                      var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
                                          {lambdaParam} => {lambdaParam} != null
                                              ? (global::System.IObservable<{segType}>)
-                                                 new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
+                                                 new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
                                              : (global::System.IObservable<{segType}>){nullParentObservable});
                              """);
             return;

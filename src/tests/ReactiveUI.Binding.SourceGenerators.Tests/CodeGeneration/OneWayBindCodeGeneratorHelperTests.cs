@@ -123,10 +123,13 @@ public class OneWayBindCodeGeneratorHelperTests
         await Assert.That(result).Contains("scheduler");
     }
 
-    /// <summary>Verifies FormatReturnType without conversion uses source property type.</summary>
+    /// <summary>
+    /// Verifies FormatReturnType uses the view property's type even with no converter supplied. That is what the
+    /// runtime stub declares; the source type only agrees with it while both sides happen to match.
+    /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task FormatReturnType_NoConversion_UsesSourcePropertyType()
+    public async Task FormatReturnType_NoConversion_UsesTargetPropertyType()
     {
         var group = new BindingTypeGroup(
             VMTypeName,
@@ -140,7 +143,7 @@ public class OneWayBindCodeGeneratorHelperTests
         var result = OneWayBindCodeGenerator.FormatReturnType(group);
 
         await Assert.That(result).Contains(IReactiveBindingName);
-        await Assert.That(result).Contains(Int32TypeName);
+        await Assert.That(result).Contains(StringTypeName);
     }
 
     /// <summary>Verifies FormatReturnType with conversion uses target property type.</summary>
@@ -238,7 +241,7 @@ public class OneWayBindCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindingInvocationInfo(methodName: OneWayBindName);
         var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        OneWayBindCodeGenerator.GenerateOneWayBindMethod(sb, inv, classInfo, "TEST00000000TEST");
+        OneWayBindCodeGenerator.GenerateOneWayBindMethod(sb, inv, classInfo, null, "TEST00000000TEST");
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__OneWayBind_TEST00000000TEST");

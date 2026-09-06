@@ -50,9 +50,9 @@ public class EquatableArrayTests
     [Test]
     public async Task ComputeHashCode_SameContent_ReturnsSameHash()
     {
-        var seg = new PropertyPathSegment("Name", StringTypeName, VMTypeName, true);
+        var seg = new PropertyPathSegment("Name", StringTypeName, VMTypeName, true, null);
         var arr1 = new[] { seg };
-        var arr2 = new[] { new PropertyPathSegment("Name", StringTypeName, VMTypeName, true) };
+        var arr2 = new[] { new PropertyPathSegment("Name", StringTypeName, VMTypeName, true, null) };
 
         var hash1 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr1);
         var hash2 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr2);
@@ -65,8 +65,8 @@ public class EquatableArrayTests
     [Test]
     public async Task ComputeHashCode_DifferentContent_ReturnsDifferentHash()
     {
-        var arr1 = new[] { new PropertyPathSegment("Name", StringTypeName, VMTypeName, true) };
-        var arr2 = new[] { new PropertyPathSegment("Age", Int32TypeName, VMTypeName, false) };
+        var arr1 = new[] { new PropertyPathSegment("Name", StringTypeName, VMTypeName, true, null) };
+        var arr2 = new[] { new PropertyPathSegment("Age", Int32TypeName, VMTypeName, false, null) };
 
         var hash1 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr1);
         var hash2 = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr2);
@@ -79,7 +79,7 @@ public class EquatableArrayTests
     [Test]
     public async Task Constructor_CachesHashCode_MatchesComputeHashCode()
     {
-        var seg = new PropertyPathSegment("Name", StringTypeName, VMTypeName, true);
+        var seg = new PropertyPathSegment("Name", StringTypeName, VMTypeName, true, null);
         var arr = new[] { seg };
 
         var equatable = new EquatableArray<PropertyPathSegment>(arr);
@@ -100,9 +100,9 @@ public class EquatableArrayTests
     public async Task Equals_SameContent_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, VMTypeName, true)]);
+            [new("Name", StringTypeName, VMTypeName, true, null)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, VMTypeName, true)]);
+            [new("Name", StringTypeName, VMTypeName, true, null)]);
 
         await Assert.That(arr1.Equals(arr2)).IsTrue();
     }
@@ -113,9 +113,9 @@ public class EquatableArrayTests
     public async Task Equals_DifferentContent_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, VMTypeName, true)]);
+            [new("Name", StringTypeName, VMTypeName, true, null)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new("Age", Int32TypeName, VMTypeName, false)]);
+            [new("Age", Int32TypeName, VMTypeName, false, null)]);
 
         await Assert.That(arr1.Equals(arr2)).IsFalse();
     }
@@ -135,8 +135,8 @@ public class EquatableArrayTests
     {
         const int ExpectedArrCount = 2;
         var arr = new EquatableArray<PropertyPathSegment>([
-            new("A", StringTypeName, GlobalTTypeName, true),
-            new("B", Int32TypeName, GlobalTTypeName, false)
+            new("A", StringTypeName, GlobalTTypeName, true, null),
+            new("B", Int32TypeName, GlobalTTypeName, false, null)
         ]);
 
         await Assert.That(arr.Length).IsEqualTo(ExpectedArrCount);
@@ -156,7 +156,7 @@ public class EquatableArrayTests
     [Test]
     public async Task ComputeHashCode_NullElements_UsesZeroForNullHashCode()
     {
-        var arr = new PropertyPathSegment?[] { null!, new("Name", StringTypeName, GlobalTTypeName, true), null! };
+        var arr = new PropertyPathSegment?[] { null!, new("Name", StringTypeName, GlobalTTypeName, true, null), null! };
 
         // The hash should incorporate 0 for null elements and the actual hash for non-null
         var hash = EquatableArray<PropertyPathSegment>.ComputeHashCode(arr!);
@@ -168,9 +168,9 @@ public class EquatableArrayTests
         // Verify it differs from an array with all non-null elements
         var nonNullArr = new[]
         {
-            new PropertyPathSegment("A", StringTypeName, GlobalTTypeName, true),
-            new PropertyPathSegment("Name", StringTypeName, GlobalTTypeName, true),
-            new PropertyPathSegment("B", StringTypeName, GlobalTTypeName, true),
+            new PropertyPathSegment("A", StringTypeName, GlobalTTypeName, true, null),
+            new PropertyPathSegment("Name", StringTypeName, GlobalTTypeName, true, null),
+            new PropertyPathSegment("B", StringTypeName, GlobalTTypeName, true, null),
         };
 
         var nonNullHash = EquatableArray<PropertyPathSegment>.ComputeHashCode(nonNullArr);
@@ -183,9 +183,9 @@ public class EquatableArrayTests
     public async Task OperatorEquals_SameContent_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, GlobalTTypeName, true)]);
+            [new("Name", StringTypeName, GlobalTTypeName, true, null)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, GlobalTTypeName, true)]);
+            [new("Name", StringTypeName, GlobalTTypeName, true, null)]);
 
         await Assert.That(arr1 == arr2).IsTrue();
     }
@@ -196,9 +196,9 @@ public class EquatableArrayTests
     public async Task OperatorNotEquals_DifferentContent_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, GlobalTTypeName, true)]);
+            [new("Name", StringTypeName, GlobalTTypeName, true, null)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new("Age", Int32TypeName, GlobalTTypeName, false)]);
+            [new("Age", Int32TypeName, GlobalTTypeName, false, null)]);
 
         await Assert.That(arr1 != arr2).IsTrue();
     }
@@ -208,8 +208,8 @@ public class EquatableArrayTests
     [Test]
     public async Task Indexer_ReturnsCorrectElement()
     {
-        var seg0 = new PropertyPathSegment("Name", StringTypeName, VMTypeName, true);
-        var seg1 = new PropertyPathSegment("Age", Int32TypeName, VMTypeName, false);
+        var seg0 = new PropertyPathSegment("Name", StringTypeName, VMTypeName, true, null);
+        var seg1 = new PropertyPathSegment("Age", Int32TypeName, VMTypeName, false, null);
         var arr = new EquatableArray<PropertyPathSegment>([seg0, seg1]);
 
         await Assert.That(arr[0]).IsEqualTo(seg0);
@@ -222,9 +222,9 @@ public class EquatableArrayTests
     public async Task Equals_ObjectOverload_WithSameType_ReturnsTrue()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, VMTypeName, true)]);
+            [new("Name", StringTypeName, VMTypeName, true, null)]);
         object obj = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, VMTypeName, true)]);
+            [new("Name", StringTypeName, VMTypeName, true, null)]);
 
         await Assert.That(arr1.Equals(obj)).IsTrue();
     }
@@ -235,7 +235,7 @@ public class EquatableArrayTests
     public async Task Equals_ObjectOverload_WithDifferentType_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, VMTypeName, true)]);
+            [new("Name", StringTypeName, VMTypeName, true, null)]);
 
         await Assert.That(arr1.Equals("not an array")).IsFalse();
     }
@@ -246,7 +246,7 @@ public class EquatableArrayTests
     public async Task Equals_ObjectOverload_WithNull_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, VMTypeName, true)]);
+            [new("Name", StringTypeName, VMTypeName, true, null)]);
 
         await Assert.That(arr1.Equals((object?)null)).IsFalse();
     }
@@ -258,7 +258,7 @@ public class EquatableArrayTests
     {
         var defaultArr = default(EquatableArray<PropertyPathSegment>);
         var nonDefaultArr = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, VMTypeName, true)]);
+            [new("Name", StringTypeName, VMTypeName, true, null)]);
 
         await Assert.That(defaultArr.Equals(nonDefaultArr)).IsFalse();
     }
@@ -269,10 +269,10 @@ public class EquatableArrayTests
     public async Task Equals_DifferentLengths_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, VMTypeName, true)]);
+            [new("Name", StringTypeName, VMTypeName, true, null)]);
         var arr2 = new EquatableArray<PropertyPathSegment>([
-            new("Name", StringTypeName, VMTypeName, true),
-            new("Age", Int32TypeName, VMTypeName, false)
+            new("Name", StringTypeName, VMTypeName, true, null),
+            new("Age", Int32TypeName, VMTypeName, false, null)
         ]);
 
         await Assert.That(arr1.Equals(arr2)).IsFalse();
@@ -284,9 +284,9 @@ public class EquatableArrayTests
     public async Task GetEnumerator_IteratesAllElements()
     {
         const int ExpectedListCount = 3;
-        var seg0 = new PropertyPathSegment("A", StringTypeName, VMTypeName, true);
-        var seg1 = new PropertyPathSegment("B", Int32TypeName, VMTypeName, false);
-        var seg2 = new PropertyPathSegment("C", "global::System.Boolean", VMTypeName, false);
+        var seg0 = new PropertyPathSegment("A", StringTypeName, VMTypeName, true, null);
+        var seg1 = new PropertyPathSegment("B", Int32TypeName, VMTypeName, false, null);
+        var seg2 = new PropertyPathSegment("C", "global::System.Boolean", VMTypeName, false, null);
         var arr = new EquatableArray<PropertyPathSegment>([seg0, seg1, seg2]);
 
         var list = arr.ToList();
@@ -320,8 +320,8 @@ public class EquatableArrayTests
     {
         const int Expected = 2;
         var arr = new EquatableArray<PropertyPathSegment>([
-            new("Name", StringTypeName, VMTypeName, true),
-            new("Age", Int32TypeName, VMTypeName, false)
+            new("Name", StringTypeName, VMTypeName, true, null),
+            new("Age", Int32TypeName, VMTypeName, false, null)
         ]);
 
         var enumerator = ((IEnumerable)arr).GetEnumerator();
@@ -347,9 +347,9 @@ public class EquatableArrayTests
     public async Task OperatorNotEquals_SameContent_ReturnsFalse()
     {
         var arr1 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, VMTypeName, true)]);
+            [new("Name", StringTypeName, VMTypeName, true, null)]);
         var arr2 = new EquatableArray<PropertyPathSegment>(
-            [new("Name", StringTypeName, VMTypeName, true)]);
+            [new("Name", StringTypeName, VMTypeName, true, null)]);
 
         await Assert.That(arr1 != arr2).IsFalse();
     }

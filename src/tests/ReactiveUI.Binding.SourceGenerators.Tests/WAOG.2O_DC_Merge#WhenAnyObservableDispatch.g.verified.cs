@@ -21,8 +21,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            obs1Expression = obs1Expression.StartsWith("static ") ? obs1Expression.Substring(7) : obs1Expression;
-            obs2Expression = obs2Expression.StartsWith("static ") ? obs2Expression.Substring(7) : obs2Expression;
+            obs1Expression = obs1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? obs1Expression.Substring(7) : obs1Expression;
+            obs2Expression = obs2Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? obs2Expression.Substring(7) : obs2Expression;
 
             if (obs1Expression == "x => x.Child.Command1" && obs2Expression == "x => x.Child.Command2")
             {
@@ -46,12 +46,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     "Command1",
                     (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel)__o).Command1,
                     false)
-                : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Binding.Observables.EmptyObservable<global::System.IObservable<string>>.Instance);
+                : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<global::System.IObservable<string>>.Instance);
             var __obsProperty0 = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obsProperty0_s1);
 
 
             var __switched0 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty0,
-                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
 
             var __obsProperty1_s0 = (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>(
                 obj,
@@ -66,12 +66,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     "Command2",
                     (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel)__o).Command2,
                     false)
-                : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Binding.Observables.EmptyObservable<global::System.IObservable<string>>.Instance);
+                : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<global::System.IObservable<string>>.Instance);
             var __obsProperty1 = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obsProperty1_s1);
 
 
             var __switched1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty1,
-                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Binding.Observables.EmptyObservable<string>.Instance);
+                __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
 
             return global::ReactiveUI.Primitives.LinqExtensions.Merge(
                 __switched0,

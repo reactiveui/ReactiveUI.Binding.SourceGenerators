@@ -36,13 +36,7 @@ public class BindingGenerator : IIncrementalGenerator
         RegisterSharedAttributeOutput(in context, languageFeatures);
 
         // Pipeline A: Shared type detection
-        // One pass: sets flags for IRO, INPC, WpfDP, WinUIDP, KVO, etc.
-        var allClasses = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                RoslynHelpers.IsClassWithBaseList,
-                TypeDetectionExtractor.ExtractClassBindingInfo)
-            .Where(static x => x is not null)
-            .Select(static (x, _) => x!);
+        var allClasses = DetectTypes(in context);
 
         // Single plugin-based step replaces 7 separate filter calls.
         // Each type is matched against the plugin registry; the highest-affinity
@@ -104,6 +98,26 @@ public class BindingGenerator : IIncrementalGenerator
         BindCommandInvocationGenerator.Register(context, bindCommand, allClasses, languageFeatures);
         BindToInvocationGenerator.Register(context, bindTo, languageFeatures);
     }
+
+    /// <summary>Detects every type the emitters may need a notification mechanism for.</summary>
+    /// <param name="context">The generator initialization context.</param>
+    /// <returns>One entry per detected type, from declarations and from call sites alike.</returns>
+    /// <remarks>
+    /// Only declarations are scanned here. A type the consumer merely references reaches the emitters through
+    /// the property path instead, which carries how each segment's declaring type notifies - and that costs
+    /// nothing extra, because extraction already holds the symbol. Resolving those types from the call sites
+    /// separately would mean binding every binding invocation a second time, and that binding is the single
+    /// largest allocation in a generation pass.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static IncrementalValuesProvider<ClassBindingInfo> DetectTypes(
+        in IncrementalGeneratorInitializationContext context) =>
+        context.SyntaxProvider
+            .CreateSyntaxProvider(
+                RoslynHelpers.IsClassWithBaseList,
+                TypeDetectionExtractor.ExtractClassBindingInfo)
+            .Where(static x => x is not null)
+            .Select(static (x, _) => x!);
 
     /// <summary>
     /// Declares the observation helper classes that generated observation code instantiates by name, once

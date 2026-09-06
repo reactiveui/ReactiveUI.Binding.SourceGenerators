@@ -246,7 +246,9 @@ internal static class ObservationCodeGenerator
         bool isBeforeChange)
     {
         var segment = path[0];
-        var plugin = classInfo is not null ? ObservationPluginRegistry.GetBestPlugin(classInfo) : null;
+        var plugin = classInfo is not null
+            ? ObservationPluginRegistry.GetBestPlugin(classInfo, segment.PropertyName)
+            : null;
 
         if (plugin is not null)
         {
@@ -263,7 +265,7 @@ internal static class ObservationCodeGenerator
         {
             var propertyAccess = $"obj.{segment.PropertyName}";
             _ = sb.Append(
-                $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>({propertyAccess})");
+                $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>({propertyAccess})");
         }
     }
 
@@ -284,7 +286,9 @@ internal static class ObservationCodeGenerator
         string varName)
     {
         var segment = path[0];
-        var plugin = classInfo is not null ? ObservationPluginRegistry.GetBestPlugin(classInfo) : null;
+        var plugin = classInfo is not null
+            ? ObservationPluginRegistry.GetBestPlugin(classInfo, segment.PropertyName)
+            : null;
 
         if (plugin is not null)
         {
@@ -309,7 +313,7 @@ internal static class ObservationCodeGenerator
         {
             var propertyAccess = $"obj.{segment.PropertyName}";
             _ = sb.Append(
-                $"            var {varName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{segment.PropertyTypeFullName}>({propertyAccess});");
+                $"            var {varName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>({propertyAccess});");
         }
     }
 
@@ -332,7 +336,9 @@ internal static class ObservationCodeGenerator
         // First segment: observe root object for first property
         var seg0 = path[0];
         var obs0Var = $"{varName}_s0";
-        var rootPlugin = classInfo is not null ? ObservationPluginRegistry.GetBestPlugin(classInfo) : null;
+        var rootPlugin = classInfo is not null
+            ? ObservationPluginRegistry.GetBestPlugin(classInfo, seg0.PropertyName)
+            : null;
 
         if (rootPlugin is not null)
         {
@@ -351,10 +357,10 @@ internal static class ObservationCodeGenerator
         {
             _ = sb
                 .Append($"            var {obs0Var} = (global::System.IObservable<{seg0.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Binding.Observables.ReturnObservable<{seg0.PropertyTypeFullName}>(obj.{seg0.PropertyName});");
+                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{seg0.PropertyTypeFullName}>(obj.{seg0.PropertyName});");
         }
 
-        EmitDeepChainInnerSegments(sb, path, classInfo, rootPlugin, isBeforeChange, varName);
+        EmitDeepChainInnerSegments(sb, path, isBeforeChange, varName);
 
         var lastObsVar = $"{varName}_s{path.Length - 1}";
         _ = sb.AppendLine(isBeforeChange
@@ -529,10 +535,10 @@ internal static class ObservationCodeGenerator
         }
         else if (propCount == 1)
         {
-            // Single property with selector: wrap fallback with SelectObservable
+            // Single property with selector: wrap fallback with MapSignal
             var propType = first.PropertyPaths[0][first.PropertyPaths[0].Length - 1].PropertyTypeFullName;
             _ = sb.AppendLine(
-            $"                return new global::ReactiveUI.Binding.Observables.SelectObservable<{propType}, {first.ReturnTypeFullName}>(")
+            $"                return new global::ReactiveUI.Primitives.Signals.MapSignal<{propType}, {first.ReturnTypeFullName}>(")
             .AppendLine(
             $"                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.{fallbackMethod}(objectToMonitor{propArgs}),")
             .AppendLine("                    selector);");
@@ -565,7 +571,7 @@ internal static class ObservationCodeGenerator
             }
 
             _ = sb.AppendLine(
-            $"                return new global::ReactiveUI.Binding.Observables.SelectObservable<{tupleType}, {first.ReturnTypeFullName}>(")
+            $"                return new global::ReactiveUI.Primitives.Signals.MapSignal<{tupleType}, {first.ReturnTypeFullName}>(")
             .AppendLine(
             $"                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.{fallbackMethod}(objectToMonitor{propArgs}),")
             .AppendLine($"                    __t => selector({selectorArgs}));");
@@ -592,7 +598,9 @@ internal static class ObservationCodeGenerator
     string propertyName,
     bool isBeforeChange)
     {
-        var plugin = classInfo is not null ? ObservationPluginRegistry.GetBestPlugin(classInfo) : null;
+        var plugin = classInfo is not null
+            ? ObservationPluginRegistry.GetBestPlugin(classInfo, propertyName)
+            : null;
 
         if (plugin is not null)
         {
@@ -614,7 +622,7 @@ internal static class ObservationCodeGenerator
         else
         {
             _ = sb.Append(
-                $"            return new global::ReactiveUI.Binding.Observables.ReturnObservable<{inv.ReturnTypeFullName}>({propertyAccess});");
+                $"            return new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{inv.ReturnTypeFullName}>({propertyAccess});");
         }
     }
 
@@ -631,7 +639,9 @@ internal static class ObservationCodeGenerator
     {
         var path = inv.PropertyPaths[0];
         var seg0 = path[0];
-        var rootPlugin = classInfo is not null ? ObservationPluginRegistry.GetBestPlugin(classInfo) : null;
+        var rootPlugin = classInfo is not null
+            ? ObservationPluginRegistry.GetBestPlugin(classInfo, seg0.PropertyName)
+            : null;
 
         // First segment: observe root object for first property
         if (rootPlugin is not null)
@@ -651,10 +661,10 @@ internal static class ObservationCodeGenerator
         {
             _ = sb
                 .Append($"            var __obs0 = (global::System.IObservable<{seg0.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Binding.Observables.ReturnObservable<{seg0.PropertyTypeFullName}>(obj.{seg0.PropertyName});");
+                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{seg0.PropertyTypeFullName}>(obj.{seg0.PropertyName});");
         }
 
-        EmitObservationChainInnerSegments(sb, path, classInfo, rootPlugin, isBeforeChange);
+        EmitObservationChainInnerSegments(sb, path, isBeforeChange);
 
         var lastObs = $"__obs{path.Length - 1}";
         _ = sb.Append(isBeforeChange
@@ -695,7 +705,7 @@ internal static class ObservationCodeGenerator
             {
                 var propertyAccess = $"{rootVar}.{segment.PropertyName}";
                 _ = sb.AppendLine(
-                    $"        var {variableName} = new global::ReactiveUI.Binding.Observables.ReturnObservable<{propertyTypeFullName}>({propertyAccess});");
+                    $"        var {variableName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{propertyTypeFullName}>({propertyAccess});");
             }
         }
         else
@@ -704,17 +714,27 @@ internal static class ObservationCodeGenerator
         }
     }
 
+    /// <summary>Picks the observation plugin for the type that declares a chain segment's property.</summary>
+    /// <param name="segment">The chain segment, which carries how its declaring type notifies.</param>
+    /// <returns>The plugin for that type, or null to fall back to reading the property.</returns>
+    /// <remarks>
+    /// Each link of a chain is declared by its own type and notifies - or does not - on its own terms, so the
+    /// mechanism is resolved per segment. Reusing the root's plugin emits its cast against whatever the segment
+    /// declares, which is a build error where the two are unrelated and a failed cast at runtime where they are
+    /// merely different.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static IObservationPlugin? ResolveSegmentPlugin(PropertyPathSegment segment) =>
+        segment.DeclaringTypeInfo is null
+            ? null
+            : ObservationPluginRegistry.GetBestPlugin(segment.DeclaringTypeInfo, segment.PropertyName);
+
     /// <summary>
     /// Chains the segments after the root for the standalone observation method, which names its
     /// stages <c>__obsN</c> rather than deriving them from a caller-supplied prefix.
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="path">The property path being observed.</param>
-    /// <param name="classInfo">The root type's binding info, when known.</param>
-    /// <param name="rootPlugin">
-    /// The root type's observation plugin. Every plugin emits the same generic notification observable
-    /// for inner segments, so reusing the root's plugin is safe whatever the segment declares.
-    /// </param>
     /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
     /// <remarks>
     /// Missing parents propagate through intermediate stages so downstream subscriptions detach,
@@ -723,8 +743,6 @@ internal static class ObservationCodeGenerator
     private static void EmitObservationChainInnerSegments(
         StringBuilder sb,
         EquatableArray<PropertyPathSegment> path,
-        ClassBindingInfo? classInfo,
-        IObservationPlugin? rootPlugin,
         bool isBeforeChange)
     {
         for (var s = 1; s < path.Length; s++)
@@ -734,6 +752,8 @@ internal static class ObservationCodeGenerator
             var curVar = $"__obs{s}";
             var lambdaParam = $"__parent{s}";
             var segType = seg.PropertyTypeFullName;
+            var segInfo = seg.DeclaringTypeInfo;
+            var segPlugin = ResolveSegmentPlugin(seg);
 
             // Only the leaf suppresses. Inner segments keep pushing the null downstream so the
             // stage below re-parents onto null and drops its subscription on the detached subtree.
@@ -741,12 +761,12 @@ internal static class ObservationCodeGenerator
                 ? NullParentObservationBehavior.SuppressEmission
                 : NullParentObservationBehavior.EmitDefault;
             var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-                ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
-                : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
+                ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
+                : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
 
-            if (rootPlugin is not null)
+            if (segPlugin is not null)
             {
-                rootPlugin.EmitDeepChainInnerSegment(
+                segPlugin.EmitDeepChainInnerSegment(
                     sb,
                     prevVar,
                     curVar,
@@ -755,7 +775,7 @@ internal static class ObservationCodeGenerator
                     isBeforeChange,
                     nullParentBehavior);
             }
-            else if (IsINPChanging(classInfo) && isBeforeChange)
+            else if (IsINPChanging(segInfo) && isBeforeChange)
             {
                 _ = sb.AppendLine()
                     .AppendLine($"""
@@ -775,7 +795,7 @@ internal static class ObservationCodeGenerator
                                          var {curVar} = {OpenChainSwitchMap(seg, segType, prevVar)}
                                              {lambdaParam} => {lambdaParam} != null
                                                  ? (global::System.IObservable<{segType}>)
-                                                     new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({seg.DeclaringTypeFullName}){lambdaParam}).{seg.PropertyName})
+                                                     new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>((({seg.DeclaringTypeFullName}){lambdaParam}).{seg.PropertyName})
                                                  : (global::System.IObservable<{segType}>){nullParentObservable});
                                  """);
             }
@@ -788,11 +808,6 @@ internal static class ObservationCodeGenerator
     /// </summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="path">The property path being observed.</param>
-    /// <param name="classInfo">The root type's binding info, when known.</param>
-    /// <param name="rootPlugin">
-    /// The root type's observation plugin. Every plugin emits the same generic notification observable
-    /// for inner segments, so reusing the root's plugin is safe whatever the segment declares.
-    /// </param>
     /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
     /// <param name="varName">The variable-name prefix for the emitted stages.</param>
     /// <remarks>
@@ -802,8 +817,6 @@ internal static class ObservationCodeGenerator
     private static void EmitDeepChainInnerSegments(
         StringBuilder sb,
         EquatableArray<PropertyPathSegment> path,
-        ClassBindingInfo? classInfo,
-        IObservationPlugin? rootPlugin,
         bool isBeforeChange,
         string varName)
     {
@@ -814,17 +827,19 @@ internal static class ObservationCodeGenerator
             var curObsVar = $"{varName}_s{s}";
             var lambdaParam = $"{varName}_p{s}";
             var segType = seg.PropertyTypeFullName;
+            var segInfo = seg.DeclaringTypeInfo;
+            var segPlugin = ResolveSegmentPlugin(seg);
 
             var nullParentBehavior = s == path.Length - 1
                 ? NullParentObservationBehavior.SuppressEmission
                 : NullParentObservationBehavior.EmitDefault;
             var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-                ? $"new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType}))"
-                : $"global::ReactiveUI.Binding.Observables.EmptyObservable<{segType}>.Instance";
+                ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
+                : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
 
-            if (rootPlugin is not null)
+            if (segPlugin is not null)
             {
-                rootPlugin.EmitDeepChainInnerSegment(
+                segPlugin.EmitDeepChainInnerSegment(
                     sb,
                     prevObsVar,
                     curObsVar,
@@ -833,7 +848,7 @@ internal static class ObservationCodeGenerator
                     isBeforeChange,
                     nullParentBehavior);
             }
-            else if (IsINPChanging(classInfo) && isBeforeChange)
+            else if (IsINPChanging(segInfo) && isBeforeChange)
             {
                 _ = sb.AppendLine()
                     .AppendLine($"""
@@ -853,7 +868,7 @@ internal static class ObservationCodeGenerator
                   var {curObsVar} = {OpenChainSwitchMap(seg, segType, prevObsVar)}
                       {lambdaParam} => {lambdaParam} != null
                           ? (global::System.IObservable<{segType}>)
-                              new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({seg.DeclaringTypeFullName}){lambdaParam}).{seg.PropertyName})
+                              new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>((({seg.DeclaringTypeFullName}){lambdaParam}).{seg.PropertyName})
                           : (global::System.IObservable<{segType}>){nullParentObservable});
           """);
             }
@@ -889,7 +904,7 @@ internal static class ObservationCodeGenerator
         {
             _ = sb
                 .Append($"            var __{variableName}_s0 = (global::System.IObservable<{seg0.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Binding.Observables.ReturnObservable<{seg0.PropertyTypeFullName}>({rootVar}.{seg0.PropertyName});");
+                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{seg0.PropertyTypeFullName}>({rootVar}.{seg0.PropertyName});");
         }
 
         for (var s = 1; s < propertyPath.Length; s++)
@@ -898,10 +913,11 @@ internal static class ObservationCodeGenerator
             var prevVar = $"__{variableName}_s{s - 1}";
             var curVar = $"__{variableName}_s{s}";
             var lambdaParam = $"__p{s}";
+            var segPlugin = ResolveSegmentPlugin(seg);
 
-            if (plugin is not null)
+            if (segPlugin is not null)
             {
-                plugin.EmitDeepChainInnerSegment(
+                segPlugin.EmitDeepChainInnerSegment(
                     sb,
                     prevVar,
                     curVar,
@@ -919,8 +935,8 @@ internal static class ObservationCodeGenerator
                                  var {curVar} = {OpenChainSwitchMap(seg, segType, prevVar)}
                                      {lambdaParam} => {lambdaParam} != null
                                          ? (global::System.IObservable<{segType}>)
-                                             new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>((({declType}){lambdaParam}).{seg.PropertyName})
-                                         : (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.ReturnObservable<{segType}>(default({segType})));
+                                             new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>((({declType}){lambdaParam}).{seg.PropertyName})
+                                         : (global::System.IObservable<{segType}>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType})));
                              """);
         }
 
@@ -983,7 +999,10 @@ internal static class ObservationCodeGenerator
                 continue;
             }
 
-            var classInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.SourceTypeFullName);
+            var classInfo = CodeGeneratorHelpers.ResolveObservedTypeInfo(
+                allClasses,
+                inv.SourceTypeFullName,
+                inv.PropertyPaths[0]);
 
             GenerateObservationMethod(sb, inv, classInfo, suffix, inv.IsBeforeChange, methodPrefix);
         }
@@ -1092,7 +1111,7 @@ internal static class ObservationCodeGenerator
         {
             var paramName = $"property{i + 1}Expression";
             _ = sb.AppendLine(
-                $"""            {paramName} = {paramName}.StartsWith("static ") ? {paramName}.Substring(7) : {paramName};""");
+                $"""            {paramName} = {paramName}.StartsWith("static ", global::System.StringComparison.Ordinal) ? {paramName}.Substring(7) : {paramName};""");
         }
 
         _ = sb.AppendLine();

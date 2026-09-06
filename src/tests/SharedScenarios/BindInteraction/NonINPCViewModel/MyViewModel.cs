@@ -8,7 +8,7 @@ namespace SharedScenarios.BindInteraction.NonINPCViewModel;
 
 /// <summary>
 /// ViewModel that does NOT implement INotifyPropertyChanged.
-/// The generator should use ReturnObservable fallback for property observation.
+/// The generator should use ImmediateReturnSignal fallback for property observation.
 /// </summary>
 public class MyViewModel
 {

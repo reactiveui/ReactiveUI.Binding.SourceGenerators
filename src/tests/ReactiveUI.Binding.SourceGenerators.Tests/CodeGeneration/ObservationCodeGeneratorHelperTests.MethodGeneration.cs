@@ -347,10 +347,10 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("RuntimeObservationFallback.WhenChanged(objectToMonitor, property1)");
     }
 
-    /// <summary>Verifies EmitAffinityFallbackReturn emits SelectObservable wrapper for single property with selector.</summary>
+    /// <summary>Verifies EmitAffinityFallbackReturn emits MapSignal wrapper for single property with selector.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitAffinityFallbackReturn_SinglePropertyWithSelector_EmitsSelectObservable()
+    public async Task EmitAffinityFallbackReturn_SinglePropertyWithSelector_EmitsMapSignal()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateInvocationInfo(returnTypeFullName: Int32TypeName, hasSelector: true);
@@ -358,7 +358,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.EmitAffinityFallbackReturn(sb, inv, WhenChangedName, 1, true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("SelectObservable<global::System.String, global::System.Int32>");
+        await Assert.That(result).Contains("MapSignal<global::System.String, global::System.Int32>");
         await Assert.That(result).Contains("RuntimeObservationFallback.WhenChanged(objectToMonitor, property1)");
         await Assert.That(result).Contains("selector);");
     }
@@ -408,7 +408,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result)
-            .Contains("SelectObservable<global::System.ValueTuple<global::System.String, int>, global::System.String>");
+            .Contains("MapSignal<global::System.ValueTuple<global::System.String, int>, global::System.String>");
         await Assert.That(result).Contains("__t => selector(__t.Item1, __t.Item2)");
     }
 

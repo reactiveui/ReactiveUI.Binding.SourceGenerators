@@ -35,6 +35,14 @@ internal abstract class NotifyPropertyObservationPlugin : IObservationPlugin
     public abstract bool IsAMatch(ClassBindingInfo classInfo);
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// The notification interfaces carry the property name in the event they raise rather than declaring
+    /// anything per property, so every property of a type that implements one is reachable.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) => true;
+
+    /// <inheritdoc/>
     public void EmitHelperClasses(StringBuilder sb)
     {
         // Nothing to declare - the observables come from the runtime library.

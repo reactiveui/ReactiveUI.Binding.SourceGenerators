@@ -48,6 +48,39 @@ internal static class GeneratedCodeAssertionMixins
             await Assert.That(source).Contains(text);
         }
 
+        /// <summary>Asserts how many times a generated source file contains the specified text.</summary>
+        /// <param name="hintName">The hint name of the generated file.</param>
+        /// <param name="text">The text to count.</param>
+        /// <param name="expected">The number of occurrences expected.</param>
+        /// <returns>A task representing the asynchronous assertion.</returns>
+        internal async Task GeneratedSourceContainsCount(string hintName, string text, int expected)
+        {
+            await result.HasGeneratedSource(hintName);
+            var source = result.GeneratedSources[hintName];
+
+            var count = 0;
+            var at = source.IndexOf(text, StringComparison.Ordinal);
+            while (at >= 0)
+            {
+                count++;
+                at = source.IndexOf(text, at + text.Length, StringComparison.Ordinal);
+            }
+
+            await Assert.That(count).IsEqualTo(expected)
+                .Because($"'{text}' should appear {expected} time(s) in '{hintName}':{Environment.NewLine}{source}");
+        }
+
+        /// <summary>Asserts that a generated source file does not contain the specified text.</summary>
+        /// <param name="hintName">The hint name of the generated file.</param>
+        /// <param name="text">The text that must not appear in the generated source.</param>
+        /// <returns>A task representing the asynchronous assertion.</returns>
+        internal async Task GeneratedSourceDoesNotContain(string hintName, string text)
+        {
+            await result.HasGeneratedSource(hintName);
+            var source = result.GeneratedSources[hintName];
+            await Assert.That(source).DoesNotContain(text);
+        }
+
         /// <summary>Asserts that no generated source file with the specified hint name exists.</summary>
         /// <param name="hintName">The hint name that should NOT be present.</param>
         /// <returns>A task representing the asynchronous assertion.</returns>

@@ -26,6 +26,12 @@
   <ItemGroup>
     <Using Include="ReactiveUI.Primitives.Reactive"/>
     <Using Include="ReactiveUI.Primitives.Reactive.Advanced"/>
+    <!-- ReactiveUI.Primitives.Core is one assembly shared by both runtime flavours rather than one
+         recompiled per leaf, so the namespace its signals live in does not shift. The lean leaf reaches
+         them through its own unshifted import; this leaf has to name them as well. The two Advanced
+         namespaces declare disjoint types, which is what lets the lean leaf merge them already. -->
+    <Using Include="ReactiveUI.Primitives.Advanced"/>
+    <Using Include="ReactiveUI.Primitives.Signals"/>
     <Using Include="ReactiveUI.Primitives.Reactive.Signals"/>
     <Using Include="ReactiveUI.Primitives.Disposables"/>
     <Using Include="ReactiveUI.Binding.Reactive.Builder"/>

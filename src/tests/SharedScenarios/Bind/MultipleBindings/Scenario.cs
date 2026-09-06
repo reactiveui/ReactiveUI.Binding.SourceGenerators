@@ -13,8 +13,8 @@ public static class Scenario
     /// <param name="view">The target view.</param>
     /// <param name="vm">The source view model.</param>
     /// <returns>A tuple of bindings.</returns>
-    public static (IReactiveBinding<MyView, (object? View, bool IsViewModel)> Name,
-        IReactiveBinding<MyView, (object? View, bool IsViewModel)> Age) Execute(MyView view, MyViewModel vm) =>
+    public static (IReactiveBinding<MyView, BindingChange> Name,
+        IReactiveBinding<MyView, BindingChange> Age) Execute(MyView view, MyViewModel vm) =>
         (view.Bind(vm, x => x.Name, x => x.NameText),
             view.Bind(vm, x => x.Age, x => x.AgeText));
 }

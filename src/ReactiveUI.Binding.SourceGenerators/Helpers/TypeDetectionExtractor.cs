@@ -26,7 +26,21 @@ internal static class TypeDetectionExtractor
         var semanticModel = context.SemanticModel;
         var typeSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl, ct)!;
 
-        var wellKnown = SymbolHelpers.GetWellKnownSymbols(semanticModel.Compilation);
+        return ExtractFromSymbol(typeSymbol, semanticModel.Compilation, ct);
+    }
+
+    /// <summary>Reads a type's notification mechanisms and observable properties from its symbol.</summary>
+    /// <param name="typeSymbol">The type to inspect, declared in this compilation or referenced from another.</param>
+    /// <param name="compilation">The compilation the type is resolved against.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>A ClassBindingInfo POCO for the type.</returns>
+    /// <exception cref="OperationCanceledException">If the cancellation token is triggered.</exception>
+    internal static ClassBindingInfo ExtractFromSymbol(
+        INamedTypeSymbol typeSymbol,
+        Compilation compilation,
+        CancellationToken ct)
+    {
+        var wellKnown = SymbolHelpers.GetWellKnownSymbols(compilation);
 
         // Walk AllInterfaces (includes inherited interfaces)
         DetectImplementedInterfaces(
@@ -87,18 +101,25 @@ internal static class TypeDetectionExtractor
             var hasPublicGetter = property.GetMethod!.DeclaredAccessibility == Accessibility.Public;
             var isIndexer = property.IsIndexer;
 
-            // Check if it's a DependencyProperty (heuristic: companion static field ending in "Property")
+            // A mechanism the type carries does not settle how any one property notifies: the dependency
+            // property field and the change event are declared per property, so record both here.
             var isDependencyProperty = false;
+            var hasChangeEvent = false;
+            var dependencyPropertyName = $"{property.Name}Property";
+            var changeEventName = $"{property.Name}Changed";
+
             for (var j = 0; j < members.Length; j++)
             {
-                if (members[j] is not IFieldSymbol { IsStatic: true } field
-                    || field.Name != $"{property.Name}Property")
-                {
-                    continue;
-                }
+                var member = members[j];
 
-                isDependencyProperty = true;
-                break;
+                if (member is IFieldSymbol { IsStatic: true } && member.Name == dependencyPropertyName)
+                {
+                    isDependencyProperty = true;
+                }
+                else if (member is IEventSymbol && member.Name == changeEventName)
+                {
+                    hasChangeEvent = true;
+                }
             }
 
             properties.Add(new(
@@ -106,7 +127,8 @@ internal static class TypeDetectionExtractor
                 property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 hasPublicGetter,
                 isIndexer,
-                isDependencyProperty));
+                isDependencyProperty,
+                hasChangeEvent));
         }
 
         return new([.. properties]);
