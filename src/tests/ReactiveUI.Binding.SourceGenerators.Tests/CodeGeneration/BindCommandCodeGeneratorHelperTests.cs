@@ -44,17 +44,35 @@ public class BindCommandCodeGeneratorHelperTests
     /// <summary>The observation the command parameter gets when it is read from a property, without completing.</summary>
     private const string UnchangingPropertyObservableName = "UnchangingPropertyObservable";
 
-    /// <summary>Verifies CommandPropertyBindingPlugin.CanHandle returns true when HasCommandProperty is true.</summary>
+    /// <summary>A control that takes both a command and a parameter is driven by assigning them.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task CommandPropertyPlugin_CanHandle_WithCommandProperty_ReturnsTrue()
+    public async Task CommandPropertyPlugin_CanHandle_WithCommandAndParameterProperties_ReturnsTrue()
+    {
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
+
+        var plugin = new CommandPropertyBindingPlugin();
+        var result = plugin.CanHandle(inv);
+
+        await Assert.That(result).IsTrue();
+    }
+
+    /// <summary>
+    /// A control that takes a command but no parameter cannot carry one the call site supplied, so this
+    /// binder steps aside rather than binding the command and dropping the parameter silently.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyPlugin_CanHandle_WithoutParameterProperty_ReturnsFalse()
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(hasCommandProperty: true);
 
         var plugin = new CommandPropertyBindingPlugin();
         var result = plugin.CanHandle(inv);
 
-        await Assert.That(result).IsTrue();
+        await Assert.That(result).IsFalse();
     }
 
     /// <summary>Verifies CommandPropertyBindingPlugin.CanHandle returns false when HasCommandProperty is false.</summary>
@@ -116,22 +134,46 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).DoesNotContain(VolatileName);
     }
 
-    /// <summary>Verifies CommandPropertyBindingPlugin emits Command-only code when no parameter.</summary>
+    /// <summary>With no parameter supplied, only the command is assigned as values arrive.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task CommandPropertyPlugin_EmitBinding_NoParam_EmitsCommandOnly()
+    public async Task CommandPropertyPlugin_EmitBinding_NoParam_AssignsOnlyTheCommand()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            hasCommandProperty: true);
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
 
         var plugin = new CommandPropertyBindingPlugin();
         plugin.EmitBinding(sb, inv, ViewSaveButtonName, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ViewSaveButtonCommandCmdFragment);
-        await Assert.That(result).DoesNotContain("CommandParameter");
+        await Assert.That(result).DoesNotContain("CommandParameter = viewModel");
         await Assert.That(result).DoesNotContain(VolatileName);
+    }
+
+    /// <summary>
+    /// A disposed binding leaves the control as it found it. Without that, a view rebound to a second view
+    /// model keeps executing the first one's command.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyPlugin_EmitBinding_RestoresTheControlOnDispose()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
+
+        var plugin = new CommandPropertyBindingPlugin();
+        plugin.EmitBinding(sb, inv, ViewSaveButtonName, false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("var __originalCommand = view.SaveButton.Command;");
+        await Assert.That(result).Contains("var __originalParameter = view.SaveButton.CommandParameter;");
+        await Assert.That(result).Contains("view.SaveButton.CommandParameter = __originalParameter;");
+        await Assert.That(result).Contains("view.SaveButton.Command = __originalCommand;");
     }
 
     /// <summary>Verifies EventEnabledBindingPlugin.CanHandle returns true when event and Enabled property exist.</summary>
@@ -509,7 +551,8 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            hasCommandProperty: true);
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
         var viewModelClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, TESTSUFFIXName, false);

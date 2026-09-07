@@ -12,15 +12,16 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests.Plugins;
 /// <summary>Unit tests for the <see cref="CommandBindingPluginRegistry"/> and command binding plugins.</summary>
 public class CommandBindingPluginTests
 {
-    /// <summary>Verifies that GetBestPlugin returns CommandPropertyBindingPlugin when HasCommandProperty is true.</summary>
+    /// <summary>A control that takes a command and a parameter is bound by assigning them, over any event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GetBestPlugin_HasCommandProperty_ReturnsCommandPropertyPlugin()
+    public async Task GetBestPlugin_CommandAndParameterProperties_ReturnsCommandPropertyPlugin()
     {
         const int Expected = 5;
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             resolvedEventName: "Click",
             hasCommandProperty: true,
+            hasCommandParameterProperty: true,
             hasEnabledProperty: true);
 
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
