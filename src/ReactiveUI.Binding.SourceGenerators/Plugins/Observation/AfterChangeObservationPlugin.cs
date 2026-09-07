@@ -116,6 +116,9 @@ internal abstract class AfterChangeObservationPlugin
         NullParentObservationBehavior nullParentBehavior)
     {
         var segType = segment.PropertyTypeFullName;
+        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
+            ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
+            : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
 
         _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ")
             .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
@@ -131,10 +134,7 @@ internal abstract class AfterChangeObservationPlugin
         }
 
         _ = sb.Append("                : (global::System.IObservable<").Append(segType).Append(">)")
-            .Append(nullParentBehavior == NullParentObservationBehavior.EmitDefault
-                ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
-                : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance")
-            .AppendLine(");");
+            .Append(nullParentObservable).AppendLine(");");
     }
 
     /// <summary>Appends the after-change observation as a bare expression.</summary>
