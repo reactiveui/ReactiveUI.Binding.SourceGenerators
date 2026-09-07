@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAnyValue;
 /// Tests that the source-generator-generated WhenAnyValue code works correctly at runtime
 /// for extended multi-property overloads (4 through 16 properties).
 /// </summary>
-public class WhenAnyValueExtendedTests
+public partial class WhenAnyValueTests
 {
     /// <summary>Verifies that four-property WhenAnyValue emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>

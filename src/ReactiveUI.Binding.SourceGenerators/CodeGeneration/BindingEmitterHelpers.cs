@@ -538,17 +538,47 @@ internal static class BindingEmitterHelpers
 
     /// <summary>Renders the affinity test for one side of a binding.</summary>
     /// <param name="typeFullName">The fully qualified name of the observed type.</param>
-    /// <param name="propertyPath">The path whose first segment carries how its declaring type notifies.</param>
-    /// <returns>The rendered call, without surrounding parentheses.</returns>
+    /// <param name="propertyPath">The path being observed, each segment carrying how its declaring type notifies.</param>
+    /// <returns>The rendered condition, without surrounding parentheses.</returns>
+    /// <remarks>
+    /// One test per link, because that is how the registration is resolved: a plugin scores a type and a
+    /// property together, so a chain can pick a different mechanism at every step and a registration that wins
+    /// at any one of them takes the whole binding. Asking about the root alone misses a registration aimed at
+    /// the leaf, and asking without the property name makes every mechanism-specific plugin score 0.
+    /// </remarks>
     private static string AffinityTest(string typeFullName, EquatableArray<PropertyPathSegment> propertyPath)
     {
-        var declaringType = propertyPath[0].DeclaringTypeInfo;
-        var plugin = declaringType is null
-            ? null
-            : Plugins.ObservationPluginRegistry.GetBestPlugin(declaringType);
+        var builder = new StringBuilder();
 
-        return
-            $"{GeneratedTypeNames.ObservationAffinityChecker}.HasHigherAffinityPlugin(typeof({typeFullName}), {plugin?.Affinity ?? 0}, false)";
+        for (var i = 0; i < propertyPath.Length; i++)
+        {
+            var segment = propertyPath[i];
+            var declaringType = segment.DeclaringTypeInfo;
+            var plugin = declaringType is null
+                ? null
+                : Plugins.ObservationPluginRegistry.GetBestPlugin(declaringType, segment.PropertyName);
+
+            // The root is the type the call site binds, which is what the observation is rooted on; every
+            // later link is observed on the type that declares it.
+            var observedType = i == 0 ? typeFullName : segment.DeclaringTypeFullName;
+
+            if (i > 0)
+            {
+                _ = builder.AppendLine().Append("                || ");
+            }
+
+            _ = builder
+                .Append(GeneratedTypeNames.ObservationAffinityChecker)
+                .Append(".HasHigherAffinityPlugin(typeof(")
+                .Append(observedType)
+                .Append("), \"")
+                .Append(segment.PropertyName)
+                .Append("\", ")
+                .Append(plugin?.Affinity ?? 0)
+                .Append(", false)");
+        }
+
+        return builder.ToString();
     }
 
     /// <summary>What a view-first binding observes, and from where.</summary>

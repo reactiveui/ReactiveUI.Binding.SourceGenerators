@@ -32,7 +32,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 : targetPropertyExpression;
 
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.SinglePropertyWithConverter.MyViewModel), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.SinglePropertyWithConverter.MyViewModel), "Count", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindOneWay(
                     source, target, sourceProperty, targetProperty, conversionFunc, null, targetPropertyExpression);
@@ -76,6 +76,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.CountText, value))
+                {
+                    return;
+                }
+
                 target.CountText = value;
             }, "x => x.CountText");
         }

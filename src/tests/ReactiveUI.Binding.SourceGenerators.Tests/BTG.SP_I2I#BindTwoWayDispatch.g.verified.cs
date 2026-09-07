@@ -31,8 +31,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 : targetPropertyExpression;
 
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyViewModel), 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyView), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyViewModel), "Count", 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyView), "DisplayCount", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindTwoWay(
                     source, target, sourceProperty, targetProperty, null, targetPropertyExpression);
@@ -80,12 +80,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(target.DisplayCount, value))
+                {
+                    return;
+                }
+
                 target.DisplayCount = value;
             }, "x => x.DisplayCount");
 
             var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(targetObs, 1);
             var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__targetSkipped, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(source.Count, value))
+                {
+                    return;
+                }
+
                 source.Count = value;
             }, "x => x.Count");
 

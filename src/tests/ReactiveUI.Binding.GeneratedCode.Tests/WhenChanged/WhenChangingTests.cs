@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 /// Tests that the source-generator-generated WhenChanging code works correctly at runtime.
 /// WhenChanging emits the property value before the change is applied.
 /// </summary>
-public class WhenChangingTests
+public partial class WhenChangingTests
 {
     /// <summary>The initial name value used by single-property tests.</summary>
     private const string InitialName = "Initial";

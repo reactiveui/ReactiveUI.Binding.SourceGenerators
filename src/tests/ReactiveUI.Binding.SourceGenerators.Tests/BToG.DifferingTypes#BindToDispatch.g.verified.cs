@@ -38,6 +38,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 if (global::ReactiveUI.Binding.Fallback.RuntimeBindingConverter.TryConvert<int, string>(value, null, null, out var __converted))
                 {
+                    if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.Caption, __converted))
+                    {
+                        return;
+                    }
+
                     target.Caption = __converted;
                 }
             }, "x => x.Caption");

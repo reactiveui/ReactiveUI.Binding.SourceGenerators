@@ -26,7 +26,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel), "Count", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.OneWayBind(
                     view, viewModel, viewModelProperty, viewProperty, selector, scheduler, viewPropertyExpression);
@@ -70,7 +70,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(bindObs, value =>
             {
-                view.CountText = value;
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.CountText, value))
+                    {
+                        return;
+                    }
+
+                    view.CountText = value;
             }, "x => x.CountText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView, string>(

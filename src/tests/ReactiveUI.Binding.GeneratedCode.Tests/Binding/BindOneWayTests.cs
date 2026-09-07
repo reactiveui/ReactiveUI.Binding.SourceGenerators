@@ -8,7 +8,7 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 
 /// <summary>Tests that the source-generator-generated BindOneWay code works correctly at runtime.</summary>
-public class BindOneWayTests
+public partial class BindOneWayTests
 {
     /// <summary>The initial string property value used across the binding tests.</summary>
     private const string HelloValue = "Hello";

@@ -8,7 +8,7 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 
 /// <summary>Tests that the source-generator-generated WhenChanged code works correctly at runtime.</summary>
-public class WhenChangedTests
+public partial class WhenChangedTests
 {
     /// <summary>The initial name value used by single-property tests.</summary>
     private const string InitialName = "Initial";
@@ -44,7 +44,7 @@ public class WhenChangedTests
     private const string HelloValue = "Hello";
 
     /// <summary>The city value written to the nested address in the deep-chain tests.</summary>
-    private const string SeattleCity = "Seattle";
+    private const string InitialCity = "Seattle";
 
     /// <summary>The four-property test value for the integer property.</summary>
     private const int FourPropIntValue = 20;
@@ -205,14 +205,14 @@ public class WhenChangedTests
     public async Task DeepChain_EmitsNestedPropertyValue()
     {
         var vm = new BigViewModel();
-        vm.Address.City = SeattleCity;
+        vm.Address.City = InitialCity;
         var values = new List<string>();
 
         using var sub = WhenChangedScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo(SeattleCity);
+        await Assert.That(values[0]).IsEqualTo(InitialCity);
     }
 
     /// <summary>Verifies that deep chain WhenChanged emits when the nested property changes.</summary>
@@ -221,7 +221,7 @@ public class WhenChangedTests
     public async Task DeepChain_EmitsOnNestedPropertyChange()
     {
         var vm = new BigViewModel();
-        vm.Address.City = SeattleCity;
+        vm.Address.City = InitialCity;
         var values = new List<string>();
 
         using var sub = WhenChangedScenarios.DeepChain_AddressCity(vm)

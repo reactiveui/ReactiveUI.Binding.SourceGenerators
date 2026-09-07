@@ -24,8 +24,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel), 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.TwoSameTypeBindings.MyView), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.TwoSameTypeBindings.MyViewModel), "FirstName", 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.TwoSameTypeBindings.MyView), "FirstNameText", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.Bind(
                     view, viewModel, viewModelProperty, viewProperty, null, viewPropertyExpression);
@@ -78,12 +78,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.FirstNameText, value))
+                {
+                    return;
+                }
+
                 view.FirstNameText = value;
             }, "x => x.FirstNameText");
 
             var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewObs, 1);
             var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__viewSkipped, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(viewModel.FirstName, value))
+                {
+                    return;
+                }
+
                 viewModel.FirstName = value;
             }, "x => x.FirstName");
 
@@ -133,12 +143,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.LastNameText, value))
+                {
+                    return;
+                }
+
                 view.LastNameText = value;
             }, "x => x.LastNameText");
 
             var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewObs, 1);
             var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__viewSkipped, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(viewModel.LastName, value))
+                {
+                    return;
+                }
+
                 viewModel.LastName = value;
             }, "x => x.LastName");
 

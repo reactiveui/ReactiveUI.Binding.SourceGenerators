@@ -31,8 +31,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 : targetPropertyExpression;
 
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel), 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyView), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel), "Name", 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyView), "NameText", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindTwoWay(
                     source, target, sourceProperty, targetProperty, null, targetPropertyExpression);
@@ -80,12 +80,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.NameText, value))
+                {
+                    return;
+                }
+
                 target.NameText = value;
             }, "x => x.NameText");
 
             var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(targetObs, 1);
             var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__targetSkipped, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(source.Name, value))
+                {
+                    return;
+                }
+
                 source.Name = value;
             }, "x => x.Name");
 
@@ -114,8 +124,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 : targetPropertyExpression;
 
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel), 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyView), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel), "Age", 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyView), "AgeDisplay", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindTwoWay(
                     source, target, sourceProperty, targetProperty, null, targetPropertyExpression);
@@ -163,12 +173,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(target.AgeDisplay, value))
+                {
+                    return;
+                }
+
                 target.AgeDisplay = value;
             }, "x => x.AgeDisplay");
 
             var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(targetObs, 1);
             var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__targetSkipped, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(source.Age, value))
+                {
+                    return;
+                }
+
                 source.Age = value;
             }, "x => x.Age");
 

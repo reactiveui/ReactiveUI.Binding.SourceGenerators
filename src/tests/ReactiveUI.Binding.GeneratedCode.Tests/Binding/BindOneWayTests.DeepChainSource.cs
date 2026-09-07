@@ -1,35 +1,22 @@
 // Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
-
 using ReactiveUI.Binding.GeneratedCode.TestModels.Scenarios;
 using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 
-/// <summary>
-/// Edge case tests for BindOneWay and BindTwoWay covering deep chain source properties,
-/// multiple bindings to the same property, and rapid bidirectional changes.
-/// </summary>
-public class BindingEdgeCaseTests
+/// <summary>Covers one-way bindings whose source is a chain, and repeated bindings onto one target.</summary>
+public partial class BindOneWayTests
 {
     /// <summary>The initial deep-chain city value.</summary>
-    private const string Seattle = "Seattle";
+    private const string InitialCity = "Seattle";
 
     /// <summary>The updated deep-chain city value.</summary>
-    private const string Portland = "Portland";
+    private const string ReplacementCity = "Portland";
 
     /// <summary>The pre-set source property value.</summary>
-    private const string PreSet = "PreSet";
-
-    /// <summary>The initial double property test value.</summary>
-    private const double DoubleValue = 3.14;
-
-    /// <summary>The updated double property test value.</summary>
-    private const double UpdatedDoubleValue = 2.71;
-
-    /// <summary>The square root of two double property test value.</summary>
-    private const double SqrtTwo = 1.41;
+    private const string ValueSetBeforeBinding = "PreSet";
 
     /// <summary>The number of rapid sequential changes in the rapid-changes test.</summary>
     private const int RapidChangeCount = 100;
@@ -40,12 +27,10 @@ public class BindingEdgeCaseTests
     public async Task BindOneWay_DeepChainSource_SyncsInitialValue()
     {
         var source = new BigViewModel();
-        source.Address.City = Seattle;
+        source.Address.City = InitialCity;
         var target = new BigView();
-
         using var binding = BindOneWayScenarios.DeepChainProperty(source, target);
-
-        await Assert.That(target.ViewProp1).IsEqualTo(Seattle);
+        await Assert.That(target.ViewProp1).IsEqualTo(InitialCity);
     }
 
     /// <summary>Verifies that BindOneWay with a deep chain source property syncs nested changes.</summary>
@@ -54,14 +39,11 @@ public class BindingEdgeCaseTests
     public async Task BindOneWay_DeepChainSource_SyncsNestedChanges()
     {
         var source = new BigViewModel();
-        source.Address.City = Seattle;
+        source.Address.City = InitialCity;
         var target = new BigView();
-
         using var binding = BindOneWayScenarios.DeepChainProperty(source, target);
-
-        source.Address.City = Portland;
-
-        await Assert.That(target.ViewProp1).IsEqualTo(Portland);
+        source.Address.City = ReplacementCity;
+        await Assert.That(target.ViewProp1).IsEqualTo(ReplacementCity);
     }
 
     /// <summary>Verifies that BindOneWay with a deep chain re-subscribes on intermediate replacement.</summary>
@@ -70,18 +52,14 @@ public class BindingEdgeCaseTests
     public async Task BindOneWay_DeepChainSource_IntermediateReplacement()
     {
         var source = new BigViewModel();
-        source.Address.City = Seattle;
+        source.Address.City = InitialCity;
         var target = new BigView();
-
         using var binding = BindOneWayScenarios.DeepChainProperty(source, target);
-
-        source.Address = new() { City = Portland };
-
-        await Assert.That(target.ViewProp1).IsEqualTo(Portland);
+        source.Address = new() { City = ReplacementCity, };
+        await Assert.That(target.ViewProp1).IsEqualTo(ReplacementCity);
 
         // Further changes on the new address
         source.Address.City = "Eugene";
-
         await Assert.That(target.ViewProp1).IsEqualTo("Eugene");
     }
 
@@ -90,7 +68,7 @@ public class BindingEdgeCaseTests
     [Test]
     public async Task BindOneWay_MultipleBindingsToSameTarget()
     {
-        var source = new BigViewModel { Prop1 = "From1", Prop5 = "From5" };
+        var source = new BigViewModel { Prop1 = "From1", Prop5 = "From5", };
         var target = new BigView();
 
         // Both bind to the same target: ViewProp1 and ViewProp5
@@ -100,74 +78,10 @@ public class BindingEdgeCaseTests
         // Each binding independently syncs its own target
         await Assert.That(target.ViewProp1).IsEqualTo("From1");
         await Assert.That(target.ViewProp5).IsEqualTo("From5");
-
         source.Prop1 = "Updated1";
         await Assert.That(target.ViewProp1).IsEqualTo("Updated1");
-
         source.Prop5 = "Updated5";
         await Assert.That(target.ViewProp5).IsEqualTo("Updated5");
-    }
-
-    /// <summary>Verifies that BindTwoWay handles rapid back-and-forth changes without infinite loop.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task BindTwoWay_RapidBackAndForth()
-    {
-        var source = new BigViewModel { Prop1 = "Initial" };
-        var target = new BigView();
-
-        using var binding = BindTwoWayScenarios.StringProperty(source, target);
-
-        // Rapid alternating changes
-        source.Prop1 = "A";
-        await Assert.That(target.ViewProp1).IsEqualTo("A");
-
-        target.ViewProp1 = "B";
-        await Assert.That(source.Prop1).IsEqualTo("B");
-
-        source.Prop1 = "C";
-        await Assert.That(target.ViewProp1).IsEqualTo("C");
-
-        target.ViewProp1 = "D";
-        await Assert.That(source.Prop1).IsEqualTo("D");
-    }
-
-    /// <summary>Verifies that BindTwoWay syncs double property in both directions.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task BindTwoWay_DoubleProperty_SyncsBothDirections()
-    {
-        var source = new BigViewModel { Prop3 = DoubleValue };
-        var target = new BigView();
-
-        using var binding = BindTwoWayScenarios.DoubleProperty(source, target);
-
-        await Assert.That(target.ViewProp3).IsEqualTo(DoubleValue);
-
-        source.Prop3 = UpdatedDoubleValue;
-        await Assert.That(target.ViewProp3).IsEqualTo(UpdatedDoubleValue);
-
-        target.ViewProp3 = SqrtTwo;
-        await Assert.That(source.Prop3).IsEqualTo(SqrtTwo);
-    }
-
-    /// <summary>Verifies that BindTwoWay syncs bool property in both directions.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task BindTwoWay_BoolProperty_SyncsBothDirections()
-    {
-        var source = new BigViewModel { Prop4 = true };
-        var target = new BigView();
-
-        using var binding = BindTwoWayScenarios.BoolProperty(source, target);
-
-        await Assert.That(target.ViewProp4).IsTrue();
-
-        source.Prop4 = false;
-        await Assert.That(target.ViewProp4).IsFalse();
-
-        target.ViewProp4 = true;
-        await Assert.That(source.Prop4).IsTrue();
     }
 
     /// <summary>Verifies that disposing a BindOneWay with deep chain source stops syncing.</summary>
@@ -176,17 +90,13 @@ public class BindingEdgeCaseTests
     public async Task BindOneWay_DeepChainSource_Disposal()
     {
         var source = new BigViewModel();
-        source.Address.City = Seattle;
+        source.Address.City = InitialCity;
         var target = new BigView();
-
         var binding = BindOneWayScenarios.DeepChainProperty(source, target);
-        await Assert.That(target.ViewProp1).IsEqualTo(Seattle);
-
+        await Assert.That(target.ViewProp1).IsEqualTo(InitialCity);
         binding.Dispose();
-
-        source.Address.City = Portland;
-
-        await Assert.That(target.ViewProp1).IsEqualTo(Seattle);
+        source.Address.City = ReplacementCity;
+        await Assert.That(target.ViewProp1).IsEqualTo(InitialCity);
     }
 
     /// <summary>
@@ -197,34 +107,12 @@ public class BindingEdgeCaseTests
     [Test]
     public async Task BindOneWay_SourcePropertySetBeforeBinding_SyncsOnSubscription()
     {
-        var source = new BigViewModel { Prop1 = PreSet };
+        var source = new BigViewModel { Prop1 = ValueSetBeforeBinding, };
         var target = new BigView();
 
         // Property is already set before binding is created
         using var binding = BindOneWayScenarios.StringProperty(source, target);
-
-        await Assert.That(target.ViewProp1).IsEqualTo(PreSet);
-    }
-
-    /// <summary>Verifies that BindTwoWay correctly syncs a pre-set source value and then supports bidirectional changes after binding.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task BindTwoWay_SourcePropertySetBeforeBinding_SyncsAndBiDirectional()
-    {
-        var source = new BigViewModel { Prop1 = PreSet };
-        var target = new BigView();
-
-        using var binding = BindTwoWayScenarios.StringProperty(source, target);
-
-        // Pre-set value should sync
-        await Assert.That(target.ViewProp1).IsEqualTo(PreSet);
-
-        // Bidirectional should still work
-        target.ViewProp1 = "FromView";
-        await Assert.That(source.Prop1).IsEqualTo("FromView");
-
-        source.Prop1 = "FromSource";
-        await Assert.That(target.ViewProp1).IsEqualTo("FromSource");
+        await Assert.That(target.ViewProp1).IsEqualTo(ValueSetBeforeBinding);
     }
 
     /// <summary>Verifies that BindOneWay handles rapid sequential changes without missing any.</summary>
@@ -232,11 +120,9 @@ public class BindingEdgeCaseTests
     [Test]
     public async Task BindOneWay_RapidChanges_AllSynced()
     {
-        var source = new BigViewModel { Prop1 = "Start" };
+        var source = new BigViewModel { Prop1 = "Start", };
         var target = new BigView();
-
         using var binding = BindOneWayScenarios.StringProperty(source, target);
-
         for (var i = 0; i < RapidChangeCount; i++)
         {
             source.Prop1 = $"Value_{i}";

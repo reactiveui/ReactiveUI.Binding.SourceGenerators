@@ -9,19 +9,16 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAnyValue;
 
 /// <summary>Edge case tests for WhenAnyValue covering disposal, deep chains, and multi-property change emission scenarios.</summary>
-public class WhenAnyValueEdgeCaseTests
+public partial class WhenAnyValueTests
 {
     /// <summary>The initial fixture value used in disposal and subscription tests.</summary>
     private const string InitialValue = "Initial";
 
     /// <summary>The initial nested city value used in deep-chain tests.</summary>
-    private const string Seattle = "Seattle";
+    private const string InitialCity = "Seattle";
 
     /// <summary>The updated nested city value used in deep-chain tests.</summary>
-    private const string Portland = "Portland";
-
-    /// <summary>The expected emission count after an initial value plus one change.</summary>
-    private const int ExpectedEmissionCount = 2;
+    private const string ReplacementCity = "Portland";
 
     /// <summary>The number of property changes applied in the rapid-change test.</summary>
     private const int ChangeCount = 100;
@@ -90,14 +87,14 @@ public class WhenAnyValueEdgeCaseTests
     public async Task DeepChain_EmitsNestedPropertyValue()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = InitialCity;
         var values = new List<string>();
 
         using var sub = WhenAnyValueScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo(Seattle);
+        await Assert.That(values[0]).IsEqualTo(InitialCity);
     }
 
     /// <summary>Verifies that deep chain WhenAnyValue emits on nested property change.</summary>
@@ -106,16 +103,16 @@ public class WhenAnyValueEdgeCaseTests
     public async Task DeepChain_EmitsOnNestedPropertyChange()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = InitialCity;
         var values = new List<string>();
 
         using var sub = WhenAnyValueScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
-        vm.Address.City = Portland;
+        vm.Address.City = ReplacementCity;
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
-        await Assert.That(values).Contains(Portland);
+        await Assert.That(values).Contains(ReplacementCity);
     }
 
     /// <summary>Verifies that deep chain WhenAnyValue re-subscribes on intermediate object replacement.</summary>
@@ -124,16 +121,16 @@ public class WhenAnyValueEdgeCaseTests
     public async Task DeepChain_IntermediateObjectReplacement()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = InitialCity;
         var values = new List<string>();
 
         using var sub = WhenAnyValueScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
-        var newAddress = new Address { City = Portland };
+        var newAddress = new Address { City = ReplacementCity };
         vm.Address = newAddress;
 
-        await Assert.That(values).Contains(Portland);
+        await Assert.That(values).Contains(ReplacementCity);
 
         // Verify resubscription
         newAddress.City = "Eugene";

@@ -8,16 +8,13 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 
 /// <summary>Edge case tests for WhenChanging covering deep chains, multi-property change emission, and disposal scenarios.</summary>
-public class WhenChangingEdgeCaseTests
+public partial class WhenChangingTests
 {
     /// <summary>The initial city value used by deep-chain tests.</summary>
-    private const string Seattle = "Seattle";
+    private const string InitialCity = "Seattle";
 
-    /// <summary>The minimum number of emissions expected after a single change.</summary>
-    private const int MinEmissionsAfterChange = 2;
-
-    /// <summary>The minimum number of emissions expected after two changes.</summary>
-    private const int MinEmissionsAfterTwoChanges = 3;
+    /// <summary>The city the first change moves to, which the second change then leaves behind.</summary>
+    private const string ReplacementCity = "Portland";
 
     /// <summary>The updated value for the integer property in two-property tests.</summary>
     private const int UpdatedIntValue = 2;
@@ -28,37 +25,38 @@ public class WhenChangingEdgeCaseTests
     public async Task DeepChain_EmitsInitialValue()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = InitialCity;
         var values = new List<string>();
 
         using var sub = WhenChangingScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo(Seattle);
+        await Assert.That(values[0]).IsEqualTo(InitialCity);
     }
 
     /// <summary>
-    /// Verifies that deep chain WhenChanging emits before a nested property changes.
-    /// The emitted value is the old value before the change.
+    /// A before-change chain reports the value a property is about to leave behind, and reports it only when it
+    /// differs from the one already reported. The first change is about to leave the value the initial emission
+    /// already carried, so it says nothing; the second is about to leave a value nobody has seen.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task DeepChain_EmitsBeforeNestedChange()
+    public async Task DeepChain_EmitsTheValueEachNestedChangeLeavesBehind()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = InitialCity;
         var values = new List<string>();
 
         using var sub = WhenChangingScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
-        vm.Address.City = "Portland";
+        vm.Address.City = ReplacementCity;
+        vm.Address.City = "Boston";
 
-        // Should have emitted "Seattle" (initial) and "Seattle" again (before change to Portland)
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterChange);
-        await Assert.That(values[0]).IsEqualTo(Seattle);
-        await Assert.That(values[1]).IsEqualTo(Seattle);
+        await Assert.That(values[0]).IsEqualTo(InitialCity);
+        await Assert.That(values[1]).IsEqualTo(ReplacementCity);
     }
 
     /// <summary>Verifies that WhenChanging two-property emits when either property is about to change.</summary>
@@ -93,7 +91,7 @@ public class WhenChangingEdgeCaseTests
     public async Task DeepChain_Disposal_StopsListening()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = InitialCity;
         var values = new List<string>();
 
         var sub = WhenChangingScenarios.DeepChain_AddressCity(vm)
@@ -104,7 +102,7 @@ public class WhenChangingEdgeCaseTests
         vm.Address.City = "Portland";
 
         await Assert.That(values.Count).IsEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo(Seattle);
+        await Assert.That(values[0]).IsEqualTo(InitialCity);
     }
 
     /// <summary>Verifies that WhenChanging multi-property emits sequential before-change values.</summary>

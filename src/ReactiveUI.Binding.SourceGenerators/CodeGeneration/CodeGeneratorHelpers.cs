@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -27,6 +28,9 @@ internal static class CodeGeneratorHelpers
 
     /// <summary>Room for one guarded step: the local, its null check, and the indentation each line carries.</summary>
     private const int GuardedAssignmentSegmentCapacity = 96;
+
+    /// <summary>The name a guarded assignment gives the local holding one walked intermediate.</summary>
+    private const string ParentLocalPrefix = "__parent";
 
     /// <summary>Extra buffer capacity for the escaping a string literal adds.</summary>
     private const int EscapeOverheadCapacity = 4;
@@ -98,18 +102,26 @@ internal static class CodeGeneratorHelpers
     internal static string BuildPropertySetterChain(string root, EquatableArray<PropertyPathSegment> path) =>
         BuildPropertyAccessChain(root, path);
 
-    /// <summary>Builds the statements that assign to the end of a property path, skipping the write when the path cannot be walked.</summary>
+    /// <summary>Builds the statements that assign to the end of a property path, skipping writes that would not change it.</summary>
     /// <param name="root">The root variable name.</param>
     /// <param name="path">The property path segments.</param>
-    /// <param name="valueExpression">The expression producing the value to assign.</param>
+    /// <param name="valueExpression">The expression producing the value to assign, evaluated more than once.</param>
     /// <param name="indent">The indentation of the line the statements are emitted on.</param>
-    /// <returns>The assignment, preceded by a guard per intermediate when the path has more than one segment.</returns>
+    /// <returns>The assignment, preceded by its guards.</returns>
     /// <remarks>
+    /// <para>
+    /// A write that would not change the property is dropped. That is what keeps a two-way binding from
+    /// oscillating: writing the view raises the view's own change notification, which writes the view model,
+    /// which writes the view again. Comparing first breaks the loop at the first repetition, and it also
+    /// spares every binding the notifications a redundant write would raise. The comparison is the target's
+    /// own equality, so a type that overrides it decides what "unchanged" means.
+    /// </para>
+    /// <para>
     /// The read side of a chain tolerates a missing parent and still delivers a value, so a binding into a path
     /// whose intermediate is null would otherwise assign through it and throw inside the call that established
     /// the binding. Dropping the write instead matches what the runtime engine does when a chain getter fails.
-    /// Emitted as early returns rather than nesting so a long path stays flat, and only for a path that has an
-    /// intermediate at all.
+    /// Emitted as early returns rather than nesting so a long path stays flat.
+    /// </para>
     /// </remarks>
     internal static string BuildGuardedAssignment(
         string root,
@@ -117,17 +129,13 @@ internal static class CodeGeneratorHelpers
         string valueExpression,
         string indent)
     {
-        if (path.Length <= 1)
-        {
-            return $"{BuildPropertyAccessChain(root, path)} = {valueExpression};";
-        }
-
+        var leaf = path[path.Length - 1];
         var sb = new PooledStringBuilder(path.Length * GuardedAssignmentSegmentCapacity);
         var parent = root;
 
         for (var i = 0; i < path.Length - 1; i++)
         {
-            var local = $"__parent{i}";
+            var local = ParentLocalPrefix + i.ToString(CultureInfo.InvariantCulture);
             _ = sb.Append("var ").Append(local).Append(" = ").Append(parent).Append('.')
                 .Append(path[i].PropertyName).Append(';').Append('\n')
                 .Append(indent).Append("if (").Append(local).Append(" == null)").Append('\n')
@@ -140,7 +148,16 @@ internal static class CodeGeneratorHelpers
             parent = local;
         }
 
-        _ = sb.Append(parent).Append('.').Append(path[path.Length - 1].PropertyName)
+        _ = sb.Append("if (global::System.Collections.Generic.EqualityComparer<")
+            .Append(leaf.PropertyTypeFullName).Append(">.Default.Equals(")
+            .Append(parent).Append('.').Append(leaf.PropertyName).Append(", ")
+            .Append(valueExpression).Append("))").Append('\n')
+            .Append(indent).Append('{').Append('\n')
+            .Append(indent).Append("    return;").Append('\n')
+            .Append(indent).Append('}').Append('\n')
+            .Append('\n')
+            .Append(indent)
+            .Append(parent).Append('.').Append(leaf.PropertyName)
             .Append(" = ").Append(valueExpression).Append(';');
 
         return sb.ToStringAndReturn();

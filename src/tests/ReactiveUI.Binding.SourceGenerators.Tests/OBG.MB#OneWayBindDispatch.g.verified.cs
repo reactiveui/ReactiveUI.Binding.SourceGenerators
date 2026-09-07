@@ -24,7 +24,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel), "Name", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.OneWayBind(
                     view, viewModel, viewModelProperty, viewProperty, null, viewPropertyExpression);
@@ -67,7 +67,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
-                view.NameText = value;
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.NameText, value))
+                    {
+                        return;
+                    }
+
+                    view.NameText = value;
             }, "x => x.NameText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, string>(
@@ -92,7 +97,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel), "Age", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.OneWayBind(
                     view, viewModel, viewModelProperty, viewProperty, null, viewPropertyExpression);
@@ -135,7 +140,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
-                view.AgeText = value;
+                if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(view.AgeText, value))
+                    {
+                        return;
+                    }
+
+                    view.AgeText = value;
             }, "x => x.AgeText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.OneWayBind.MultipleBindings.MyView, int>(

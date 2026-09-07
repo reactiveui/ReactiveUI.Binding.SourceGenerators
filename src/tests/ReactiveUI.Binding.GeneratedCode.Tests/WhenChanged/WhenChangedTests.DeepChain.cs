@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 /// Edge case tests for WhenChanged covering deep chain intermediate replacement,
 /// DistinctUntilChanged behavior, and multi-property with deep chains.
 /// </summary>
-public class WhenChangedEdgeCaseTests
+public partial class WhenChangedTests
 {
     /// <summary>The initial city value used by deep-chain tests.</summary>
     private const string Seattle = "Seattle";
@@ -21,12 +21,6 @@ public class WhenChangedEdgeCaseTests
 
     /// <summary>The second replacement city value used by deep-chain tests.</summary>
     private const string Eugene = "Eugene";
-
-    /// <summary>The simple property value used by multi-property tests.</summary>
-    private const string HelloValue = "Hello";
-
-    /// <summary>The minimum number of emissions expected after a change.</summary>
-    private const int MinEmissionsAfterChange = 2;
 
     /// <summary>The initial age value used by integer-property tests.</summary>
     private const int AgeValue = 25;

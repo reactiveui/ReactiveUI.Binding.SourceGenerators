@@ -8,12 +8,13 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 
 /// <summary>
-/// Tests that the source-generator-generated WhenChanged code works correctly at runtime
+/// Tests that the source-generator-generated WhenChanging code works correctly at runtime
 /// for extended multi-property overloads (5 through 16 properties).
+/// WhenChanging emits the property value before the change is applied.
 /// </summary>
-public class WhenChangedExtendedTests
+public partial class WhenChangingTests
 {
-    /// <summary>Verifies that five-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that five-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FiveProperties_EmitsInitialValues()
@@ -21,13 +22,13 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.FiveProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.FiveProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that six-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that six-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SixProperties_EmitsInitialValues()
@@ -35,13 +36,13 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.SixProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.SixProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that seven-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that seven-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SevenProperties_EmitsInitialValues()
@@ -49,13 +50,13 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.SevenProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.SevenProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that eight-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that eight-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task EightProperties_EmitsInitialValues()
@@ -63,13 +64,13 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.EightProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.EightProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that nine-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that nine-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NineProperties_EmitsInitialValues()
@@ -77,13 +78,13 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.NineProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.NineProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that ten-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that ten-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TenProperties_EmitsInitialValues()
@@ -91,13 +92,13 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.TenProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.TenProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that eleven-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that eleven-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ElevenProperties_EmitsInitialValues()
@@ -105,13 +106,13 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.ElevenProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.ElevenProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that twelve-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that twelve-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TwelveProperties_EmitsInitialValues()
@@ -119,13 +120,13 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.TwelveProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.TwelveProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that thirteen-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that thirteen-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ThirteenProperties_EmitsInitialValues()
@@ -133,13 +134,13 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.ThirteenProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.ThirteenProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that fourteen-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that fourteen-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FourteenProperties_EmitsInitialValues()
@@ -147,13 +148,13 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.FourteenProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.FourteenProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that fifteen-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that fifteen-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FifteenProperties_EmitsInitialValues()
@@ -161,13 +162,13 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.FifteenProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.FifteenProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that sixteen-property WhenChanged emits initial values.</summary>
+    /// <summary>Verifies that sixteen-property WhenChanging emits initial values.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SixteenProperties_EmitsInitialValues()
@@ -175,24 +176,24 @@ public class WhenChangedExtendedTests
         var vm = BigViewModel.CreatePopulated();
         var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.SixteenProperties(vm)
+        using var sub = WhenChangingExtendedScenarios.SixteenProperties(vm)
             .Subscribe(_ => received = true);
 
         await Assert.That(received).IsTrue();
     }
 
-    /// <summary>Verifies that sixteen-property WhenChanged with a selector correctly combines all property values.</summary>
+    /// <summary>Verifies that deep chain WhenChanging emits the nested property value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WithSelector_SixteenProperties()
+    public async Task DeepChain_AddressCity()
     {
-        var vm = BigViewModel.CreatePopulated();
-        var values = new List<string>();
+        var vm = new BigViewModel();
+        vm.Address.City = "Seattle";
+        var received = false;
 
-        using var sub = WhenChangedExtendedScenarios.WithSelector_SixteenProperties(vm)
-            .Subscribe(values.Add);
+        using var sub = WhenChangingExtendedScenarios.DeepChain_AddressCity(vm)
+            .Subscribe(_ => received = true);
 
-        await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsNotNull();
+        await Assert.That(received).IsTrue();
     }
 }

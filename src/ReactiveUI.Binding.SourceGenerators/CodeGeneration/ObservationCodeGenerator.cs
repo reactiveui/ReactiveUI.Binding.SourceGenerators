@@ -25,6 +25,9 @@ internal static class ObservationCodeGenerator
     /// </summary>
     private const int MaxAffinityFallbackPropertyCount = 3;
 
+    /// <summary>The operator every observation ends with, so consecutive equal values are suppressed.</summary>
+    private const string DistinctUntilChangedCall = "global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged";
+
     /// <summary>
     /// Returns the fully qualified type name for casting the observer parameter back to the
     /// concrete source type. Falls back to <c>"object"</c> when <paramref name="classInfo"/>
@@ -363,9 +366,12 @@ internal static class ObservationCodeGenerator
         EmitDeepChainInnerSegments(sb, path, isBeforeChange, varName);
 
         var lastObsVar = $"{varName}_s{path.Length - 1}";
-        _ = sb.AppendLine(isBeforeChange
-            ? $"            var {varName} = {lastObsVar};"
-            : $"            var {varName} = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged({lastObsVar});");
+
+        // Distinct on both timings. The runtime engine asks for it whichever way it observes, so a
+        // before-change stream that repeated a value would emit where the runtime engine stayed quiet.
+        _ = sb.Append("            var ").Append(varName)
+            .Append(" = ").Append(DistinctUntilChangedCall).Append('(')
+            .Append(lastObsVar).AppendLine(");");
     }
 
     /// <summary>
@@ -491,14 +497,65 @@ internal static class ObservationCodeGenerator
 
         _ = sb.AppendLine(
         "            // Allow user-registered plugins with higher affinity to override generated observation")
-        .AppendLine(
-        $"            if ({ObservationAffinityChecker}.HasHigherAffinityPlugin(typeof({first.SourceTypeFullName}), {generatedAffinity}, {(isBeforeChange ? "true" : "false")}))")
+        .Append("            if (")
+        .Append(AffinityCondition(first, generatedAffinity, isBeforeChange))
+        .AppendLine(")")
         .AppendLine("            {");
 
         EmitAffinityFallbackReturn(sb, first, methodPrefix, propCount, hasSelector);
 
         _ = sb.AppendLine("            }")
         .AppendLine();
+    }
+
+    /// <summary>Renders the condition that hands an observation to the runtime engine.</summary>
+    /// <param name="first">The first invocation in the group, which fixes the observed paths.</param>
+    /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
+    /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
+    /// <returns>The rendered condition, without surrounding parentheses.</returns>
+    /// <remarks>
+    /// One test per link of every observed path. A plugin scores a type and a property together, so a chain
+    /// can pick a different mechanism at every step and a registration that wins at any one of them takes the
+    /// whole observation. The property name is what makes the question answerable: the WPF, WinUI, WinForms
+    /// and KVO plugins all answer 0 for a property their mechanism does not reach, whatever the type.
+    /// </remarks>
+    internal static string AffinityCondition(InvocationInfo first, int generatedAffinity, bool isBeforeChange)
+    {
+        var builder = new StringBuilder();
+        var beforeChanged = isBeforeChange ? "true" : "false";
+        var paths = first.PropertyPaths;
+        var written = 0;
+
+        for (var p = 0; p < paths.Length; p++)
+        {
+            var path = paths[p];
+            for (var s = 0; s < path.Length; s++)
+            {
+                var segment = path[s];
+                var observedType = s == 0 ? first.SourceTypeFullName : segment.DeclaringTypeFullName;
+
+                if (written > 0)
+                {
+                    _ = builder.AppendLine().Append("                || ");
+                }
+
+                _ = builder
+                    .Append(ObservationAffinityChecker)
+                    .Append(".HasHigherAffinityPlugin(typeof(")
+                    .Append(observedType)
+                    .Append("), \"")
+                    .Append(segment.PropertyName)
+                    .Append("\", ")
+                    .Append(SegmentAffinity(segment, generatedAffinity))
+                    .Append(", ")
+                    .Append(beforeChanged)
+                    .Append(')');
+
+                written++;
+            }
+        }
+
+        return builder.ToString();
     }
 
     /// <summary>
@@ -667,9 +724,8 @@ internal static class ObservationCodeGenerator
         EmitObservationChainInnerSegments(sb, path, isBeforeChange);
 
         var lastObs = $"__obs{path.Length - 1}";
-        _ = sb.Append(isBeforeChange
-            ? $"            return {lastObs};"
-            : $"            return global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged({lastObs});");
+        _ = sb.Append("            return ").Append(DistinctUntilChangedCall).Append('(')
+            .Append(lastObs).Append(");");
     }
 
     /// <summary>
@@ -728,6 +784,19 @@ internal static class ObservationCodeGenerator
         segment.DeclaringTypeInfo is null
             ? null
             : ObservationPluginRegistry.GetBestPlugin(segment.DeclaringTypeInfo, segment.PropertyName);
+
+    /// <summary>Reads the affinity of the mechanism the generator picked for one link of a path.</summary>
+    /// <param name="segment">The link being observed.</param>
+    /// <param name="fallbackAffinity">The affinity to report when the link's declaring type was never detected.</param>
+    /// <returns>The generated affinity for that link.</returns>
+    /// <remarks>
+    /// A detected type with no plugin observes by a plain read, which any registration outranks, so it scores
+    /// zero rather than inheriting the group's affinity.
+    /// </remarks>
+    private static int SegmentAffinity(PropertyPathSegment segment, int fallbackAffinity) =>
+        segment.DeclaringTypeInfo is null
+            ? fallbackAffinity
+            : ResolveSegmentPlugin(segment)?.Affinity ?? 0;
 
     /// <summary>
     /// Chains the segments after the root for the standalone observation method, which names its

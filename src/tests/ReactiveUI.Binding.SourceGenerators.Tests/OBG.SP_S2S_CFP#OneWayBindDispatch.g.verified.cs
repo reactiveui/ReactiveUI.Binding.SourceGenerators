@@ -24,7 +24,7 @@ namespace ReactiveUI.Binding
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyViewModel), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyViewModel), "Name", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.OneWayBind(
                     view, viewModel, viewModelProperty, viewProperty, null, "x => x.NameText");
@@ -67,7 +67,12 @@ namespace ReactiveUI.Binding
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
-                view.NameText = value;
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.NameText, value))
+                    {
+                        return;
+                    }
+
+                    view.NameText = value;
             }, "x => x.NameText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyStringToString.MyView, string>(
