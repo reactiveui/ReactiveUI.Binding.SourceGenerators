@@ -17,10 +17,17 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// Whether the declaring type also declares a <c>{PropertyName}Changed</c> event, which is the convention the
 /// component mechanism observes a property through.
 /// </param>
+/// <param name="IsDeclaredByType">
+/// Whether the type this record was collected for declares the property itself, rather than inheriting it from
+/// a base in the same assembly. Key-value observing turns on this question - the Obj-C runtime backs what its
+/// own frameworks declare, not what an application adds to a subclass - so an inherited property has to stay
+/// distinguishable from a declared one even though both are now recorded.
+/// </param>
 internal sealed record ObservablePropertyInfo(
     string PropertyName,
     string PropertyTypeFullName,
     bool HasPublicGetter,
     bool IsIndexer,
     bool IsDependencyProperty,
-    bool HasChangeEvent);
+    bool HasChangeEvent,
+    bool IsDeclaredByType = true);

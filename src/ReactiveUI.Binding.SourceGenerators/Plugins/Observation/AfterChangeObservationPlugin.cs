@@ -11,9 +11,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// <summary>The base for a mechanism that reports a property change only once it has happened.</summary>
 /// <remarks>
 /// A dependency property, a component's change event and an Android widget's event all raise after the value
-/// has already moved, so none of them can say what a property is about to become. Asking any of them for a
-/// before-change observation reads the value once and stays open - the same answer in every case, which is why
-/// it is decided here rather than in each plugin.
+/// has already moved, so none of them can say what a property is about to become. What they do about being
+/// asked anyway is the one thing that differs, so the shape is decided here and the answer is left to
+/// <see cref="AnswersBeforeChangeWithLiveStream"/>.
 /// </remarks>
 internal abstract class AfterChangeObservationPlugin
 {
@@ -26,6 +26,17 @@ internal abstract class AfterChangeObservationPlugin
 
     /// <summary>Gets a value indicating whether this mechanism can report a change before it happens.</summary>
     public bool SupportsBeforeChanged => false;
+
+    /// <summary>Gets a value indicating whether a before-change request is answered with the live change stream.</summary>
+    /// <remarks>
+    /// None of these mechanisms can say what a property is about to become, but they do not all decline the
+    /// question the same way. A dependency property hands back the stream it always has, so the caller keeps
+    /// tracking and merely receives the value after each change rather than before it. A component's change
+    /// event scores nothing for a before-change request instead, which withdraws the mechanism and leaves the
+    /// property read once. Following whichever the platform does is what keeps a before-change observation
+    /// behaving the same here as it does through the runtime engine.
+    /// </remarks>
+    protected virtual bool AnswersBeforeChangeWithLiveStream => false;
 
     /// <summary>Emits the observation of a property read directly off the object a call site named.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -42,7 +53,7 @@ internal abstract class AfterChangeObservationPlugin
         bool isBeforeChange,
         bool includeStartWith)
     {
-        if (isBeforeChange)
+        if (isBeforeChange && !AnswersBeforeChangeWithLiveStream)
         {
             _ = UnchangingObservationEmitter.AppendExpression(sb, rootVar, segment, castTypeName);
             return;
@@ -66,7 +77,7 @@ internal abstract class AfterChangeObservationPlugin
         bool isBeforeChange,
         string varName)
     {
-        if (isBeforeChange)
+        if (isBeforeChange && !AnswersBeforeChangeWithLiveStream)
         {
             _ = UnchangingObservationEmitter.AppendVariable(sb, rootVar, segment, castTypeName, varName);
             return;
@@ -90,7 +101,7 @@ internal abstract class AfterChangeObservationPlugin
         bool isBeforeChange,
         string obsVarName)
     {
-        if (isBeforeChange)
+        if (isBeforeChange && !AnswersBeforeChangeWithLiveStream)
         {
             _ = UnchangingObservationEmitter.AppendTypedVariable(sb, rootVar, segment, castTypeName, obsVarName)
                 .AppendLine();
@@ -131,7 +142,7 @@ internal abstract class AfterChangeObservationPlugin
             .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
             .Append(" => ").Append(lambdaParam).AppendLine(" != null");
 
-        if (isBeforeChange)
+        if (isBeforeChange && !AnswersBeforeChangeWithLiveStream)
         {
             _ = sb.Append("                ? (global::System.IObservable<").Append(segType);
             AppendUnchangingChainSegment(sb, lambdaParam, segment);

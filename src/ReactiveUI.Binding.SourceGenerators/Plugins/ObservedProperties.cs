@@ -8,9 +8,14 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins;
 
 /// <summary>Answers what a mechanism can reach on one property of a type that carries it.</summary>
 /// <remarks>
-/// A property the type does not declare is unknown, not absent: <see cref="ClassBindingInfo.Properties"/> lists
-/// declared members only, so an inherited property is missing from it. Treating unknown as observable keeps the
-/// mechanism the type advertises rather than silently withdrawing it over a question this cannot answer.
+/// <see cref="ClassBindingInfo.Properties"/> records what the type declares and what it inherits from bases in
+/// its own assembly, so a property the consumer wrote anywhere in its own hierarchy is answered from what that
+/// declaration actually carries.
+/// <para>
+/// A property still missing from it comes from somewhere the scan cannot see - a platform base - and is unknown
+/// rather than absent. Treating unknown as observable keeps the mechanism the type advertises, which is right
+/// for a platform base: that is exactly where a dependency property or a change event it declares would live.
+/// </para>
 /// </remarks>
 internal static class ObservedProperties
 {
@@ -46,7 +51,7 @@ internal static class ObservedProperties
     /// application adds to a subclass of them.
     /// </remarks>
     internal static bool IsDeclaredByConsumer(ClassBindingInfo classInfo, string propertyName) =>
-        Find(classInfo, propertyName) is not null;
+        Find(classInfo, propertyName) is { IsDeclaredByType: true };
 
     /// <summary>Finds the declared property of that name.</summary>
     /// <param name="classInfo">The declaring type's binding info.</param>

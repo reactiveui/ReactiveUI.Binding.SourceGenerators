@@ -99,9 +99,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
             {
                 serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                view.SaveButton.Command = cmd;
                 var param = global::System.Threading.Volatile.Read(ref __latestParam);
                 view.SaveButton.CommandParameter = param;
+                view.SaveButton.Command = cmd;
                 if (cmd != null)
                 {
                     serial.Disposable = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(

@@ -119,6 +119,11 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The access chain to the bound control.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <remarks>
+    /// The parameter is written before the command. Assigning the command is what makes a control ask whether
+    /// it can execute, and it asks with whatever parameter it is holding at that moment, so setting the command
+    /// first decides the control's enabled state from the parameter belonging to the command it just replaced.
+    /// </remarks>
     private static void EmitObservableParameterBinding(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
@@ -140,9 +145,9 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
             .AppendLine("            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>")
             .AppendLine("            {")
             .AppendLine("                serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;")
-            .Append("                ").Append(controlAccess).AppendLine(".Command = cmd;")
             .Append("                var param = ").Append(CommandBindingSyntax.ReadLatestParameter(inv)).AppendLine(";")
             .Append("                ").Append(controlAccess).AppendLine(".CommandParameter = param;")
+            .Append("                ").Append(controlAccess).AppendLine(".Command = cmd;")
             .AppendLine("                if (cmd != null)")
             .AppendLine("                {")
             .AppendLine("                    serial.Disposable = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(")
