@@ -91,7 +91,7 @@ internal abstract class NotifyPropertyObservationPlugin : IObservationPlugin
         PropertyPathSegment segment,
         bool isBeforeChange,
         NullParentObservationBehavior nullParentBehavior) =>
-        NotifyPropertyEmitter.EmitDeepChainInnerSegment(sb, prevVar, curVar, lambdaParam, segment, isBeforeChange, nullParentBehavior);
+        NotifyPropertyEmitter.EmitDeepChainInnerSegment(sb, new(prevVar, curVar, lambdaParam), segment, isBeforeChange, nullParentBehavior, Affinity);
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

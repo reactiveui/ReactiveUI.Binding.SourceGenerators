@@ -30,13 +30,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 ? targetPropertyExpression.Substring(7)
                 : targetPropertyExpression;
 
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::TestApp.MyAppleView), "Text", 0, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindOneWay(
-                    source, target, sourceProperty, targetProperty, null, targetPropertyExpression);
-            }
-
             if (sourcePropertyExpression == "x => x.Text"
                 && targetPropertyExpression == "x => x.Name")
             {
@@ -65,12 +58,23 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
         }
-        var sourceObs = new __KVOObservable<string>(
+        var sourceObsMechanism = new __KVOObservable<string>(
             (global::Foundation.NSObject)source,
             "text",
             (global::Foundation.NSObject __o) => ((global::TestApp.MyAppleView)__o).Text,
             true,
             false);
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::TestApp.MyAppleView), "Text", 15, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<string>)sourceObsMechanism
+            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                sourceObsRegistration,
+                source,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyAppleView, string>>)(__e => __e.Text)).Body,
+                "Text",
+                (object __o) => ((global::TestApp.MyAppleView)__o).Text,
+                false,
+                true);
             var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>

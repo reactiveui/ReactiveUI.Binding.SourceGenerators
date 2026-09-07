@@ -150,21 +150,25 @@ internal static class NotifyPropertyEmitter
 
     /// <summary>Emits an inner stage of a deep observation chain.</summary>
     /// <param name="sb">The string builder to append to.</param>
-    /// <param name="prevVar">The previous stage's observable.</param>
-    /// <param name="curVar">The name of the observable local to assign.</param>
-    /// <param name="lambdaParam">The lambda parameter holding the parent value.</param>
+    /// <param name="stage">The locals this stage reads from and writes to.</param>
     /// <param name="segment">The property path segment being observed.</param>
     /// <param name="isBeforeChange">True for before-change observation.</param>
     /// <param name="nullParentBehavior">What this stage emits while its parent is null.</param>
+    /// <param name="generatedAffinity">The affinity of the mechanism this stage was built from.</param>
+    /// <remarks>
+    /// The stage offers its observation to a registration that outranks the mechanism, which is how a chain
+    /// honours one link at a time. The registration decides only when the property changed - the value is read
+    /// with the accessor emitted here either way - so the link resolves nothing by name.
+    /// </remarks>
     internal static void EmitDeepChainInnerSegment(
         StringBuilder sb,
-        string prevVar,
-        string curVar,
-        string lambdaParam,
+        in ChainStageVariables stage,
         PropertyPathSegment segment,
         bool isBeforeChange,
-        NullParentObservationBehavior nullParentBehavior)
+        NullParentObservationBehavior nullParentBehavior,
+        int generatedAffinity)
     {
+        var (prevVar, curVar, lambdaParam) = stage;
         var segType = segment.PropertyTypeFullName;
         var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
             ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
@@ -184,12 +188,21 @@ internal static class NotifyPropertyEmitter
         }
         else
         {
-            _ = sb.Append(ParentPresentBranchOpen).Append(segType)
-                .Append(">)new global::ReactiveUI.Binding.Observables.PropertyObservable<").Append(segType).AppendLine(">(")
-                .Append("                    (global::System.ComponentModel.INotifyPropertyChanged)").Append(lambdaParam).AppendLine(",")
+            var declaringType = segment.DeclaringTypeFullName;
+
+            _ = sb.Append("                ? global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<").Append(segType).AppendLine(">(")
+                .Append("                    ").Append(lambdaParam).AppendLine(",")
+                .Append("                    ((global::System.Linq.Expressions.Expression<global::System.Func<").Append(declaringType).Append(", ")
+                .Append(segType).Append(">>)(__e => __e.").Append(segment.PropertyName).AppendLine(")).Body,")
                 .Append(StageQuotedArgumentOpen).Append(segment.PropertyName).AppendLine("\",")
-                .Append("                    (global::System.ComponentModel.INotifyPropertyChanged __o) => ((").Append(segment.DeclaringTypeFullName)
-                .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).AppendLine(",").AppendLine("                    false)");
+                .AppendLine("                    false,")
+                .Append("                    ").Append(generatedAffinity).AppendLine(",")
+                .Append("                    (object __o) => ((").Append(declaringType).Append(")__o).").Append(segment.PropertyName).AppendLine(",")
+                .Append("                    new global::ReactiveUI.Binding.Observables.PropertyObservable<").Append(segType).AppendLine(">(")
+                .Append("                        (global::System.ComponentModel.INotifyPropertyChanged)").Append(lambdaParam).AppendLine(",")
+                .Append("                        \"").Append(segment.PropertyName).AppendLine("\",")
+                .Append("                        (global::System.ComponentModel.INotifyPropertyChanged __o) => ((").Append(declaringType)
+                .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).AppendLine(",").AppendLine("                        false))");
         }
 
         _ = sb.Append(ParentMissingBranchOpen).Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");

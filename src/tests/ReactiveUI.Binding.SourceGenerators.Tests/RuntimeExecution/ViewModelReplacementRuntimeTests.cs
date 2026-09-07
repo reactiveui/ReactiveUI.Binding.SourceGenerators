@@ -95,6 +95,174 @@ public class ViewModelReplacementRuntimeTests
                                                       }
                                                       """;
 
+    /// <summary>A view whose command binding is made once and is then given a new view model.</summary>
+    private const string CommandReplacementSource = """
+                                                    using System;
+                                                    using System.ComponentModel;
+                                                    using System.Windows.Input;
+                                                    using ReactiveUI.Binding;
+
+                                                    namespace TestApp
+                                                    {
+                                                        public class RecordingCommand : ICommand
+                                                        {
+                                                            private readonly Action _onExecute;
+
+                                                            public RecordingCommand(Action onExecute)
+                                                            {
+                                                                _onExecute = onExecute;
+                                                            }
+
+                                                            public event EventHandler CanExecuteChanged;
+
+                                                            public bool CanExecute(object parameter)
+                                                            {
+                                                                return true;
+                                                            }
+
+                                                            public void Execute(object parameter)
+                                                            {
+                                                                _onExecute();
+                                                            }
+                                                        }
+
+                                                        public class MyButton
+                                                        {
+                                                            public event EventHandler Click;
+
+                                                            public void PerformClick()
+                                                            {
+                                                                var handler = Click;
+                                                                if (handler != null)
+                                                                {
+                                                                    handler(this, EventArgs.Empty);
+                                                                }
+                                                            }
+                                                        }
+
+                                                        public class MyViewModel : INotifyPropertyChanged
+                                                        {
+                                                            public event PropertyChangedEventHandler PropertyChanged;
+
+                                                            public ICommand Save { get; set; }
+                                                        }
+
+                                                        public class MyView : INotifyPropertyChanged, IViewFor<MyViewModel>
+                                                        {
+                                                            private MyViewModel _viewModel;
+
+                                                            public event PropertyChangedEventHandler PropertyChanged;
+
+                                                            public MyButton SaveButton { get; } = new MyButton();
+
+                                                            public MyViewModel ViewModel
+                                                            {
+                                                                get { return _viewModel; }
+                                                                set
+                                                                {
+                                                                    _viewModel = value;
+                                                                    var handler = PropertyChanged;
+                                                                    if (handler != null)
+                                                                    {
+                                                                        handler(this, new PropertyChangedEventArgs("ViewModel"));
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            object IViewFor.ViewModel
+                                                            {
+                                                                get { return ViewModel; }
+                                                                set { ViewModel = (MyViewModel)value; }
+                                                            }
+                                                        }
+
+                                                        public static class Usage
+                                                        {
+                                                            public static string Run()
+                                                            {
+                                                                var invoked = "";
+                                                                var view = new MyView();
+                                                                view.ViewModel = new MyViewModel();
+                                                                view.ViewModel.Save = new RecordingCommand(() => invoked = "first");
+
+                                                                var binding = view.BindCommand(view.ViewModel, vm => vm.Save, v => v.SaveButton);
+
+                                                                var replacement = new MyViewModel();
+                                                                replacement.Save = new RecordingCommand(() => invoked = "second");
+                                                                view.ViewModel = replacement;
+
+                                                                view.SaveButton.PerformClick();
+
+                                                                return invoked;
+                                                            }
+                                                        }
+                                                    }
+                                                    """;
+
+    /// <summary>A view whose interaction binding is made once and is then given a new view model.</summary>
+    private const string InteractionReplacementSource = """
+                                                        using System;
+                                                        using System.ComponentModel;
+                                                        using System.Threading.Tasks;
+                                                        using ReactiveUI.Binding;
+
+                                                        namespace TestApp
+                                                        {
+                                                            public class MyViewModel : INotifyPropertyChanged
+                                                            {
+                                                                public event PropertyChangedEventHandler PropertyChanged;
+
+                                                                public Interaction<string, string> Confirm { get; set; } = new Interaction<string, string>();
+                                                            }
+
+                                                            public class MyView : INotifyPropertyChanged, IViewFor<MyViewModel>
+                                                            {
+                                                                private MyViewModel _viewModel;
+
+                                                                public event PropertyChangedEventHandler PropertyChanged;
+
+                                                                public MyViewModel ViewModel
+                                                                {
+                                                                    get { return _viewModel; }
+                                                                    set
+                                                                    {
+                                                                        _viewModel = value;
+                                                                        var handler = PropertyChanged;
+                                                                        if (handler != null)
+                                                                        {
+                                                                            handler(this, new PropertyChangedEventArgs("ViewModel"));
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                object IViewFor.ViewModel
+                                                                {
+                                                                    get { return ViewModel; }
+                                                                    set { ViewModel = (MyViewModel)value; }
+                                                                }
+                                                            }
+
+                                                            public static class Usage
+                                                            {
+                                                                public static string Run()
+                                                                {
+                                                                    var view = new MyView();
+                                                                    view.ViewModel = new MyViewModel();
+
+                                                                    var binding = view.BindInteraction(view.ViewModel, vm => vm.Confirm, ctx =>
+                                                                    {
+                                                                        ctx.SetOutput("second");
+                                                                        return Task.CompletedTask;
+                                                                    });
+
+                                                                    view.ViewModel = new MyViewModel();
+
+                                                                    return view.ViewModel.Confirm.Handle("ask").GetAwaiter().GetResult();
+                                                                }
+                                                            }
+                                                        }
+                                                        """;
+
     /// <summary>
     /// A binding follows the view's current view model. Holding the instance the call was handed leaves the
     /// replaced view model driving the view, with nothing raised to say the binding went stale.
@@ -115,6 +283,26 @@ public class ViewModelReplacementRuntimeTests
                 "view.OneWayBind(view.ViewModel, vm => vm.Name, v => v.Text)",
                 "view.Bind(view.ViewModel, vm => vm.Name, v => v.Text)",
                 StringComparison.Ordinal));
+
+    /// <summary>
+    /// A command binding follows the view's current view model, so clicking the control invokes the command the
+    /// view model on display exposes rather than the one belonging to the view model it replaced.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindCommand_AfterTheViewModelIsReplaced_InvokesTheNewViewModelsCommand() =>
+        AssertTracksReplacement(CommandReplacementSource);
+
+    /// <summary>
+    /// An interaction binding follows the view's current view model, so the handler answers the interaction the
+    /// view model on display raises rather than staying registered against the one it replaced.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindInteraction_AfterTheViewModelIsReplaced_HandlesTheNewViewModelsInteraction() =>
+        AssertTracksReplacement(InteractionReplacementSource);
 
     /// <summary>Runs a replacement scenario and asserts the view ends up showing the replacement's value.</summary>
     /// <param name="source">The scenario source to generate, compile and run.</param>

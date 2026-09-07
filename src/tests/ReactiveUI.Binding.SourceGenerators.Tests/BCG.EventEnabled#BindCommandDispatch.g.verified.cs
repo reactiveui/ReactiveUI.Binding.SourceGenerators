@@ -50,11 +50,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
             }
 
-        var commandObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Windows.Input.ICommand>(
+        var commandObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Windows.Input.ICommand>(
             viewModel,
             "Save",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.EventEnabled.MyViewModel)__o).Save,
             true);
+        var commandObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindCommand.EventEnabled.MyViewModel), "Save", 5, false);
+        var commandObs = commandObsRegistration == null
+            ? (global::System.IObservable<global::System.Windows.Input.ICommand>)commandObsMechanism
+            : (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.Windows.Input.ICommand>(
+                commandObsRegistration,
+                viewModel,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.EventEnabled.MyViewModel, global::System.Windows.Input.ICommand>>)(__e => __e.Save)).Body,
+                "Save",
+                (object __o) => ((global::SharedScenarios.BindCommand.EventEnabled.MyViewModel)__o).Save,
+                false,
+                true);
 
             if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
                 .HasHigherAffinityPlugin<global::SharedScenarios.BindCommand.EventEnabled.WinFormsLikeButton>(4, true))

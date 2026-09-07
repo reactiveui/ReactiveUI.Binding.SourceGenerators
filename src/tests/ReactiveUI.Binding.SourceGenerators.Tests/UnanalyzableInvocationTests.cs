@@ -216,6 +216,235 @@ public class UnanalyzableInvocationTests
     }
 
     /// <summary>
+    /// A BindInteraction call whose view is a type parameter names no type a generated overload could
+    /// declare, so no dispatch is emitted for it. Emitting one puts the type parameter's own name in the
+    /// consumer's build, which does not compile.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindInteraction_GenericViewParameter_GeneratesNoDispatch()
+    {
+        const string source = """
+                              using System.ComponentModel;
+                              using System.Threading.Tasks;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                                      public Interaction<string, bool> Confirm { get; set; } = new Interaction<string, bool>();
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static void Execute<TView>(TView view, MyViewModel vm)
+                                          where TView : class, IViewFor
+                                      {
+                                          view.BindInteraction(vm, x => x.Confirm, ctx =>
+                                          {
+                                              ctx.SetOutput(true);
+                                              return Task.CompletedTask;
+                                          });
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+        await result.CompilationSucceeds();
+        await result.DoesNotHaveGeneratedSource(BindInteractionDispatchgcsName);
+    }
+
+    /// <summary>A WhenChanged call on a type parameter emits nothing that names it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WhenChanged_GenericReceiver_EmitsNothingNamingTheTypeParameter()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public interface INamed : INotifyPropertyChanged
+                                  {
+                                      string Name { get; set; }
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static IObservable<string> Execute<TSource>(TSource source)
+                                          where TSource : class, INamed
+                                      {
+                                          return source.WhenChanged(x => x.Name);
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+        await result.CompilationSucceeds();
+    }
+
+    /// <summary>A BindOneWay call between two type parameters emits nothing that names them.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindOneWay_GenericReceiver_EmitsNothingNamingTheTypeParameter()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public interface INamed : INotifyPropertyChanged
+                                  {
+                                      string Name { get; set; }
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static IDisposable Execute<TSource, TTarget>(TSource source, TTarget target)
+                                          where TSource : class, INamed
+                                          where TTarget : class, INamed
+                                      {
+                                          return source.BindOneWay(target, x => x.Name, x => x.Name);
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+        await result.CompilationSucceeds();
+    }
+
+    /// <summary>A WhenAnyObservable call on a type parameter emits nothing that names it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WhenAnyObservable_GenericReceiver_EmitsNothingNamingTheTypeParameter()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public interface IHasSignal : INotifyPropertyChanged
+                                  {
+                                      IObservable<int> Signal { get; }
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static IObservable<int> Execute<TSource>(TSource source)
+                                          where TSource : class, IHasSignal
+                                      {
+                                          return source.WhenAnyObservable(x => x.Signal);
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+        await result.CompilationSucceeds();
+    }
+
+    /// <summary>A BindTo call onto a type parameter target emits nothing that names it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindTo_GenericTargetParameter_EmitsNothingNamingTheTypeParameter()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public interface INamed : INotifyPropertyChanged
+                                  {
+                                      string Name { get; set; }
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static IDisposable Execute<TTarget>(IObservable<string> source, TTarget target)
+                                          where TTarget : class, INamed
+                                      {
+                                          return source.BindTo(target, x => x.Name);
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+        await result.CompilationSucceeds();
+    }
+
+    /// <summary>A BindCommand call on a type parameter view emits nothing that names it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindCommand_GenericViewParameter_EmitsNothingNamingTheTypeParameter()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using System.Windows.Input;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public class MyButton
+                                  {
+                                      public event EventHandler? Click;
+                                  }
+
+                                  public interface IHasButton : IViewFor
+                                  {
+                                      MyButton SaveButton { get; }
+                                  }
+
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                                      public ICommand? Save { get; set; }
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static IDisposable Execute<TView>(TView view, MyViewModel vm)
+                                          where TView : class, IHasButton
+                                      {
+                                          return view.BindCommand(vm, x => x.Save, x => x.SaveButton);
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+        await result.CompilationSucceeds();
+    }
+
+    /// <summary>
     /// Verifies that a BindOneWay call with a non-lambda expression (method group) is skipped.
     /// Exercises the property path null guard in BindingExtractor (line 63).
     /// </summary>

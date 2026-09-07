@@ -273,6 +273,76 @@ public class ObservationAffinityCheckerTests
         }
     }
 
+    /// <summary>Generated code asks for the registration itself, so a winner is handed back rather than a flag.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FindHigherAffinityPlugin_RegistrationOutranksTheGenerated_HandsBackThatRegistration()
+    {
+        AppLocator.UnregisterAll<ICreatesObservableForProperty>();
+        try
+        {
+            AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(HigherPluginAffinity));
+            ObservationAffinityChecker.Refresh();
+
+            var found = ObservationAffinityChecker.FindHigherAffinityPlugin(
+                typeof(string),
+                ObservedPropertyName,
+                GeneratedAffinity,
+                false);
+
+            await Assert.That(found).IsNotNull();
+        }
+        finally
+        {
+            RestoreDefaultPlugins();
+        }
+    }
+
+    /// <summary>A registration scoring no better than the generated mechanism leaves the observation alone.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FindHigherAffinityPlugin_NoRegistrationOutranksTheGenerated_HandsBackNothing()
+    {
+        AppLocator.UnregisterAll<ICreatesObservableForProperty>();
+        try
+        {
+            AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(LowerPluginAffinity));
+            ObservationAffinityChecker.Refresh();
+
+            var found = ObservationAffinityChecker.FindHigherAffinityPlugin(
+                typeof(string),
+                ObservedPropertyName,
+                GeneratedAffinity,
+                false);
+
+            await Assert.That(found).IsNull();
+        }
+        finally
+        {
+            RestoreDefaultPlugins();
+        }
+    }
+
+    /// <summary>The observed type is required to score a registration against it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FindHigherAffinityPlugin_NullType_ThrowsArgumentNullException()
+    {
+        var action = static () =>
+            ObservationAffinityChecker.FindHigherAffinityPlugin(null!, ObservedPropertyName, GeneratedAffinity, false);
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>The property name is required, because a registration scores a type and a property together.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FindHigherAffinityPlugin_NullPropertyName_ThrowsArgumentNullException()
+    {
+        var action = static () =>
+            ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), null!, GeneratedAffinity, false);
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
     /// <summary>Restores default plugins by re-initializing the binding infrastructure.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void RestoreDefaultPlugins()

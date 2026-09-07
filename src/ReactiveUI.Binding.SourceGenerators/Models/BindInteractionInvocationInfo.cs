@@ -19,6 +19,13 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="DontCareTypeFullName">The TDontCare type for observable handlers, or null for task handlers.</param>
 /// <param name="MethodName">The name of the invoked method (BindInteraction).</param>
 /// <param name="ExpressionText">The normalized expression text of the property path lambda.</param>
+/// <param name="ViewClassInfo">
+/// How the view type notifies, or <see langword="null"/> when the call site was built without a symbol to read
+/// it from. This API takes no lambda rooted on the view, so nothing else in the call site carries the view's
+/// mechanism and the declaration scan only sees types the consumer writes. Captured here so a view declared in
+/// a referenced assembly is still followed through the view model it holds rather than reduced to the instance
+/// the call was handed.
+/// </param>
 internal sealed record BindInteractionInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -30,4 +37,5 @@ internal sealed record BindInteractionInvocationInfo(
     bool IsTaskHandler,
     string? DontCareTypeFullName,
     string MethodName,
-    string ExpressionText);
+    string ExpressionText,
+    ClassBindingInfo? ViewClassInfo = null);

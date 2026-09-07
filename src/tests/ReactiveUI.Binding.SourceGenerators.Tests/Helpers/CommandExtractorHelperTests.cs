@@ -402,14 +402,14 @@ public class CommandExtractorHelperTests
         var invocation = await FirstInvocationAsync(tree);
         var memberAccess = (Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax)invocation.Expression;
 
-        var (view, viewModel) = CommandExtractor.ResolveBindCommandSides(
+        var sides = CommandExtractor.ResolveBindCommandSides(
             memberAccess,
             invocation.ArgumentList.Arguments,
             model,
             CancellationToken.None);
 
-        await Assert.That(view).IsEqualTo("global::TestApp.View");
-        await Assert.That(viewModel).IsEqualTo("global::TestApp.Vm");
+        await Assert.That(sides!.Value.ViewTypeFullName).IsEqualTo("global::TestApp.View");
+        await Assert.That(sides!.Value.ViewModelTypeFullName).IsEqualTo("global::TestApp.Vm");
     }
 
     /// <summary>Verifies that the control binding resolves the explicit event, its args type and the capabilities.</summary>

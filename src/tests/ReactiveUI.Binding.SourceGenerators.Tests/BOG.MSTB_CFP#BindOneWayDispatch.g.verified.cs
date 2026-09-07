@@ -23,13 +23,6 @@ namespace ReactiveUI.Binding
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel), "FirstName", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindOneWay(
-                    source, target, sourceProperty, targetProperty, null, "x => x.FirstNameText");
-            }
-
             if (callerLineNumber == 110
                 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
@@ -63,11 +56,22 @@ namespace ReactiveUI.Binding
         {
             return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
         }
-        var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
             source,
             "FirstName",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel)__o).FirstName,
             true);
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel), "FirstName", 5, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<string>)sourceObsMechanism
+            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                sourceObsRegistration,
+                source,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel, string>>)(__e => __e.FirstName)).Body,
+                "FirstName",
+                (object __o) => ((global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel)__o).FirstName,
+                false,
+                true);
             var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
@@ -100,11 +104,22 @@ namespace ReactiveUI.Binding
         {
             return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
         }
-        var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
             source,
             "LastName",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel)__o).LastName,
             true);
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel), "LastName", 5, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<string>)sourceObsMechanism
+            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                sourceObsRegistration,
+                source,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel, string>>)(__e => __e.LastName)).Body,
+                "LastName",
+                (object __o) => ((global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel)__o).LastName,
+                false,
+                true);
             var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>

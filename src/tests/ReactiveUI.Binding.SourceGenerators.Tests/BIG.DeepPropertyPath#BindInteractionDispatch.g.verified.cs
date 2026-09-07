@@ -26,13 +26,14 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             if (propertyNameExpression == "x => x.Child!.Confirm")
             {
-                return __BindInteraction_7FFFEF09AD5AF30B(viewModel, handler);
+                return __BindInteraction_7FFFEF09AD5AF30B(view, viewModel, handler);
             }
             throw new global::System.InvalidOperationException(
                 "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
         }
 
         private static global::System.IDisposable __BindInteraction_7FFFEF09AD5AF30B(
+            global::SharedScenarios.BindInteraction.DeepPropertyPath.MyView view,
             global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel viewModel,
             global::System.Func<global::ReactiveUI.Binding.IInteractionContext<string, bool>, global::System.Threading.Tasks.Task> handler)
         {
@@ -51,11 +52,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         var __interactionObs_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>(__interactionObs_s0,
             __p1 => __p1 != null
-                ? (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(
-                    (global::System.ComponentModel.INotifyPropertyChanged)__p1,
+                ? global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<global::ReactiveUI.Binding.Interaction<string, bool>>(
+                    __p1,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>>)(__e => __e.Confirm)).Body,
                     "Confirm",
-                    (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm,
-                    false)
+                    false,
+                    5,
+                    (object __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm,
+                    new global::ReactiveUI.Binding.Observables.PropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(
+                        (global::System.ComponentModel.INotifyPropertyChanged)__p1,
+                        "Confirm",
+                        (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm,
+                        false))
                 : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::ReactiveUI.Binding.Interaction<string, bool>>(default(global::ReactiveUI.Binding.Interaction<string, bool>)));
         var interactionObs = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__interactionObs_s1);
 

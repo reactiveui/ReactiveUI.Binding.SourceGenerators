@@ -41,7 +41,6 @@ internal static class BindTwoWayCodeGenerator
         AppendExtraParameters = AppendExtraParameters,
         FormatWorkerParameters = FormatExtraMethodParams,
         FormatExtraArguments = FormatExtraArgs,
-        EmitAffinityOverride = EmitAffinityOverride,
     };
 
     /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
@@ -133,24 +132,6 @@ internal static class BindTwoWayCodeGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string FormatExtraMethodParams(BindingInvocationInfo inv) =>
         BindingEmitterHelpers.FormatTwoWayExtraMethodParams(inv, ForwardConverterName, ReverseConverterName);
-
-    /// <summary>Emits the check that hands the binding to the runtime engine when a registered plugin outranks the generated one.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="group">The binding type group, which fixes both bound types for the whole overload.</param>
-    /// <param name="bindingExpression">The C# expression naming the bound target, used when a write faults.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void EmitAffinityOverride(StringBuilder sb, BindingTypeGroup group, string bindingExpression) =>
-        BindingEmitterHelpers.EmitAffinityOverride(
-            sb,
-            group,
-            "BindTwoWay",
-            "source, target, sourceProperty, targetProperty, "
-            + (group.HasConversion
-                ? $"{TwoWayConverters}.Create({ForwardConverterName}, {ReverseConverterName}), "
-                : string.Empty)
-            + (group.HasScheduler ? "scheduler" : "null")
-            + $", {bindingExpression}",
-            true);
 
     /// <summary>Emits the two-way subscription and <c>MultipleDisposable</c> return block.</summary>
     /// <param name="sb">The string builder to append to.</param>

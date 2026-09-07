@@ -32,13 +32,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 ? targetPropertyExpression.Substring(7)
                 : targetPropertyExpression;
 
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel), "Count", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindOneWay(
-                    source, target, sourceProperty, targetProperty, conversionFunc, scheduler, targetPropertyExpression);
-            }
-
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
             {
@@ -67,11 +60,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
         }
-        var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
+        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             source,
             "Count",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel)__o).Count,
             true);
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel), "Count", 5, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<int>)sourceObsMechanism
+            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                sourceObsRegistration,
+                source,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel, int>>)(__e => __e.Count)).Body,
+                "Count",
+                (object __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyWithConverterAndScheduler.MyViewModel)__o).Count,
+                false,
+                true);
         var __selected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, conversionFunc);
         var bindObs = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<string>(__selected, scheduler);
 

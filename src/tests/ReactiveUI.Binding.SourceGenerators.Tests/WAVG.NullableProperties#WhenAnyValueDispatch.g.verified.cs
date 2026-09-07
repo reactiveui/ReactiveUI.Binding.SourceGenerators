@@ -21,12 +21,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             property1Expression = property1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property1Expression.Substring(7) : property1Expression;
 
-            // Allow user-registered plugins with higher affinity to override generated observation
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel), "NullableName", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenAnyValue(objectToMonitor, property1);
-            }
-
             if (property1Expression == "x => x.NullableName!")
             {
                 return __WhenAnyValue_00001B08EE215D76(objectToMonitor);
@@ -50,12 +44,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
             property1Expression = property1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property1Expression.Substring(7) : property1Expression;
-
-            // Allow user-registered plugins with higher affinity to override generated observation
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel), "NullableAge", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenAnyValue(objectToMonitor, property1);
-            }
 
             if (property1Expression == "x => x.NullableAge!")
             {

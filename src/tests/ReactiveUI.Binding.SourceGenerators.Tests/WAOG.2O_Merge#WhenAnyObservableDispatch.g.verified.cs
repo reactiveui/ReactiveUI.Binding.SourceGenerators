@@ -33,20 +33,42 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenAnyObservable_000004E8406EC0BF(global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel obj)
         {
-            var __obsProperty0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
+            var __obsProperty0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,
                 "Command1",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel)__o).Command1,
                 true);
+            var __obsProperty0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel), "Command1", 5, false);
+            var __obsProperty0 = __obsProperty0Registration == null
+                ? (global::System.IObservable<global::System.IObservable<string>>)__obsProperty0Mechanism
+                : (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<string>>(
+                    __obsProperty0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel, global::System.IObservable<string>>>)(__e => __e.Command1)).Body,
+                    "Command1",
+                    (object __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel)__o).Command1,
+                    false,
+                    true);
 
             var __switched0 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty0,
                 __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
 
-            var __obsProperty1 = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
+            var __obsProperty1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,
                 "Command2",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel)__o).Command2,
                 true);
+            var __obsProperty1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel), "Command2", 5, false);
+            var __obsProperty1 = __obsProperty1Registration == null
+                ? (global::System.IObservable<global::System.IObservable<string>>)__obsProperty1Mechanism
+                : (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<string>>(
+                    __obsProperty1Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel, global::System.IObservable<string>>>)(__e => __e.Command2)).Body,
+                    "Command2",
+                    (object __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesMerge.MyViewModel)__o).Command2,
+                    false,
+                    true);
 
             var __switched1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty1,
                 __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);

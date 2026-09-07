@@ -195,12 +195,14 @@ internal static class BindCommandCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="viewModelClassInfo">The view model type class binding info.</param>
+    /// <param name="viewClassInfo">The view type class binding info, which says whether it exposes a view model.</param>
     /// <param name="suffix">The stable method name suffix.</param>
     /// <param name="supportsNullable">There can be a null type.</param>
     internal static void GenerateBindCommandMethod(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         ClassBindingInfo? viewModelClassInfo,
+        ClassBindingInfo? viewClassInfo,
         string suffix,
         bool supportsNullable)
     {
@@ -225,28 +227,7 @@ internal static class BindCommandCodeGenerator
         // Get the control access chain
         var controlAccess = CodeGeneratorHelpers.BuildPropertyAccessChain("view", inv.ControlPropertyPath);
 
-        // Emit command observation (for rebinding when command property changes)
-        ObservationCodeGenerator.EmitInlineObservation(
-            sb,
-            "viewModel",
-            inv.CommandPropertyPath,
-            inv.CommandTypeFullName,
-            viewModelClassInfo,
-            "commandObs");
-
-        // A parameter named as a property is observed, not read once. The control has to see each value the
-        // property takes, the same as it would from a caller-supplied stream; reading it when the command
-        // arrives leaves the control holding whatever it happened to be at that moment.
-        if (inv is { HasObservableParameter: false, HasExpressionParameter: true, ParameterPropertyPath: not null })
-        {
-            ObservationCodeGenerator.EmitInlineObservation(
-                sb,
-                "viewModel",
-                inv.ParameterPropertyPath.Value,
-                inv.ParameterTypeFullName ?? "object",
-                viewModelClassInfo,
-                "withParameter");
-        }
+        EmitViewModelObservations(sb, inv, viewModelClassInfo, viewClassInfo);
 
         // Try plugins in affinity order (highest first) via registry
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
@@ -327,6 +308,62 @@ internal static class BindCommandCodeGenerator
             ? $"new global::ReactiveUI.Primitives.Signals.MapSignal<{inv.ParameterTypeFullName}, object>(withParameter, __p => __p)"
             : "global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<object>.Instance";
 
+    /// <summary>Emits the observations of the command, and of a parameter named as a property.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="inv">The BindCommand invocation info.</param>
+    /// <param name="viewModelClassInfo">The view model type class binding info.</param>
+    /// <param name="viewClassInfo">The view type class binding info, which says whether it exposes a view model.</param>
+    /// <remarks>
+    /// Both are observed through whichever view model the view currently holds, so replacing it rebinds the
+    /// command and keeps the parameter flowing from the view model now on display.
+    /// <para>
+    /// A parameter named as a property is observed rather than read once. The control has to see each value the
+    /// property takes, the same as it would from a caller-supplied stream; reading it when the command arrives
+    /// leaves the control holding whatever it happened to be at that moment.
+    /// </para>
+    /// </remarks>
+    private static void EmitViewModelObservations(
+        StringBuilder sb,
+        BindCommandInvocationInfo inv,
+        ClassBindingInfo? viewModelClassInfo,
+        ClassBindingInfo? viewClassInfo)
+    {
+        var commandObservation = BindingEmitterHelpers.ResolveViewModelObservation(
+            inv.ViewModelTypeFullName,
+            inv.ViewTypeFullName,
+            inv.CommandPropertyPath,
+            viewModelClassInfo,
+            viewClassInfo);
+
+        ObservationCodeGenerator.EmitInlineObservation(
+            sb,
+            commandObservation.RootVariable,
+            commandObservation.Path,
+            inv.CommandTypeFullName,
+            commandObservation.RootClassInfo,
+            "commandObs");
+
+        if (inv is not { HasObservableParameter: false, HasExpressionParameter: true, ParameterPropertyPath: not null })
+        {
+            return;
+        }
+
+        var parameterObservation = BindingEmitterHelpers.ResolveViewModelObservation(
+            inv.ViewModelTypeFullName,
+            inv.ViewTypeFullName,
+            inv.ParameterPropertyPath.Value,
+            viewModelClassInfo,
+            viewClassInfo);
+
+        ObservationCodeGenerator.EmitInlineObservation(
+            sb,
+            parameterObservation.RootVariable,
+            parameterObservation.Path,
+            inv.ParameterTypeFullName ?? "object",
+            parameterObservation.RootClassInfo,
+            "withParameter");
+    }
+
     /// <summary>Appends the signature both dispatch overloads declare, up to the parameters that identify a call site.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindCommand type group.</param>
@@ -406,7 +443,8 @@ internal static class BindCommandCodeGenerator
             GenerateBindCommandMethod(
                 sb,
                 inv,
-                CodeGeneratorHelpers.FindClassInfo(allClasses, inv.ViewModelTypeFullName),
+                CodeGeneratorHelpers.ResolveObservedTypeInfo(allClasses, inv.ViewModelTypeFullName, inv.CommandPropertyPath),
+                CodeGeneratorHelpers.ResolveObservedTypeInfo(allClasses, inv.ViewTypeFullName, inv.ControlPropertyPath),
                 MethodSuffix(inv),
                 features.SupportsNullable);
         }

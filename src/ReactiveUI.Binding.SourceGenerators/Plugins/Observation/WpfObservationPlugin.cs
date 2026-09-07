@@ -51,7 +51,7 @@ internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin, IObse
     private static readonly int WpfAffinity = BindingAffinity.WpfDependencyObject;
 
     /// <inheritdoc/>
-    public int Affinity => WpfAffinity;
+    public override int Affinity => WpfAffinity;
 
     /// <inheritdoc/>
     public string ObservationKind => "WpfDP";
@@ -130,7 +130,7 @@ internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin, IObse
         StringBuilder sb,
         string lambdaParam,
         PropertyPathSegment segment) =>
-        _ = sb.Append(">)new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+        _ = sb.Append("                    new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
             .AppendLine("                    __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(")
             .Append("                        ").Append(segment.DeclaringTypeFullName).Append('.').Append(segment.PropertyName)
             .Append(DependencyPropertyOwnerOpen).Append(segment.DeclaringTypeFullName).Append(AddValueChangedCall).Append(lambdaParam)
@@ -139,7 +139,7 @@ internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin, IObse
             .Append("                        ").Append(segment.DeclaringTypeFullName).Append('.').Append(segment.PropertyName)
             .Append(DependencyPropertyOwnerOpen).Append(segment.DeclaringTypeFullName).Append(RemoveValueChangedCall).Append(lambdaParam)
             .AppendLine(HandlerArgumentClose).Append("                    () => ((").Append(segment.DeclaringTypeFullName).Append(')')
-            .Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(",").AppendLine("                    false)");
+            .Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(",").Append("                    false)");
 
     /// <inheritdoc/>
     protected override void AppendDeepChainRootSegment(
@@ -149,7 +149,7 @@ internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin, IObse
         string castTypeName,
         string obsVarName) =>
         _ = sb.Append("            var ").Append(obsVarName).Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName)
-            .Append(">)new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append("                    new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
             .AppendLine(DescriptorLookupOpen).Append("                    ")
             .Append(castTypeName).Append('.').Append(segment.PropertyName).Append(DependencyPropertyOwnerOpen).Append(castTypeName).Append(AddValueChangedCall)
             .Append(rootVar).AppendLine(HandlerArgumentClose)

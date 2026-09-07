@@ -58,11 +58,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         var __commandObs_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel, global::System.Windows.Input.ICommand>(__commandObs_s0,
             __p1 => __p1 != null
-                ? (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Windows.Input.ICommand>(
-                    (global::System.ComponentModel.INotifyPropertyChanged)__p1,
+                ? global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<global::System.Windows.Input.ICommand>(
+                    __p1,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel, global::System.Windows.Input.ICommand>>)(__e => __e.SaveCommand)).Body,
                     "SaveCommand",
-                    (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel)__o).SaveCommand,
-                    false)
+                    false,
+                    5,
+                    (object __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel)__o).SaveCommand,
+                    new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Windows.Input.ICommand>(
+                        (global::System.ComponentModel.INotifyPropertyChanged)__p1,
+                        "SaveCommand",
+                        (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel)__o).SaveCommand,
+                        false))
                 : (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::System.Windows.Input.ICommand>(default(global::System.Windows.Input.ICommand)));
         var commandObs = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__commandObs_s1);
 

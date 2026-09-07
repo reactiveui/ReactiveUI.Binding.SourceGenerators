@@ -157,9 +157,12 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
 
         _ = sb.AppendLine().Append("        var ").Append(curVar).Append(" = ")
             .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
-            .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType)
-            .AppendLine(">)").Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType)
-            .Append(">(((").Append(declType).Append(')').Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(")")
+            .Append(" => ").Append(lambdaParam).AppendLine(" != null");
+
+        ChainRegistrationEmitter.AppendChoiceOpen(sb, lambdaParam, segment, Affinity, isBeforeChange);
+
+        _ = sb.Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType)
+            .Append(">(((").Append(declType).Append(')').Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine("))")
             .Append("                : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
     }
 

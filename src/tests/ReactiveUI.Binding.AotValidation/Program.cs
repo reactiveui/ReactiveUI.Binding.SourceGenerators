@@ -55,6 +55,8 @@ internal static class Program
         ValidateBindOneWay();
         ValidateBindTwoWay();
         ValidateBindOneWayDisposal();
+        ValidateOneWayBind();
+        ValidateBind();
 
         Report(string.Empty);
         Report($"AOT Validation: {_passed} passed, {_failed} failed");
@@ -141,6 +143,30 @@ internal static class Program
         binding.Dispose();
         source.Name = "After";
         AssertEqual("BindOneWay post-dispose unchanged", BeforeDisposal, target.DisplayName);
+    }
+
+    /// <summary>OneWayBind, which observes the view model through the view, propagates changes to the view.</summary>
+    private static void ValidateOneWayBind()
+    {
+        var viewModel = new AotViewModel { Name = SourceName };
+        var view = new AotView { ViewModel = viewModel };
+        using var binding = view.OneWayBind(viewModel, x => x.Name, x => x.DisplayName);
+        AssertEqual("OneWayBind initial", SourceName, view.DisplayName);
+        viewModel.Name = ReplacementName;
+        AssertEqual("OneWayBind after set", ReplacementName, view.DisplayName);
+    }
+
+    /// <summary>Bind, which observes both sides through the view, propagates changes in both directions.</summary>
+    private static void ValidateBind()
+    {
+        var viewModel = new AotViewModel { Name = SourceName };
+        var view = new AotView { ViewModel = viewModel };
+        using var binding = view.Bind(viewModel, x => x.Name, x => x.DisplayName);
+        AssertEqual("Bind initial", SourceName, view.DisplayName);
+        viewModel.Name = "FromViewModel";
+        AssertEqual("Bind view model to view", "FromViewModel", view.DisplayName);
+        view.DisplayName = "FromView";
+        AssertEqual("Bind view to view model", "FromView", viewModel.Name);
     }
 
     /// <summary>Compares an expected and actual value, recording a pass or failure to the console.</summary>

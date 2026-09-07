@@ -35,11 +35,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenAny_00002A5206691BE8(global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel obj, global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel, string>, string> selector)
         {
-            var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "FirstName",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel)__o).FirstName,
                 true);
+            var __propObs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel), "FirstName", 5, false);
+            var __propObs0 = __propObs0Registration == null
+                ? (global::System.IObservable<string>)__propObs0Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel, string>>)(__e => __e.FirstName)).Body,
+                    "FirstName",
+                    (object __o) => ((global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel)__o).FirstName,
+                    false,
+                    true);
 
             return global::ReactiveUI.Primitives.LinqExtensions.Select(__propObs0,
                 value => selector(new global::ReactiveUI.Binding.ObservedChange<global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel, string>(obj, null, value)));
@@ -47,11 +58,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenAny_00002A522B790276(global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel obj, global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel, string>, string> selector)
         {
-            var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "LastName",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel)__o).LastName,
                 true);
+            var __propObs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel), "LastName", 5, false);
+            var __propObs0 = __propObs0Registration == null
+                ? (global::System.IObservable<string>)__propObs0Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel, string>>)(__e => __e.LastName)).Body,
+                    "LastName",
+                    (object __o) => ((global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel)__o).LastName,
+                    false,
+                    true);
 
             return global::ReactiveUI.Primitives.LinqExtensions.Select(__propObs0,
                 value => selector(new global::ReactiveUI.Binding.ObservedChange<global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel, string>(obj, null, value)));

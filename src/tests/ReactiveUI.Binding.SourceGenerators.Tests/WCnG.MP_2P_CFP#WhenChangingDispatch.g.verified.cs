@@ -21,13 +21,6 @@ namespace ReactiveUI.Binding
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            // Allow user-registered plugins with higher affinity to override generated observation
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel), "Name", 5, true)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel), "Age", 5, true))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanging(objectToMonitor, property1, property2);
-            }
-
             if (callerLineNumber == 71 && callerFilePath.EndsWith("", global::System.StringComparison.OrdinalIgnoreCase))
             {
                 return __WhenChanging_000011A95039C09F(objectToMonitor);
@@ -37,15 +30,37 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int>> __WhenChanging_000011A95039C09F(global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel obj)
         {
-            var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
+            var __propObs0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
                 (global::System.ComponentModel.INotifyPropertyChanging)obj,
                 "Name",
                 (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel)__o).Name);
+            var __propObs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel), "Name", 5, true);
+            var __propObs0 = __propObs0Registration == null
+                ? (global::System.IObservable<string>)__propObs0Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel, string>>)(__e => __e.Name)).Body,
+                    "Name",
+                    (object __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel)__o).Name,
+                    true,
+                    true);
 
-            var __propObs1 = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<int>(
+            var __propObs1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<int>(
                 (global::System.ComponentModel.INotifyPropertyChanging)obj,
                 "Age",
                 (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel)__o).Age);
+            var __propObs1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel), "Age", 5, true);
+            var __propObs1 = __propObs1Registration == null
+                ? (global::System.IObservable<int>)__propObs1Mechanism
+                : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                    __propObs1Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel, int>>)(__e => __e.Age)).Body,
+                    "Age",
+                    (object __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyTwoProperties.MyViewModel)__o).Age,
+                    true,
+                    true);
 
             return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
                 __propObs0,

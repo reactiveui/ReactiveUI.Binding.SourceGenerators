@@ -42,35 +42,90 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int, double, bool, string>> __WhenAnyValue_00003486AFD4FA6C(global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel obj)
         {
-            var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Prop1",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel)__o).Prop1,
                 true);
+            var __propObs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel), "Prop1", 5, false);
+            var __propObs0 = __propObs0Registration == null
+                ? (global::System.IObservable<string>)__propObs0Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, string>>)(__e => __e.Prop1)).Body,
+                    "Prop1",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel)__o).Prop1,
+                    false,
+                    true);
 
-            var __propObs1 = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
+            var __propObs1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
                 obj,
                 "Prop2",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel)__o).Prop2,
                 true);
+            var __propObs1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel), "Prop2", 5, false);
+            var __propObs1 = __propObs1Registration == null
+                ? (global::System.IObservable<int>)__propObs1Mechanism
+                : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                    __propObs1Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, int>>)(__e => __e.Prop2)).Body,
+                    "Prop2",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel)__o).Prop2,
+                    false,
+                    true);
 
-            var __propObs2 = new global::ReactiveUI.Binding.Observables.PropertyObservable<double>(
+            var __propObs2Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<double>(
                 obj,
                 "Prop3",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel)__o).Prop3,
                 true);
+            var __propObs2Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel), "Prop3", 5, false);
+            var __propObs2 = __propObs2Registration == null
+                ? (global::System.IObservable<double>)__propObs2Mechanism
+                : (global::System.IObservable<double>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<double>(
+                    __propObs2Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, double>>)(__e => __e.Prop3)).Body,
+                    "Prop3",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel)__o).Prop3,
+                    false,
+                    true);
 
-            var __propObs3 = new global::ReactiveUI.Binding.Observables.PropertyObservable<bool>(
+            var __propObs3Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<bool>(
                 obj,
                 "Prop4",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel)__o).Prop4,
                 true);
+            var __propObs3Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel), "Prop4", 5, false);
+            var __propObs3 = __propObs3Registration == null
+                ? (global::System.IObservable<bool>)__propObs3Mechanism
+                : (global::System.IObservable<bool>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<bool>(
+                    __propObs3Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, bool>>)(__e => __e.Prop4)).Body,
+                    "Prop4",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel)__o).Prop4,
+                    false,
+                    true);
 
-            var __propObs4 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs4Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Prop5",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel)__o).Prop5,
                 true);
+            var __propObs4Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel), "Prop5", 5, false);
+            var __propObs4 = __propObs4Registration == null
+                ? (global::System.IObservable<string>)__propObs4Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs4Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel, string>>)(__e => __e.Prop5)).Body,
+                    "Prop5",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyFiveProperties.MyViewModel)__o).Prop5,
+                    false,
+                    true);
 
             return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
                 __propObs0,

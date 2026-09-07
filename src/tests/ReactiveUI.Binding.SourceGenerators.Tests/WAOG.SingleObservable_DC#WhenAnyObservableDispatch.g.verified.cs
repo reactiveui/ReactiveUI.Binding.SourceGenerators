@@ -38,11 +38,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         var __obsProperty_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel, global::System.IObservable<string>>(__obsProperty_s0,
             __obsProperty_p1 => __obsProperty_p1 != null
-                ? (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
-                    (global::System.ComponentModel.INotifyPropertyChanged)__obsProperty_p1,
+                ? global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<global::System.IObservable<string>>(
+                    __obsProperty_p1,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel, global::System.IObservable<string>>>)(__e => __e.MyCommand)).Body,
                     "MyCommand",
-                    (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand,
-                    false)
+                    false,
+                    5,
+                    (object __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand,
+                    new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
+                        (global::System.ComponentModel.INotifyPropertyChanged)__obsProperty_p1,
+                        "MyCommand",
+                        (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand,
+                        false))
                 : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<global::System.IObservable<string>>.Instance);
             var __obsProperty = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obsProperty_s1);
 

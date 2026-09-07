@@ -23,13 +23,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyViewModel), "Count", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.OneWayBind(
-                    view, viewModel, viewModelProperty, viewProperty, null, viewPropertyExpression);
-            }
-
             if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountValue")
             {
@@ -58,11 +51,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return null;
         }
-        var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
+        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             viewModel,
             "Count",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyViewModel)__o).Count,
             true);
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyViewModel), "Count", 5, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<int>)sourceObsMechanism
+            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                sourceObsRegistration,
+                viewModel,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyViewModel, int>>)(__e => __e.Count)).Body,
+                "Count",
+                (object __o) => ((global::SharedScenarios.OneWayBind.SinglePropertyIntToInt.MyViewModel)__o).Count,
+                false,
+                true);
             var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>

@@ -43,11 +43,11 @@ internal static class ObservationCodeGenerator
     /// <summary>Opens a before-change observation cast to the interface the chain stage expects.</summary>
     private const string ChangingObservableOpen = ">)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<";
 
-    /// <summary>
-    /// The maximum number of property expressions for which a runtime affinity check is emitted.
-    /// This matches the available <c>RuntimeObservationFallback</c> method signatures.
-    /// </summary>
-    private const int MaxAffinityFallbackPropertyCount = 3;
+    /// <summary>Names the local holding the observation the generator's own mechanism builds.</summary>
+    private const string MechanismVariableSuffix = "Mechanism";
+
+    /// <summary>Names the local holding the registration that outranked that mechanism.</summary>
+    private const string RegistrationVariableSuffix = "Registration";
 
     /// <summary>The operator every observation ends with, so consecutive equal values are suppressed.</summary>
     private const string DistinctUntilChangedCall = "global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged";
@@ -298,6 +298,7 @@ internal static class ObservationCodeGenerator
     {
         var segment = path[0];
         var plugin = ResolveRootPlugin(classInfo, segment);
+        var mechanismVariable = varName + MechanismVariableSuffix;
 
         if (plugin is not null)
         {
@@ -307,11 +308,11 @@ internal static class ObservationCodeGenerator
                 segment,
                 GetTypeCastName(classInfo),
                 isBeforeChange,
-                varName);
+                mechanismVariable);
         }
         else if (IsINPChanging(classInfo) && isBeforeChange)
         {
-            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(varName).Append(" = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<")
+            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(mechanismVariable).Append(" = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<")
                 .Append(segment.PropertyTypeFullName).AppendLine(">(")
                 .AppendLine(ChangingSourceArgument).Append(GeneratedSyntax.QuotedArgumentOpen)
                 .Append(segment.PropertyName).AppendLine("\",")
@@ -321,9 +322,19 @@ internal static class ObservationCodeGenerator
         else
         {
             var propertyAccess = $"obj.{segment.PropertyName}";
-            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(varName).Append(" = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<")
+            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(mechanismVariable).Append(" = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<")
                 .Append(segment.PropertyTypeFullName).Append(">(").Append(propertyAccess).Append(");");
         }
+
+        _ = sb.AppendLine();
+
+        EmitInlinePluginChoice(
+            sb,
+            "obj",
+            segment,
+            plugin?.Affinity ?? 0,
+            isBeforeChange,
+            new(GeneratedSyntax.BodyLocalDeclaration, "                ", mechanismVariable, varName));
     }
 
     /// <summary>
@@ -424,25 +435,18 @@ internal static class ObservationCodeGenerator
         return result;
     }
 
-    /// <summary>
-    /// Generates a concrete typed extension method overload with dispatch logic.
-    /// When <paramref name="generatedAffinity"/> is non-negative, emits an affinity check
-    /// before the dispatch table to allow user-registered plugins with higher affinity
-    /// to override the source-generated observation at runtime.
-    /// </summary>
+    /// <summary>Generates a concrete typed extension method overload with its dispatch table.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The type group containing invocations that share a signature.</param>
     /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
-    /// <param name="generatedAffinity">The affinity of the source generator's selected plugin, or -1 if unknown.</param>
     internal static void GenerateConcreteOverload(
-    StringBuilder sb,
-    TypeGroup group,
-    bool supportsCallerArgExpr,
-    bool stubHasExpressionParameters,
-    string methodPrefix,
-    int generatedAffinity = -1)
+        StringBuilder sb,
+        TypeGroup group,
+        bool supportsCallerArgExpr,
+        bool stubHasExpressionParameters,
+        string methodPrefix)
     {
         var first = group.First;
         var propCount = first.PropertyPaths.Length;
@@ -451,13 +455,8 @@ internal static class ObservationCodeGenerator
         EmitOverloadSignature(sb, first, supportsCallerArgExpr, stubHasExpressionParameters, methodPrefix, propCount, hasSelector);
         CodeGeneratorHelpers.AppendIndexedStaticPrefixNormalization(sb, supportsCallerArgExpr, "property", propCount);
 
-        // Emit runtime affinity check: allow user-registered plugins to override generated observation.
-        // Only emit for overloads with <= 3 properties, matching RuntimeObservationFallback signatures.
-        if (generatedAffinity >= 0 && propCount <= MaxAffinityFallbackPropertyCount)
-        {
-            EmitAffinityCheck(sb, first, methodPrefix, propCount, hasSelector, generatedAffinity);
-        }
-
+        // A registration that outranks the generated mechanism is honoured where the observation is built,
+        // one property at a time, so the dispatch itself has nothing to decide.
         EmitDispatchTable(sb, group, supportsCallerArgExpr, methodPrefix, propCount, hasSelector);
 
         GenerateRuntimeFallback(sb, methodPrefix);
@@ -476,171 +475,6 @@ internal static class ObservationCodeGenerator
     internal static void GenerateRuntimeFallback(StringBuilder sb, string methodPrefix) =>
     sb.Append("            throw new global::System.InvalidOperationException(\"No generated ").Append(methodPrefix)
         .AppendLine(" dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.\");");
-
-    /// <summary>
-    /// Emits a runtime affinity check at the top of a concrete overload method body.
-    /// If a user-registered <c>ICreatesObservableForProperty</c> implementation has higher
-    /// affinity than the source generator's plugin, delegates to <c>RuntimeObservationFallback</c>.
-    /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="first">The first invocation in the group, used for type information.</param>
-    /// <param name="methodPrefix">The method name prefix ("WhenChanged", "WhenChanging", or "WhenAnyValue").</param>
-    /// <param name="propCount">The number of property expressions.</param>
-    /// <param name="hasSelector">Whether a selector function is present.</param>
-    /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
-    internal static void EmitAffinityCheck(
-    StringBuilder sb,
-    InvocationInfo first,
-    string methodPrefix,
-    int propCount,
-    bool hasSelector,
-    int generatedAffinity)
-    {
-        var isBeforeChange = methodPrefix == "WhenChanging";
-
-        _ = sb.AppendLine(
-        "            // Allow user-registered plugins with higher affinity to override generated observation")
-        .Append("            if (")
-        .Append(AffinityCondition(first, generatedAffinity, isBeforeChange))
-        .AppendLine(")")
-        .AppendLine("            {");
-
-        EmitAffinityFallbackReturn(sb, first, methodPrefix, propCount, hasSelector);
-
-        _ = sb.AppendLine("            }")
-        .AppendLine();
-    }
-
-    /// <summary>Renders the condition that hands an observation to the runtime engine.</summary>
-    /// <param name="first">The first invocation in the group, which fixes the observed paths.</param>
-    /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
-    /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
-    /// <returns>The rendered condition, without surrounding parentheses.</returns>
-    /// <remarks>
-    /// One test per link of every observed path. A plugin scores a type and a property together, so a chain
-    /// can pick a different mechanism at every step and a registration that wins at any one of them takes the
-    /// whole observation. The property name is what makes the question answerable: the WPF, WinUI, WinForms
-    /// and KVO plugins all answer 0 for a property their mechanism does not reach, whatever the type.
-    /// </remarks>
-    internal static string AffinityCondition(InvocationInfo first, int generatedAffinity, bool isBeforeChange)
-    {
-        var builder = new StringBuilder();
-        var beforeChanged = isBeforeChange ? "true" : "false";
-        var paths = first.PropertyPaths;
-        var written = 0;
-
-        for (var p = 0; p < paths.Length; p++)
-        {
-            var path = paths[p];
-            for (var s = 0; s < path.Length; s++)
-            {
-                var segment = path[s];
-                var observedType = s == 0 ? first.SourceTypeFullName : segment.DeclaringTypeFullName;
-
-                if (written > 0)
-                {
-                    _ = builder.AppendLine().Append("                || ");
-                }
-
-                _ = builder
-                    .Append(ObservationAffinityChecker)
-                    .Append(".HasHigherAffinityPlugin(typeof(")
-                    .Append(observedType)
-                    .Append("), \"")
-                    .Append(segment.PropertyName)
-                    .Append("\", ")
-                    .Append(SegmentAffinity(segment, generatedAffinity))
-                    .Append(", ")
-                    .Append(beforeChanged)
-                    .Append(')');
-
-                written++;
-            }
-        }
-
-        return builder.ToString();
-    }
-
-    /// <summary>
-    /// Emits the return statement inside the affinity check block, delegating to
-    /// <c>RuntimeObservationFallback</c> with the appropriate method signature.
-    /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="first">The first invocation in the group, used for type information.</param>
-    /// <param name="methodPrefix">The method name prefix.</param>
-    /// <param name="propCount">The number of property expressions.</param>
-    /// <param name="hasSelector">Whether a selector function is present.</param>
-    internal static void EmitAffinityFallbackReturn(
-    StringBuilder sb,
-    InvocationInfo first,
-    string methodPrefix,
-    int propCount,
-    bool hasSelector)
-    {
-        // Determine the fallback method name: WhenAnyValue maps to WhenAnyValue, others stay as-is
-        var fallbackMethod = methodPrefix;
-
-        // Build the property arguments (property1, property2, ...)
-        var propArgs = new PooledStringBuilder();
-        for (var i = 0; i < propCount; i++)
-        {
-            _ = propArgs.Append(", property").Append(i + 1);
-        }
-
-        if (!hasSelector)
-        {
-            // No selector: direct call to RuntimeObservationFallback
-            _ = sb.Append("                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.")
-            .Append(fallbackMethod).Append(MonitoredObjectArgument).Append(propArgs).AppendLine(");");
-        }
-        else if (propCount == 1)
-        {
-            // Single property with selector: wrap fallback with MapSignal
-            var propType = first.PropertyPaths[0][first.PropertyPaths[0].Length - 1].PropertyTypeFullName;
-            _ = sb.Append("                return new global::ReactiveUI.Primitives.Signals.MapSignal<").Append(propType).Append(", ")
-                .Append(first.ReturnTypeFullName).AppendLine(">(")
-                .Append("                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.").Append(fallbackMethod)
-                .Append(MonitoredObjectArgument).Append(propArgs).AppendLine("),").AppendLine("                    selector);");
-        }
-        else
-        {
-            // Multi-property with selector: read the fallback's emission back out for the selector
-            var valuesType = new PooledStringBuilder().Append(PropertyValues).Append('<');
-            for (var i = 0; i < propCount; i++)
-            {
-                var path = first.PropertyPaths[i];
-                _ = valuesType.Append(path[path.Length - 1].PropertyTypeFullName);
-                if (i < propCount - 1)
-                {
-                    _ = valuesType.Append(", ");
-                }
-            }
-
-            _ = valuesType.Append('>');
-
-            // Build the selector decomposition lambda: __t => selector(__t.Property1, __t.Property2, ...)
-            var selectorArgs = new PooledStringBuilder();
-            for (var i = 0; i < propCount; i++)
-            {
-                _ = selectorArgs.Append("__t.Property").Append(i + 1);
-                if (i < propCount - 1)
-                {
-                    _ = selectorArgs.Append(", ");
-                }
-            }
-
-            _ = sb.Append("                return new global::ReactiveUI.Primitives.Signals.MapSignal<").Append(valuesType).Append(", ")
-                .Append(first.ReturnTypeFullName).AppendLine(">(")
-                .Append("                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.").Append(fallbackMethod)
-                .Append(MonitoredObjectArgument).Append(propArgs).AppendLine("),").Append("                    __t => selector(").Append(selectorArgs)
-                .AppendLine("));");
-
-            valuesType.Return();
-            selectorArgs.Return();
-        }
-
-        propArgs.Return();
-    }
 
     /// <summary>Generates a single-property observation method body using plugin dispatch.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -750,23 +584,84 @@ internal static class ObservationCodeGenerator
         if (propertyPath.Length == 1)
         {
             var segment = propertyPath[0];
+            var mechanismVariable = variableName + MechanismVariableSuffix;
 
             if (plugin is not null)
             {
-                plugin.EmitInlineObservationVariable(sb, rootVar, segment, GetTypeCastName(classInfo), variableName);
+                plugin.EmitInlineObservationVariable(sb, rootVar, segment, GetTypeCastName(classInfo), mechanismVariable);
             }
             else
             {
                 var propertyAccess = $"{rootVar}.{segment.PropertyName}";
-                _ = sb.Append(GeneratedSyntax.InlineLocalDeclaration).Append(variableName)
+                _ = sb.Append(GeneratedSyntax.InlineLocalDeclaration).Append(mechanismVariable)
                     .Append(" = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<").Append(propertyTypeFullName).Append(">(")
                     .Append(propertyAccess).AppendLine(");");
             }
+
+            EmitInlinePluginChoice(
+                sb,
+                rootVar,
+                segment,
+                plugin?.Affinity ?? 0,
+                false,
+                new(GeneratedSyntax.InlineLocalDeclaration, "            ", mechanismVariable, variableName));
+            _ = sb.AppendLine();
         }
         else
         {
             EmitInlineDeepChain(sb, rootVar, propertyPath, classInfo, plugin, variableName);
         }
+    }
+
+    /// <summary>Renders a flag as the generated output spells it.</summary>
+    /// <param name="value">The flag to render.</param>
+    /// <returns>The literal a generated argument carries.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string BooleanLiteral(bool value) => value ? "true" : "false";
+
+    /// <summary>Emits the choice between the mechanism the generator picked and a registration that outranks it.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="rootVar">The variable holding the observed object.</param>
+    /// <param name="segment">The property being observed.</param>
+    /// <param name="generatedAffinity">The affinity of the mechanism the generator picked.</param>
+    /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
+    /// <param name="layout">Where the choice is written and what it names the locals it declares.</param>
+    /// <remarks>
+    /// The registration is resolved where the observation is built rather than at the call site's dispatch, so a
+    /// binding keeps its generated write and only its reading changes. The property is named as a literal and
+    /// read through an emitted accessor, and the expression handed to the registration is a lambda the compiler
+    /// built, so nothing on this path is resolved by name and an ahead-of-time consumer carries no expression
+    /// engine for it.
+    /// </remarks>
+    private static void EmitInlinePluginChoice(
+        StringBuilder sb,
+        string rootVar,
+        PropertyPathSegment segment,
+        int generatedAffinity,
+        bool isBeforeChange,
+        in PluginChoiceLayout layout)
+    {
+        var declaringType = segment.DeclaringTypeFullName;
+        var valueType = segment.PropertyTypeFullName;
+        var pluginVariable = layout.VariableName + RegistrationVariableSuffix;
+        var argumentIndent = $"{layout.ContinuationIndent}    ";
+        const string observableOpen = "? (global::System.IObservable<";
+
+        _ = sb.Append(layout.DeclarationPrefix).Append(pluginVariable).Append(" = ").Append(ObservationAffinityChecker)
+            .Append(".FindHigherAffinityPlugin(typeof(").Append(declaringType).Append("), \"").Append(segment.PropertyName)
+            .Append("\", ").Append(generatedAffinity).Append(", ").Append(BooleanLiteral(isBeforeChange)).AppendLine(");")
+            .Append(layout.DeclarationPrefix).Append(layout.VariableName).Append(" = ").Append(pluginVariable).AppendLine(" == null")
+            .Append(layout.ContinuationIndent).Append(observableOpen).Append(valueType).Append(">)").AppendLine(layout.MechanismVariable)
+            .Append(layout.ContinuationIndent).Append(": (global::System.IObservable<").Append(valueType).Append(">)new ")
+            .Append(PluginPropertyObservable).Append('<').Append(valueType).AppendLine(">(")
+            .Append(argumentIndent).Append(pluginVariable).AppendLine(",")
+            .Append(argumentIndent).Append(rootVar).AppendLine(",")
+            .Append(argumentIndent).Append("((global::System.Linq.Expressions.Expression<global::System.Func<").Append(declaringType).Append(", ")
+            .Append(valueType).Append(">>)(__e => __e.").Append(segment.PropertyName).AppendLine(")).Body,")
+            .Append(argumentIndent).Append('"').Append(segment.PropertyName).AppendLine("\",")
+            .Append(argumentIndent).Append("(object __o) => ((").Append(declaringType).Append(")__o).").Append(segment.PropertyName).AppendLine(",")
+            .Append(argumentIndent).Append(BooleanLiteral(isBeforeChange)).AppendLine(",")
+            .Append(argumentIndent).Append("true);");
     }
 
     /// <summary>Picks the observation plugin for the type that declares a chain segment's property.</summary>
@@ -807,19 +702,6 @@ internal static class ObservationCodeGenerator
             ? ObservationPluginRegistry.GetBestPlugin(classInfo, segment.PropertyName)
             : ObservationPluginRegistry.GetBestPlugin(segment.DeclaringTypeInfo, segment.PropertyName);
     }
-
-    /// <summary>Reads the affinity of the mechanism the generator picked for one link of a path.</summary>
-    /// <param name="segment">The link being observed.</param>
-    /// <param name="fallbackAffinity">The affinity to report when the link's declaring type was never detected.</param>
-    /// <returns>The generated affinity for that link.</returns>
-    /// <remarks>
-    /// A detected type with no plugin observes by a plain read, which any registration outranks, so it scores
-    /// zero rather than inheriting the group's affinity.
-    /// </remarks>
-    private static int SegmentAffinity(PropertyPathSegment segment, int fallbackAffinity) =>
-        segment.DeclaringTypeInfo is null
-            ? fallbackAffinity
-            : ResolveSegmentPlugin(segment)?.Affinity ?? 0;
 
     /// <summary>
     /// Chains the segments after the root for the standalone observation method, which names its
@@ -1061,15 +943,8 @@ internal static class ObservationCodeGenerator
         bool stubHasExpressionParameters,
         string methodPrefix)
     {
-        // Resolve the plugin affinity for the source type to emit the runtime override check
-        var groupClassInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, group.SourceTypeFullName);
-        var groupPlugin = groupClassInfo is not null
-            ? ObservationPluginRegistry.GetBestPlugin(groupClassInfo)
-            : null;
-        var groupAffinity = groupPlugin is not null ? groupPlugin.Affinity : -1;
-
         // Generate the concrete typed extension method overload
-        GenerateConcreteOverload(sb, group, supportsCallerArgExpr, stubHasExpressionParameters, methodPrefix, groupAffinity);
+        GenerateConcreteOverload(sb, group, supportsCallerArgExpr, stubHasExpressionParameters, methodPrefix);
         _ = sb.AppendLine();
 
         // Generate the observation methods for each invocation in this group. Call sites that share the
@@ -1256,6 +1131,17 @@ internal static class ObservationCodeGenerator
 
         _ = sb.AppendLine(")");
     }
+
+    /// <summary>Where a plugin choice is written, and what it names the two locals it declares.</summary>
+    /// <param name="DeclarationPrefix">The <c>var</c> declaration at the indentation the surrounding body sits at.</param>
+    /// <param name="ContinuationIndent">The indentation the branches of the choice are written at.</param>
+    /// <param name="MechanismVariable">The local holding the observation the generator's own mechanism built.</param>
+    /// <param name="VariableName">The local the chosen observation is assigned to.</param>
+    internal readonly record struct PluginChoiceLayout(
+        string DeclarationPrefix,
+        string ContinuationIndent,
+        string MechanismVariable,
+        string VariableName);
 
     /// <summary>Groups invocations by source and return type signature for overload generation.</summary>
     /// <param name="First">The first invocation in the group, used for type information.</param>

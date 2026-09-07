@@ -7,10 +7,33 @@ using System.ComponentModel;
 namespace ReactiveUI.Binding.AotValidation;
 
 /// <summary>A view used for AOT binding validation.</summary>
-public class AotView : INotifyPropertyChanged
+public class AotView : INotifyPropertyChanged, IViewFor<AotViewModel>
 {
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>Gets or sets the view model this view displays.</summary>
+    public AotViewModel? ViewModel
+    {
+        get => field;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            field = value;
+            PropertyChanged?.Invoke(this, new(nameof(ViewModel)));
+        }
+    }
+
+    /// <inheritdoc/>
+    object? IViewFor.ViewModel
+    {
+        get => ViewModel;
+        set => ViewModel = (AotViewModel?)value;
+    }
 
     /// <summary>Gets or sets the display name.</summary>
     public string DisplayName

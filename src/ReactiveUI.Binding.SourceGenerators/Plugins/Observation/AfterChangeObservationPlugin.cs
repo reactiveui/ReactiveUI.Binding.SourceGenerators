@@ -17,6 +17,13 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// </remarks>
 internal abstract class AfterChangeObservationPlugin
 {
+    /// <summary>Gets the affinity this mechanism bids with.</summary>
+    /// <remarks>
+    /// A chain link offers its observation to any registration scoring higher than this, so the number the
+    /// plugin bids to the registry is the same one the emitted comparison carries.
+    /// </remarks>
+    public abstract int Affinity { get; }
+
     /// <summary>Gets a value indicating whether this mechanism can report a change before it happens.</summary>
     public bool SupportsBeforeChanged => false;
 
@@ -122,15 +129,18 @@ internal abstract class AfterChangeObservationPlugin
 
         _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ")
             .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
-            .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType);
+            .Append(" => ").Append(lambdaParam).AppendLine(" != null");
 
         if (isBeforeChange)
         {
+            _ = sb.Append("                ? (global::System.IObservable<").Append(segType);
             AppendUnchangingChainSegment(sb, lambdaParam, segment);
         }
         else
         {
+            ChainRegistrationEmitter.AppendChoiceOpen(sb, lambdaParam, segment, Affinity, false);
             AppendChainSegmentObservation(sb, lambdaParam, segment);
+            _ = sb.AppendLine(")");
         }
 
         _ = sb.Append("                : (global::System.IObservable<").Append(segType).Append(">)")

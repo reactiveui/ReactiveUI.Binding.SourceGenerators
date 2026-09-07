@@ -50,23 +50,22 @@ internal static class CommandExtractor
         var args = invocation.ArgumentList.Arguments;
         InvalidOperationExceptionHelper.EnsureMinimumArguments(args.Count, MinimumBindCommandArgumentCount);
 
-        // Extract command property path (2nd argument: propertyName)
+        // The command path comes from the 2nd argument, the control path from the 3rd.
         var commandPropertyArg = args[1].Expression;
-        var commandPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(commandPropertyArg, semanticModel, ct);
-        if (commandPropertyPath is null)
-        {
-            return null;
-        }
-
-        // Extract control property path (3rd argument: controlName)
         var controlPropertyArg = args[2].Expression;
+        var commandPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(commandPropertyArg, semanticModel, ct);
         var controlPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(controlPropertyArg, semanticModel, ct);
-        if (controlPropertyPath is null)
+        if (commandPropertyPath is null || controlPropertyPath is null)
         {
             return null;
         }
 
-        var (viewTypeFullName, viewModelTypeFullName) = ResolveBindCommandSides(memberAccess, args, semanticModel, ct);
+        if (ResolveBindCommandSides(memberAccess, args, semanticModel, ct)
+            is not var (viewTypeFullName, viewModelTypeFullName))
+        {
+            return null;
+        }
+
         var commandTypeFullName = commandPropertyPath[^1].PropertyTypeFullName;
         var controlTypeFullName = controlPropertyPath[^1].PropertyTypeFullName;
 
@@ -114,15 +113,15 @@ internal static class CommandExtractor
             SemanticModel semanticModel,
             CancellationToken ct)
     {
-        for (var a = WithParameterSearchStartIndex; a < args.Count; a++)
+        for (var argumentIndex = WithParameterSearchStartIndex; argumentIndex < args.Count; argumentIndex++)
         {
-            var paramPath = SyntaxHelpers.ExtractPropertyPathFromLambda(args[a].Expression, semanticModel, ct);
+            var paramPath = SyntaxHelpers.ExtractPropertyPathFromLambda(args[argumentIndex].Expression, semanticModel, ct);
             if (paramPath is not null)
             {
                 return new ParameterLambda(
                     paramPath,
                     paramPath[^1].PropertyTypeFullName,
-                    CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[a].Expression.ToString()));
+                    CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[argumentIndex].Expression.ToString()));
             }
         }
 
@@ -247,14 +246,14 @@ internal static class CommandExtractor
             }
 
             // Find matching argument
-            for (var a = 0; a < args.Count; a++)
+            for (var argumentIndex = 0; argumentIndex < args.Count; argumentIndex++)
             {
-                if (!IsToEventArgument(args[a], a, i))
+                if (!IsToEventArgument(args[argumentIndex], argumentIndex, i))
                 {
                     continue;
                 }
 
-                var constant = semanticModel.GetConstantValue(args[a].Expression, ct);
+                var constant = semanticModel.GetConstantValue(args[argumentIndex].Expression, ct);
                 return constant is { HasValue: true, Value: string eventName } && !string.IsNullOrEmpty(eventName)
                     ? eventName
                     : null;
@@ -271,22 +270,24 @@ internal static class CommandExtractor
     /// <param name="args">The invocation arguments.</param>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>The fully qualified view and view model type names.</returns>
-    internal static BindCommandSides ResolveBindCommandSides(
+    /// <returns>
+    /// The fully qualified view and view model type names, or <see langword="null"/> when either names a type
+    /// a generated overload could not declare.
+    /// </returns>
+    internal static BindCommandSides? ResolveBindCommandSides(
         MemberAccessExpressionSyntax memberAccess,
         SeparatedSyntaxList<ArgumentSyntax> args,
         SemanticModel semanticModel,
         CancellationToken ct)
     {
-        var viewTypeFullName = InvalidOperationExceptionHelper.EnsureNotNull(
-            ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type),
-            "view type display name");
+        var viewTypeFullName =
+            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type);
+        var viewModelTypeFullName =
+            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
 
-        var viewModelTypeFullName = InvalidOperationExceptionHelper.EnsureNotNull(
-            ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type),
-            "view model type display name");
-
-        return new(viewTypeFullName, viewModelTypeFullName);
+        return viewTypeFullName is null || viewModelTypeFullName is null
+            ? null
+            : new BindCommandSides(viewTypeFullName, viewModelTypeFullName);
     }
 
     /// <summary>

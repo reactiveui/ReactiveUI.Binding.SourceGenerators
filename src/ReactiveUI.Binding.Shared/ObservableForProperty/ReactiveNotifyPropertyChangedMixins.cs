@@ -130,13 +130,13 @@ public static class ReactiveNotifyPropertyChangedMixins
                     return default!;
                 }
 
-                var val = prop.GetValue(sender);
-                if (val is null)
+                var propertyValue = prop.GetValue(sender);
+                if (propertyValue is null)
                 {
                     return default!;
                 }
 
-                return val is TValue tv ? tv : (TValue)val;
+                return propertyValue is TValue typedValue ? typedValue : (TValue)propertyValue;
             }
 
             // Single fused sink: emits the initial value (unless skipped), then re-reads and emits on each

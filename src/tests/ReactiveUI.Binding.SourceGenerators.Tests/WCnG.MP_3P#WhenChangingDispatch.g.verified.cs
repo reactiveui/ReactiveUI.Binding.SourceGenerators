@@ -27,14 +27,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             property2Expression = property2Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property2Expression.Substring(7) : property2Expression;
             property3Expression = property3Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property3Expression.Substring(7) : property3Expression;
 
-            // Allow user-registered plugins with higher affinity to override generated observation
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel), "Name", 5, true)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel), "Age", 5, true)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel), "Score", 5, true))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanging(objectToMonitor, property1, property2, property3);
-            }
-
             if (property1Expression == "x => x.Name" && property2Expression == "x => x.Age" && property3Expression == "x => x.Score")
             {
                 return __WhenChanging_7FFFF53EB8A56F90(objectToMonitor);
@@ -44,20 +36,53 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int, double>> __WhenChanging_7FFFF53EB8A56F90(global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel obj)
         {
-            var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
+            var __propObs0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
                 (global::System.ComponentModel.INotifyPropertyChanging)obj,
                 "Name",
                 (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel)__o).Name);
+            var __propObs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel), "Name", 5, true);
+            var __propObs0 = __propObs0Registration == null
+                ? (global::System.IObservable<string>)__propObs0Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel, string>>)(__e => __e.Name)).Body,
+                    "Name",
+                    (object __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel)__o).Name,
+                    true,
+                    true);
 
-            var __propObs1 = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<int>(
+            var __propObs1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<int>(
                 (global::System.ComponentModel.INotifyPropertyChanging)obj,
                 "Age",
                 (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel)__o).Age);
+            var __propObs1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel), "Age", 5, true);
+            var __propObs1 = __propObs1Registration == null
+                ? (global::System.IObservable<int>)__propObs1Mechanism
+                : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                    __propObs1Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel, int>>)(__e => __e.Age)).Body,
+                    "Age",
+                    (object __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel)__o).Age,
+                    true,
+                    true);
 
-            var __propObs2 = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<double>(
+            var __propObs2Mechanism = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<double>(
                 (global::System.ComponentModel.INotifyPropertyChanging)obj,
                 "Score",
                 (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel)__o).Score);
+            var __propObs2Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel), "Score", 5, true);
+            var __propObs2 = __propObs2Registration == null
+                ? (global::System.IObservable<double>)__propObs2Mechanism
+                : (global::System.IObservable<double>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<double>(
+                    __propObs2Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel, double>>)(__e => __e.Score)).Body,
+                    "Score",
+                    (object __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyThreeProperties.MyViewModel)__o).Score,
+                    true,
+                    true);
 
             return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
                 __propObs0,

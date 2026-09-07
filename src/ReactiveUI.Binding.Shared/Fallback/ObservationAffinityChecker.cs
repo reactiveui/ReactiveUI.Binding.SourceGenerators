@@ -63,6 +63,46 @@ public static class ObservationAffinityChecker
         return false;
     }
 
+    /// <summary>Finds the registered <see cref="ICreatesObservableForProperty"/> that outranks <paramref name="generatedAffinity"/>.</summary>
+    /// <param name="type">The type being observed.</param>
+    /// <param name="propertyName">The property being observed on that type.</param>
+    /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
+    /// <param name="beforeChanged">Whether before-change (PropertyChanging) observation is requested.</param>
+    /// <returns>The highest-scoring registration that beats the generated one, or <see langword="null"/> when none does.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="type"/> or <paramref name="propertyName"/> is null.</exception>
+    /// <remarks>
+    /// Generated code asks for the registration itself rather than for a yes-or-no, so the winner is scored
+    /// once and then observed through. Answering only "is there one" costs a second scan to find it again,
+    /// on a path every binding runs.
+    /// </remarks>
+    public static ICreatesObservableForProperty? FindHigherAffinityPlugin(
+        Type type,
+        string propertyName,
+        int generatedAffinity,
+        bool beforeChanged)
+    {
+        ArgumentExceptionHelper.ThrowIfNull(type);
+        ArgumentExceptionHelper.ThrowIfNull(propertyName);
+
+        var plugins = Resolve();
+        var bestScore = generatedAffinity;
+        ICreatesObservableForProperty? best = null;
+
+        for (var i = 0; i < plugins.Length; i++)
+        {
+            var score = plugins[i].GetAffinityForObject(type, propertyName, beforeChanged);
+            if (score <= bestScore)
+            {
+                continue;
+            }
+
+            bestScore = score;
+            best = plugins[i];
+        }
+
+        return best;
+    }
+
     /// <summary>Resolves the registered plugins once and keeps them.</summary>
     /// <returns>The registered plugins, empty when none is registered.</returns>
     /// <remarks>

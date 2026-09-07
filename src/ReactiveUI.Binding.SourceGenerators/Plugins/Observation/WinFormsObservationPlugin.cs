@@ -46,7 +46,7 @@ internal sealed class WinFormsObservationPlugin : AfterChangeObservationPlugin, 
     private static readonly int WinFormsAffinity = BindingAffinity.WinFormsEvent;
 
     /// <inheritdoc/>
-    public int Affinity => WinFormsAffinity;
+    public override int Affinity => WinFormsAffinity;
 
     /// <inheritdoc/>
     public string ObservationKind => "WinForms";
@@ -116,12 +116,12 @@ internal sealed class WinFormsObservationPlugin : AfterChangeObservationPlugin, 
         StringBuilder sb,
         string lambdaParam,
         PropertyPathSegment segment) =>
-        _ = sb.Append(">)new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+        _ = sb.Append("                    new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
             .Append("                    __h => ((").Append(segment.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").")
             .Append(segment.PropertyName).AppendLine(ChangedEventAdd).Append("                    __h => ((").Append(segment.DeclaringTypeFullName)
             .Append(')').Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(ChangedEventRemove)
             .Append("                    () => ((").Append(segment.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").")
-            .Append(segment.PropertyName).AppendLine(",").AppendLine("                    false)");
+            .Append(segment.PropertyName).AppendLine(",").Append("                    false)");
 
     /// <inheritdoc/>
     protected override void AppendDeepChainRootSegment(
@@ -131,7 +131,7 @@ internal sealed class WinFormsObservationPlugin : AfterChangeObservationPlugin, 
         string castTypeName,
         string obsVarName) =>
         _ = sb.Append("            var ").Append(obsVarName).Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName)
-            .Append(">)new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append("                    new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
             .Append(HandlerLambdaOpen).Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName)
             .AppendLine(ChangedEventAdd).Append(HandlerLambdaOpen).Append(castTypeName).Append(')').Append(rootVar).Append(").")
             .Append(segment.PropertyName).AppendLine(ChangedEventRemove).Append("                () => ((").Append(castTypeName).Append(')')
