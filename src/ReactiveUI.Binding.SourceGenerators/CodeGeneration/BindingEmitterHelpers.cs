@@ -24,6 +24,9 @@ internal static class BindingEmitterHelpers
     /// <summary>The name a view exposes its view model under.</summary>
     private const string ViewModelPropertyName = "ViewModel";
 
+    /// <summary>The type the non-generic view interface declares the view model as, which names no view model.</summary>
+    private const string WeaklyTypedViewModel = "object";
+
     /// <summary>Opens a delegate parameter, ready for the two type arguments and the parameter name.</summary>
     private const string FuncParameterPrefix = ", global::System.Func<";
 
@@ -494,17 +497,25 @@ internal static class BindingEmitterHelpers
         ClassBindingInfo? sourceClassInfo,
         ClassBindingInfo? targetClassInfo)
     {
-        if (targetClassInfo is null || !DeclaresViewModel(targetClassInfo, inv.SourceTypeFullName))
+        var declaredType = targetClassInfo is null ? null : FindViewModelPropertyType(targetClassInfo);
+        if (declaredType is null)
         {
             return new("viewModel", inv.SourcePropertyPath, sourceClassInfo);
         }
+
+        // The stage below is typed as the view model the call site named, so a view exposing it as a base or
+        // an interface has to narrow on the way out. Observables convert the other way, so the read does it.
+        var readCast = string.Equals(declaredType, inv.SourceTypeFullName, StringComparison.Ordinal)
+            ? null
+            : inv.SourceTypeFullName;
 
         var viewModelSegment = new PropertyPathSegment(
             ViewModelPropertyName,
             inv.SourceTypeFullName,
             inv.TargetTypeFullName,
             true,
-            sourceClassInfo);
+            sourceClassInfo,
+            readCast);
 
         var source = inv.SourcePropertyPath;
         var rooted = new PropertyPathSegment[source.Length + 1];
@@ -517,23 +528,34 @@ internal static class BindingEmitterHelpers
         return new("view", new(rooted), targetClassInfo);
     }
 
-    /// <summary>Determines whether a view declares a view model property of the bound type.</summary>
+    /// <summary>Finds the type a view declares its view model property as.</summary>
     /// <param name="targetClassInfo">The view type's binding info.</param>
-    /// <param name="viewModelTypeFullName">The view model type the call site binds from.</param>
-    /// <returns><see langword="true"/> when the view exposes that view model.</returns>
-    private static bool DeclaresViewModel(ClassBindingInfo targetClassInfo, string viewModelTypeFullName)
+    /// <returns>The declared property type, or <see langword="null"/> when the view exposes no such property.</returns>
+    /// <remarks>
+    /// A view implementing <c>IViewFor&lt;T&gt;</c> declares the property twice - once weakly typed for the
+    /// non-generic interface, once as the view model itself. Only the typed declaration counts. The weak one
+    /// says nothing about which view model the view holds, and following it would point the binding at a
+    /// property the view may never have been given, where the call site handed the view model over directly.
+    /// </remarks>
+    private static string? FindViewModelPropertyType(ClassBindingInfo targetClassInfo)
     {
         var properties = targetClassInfo.Properties;
+
         for (var i = 0; i < properties.Length; i++)
         {
-            if (string.Equals(properties[i].PropertyName, ViewModelPropertyName, StringComparison.Ordinal)
-                && string.Equals(properties[i].PropertyTypeFullName, viewModelTypeFullName, StringComparison.Ordinal))
+            if (!string.Equals(properties[i].PropertyName, ViewModelPropertyName, StringComparison.Ordinal))
             {
-                return true;
+                continue;
+            }
+
+            var declaredType = properties[i].PropertyTypeFullName;
+            if (!string.Equals(declaredType, WeaklyTypedViewModel, StringComparison.Ordinal))
+            {
+                return declaredType;
             }
         }
 
-        return false;
+        return null;
     }
 
     /// <summary>Renders the affinity test for one side of a binding.</summary>

@@ -103,13 +103,13 @@ internal static class NotifyPropertyEmitter
             var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>(
                 (global::System.ComponentModel.INotifyPropertyChanging){rootVar},
                 "{segment.PropertyName}",
-                (global::System.ComponentModel.INotifyPropertyChanging __o) => (({castTypeName})__o).{segment.PropertyName});
+                (global::System.ComponentModel.INotifyPropertyChanging __o) => {GeneratedTypeNames.ReadProperty(segment, castTypeName, "__o")});
 """
             : $"""
                            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.PropertyObservable<{segment.PropertyTypeFullName}>(
                                {rootVar},
                                "{segment.PropertyName}",
-                               (global::System.ComponentModel.INotifyPropertyChanged __o) => (({castTypeName})__o).{segment.PropertyName},
+                               (global::System.ComponentModel.INotifyPropertyChanged __o) => {GeneratedTypeNames.ReadProperty(segment, castTypeName, "__o")},
                                false);
                """);
 

@@ -76,14 +76,38 @@ internal static class CodeGeneratorHelpers
             return root;
         }
 
-        var sb = new PooledStringBuilder(root.Length + (path.Length * PerPathSegmentCapacity));
-        _ = sb.Append(root);
+        var chain = root;
         for (var i = 0; i < path.Length; i++)
         {
-            _ = sb.Append('.').Append(path[i].PropertyName);
+            chain = AppendSegmentRead(chain, path[i]);
         }
 
-        return sb.ToStringAndReturn();
+        return chain;
+    }
+
+    /// <summary>Reads one segment from the expression that produced its parent, narrowing where the path says to.</summary>
+    /// <param name="parent">The expression producing the object to read from.</param>
+    /// <param name="segment">The property being read.</param>
+    /// <returns>The expression producing the segment's value.</returns>
+    /// <remarks>
+    /// A view exposing its view model as a base or an interface still holds the view model the call site
+    /// named, so the read narrows to it and the rest of the path continues from there.
+    /// </remarks>
+    internal static string AppendSegmentRead(string parent, PropertyPathSegment segment)
+    {
+        var sb = new PooledStringBuilder(parent.Length + PerPathSegmentCapacity);
+        _ = sb.Append(parent).Append('.').Append(segment.PropertyName);
+
+        if (segment.ReadCastTypeFullName is null)
+        {
+            return sb.ToStringAndReturn();
+        }
+
+        var read = sb.ToStringAndReturn();
+        var cast = new PooledStringBuilder(read.Length + segment.ReadCastTypeFullName.Length + PerPathSegmentCapacity);
+
+        return cast.Append("((").Append(segment.ReadCastTypeFullName).Append(")(object)")
+            .Append(read).Append(')').ToStringAndReturn();
     }
 
     /// <summary>Builds a property access expression for use in a lambda body.</summary>
@@ -136,8 +160,8 @@ internal static class CodeGeneratorHelpers
         for (var i = 0; i < path.Length - 1; i++)
         {
             var local = ParentLocalPrefix + i.ToString(CultureInfo.InvariantCulture);
-            _ = sb.Append("var ").Append(local).Append(" = ").Append(parent).Append('.')
-                .Append(path[i].PropertyName).Append(';').Append('\n')
+            _ = sb.Append("var ").Append(local).Append(" = ").Append(AppendSegmentRead(parent, path[i]))
+                .Append(';').Append('\n')
                 .Append(indent).Append("if (").Append(local).Append(" == null)").Append('\n')
                 .Append(indent).Append('{').Append('\n')
                 .Append(indent).Append("    return;").Append('\n')

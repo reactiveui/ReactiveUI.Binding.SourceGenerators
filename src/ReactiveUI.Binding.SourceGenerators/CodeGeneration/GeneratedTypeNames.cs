@@ -183,4 +183,26 @@ internal static class GeneratedTypeNames
         string segmentTypeName,
         string parentVariable) =>
         $"new {SwitchMapSignal}<{segment.DeclaringTypeFullName}, {segmentTypeName}>({parentVariable},";
+
+    /// <summary>Renders the read of a segment's property from an object that has to be cast to reach it.</summary>
+    /// <param name="segment">The property being read.</param>
+    /// <param name="castTypeName">The type the object is cast to before the read.</param>
+    /// <param name="objectExpression">The expression producing the object.</param>
+    /// <returns>The rendered read.</returns>
+    /// <remarks>
+    /// A segment may also have to narrow what it read. A view exposing its view model as a base or an
+    /// interface still holds the view model the call site named, and the stage below is typed as that view
+    /// model - observables being covariant, only the read itself can bridge the two.
+    /// </remarks>
+    internal static string ReadProperty(
+        Models.PropertyPathSegment segment,
+        string castTypeName,
+        string objectExpression)
+    {
+        var read = $"(({castTypeName}){objectExpression}).{segment.PropertyName}";
+
+        return segment.ReadCastTypeFullName is null
+            ? read
+            : $"(({segment.ReadCastTypeFullName})(object){read})";
+    }
 }
