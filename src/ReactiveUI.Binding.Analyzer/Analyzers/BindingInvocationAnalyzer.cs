@@ -505,11 +505,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     /// <param name="body">The lambda body naming the observed path.</param>
     private static void ReportSilentLinks(in OperationAnalysisContext context, ExpressionSyntax body)
     {
-        var model = context.Operation.SemanticModel;
-        if (model is null)
-        {
-            return;
-        }
+        var model = context.Operation.SemanticModel!;
 
         // The path is written outermost-first, so walking down it reaches the root last. Every access whose
         // own receiver is itself an access is a link past the first.

@@ -59,7 +59,11 @@ public sealed class AppliedChangeObservable : IObservable<BindingChange>
 
     /// <summary>Drops one observer without disturbing a change already being delivered.</summary>
     /// <param name="observer">The observer to drop.</param>
-    private void Remove(IObserver<BindingChange> observer)
+    /// <remarks>
+    /// An observer that is not there is left alone. A subscription drops its own place once and no other path
+    /// reaches here, so that is a guard against a future caller rather than something the current ones do.
+    /// </remarks>
+    internal void Remove(IObserver<BindingChange> observer)
     {
         IObserver<BindingChange>[] current;
         IObserver<BindingChange>[] updated;
