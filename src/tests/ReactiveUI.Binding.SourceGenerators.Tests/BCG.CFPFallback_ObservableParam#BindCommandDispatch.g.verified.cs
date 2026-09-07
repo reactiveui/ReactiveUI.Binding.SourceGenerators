@@ -73,7 +73,7 @@ namespace ReactiveUI.Binding
 
             string? __latestParam = default;
             var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
-                withParameter, p => System.Threading.Volatile.Write(ref __latestParam, p));
+                withParameter, p => global::System.Threading.Volatile.Write(ref __latestParam, p));
 
             var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
             var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
@@ -86,7 +86,7 @@ namespace ReactiveUI.Binding
 
                 void __Handler(object? sender, global::System.EventArgs e)
                 {
-                    var param = System.Threading.Volatile.Read(ref __latestParam);
+                    var param = global::System.Threading.Volatile.Read(ref __latestParam);
                     if (cmd.CanExecute(param))
                     {
                         cmd.Execute(param);

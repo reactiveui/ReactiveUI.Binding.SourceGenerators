@@ -80,7 +80,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             string? __latestParam = default;
             var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
-                withParameter, p => System.Threading.Volatile.Write(ref __latestParam, p));
+                withParameter, p => global::System.Threading.Volatile.Write(ref __latestParam, p));
 
             var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
             var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
@@ -92,15 +92,15 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     return;
                 }
 
-                var param = System.Threading.Volatile.Read(ref __latestParam);
+                var param = global::System.Threading.Volatile.Read(ref __latestParam);
                 view.SaveButton.Enabled = cmd.CanExecute(param);
                 global::System.EventHandler __canExecHandler = (s, e) =>
-                    view.SaveButton.Enabled = cmd.CanExecute(System.Threading.Volatile.Read(ref __latestParam));
+                    view.SaveButton.Enabled = cmd.CanExecute(global::System.Threading.Volatile.Read(ref __latestParam));
                 cmd.CanExecuteChanged += __canExecHandler;
 
                 void __Handler(object? sender, global::System.EventArgs e)
                 {
-                    var p = System.Threading.Volatile.Read(ref __latestParam);
+                    var p = global::System.Threading.Volatile.Read(ref __latestParam);
                     if (cmd.CanExecute(p))
                     {
                         cmd.Execute(p);

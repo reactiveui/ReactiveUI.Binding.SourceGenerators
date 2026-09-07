@@ -115,24 +115,17 @@ internal static class BindingEmitterHelpers
         string sourceVar,
         string targetVar,
         string direction,
-        string earlyReturn) => _ = sb.AppendLine($$"""
-                                    if ({{GeneratedTypeNames.BindingHooks}}.Any
-                                        && !{{GeneratedTypeNames.BindingHooks}}.ShouldBind(
-                                            {{sourceVar}},
-                                            {{targetVar}},
-                                            () => new {{GeneratedTypeNames.IObservedChange}}<object, object>[]
-                                            {
-                                                new {{GeneratedTypeNames.ObservedChange}}<object, object>({{sourceVar}}, null, {{sourceVar}}),
-                                            },
-                                            () => new {{GeneratedTypeNames.IObservedChange}}<object, object>[]
-                                            {
-                                                new {{GeneratedTypeNames.ObservedChange}}<object, object>({{targetVar}}, null, {{targetVar}}),
-                                            },
-                                            {{GeneratedTypeNames.BindingDirection}}.{{direction}}))
-                                    {
-                                        return {{earlyReturn}};
-                                    }
-                            """);
+        string earlyReturn) => _ = sb.Append("        if (").Append(GeneratedTypeNames.BindingHooks).AppendLine(".Any").Append("            && !")
+            .Append(GeneratedTypeNames.BindingHooks).AppendLine(".ShouldBind(").Append("                ").Append(sourceVar).AppendLine(",")
+            .Append("                ").Append(targetVar).AppendLine(",").Append("                () => new ")
+            .Append(GeneratedTypeNames.IObservedChange).AppendLine("<object, object>[]").AppendLine("                {")
+            .Append("                    new ").Append(GeneratedTypeNames.ObservedChange).Append("<object, object>(").Append(sourceVar)
+            .Append(", null, ").Append(sourceVar).AppendLine("),").AppendLine("                },").Append("                () => new ")
+            .Append(GeneratedTypeNames.IObservedChange).AppendLine("<object, object>[]").AppendLine("                {")
+            .Append("                    new ").Append(GeneratedTypeNames.ObservedChange).Append("<object, object>(").Append(targetVar)
+            .Append(", null, ").Append(targetVar).AppendLine("),").AppendLine("                },").Append("                ")
+            .Append(GeneratedTypeNames.BindingDirection).Append('.').Append(direction).AppendLine("))").AppendLine("        {")
+            .Append("            return ").Append(earlyReturn).AppendLine(";").AppendLine("        }");
 
     /// <summary>Emits the check that hands a binding to the runtime engine when a registered plugin outranks the generated one.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -159,21 +152,16 @@ internal static class BindingEmitterHelpers
         _ = sb.AppendLine(
             "            // A registered plugin that outranks the generated one drives the binding instead");
 
-        _ = sb.Append(
-            $"            if ({AffinityTest(group.SourceTypeFullName, first.SourcePropertyPath)}");
+        _ = sb.Append("            if (").Append(AffinityTest(group.SourceTypeFullName, first.SourcePropertyPath));
 
         if (observesTarget)
         {
-            _ = sb.AppendLine()
-                .Append($"                || {AffinityTest(group.TargetTypeFullName, first.TargetPropertyPath)}");
+            _ = sb.AppendLine().Append("                || ").Append(AffinityTest(group.TargetTypeFullName, first.TargetPropertyPath));
         }
 
-        _ = sb.AppendLine(")")
-            .AppendLine("            {")
-            .AppendLine($"                return {GeneratedTypeNames.RuntimeBindingFallback}.{fallbackMethod}(")
-            .AppendLine($"                    {arguments});")
-            .AppendLine("            }")
-            .AppendLine();
+        _ = sb.AppendLine(")").AppendLine("            {").Append("                return ").Append(GeneratedTypeNames.RuntimeBindingFallback)
+            .Append('.').Append(fallbackMethod).AppendLine("(").Append("                    ").Append(arguments).AppendLine(");")
+            .AppendLine("            }").AppendLine();
     }
 
     /// <summary>Groups call sites that can share one generated overload.</summary>
@@ -238,10 +226,10 @@ internal static class BindingEmitterHelpers
     {
         if (group.HasConversion)
         {
-            _ = sb.AppendLine($"""
-                                       global::System.Func<{group.SourcePropertyTypeFullName}, {group.TargetPropertyTypeFullName}> {forwardName},
-                                       global::System.Func<{group.TargetPropertyTypeFullName}, {group.SourcePropertyTypeFullName}> {reverseName},
-                           """);
+            _ = sb.Append(GeneratedSyntax.FuncParameterOpen).Append(group.SourcePropertyTypeFullName).Append(", ")
+                .Append(group.TargetPropertyTypeFullName).Append("> ").Append(forwardName).AppendLine(",").Append(GeneratedSyntax.FuncParameterOpen)
+                .Append(group.TargetPropertyTypeFullName).Append(", ").Append(group.SourcePropertyTypeFullName).Append("> ").Append(reverseName)
+                .AppendLine(",");
         }
 
         if (!group.HasScheduler)
@@ -249,7 +237,7 @@ internal static class BindingEmitterHelpers
             return;
         }
 
-        _ = sb.AppendLine($"            {GeneratedTypeNames.ISequencer} scheduler,");
+        _ = sb.Append("            ").Append(GeneratedTypeNames.ISequencer).AppendLine(" scheduler,");
     }
 
     /// <summary>Formats the extra arguments a two-way overload forwards to its generated method.</summary>
@@ -322,8 +310,8 @@ internal static class BindingEmitterHelpers
     {
         if (group.HasConversion)
         {
-            _ = sb.AppendLine(
-                $"            global::System.Func<{group.SourcePropertyTypeFullName}, {group.TargetPropertyTypeFullName}> {conversionParameterName},");
+            _ = sb.Append(GeneratedSyntax.FuncParameterOpen).Append(group.SourcePropertyTypeFullName).Append(", ")
+                .Append(group.TargetPropertyTypeFullName).Append("> ").Append(conversionParameterName).AppendLine(",");
         }
 
         if (!group.HasScheduler)
@@ -331,7 +319,7 @@ internal static class BindingEmitterHelpers
             return;
         }
 
-        _ = sb.AppendLine($"            {GeneratedTypeNames.ISequencer} scheduler,");
+        _ = sb.Append("            ").Append(GeneratedTypeNames.ISequencer).AppendLine(" scheduler,");
     }
 
     /// <summary>Formats the extra arguments for forwarding to the generated binding method.</summary>
@@ -436,16 +424,13 @@ internal static class BindingEmitterHelpers
         string resultVar,
         string fromTypeFullName,
         string toTypeFullName) =>
-        sb.AppendLine($$"""
-                                var {{resultVar}} = new {{GeneratedTypeNames.MapSignal}}<{{fromTypeFullName}}, {{toTypeFullName}}>(
-                                    {{sourceVar}},
-                                    __value =>
-                                    {
-                                        {{toTypeFullName}} __converted;
-                                        {{GeneratedTypeNames.RuntimeBindingConverter}}.TryConvert<{{fromTypeFullName}}, {{toTypeFullName}}>(__value, null, null, out __converted);
-                                        return __converted;
-                                    });
-                """);
+        sb.Append("                var ").Append(resultVar).Append(" = new ").Append(GeneratedTypeNames.MapSignal).Append('<')
+            .Append(fromTypeFullName).Append(", ").Append(toTypeFullName).AppendLine(">(").Append("                    ").Append(sourceVar)
+            .AppendLine(",").AppendLine("                    __value =>").AppendLine("                    {").Append("                        ")
+            .Append(toTypeFullName).AppendLine(" __converted;").Append("                        ").Append(GeneratedTypeNames.RuntimeBindingConverter)
+            .Append(".TryConvert<").Append(fromTypeFullName).Append(", ").Append(toTypeFullName)
+            .AppendLine(">(__value, null, null, out __converted);").AppendLine("                        return __converted;")
+            .AppendLine("                    });");
 
     /// <summary>Emits the stage that delivers a write to the view on the thread the view belongs to.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -470,8 +455,8 @@ internal static class BindingEmitterHelpers
             return sourceVar;
         }
 
-        _ = sb.AppendLine(
-            $"            var {resultVar} = {GeneratedTypeNames.BindingSchedulers}.ObserveOnMainThread({sourceVar});");
+        _ = sb.Append("            var ").Append(resultVar).Append(" = ").Append(GeneratedTypeNames.BindingSchedulers).Append(".ObserveOnMainThread(")
+            .Append(sourceVar).AppendLine(");");
 
         return resultVar;
     }

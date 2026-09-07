@@ -17,6 +17,15 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class WhenAnyObservableCodeGenerator
 {
+    /// <summary>Opens the substitution that replaces a null observable property with an empty one.</summary>
+    private const string ObservableFallbackOpen = "                __obs => __obs ?? (global::System.IObservable<";
+
+    /// <summary>Opens the empty observation a null observable property is substituted with.</summary>
+    private const string EmptySignalOpen = ">)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<";
+
+    /// <summary>Closes a reference to a cached empty observation.</summary>
+    private const string SingletonInstanceClose = ">.Instance);";
+
     /// <summary>The base name used to build emitted local variable identifiers for the raw observable property.</summary>
     private const string ObsPropertyVarName = "__obsProperty";
 
@@ -91,20 +100,17 @@ internal static class WhenAnyObservableCodeGenerator
         var propCount = first.PropertyPaths.Length;
         var hasSelector = first.HasSelector;
 
-        _ = sb.AppendLine($"""
-                               /// <summary>
-                               /// Concrete typed overload for WhenAnyObservable on {first.SourceTypeFullName}.
-                               /// </summary>
-                               public static global::System.IObservable<{first.ReturnTypeFullName}> WhenAnyObservable(
-                                   this {first.SourceTypeFullName} objectToMonitor,
-                       """);
+        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for WhenAnyObservable on ")
+            .Append(first.SourceTypeFullName).AppendLine(".").AppendLine("        /// </summary>")
+            .Append("        public static global::System.IObservable<").Append(first.ReturnTypeFullName).AppendLine("> WhenAnyObservable(")
+            .Append("            this ").Append(first.SourceTypeFullName).AppendLine(" objectToMonitor,");
 
         for (var i = 0; i < propCount; i++)
         {
             var innerType = first.InnerObservableTypeFullNames[i];
             var obsType = $"global::System.IObservable<{innerType}>{(supportsNullable ? "?" : string.Empty)}";
-            _ = sb.AppendLine(
-                $"            global::System.Linq.Expressions.Expression<global::System.Func<{first.SourceTypeFullName}, {obsType}>> obs{i + 1},");
+            _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<").Append(first.SourceTypeFullName).Append(", ")
+                .Append(obsType).Append(">> obs").Append(i + 1).AppendLine(",");
         }
 
         if (hasSelector)
@@ -152,10 +158,8 @@ internal static class WhenAnyObservableCodeGenerator
     {
         var selectorParam = inv.HasSelector ? $", {GetSelectorType(inv)} selector" : string.Empty;
 
-        _ = sb.AppendLine($$"""
-                                private static global::System.IObservable<{{inv.ReturnTypeFullName}}> __WhenAnyObservable_{{suffix}}({{inv.SourceTypeFullName}} obj{{selectorParam}})
-                                {
-                        """);
+        _ = sb.Append("        private static global::System.IObservable<").Append(inv.ReturnTypeFullName).Append("> __WhenAnyObservable_")
+            .Append(suffix).Append('(').Append(inv.SourceTypeFullName).Append(" obj").Append(selectorParam).AppendLine(")").AppendLine("        {");
 
         if (inv.PropertyPaths.Length == 1)
         {
@@ -201,10 +205,9 @@ internal static class WhenAnyObservableCodeGenerator
             .AppendLine();
 
         // Switch pattern: take the observable property value, replace null with Empty, and switch
-        _ = sb.Append($"""
-                               return new {SwitchMapSignal}<{ObservableOf(innerType)}, {innerType}>(__obsProperty,
-                                   __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{innerType}>.Instance);
-                   """);
+        _ = sb.Append("            return new ").Append(SwitchMapSignal).Append('<').Append(ObservableOf(innerType)).Append(", ").Append(innerType)
+            .AppendLine(">(__obsProperty,").Append(ObservableFallbackOpen).Append(innerType)
+            .Append(EmptySignalOpen).Append(innerType).Append(SingletonInstanceClose);
     }
 
     /// <summary>Generates a multi-property Merge pattern: observe each IObservable property, switch each, then merge.</summary>
@@ -233,13 +236,10 @@ internal static class WhenAnyObservableCodeGenerator
                 ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, rawVar);
             }
 
-            _ = sb.AppendLine()
-                .AppendLine()
-                .AppendLine($"""
-                                         var {switchedVar} = new {SwitchMapSignal}<{ObservableOf(innerType)}, {innerType}>({rawVar},
-                                             __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{innerType}>.Instance);
-                             """)
-                .AppendLine();
+            _ = sb.AppendLine().AppendLine().Append("            var ").Append(switchedVar).Append(" = new ").Append(SwitchMapSignal).Append('<')
+                .Append(ObservableOf(innerType)).Append(", ").Append(innerType).Append(">(").Append(rawVar).AppendLine(",")
+                .Append(ObservableFallbackOpen).Append(innerType)
+                .Append(EmptySignalOpen).Append(innerType).AppendLine(SingletonInstanceClose).AppendLine();
         }
 
         _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.Merge(");
@@ -284,13 +284,10 @@ internal static class WhenAnyObservableCodeGenerator
                 ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, rawVar);
             }
 
-            _ = sb.AppendLine()
-                .AppendLine()
-                .AppendLine($"""
-                                         var {switchedVar} = new {SwitchMapSignal}<{ObservableOf(innerType)}, {innerType}>({rawVar},
-                                             __obs => __obs ?? (global::System.IObservable<{innerType}>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{innerType}>.Instance);
-                             """)
-                .AppendLine();
+            _ = sb.AppendLine().AppendLine().Append("            var ").Append(switchedVar).Append(" = new ").Append(SwitchMapSignal).Append('<')
+                .Append(ObservableOf(innerType)).Append(", ").Append(innerType).Append(">(").Append(rawVar).AppendLine(",")
+                .Append(ObservableFallbackOpen).Append(innerType)
+                .Append(EmptySignalOpen).Append(innerType).AppendLine(SingletonInstanceClose).AppendLine();
         }
 
         _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
@@ -375,8 +372,9 @@ internal static class WhenAnyObservableCodeGenerator
         for (var i = 0; i < propCount; i++)
         {
             var paramName = $"obs{i + 1}Expression";
-            _ = sb.AppendLine(
-                $"""            {paramName} = {paramName}.StartsWith("static ", global::System.StringComparison.Ordinal) ? {paramName}.Substring(7) : {paramName};""");
+            _ = sb.Append("            ").Append(paramName).Append(" = ").Append(paramName)
+                .Append(".StartsWith(\"static \", global::System.StringComparison.Ordinal) ? ").Append(paramName).Append(".Substring(7) : ")
+                .Append(paramName).AppendLine(";");
         }
 
         _ = sb.AppendLine();
@@ -407,8 +405,8 @@ internal static class WhenAnyObservableCodeGenerator
             else
             {
                 var suffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-                _ = sb
-                    .Append($"""            {condition} (callerLineNumber == {inv.CallerLineNumber} && callerFilePath.EndsWith("{CodeGeneratorHelpers.EscapeString(suffix)}",""")
+                _ = sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber)
+                    .Append(" && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(suffix)).Append("\",")
                     .AppendLine(" global::System.StringComparison.OrdinalIgnoreCase))");
             }
 
@@ -419,8 +417,8 @@ internal static class WhenAnyObservableCodeGenerator
                 inv.CallerFilePath,
                 inv.CallerLineNumber,
                 string.Join("|", inv.ExpressionTexts));
-            _ = sb.AppendLine($"                return __WhenAnyObservable_{methodSuffix}(objectToMonitor{selectorArg});")
-                .AppendLine("            }");
+            _ = sb.Append("                return __WhenAnyObservable_").Append(methodSuffix).Append("(objectToMonitor").Append(selectorArg)
+                .AppendLine(");").AppendLine("            }");
         }
     }
 
@@ -435,11 +433,11 @@ internal static class WhenAnyObservableCodeGenerator
         string condition,
         int propCount)
     {
-        _ = sb.Append($"            {condition} (");
+        _ = sb.Append("            ").Append(condition).Append(" (");
         for (var p = 0; p < propCount; p++)
         {
-            _ = sb.Append(
-                $"obs{p + 1}Expression == \"{CodeGeneratorHelpers.EscapeString(inv.ExpressionTexts[p])}\"");
+            _ = sb.Append("obs").Append(p + 1).Append("Expression == \"").Append(CodeGeneratorHelpers.EscapeString(inv.ExpressionTexts[p]))
+                .Append('"');
             if (p < propCount - 1)
             {
                 _ = sb.Append(" && ");

@@ -72,17 +72,13 @@ internal static class BindOneWayCodeGenerator
     {
         var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
         var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
-        _ = sb.AppendLine($"""
-                               /// <summary>
-                               /// Concrete typed overload for BindOneWay from {group.SourceTypeFullName} to {group.TargetTypeFullName}.
-                               /// Uses CallerArgumentExpression for dispatch.
-                               /// </summary>
-                               public static global::System.IDisposable BindOneWay(
-                                   this {group.SourceTypeFullName} source,
-                                   {group.TargetTypeFullName} target,
-                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {sourcePropType}>> sourceProperty,
-                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {targetPropType}>> targetProperty,
-                       """);
+        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindOneWay from ").Append(group.SourceTypeFullName)
+            .Append(" to ").Append(group.TargetTypeFullName).AppendLine(".").AppendLine("        /// Uses CallerArgumentExpression for dispatch.")
+            .AppendLine("        /// </summary>").AppendLine("        public static global::System.IDisposable BindOneWay(").Append("            this ")
+            .Append(group.SourceTypeFullName).AppendLine(" source,").Append("            ").Append(group.TargetTypeFullName).AppendLine(" target,")
+            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ")
+            .Append(sourcePropType).AppendLine(">> sourceProperty,").Append(GeneratedSyntax.SelectorParameterOpen)
+            .Append(group.TargetTypeFullName).Append(", ").Append(targetPropType).AppendLine(">> targetProperty,");
 
         AppendExtraParameters(sb, group);
 
@@ -115,13 +111,10 @@ internal static class BindOneWayCodeGenerator
             var escapedSourceExpr = CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText);
             var escapedTargetExpr = CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText);
 
-            _ = sb.AppendLine($$"""
-                                        {{condition}} (sourcePropertyExpression == "{{escapedSourceExpr}}"
-                                            && targetPropertyExpression == "{{escapedTargetExpr}}")
-                                        {
-                                            return __BindOneWay_{{methodSuffix}}(source, target{{FormatExtraArgs(group)}});
-                                        }
-                            """);
+            _ = sb.Append("            ").Append(condition).Append(" (sourcePropertyExpression == \"").Append(escapedSourceExpr).AppendLine("\"")
+                .Append("                && targetPropertyExpression == \"").Append(escapedTargetExpr).AppendLine("\")").AppendLine(GeneratedSyntax.StatementBlockOpen)
+                .Append("                return __BindOneWay_").Append(methodSuffix).Append("(source, target").Append(FormatExtraArgs(group))
+                .AppendLine(");").AppendLine("            }");
         }
 
         _ = sb.AppendLine("""
@@ -147,17 +140,14 @@ internal static class BindOneWayCodeGenerator
     {
         var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
         var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
-        _ = sb.AppendLine($"""
-                               /// <summary>
-                               /// Concrete typed overload for BindOneWay from {group.SourceTypeFullName} to {group.TargetTypeFullName}.
-                               /// Uses CallerFilePath + CallerLineNumber for dispatch.
-                               /// </summary>
-                               public static global::System.IDisposable BindOneWay(
-                                   this {group.SourceTypeFullName} source,
-                                   {group.TargetTypeFullName} target,
-                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {sourcePropType}>> sourceProperty,
-                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {targetPropType}>> targetProperty,
-                       """);
+        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindOneWay from ").Append(group.SourceTypeFullName)
+            .Append(" to ").Append(group.TargetTypeFullName).AppendLine(".")
+            .AppendLine("        /// Uses CallerFilePath + CallerLineNumber for dispatch.").AppendLine("        /// </summary>")
+            .AppendLine("        public static global::System.IDisposable BindOneWay(").Append("            this ").Append(group.SourceTypeFullName)
+            .AppendLine(" source,").Append("            ").Append(group.TargetTypeFullName).AppendLine(" target,")
+            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ")
+            .Append(sourcePropType).AppendLine(">> sourceProperty,").Append(GeneratedSyntax.SelectorParameterOpen)
+            .Append(group.TargetTypeFullName).Append(", ").Append(targetPropType).AppendLine(">> targetProperty,");
 
         AppendExtraParameters(sb, group);
 
@@ -189,13 +179,11 @@ internal static class BindOneWayCodeGenerator
             var pathSuffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
             var condition = CodeGeneratorHelpers.ConditionKeyword(i);
 
-            _ = sb.AppendLine($$"""
-                                        {{condition}} (callerLineNumber == {{inv.CallerLineNumber}}
-                                            && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(pathSuffix)}}", global::System.StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            return __BindOneWay_{{methodSuffix}}(source, target{{FormatExtraArgs(group)}});
-                                        }
-                            """);
+            _ = sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).AppendLine()
+                .Append("                && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(pathSuffix))
+                .AppendLine("\", global::System.StringComparison.OrdinalIgnoreCase))").AppendLine(GeneratedSyntax.StatementBlockOpen)
+                .Append("                return __BindOneWay_").Append(methodSuffix).Append("(source, target").Append(FormatExtraArgs(group))
+                .AppendLine(");").AppendLine("            }");
         }
 
         _ = sb.AppendLine("""
@@ -230,11 +218,10 @@ internal static class BindOneWayCodeGenerator
         var conversionComment = inv.HasConversion ? " (with conversion)" : string.Empty;
         var schedulerComment = inv.HasScheduler ? " (with scheduler)" : string.Empty;
 
-        _ = sb.AppendLine($$"""
-                                private static global::System.IDisposable __BindOneWay_{{suffix}}({{inv.SourceTypeFullName}} source, {{inv.TargetTypeFullName}} target{{extraParams}})
-                                {
-                                    // BindOneWay: {{sourcePathComment}} -> {{targetPathComment}}{{conversionComment}}{{schedulerComment}}
-                        """);
+        _ = sb.Append("        private static global::System.IDisposable __BindOneWay_").Append(suffix).Append('(').Append(inv.SourceTypeFullName)
+            .Append(" source, ").Append(inv.TargetTypeFullName).Append(" target").Append(extraParams).AppendLine(")").AppendLine("        {")
+            .Append("            // BindOneWay: ").Append(sourcePathComment).Append(" -> ").Append(targetPathComment).Append(conversionComment)
+            .Append(schedulerComment).AppendLine();
 
         BindingEmitterHelpers.EmitBindingHookGuard(sb, "source", "target", "OneWay", "global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance");
 
@@ -253,15 +240,9 @@ internal static class BindOneWayCodeGenerator
 
         subscribeVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, subscribeVar, "targetThreadObs");
 
-        _ = sb.AppendLine($$"""
-
-                                    return {{BindingErrors}}.Subscribe({{subscribeVar}}, value =>
-                                    {
-                                        {{targetAssignment}}
-                                    }, "{{CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)}}");
-                                }
-                        """)
-            .AppendLine();
+        _ = sb.AppendLine().Append("            return ").Append(BindingErrors).Append(".Subscribe(").Append(subscribeVar).AppendLine(", value =>")
+            .AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(targetAssignment).AppendLine().Append("            }, \"")
+            .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");").AppendLine("        }").AppendLine();
     }
 
     /// <summary>Appends extra parameters (converter, scheduler) to the concrete overload signature.</summary>
@@ -312,15 +293,15 @@ internal static class BindOneWayCodeGenerator
         if (inv.HasConversion)
         {
             var nextVar = inv.HasScheduler ? "__selected" : "bindObs";
-            _ = sb.AppendLine(
-                $"        var {nextVar} = new {MapSignal}<{inv.SourcePropertyTypeFullName}, {inv.TargetPropertyTypeFullName}>({currentVar}, conversionFunc);");
+            _ = sb.Append("        var ").Append(nextVar).Append(" = new ").Append(MapSignal).Append('<').Append(inv.SourcePropertyTypeFullName)
+                .Append(", ").Append(inv.TargetPropertyTypeFullName).Append(">(").Append(currentVar).AppendLine(", conversionFunc);");
             currentVar = nextVar;
         }
 
         if (inv.HasScheduler)
         {
-            _ = sb.AppendLine(
-                $"        var bindObs = {LinqExtensions}.ObserveOn<{inv.TargetPropertyTypeFullName}>({currentVar}, scheduler);");
+            _ = sb.Append("        var bindObs = ").Append(LinqExtensions).Append(".ObserveOn<").Append(inv.TargetPropertyTypeFullName).Append(">(")
+                .Append(currentVar).AppendLine(", scheduler);");
             currentVar = "bindObs";
         }
 

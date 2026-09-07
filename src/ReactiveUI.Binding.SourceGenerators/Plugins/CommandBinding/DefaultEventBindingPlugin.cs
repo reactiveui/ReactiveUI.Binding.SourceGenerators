@@ -4,6 +4,7 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
@@ -38,38 +39,27 @@ internal sealed class DefaultEventBindingPlugin : EventCommandBindingPlugin
         string controlAccess,
         string eventArgsType,
         bool supportsNullable) =>
-        sb.AppendLine($$"""
-
-                                        {{inv.ParameterTypeFullName}}{{(supportsNullable && inv.ParameterIsReferenceType ? "?" : string.Empty)}} __latestParam = default;
-                                        var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
-                                            withParameter, p => System.Threading.Volatile.Write(ref __latestParam, p));
-
-                                        var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
-                                        var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
-                                        {
-                                            serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                                            if (cmd == null)
-                                            {
-                                                return;
-                                            }
-
-                                            void __Handler({{CommandEventBindingEmitter.SenderType(supportsNullable)}} sender, {{eventArgsType}} e)
-                                            {
-                                                var param = System.Threading.Volatile.Read(ref __latestParam);
-                                                if (cmd.CanExecute(param))
-                                                {
-                                                    cmd.Execute(param);
-                                                }
-                                            }
-
-                                            {{controlAccess}}.{{inv.ResolvedEventName}} += __Handler;
-                                            serial.Disposable = new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>
-                                                {{controlAccess}}.{{inv.ResolvedEventName}} -= __Handler);
-                                        });
-                                        return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(
-                                            new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, __paramSub), serial);
-                                    }
-                            """);
+        sb.AppendLine().Append("            ").Append(inv.ParameterTypeFullName)
+            .Append(supportsNullable && inv.ParameterIsReferenceType ? "?" : string.Empty).AppendLine(" __latestParam = default;")
+            .AppendLine("            var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(")
+            .Append("                withParameter, p => ").Append(CommandBindingSyntax.WriteLatestParameter(inv, "p")).AppendLine(");").AppendLine()
+            .AppendLine(CommandBindingSyntax.SerialDisposableDeclaration)
+            .AppendLine(CommandBindingSyntax.CommandSubscriptionOpen)
+            .AppendLine(GeneratedSyntax.StatementBlockOpen)
+            .AppendLine(CommandBindingSyntax.ResetSerialDisposable)
+            .AppendLine(CommandBindingSyntax.CommandMissingTest).AppendLine(CommandBindingSyntax.SubscriptionBlockOpen).AppendLine(CommandBindingSyntax.CommandMissingReturn)
+            .AppendLine(CommandBindingSyntax.SubscriptionBlockClose).AppendLine().Append(CommandBindingSyntax.HandlerDeclarationOpen)
+            .Append(CommandEventBindingEmitter.SenderType(supportsNullable)).Append(CommandBindingSyntax.HandlerSenderSeparator).Append(eventArgsType).AppendLine(" e)")
+            .AppendLine(CommandBindingSyntax.SubscriptionBlockOpen)
+            .Append("                    var param = ").Append(CommandBindingSyntax.ReadLatestParameter(inv)).AppendLine(";")
+            .AppendLine("                    if (cmd.CanExecute(param))").AppendLine(CommandBindingSyntax.NestedBlockOpen)
+            .AppendLine("                        cmd.Execute(param);").AppendLine(CommandBindingSyntax.NestedBlockClose).AppendLine(CommandBindingSyntax.SubscriptionBlockClose)
+            .AppendLine().Append("                ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerSubscribe)
+            .AppendLine(CommandBindingSyntax.SerialDisposableOpen)
+            .Append("                    ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerUnsubscribeAndClose)
+            .AppendLine(CommandBindingSyntax.CommandSubscriptionClose).AppendLine("            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(")
+            .AppendLine("                new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, __paramSub), serial);")
+            .AppendLine(GeneratedSyntax.MemberBodyClose);
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,33 +70,22 @@ internal sealed class DefaultEventBindingPlugin : EventCommandBindingPlugin
         string eventArgsType,
         string paramAccess,
         bool supportsNullable) =>
-        sb.AppendLine($$"""
-
-                                        var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
-                                        var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
-                                        {
-                                            serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                                            if (cmd == null)
-                                            {
-                                                return;
-                                            }
-
-                                            void __Handler({{CommandEventBindingEmitter.SenderType(supportsNullable)}} sender, {{eventArgsType}} e)
-                                            {
-                                                var param = {{paramAccess}};
-                                                if (cmd.CanExecute(param))
-                                                {
-                                                    cmd.Execute(param);
-                                                }
-                                            }
-
-                                            {{controlAccess}}.{{inv.ResolvedEventName}} += __Handler;
-                                            serial.Disposable = new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>
-                                                {{controlAccess}}.{{inv.ResolvedEventName}} -= __Handler);
-                                        });
-                                        return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial);
-                                    }
-                            """);
+        sb.AppendLine().AppendLine(CommandBindingSyntax.SerialDisposableDeclaration)
+            .AppendLine(CommandBindingSyntax.CommandSubscriptionOpen)
+            .AppendLine(GeneratedSyntax.StatementBlockOpen)
+            .AppendLine(CommandBindingSyntax.ResetSerialDisposable)
+            .AppendLine(CommandBindingSyntax.CommandMissingTest).AppendLine(CommandBindingSyntax.SubscriptionBlockOpen).AppendLine(CommandBindingSyntax.CommandMissingReturn)
+            .AppendLine(CommandBindingSyntax.SubscriptionBlockClose).AppendLine().Append(CommandBindingSyntax.HandlerDeclarationOpen)
+            .Append(CommandEventBindingEmitter.SenderType(supportsNullable)).Append(CommandBindingSyntax.HandlerSenderSeparator).Append(eventArgsType).AppendLine(" e)")
+            .AppendLine(CommandBindingSyntax.SubscriptionBlockOpen).Append("                    var param = ").Append(paramAccess).AppendLine(";")
+            .AppendLine("                    if (cmd.CanExecute(param))").AppendLine(CommandBindingSyntax.NestedBlockOpen)
+            .AppendLine("                        cmd.Execute(param);").AppendLine(CommandBindingSyntax.NestedBlockClose).AppendLine(CommandBindingSyntax.SubscriptionBlockClose)
+            .AppendLine().Append("                ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerSubscribe)
+            .AppendLine(CommandBindingSyntax.SerialDisposableOpen)
+            .Append("                    ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerUnsubscribeAndClose)
+            .AppendLine(CommandBindingSyntax.CommandSubscriptionClose)
+            .AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn)
+            .AppendLine(GeneratedSyntax.MemberBodyClose);
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -116,30 +95,19 @@ internal sealed class DefaultEventBindingPlugin : EventCommandBindingPlugin
         string controlAccess,
         string eventArgsType,
         bool supportsNullable) =>
-        sb.AppendLine($$"""
-
-                                        var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
-                                        var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
-                                        {
-                                            serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                                            if (cmd == null)
-                                            {
-                                                return;
-                                            }
-
-                                            void __Handler({{CommandEventBindingEmitter.SenderType(supportsNullable)}} sender, {{eventArgsType}} e)
-                                            {
-                                                if (cmd.CanExecute(null))
-                                                {
-                                                    cmd.Execute(null);
-                                                }
-                                            }
-
-                                            {{controlAccess}}.{{inv.ResolvedEventName}} += __Handler;
-                                            serial.Disposable = new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>
-                                                {{controlAccess}}.{{inv.ResolvedEventName}} -= __Handler);
-                                        });
-                                        return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial);
-                                    }
-                            """);
+        sb.AppendLine().AppendLine(CommandBindingSyntax.SerialDisposableDeclaration)
+            .AppendLine(CommandBindingSyntax.CommandSubscriptionOpen)
+            .AppendLine(GeneratedSyntax.StatementBlockOpen)
+            .AppendLine(CommandBindingSyntax.ResetSerialDisposable)
+            .AppendLine(CommandBindingSyntax.CommandMissingTest).AppendLine(CommandBindingSyntax.SubscriptionBlockOpen).AppendLine(CommandBindingSyntax.CommandMissingReturn)
+            .AppendLine(CommandBindingSyntax.SubscriptionBlockClose).AppendLine().Append(CommandBindingSyntax.HandlerDeclarationOpen)
+            .Append(CommandEventBindingEmitter.SenderType(supportsNullable)).Append(CommandBindingSyntax.HandlerSenderSeparator).Append(eventArgsType).AppendLine(" e)")
+            .AppendLine(CommandBindingSyntax.SubscriptionBlockOpen).AppendLine("                    if (cmd.CanExecute(null))").AppendLine(CommandBindingSyntax.NestedBlockOpen)
+            .AppendLine("                        cmd.Execute(null);").AppendLine(CommandBindingSyntax.NestedBlockClose).AppendLine(CommandBindingSyntax.SubscriptionBlockClose).AppendLine()
+            .Append("                ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerSubscribe)
+            .AppendLine(CommandBindingSyntax.SerialDisposableOpen)
+            .Append("                    ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerUnsubscribeAndClose)
+            .AppendLine(CommandBindingSyntax.CommandSubscriptionClose)
+            .AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn)
+            .AppendLine(GeneratedSyntax.MemberBodyClose);
 }

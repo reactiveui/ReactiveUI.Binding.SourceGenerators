@@ -23,6 +23,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// </remarks>
 internal sealed class WinUIObservationPlugin : IObservationPlugin
 {
+    /// <summary>Completes the name of the dependency property field a plain property is registered under.</summary>
+    private const string DependencyPropertyFieldSuffix = "Property,";
+
     /// <summary>
     /// The affinity score for the WinUI DependencyObject observation plugin
     /// (matches ReactiveUI's WinUI DependencyObjectObservableForProperty).
@@ -73,13 +76,10 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
             return;
         }
 
-        _ = sb.Append($"new __WinUIDPObservable<{segment.PropertyTypeFullName}>(")
-            .Append($"(global::Microsoft.UI.Xaml.DependencyObject){rootVar}, ")
-            .Append($"{castTypeName}.{segment.PropertyName}Property, ")
-            .Append(
-                $"(global::Microsoft.UI.Xaml.DependencyObject __o) => (({castTypeName})__o).{segment.PropertyName}, ")
-            .Append(includeStartWith ? "true" : "false")
-            .Append(')');
+        _ = sb.Append("new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).Append(">(")
+            .Append("(global::Microsoft.UI.Xaml.DependencyObject)").Append(rootVar).Append(", ").Append(castTypeName).Append('.')
+            .Append(segment.PropertyName).Append("Property, ").Append("(global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(castTypeName)
+            .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).Append(", ").Append(includeStartWith ? "true" : "false").Append(')');
     }
 
     /// <inheritdoc/>
@@ -97,13 +97,11 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
             return;
         }
 
-        _ = sb.Append($"""
-                               var {varName} = new __WinUIDPObservable<{segment.PropertyTypeFullName}>(
-                                   (global::Microsoft.UI.Xaml.DependencyObject){rootVar},
-                                   {castTypeName}.{segment.PropertyName}Property,
-                                   (global::Microsoft.UI.Xaml.DependencyObject __o) => (({castTypeName})__o).{segment.PropertyName},
-                                   true);
-                   """);
+        _ = sb.Append("            var ").Append(varName).Append(" = new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append("                (global::Microsoft.UI.Xaml.DependencyObject)").Append(rootVar).AppendLine(",").Append("                ")
+            .Append(castTypeName).Append('.').Append(segment.PropertyName).AppendLine(DependencyPropertyFieldSuffix)
+            .Append("                (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)
+            .Append(segment.PropertyName).AppendLine(",").Append("                true);");
     }
 
     /// <inheritdoc/>
@@ -122,13 +120,12 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
             return;
         }
 
-        _ = sb.AppendLine($"""
-                                   var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new __WinUIDPObservable<{segment.PropertyTypeFullName}>(
-                                       (global::Microsoft.UI.Xaml.DependencyObject){rootVar},
-                                       {castTypeName}.{segment.PropertyName}Property,
-                                       (global::Microsoft.UI.Xaml.DependencyObject __o) => (({castTypeName})__o).{segment.PropertyName},
-                                       false);
-                       """);
+        _ = sb.Append("            var ").Append(obsVarName).Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName)
+            .Append(">)new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append("                (global::Microsoft.UI.Xaml.DependencyObject)").Append(rootVar).AppendLine(",").Append("                ")
+            .Append(castTypeName).Append('.').Append(segment.PropertyName).AppendLine(DependencyPropertyFieldSuffix)
+            .Append("                (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)
+            .Append(segment.PropertyName).AppendLine(",").AppendLine("                false);");
     }
 
     /// <inheritdoc/>
@@ -149,28 +146,24 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
 
         if (isBeforeChange)
         {
-            _ = sb.AppendLine()
-                .AppendLine($"""
-                                     var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
-                                         {lambdaParam} => {lambdaParam} != null
-                                             ? (global::System.IObservable<{segType}>)
-                                                 new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
-                                             : (global::System.IObservable<{segType}>){nullParentObservable});
-                             """);
+            _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ")
+                .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
+                .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType)
+                .AppendLine(">)").Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType)
+                .Append(">(((").Append(declType).Append(')').Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(")")
+                .Append("                : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
             return;
         }
 
-        _ = sb.AppendLine()
-            .AppendLine($"""
-                                 var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
-                                     {lambdaParam} => {lambdaParam} != null
-                                         ? (global::System.IObservable<{segType}>)new __WinUIDPObservable<{segType}>(
-                                             (global::Microsoft.UI.Xaml.DependencyObject){lambdaParam},
-                                             {declType}.{segment.PropertyName}Property,
-                                             (global::Microsoft.UI.Xaml.DependencyObject __o) => (({declType})__o).{segment.PropertyName},
-                                             false)
-                                         : (global::System.IObservable<{segType}>){nullParentObservable});
-                         """);
+        _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ")
+            .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
+            .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType)
+            .Append(">)new __WinUIDPObservable<").Append(segType).AppendLine(">(")
+            .Append("                    (global::Microsoft.UI.Xaml.DependencyObject)").Append(lambdaParam).AppendLine(",").Append("                    ")
+            .Append(declType).Append('.').Append(segment.PropertyName).AppendLine(DependencyPropertyFieldSuffix)
+            .Append("                    (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(declType).Append(GeneratedSyntax.ObserverCastClose)
+            .Append(segment.PropertyName).AppendLine(",").AppendLine("                    false)")
+            .Append("                : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
     }
 
     /// <inheritdoc/>
@@ -181,13 +174,11 @@ internal sealed class WinUIObservationPlugin : IObservationPlugin
         PropertyPathSegment segment,
         string castTypeName,
         string varName) =>
-        sb.AppendLine($"""
-                               var {varName} = new __WinUIDPObservable<{segment.PropertyTypeFullName}>(
-                                   (global::Microsoft.UI.Xaml.DependencyObject){rootVar},
-                                   {castTypeName}.{segment.PropertyName}Property,
-                                   (global::Microsoft.UI.Xaml.DependencyObject __o) => (({castTypeName})__o).{segment.PropertyName},
-                                   true);
-                       """);
+        sb.Append(GeneratedSyntax.InlineLocalDeclaration).Append(varName).Append(" = new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append("            (global::Microsoft.UI.Xaml.DependencyObject)").Append(rootVar).AppendLine(",").Append("            ")
+            .Append(castTypeName).Append('.').Append(segment.PropertyName).AppendLine("Property,")
+            .Append("            (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(castTypeName).Append(")__o).")
+            .Append(segment.PropertyName).AppendLine(",").AppendLine("            true);");
 
     /// <summary>Emits the <c>__WinUIDPObservable&lt;T&gt;</c> class header (fields and constructor).</summary>
     /// <param name="sb">The string builder.</param>

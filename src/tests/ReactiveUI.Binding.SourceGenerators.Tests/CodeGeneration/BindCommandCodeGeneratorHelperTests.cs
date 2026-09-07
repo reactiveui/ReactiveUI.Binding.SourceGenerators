@@ -262,6 +262,7 @@ public class BindCommandCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: StringTypeName,
+            parameterIsReferenceType: true,
             resolvedEventName: ClickName,
             hasEnabledProperty: true);
 

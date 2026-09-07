@@ -90,31 +90,6 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
         sb.Append("            var __originalCommand = ").Append(controlAccess).AppendLine(".Command;")
             .Append("            var __originalParameter = ").Append(controlAccess).AppendLine(".CommandParameter;");
 
-    /// <summary>Renders the write that records the parameter a later command emission will be given.</summary>
-    /// <param name="inv">The BindCommand invocation info.</param>
-    /// <param name="valueExpression">The expression producing the value to record.</param>
-    /// <returns>The rendered write, without a trailing semicolon.</returns>
-    /// <remarks>
-    /// The volatile write is what makes a parameter arriving on one thread visible to a command arriving on
-    /// another, and it is only available for a reference type - <c>Volatile</c> offers no overload for an
-    /// arbitrary value type, so a parameter such as a <c>Guid</c> would not compile. Those are recorded by a
-    /// plain write, which is what the runtime engine does for every parameter it boxes.
-    /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string WriteLatestParameter(BindCommandInvocationInfo inv, string valueExpression) =>
-        inv.ParameterIsReferenceType
-            ? $"global::System.Threading.Volatile.Write(ref __latestParam, {valueExpression})"
-            : $"__latestParam = {valueExpression}";
-
-    /// <summary>Renders the read that recovers the parameter a command emission should be given.</summary>
-    /// <param name="inv">The BindCommand invocation info.</param>
-    /// <returns>The rendered read.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string ReadLatestParameter(BindCommandInvocationInfo inv) =>
-        inv.ParameterIsReferenceType
-            ? "global::System.Threading.Volatile.Read(ref __latestParam)"
-            : "__latestParam";
-
     /// <summary>Appends the return that disposes the binding and puts the control back as it was found.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="controlAccess">The access chain to the bound control.</param>
@@ -154,7 +129,7 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
         AppendCapturedOriginals(sb, controlAccess);
 
         var nullableSuffix = supportsNullable && inv.ParameterIsReferenceType ? "?" : string.Empty;
-        var writeLatest = WriteLatestParameter(inv, "p");
+        var writeLatest = CommandBindingSyntax.WriteLatestParameter(inv, "p");
 
         _ = sb.Append("            ").Append(inv.ParameterTypeFullName).Append(nullableSuffix)
             .AppendLine(" __latestParam = default;")
@@ -166,7 +141,7 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
             .AppendLine("            {")
             .AppendLine("                serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;")
             .Append("                ").Append(controlAccess).AppendLine(".Command = cmd;")
-            .Append("                var param = ").Append(ReadLatestParameter(inv)).AppendLine(";")
+            .Append("                var param = ").Append(CommandBindingSyntax.ReadLatestParameter(inv)).AppendLine(";")
             .Append("                ").Append(controlAccess).AppendLine(".CommandParameter = param;")
             .AppendLine("                if (cmd != null)")
             .AppendLine("                {")

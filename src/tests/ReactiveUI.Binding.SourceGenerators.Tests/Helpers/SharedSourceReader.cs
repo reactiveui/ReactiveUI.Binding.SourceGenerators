@@ -66,7 +66,7 @@ internal static partial class SharedSourceReader
         _ = sb.AppendLine();
 
         // Single namespace block with all type blocks
-        _ = sb.AppendLine($"namespace {namespaceName}");
+        _ = sb.Append("namespace ").Append(namespaceName).AppendLine();
         _ = sb.AppendLine("{");
 
         for (var i = 0; i < typeBlocks.Count; i++)

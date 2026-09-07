@@ -17,6 +17,15 @@ namespace ReactiveUI.Binding.Generator.Benchmarks;
 /// </remarks>
 internal static class GeneratorCorpus
 {
+    /// <summary>Opens the body of a corpus type.</summary>
+    private const string TypeBodyOpen = "        {";
+
+    /// <summary>Closes the body of a corpus type.</summary>
+    private const string TypeBodyClose = "        }";
+
+    /// <summary>Names the view model parameter and opens the view parameter of a corpus call site.</summary>
+    private const string ViewModelAndViewParameters = " vm, MyView";
+
     /// <summary>Roughly how many characters one view-model and view pair contributes.</summary>
     private const int PairSourceCapacity = 2_048;
 
@@ -57,82 +66,49 @@ internal static class GeneratorCorpus
     /// <param name="index">The index that makes the emitted names unique.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void AppendTypes(StringBuilder sb, int index) =>
-        sb.Append($$"""
-                        public class Child{{index}} : INotifyPropertyChanged
-                        {
-                            public event PropertyChangedEventHandler PropertyChanged;
-
-                            public string Nested { get; set; }
-                        }
-
-                        public class MyViewModel{{index}} : INotifyPropertyChanged
-                        {
-                            public event PropertyChangedEventHandler PropertyChanged;
-
-                            public string Name { get; set; }
-
-                            public int Count { get; set; }
-
-                            public bool Flag { get; set; }
-
-                            public Child{{index}} Child { get; set; }
-
-                            public ICommand Save { get; set; }
-                        }
-
-                        public class MyButton{{index}}
-                        {
-                            public event EventHandler Click;
-                        }
-
-                        public class MyView{{index}} : IViewFor<MyViewModel{{index}}>
-                        {
-                            public MyViewModel{{index}} ViewModel { get; set; }
-
-                            object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (MyViewModel{{index}})value; }
-
-                            public string NameText { get; set; }
-
-                            public string CountText { get; set; }
-
-                            public bool FlagValue { get; set; }
-
-                            public MyButton{{index}} SaveButton { get; set; }
-                        }
-
-                """);
+        sb.Append("        public class Child").Append(index).AppendLine(" : INotifyPropertyChanged").AppendLine(TypeBodyOpen)
+            .AppendLine("            public event PropertyChangedEventHandler PropertyChanged;").AppendLine()
+            .AppendLine("            public string Nested { get; set; }").AppendLine(TypeBodyClose).AppendLine()
+            .Append("        public class MyViewModel").Append(index).AppendLine(" : INotifyPropertyChanged").AppendLine(TypeBodyOpen)
+            .AppendLine("            public event PropertyChangedEventHandler PropertyChanged;").AppendLine()
+            .AppendLine("            public string Name { get; set; }").AppendLine().AppendLine("            public int Count { get; set; }")
+            .AppendLine().AppendLine("            public bool Flag { get; set; }").AppendLine().Append("            public Child").Append(index)
+            .AppendLine(" Child { get; set; }").AppendLine().AppendLine("            public ICommand Save { get; set; }").AppendLine(TypeBodyClose)
+            .AppendLine().Append("        public class MyButton").Append(index).AppendLine().AppendLine(TypeBodyOpen)
+            .AppendLine("            public event EventHandler Click;").AppendLine(TypeBodyClose).AppendLine().Append("        public class MyView")
+            .Append(index).Append(" : IViewFor<MyViewModel").Append(index).AppendLine(">").AppendLine(TypeBodyOpen)
+            .Append("            public MyViewModel").Append(index).AppendLine(" ViewModel { get; set; }").AppendLine()
+            .Append("            object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (MyViewModel").Append(index).AppendLine(")value; }")
+            .AppendLine().AppendLine("            public string NameText { get; set; }").AppendLine()
+            .AppendLine("            public string CountText { get; set; }").AppendLine()
+            .AppendLine("            public bool FlagValue { get; set; }").AppendLine().Append("            public MyButton").Append(index)
+            .AppendLine(" SaveButton { get; set; }").AppendLine(TypeBodyClose);
 
     /// <summary>Appends the call sites for one pair, spread across the observation and binding APIs.</summary>
     /// <param name="sb">The builder to append to.</param>
     /// <param name="index">The index that makes the emitted names unique.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void AppendUsage(StringBuilder sb, int index) =>
-        sb.Append($$"""
-                        public static class Usage{{index}}
-                        {
-                            public static IObservable<string> ObserveName(MyViewModel{{index}} vm) => vm.WhenChanged(x => x.Name);
-
-                            public static IObservable<string> ObserveNested(MyViewModel{{index}} vm) => vm.WhenChanged(x => x.Child.Nested);
-
-                            public static IObservable<(string, int)> ObserveBoth(MyViewModel{{index}} vm) => vm.WhenChanged(x => x.Name, x => x.Count);
-
-                            public static IObservable<int> ObserveChanging(MyViewModel{{index}} vm) => vm.WhenChanging(x => x.Count);
-
-                            public static IObservable<string> AnyValue(MyViewModel{{index}} vm) => vm.WhenAnyValue(x => x.Name);
-
-                            public static IDisposable BindName(MyViewModel{{index}} vm, MyView{{index}} view) => vm.BindOneWay(view, x => x.Name, x => x.NameText);
-
-                            public static IDisposable BindFlag(MyViewModel{{index}} vm, MyView{{index}} view) => vm.BindTwoWay(view, x => x.Flag, x => x.FlagValue);
-
-                            public static IDisposable OneWay(MyViewModel{{index}} vm, MyView{{index}} view) => view.OneWayBind(vm, x => x.Name, x => x.NameText);
-
-                            public static IReactiveBinding<MyView{{index}}, string> TwoWay(MyViewModel{{index}} vm, MyView{{index}} view) => view.Bind(vm, x => x.Name, x => x.NameText);
-
-                            public static IDisposable Command(MyViewModel{{index}} vm, MyView{{index}} view) => view.BindCommand(vm, x => x.Save, x => x.SaveButton);
-
-                            public static IDisposable ToTarget(MyViewModel{{index}} vm, MyView{{index}} view) => vm.WhenChanged(x => x.Name).BindTo(view, x => x.NameText);
-                        }
-
-
-                """);
+        sb.Append("        public static class Usage").Append(index).AppendLine().AppendLine(TypeBodyOpen)
+            .Append("            public static IObservable<string> ObserveName(MyViewModel").Append(index)
+            .AppendLine(" vm) => vm.WhenChanged(x => x.Name);").AppendLine()
+            .Append("            public static IObservable<string> ObserveNested(MyViewModel").Append(index)
+            .AppendLine(" vm) => vm.WhenChanged(x => x.Child.Nested);").AppendLine()
+            .Append("            public static IObservable<(string, int)> ObserveBoth(MyViewModel").Append(index)
+            .AppendLine(" vm) => vm.WhenChanged(x => x.Name, x => x.Count);").AppendLine()
+            .Append("            public static IObservable<int> ObserveChanging(MyViewModel").Append(index)
+            .AppendLine(" vm) => vm.WhenChanging(x => x.Count);").AppendLine()
+            .Append("            public static IObservable<string> AnyValue(MyViewModel").Append(index)
+            .AppendLine(" vm) => vm.WhenAnyValue(x => x.Name);").AppendLine().Append("            public static IDisposable BindName(MyViewModel")
+            .Append(index).Append(ViewModelAndViewParameters).Append(index).AppendLine(" view) => vm.BindOneWay(view, x => x.Name, x => x.NameText);").AppendLine()
+            .Append("            public static IDisposable BindFlag(MyViewModel").Append(index).Append(ViewModelAndViewParameters).Append(index)
+            .AppendLine(" view) => vm.BindTwoWay(view, x => x.Flag, x => x.FlagValue);").AppendLine()
+            .Append("            public static IDisposable OneWay(MyViewModel").Append(index).Append(ViewModelAndViewParameters).Append(index)
+            .AppendLine(" view) => view.OneWayBind(vm, x => x.Name, x => x.NameText);").AppendLine()
+            .Append("            public static IReactiveBinding<MyView").Append(index).Append(", string> TwoWay(MyViewModel").Append(index)
+            .Append(ViewModelAndViewParameters).Append(index).AppendLine(" view) => view.Bind(vm, x => x.Name, x => x.NameText);").AppendLine()
+            .Append("            public static IDisposable Command(MyViewModel").Append(index).Append(ViewModelAndViewParameters).Append(index)
+            .AppendLine(" view) => view.BindCommand(vm, x => x.Save, x => x.SaveButton);").AppendLine()
+            .Append("            public static IDisposable ToTarget(MyViewModel").Append(index).Append(ViewModelAndViewParameters).Append(index)
+            .AppendLine(" view) => vm.WhenChanged(x => x.Name).BindTo(view, x => x.NameText);").AppendLine(TypeBodyClose).AppendLine();
 }

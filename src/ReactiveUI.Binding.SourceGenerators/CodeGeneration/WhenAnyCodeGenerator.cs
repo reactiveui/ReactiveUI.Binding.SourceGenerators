@@ -89,19 +89,16 @@ internal static class WhenAnyCodeGenerator
         var first = group.First;
         var propCount = first.PropertyPaths.Length;
 
-        _ = sb.AppendLine($"""
-                               /// <summary>
-                               /// Concrete typed overload for WhenAny on {first.SourceTypeFullName}.
-                               /// </summary>
-                               public static global::System.IObservable<{first.ReturnTypeFullName}> WhenAny(
-                                   this {first.SourceTypeFullName} objectToMonitor,
-                       """);
+        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for WhenAny on ").Append(first.SourceTypeFullName)
+            .AppendLine(".").AppendLine("        /// </summary>").Append("        public static global::System.IObservable<")
+            .Append(first.ReturnTypeFullName).AppendLine("> WhenAny(").Append("            this ").Append(first.SourceTypeFullName)
+            .AppendLine(" objectToMonitor,");
 
         for (var i = 0; i < propCount; i++)
         {
             var type = CodeGeneratorHelpers.NullableSelectorLeafType(first.PropertyPaths[i], supportsNullable);
-            _ = sb.AppendLine(
-                $"            global::System.Linq.Expressions.Expression<global::System.Func<{first.SourceTypeFullName}, {type}>> property{i + 1},");
+            _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<").Append(first.SourceTypeFullName).Append(", ")
+                .Append(type).Append(">> property").Append(i + 1).AppendLine(",");
         }
 
         // WhenAny always has a selector that takes IObservedChange parameters
@@ -160,10 +157,8 @@ internal static class WhenAnyCodeGenerator
     {
         var selectorType = GetWhenAnySelectorType(inv);
 
-        _ = sb.AppendLine($$"""
-                                private static global::System.IObservable<{{inv.ReturnTypeFullName}}> __WhenAny_{{suffix}}({{inv.SourceTypeFullName}} obj, {{selectorType}} selector)
-                                {
-                        """);
+        _ = sb.Append("        private static global::System.IObservable<").Append(inv.ReturnTypeFullName).Append("> __WhenAny_").Append(suffix)
+            .Append('(').Append(inv.SourceTypeFullName).Append(" obj, ").Append(selectorType).AppendLine(" selector)").AppendLine("        {");
 
         if (inv.PropertyPaths.Length == 1)
         {
@@ -205,10 +200,9 @@ internal static class WhenAnyCodeGenerator
             .AppendLine();
 
         // Wrap in ObservedChange and apply selector
-        _ = sb.Append($"""
-                               return global::ReactiveUI.Primitives.LinqExtensions.Select(__propObs0,
-                                   value => selector(new global::ReactiveUI.Binding.ObservedChange<{inv.SourceTypeFullName}, {leafType}>(obj, null, value)));
-                   """);
+        _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.Select(__propObs0,")
+            .Append("                value => selector(new global::ReactiveUI.Binding.ObservedChange<").Append(inv.SourceTypeFullName).Append(", ")
+            .Append(leafType).Append(">(obj, null, value)));");
     }
 
     /// <summary>
@@ -270,8 +264,8 @@ internal static class WhenAnyCodeGenerator
         {
             var path = inv.PropertyPaths[i];
             var leafType = path[path.Length - 1].PropertyTypeFullName;
-            _ = sb.Append(
-                $"new global::ReactiveUI.Binding.ObservedChange<{inv.SourceTypeFullName}, {leafType}>(obj, null, v{i + 1})");
+            _ = sb.Append("new global::ReactiveUI.Binding.ObservedChange<").Append(inv.SourceTypeFullName).Append(", ").Append(leafType)
+                .Append(">(obj, null, v").Append(i + 1).Append(')');
             if (i < inv.PropertyPaths.Length - 1)
             {
                 _ = sb.Append(", ");
@@ -294,7 +288,7 @@ internal static class WhenAnyCodeGenerator
         {
             var path = inv.PropertyPaths[i];
             var leafType = path[path.Length - 1].PropertyTypeFullName;
-            _ = sb.Append($"global::ReactiveUI.Binding.IObservedChange<{inv.SourceTypeFullName}, {leafType}>, ");
+            _ = sb.Append("global::ReactiveUI.Binding.IObservedChange<").Append(inv.SourceTypeFullName).Append(", ").Append(leafType).Append(">, ");
         }
 
         _ = sb.Append(inv.ReturnTypeFullName).Append('>');
@@ -315,8 +309,9 @@ internal static class WhenAnyCodeGenerator
         for (var i = 0; i < propCount; i++)
         {
             var paramName = $"property{i + 1}Expression";
-            _ = sb.AppendLine(
-                $"""            {paramName} = {paramName}.StartsWith("static ", global::System.StringComparison.Ordinal) ? {paramName}.Substring(7) : {paramName};""");
+            _ = sb.Append("            ").Append(paramName).Append(" = ").Append(paramName)
+                .Append(".StartsWith(\"static \", global::System.StringComparison.Ordinal) ? ").Append(paramName).Append(".Substring(7) : ")
+                .Append(paramName).AppendLine(";");
         }
 
         _ = sb.AppendLine();
@@ -345,8 +340,8 @@ internal static class WhenAnyCodeGenerator
             else
             {
                 var suffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-                _ = sb
-                    .Append($"""            {condition} (callerLineNumber == {inv.CallerLineNumber} && callerFilePath.EndsWith("{CodeGeneratorHelpers.EscapeString(suffix)}",""")
+                _ = sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber)
+                    .Append(" && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(suffix)).Append("\",")
                     .AppendLine(" global::System.StringComparison.OrdinalIgnoreCase))");
             }
 
@@ -355,9 +350,8 @@ internal static class WhenAnyCodeGenerator
                 inv.CallerFilePath,
                 inv.CallerLineNumber,
                 string.Join("|", inv.ExpressionTexts));
-            _ = sb.AppendLine("            {")
-                .AppendLine($"                return __WhenAny_{methodSuffix}(objectToMonitor, selector);")
-                .AppendLine("            }");
+            _ = sb.AppendLine("            {").Append("                return __WhenAny_").Append(methodSuffix)
+                .AppendLine("(objectToMonitor, selector);").AppendLine("            }");
         }
     }
 
@@ -372,11 +366,11 @@ internal static class WhenAnyCodeGenerator
         string condition,
         int propCount)
     {
-        _ = sb.Append($"            {condition} (");
+        _ = sb.Append("            ").Append(condition).Append(" (");
         for (var p = 0; p < propCount; p++)
         {
-            _ = sb.Append(
-                $"property{p + 1}Expression == \"{CodeGeneratorHelpers.EscapeString(inv.ExpressionTexts[p])}\"");
+            _ = sb.Append("property").Append(p + 1).Append("Expression == \"").Append(CodeGeneratorHelpers.EscapeString(inv.ExpressionTexts[p]))
+                .Append('"');
             if (p < propCount - 1)
             {
                 _ = sb.Append(" && ");

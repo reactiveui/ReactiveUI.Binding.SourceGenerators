@@ -30,6 +30,21 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// </remarks>
 internal sealed class WpfObservationPlugin : IObservationPlugin
 {
+    /// <summary>Opens the descriptor lookup the handler is added to or removed from.</summary>
+    private const string DescriptorLookupOpen = "                __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(";
+
+    /// <summary>Closes the descriptor lookup and subscribes the generated handler.</summary>
+    private const string AddValueChangedCall = ")).AddValueChanged(";
+
+    /// <summary>Closes the descriptor lookup and unsubscribes the generated handler.</summary>
+    private const string RemoveValueChangedCall = ")).RemoveValueChanged(";
+
+    /// <summary>Passes the generated handler and closes the add or remove lambda.</summary>
+    private const string HandlerArgumentClose = ", __h),";
+
+    /// <summary>Completes the dependency property field name and opens its owner type.</summary>
+    private const string DependencyPropertyOwnerOpen = "Property, typeof(";
+
     /// <summary>
     /// The affinity score for the WPF DependencyObject observation plugin
     /// (matches ReactiveUI's DependencyObjectObservableForProperty).
@@ -81,14 +96,13 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
             return;
         }
 
-        _ = sb.Append($"new global::ReactiveUI.Binding.Observables.EventObservable<{segment.PropertyTypeFullName}>(")
-            .Append($"__h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty({castTypeName}.{segment.PropertyName}Property,")
-            .Append($" typeof({castTypeName})).AddValueChanged({rootVar}, __h), ")
-            .Append($"__h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty({castTypeName}.{segment.PropertyName}Property,")
-            .Append($" typeof({castTypeName})).RemoveValueChanged({rootVar}, __h), ")
-            .Append($"() => (({castTypeName}){rootVar}).{segment.PropertyName}, ")
-            .Append(includeStartWith ? "true" : "false")
-            .Append(')');
+        _ = sb.Append("new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).Append(">(")
+            .Append("__h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(").Append(castTypeName).Append('.')
+            .Append(segment.PropertyName).Append("Property,").Append(" typeof(").Append(castTypeName).Append(AddValueChangedCall).Append(rootVar)
+            .Append(", __h), ").Append("__h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(").Append(castTypeName).Append('.')
+            .Append(segment.PropertyName).Append("Property,").Append(" typeof(").Append(castTypeName).Append(RemoveValueChangedCall).Append(rootVar)
+            .Append(", __h), ").Append("() => ((").Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).Append(", ")
+            .Append(includeStartWith ? "true" : "false").Append(')');
     }
 
     /// <inheritdoc/>
@@ -106,15 +120,15 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
             return;
         }
 
-        _ = sb.Append($"""
-                               var {varName} = new global::ReactiveUI.Binding.Observables.EventObservable<{segment.PropertyTypeFullName}>(
-                                   __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
-                                       {castTypeName}.{segment.PropertyName}Property, typeof({castTypeName})).AddValueChanged({rootVar}, __h),
-                                   __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
-                                       {castTypeName}.{segment.PropertyName}Property, typeof({castTypeName})).RemoveValueChanged({rootVar}, __h),
-                                   () => (({castTypeName}){rootVar}).{segment.PropertyName},
-                                   true);
-                   """);
+        _ = sb.Append("            var ").Append(varName).Append(" = new global::ReactiveUI.Binding.Observables.EventObservable<")
+            .Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .AppendLine(DescriptorLookupOpen).Append("                    ")
+            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append(DependencyPropertyOwnerOpen).Append(castTypeName).Append(AddValueChangedCall)
+            .Append(rootVar).AppendLine(HandlerArgumentClose)
+            .AppendLine(DescriptorLookupOpen).Append("                    ")
+            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append(DependencyPropertyOwnerOpen).Append(castTypeName)
+            .Append(RemoveValueChangedCall).Append(rootVar).AppendLine(HandlerArgumentClose).Append("                () => ((").Append(castTypeName).Append(')')
+            .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",").Append("                true);");
     }
 
     /// <inheritdoc/>
@@ -133,15 +147,15 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
             return;
         }
 
-        _ = sb.AppendLine($"""
-            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.EventObservable<{segment.PropertyTypeFullName}>(
-                __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
-                    {castTypeName}.{segment.PropertyName}Property, typeof({castTypeName})).AddValueChanged({rootVar}, __h),
-                __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
-                    {castTypeName}.{segment.PropertyName}Property, typeof({castTypeName})).RemoveValueChanged({rootVar}, __h),
-                () => (({castTypeName}){rootVar}).{segment.PropertyName},
-                false);
-""");
+        _ = sb.Append("            var ").Append(obsVarName).Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName)
+            .Append(">)new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .AppendLine(DescriptorLookupOpen).Append("                    ")
+            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append(DependencyPropertyOwnerOpen).Append(castTypeName).Append(AddValueChangedCall)
+            .Append(rootVar).AppendLine(HandlerArgumentClose)
+            .AppendLine(DescriptorLookupOpen).Append("                    ")
+            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append(DependencyPropertyOwnerOpen).Append(castTypeName)
+            .Append(RemoveValueChangedCall).Append(rootVar).AppendLine(HandlerArgumentClose).Append("                () => ((").Append(castTypeName).Append(')')
+            .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",").AppendLine("                false);");
     }
 
     /// <inheritdoc/>
@@ -163,30 +177,29 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
         if (isBeforeChange)
         {
             // WPF DP does not support before-change; emit ImmediateReturnSignal for inner segments too
-            _ = sb.AppendLine()
-                .AppendLine($"""
-                                     var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
-                                         {lambdaParam} => {lambdaParam} != null
-                                             ? (global::System.IObservable<{segType}>)
-                                                 new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>((({declType}){lambdaParam}).{segment.PropertyName})
-                                             : (global::System.IObservable<{segType}>){nullParentObservable});
-                             """);
+            _ = sb.AppendLine();
+            _ = sb.Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ")
+                .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar))
+                .AppendLine().Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(" != null")
+                .Append("                ? (global::System.IObservable<").Append(segType).AppendLine(">)")
+                .Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((").Append(declType)
+                .Append(')').Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(")").Append("                : (global::System.IObservable<")
+                .Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
             return;
         }
 
-        _ = sb.AppendLine()
-            .AppendLine($"""
-                                 var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
-                                     {lambdaParam} => {lambdaParam} != null
-                                         ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.EventObservable<{segType}>(
-                                             __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
-                                                 {declType}.{segment.PropertyName}Property, typeof({declType})).AddValueChanged({lambdaParam}, __h),
-                                             __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
-                                                 {declType}.{segment.PropertyName}Property, typeof({declType})).RemoveValueChanged({lambdaParam}, __h),
-                                             () => (({declType}){lambdaParam}).{segment.PropertyName},
-                                             false)
-                                         : (global::System.IObservable<{segType}>){nullParentObservable});
-                         """);
+        _ = sb.AppendLine().Append("        var ").Append(curVar).Append(" = ")
+            .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
+            .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType)
+            .Append(">)new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segType).AppendLine(">(")
+            .AppendLine("                    __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(")
+            .Append("                        ").Append(declType).Append('.').Append(segment.PropertyName).Append(DependencyPropertyOwnerOpen).Append(declType)
+            .Append(AddValueChangedCall).Append(lambdaParam).AppendLine(HandlerArgumentClose)
+            .AppendLine("                    __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(")
+            .Append("                        ").Append(declType).Append('.').Append(segment.PropertyName).Append(DependencyPropertyOwnerOpen).Append(declType)
+            .Append(RemoveValueChangedCall).Append(lambdaParam).AppendLine(HandlerArgumentClose).Append("                    () => ((").Append(declType)
+            .Append(')').Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(",").AppendLine("                    false)")
+            .Append("                : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
     }
 
     /// <inheritdoc/>
@@ -197,13 +210,13 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
         PropertyPathSegment segment,
         string castTypeName,
         string varName) =>
-        sb.AppendLine($"""
-                               var {varName} = new global::ReactiveUI.Binding.Observables.EventObservable<{segment.PropertyTypeFullName}>(
-                                   __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
-                                       {castTypeName}.{segment.PropertyName}Property, typeof({castTypeName})).AddValueChanged({rootVar}, __h),
-                                   __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(
-                                       {castTypeName}.{segment.PropertyName}Property, typeof({castTypeName})).RemoveValueChanged({rootVar}, __h),
-                                   () => (({castTypeName}){rootVar}).{segment.PropertyName},
-                                   true);
-                       """);
+        sb.Append("        var ").Append(varName).Append(" = new global::ReactiveUI.Binding.Observables.EventObservable<")
+            .Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .AppendLine("            __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(").Append("                ")
+            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append("Property, typeof(").Append(castTypeName)
+            .Append(")).AddValueChanged(").Append(rootVar).AppendLine(", __h),")
+            .AppendLine("            __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(").Append("                ")
+            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append("Property, typeof(").Append(castTypeName)
+            .Append(")).RemoveValueChanged(").Append(rootVar).AppendLine(", __h),").Append("            () => ((").Append(castTypeName).Append(')')
+            .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",").AppendLine("            true);");
 }

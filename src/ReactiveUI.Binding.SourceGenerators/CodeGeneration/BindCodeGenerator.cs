@@ -74,17 +74,14 @@ internal static class BindCodeGenerator
         var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
         var returnType = FormatReturnType(group);
 
-        _ = sb.AppendLine($"""
-                               /// <summary>
-                               /// Concrete typed overload for Bind from {group.SourceTypeFullName} to {group.TargetTypeFullName}.
-                               /// Uses CallerArgumentExpression for dispatch.
-                               /// </summary>
-                               public static {returnType} Bind(
-                                   this {group.TargetTypeFullName} view,
-                                   {group.SourceTypeFullName} viewModel,
-                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {sourcePropType}>> viewModelProperty,
-                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {targetPropType}>> viewProperty,
-                       """);
+        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for Bind from ").Append(group.SourceTypeFullName)
+            .Append(" to ").Append(group.TargetTypeFullName).AppendLine(".").AppendLine("        /// Uses CallerArgumentExpression for dispatch.")
+            .AppendLine("        /// </summary>").Append("        public static ").Append(returnType).AppendLine(" Bind(").Append("            this ")
+            .Append(group.TargetTypeFullName).AppendLine(" view,").Append("            ").Append(group.SourceTypeFullName).AppendLine(" viewModel,")
+            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ")
+            .Append(sourcePropType).AppendLine(">> viewModelProperty,")
+            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.TargetTypeFullName).Append(", ")
+            .Append(targetPropType).AppendLine(">> viewProperty,");
 
         AppendExtraParameters(sb, group);
 
@@ -110,13 +107,10 @@ internal static class BindCodeGenerator
                 inv.CallerLineNumber,
                 $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
 
-            _ = sb.AppendLine($$"""
-                                        {{condition}} (viewModelPropertyExpression == "{{escapedSourceExpr}}"
-                                            && viewPropertyExpression == "{{escapedTargetExpr}}")
-                                        {
-                                            return __Bind_{{methodSuffix}}(viewModel, view{{FormatExtraArgs(group)}});
-                                        }
-                            """);
+            _ = sb.Append("            ").Append(condition).Append(" (viewModelPropertyExpression == \"").Append(escapedSourceExpr).AppendLine("\"")
+                .Append("                && viewPropertyExpression == \"").Append(escapedTargetExpr).AppendLine("\")").AppendLine(GeneratedSyntax.StatementBlockOpen)
+                .Append("                return __Bind_").Append(methodSuffix).Append("(viewModel, view").Append(FormatExtraArgs(group)).AppendLine(");")
+                .AppendLine("            }");
         }
 
         _ = sb.AppendLine("""
@@ -141,17 +135,15 @@ internal static class BindCodeGenerator
         var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
         var returnType = FormatReturnType(group);
 
-        _ = sb.AppendLine($"""
-                               /// <summary>
-                               /// Concrete typed overload for Bind from {group.SourceTypeFullName} to {group.TargetTypeFullName}.
-                               /// Uses CallerFilePath + CallerLineNumber for dispatch.
-                               /// </summary>
-                               public static {returnType} Bind(
-                                   this {group.TargetTypeFullName} view,
-                                   {group.SourceTypeFullName} viewModel,
-                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.SourceTypeFullName}, {sourcePropType}>> viewModelProperty,
-                                   global::System.Linq.Expressions.Expression<global::System.Func<{group.TargetTypeFullName}, {targetPropType}>> viewProperty,
-                       """);
+        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for Bind from ").Append(group.SourceTypeFullName)
+            .Append(" to ").Append(group.TargetTypeFullName).AppendLine(".")
+            .AppendLine("        /// Uses CallerFilePath + CallerLineNumber for dispatch.").AppendLine("        /// </summary>")
+            .Append("        public static ").Append(returnType).AppendLine(" Bind(").Append("            this ").Append(group.TargetTypeFullName)
+            .AppendLine(" view,").Append("            ").Append(group.SourceTypeFullName).AppendLine(" viewModel,")
+            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ")
+            .Append(sourcePropType).AppendLine(">> viewModelProperty,")
+            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.TargetTypeFullName).Append(", ")
+            .Append(targetPropType).AppendLine(">> viewProperty,");
 
         AppendExtraParameters(sb, group);
 
@@ -183,13 +175,11 @@ internal static class BindCodeGenerator
                 inv.CallerLineNumber,
                 $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
 
-            _ = sb.AppendLine($$"""
-                                        {{condition}} (callerLineNumber == {{inv.CallerLineNumber}}
-                                            && callerFilePath.EndsWith("{{CodeGeneratorHelpers.EscapeString(suffix)}}", global::System.StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            return __Bind_{{methodSuffix}}(viewModel, view{{FormatExtraArgs(group)}});
-                                        }
-                            """);
+            _ = sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).AppendLine()
+                .Append("                && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(suffix))
+                .AppendLine("\", global::System.StringComparison.OrdinalIgnoreCase))").AppendLine(GeneratedSyntax.StatementBlockOpen)
+                .Append("                return __Bind_").Append(methodSuffix).Append("(viewModel, view").Append(FormatExtraArgs(group)).AppendLine(");")
+                .AppendLine("            }");
         }
 
         _ = sb.AppendLine("""
@@ -234,11 +224,10 @@ internal static class BindCodeGenerator
         var schedulerComment = inv.HasScheduler ? " (with scheduler)" : string.Empty;
         var returnType = FormatMethodReturnType(inv);
 
-        _ = sb.AppendLine($$"""
-                                private static {{returnType}} __Bind_{{suffix}}({{inv.SourceTypeFullName}} viewModel, {{inv.TargetTypeFullName}} view{{extraParams}})
-                                {
-                                    // Bind: {{viewModelPathComment}} <-> {{viewPathComment}}{{conversionComment}}{{schedulerComment}}
-                        """);
+        _ = sb.Append("        private static ").Append(returnType).Append(" __Bind_").Append(suffix).Append('(').Append(inv.SourceTypeFullName)
+            .Append(" viewModel, ").Append(inv.TargetTypeFullName).Append(" view").Append(extraParams).AppendLine(")").AppendLine("        {")
+            .Append("            // Bind: ").Append(viewModelPathComment).Append(" <-> ").Append(viewPathComment).Append(conversionComment)
+            .Append(schedulerComment).AppendLine();
 
         BindingEmitterHelpers.EmitBindingHookGuard(sb, "viewModel", "view", "TwoWay", "null");
 
@@ -328,20 +317,19 @@ internal static class BindCodeGenerator
         {
             var viewModelNext = inv.HasScheduler ? "__vmSelected" : "vmBind";
             var viewNext = inv.HasScheduler ? "__viewSelected" : "viewBind";
-            _ = sb.AppendLine($"""
-                                   var {viewModelNext} = new {MapSignal}<{inv.SourcePropertyTypeFullName}, {inv.TargetPropertyTypeFullName}>({viewModelVar}, viewModelToViewConverter);
-                                   var {viewNext} = new {MapSignal}<{inv.TargetPropertyTypeFullName}, {inv.SourcePropertyTypeFullName}>({viewVar}, viewToViewModelConverter);
-                           """);
+            _ = sb.Append("        var ").Append(viewModelNext).Append(" = new ").Append(MapSignal).Append('<').Append(inv.SourcePropertyTypeFullName)
+                .Append(", ").Append(inv.TargetPropertyTypeFullName).Append(">(").Append(viewModelVar).AppendLine(", viewModelToViewConverter);")
+                .Append("        var ").Append(viewNext).Append(" = new ").Append(MapSignal).Append('<').Append(inv.TargetPropertyTypeFullName)
+                .Append(", ").Append(inv.SourcePropertyTypeFullName).Append(">(").Append(viewVar).AppendLine(", viewToViewModelConverter);");
             viewModelVar = viewModelNext;
             viewVar = viewNext;
         }
 
         if (inv.HasScheduler)
         {
-            _ = sb.AppendLine($"""
-                                   var vmBind = {LinqExtensions}.ObserveOn<{inv.TargetPropertyTypeFullName}>({viewModelVar}, scheduler);
-                                   var viewBind = {LinqExtensions}.ObserveOn<{inv.SourcePropertyTypeFullName}>({viewVar}, scheduler);
-                           """);
+            _ = sb.Append("        var vmBind = ").Append(LinqExtensions).Append(".ObserveOn<").Append(inv.TargetPropertyTypeFullName).Append(">(")
+                .Append(viewModelVar).AppendLine(", scheduler);").Append("        var viewBind = ").Append(LinqExtensions).Append(".ObserveOn<")
+                .Append(inv.SourcePropertyTypeFullName).Append(">(").Append(viewVar).AppendLine(", scheduler);");
             viewModelVar = "vmBind";
             viewVar = "viewBind";
         }
@@ -362,33 +350,23 @@ internal static class BindCodeGenerator
         string viewModelVar,
         string viewVar,
         string viewPropertyAccess,
-        string viewModelSetAccess) => _ = sb.AppendLine($$"""
-
-                                    var d1 = {{BindingErrors}}.Subscribe({{viewModelVar}}, value =>
-                                    {
-                                        {{viewPropertyAccess}}
-                                    }, "{{CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)}}");
-
-                                    var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip({{viewVar}}, 1);
-                                    var d2 = {{BindingErrors}}.Subscribe(__viewSkipped, value =>
-                                    {
-                                        {{viewModelSetAccess}}
-                                    }, "{{CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText)}}");
-
-                                    var __vmTagged = new {{MapSignal}}<{{inv.TargetPropertyTypeFullName}}, {{BindingChange}}>({{viewModelVar}}, v => new {{BindingChange}}(v, true));
-                                    var __viewTagged = new {{MapSignal}}<{{inv.SourcePropertyTypeFullName}}, {{BindingChange}}>(__viewSkipped, v => new {{BindingChange}}(v, false));
-                                    var changed = new {{MergeSignal}}<{{BindingChange}}>(__vmTagged, __viewTagged);
-
-                                    var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
-
-                                    return new global::ReactiveUI.Binding.ReactiveBinding<{{inv.TargetTypeFullName}}, {{BindingChange}}>(
-                                        view,
-                                        changed,
-                                        global::ReactiveUI.Binding.BindingDirection.TwoWay,
-                                        disposable);
-                                }
-                        """)
-            .AppendLine();
+        string viewModelSetAccess) => _ = sb.AppendLine().Append("            var d1 = ").Append(BindingErrors).Append(".Subscribe(")
+            .Append(viewModelVar).AppendLine(", value =>").AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(viewPropertyAccess)
+            .AppendLine().Append("            }, \"").Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");")
+            .AppendLine().Append("            var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(").Append(viewVar)
+            .AppendLine(", 1);").Append("            var d2 = ").Append(BindingErrors).AppendLine(".Subscribe(__viewSkipped, value =>")
+            .AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(viewModelSetAccess).AppendLine().Append("            }, \"")
+            .Append(CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText)).AppendLine("\");").AppendLine()
+            .Append("            var __vmTagged = new ").Append(MapSignal).Append('<').Append(inv.TargetPropertyTypeFullName).Append(", ")
+            .Append(BindingChange).Append(">(").Append(viewModelVar).Append(", v => new ").Append(BindingChange).AppendLine("(v, true));")
+            .Append("            var __viewTagged = new ").Append(MapSignal).Append('<').Append(inv.SourcePropertyTypeFullName).Append(", ")
+            .Append(BindingChange).Append(">(__viewSkipped, v => new ").Append(BindingChange).AppendLine("(v, false));")
+            .Append("            var changed = new ").Append(MergeSignal).Append('<').Append(BindingChange).AppendLine(">(__vmTagged, __viewTagged);")
+            .AppendLine().AppendLine("            var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);")
+            .AppendLine().Append("            return new global::ReactiveUI.Binding.ReactiveBinding<").Append(inv.TargetTypeFullName).Append(", ")
+            .Append(BindingChange).AppendLine(">(").AppendLine("                view,").AppendLine("                changed,")
+            .AppendLine("                global::ReactiveUI.Binding.BindingDirection.TwoWay,").AppendLine("                disposable);")
+            .AppendLine("        }").AppendLine();
 
     /// <summary>Emits the stages that convert each direction to the type the other side declares.</summary>
     /// <param name="sb">The string builder to append to.</param>
