@@ -62,7 +62,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             methodName: BindTwoWayName);
         var invocations = ImmutableArray.Create(inv1, inv2);
 
-        var groups = BindTwoWayCodeGenerator.GroupByTypeSignature(invocations);
+        var groups = BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
         await Assert.That(groups.Count).IsEqualTo(1);
         await Assert.That(groups[0].Invocations.Length).IsEqualTo(ExpectedInvocationCount);
@@ -82,7 +82,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             isTwoWay: true);
         var invocations = ImmutableArray.Create(inv1, inv2);
 
-        var groups = BindTwoWayCodeGenerator.GroupByTypeSignature(invocations);
+        var groups = BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
         await Assert.That(groups.Count).IsEqualTo(ExpectedGroupCount);
     }
@@ -103,7 +103,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true);
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, BindTwoWayCodeGenerator.DispatchApi, true, false, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -126,7 +126,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, false, false, false);
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, BindTwoWayCodeGenerator.DispatchApi, false, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerFilePath");
@@ -151,7 +151,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, true, false, false);
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, BindTwoWayCodeGenerator.DispatchApi, true, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("sourcePropertyExpression == ");
@@ -180,7 +180,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, false, false, false);
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, BindTwoWayCodeGenerator.DispatchApi, false, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerLineNumber == 55");

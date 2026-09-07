@@ -90,35 +90,23 @@ internal static class ObservationCodeGenerator
     /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
     /// <param name="methodPrefix">The method name prefix ("WhenChanged", "WhenChanging", or "WhenAnyValue").</param>
     /// <returns>Generated source code string, or null if no invocations.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string? Generate(
         ImmutableArray<InvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features,
-        string methodPrefix)
-    {
-        if (invocations.IsDefaultOrEmpty)
-        {
-            return null;
-        }
-
-        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
-        var supportsCallerArgExpr = features.SupportsCallerArgExpr;
-        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
-        _ = sb.AppendLine();
-
-        // Group invocations by their method signature
-        var groups = GroupByTypeSignature(invocations);
-
-        for (var g = 0; g < groups.Count; g++)
-        {
-            GenerateGroup(sb, groups[g], allClasses, supportsCallerArgExpr, features.StubHasExpressionParameters, methodPrefix);
-        }
-
-        CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
-        _ = sb.AppendLine();
-
-        return PooledBuilder.ToStringAndReturn(sb);
-    }
+        string methodPrefix) =>
+        CodeGeneratorHelpers.GenerateDispatchFile(
+            invocations,
+            features,
+            GroupByTypeSignature,
+            (sb, group, snapshot) => GenerateGroup(
+                sb,
+                group,
+                allClasses,
+                snapshot.SupportsCallerArgExpr,
+                snapshot.StubHasExpressionParameters,
+                methodPrefix));
 
     /// <summary>Generates an observation method for a single invocation.</summary>
     /// <param name="sb">The string builder to append to.</param>

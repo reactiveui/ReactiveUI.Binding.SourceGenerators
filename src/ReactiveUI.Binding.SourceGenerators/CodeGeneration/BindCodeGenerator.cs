@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
@@ -16,41 +15,8 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class BindCodeGenerator
 {
-    /// <summary>What this API calls the selector for the side it reads from.</summary>
-    private const string SourceSelectorName = "viewModelProperty";
-
-    /// <summary>What this API calls the selector for the side it writes to.</summary>
-    private const string TargetSelectorName = "viewProperty";
-
-    /// <summary>The parameter carrying the text of the selector for the side read from.</summary>
-    private const string SourceExpressionParameter = SourceSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
-
-    /// <summary>The parameter carrying the text of the selector for the side written to.</summary>
-    private const string TargetExpressionParameter = TargetSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
-
-    /// <summary>The generated worker each dispatch branch hands the binding to.</summary>
-    private const string WorkerMethodPrefix = "__Bind_";
-
-    /// <summary>The two objects a generated worker binds, in its own parameter order.</summary>
-    private const string WorkerArguments = "viewModel, view";
-
-    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
-    private const string SubscriptionBodyIndent = "                ";
-
-    /// <summary>What this API calls the view-model-to-view converter in its generated signatures.</summary>
-    private const string ForwardConverterName = "viewModelToViewConverter";
-
-    /// <summary>What this API calls the view-to-view-model converter in its generated signatures.</summary>
-    private const string ReverseConverterName = "viewToViewModelConverter";
-
-    /// <summary>Name of the generated local holding the view model side observable.</summary>
-    private const string ViewModelObservableName = "vmObs";
-
-    /// <summary>Name of the generated local holding the view side observable.</summary>
-    private const string ViewObservableName = "viewObs";
-
-    /// <summary>What distinguishes this API's generated dispatch overload from the other three.</summary>
-    private static readonly BindingEmitterHelpers.BindingDispatchApi DispatchApi = new()
+    /// <summary>Gets what distinguishes this API's generated dispatch overload from the other three.</summary>
+    internal static readonly BindingEmitterHelpers.BindingDispatchApi DispatchApi = new()
     {
         Name = "Bind",
         ReceiverParameterName = "view",
@@ -67,22 +33,20 @@ internal static class BindCodeGenerator
         EmitAffinityOverride = EmitAffinityOverride,
     };
 
-    /// <summary>Groups Bind invocations by their type signature for overload generation.</summary>
-    /// <param name="invocations">The Bind invocations to group.</param>
-    /// <returns>A list of grouped invocations sharing the same type signature.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations) =>
-        BindingEmitterHelpers.GroupByTypeSignature(invocations);
+    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
+    private const string SubscriptionBodyIndent = "                ";
 
-    /// <summary>Generates the concrete typed overload using the appropriate dispatch strategy.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="group">The binding type group.</param>
-    /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is available.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateConcreteOverload(StringBuilder sb, BindingTypeGroup group, bool supportsCallerArgExpr, bool supportsNullable, bool stubHasExpressionParameters) =>
-        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, DispatchApi, supportsCallerArgExpr, supportsNullable, stubHasExpressionParameters);
+    /// <summary>What this API calls the view-model-to-view converter in its generated signatures.</summary>
+    private const string ForwardConverterName = "viewModelToViewConverter";
+
+    /// <summary>What this API calls the view-to-view-model converter in its generated signatures.</summary>
+    private const string ReverseConverterName = "viewToViewModelConverter";
+
+    /// <summary>Name of the generated local holding the view model side observable.</summary>
+    private const string ViewModelObservableName = "vmObs";
+
+    /// <summary>Name of the generated local holding the view side observable.</summary>
+    private const string ViewObservableName = "viewObs";
 
     /// <summary>Generates a private Bind method for a specific invocation.</summary>
     /// <param name="sb">The string builder to append to.</param>

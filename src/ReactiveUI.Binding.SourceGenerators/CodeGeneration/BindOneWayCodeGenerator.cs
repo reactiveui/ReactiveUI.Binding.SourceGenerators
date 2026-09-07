@@ -2,7 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
@@ -16,35 +15,8 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class BindOneWayCodeGenerator
 {
-    /// <summary>What this API calls the conversion argument in its generated signatures.</summary>
-    private const string ConversionParameterName = "conversionFunc";
-
-    /// <summary>What this API calls the selector for the side it reads from.</summary>
-    private const string SourceSelectorName = "sourceProperty";
-
-    /// <summary>What this API calls the selector for the side it writes to.</summary>
-    private const string TargetSelectorName = "targetProperty";
-
-    /// <summary>The parameter carrying the text of the selector for the side read from.</summary>
-    private const string SourceExpressionParameter = SourceSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
-
-    /// <summary>The parameter carrying the text of the selector for the side written to.</summary>
-    private const string TargetExpressionParameter = TargetSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
-
-    /// <summary>The generated worker each dispatch branch hands the binding to.</summary>
-    private const string WorkerMethodPrefix = "__BindOneWay_";
-
-    /// <summary>The two objects a generated worker binds, in its own parameter order.</summary>
-    private const string WorkerArguments = "source, target";
-
-    /// <summary>Name of the emitted local holding the source property observation, before conversion or scheduling.</summary>
-    private const string SourceObservableVariable = "sourceObs";
-
-    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
-    private const string SubscriptionBodyIndent = "                ";
-
-    /// <summary>What distinguishes this API's generated dispatch overload from the other three.</summary>
-    private static readonly BindingEmitterHelpers.BindingDispatchApi DispatchApi = new()
+    /// <summary>Gets what distinguishes this API's generated dispatch overload from the other three.</summary>
+    internal static readonly BindingEmitterHelpers.BindingDispatchApi DispatchApi = new()
     {
         Name = "BindOneWay",
         ReceiverParameterName = "source",
@@ -60,25 +32,14 @@ internal static class BindOneWayCodeGenerator
         EmitAffinityOverride = EmitAffinityOverride,
     };
 
-    /// <summary>Groups binding invocation information by a unique type signature, producing a collection of grouped results.</summary>
-    /// <param name="invocations">The collection of binding invocation details to be grouped.</param>
-    /// <returns>A list of grouped binding type information, where each group shares the same type signature.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static List<BindingTypeGroup> GroupByTypeSignature(ImmutableArray<BindingInvocationInfo> invocations) =>
-        BindingEmitterHelpers.GroupByTypeSignature(invocations);
+    /// <summary>What this API calls the conversion argument in its generated signatures.</summary>
+    private const string ConversionParameterName = "conversionFunc";
 
-    /// <summary>
-    /// Generates a concrete typed extension method overload for a specific group of binding types,
-    /// adjusting the generated code based on whether the target language version supports CallerArgumentExpression.
-    /// </summary>
-    /// <param name="sb">The <see cref="StringBuilder"/> instance to which the generated code will be appended.</param>
-    /// <param name="group">The group of binding types containing information about source and target members, conversion, and scheduling.</param>
-    /// <param name="supportsCallerArgExpr">Indicates whether the CallerArgumentExpression feature is supported by the target language version.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateConcreteOverload(StringBuilder sb, BindingTypeGroup group, bool supportsCallerArgExpr, bool supportsNullable, bool stubHasExpressionParameters) =>
-        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, DispatchApi, supportsCallerArgExpr, supportsNullable, stubHasExpressionParameters);
+    /// <summary>Name of the emitted local holding the source property observation, before conversion or scheduling.</summary>
+    private const string SourceObservableVariable = "sourceObs";
+
+    /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
+    private const string SubscriptionBodyIndent = "                ";
 
     /// <summary>
     /// Generates the BindOneWay method used for binding a source property to a target property with optional conversion and scheduler.

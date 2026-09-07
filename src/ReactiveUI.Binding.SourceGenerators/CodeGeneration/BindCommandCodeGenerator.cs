@@ -33,55 +33,16 @@ internal static class BindCommandCodeGenerator
     /// <param name="allClasses">All detected class binding info.</param>
     /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
     /// <returns>Generated source code string, or null if no invocations.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string? Generate(
         ImmutableArray<BindCommandInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        in LanguageFeatures features)
-    {
-        if (invocations.IsDefaultOrEmpty)
-        {
-            return null;
-        }
-
-        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
-        var supportsCallerArgExpr = features.SupportsCallerArgExpr;
-        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
-        _ = sb.AppendLine();
-
-        var groups = GroupByTypeSignature(invocations);
-
-        for (var g = 0; g < groups.Count; g++)
-        {
-            var group = supportsCallerArgExpr
-                ? groups[g] with
-                {
-                    Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
-                        groups[g].Invocations,
-                        static x => $"{x.CommandExpressionText}|{x.ControlExpressionText}"),
-                }
-                : groups[g];
-
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.SupportsNullable, features.StubHasExpressionParameters);
-            _ = sb.AppendLine();
-
-            for (var i = 0; i < group.Invocations.Length; i++)
-            {
-                var inv = group.Invocations[i];
-                var viewModelClassInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.ViewModelTypeFullName);
-                var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                    inv.ViewTypeFullName,
-                    inv.CallerFilePath,
-                    inv.CallerLineNumber,
-                    $"{inv.CommandExpressionText}|{inv.ControlExpressionText}");
-                GenerateBindCommandMethod(sb, inv, viewModelClassInfo, suffix, features.SupportsNullable);
-            }
-        }
-
-        CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
-        _ = sb.AppendLine();
-
-        return PooledBuilder.ToStringAndReturn(sb);
-    }
+        in LanguageFeatures features) =>
+        CodeGeneratorHelpers.GenerateDispatchFile(
+            invocations,
+            features,
+            GroupByTypeSignature,
+            (sb, group, snapshot) => EmitGroup(sb, group, allClasses, snapshot));
 
     /// <summary>Groups BindCommand invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The BindCommand invocations to group.</param>
@@ -424,6 +385,46 @@ internal static class BindCommandCodeGenerator
         inv.HasObservableParameter || inv is { HasExpressionParameter: true, ParameterPropertyPath: not null }
             ? $"new global::ReactiveUI.Primitives.Signals.MapSignal<{inv.ParameterTypeFullName}, object>(withParameter, __p => __p)"
             : "global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<object>.Instance";
+
+    /// <summary>Emits the overload and the workers for one group of call sites.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The group of call sites that share an overload.</param>
+    /// <param name="allClasses">All detected class binding info.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    private static void EmitGroup(
+        StringBuilder sb,
+        BindCommandTypeGroup group,
+        ImmutableArray<ClassBindingInfo> allClasses,
+        in LanguageFeatures features)
+    {
+        var collapsed = features.SupportsCallerArgExpr
+            ? group with
+            {
+                Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
+                    group.Invocations,
+                    static x => $"{x.CommandExpressionText}|{x.ControlExpressionText}"),
+            }
+            : group;
+
+        GenerateConcreteOverload(
+            sb,
+            collapsed,
+            features.SupportsCallerArgExpr,
+            features.SupportsNullable,
+            features.StubHasExpressionParameters);
+        _ = sb.AppendLine();
+
+        for (var i = 0; i < collapsed.Invocations.Length; i++)
+        {
+            var inv = collapsed.Invocations[i];
+            GenerateBindCommandMethod(
+                sb,
+                inv,
+                CodeGeneratorHelpers.FindClassInfo(allClasses, inv.ViewModelTypeFullName),
+                MethodSuffix(inv),
+                features.SupportsNullable);
+        }
+    }
 
     /// <summary>Emits one expression-text comparison branch per call site in the group.</summary>
     /// <param name="sb">The string builder to append to.</param>

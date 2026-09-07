@@ -552,6 +552,46 @@ internal static class CodeGeneratorHelpers
         + $"{GeneratedTypeNames.RuntimeBindingConverter}.TryConvert<{fromTypeFullName}, {toTypeFullName}>(__value, null, null, out __converted); "
         + "return __converted; }";
 
+    /// <summary>Emits a whole dispatch file: the extension class, and one overload per group of call sites.</summary>
+    /// <typeparam name="TInvocation">The call-site model this API extracts.</typeparam>
+    /// <typeparam name="TGroup">The group of call sites that share one overload.</typeparam>
+    /// <param name="invocations">The detected call sites for this API.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    /// <param name="groupByTypeSignature">Collects the call sites into the groups that share an overload.</param>
+    /// <param name="emitGroup">Emits the overload and the workers for one group.</param>
+    /// <returns>The generated source, or <see langword="null"/> when there are no call sites.</returns>
+    /// <remarks>
+    /// Every API's file has the same outline - header, a run of groups, footer - and differs only in how call
+    /// sites group and what each group emits. Both are handed in, so the outline is written once.
+    /// </remarks>
+    internal static string? GenerateDispatchFile<TInvocation, TGroup>(
+        ImmutableArray<TInvocation> invocations,
+        in LanguageFeatures features,
+        Func<ImmutableArray<TInvocation>, List<TGroup>> groupByTypeSignature,
+        Action<StringBuilder, TGroup, LanguageFeatures> emitGroup)
+    {
+        if (invocations.IsDefaultOrEmpty)
+        {
+            return null;
+        }
+
+        var snapshot = features;
+        var sb = PooledBuilder.Rent(invocations.Length * PerInvocationBufferCapacity);
+        AppendExtensionClassHeader(sb, snapshot);
+        _ = sb.AppendLine();
+
+        var groups = groupByTypeSignature(invocations);
+        for (var g = 0; g < groups.Count; g++)
+        {
+            emitGroup(sb, groups[g], snapshot);
+        }
+
+        AppendExtensionClassFooter(sb);
+        _ = sb.AppendLine();
+
+        return PooledBuilder.ToStringAndReturn(sb);
+    }
+
     /// <summary>Appends the documentation comment on a generated dispatch overload.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="apiName">The binding API the overload stands in for.</param>

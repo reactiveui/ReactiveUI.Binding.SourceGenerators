@@ -32,55 +32,16 @@ internal static class BindInteractionCodeGenerator
     /// <param name="allClasses">All detected class binding info.</param>
     /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
     /// <returns>Generated source code string, or null if no invocations.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string? Generate(
         ImmutableArray<BindInteractionInvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
-        in LanguageFeatures features)
-    {
-        if (invocations.IsDefaultOrEmpty)
-        {
-            return null;
-        }
-
-        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
-        var supportsCallerArgExpr = features.SupportsCallerArgExpr;
-        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
-        _ = sb.AppendLine();
-
-        var groups = GroupByTypeSignature(invocations);
-
-        for (var g = 0; g < groups.Count; g++)
-        {
-            var group = supportsCallerArgExpr
-                ? groups[g] with
-                {
-                    Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
-                        groups[g].Invocations,
-                        static x => x.ExpressionText),
-                }
-                : groups[g];
-
-            GenerateConcreteOverload(sb, group, supportsCallerArgExpr, features.StubHasExpressionParameters);
-            _ = sb.AppendLine();
-
-            for (var i = 0; i < group.Invocations.Length; i++)
-            {
-                var inv = group.Invocations[i];
-                var viewModelClassInfo = CodeGeneratorHelpers.FindClassInfo(allClasses, inv.ViewModelTypeFullName);
-                var suffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                    inv.ViewTypeFullName,
-                    inv.CallerFilePath,
-                    inv.CallerLineNumber,
-                    inv.ExpressionText);
-                GenerateBindInteractionMethod(sb, inv, viewModelClassInfo, suffix);
-            }
-        }
-
-        CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
-        _ = sb.AppendLine();
-
-        return PooledBuilder.ToStringAndReturn(sb);
-    }
+        in LanguageFeatures features) =>
+        CodeGeneratorHelpers.GenerateDispatchFile(
+            invocations,
+            features,
+            GroupByTypeSignature,
+            (sb, group, snapshot) => EmitGroup(sb, group, allClasses, snapshot));
 
     /// <summary>Groups BindInteraction invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The BindInteraction invocations to group.</param>
@@ -272,6 +233,40 @@ internal static class BindInteractionCodeGenerator
             .Append(registerCall).AppendLine().AppendLine("                    : global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;")
             .AppendLine("            });").AppendLine("            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(sub, serial);")
             .AppendLine("        }").AppendLine();
+    }
+
+    /// <summary>Emits the overload and the workers for one group of call sites.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The group of call sites that share an overload.</param>
+    /// <param name="allClasses">All detected class binding info.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    private static void EmitGroup(
+        StringBuilder sb,
+        BindInteractionTypeGroup group,
+        ImmutableArray<ClassBindingInfo> allClasses,
+        in LanguageFeatures features)
+    {
+        var collapsed = features.SupportsCallerArgExpr
+            ? group with
+            {
+                Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
+                    group.Invocations,
+                    static x => x.ExpressionText),
+            }
+            : group;
+
+        GenerateConcreteOverload(sb, collapsed, features.SupportsCallerArgExpr, features.StubHasExpressionParameters);
+        _ = sb.AppendLine();
+
+        for (var i = 0; i < collapsed.Invocations.Length; i++)
+        {
+            var inv = collapsed.Invocations[i];
+            GenerateBindInteractionMethod(
+                sb,
+                inv,
+                CodeGeneratorHelpers.FindClassInfo(allClasses, inv.ViewModelTypeFullName),
+                MethodSuffix(inv));
+        }
     }
 
     /// <summary>
