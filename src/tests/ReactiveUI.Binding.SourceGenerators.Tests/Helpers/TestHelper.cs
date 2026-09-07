@@ -407,8 +407,8 @@ public static class TestHelper
     {
         ArgumentNullException.ThrowIfNull(result);
 
-        using var ms = new MemoryStream();
-        var emitResult = result.OutputCompilation.Emit(ms);
+        using var assemblyStream = new MemoryStream();
+        var emitResult = result.OutputCompilation.Emit(assemblyStream);
 
         if (!emitResult.Success)
         {
@@ -422,9 +422,9 @@ public static class TestHelper
                 $"Failed to emit compilation:{Environment.NewLine}{errors}");
         }
 
-        ms.Position = 0;
+        assemblyStream.Position = 0;
         var context = new CollectibleAssemblyLoadContext();
-        var assembly = context.LoadFromStream(ms);
+        var assembly = context.LoadFromStream(assemblyStream);
         return new(assembly, context);
     }
 

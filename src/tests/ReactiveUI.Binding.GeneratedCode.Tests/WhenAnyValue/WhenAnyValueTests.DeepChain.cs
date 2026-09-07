@@ -33,7 +33,7 @@ public partial class WhenAnyValueTests
     private const string ReplacementName = "Changed";
 
     /// <summary>The initial child name used in nullable deep-chain tests.</summary>
-    private const string Alice = "Alice";
+    private const string InitialChildName = "Alice";
 
     /// <summary>The replacement child name used in nullable deep-chain tests.</summary>
     private const string Charlie = "Charlie";
@@ -157,8 +157,8 @@ public partial class WhenAnyValueTests
             .WhenAnyValue(fallbackHost, x => x.Child!.Name)
             .Subscribe(fallbackValues.Add);
 
-        generatedHost.Child = new() { Name = Alice };
-        fallbackHost.Child = new() { Name = Alice };
+        generatedHost.Child = new() { Name = InitialChildName };
+        fallbackHost.Child = new() { Name = InitialChildName };
         generatedHost.Child.Name = "Bob";
         fallbackHost.Child.Name = "Bob";
 
@@ -182,8 +182,8 @@ public partial class WhenAnyValueTests
     [Test]
     public async Task DeepChain_ThreeLinks_DetachesOrphanedSubtreeLikeLegacyReactiveUI()
     {
-        var generatedMiddle = new TestViewModel { Child = new() { Name = Alice } };
-        var fallbackMiddle = new TestViewModel { Child = new() { Name = Alice } };
+        var generatedMiddle = new TestViewModel { Child = new() { Name = InitialChildName } };
+        var fallbackMiddle = new TestViewModel { Child = new() { Name = InitialChildName } };
         var generatedHost = new HostTestFixture { Child = generatedMiddle };
         var fallbackHost = new HostTestFixture { Child = fallbackMiddle };
         var generatedValues = new List<string>();
@@ -215,7 +215,7 @@ public partial class WhenAnyValueTests
     [Test]
     public async Task DeepChain_NullLeaf_StillEmits()
     {
-        var host = new HostTestFixture { Child = new() { Name = Alice } };
+        var host = new HostTestFixture { Child = new() { Name = InitialChildName } };
         var values = new List<string>();
 
         using var sub = WhenAnyValueScenarios.DeepChain_ChildName(host)

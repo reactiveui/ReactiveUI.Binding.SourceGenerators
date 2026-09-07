@@ -40,10 +40,10 @@ public class ModelEqualityTests
             ModelFactory.CreateObservablePropertyInfo()
         ]);
 
-        var a = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
-        var b = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
+        var left = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
+        var right = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
 
-        await Assert.That(a.Equals(b)).IsTrue();
+        await Assert.That(left.Equals(right)).IsTrue();
     }
 
     /// <summary>Verifies that two ObservableTypeInfo instances with different values are not equal.</summary>
@@ -56,10 +56,10 @@ public class ModelEqualityTests
             ModelFactory.CreateObservablePropertyInfo()
         ]);
 
-        var a = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
-        var b = new ObservableTypeInfo("global::TestApp.OtherType", "OtherType", "INPC", Affinity, true, properties);
+        var left = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
+        var right = new ObservableTypeInfo("global::TestApp.OtherType", "OtherType", "INPC", Affinity, true, properties);
 
-        await Assert.That(a.Equals(b)).IsFalse();
+        await Assert.That(left.Equals(right)).IsFalse();
     }
 
     /// <summary>Verifies that ObservableTypeInfo.Equals returns false when compared to null object.</summary>
@@ -69,9 +69,9 @@ public class ModelEqualityTests
     {
         const int Affinity = 21;
         var properties = new EquatableArray<ObservablePropertyInfo>([]);
-        var a = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
+        var left = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
 
-        await Assert.That(a.Equals(NullReference())).IsFalse();
+        await Assert.That(left.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>Verifies that ObservableTypeInfo.Equals returns false when compared to a different type.</summary>
@@ -81,9 +81,9 @@ public class ModelEqualityTests
     {
         const int Affinity = 21;
         var properties = new EquatableArray<ObservablePropertyInfo>([]);
-        var a = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
+        var left = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
 
-        await Assert.That(a.Equals(StringName)).IsFalse();
+        await Assert.That(left.Equals(StringName)).IsFalse();
     }
 
     /// <summary>Verifies that two ObservableTypeInfo instances with same values produce the same hash code.</summary>
@@ -96,10 +96,10 @@ public class ModelEqualityTests
             ModelFactory.CreateObservablePropertyInfo()
         ]);
 
-        var a = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
-        var b = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
+        var left = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
+        var right = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
 
-        await Assert.That(a.GetHashCode()).IsEqualTo(b.GetHashCode());
+        await Assert.That(left.GetHashCode()).IsEqualTo(right.GetHashCode());
     }
 
     /// <summary>Verifies that operator== returns true for ObservableTypeInfo instances with same values.</summary>
@@ -112,10 +112,10 @@ public class ModelEqualityTests
             ModelFactory.CreateObservablePropertyInfo()
         ]);
 
-        var a = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
-        var b = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
+        var left = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
+        var right = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
 
-        await Assert.That(a == b).IsTrue();
+        await Assert.That(left == right).IsTrue();
     }
 
     /// <summary>Verifies that operator!= returns true for ObservableTypeInfo instances with different values.</summary>
@@ -127,8 +127,8 @@ public class ModelEqualityTests
         const int Affinity2 = 24;
         var properties = new EquatableArray<ObservablePropertyInfo>([]);
 
-        var a = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
-        var b = new ObservableTypeInfo(
+        var left = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
+        var right = new ObservableTypeInfo(
             MyViewModelTypeName,
             MyViewModelName,
             "ReactiveObject",
@@ -136,7 +136,7 @@ public class ModelEqualityTests
             true,
             properties);
 
-        await Assert.That(a != b).IsTrue();
+        await Assert.That(left != right).IsTrue();
     }
 
     /// <summary>Verifies that ObservableTypeInfo.ToString contains the type name.</summary>
@@ -146,9 +146,9 @@ public class ModelEqualityTests
     {
         const int Affinity = 21;
         var properties = new EquatableArray<ObservablePropertyInfo>([]);
-        var a = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
+        var left = new ObservableTypeInfo(MyViewModelTypeName, MyViewModelName, "INPC", Affinity, true, properties);
 
-        await Assert.That(a.ToString()).Contains("ObservableTypeInfo");
+        await Assert.That(left.ToString()).Contains("ObservableTypeInfo");
     }
 
     // ───────────────────────────────────────────────────────────────────────────
@@ -159,10 +159,10 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_Equals_SameValues_ReturnsTrue()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
-        var b = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var left = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var right = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
-        await Assert.That(a.Equals(b)).IsTrue();
+        await Assert.That(left.Equals(right)).IsTrue();
     }
 
     /// <summary>Verifies that two ObservablePropertyInfo instances with different values are not equal.</summary>
@@ -170,10 +170,10 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_Equals_DifferentValues_ReturnsFalse()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
-        var b = new ObservablePropertyInfo("Age", Int32TypeName, true, false, false, false);
+        var left = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var right = new ObservablePropertyInfo("Age", Int32TypeName, true, false, false, false);
 
-        await Assert.That(a.Equals(b)).IsFalse();
+        await Assert.That(left.Equals(right)).IsFalse();
     }
 
     /// <summary>Verifies that ObservablePropertyInfo.Equals returns false when compared to null object.</summary>
@@ -181,9 +181,9 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_Equals_ObjectNull_ReturnsFalse()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var left = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
-        await Assert.That(a.Equals(NullReference())).IsFalse();
+        await Assert.That(left.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>Verifies that ObservablePropertyInfo.Equals returns false when compared to a different type.</summary>
@@ -191,9 +191,9 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_Equals_ObjectWrongType_ReturnsFalse()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var left = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
-        await Assert.That(a.Equals(StringName)).IsFalse();
+        await Assert.That(left.Equals(StringName)).IsFalse();
     }
 
     /// <summary>Verifies that two ObservablePropertyInfo instances with same values produce the same hash code.</summary>
@@ -201,10 +201,10 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_GetHashCode_SameValues_AreEqual()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
-        var b = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var left = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var right = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
-        await Assert.That(a.GetHashCode()).IsEqualTo(b.GetHashCode());
+        await Assert.That(left.GetHashCode()).IsEqualTo(right.GetHashCode());
     }
 
     /// <summary>Verifies that operator== returns true for ObservablePropertyInfo instances with same values.</summary>
@@ -212,10 +212,10 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_OperatorEquals_SameValues_ReturnsTrue()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
-        var b = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var left = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var right = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
-        await Assert.That(a == b).IsTrue();
+        await Assert.That(left == right).IsTrue();
     }
 
     /// <summary>Verifies that operator!= returns true for ObservablePropertyInfo instances with different values.</summary>
@@ -223,10 +223,10 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_OperatorNotEquals_DifferentValues_ReturnsTrue()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
-        var b = new ObservablePropertyInfo("Name", StringTypeName, false, false, false, false);
+        var left = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var right = new ObservablePropertyInfo("Name", StringTypeName, false, false, false, false);
 
-        await Assert.That(a != b).IsTrue();
+        await Assert.That(left != right).IsTrue();
     }
 
     /// <summary>Verifies that ObservablePropertyInfo.ToString contains the type name.</summary>
@@ -234,9 +234,9 @@ public class ModelEqualityTests
     [Test]
     public async Task ObservablePropertyInfo_ToString_ContainsTypeName()
     {
-        var a = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
+        var left = new ObservablePropertyInfo("Name", StringTypeName, true, false, false, false);
 
-        await Assert.That(a.ToString()).Contains("ObservablePropertyInfo");
+        await Assert.That(left.ToString()).Contains("ObservablePropertyInfo");
     }
 
     // ───────────────────────────────────────────────────────────────────────────
@@ -247,10 +247,10 @@ public class ModelEqualityTests
     [Test]
     public async Task InvocationInfo_Equals_SameValues_ReturnsTrue()
     {
-        var a = ModelFactory.CreateInvocationInfo();
-        var b = ModelFactory.CreateInvocationInfo();
+        var left = ModelFactory.CreateInvocationInfo();
+        var right = ModelFactory.CreateInvocationInfo();
 
-        await Assert.That(a.Equals(b)).IsTrue();
+        await Assert.That(left.Equals(right)).IsTrue();
     }
 
     /// <summary>Verifies that two InvocationInfo instances with different values are not equal.</summary>
@@ -258,10 +258,10 @@ public class ModelEqualityTests
     [Test]
     public async Task InvocationInfo_Equals_DifferentValues_ReturnsFalse()
     {
-        var a = ModelFactory.CreateInvocationInfo();
-        var b = ModelFactory.CreateInvocationInfo(callerLineNumber: 99);
+        var left = ModelFactory.CreateInvocationInfo();
+        var right = ModelFactory.CreateInvocationInfo(callerLineNumber: 99);
 
-        await Assert.That(a.Equals(b)).IsFalse();
+        await Assert.That(left.Equals(right)).IsFalse();
     }
 
     /// <summary>Verifies that InvocationInfo.Equals returns false when compared to null object.</summary>
@@ -269,9 +269,9 @@ public class ModelEqualityTests
     [Test]
     public async Task InvocationInfo_Equals_ObjectNull_ReturnsFalse()
     {
-        var a = ModelFactory.CreateInvocationInfo();
+        var left = ModelFactory.CreateInvocationInfo();
 
-        await Assert.That(a.Equals(NullReference())).IsFalse();
+        await Assert.That(left.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>Verifies that InvocationInfo.Equals returns false when compared to a different type.</summary>
@@ -279,9 +279,9 @@ public class ModelEqualityTests
     [Test]
     public async Task InvocationInfo_Equals_ObjectWrongType_ReturnsFalse()
     {
-        var a = ModelFactory.CreateInvocationInfo();
+        var left = ModelFactory.CreateInvocationInfo();
 
-        await Assert.That(a.Equals(StringName)).IsFalse();
+        await Assert.That(left.Equals(StringName)).IsFalse();
     }
 
     /// <summary>Verifies that two InvocationInfo instances with same values produce the same hash code.</summary>
@@ -289,10 +289,10 @@ public class ModelEqualityTests
     [Test]
     public async Task InvocationInfo_GetHashCode_SameValues_AreEqual()
     {
-        var a = ModelFactory.CreateInvocationInfo();
-        var b = ModelFactory.CreateInvocationInfo();
+        var left = ModelFactory.CreateInvocationInfo();
+        var right = ModelFactory.CreateInvocationInfo();
 
-        await Assert.That(a.GetHashCode()).IsEqualTo(b.GetHashCode());
+        await Assert.That(left.GetHashCode()).IsEqualTo(right.GetHashCode());
     }
 
     /// <summary>Verifies that operator== returns true for InvocationInfo instances with same values.</summary>
@@ -300,10 +300,10 @@ public class ModelEqualityTests
     [Test]
     public async Task InvocationInfo_OperatorEquals_SameValues_ReturnsTrue()
     {
-        var a = ModelFactory.CreateInvocationInfo();
-        var b = ModelFactory.CreateInvocationInfo();
+        var left = ModelFactory.CreateInvocationInfo();
+        var right = ModelFactory.CreateInvocationInfo();
 
-        await Assert.That(a == b).IsTrue();
+        await Assert.That(left == right).IsTrue();
     }
 
     /// <summary>Verifies that operator!= returns true for InvocationInfo instances with different values.</summary>
@@ -311,10 +311,10 @@ public class ModelEqualityTests
     [Test]
     public async Task InvocationInfo_OperatorNotEquals_DifferentValues_ReturnsTrue()
     {
-        var a = ModelFactory.CreateInvocationInfo();
-        var b = ModelFactory.CreateInvocationInfo(methodName: "WhenChanging");
+        var left = ModelFactory.CreateInvocationInfo();
+        var right = ModelFactory.CreateInvocationInfo(methodName: "WhenChanging");
 
-        await Assert.That(a != b).IsTrue();
+        await Assert.That(left != right).IsTrue();
     }
 
     /// <summary>Verifies that InvocationInfo.ToString contains the type name.</summary>
@@ -322,9 +322,9 @@ public class ModelEqualityTests
     [Test]
     public async Task InvocationInfo_ToString_ContainsTypeName()
     {
-        var a = ModelFactory.CreateInvocationInfo();
+        var left = ModelFactory.CreateInvocationInfo();
 
-        await Assert.That(a.ToString()).Contains("InvocationInfo");
+        await Assert.That(left.ToString()).Contains("InvocationInfo");
     }
 
     // ───────────────────────────────────────────────────────────────────────────
@@ -335,10 +335,10 @@ public class ModelEqualityTests
     [Test]
     public async Task BindingInvocationInfo_Equals_SameValues_ReturnsTrue()
     {
-        var a = ModelFactory.CreateBindingInvocationInfo();
-        var b = ModelFactory.CreateBindingInvocationInfo();
+        var left = ModelFactory.CreateBindingInvocationInfo();
+        var right = ModelFactory.CreateBindingInvocationInfo();
 
-        await Assert.That(a.Equals(b)).IsTrue();
+        await Assert.That(left.Equals(right)).IsTrue();
     }
 
     /// <summary>Verifies that two BindingInvocationInfo instances with different values are not equal.</summary>
@@ -346,10 +346,10 @@ public class ModelEqualityTests
     [Test]
     public async Task BindingInvocationInfo_Equals_DifferentValues_ReturnsFalse()
     {
-        var a = ModelFactory.CreateBindingInvocationInfo();
-        var b = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true);
+        var left = ModelFactory.CreateBindingInvocationInfo();
+        var right = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true);
 
-        await Assert.That(a.Equals(b)).IsFalse();
+        await Assert.That(left.Equals(right)).IsFalse();
     }
 
     /// <summary>Verifies that BindingInvocationInfo.Equals returns false when compared to null object.</summary>
@@ -357,9 +357,9 @@ public class ModelEqualityTests
     [Test]
     public async Task BindingInvocationInfo_Equals_ObjectNull_ReturnsFalse()
     {
-        var a = ModelFactory.CreateBindingInvocationInfo();
+        var left = ModelFactory.CreateBindingInvocationInfo();
 
-        await Assert.That(a.Equals(NullReference())).IsFalse();
+        await Assert.That(left.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>Verifies that BindingInvocationInfo.Equals returns false when compared to a different type.</summary>
@@ -367,9 +367,9 @@ public class ModelEqualityTests
     [Test]
     public async Task BindingInvocationInfo_Equals_ObjectWrongType_ReturnsFalse()
     {
-        var a = ModelFactory.CreateBindingInvocationInfo();
+        var left = ModelFactory.CreateBindingInvocationInfo();
 
-        await Assert.That(a.Equals(StringName)).IsFalse();
+        await Assert.That(left.Equals(StringName)).IsFalse();
     }
 
     /// <summary>Verifies that two BindingInvocationInfo instances with same values produce the same hash code.</summary>
@@ -377,10 +377,10 @@ public class ModelEqualityTests
     [Test]
     public async Task BindingInvocationInfo_GetHashCode_SameValues_AreEqual()
     {
-        var a = ModelFactory.CreateBindingInvocationInfo();
-        var b = ModelFactory.CreateBindingInvocationInfo();
+        var left = ModelFactory.CreateBindingInvocationInfo();
+        var right = ModelFactory.CreateBindingInvocationInfo();
 
-        await Assert.That(a.GetHashCode()).IsEqualTo(b.GetHashCode());
+        await Assert.That(left.GetHashCode()).IsEqualTo(right.GetHashCode());
     }
 
     /// <summary>Verifies that operator== returns true for BindingInvocationInfo instances with same values.</summary>
@@ -388,10 +388,10 @@ public class ModelEqualityTests
     [Test]
     public async Task BindingInvocationInfo_OperatorEquals_SameValues_ReturnsTrue()
     {
-        var a = ModelFactory.CreateBindingInvocationInfo();
-        var b = ModelFactory.CreateBindingInvocationInfo();
+        var left = ModelFactory.CreateBindingInvocationInfo();
+        var right = ModelFactory.CreateBindingInvocationInfo();
 
-        await Assert.That(a == b).IsTrue();
+        await Assert.That(left == right).IsTrue();
     }
 
     /// <summary>Verifies that operator!= returns true for BindingInvocationInfo instances with different values.</summary>
@@ -399,10 +399,10 @@ public class ModelEqualityTests
     [Test]
     public async Task BindingInvocationInfo_OperatorNotEquals_DifferentValues_ReturnsTrue()
     {
-        var a = ModelFactory.CreateBindingInvocationInfo();
-        var b = ModelFactory.CreateBindingInvocationInfo(methodName: "BindTwoWay");
+        var left = ModelFactory.CreateBindingInvocationInfo();
+        var right = ModelFactory.CreateBindingInvocationInfo(methodName: "BindTwoWay");
 
-        await Assert.That(a != b).IsTrue();
+        await Assert.That(left != right).IsTrue();
     }
 
     /// <summary>Verifies that BindingInvocationInfo.ToString contains the type name.</summary>
@@ -410,9 +410,9 @@ public class ModelEqualityTests
     [Test]
     public async Task BindingInvocationInfo_ToString_ContainsTypeName()
     {
-        var a = ModelFactory.CreateBindingInvocationInfo();
+        var left = ModelFactory.CreateBindingInvocationInfo();
 
-        await Assert.That(a.ToString()).Contains("BindingInvocationInfo");
+        await Assert.That(left.ToString()).Contains("BindingInvocationInfo");
     }
 
     // ───────────────────────────────────────────────────────────────────────────
@@ -423,10 +423,10 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_SameValues_ReturnsTrue()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
-        var b = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var left = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var right = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
-        await Assert.That(a.Equals(b)).IsTrue();
+        await Assert.That(left.Equals(right)).IsTrue();
     }
 
     /// <summary>Verifies that two PropertyPathSegment instances with different values are not equal.</summary>
@@ -434,10 +434,10 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_DifferentValues_ReturnsFalse()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
-        var b = new PropertyPathSegment("Age", Int32TypeName, MyViewModelTypeName, false, null);
+        var left = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var right = new PropertyPathSegment("Age", Int32TypeName, MyViewModelTypeName, false, null);
 
-        await Assert.That(a.Equals(b)).IsFalse();
+        await Assert.That(left.Equals(right)).IsFalse();
     }
 
     /// <summary>Verifies that PropertyPathSegment.Equals returns false when compared to null object.</summary>
@@ -445,9 +445,9 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_ObjectNull_ReturnsFalse()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var left = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
-        await Assert.That(a.Equals(NullReference())).IsFalse();
+        await Assert.That(left.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>Verifies that PropertyPathSegment.Equals returns false when compared to a different type.</summary>
@@ -455,9 +455,9 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_Equals_ObjectWrongType_ReturnsFalse()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var left = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
-        await Assert.That(a.Equals(StringName)).IsFalse();
+        await Assert.That(left.Equals(StringName)).IsFalse();
     }
 
     /// <summary>Verifies that two PropertyPathSegment instances with same values produce the same hash code.</summary>
@@ -465,10 +465,10 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_GetHashCode_SameValues_AreEqual()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
-        var b = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var left = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var right = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
-        await Assert.That(a.GetHashCode()).IsEqualTo(b.GetHashCode());
+        await Assert.That(left.GetHashCode()).IsEqualTo(right.GetHashCode());
     }
 
     /// <summary>Verifies that operator== returns true for PropertyPathSegment instances with same values.</summary>
@@ -476,10 +476,10 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_OperatorEquals_SameValues_ReturnsTrue()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
-        var b = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var left = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var right = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
-        await Assert.That(a == b).IsTrue();
+        await Assert.That(left == right).IsTrue();
     }
 
     /// <summary>Verifies that operator!= returns true for PropertyPathSegment instances with different values.</summary>
@@ -487,10 +487,10 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_OperatorNotEquals_DifferentValues_ReturnsTrue()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
-        var b = new PropertyPathSegment("Name", StringTypeName, "global::TestApp.OtherType", true, null);
+        var left = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var right = new PropertyPathSegment("Name", StringTypeName, "global::TestApp.OtherType", true, null);
 
-        await Assert.That(a != b).IsTrue();
+        await Assert.That(left != right).IsTrue();
     }
 
     /// <summary>Verifies that PropertyPathSegment.ToString contains the type name.</summary>
@@ -498,9 +498,9 @@ public class ModelEqualityTests
     [Test]
     public async Task PropertyPathSegment_ToString_ContainsTypeName()
     {
-        var a = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
+        var left = new PropertyPathSegment("Name", StringTypeName, MyViewModelTypeName, true, null);
 
-        await Assert.That(a.ToString()).Contains("PropertyPathSegment");
+        await Assert.That(left.ToString()).Contains("PropertyPathSegment");
     }
 
     // ───────────────────────────────────────────────────────────────────────────
@@ -514,10 +514,10 @@ public class ModelEqualityTests
         var inv = ModelFactory.CreateInvocationInfo();
         var invocations = new[] { inv };
 
-        var a = new ObservationCodeGenerator.TypeGroup(inv, invocations);
-        var b = new ObservationCodeGenerator.TypeGroup(inv, invocations);
+        var left = new ObservationCodeGenerator.TypeGroup(inv, invocations);
+        var right = new ObservationCodeGenerator.TypeGroup(inv, invocations);
 
-        await Assert.That(a.Equals(b)).IsTrue();
+        await Assert.That(left.Equals(right)).IsTrue();
     }
 
     /// <summary>Verifies that two TypeGroup instances with different First values are not equal.</summary>
@@ -528,10 +528,10 @@ public class ModelEqualityTests
         var invA = ModelFactory.CreateInvocationInfo(callerLineNumber: 10);
         var invB = ModelFactory.CreateInvocationInfo(callerLineNumber: 20);
 
-        var a = new ObservationCodeGenerator.TypeGroup(invA, [invA]);
-        var b = new ObservationCodeGenerator.TypeGroup(invB, [invB]);
+        var left = new ObservationCodeGenerator.TypeGroup(invA, [invA]);
+        var right = new ObservationCodeGenerator.TypeGroup(invB, [invB]);
 
-        await Assert.That(a.Equals(b)).IsFalse();
+        await Assert.That(left.Equals(right)).IsFalse();
     }
 
     /// <summary>Verifies that TypeGroup.Equals returns false when compared to null object.</summary>
@@ -540,9 +540,9 @@ public class ModelEqualityTests
     public async Task TypeGroup_Equals_ObjectNull_ReturnsFalse()
     {
         var inv = ModelFactory.CreateInvocationInfo();
-        var a = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
+        var left = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        await Assert.That(a.Equals(NullReference())).IsFalse();
+        await Assert.That(left.Equals(NullReference())).IsFalse();
     }
 
     /// <summary>Verifies that TypeGroup.Equals returns false when compared to a different type.</summary>
@@ -551,9 +551,9 @@ public class ModelEqualityTests
     public async Task TypeGroup_Equals_ObjectWrongType_ReturnsFalse()
     {
         var inv = ModelFactory.CreateInvocationInfo();
-        var a = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
+        var left = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        await Assert.That(a.Equals(StringName)).IsFalse();
+        await Assert.That(left.Equals(StringName)).IsFalse();
     }
 
     /// <summary>Verifies that two TypeGroup instances with same values produce the same hash code.</summary>
@@ -564,10 +564,10 @@ public class ModelEqualityTests
         var inv = ModelFactory.CreateInvocationInfo();
         var invocations = new[] { inv };
 
-        var a = new ObservationCodeGenerator.TypeGroup(inv, invocations);
-        var b = new ObservationCodeGenerator.TypeGroup(inv, invocations);
+        var left = new ObservationCodeGenerator.TypeGroup(inv, invocations);
+        var right = new ObservationCodeGenerator.TypeGroup(inv, invocations);
 
-        await Assert.That(a.GetHashCode()).IsEqualTo(b.GetHashCode());
+        await Assert.That(left.GetHashCode()).IsEqualTo(right.GetHashCode());
     }
 
     /// <summary>Verifies that operator== returns true for TypeGroup instances with same values.</summary>
@@ -578,10 +578,10 @@ public class ModelEqualityTests
         var inv = ModelFactory.CreateInvocationInfo();
         var invocations = new[] { inv };
 
-        var a = new ObservationCodeGenerator.TypeGroup(inv, invocations);
-        var b = new ObservationCodeGenerator.TypeGroup(inv, invocations);
+        var left = new ObservationCodeGenerator.TypeGroup(inv, invocations);
+        var right = new ObservationCodeGenerator.TypeGroup(inv, invocations);
 
-        await Assert.That(a == b).IsTrue();
+        await Assert.That(left == right).IsTrue();
     }
 
     /// <summary>Verifies that operator!= returns true for TypeGroup instances with different values.</summary>
@@ -592,10 +592,10 @@ public class ModelEqualityTests
         var invA = ModelFactory.CreateInvocationInfo(callerLineNumber: 10);
         var invB = ModelFactory.CreateInvocationInfo(callerLineNumber: 20);
 
-        var a = new ObservationCodeGenerator.TypeGroup(invA, [invA]);
-        var b = new ObservationCodeGenerator.TypeGroup(invB, [invB]);
+        var left = new ObservationCodeGenerator.TypeGroup(invA, [invA]);
+        var right = new ObservationCodeGenerator.TypeGroup(invB, [invB]);
 
-        await Assert.That(a != b).IsTrue();
+        await Assert.That(left != right).IsTrue();
     }
 
     /// <summary>Verifies that TypeGroup.ToString contains the type name.</summary>
@@ -604,9 +604,9 @@ public class ModelEqualityTests
     public async Task TypeGroup_ToString_ContainsTypeName()
     {
         var inv = ModelFactory.CreateInvocationInfo();
-        var a = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
+        var left = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        await Assert.That(a.ToString()).Contains("TypeGroup");
+        await Assert.That(left.ToString()).Contains("TypeGroup");
     }
 
     /// <summary>Verifies that TypeGroup.SourceTypeFullName delegates to First.SourceTypeFullName.</summary>
@@ -615,9 +615,9 @@ public class ModelEqualityTests
     public async Task TypeGroup_SourceTypeFullName_DelegatesToFirst()
     {
         var inv = ModelFactory.CreateInvocationInfo(sourceTypeFullName: "global::TestApp.SpecialViewModel");
-        var a = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
+        var left = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        await Assert.That(a.SourceTypeFullName).IsEqualTo("global::TestApp.SpecialViewModel");
+        await Assert.That(left.SourceTypeFullName).IsEqualTo("global::TestApp.SpecialViewModel");
     }
 
     /// <summary>Verifies that TypeGroup.ReturnTypeFullName delegates to First.ReturnTypeFullName.</summary>
@@ -626,9 +626,9 @@ public class ModelEqualityTests
     public async Task TypeGroup_ReturnTypeFullName_DelegatesToFirst()
     {
         var inv = ModelFactory.CreateInvocationInfo(returnTypeFullName: Int32TypeName);
-        var a = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
+        var left = new ObservationCodeGenerator.TypeGroup(inv, [inv]);
 
-        await Assert.That(a.ReturnTypeFullName).IsEqualTo(Int32TypeName);
+        await Assert.That(left.ReturnTypeFullName).IsEqualTo(Int32TypeName);
     }
 
     /// <summary>

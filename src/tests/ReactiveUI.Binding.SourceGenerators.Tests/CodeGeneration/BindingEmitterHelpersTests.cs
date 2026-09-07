@@ -27,6 +27,9 @@ public class BindingEmitterHelpersTests
     /// <summary>The name a view exposes its view model under.</summary>
     private const string ViewModelPropertyName = "ViewModel";
 
+    /// <summary>The generated name of the view model a binding was handed.</summary>
+    private const string ViewModelVariableName = "viewModel";
+
     /// <summary>A view exposing its view model as the concrete type is observed through it, unnarrowed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -62,7 +65,7 @@ public class BindingEmitterHelpersTests
     {
         var observation = ResolveWithViewModelProperty("object");
 
-        await Assert.That(observation.RootVariable).IsEqualTo("viewModel");
+        await Assert.That(observation.RootVariable).IsEqualTo(ViewModelVariableName);
     }
 
     /// <summary>A view exposing no view model at all leaves the binding on the one it was handed.</summary>
@@ -76,7 +79,7 @@ public class BindingEmitterHelpersTests
             ModelFactory.CreateClassBindingInfo(implementsINPC: true),
             view);
 
-        await Assert.That(observation.RootVariable).IsEqualTo("viewModel");
+        await Assert.That(observation.RootVariable).IsEqualTo(ViewModelVariableName);
     }
 
     /// <summary>A supplied converter settles the conversion, so the registry is not asked for one.</summary>
@@ -139,6 +142,47 @@ public class BindingEmitterHelpersTests
         var result = sb.ToString();
         await Assert.That(result).Contains("typeof(global::TestApp.MyViewModel), \"Address\"");
         await Assert.That(result).Contains("typeof(global::TestApp.MyView), \"Text\"");
+    }
+
+    /// <summary>
+    /// A binding API that takes neither a converter nor a scheduler describes itself by leaving those members
+    /// unset, so the descriptor's own defaults have to emit nothing rather than require every API to say so.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindingDispatchApi_WithNoConversionOrSchedulerDeclared_EmitsNothingExtra()
+    {
+        var api = new BindingEmitterHelpers.BindingDispatchApi();
+        var group = Group(false, IntTypeName, IntTypeName);
+        var sb = new StringBuilder();
+
+        api.AppendExtraParameters(sb, group);
+        api.EmitAffinityOverride(sb, group, "\"Text\"");
+
+        await Assert.That(sb.ToString()).IsEmpty();
+        await Assert.That(api.FormatExtraArguments(group)).IsEmpty();
+        await Assert.That(api.FormatWorkerParameters(ModelFactory.CreateBindingInvocationInfo())).IsEmpty();
+    }
+
+    /// <summary>A binding API that hands back a plain disposable says so by leaving both return types unset.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindingDispatchApi_WithNoReturnTypeDeclared_HandsBackADisposable()
+    {
+        var api = new BindingEmitterHelpers.BindingDispatchApi();
+
+        await Assert.That(api.FormatReturnType(Group(false, IntTypeName, IntTypeName))).IsEqualTo("global::System.IDisposable");
+        await Assert.That(api.FormatWorkerReturnType(ModelFactory.CreateBindingInvocationInfo())).IsEqualTo("global::System.IDisposable");
+    }
+
+    /// <summary>The two objects a worker binds are named from the two parameters it declares them as.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindingDispatchApi_WorkerArguments_NamesBothParametersInTheirDeclaredOrder()
+    {
+        var api = new BindingEmitterHelpers.BindingDispatchApi { WorkerSourceParameterName = ViewModelVariableName, WorkerTargetParameterName = "view" };
+
+        await Assert.That(api.WorkerArguments).IsEqualTo($"{ViewModelVariableName}, view");
     }
 
     /// <summary>Resolves the observation for a view declaring its view model as the given type.</summary>

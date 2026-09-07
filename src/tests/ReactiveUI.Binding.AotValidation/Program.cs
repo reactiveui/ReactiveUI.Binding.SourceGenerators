@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.AotValidation;
 internal static class Program
 {
     /// <summary>A sample name value used across the WhenChanged scenarios.</summary>
-    private const string Alice = "Alice";
+    private const string InitialName = "Alice";
 
     /// <summary>The replacement string value used to assert change propagation.</summary>
     private const string ReplacementName = "Updated";
@@ -64,10 +64,10 @@ internal static class Program
     /// <summary>WhenChanged on a single property emits the initial value and subsequent changes.</summary>
     private static void ValidateWhenChangedSingleProperty()
     {
-        var vm = new AotViewModel { Name = Alice };
+        var vm = new AotViewModel { Name = InitialName };
         string? last = null;
         using var sub = vm.WhenChanged(x => x.Name).Subscribe(v => last = v);
-        AssertEqual("WhenChanged initial", Alice, last);
+        AssertEqual("WhenChanged initial", InitialName, last);
         vm.Name = "Bob";
         AssertEqual("WhenChanged after set", "Bob", last);
     }
@@ -87,10 +87,10 @@ internal static class Program
     /// <summary>WhenChanged on two properties emits a tuple and updates when either changes.</summary>
     private static void ValidateWhenChangedTwoProperties()
     {
-        var vm = new AotViewModel { Name = Alice, Age = InitialAge };
+        var vm = new AotViewModel { Name = InitialName, Age = InitialAge };
         PropertyValues<string, int> last = default;
         using var sub = vm.WhenChanged(x => x.Name, x => x.Age).Subscribe(v => last = v);
-        AssertEqual("WhenChanged two-prop name", Alice, last.Property1);
+        AssertEqual("WhenChanged two-prop name", InitialName, last.Property1);
         AssertEqual("WhenChanged two-prop age", InitialAge, last.Property2);
         vm.Age = ReplacementAge;
         AssertEqual("WhenChanged two-prop age update", ReplacementAge, last.Property2);
