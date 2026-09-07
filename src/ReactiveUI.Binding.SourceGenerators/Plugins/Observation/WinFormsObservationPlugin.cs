@@ -28,7 +28,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// that the property cannot be observed via the WinForms event convention.
 /// </para>
 /// </remarks>
-internal sealed class WinFormsObservationPlugin : IObservationPlugin
+internal sealed class WinFormsObservationPlugin : AfterChangeObservationPlugin, IObservationPlugin
 {
     /// <summary>Opens the lambda that adds or removes the generated event handler.</summary>
     private const string HandlerLambdaOpen = "                __h => ((";
@@ -52,9 +52,6 @@ internal sealed class WinFormsObservationPlugin : IObservationPlugin
     public string ObservationKind => "WinForms";
 
     /// <inheritdoc/>
-    public bool SupportsBeforeChanged => false;
-
-    /// <inheritdoc/>
     public bool RequiresHelperClasses => false;
 
     /// <inheritdoc/>
@@ -71,74 +68,6 @@ internal sealed class WinFormsObservationPlugin : IObservationPlugin
     public void EmitHelperClasses(StringBuilder sb)
     {
         // No helper classes needed — uses EventObservable<T> from runtime library.
-    }
-
-    /// <inheritdoc/>
-    public void EmitShallowObservation(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        bool isBeforeChange,
-        bool includeStartWith)
-    {
-        if (isBeforeChange)
-        {
-            _ = UnchangingObservationEmitter.AppendExpression(sb, rootVar, segment, castTypeName);
-            return;
-        }
-
-        _ = sb.Append("new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).Append(">(")
-            .Append("__h => ((").Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).Append("Changed += __h, ")
-            .Append("__h => ((").Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).Append("Changed -= __h, ")
-            .Append("() => ((").Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).Append(", ")
-            .Append(includeStartWith ? "true" : "false").Append(')');
-    }
-
-    /// <inheritdoc/>
-    public void EmitShallowObservationVariable(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        bool isBeforeChange,
-        string varName)
-    {
-        if (isBeforeChange)
-        {
-            _ = UnchangingObservationEmitter.AppendVariable(sb, rootVar, segment, castTypeName, varName);
-            return;
-        }
-
-        _ = sb.Append("            var ").Append(varName).Append(" = new global::ReactiveUI.Binding.Observables.EventObservable<")
-            .Append(segment.PropertyTypeFullName).AppendLine(">(").Append(HandlerLambdaOpen).Append(castTypeName).Append(')').Append(rootVar)
-            .Append(").").Append(segment.PropertyName).AppendLine(ChangedEventAdd).Append(HandlerLambdaOpen).Append(castTypeName).Append(')')
-            .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(ChangedEventRemove).Append("                () => ((")
-            .Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",").Append("                true);");
-    }
-
-    /// <inheritdoc/>
-    public void EmitDeepChainRootSegment(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        bool isBeforeChange,
-        string obsVarName)
-    {
-        if (isBeforeChange)
-        {
-            _ = UnchangingObservationEmitter.AppendTypedVariable(sb, rootVar, segment, castTypeName, obsVarName)
-                .AppendLine();
-            return;
-        }
-
-        _ = sb.Append("            var ").Append(obsVarName).Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName)
-            .Append(">)new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .Append(HandlerLambdaOpen).Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName)
-            .AppendLine(ChangedEventAdd).Append(HandlerLambdaOpen).Append(castTypeName).Append(')').Append(rootVar).Append(").")
-            .Append(segment.PropertyName).AppendLine(ChangedEventRemove).Append("                () => ((").Append(castTypeName).Append(')')
-            .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",").AppendLine("                false);");
     }
 
     /// <inheritdoc/>
@@ -193,4 +122,44 @@ internal sealed class WinFormsObservationPlugin : IObservationPlugin
             .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine("Changed -= __h,").Append("            () => ((")
             .Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",")
             .AppendLine("            true);");
+
+    /// <inheritdoc/>
+    protected override void AppendShallowObservation(
+        StringBuilder sb,
+        string rootVar,
+        PropertyPathSegment segment,
+        string castTypeName,
+        bool includeStartWith) =>
+        _ = sb.Append("new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).Append(">(")
+            .Append("__h => ((").Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).Append("Changed += __h, ")
+            .Append("__h => ((").Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).Append("Changed -= __h, ")
+            .Append("() => ((").Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).Append(", ")
+            .Append(includeStartWith ? "true" : "false").Append(')');
+
+    /// <inheritdoc/>
+    protected override void AppendShallowObservationVariable(
+        StringBuilder sb,
+        string rootVar,
+        PropertyPathSegment segment,
+        string castTypeName,
+        string varName) =>
+        _ = sb.Append("            var ").Append(varName).Append(" = new global::ReactiveUI.Binding.Observables.EventObservable<")
+            .Append(segment.PropertyTypeFullName).AppendLine(">(").Append(HandlerLambdaOpen).Append(castTypeName).Append(')').Append(rootVar)
+            .Append(").").Append(segment.PropertyName).AppendLine(ChangedEventAdd).Append(HandlerLambdaOpen).Append(castTypeName).Append(')')
+            .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(ChangedEventRemove).Append("                () => ((")
+            .Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",").Append("                true);");
+
+    /// <inheritdoc/>
+    protected override void AppendDeepChainRootSegment(
+        StringBuilder sb,
+        string rootVar,
+        PropertyPathSegment segment,
+        string castTypeName,
+        string obsVarName) =>
+        _ = sb.Append("            var ").Append(obsVarName).Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName)
+            .Append(">)new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append(HandlerLambdaOpen).Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName)
+            .AppendLine(ChangedEventAdd).Append(HandlerLambdaOpen).Append(castTypeName).Append(')').Append(rootVar).Append(").")
+            .Append(segment.PropertyName).AppendLine(ChangedEventRemove).Append("                () => ((").Append(castTypeName).Append(')')
+            .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",").AppendLine("                false);");
 }
