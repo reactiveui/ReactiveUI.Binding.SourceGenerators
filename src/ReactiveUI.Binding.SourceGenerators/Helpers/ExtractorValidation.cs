@@ -86,6 +86,19 @@ internal static class ExtractorValidation
     internal static string? GetTypeDisplayName(ITypeSymbol? type) =>
         type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
+    /// <summary>Names a type only when a generated overload could declare a parameter of it.</summary>
+    /// <param name="type">The type symbol, which may be null.</param>
+    /// <returns>The fully qualified type name, or <see langword="null"/> when no overload could name it.</returns>
+    /// <remarks>
+    /// A call made through a type parameter binds to whatever closes it, which the call site does not name.
+    /// Writing the parameter's own name into an overload puts an identifier no consumer declared into their
+    /// build, so the whole compilation fails over generated code they cannot edit - including every unrelated
+    /// call site in the project. Declining the call site leaves it on the runtime stub instead.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static string? GetDeclarableTypeDisplayName(ITypeSymbol? type) =>
+        type is INamedTypeSymbol named ? GetTypeDisplayName(named) : null;
+
     /// <summary>
     /// Searches method parameters for a selector or conversion function parameter
     /// and returns the fully qualified return type (the last type argument of the Func).

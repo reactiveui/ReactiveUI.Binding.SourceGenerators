@@ -56,7 +56,7 @@ internal static class BindToExtractor
         var targetPropertyArg = args[1].Expression;
         var targetPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(targetPropertyArg, semanticModel, ct);
         var targetTypeName =
-            ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
+            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
 
         // One guard for both: a target the model could not name is as unusable as a property path it could
         // not read, and the target type is only reachable through an argument the path check already covers.

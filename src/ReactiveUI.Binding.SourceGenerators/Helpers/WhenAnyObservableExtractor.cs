@@ -49,9 +49,12 @@ internal static class WhenAnyObservableExtractor
         }
 
         // Get the source type from the receiver
-        var sourceTypeFullName = InvalidOperationExceptionHelper.EnsureNotNull(
-            ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type),
-            "source type display name");
+        var sourceTypeFullName =
+            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type);
+        if (sourceTypeFullName is null)
+        {
+            return null;
+        }
 
         // Compute return type
         var returnTypeFullName = hasSelector

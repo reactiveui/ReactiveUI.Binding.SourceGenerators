@@ -59,8 +59,11 @@ internal static class BindingExtractor
             return null;
         }
 
-        var (sourceTypeFullName, targetTypeFullName) =
-            ResolveBindingSides(memberAccess, args, methodName, semanticModel, ct);
+        if (ResolveBindingSides(memberAccess, args, methodName, semanticModel, ct)
+            is not var (sourceTypeFullName, targetTypeFullName))
+        {
+            return null;
+        }
 
         DetectBindingParameters(
             methodSymbol,
@@ -95,21 +98,26 @@ internal static class BindingExtractor
     /// <param name="methodName">The invoked method name.</param>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>The fully qualified source and target type names.</returns>
-    private static BindingSides ResolveBindingSides(
+    /// <returns>
+    /// The fully qualified source and target type names, or <see langword="null"/> when either side names a
+    /// type a generated overload could not declare.
+    /// </returns>
+    private static BindingSides? ResolveBindingSides(
         MemberAccessExpressionSyntax memberAccess,
         SeparatedSyntaxList<ArgumentSyntax> args,
         string methodName,
         SemanticModel semanticModel,
         CancellationToken ct)
     {
-        var receiverTypeName = InvalidOperationExceptionHelper.EnsureNotNull(
-            ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type),
-            "receiver type display name");
+        var receiverTypeName =
+            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type);
+        var firstArgTypeName =
+            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
 
-        var firstArgTypeName = InvalidOperationExceptionHelper.EnsureNotNull(
-            ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type),
-            "first argument type display name");
+        if (receiverTypeName is null || firstArgTypeName is null)
+        {
+            return null;
+        }
 
         var isViewFirst = methodName is Constants.OneWayBindMethodName or Constants.BindMethodName;
         return isViewFirst
