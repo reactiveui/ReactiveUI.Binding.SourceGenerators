@@ -652,6 +652,37 @@ internal static class CodeGeneratorHelpers
             .Append("                ? ").Append(expressionParameterName).AppendLine(".Substring(7)")
             .Append("                : ").Append(expressionParameterName).AppendLine(";");
 
+    /// <summary>Appends that same strip for a run of numbered expression parameters.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="supportsCallerArgExpr">Whether dispatch matches on expression text at all.</param>
+    /// <param name="parameterPrefix">What the overload calls its selector parameters, before their index.</param>
+    /// <param name="count">How many selectors the overload declares.</param>
+    /// <remarks>
+    /// An overload taking several selectors captures the text of each, and any of them may have been written
+    /// as a <c>static</c> lambda. Below C# 10 there is no captured text to strip, so nothing is emitted.
+    /// </remarks>
+    internal static void AppendIndexedStaticPrefixNormalization(
+        StringBuilder sb,
+        bool supportsCallerArgExpr,
+        string parameterPrefix,
+        int count)
+    {
+        if (!supportsCallerArgExpr)
+        {
+            return;
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            var parameterName = $"{parameterPrefix}{i + 1}{ExpressionParameterSuffix}";
+            _ = sb.Append(ParameterIndent).Append(parameterName).Append(" = ").Append(parameterName)
+                .Append(".StartsWith(\"static \", global::System.StringComparison.Ordinal) ? ").Append(parameterName).Append(".Substring(7) : ")
+                .Append(parameterName).AppendLine(";");
+        }
+
+        _ = sb.AppendLine();
+    }
+
     /// <summary>Appends the condition that matches a call site by the text of both its selectors.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="condition">The conditional keyword this branch opens with.</param>

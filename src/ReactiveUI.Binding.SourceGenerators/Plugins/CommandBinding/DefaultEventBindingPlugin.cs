@@ -32,82 +32,78 @@ internal sealed class DefaultEventBindingPlugin : EventCommandBindingPlugin
         inv.ResolvedEventName is not null;
 
     /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected override void EmitWithObservableParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
         string eventArgsType,
-        bool supportsNullable) =>
-        sb.AppendLine().Append("            ").Append(inv.ParameterTypeFullName)
-            .Append(supportsNullable && inv.ParameterIsReferenceType ? "?" : string.Empty).AppendLine(" __latestParam = default;")
-            .AppendLine("            var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(")
-            .Append("                withParameter, p => ").Append(CommandBindingSyntax.WriteLatestParameter(inv, "p")).AppendLine(");").AppendLine()
-            .AppendLine(CommandBindingSyntax.SerialDisposableDeclaration)
-            .AppendLine(CommandBindingSyntax.CommandSubscriptionOpen)
-            .AppendLine(GeneratedSyntax.StatementBlockOpen)
-            .AppendLine(CommandBindingSyntax.ResetSerialDisposable)
-            .AppendLine(CommandBindingSyntax.CommandMissingTest).AppendLine(CommandBindingSyntax.SubscriptionBlockOpen).AppendLine(CommandBindingSyntax.CommandMissingReturn)
-            .AppendLine(CommandBindingSyntax.SubscriptionBlockClose).AppendLine().Append(CommandBindingSyntax.HandlerDeclarationOpen)
-            .Append(CommandEventBindingEmitter.SenderType(supportsNullable)).Append(CommandBindingSyntax.HandlerSenderSeparator).Append(eventArgsType).AppendLine(" e)")
-            .AppendLine(CommandBindingSyntax.SubscriptionBlockOpen)
-            .Append("                    var param = ").Append(CommandBindingSyntax.ReadLatestParameter(inv)).AppendLine(";")
-            .AppendLine("                    if (cmd.CanExecute(param))").AppendLine(CommandBindingSyntax.NestedBlockOpen)
-            .AppendLine("                        cmd.Execute(param);").AppendLine(CommandBindingSyntax.NestedBlockClose).AppendLine(CommandBindingSyntax.SubscriptionBlockClose)
-            .AppendLine().Append("                ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerSubscribe)
-            .AppendLine(CommandBindingSyntax.SerialDisposableOpen)
-            .Append("                    ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerUnsubscribeAndClose)
-            .AppendLine(CommandBindingSyntax.CommandSubscriptionClose).AppendLine("            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(")
-            .AppendLine("                new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, __paramSub), serial);")
-            .AppendLine(GeneratedSyntax.MemberBodyClose);
+        bool supportsNullable)
+    {
+        AppendLatestParameterCapture(sb, inv, supportsNullable);
+        AppendCommandMissingExit(sb);
+        AppendHandlerDeclaration(sb, eventArgsType, supportsNullable);
+
+        _ = sb.Append("                    var param = ").Append(CommandBindingSyntax.ReadLatestParameter(inv)).AppendLine(";");
+
+        AppendHandlerExecution(sb, "param");
+        AppendHandlerAttachment(sb, inv, controlAccess);
+        AppendParameterisedDisposableReturn(sb);
+    }
 
     /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected override void EmitWithExpressionParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
         string eventArgsType,
         string paramAccess,
-        bool supportsNullable) =>
-        sb.AppendLine().AppendLine(CommandBindingSyntax.SerialDisposableDeclaration)
-            .AppendLine(CommandBindingSyntax.CommandSubscriptionOpen)
-            .AppendLine(GeneratedSyntax.StatementBlockOpen)
-            .AppendLine(CommandBindingSyntax.ResetSerialDisposable)
-            .AppendLine(CommandBindingSyntax.CommandMissingTest).AppendLine(CommandBindingSyntax.SubscriptionBlockOpen).AppendLine(CommandBindingSyntax.CommandMissingReturn)
-            .AppendLine(CommandBindingSyntax.SubscriptionBlockClose).AppendLine().Append(CommandBindingSyntax.HandlerDeclarationOpen)
-            .Append(CommandEventBindingEmitter.SenderType(supportsNullable)).Append(CommandBindingSyntax.HandlerSenderSeparator).Append(eventArgsType).AppendLine(" e)")
-            .AppendLine(CommandBindingSyntax.SubscriptionBlockOpen).Append("                    var param = ").Append(paramAccess).AppendLine(";")
-            .AppendLine("                    if (cmd.CanExecute(param))").AppendLine(CommandBindingSyntax.NestedBlockOpen)
-            .AppendLine("                        cmd.Execute(param);").AppendLine(CommandBindingSyntax.NestedBlockClose).AppendLine(CommandBindingSyntax.SubscriptionBlockClose)
-            .AppendLine().Append("                ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerSubscribe)
-            .AppendLine(CommandBindingSyntax.SerialDisposableOpen)
-            .Append("                    ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerUnsubscribeAndClose)
-            .AppendLine(CommandBindingSyntax.CommandSubscriptionClose)
-            .AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn)
-            .AppendLine(GeneratedSyntax.MemberBodyClose);
+        bool supportsNullable)
+    {
+        _ = sb.AppendLine();
+        AppendCommandSubscription(sb);
+        AppendCommandMissingExit(sb);
+        AppendHandlerDeclaration(sb, eventArgsType, supportsNullable);
+
+        _ = sb.Append("                    var param = ").Append(paramAccess).AppendLine(";");
+
+        AppendHandlerExecution(sb, "param");
+        AppendHandlerAttachment(sb, inv, controlAccess);
+
+        _ = sb.AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn).AppendLine(GeneratedSyntax.MemberBodyClose);
+    }
 
     /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected override void EmitWithNoParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
         string eventArgsType,
-        bool supportsNullable) =>
-        sb.AppendLine().AppendLine(CommandBindingSyntax.SerialDisposableDeclaration)
-            .AppendLine(CommandBindingSyntax.CommandSubscriptionOpen)
-            .AppendLine(GeneratedSyntax.StatementBlockOpen)
-            .AppendLine(CommandBindingSyntax.ResetSerialDisposable)
-            .AppendLine(CommandBindingSyntax.CommandMissingTest).AppendLine(CommandBindingSyntax.SubscriptionBlockOpen).AppendLine(CommandBindingSyntax.CommandMissingReturn)
-            .AppendLine(CommandBindingSyntax.SubscriptionBlockClose).AppendLine().Append(CommandBindingSyntax.HandlerDeclarationOpen)
-            .Append(CommandEventBindingEmitter.SenderType(supportsNullable)).Append(CommandBindingSyntax.HandlerSenderSeparator).Append(eventArgsType).AppendLine(" e)")
-            .AppendLine(CommandBindingSyntax.SubscriptionBlockOpen).AppendLine("                    if (cmd.CanExecute(null))").AppendLine(CommandBindingSyntax.NestedBlockOpen)
-            .AppendLine("                        cmd.Execute(null);").AppendLine(CommandBindingSyntax.NestedBlockClose).AppendLine(CommandBindingSyntax.SubscriptionBlockClose).AppendLine()
-            .Append("                ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerSubscribe)
+        bool supportsNullable)
+    {
+        _ = sb.AppendLine();
+        AppendCommandSubscription(sb);
+        AppendCommandMissingExit(sb);
+        AppendHandlerDeclaration(sb, eventArgsType, supportsNullable);
+        AppendHandlerExecution(sb, "null");
+        AppendHandlerAttachment(sb, inv, controlAccess);
+
+        _ = sb.AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn).AppendLine(GeneratedSyntax.MemberBodyClose);
+    }
+
+    /// <summary>Appends the exit taken while the view model has handed over no command.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AppendCommandMissingExit(StringBuilder sb) =>
+        _ = sb.AppendLine(CommandBindingSyntax.CommandMissingReturn).AppendLine(CommandBindingSyntax.SubscriptionBlockClose);
+
+    /// <summary>Appends the handler's subscription to the control's event, and the disposable that detaches it.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="inv">The BindCommand invocation info.</param>
+    /// <param name="controlAccess">The control access chain.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AppendHandlerAttachment(StringBuilder sb, BindCommandInvocationInfo inv, string controlAccess) =>
+        _ = sb.Append("                ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerSubscribe)
             .AppendLine(CommandBindingSyntax.SerialDisposableOpen)
             .Append("                    ").Append(controlAccess).Append('.').Append(inv.ResolvedEventName).AppendLine(CommandBindingSyntax.HandlerUnsubscribeAndClose)
-            .AppendLine(CommandBindingSyntax.CommandSubscriptionClose)
-            .AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn)
-            .AppendLine(GeneratedSyntax.MemberBodyClose);
+            .AppendLine(CommandBindingSyntax.CommandSubscriptionClose);
 }

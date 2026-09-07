@@ -25,10 +25,23 @@ internal static class BindCodeGenerator
         SourceSelectorName = "viewModelProperty",
         TargetSelectorName = "viewProperty",
         WorkerMethodPrefix = "__Bind_",
-        WorkerArguments = "viewModel, view",
+        WorkerSourceParameterName = "viewModel",
+        WorkerTargetParameterName = "view",
+        IsTwoWay = true,
+        HookRefusalValue = "null",
+        SourceObservableName = ViewModelObservableName,
+        TargetObservableName = ViewObservableName,
+        SourceConvertedName = "__vmSelected",
+        TargetConvertedName = "__viewSelected",
+        SourceScheduledName = "vmBind",
+        TargetScheduledName = "viewBind",
+        ForwardConverterArgument = ForwardConverterName,
+        ReverseConverterArgument = ReverseConverterName,
         NormalizesStaticPrefix = false,
         FormatReturnType = FormatReturnType,
+        FormatWorkerReturnType = FormatMethodReturnType,
         AppendExtraParameters = AppendExtraParameters,
+        FormatWorkerParameters = FormatExtraMethodParams,
         FormatExtraArguments = FormatExtraArgs,
         EmitAffinityOverride = EmitAffinityOverride,
     };
@@ -75,20 +88,7 @@ internal static class BindCodeGenerator
             observation.Path,
             "value",
             SubscriptionBodyIndent);
-        var viewModelPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath);
-        var viewPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
-
-        var extraParams = FormatExtraMethodParams(inv);
-        var conversionComment = inv.HasConversion ? " (with conversion)" : string.Empty;
-        var schedulerComment = inv.HasScheduler ? " (with scheduler)" : string.Empty;
-        var returnType = FormatMethodReturnType(inv);
-
-        _ = sb.Append("        private static ").Append(returnType).Append(" __Bind_").Append(suffix).Append('(').Append(inv.SourceTypeFullName)
-            .Append(" viewModel, ").Append(inv.TargetTypeFullName).Append(" view").Append(extraParams).AppendLine(")").AppendLine("        {")
-            .Append("            // Bind: ").Append(viewModelPathComment).Append(" <-> ").Append(viewPathComment).Append(conversionComment)
-            .Append(schedulerComment).AppendLine();
-
-        BindingEmitterHelpers.EmitBindingHookGuard(sb, "viewModel", "view", "TwoWay", "null");
+        BindingEmitterHelpers.AppendWorkerMethodHeader(sb, DispatchApi, inv, suffix);
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
         ObservationCodeGenerator.EmitInlineObservation(
@@ -107,22 +107,11 @@ internal static class BindCodeGenerator
             targetClassInfo,
             ViewObservableName);
 
-        if (inv.HasConversion || inv.HasScheduler)
-        {
-            var (viewModelVar, viewVar) = EmitConversionAndSchedulerStages(sb, inv);
-            (viewModelVar, viewVar) = EmitRegistryConversionStages(sb, inv, viewModelVar, viewVar);
-            viewModelVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, viewModelVar, "viewThreadObs");
+        var (viewModelVar, viewVar) = BindingEmitterHelpers.EmitDualStreamStages(sb, DispatchApi, inv);
+        (viewModelVar, viewVar) = EmitRegistryConversionStages(sb, inv, viewModelVar, viewVar);
+        viewModelVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, viewModelVar, "viewThreadObs");
 
-            EmitTwoWaySubscription(sb, inv, viewModelVar, viewVar, viewPropertyAccess, viewModelSetAccess);
-        }
-        else
-        {
-            var (viewModelVar, viewVar) =
-                EmitRegistryConversionStages(sb, inv, ViewModelObservableName, ViewObservableName);
-            viewModelVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, viewModelVar, "viewThreadObs");
-
-            EmitTwoWaySubscription(sb, inv, viewModelVar, viewVar, viewPropertyAccess, viewModelSetAccess);
-        }
+        EmitTwoWaySubscription(sb, inv, viewModelVar, viewVar, viewPropertyAccess, viewModelSetAccess);
     }
 
     /// <summary>Appends extra parameters (converters, scheduler) to the concrete overload signature.</summary>
@@ -157,44 +146,6 @@ internal static class BindCodeGenerator
     /// <returns>The fully qualified return type string.</returns>
     internal static string FormatMethodReturnType(BindingInvocationInfo inv) =>
         $"global::ReactiveUI.Binding.IReactiveBinding<{inv.TargetTypeFullName}, {BindingChange}>";
-
-    /// <summary>
-    /// Emits the conversion and scheduler stages that sit between the raw observations and the
-    /// subscription, and reports the variable names the subscription should read from.
-    /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="inv">The binding invocation info.</param>
-    /// <returns>The view model and view observable variable names after the stages are applied.</returns>
-    private static BindingObservables EmitConversionAndSchedulerStages(
-        StringBuilder sb,
-        BindingInvocationInfo inv)
-    {
-        var viewModelVar = ViewModelObservableName;
-        var viewVar = ViewObservableName;
-
-        if (inv.HasConversion)
-        {
-            var viewModelNext = inv.HasScheduler ? "__vmSelected" : "vmBind";
-            var viewNext = inv.HasScheduler ? "__viewSelected" : "viewBind";
-            _ = sb.Append("        var ").Append(viewModelNext).Append(" = new ").Append(MapSignal).Append('<').Append(inv.SourcePropertyTypeFullName)
-                .Append(", ").Append(inv.TargetPropertyTypeFullName).Append(">(").Append(viewModelVar).AppendLine(", viewModelToViewConverter);")
-                .Append("        var ").Append(viewNext).Append(" = new ").Append(MapSignal).Append('<').Append(inv.TargetPropertyTypeFullName)
-                .Append(", ").Append(inv.SourcePropertyTypeFullName).Append(">(").Append(viewVar).AppendLine(", viewToViewModelConverter);");
-            viewModelVar = viewModelNext;
-            viewVar = viewNext;
-        }
-
-        if (inv.HasScheduler)
-        {
-            _ = sb.Append("        var vmBind = ").Append(LinqExtensions).Append(".ObserveOn<").Append(inv.TargetPropertyTypeFullName).Append(">(")
-                .Append(viewModelVar).AppendLine(", scheduler);").Append("        var viewBind = ").Append(LinqExtensions).Append(".ObserveOn<")
-                .Append(inv.SourcePropertyTypeFullName).Append(">(").Append(viewVar).AppendLine(", scheduler);");
-            viewModelVar = "vmBind";
-            viewVar = "viewBind";
-        }
-
-        return new(viewModelVar, viewVar);
-    }
 
     /// <summary>Emits the two-way subscription, change-stream merge, and <c>ReactiveBinding</c> return block.</summary>
     /// <param name="sb">The string builder to append to.</param>

@@ -449,7 +449,7 @@ internal static class ObservationCodeGenerator
         var hasSelector = first.HasSelector;
 
         EmitOverloadSignature(sb, first, supportsCallerArgExpr, stubHasExpressionParameters, methodPrefix, propCount, hasSelector);
-        EmitStaticPrefixNormalization(sb, supportsCallerArgExpr, propCount);
+        CodeGeneratorHelpers.AppendIndexedStaticPrefixNormalization(sb, supportsCallerArgExpr, "property", propCount);
 
         // Emit runtime affinity check: allow user-registered plugins to override generated observation.
         // Only emit for overloads with <= 3 properties, matching RuntimeObservationFallback signatures.
@@ -1179,28 +1179,6 @@ internal static class ObservationCodeGenerator
                                   [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
                               {
                       """);
-    }
-
-    /// <summary>Emits normalization that strips the <c>static</c> prefix from CallerArgumentExpression values.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
-    /// <param name="propCount">The number of property expressions.</param>
-    private static void EmitStaticPrefixNormalization(StringBuilder sb, bool supportsCallerArgExpr, int propCount)
-    {
-        if (!supportsCallerArgExpr)
-        {
-            return;
-        }
-
-        for (var i = 0; i < propCount; i++)
-        {
-            var paramName = $"property{i + 1}Expression";
-            _ = sb.Append("            ").Append(paramName).Append(" = ").Append(paramName)
-                .Append(".StartsWith(\"static \", global::System.StringComparison.Ordinal) ? ").Append(paramName).Append(".Substring(7) : ")
-                .Append(paramName).AppendLine(";");
-        }
-
-        _ = sb.AppendLine();
     }
 
     /// <summary>Emits the if/else-if dispatch table that routes each matched invocation to its generated method.</summary>

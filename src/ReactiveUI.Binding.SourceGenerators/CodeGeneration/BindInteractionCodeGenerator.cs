@@ -120,18 +120,9 @@ internal static class BindInteractionCodeGenerator
         StringBuilder sb,
         BindInteractionTypeGroup group)
     {
-        var handlerType = group.IsTaskHandler
-            ? $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.Threading.Tasks.Task>"
-            : $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.IObservable<{group.DontCareTypeFullName}>>";
+        AppendOverloadSignature(sb, group, "        /// Uses CallerArgumentExpression for dispatch.");
 
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindInteraction on ")
-            .Append(group.ViewTypeFullName).AppendLine(".").AppendLine("        /// Uses CallerArgumentExpression for dispatch.")
-            .AppendLine("        /// </summary>").AppendLine("        public static global::System.IDisposable BindInteraction(")
-            .Append("            this ").Append(group.ViewTypeFullName).AppendLine(" view,").Append("            ").Append(group.ViewModelTypeFullName)
-            .AppendLine(ViewModelParameterSuffix).Append("            ").Append(Expression).Append('<').Append(Func).Append('<').Append(group.ViewModelTypeFullName)
-            .Append(", ").Append(IInteraction).Append('<').Append(group.InputTypeFullName).Append(", ").Append(group.OutputTypeFullName)
-            .AppendLine(">>> propertyName,").Append("            ").Append(handlerType).AppendLine(" handler,")
-            .AppendLine("            [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"propertyName\")] string propertyNameExpression = \"\",")
+        _ = sb.AppendLine("            [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"propertyName\")] string propertyNameExpression = \"\",")
             .AppendLine("            [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = \"\",")
             .AppendLine("            [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)").AppendLine("        {")
             .Append("            propertyNameExpression = propertyNameExpression.StartsWith(\"static \", global::System.StringComparison.Ordinal)")
@@ -160,17 +151,7 @@ internal static class BindInteractionCodeGenerator
         BindInteractionTypeGroup group,
         bool stubHasExpressionParameters)
     {
-        var handlerType = group.IsTaskHandler
-            ? $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.Threading.Tasks.Task>"
-            : $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.IObservable<{group.DontCareTypeFullName}>>";
-
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindInteraction on ")
-            .Append(group.ViewTypeFullName).AppendLine(".").AppendLine("        /// Uses CallerFilePath + CallerLineNumber for dispatch.")
-            .AppendLine("        /// </summary>").AppendLine("        public static global::System.IDisposable BindInteraction(")
-            .Append("            this ").Append(group.ViewTypeFullName).AppendLine(" view,").Append("            ").Append(group.ViewModelTypeFullName)
-            .AppendLine(ViewModelParameterSuffix).Append("            ").Append(Expression).Append('<').Append(Func).Append('<').Append(group.ViewModelTypeFullName)
-            .Append(", ").Append(IInteraction).Append('<').Append(group.InputTypeFullName).Append(", ").Append(group.OutputTypeFullName)
-            .AppendLine(">>> propertyName,").Append("            ").Append(handlerType).AppendLine(" handler,");
+        AppendOverloadSignature(sb, group, "        /// Uses CallerFilePath + CallerLineNumber for dispatch.");
 
         if (stubHasExpressionParameters)
         {
@@ -233,6 +214,28 @@ internal static class BindInteractionCodeGenerator
             .Append(registerCall).AppendLine().AppendLine("                    : global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;")
             .AppendLine("            });").AppendLine("            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(sub, serial);")
             .AppendLine("        }").AppendLine();
+    }
+
+    /// <summary>Appends the signature both dispatch overloads declare, up to the parameters that identify a call site.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The BindInteraction type group.</param>
+    /// <param name="dispatchSummaryLine">The documentation line naming what the overload matches a call site on.</param>
+    private static void AppendOverloadSignature(
+        StringBuilder sb,
+        BindInteractionTypeGroup group,
+        string dispatchSummaryLine)
+    {
+        var handlerType = group.IsTaskHandler
+            ? $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.Threading.Tasks.Task>"
+            : $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.IObservable<{group.DontCareTypeFullName}>>";
+
+        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindInteraction on ")
+            .Append(group.ViewTypeFullName).AppendLine(".").AppendLine(dispatchSummaryLine)
+            .AppendLine("        /// </summary>").AppendLine("        public static global::System.IDisposable BindInteraction(")
+            .Append("            this ").Append(group.ViewTypeFullName).AppendLine(" view,").Append("            ").Append(group.ViewModelTypeFullName)
+            .AppendLine(ViewModelParameterSuffix).Append("            ").Append(Expression).Append('<').Append(Func).Append('<').Append(group.ViewModelTypeFullName)
+            .Append(", ").Append(IInteraction).Append('<').Append(group.InputTypeFullName).Append(", ").Append(group.OutputTypeFullName)
+            .AppendLine(">>> propertyName,").Append("            ").Append(handlerType).AppendLine(" handler,");
     }
 
     /// <summary>Emits the overload and the workers for one group of call sites.</summary>

@@ -71,44 +71,6 @@ internal sealed class WinFormsObservationPlugin : AfterChangeObservationPlugin, 
     }
 
     /// <inheritdoc/>
-    public void EmitDeepChainInnerSegment(
-        StringBuilder sb,
-        string prevVar,
-        string curVar,
-        string lambdaParam,
-        PropertyPathSegment segment,
-        bool isBeforeChange,
-        NullParentObservationBehavior nullParentBehavior)
-    {
-        var segType = segment.PropertyTypeFullName;
-        var declType = segment.DeclaringTypeFullName;
-        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-            ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
-            : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
-
-        if (isBeforeChange)
-        {
-            _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ")
-                .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
-                .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType)
-                .AppendLine(">)").Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType)
-                .Append(">(((").Append(declType).Append(')').Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(")")
-                .Append("                : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
-            return;
-        }
-
-        _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ")
-            .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
-            .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType)
-            .Append(">)new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segType).AppendLine(">(")
-            .Append("                    __h => ((").Append(declType).Append(')').Append(lambdaParam).Append(").").Append(segment.PropertyName)
-            .AppendLine(ChangedEventAdd).Append("                    __h => ((").Append(declType).Append(')').Append(lambdaParam).Append(").")
-            .Append(segment.PropertyName).AppendLine(ChangedEventRemove).Append("                    () => ((").Append(declType).Append(')')
-            .Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(",").AppendLine("                    false)")
-            .Append("                : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
-    }
-
-    /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitInlineObservationVariable(
         StringBuilder sb,
@@ -148,6 +110,18 @@ internal sealed class WinFormsObservationPlugin : AfterChangeObservationPlugin, 
             .Append(").").Append(segment.PropertyName).AppendLine(ChangedEventAdd).Append(HandlerLambdaOpen).Append(castTypeName).Append(')')
             .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(ChangedEventRemove).Append("                () => ((")
             .Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",").Append("                true);");
+
+    /// <inheritdoc/>
+    protected override void AppendChainSegmentObservation(
+        StringBuilder sb,
+        string lambdaParam,
+        PropertyPathSegment segment) =>
+        _ = sb.Append(">)new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append("                    __h => ((").Append(segment.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").")
+            .Append(segment.PropertyName).AppendLine(ChangedEventAdd).Append("                    __h => ((").Append(segment.DeclaringTypeFullName)
+            .Append(')').Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(ChangedEventRemove)
+            .Append("                    () => ((").Append(segment.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").")
+            .Append(segment.PropertyName).AppendLine(",").AppendLine("                    false)");
 
     /// <inheritdoc/>
     protected override void AppendDeepChainRootSegment(

@@ -25,10 +25,19 @@ internal static class OneWayBindCodeGenerator
         SourceSelectorName = "viewModelProperty",
         TargetSelectorName = "viewProperty",
         WorkerMethodPrefix = "__OneWayBind_",
-        WorkerArguments = "viewModel, view",
+        WorkerSourceParameterName = "viewModel",
+        WorkerTargetParameterName = "view",
+        IsTwoWay = false,
+        HookRefusalValue = "null",
+        SourceObservableName = SourceObservableVariable,
+        SourceConvertedName = "__selected",
+        SourceScheduledName = "bindObs",
+        ForwardConverterArgument = ConversionParameterName,
         NormalizesStaticPrefix = false,
         FormatReturnType = FormatReturnType,
+        FormatWorkerReturnType = FormatMethodReturnType,
         AppendExtraParameters = AppendExtraParameters,
+        FormatWorkerParameters = FormatExtraMethodParams,
         FormatExtraArguments = FormatExtraArgs,
         EmitAffinityOverride = EmitAffinityOverride,
     };
@@ -60,20 +69,7 @@ internal static class OneWayBindCodeGenerator
             inv.TargetPropertyPath,
             "value",
             SubscriptionBodyIndent);
-        var viewModelPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath);
-        var viewPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
-
-        var extraParams = FormatExtraMethodParams(inv);
-        var conversionComment = inv.HasConversion ? " (with conversion)" : string.Empty;
-        var schedulerComment = inv.HasScheduler ? " (with scheduler)" : string.Empty;
-        var returnType = FormatMethodReturnType(inv);
-
-        _ = sb.Append("        private static ").Append(returnType).Append(" __OneWayBind_").Append(suffix).Append('(').Append(inv.SourceTypeFullName)
-            .Append(" viewModel, ").Append(inv.TargetTypeFullName).Append(" view").Append(extraParams).AppendLine(")").AppendLine("        {")
-            .Append("            // OneWayBind: ").Append(viewModelPathComment).Append(" -> ").Append(viewPathComment).Append(conversionComment)
-            .Append(schedulerComment).AppendLine();
-
-        BindingEmitterHelpers.EmitBindingHookGuard(sb, "viewModel", "view", "OneWay", "null");
+        BindingEmitterHelpers.AppendWorkerMethodHeader(sb, DispatchApi, inv, suffix);
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
         var observation = BindingEmitterHelpers.ResolveViewModelObservation(inv, sourceClassInfo, targetClassInfo);
@@ -86,9 +82,7 @@ internal static class OneWayBindCodeGenerator
             observation.RootClassInfo,
             SourceObservableVariable);
 
-        var currentVar = inv.HasConversion || inv.HasScheduler
-            ? EmitConversionAndSchedulerStages(sb, inv)
-            : SourceObservableVariable;
+        var currentVar = BindingEmitterHelpers.EmitSingleStreamStages(sb, DispatchApi, inv);
 
         if (BindingEmitterHelpers.RequiresRegistryConversion(inv))
         {
@@ -164,32 +158,6 @@ internal static class OneWayBindCodeGenerator
     /// <returns>The fully qualified return type string.</returns>
     internal static string FormatMethodReturnType(BindingInvocationInfo inv) =>
         $"global::ReactiveUI.Binding.IReactiveBinding<{inv.TargetTypeFullName}, {inv.TargetPropertyTypeFullName}>";
-
-    /// <summary>Emits the conversion and scheduler stages between the source observation and the subscription.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="inv">The binding invocation info.</param>
-    /// <returns>The variable name the subscription should read from.</returns>
-    private static string EmitConversionAndSchedulerStages(StringBuilder sb, BindingInvocationInfo inv)
-    {
-        var currentVar = SourceObservableVariable;
-
-        if (inv.HasConversion)
-        {
-            var nextVar = inv.HasScheduler ? "__selected" : "bindObs";
-            _ = sb.Append("        var ").Append(nextVar).Append(" = new ").Append(MapSignal).Append('<').Append(inv.SourcePropertyTypeFullName)
-                .Append(", ").Append(inv.TargetPropertyTypeFullName).Append(">(").Append(currentVar).AppendLine(", selector);");
-            currentVar = nextVar;
-        }
-
-        if (inv.HasScheduler)
-        {
-            _ = sb.Append("        var bindObs = ").Append(LinqExtensions).Append(".ObserveOn<").Append(inv.TargetPropertyTypeFullName).Append(">(")
-                .Append(currentVar).AppendLine(", scheduler);");
-            currentVar = "bindObs";
-        }
-
-        return currentVar;
-    }
 
     /// <summary>Names the conversion the fallback needs, matching whatever the generated body would apply.</summary>
     /// <param name="group">The binding type group.</param>

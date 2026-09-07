@@ -25,9 +25,21 @@ internal static class BindTwoWayCodeGenerator
         SourceSelectorName = "sourceProperty",
         TargetSelectorName = "targetProperty",
         WorkerMethodPrefix = "__BindTwoWay_",
-        WorkerArguments = "source, target",
+        WorkerSourceParameterName = SourceParameterName,
+        WorkerTargetParameterName = TargetParameterName,
+        IsTwoWay = true,
+        HookRefusalValue = "global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance",
+        SourceObservableName = BindTwoWayCodeGenerator.SourceObservableName,
+        TargetObservableName = BindTwoWayCodeGenerator.TargetObservableName,
+        SourceConvertedName = "__srcSelected",
+        TargetConvertedName = "__tgtSelected",
+        SourceScheduledName = "sourceBind",
+        TargetScheduledName = "targetBind",
+        ForwardConverterArgument = ForwardConverterName,
+        ReverseConverterArgument = ReverseConverterName,
         NormalizesStaticPrefix = true,
         AppendExtraParameters = AppendExtraParameters,
+        FormatWorkerParameters = FormatExtraMethodParams,
         FormatExtraArguments = FormatExtraArgs,
         EmitAffinityOverride = EmitAffinityOverride,
     };
@@ -76,19 +88,7 @@ internal static class BindTwoWayCodeGenerator
             inv.SourcePropertyPath,
             "value",
             SubscriptionBodyIndent);
-        var sourcePathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath);
-        var targetPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
-
-        var extraParams = FormatExtraMethodParams(inv);
-        var conversionComment = inv.HasConversion ? " (with conversion)" : string.Empty;
-        var schedulerComment = inv.HasScheduler ? " (with scheduler)" : string.Empty;
-
-        _ = sb.Append("        private static global::System.IDisposable __BindTwoWay_").Append(suffix).Append('(').Append(inv.SourceTypeFullName)
-            .Append(" source, ").Append(inv.TargetTypeFullName).Append(" target").Append(extraParams).AppendLine(")").AppendLine("        {")
-            .Append("            // BindTwoWay: ").Append(sourcePathComment).Append(" <-> ").Append(targetPathComment).Append(conversionComment)
-            .Append(schedulerComment).AppendLine();
-
-        BindingEmitterHelpers.EmitBindingHookGuard(sb, SourceParameterName, TargetParameterName, "TwoWay", "global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance");
+        BindingEmitterHelpers.AppendWorkerMethodHeader(sb, DispatchApi, inv, suffix);
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
         ObservationCodeGenerator.EmitInlineObservation(
@@ -107,23 +107,10 @@ internal static class BindTwoWayCodeGenerator
             targetClassInfo,
             TargetObservableName);
 
-        if (inv.HasConversion || inv.HasScheduler)
-        {
-            var (sourceVar, targetVar) = EmitConversionAndSchedulerStages(sb, inv);
-            sourceVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, sourceVar, "targetThreadObs");
+        var (sourceVar, targetVar) = BindingEmitterHelpers.EmitDualStreamStages(sb, DispatchApi, inv);
+        sourceVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, sourceVar, "targetThreadObs");
 
-            EmitTwoWaySubscription(sb, inv, sourceVar, targetVar, targetAccess, sourceSetAccess);
-        }
-        else
-        {
-            var sourceVar = BindingEmitterHelpers.EmitViewThreadStage(
-                sb,
-                inv,
-                SourceObservableName,
-                "targetThreadObs");
-
-            EmitTwoWaySubscription(sb, inv, sourceVar, TargetObservableName, targetAccess, sourceSetAccess);
-        }
+        EmitTwoWaySubscription(sb, inv, sourceVar, targetVar, targetAccess, sourceSetAccess);
     }
 
     /// <summary>Appends extra parameters (converters, scheduler) to the concrete overload signature.</summary>
@@ -146,44 +133,6 @@ internal static class BindTwoWayCodeGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string FormatExtraMethodParams(BindingInvocationInfo inv) =>
         BindingEmitterHelpers.FormatTwoWayExtraMethodParams(inv, ForwardConverterName, ReverseConverterName);
-
-    /// <summary>
-    /// Emits the conversion and scheduler stages that sit between the raw observations and the
-    /// subscription, and reports the variable names the subscription should read from.
-    /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="inv">The binding invocation info.</param>
-    /// <returns>The source and target observable variable names after the stages are applied.</returns>
-    private static BindingObservables EmitConversionAndSchedulerStages(
-        StringBuilder sb,
-        BindingInvocationInfo inv)
-    {
-        var sourceVar = SourceObservableName;
-        var targetVar = TargetObservableName;
-
-        if (inv.HasConversion)
-        {
-            var srcNext = inv.HasScheduler ? "__srcSelected" : "sourceBind";
-            var tgtNext = inv.HasScheduler ? "__tgtSelected" : "targetBind";
-            _ = sb.Append("        var ").Append(srcNext).Append(" = new ").Append(MapSignal).Append('<').Append(inv.SourcePropertyTypeFullName)
-                .Append(", ").Append(inv.TargetPropertyTypeFullName).Append(">(").Append(sourceVar).AppendLine(", sourceToTargetConv);")
-                .Append("        var ").Append(tgtNext).Append(" = new ").Append(MapSignal).Append('<').Append(inv.TargetPropertyTypeFullName)
-                .Append(", ").Append(inv.SourcePropertyTypeFullName).Append(">(").Append(targetVar).AppendLine(", targetToSourceConv);");
-            sourceVar = srcNext;
-            targetVar = tgtNext;
-        }
-
-        if (inv.HasScheduler)
-        {
-            _ = sb.Append("        var sourceBind = ").Append(LinqExtensions).Append(".ObserveOn<").Append(inv.TargetPropertyTypeFullName)
-                .Append(">(").Append(sourceVar).AppendLine(", scheduler);").Append("        var targetBind = ").Append(LinqExtensions)
-                .Append(".ObserveOn<").Append(inv.SourcePropertyTypeFullName).Append(">(").Append(targetVar).AppendLine(", scheduler);");
-            sourceVar = "sourceBind";
-            targetVar = "targetBind";
-        }
-
-        return new(sourceVar, targetVar);
-    }
 
     /// <summary>Emits the check that hands the binding to the runtime engine when a registered plugin outranks the generated one.</summary>
     /// <param name="sb">The string builder to append to.</param>

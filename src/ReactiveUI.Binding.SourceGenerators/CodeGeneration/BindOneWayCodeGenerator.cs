@@ -25,9 +25,17 @@ internal static class BindOneWayCodeGenerator
         SourceSelectorName = "sourceProperty",
         TargetSelectorName = "targetProperty",
         WorkerMethodPrefix = "__BindOneWay_",
-        WorkerArguments = "source, target",
+        WorkerSourceParameterName = "source",
+        WorkerTargetParameterName = "target",
+        IsTwoWay = false,
+        HookRefusalValue = "global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance",
+        SourceObservableName = SourceObservableVariable,
+        SourceConvertedName = "__selected",
+        SourceScheduledName = "bindObs",
+        ForwardConverterArgument = ConversionParameterName,
         NormalizesStaticPrefix = true,
         AppendExtraParameters = AppendExtraParameters,
+        FormatWorkerParameters = FormatExtraMethodParams,
         FormatExtraArguments = FormatExtraArgs,
         EmitAffinityOverride = EmitAffinityOverride,
     };
@@ -59,19 +67,8 @@ internal static class BindOneWayCodeGenerator
             inv.TargetPropertyPath,
             "value",
             SubscriptionBodyIndent);
-        var sourcePathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath);
-        var targetPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
 
-        var extraParams = FormatExtraMethodParams(inv);
-        var conversionComment = inv.HasConversion ? " (with conversion)" : string.Empty;
-        var schedulerComment = inv.HasScheduler ? " (with scheduler)" : string.Empty;
-
-        _ = sb.Append("        private static global::System.IDisposable __BindOneWay_").Append(suffix).Append('(').Append(inv.SourceTypeFullName)
-            .Append(" source, ").Append(inv.TargetTypeFullName).Append(" target").Append(extraParams).AppendLine(")").AppendLine("        {")
-            .Append("            // BindOneWay: ").Append(sourcePathComment).Append(" -> ").Append(targetPathComment).Append(conversionComment)
-            .Append(schedulerComment).AppendLine();
-
-        BindingEmitterHelpers.EmitBindingHookGuard(sb, "source", "target", "OneWay", "global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance");
+        BindingEmitterHelpers.AppendWorkerMethodHeader(sb, DispatchApi, inv, suffix);
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
         ObservationCodeGenerator.EmitInlineObservation(
@@ -82,9 +79,7 @@ internal static class BindOneWayCodeGenerator
             sourceClassInfo,
             SourceObservableVariable);
 
-        var subscribeVar = inv.HasConversion || inv.HasScheduler
-            ? EmitConversionAndSchedulerStages(sb, inv)
-            : SourceObservableVariable;
+        var subscribeVar = BindingEmitterHelpers.EmitSingleStreamStages(sb, DispatchApi, inv);
 
         subscribeVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, subscribeVar, "targetThreadObs");
 
@@ -129,30 +124,4 @@ internal static class BindOneWayCodeGenerator
             + (group.HasScheduler ? "scheduler" : "null")
             + $", {bindingExpression}",
             false);
-
-    /// <summary>Emits the conversion and scheduler stages between the source observation and the subscription.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="inv">The binding invocation info.</param>
-    /// <returns>The variable name the subscription should read from.</returns>
-    private static string EmitConversionAndSchedulerStages(StringBuilder sb, BindingInvocationInfo inv)
-    {
-        var currentVar = SourceObservableVariable;
-
-        if (inv.HasConversion)
-        {
-            var nextVar = inv.HasScheduler ? "__selected" : "bindObs";
-            _ = sb.Append("        var ").Append(nextVar).Append(" = new ").Append(MapSignal).Append('<').Append(inv.SourcePropertyTypeFullName)
-                .Append(", ").Append(inv.TargetPropertyTypeFullName).Append(">(").Append(currentVar).AppendLine(", conversionFunc);");
-            currentVar = nextVar;
-        }
-
-        if (inv.HasScheduler)
-        {
-            _ = sb.Append("        var bindObs = ").Append(LinqExtensions).Append(".ObserveOn<").Append(inv.TargetPropertyTypeFullName).Append(">(")
-                .Append(currentVar).AppendLine(", scheduler);");
-            currentVar = "bindObs";
-        }
-
-        return currentVar;
-    }
 }

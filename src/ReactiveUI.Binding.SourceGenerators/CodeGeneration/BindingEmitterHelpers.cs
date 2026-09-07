@@ -570,6 +570,93 @@ internal static class BindingEmitterHelpers
         CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
     }
 
+    /// <summary>Emits the head of a generated worker: its signature, the path it binds, and the hook guard.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="api">What distinguishes this API's worker from the other three.</param>
+    /// <param name="inv">The call site being emitted.</param>
+    /// <param name="suffix">The stable method-name suffix for this call site.</param>
+    /// <remarks>
+    /// Every binding worker opens the same way - it takes the two objects and whatever conversion and scheduler
+    /// arguments its API declares, records the path it binds, and offers the binding to a registered hook. What
+    /// varies is the naming and the direction, which <paramref name="api"/> carries.
+    /// </remarks>
+    internal static void AppendWorkerMethodHeader(
+        StringBuilder sb,
+        BindingDispatchApi api,
+        BindingInvocationInfo inv,
+        string suffix)
+    {
+        _ = sb.Append("        private static ").Append(api.FormatWorkerReturnType(inv)).Append(' ').Append(api.WorkerMethodPrefix).Append(suffix)
+            .Append('(').Append(inv.SourceTypeFullName).Append(' ').Append(api.WorkerSourceParameterName).Append(", ")
+            .Append(inv.TargetTypeFullName).Append(' ').Append(api.WorkerTargetParameterName).Append(api.FormatWorkerParameters(inv))
+            .AppendLine(")").AppendLine(GeneratedSyntax.MemberBodyOpen)
+            .Append("            // ").Append(api.Name).Append(": ").Append(CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath))
+            .Append(api.IsTwoWay ? " <-> " : " -> ").Append(CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath))
+            .Append(inv.HasConversion ? " (with conversion)" : string.Empty)
+            .Append(inv.HasScheduler ? " (with scheduler)" : string.Empty).AppendLine();
+
+        EmitBindingHookGuard(
+            sb,
+            api.WorkerSourceParameterName,
+            api.WorkerTargetParameterName,
+            api.IsTwoWay ? "TwoWay" : "OneWay",
+            api.HookRefusalValue);
+    }
+
+    /// <summary>Emits the conversion and scheduler stages a one-directional binding puts its values through.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="api">What this API calls the locals along the way.</param>
+    /// <param name="inv">The call site being emitted.</param>
+    /// <returns>The local the subscription should read from.</returns>
+    internal static string EmitSingleStreamStages(StringBuilder sb, BindingDispatchApi api, BindingInvocationInfo inv)
+    {
+        var forward = ForwardStage(api, inv);
+        var currentVar = forward.ObservableName;
+
+        if (inv.HasConversion)
+        {
+            currentVar = AppendMapStage(sb, forward, currentVar, inv.HasScheduler);
+        }
+
+        if (inv.HasScheduler)
+        {
+            currentVar = AppendObserveOnStage(sb, forward, currentVar);
+        }
+
+        return currentVar;
+    }
+
+    /// <summary>Emits those same stages for a binding that drives both sides.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="api">What this API calls the locals along the way.</param>
+    /// <param name="inv">The call site being emitted.</param>
+    /// <returns>The locals each direction's subscription should read from.</returns>
+    /// <remarks>
+    /// Each direction assigns across the same type gap in the opposite sense, so the two run the same stages
+    /// with their type arguments and converter swapped.
+    /// </remarks>
+    internal static BindingObservables EmitDualStreamStages(StringBuilder sb, BindingDispatchApi api, BindingInvocationInfo inv)
+    {
+        var forward = ForwardStage(api, inv);
+        var reverse = ReverseStage(api, inv);
+        var sourceVar = forward.ObservableName;
+        var targetVar = reverse.ObservableName;
+
+        if (inv.HasConversion)
+        {
+            sourceVar = AppendMapStage(sb, forward, sourceVar, inv.HasScheduler);
+            targetVar = AppendMapStage(sb, reverse, targetVar, inv.HasScheduler);
+        }
+
+        if (inv.HasScheduler)
+        {
+            sourceVar = AppendObserveOnStage(sb, forward, sourceVar);
+            targetVar = AppendObserveOnStage(sb, reverse, targetVar);
+        }
+
+        return new(sourceVar, targetVar);
+    }
+
     /// <summary>Finds the type a view declares its view model property as.</summary>
     /// <param name="targetClassInfo">The view type's binding info.</param>
     /// <returns>The declared property type, or <see langword="null"/> when the view exposes no such property.</returns>
@@ -722,6 +809,64 @@ internal static class BindingEmitterHelpers
         }
     }
 
+    /// <summary>Describes the direction that carries the source side's values to the target side.</summary>
+    /// <param name="api">What this API calls the locals along the way.</param>
+    /// <param name="inv">The call site being emitted.</param>
+    /// <returns>The stage description.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static BindingStreamStage ForwardStage(BindingDispatchApi api, BindingInvocationInfo inv) =>
+        new(
+            api.SourceObservableName,
+            api.SourceConvertedName,
+            api.SourceScheduledName,
+            api.ForwardConverterArgument,
+            inv.SourcePropertyTypeFullName,
+            inv.TargetPropertyTypeFullName);
+
+    /// <summary>Describes the direction that carries the target side's values back to the source side.</summary>
+    /// <param name="api">What this API calls the locals along the way.</param>
+    /// <param name="inv">The call site being emitted.</param>
+    /// <returns>The stage description.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static BindingStreamStage ReverseStage(BindingDispatchApi api, BindingInvocationInfo inv) =>
+        new(
+            api.TargetObservableName,
+            api.TargetConvertedName,
+            api.TargetScheduledName,
+            api.ReverseConverterArgument,
+            inv.TargetPropertyTypeFullName,
+            inv.SourcePropertyTypeFullName);
+
+    /// <summary>Appends the stage that runs one direction's values through the converter the call site named.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="stage">The direction being emitted.</param>
+    /// <param name="sourceVar">The local holding the values to convert.</param>
+    /// <param name="hasScheduler">Whether a scheduler stage follows, which decides what the result is called.</param>
+    /// <returns>The local holding the converted values.</returns>
+    private static string AppendMapStage(StringBuilder sb, in BindingStreamStage stage, string sourceVar, bool hasScheduler)
+    {
+        var resultVar = hasScheduler ? stage.ConvertedName : stage.ScheduledName;
+
+        _ = sb.Append("        var ").Append(resultVar).Append(" = new ").Append(GeneratedTypeNames.MapSignal).Append('<')
+            .Append(stage.FromTypeFullName).Append(", ").Append(stage.ToTypeFullName).Append(">(").Append(sourceVar)
+            .Append(", ").Append(stage.ConverterArgument).AppendLine(");");
+
+        return resultVar;
+    }
+
+    /// <summary>Appends the stage that delivers one direction's values on the scheduler the call site named.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="stage">The direction being emitted.</param>
+    /// <param name="sourceVar">The local holding the values to route.</param>
+    /// <returns>The local holding the routed values.</returns>
+    private static string AppendObserveOnStage(StringBuilder sb, in BindingStreamStage stage, string sourceVar)
+    {
+        _ = sb.Append("        var ").Append(stage.ScheduledName).Append(" = ").Append(GeneratedTypeNames.LinqExtensions)
+            .Append(".ObserveOn<").Append(stage.ToTypeFullName).Append(">(").Append(sourceVar).AppendLine(", scheduler);");
+
+        return stage.ScheduledName;
+    }
+
     /// <summary>Names the generated worker a binding call site dispatches to.</summary>
     /// <param name="inv">The call site.</param>
     /// <returns>The stable suffix its worker is named with.</returns>
@@ -741,6 +886,21 @@ internal static class BindingEmitterHelpers
         string RootVariable,
         EquatableArray<PropertyPathSegment> Path,
         ClassBindingInfo? RootClassInfo);
+
+    /// <summary>One direction of a binding's value flow, and what the generated locals along it are called.</summary>
+    /// <param name="ObservableName">The local the direction's observation is held in.</param>
+    /// <param name="ConvertedName">The local the converted values are held in, ahead of a scheduler stage.</param>
+    /// <param name="ScheduledName">The local the values are held in once the subscription can read them.</param>
+    /// <param name="ConverterArgument">What the generated worker calls this direction's converter.</param>
+    /// <param name="FromTypeFullName">The type the values arrive as.</param>
+    /// <param name="ToTypeFullName">The type the assignment at the far end needs.</param>
+    internal readonly record struct BindingStreamStage(
+        string ObservableName,
+        string ConvertedName,
+        string ScheduledName,
+        string ConverterArgument,
+        string FromTypeFullName,
+        string ToTypeFullName);
 
     /// <summary>Everything a per-call-site binding emitter needs about one resolved call site.</summary>
     /// <param name="Invocation">The call site being emitted.</param>
@@ -783,8 +943,41 @@ internal static class BindingEmitterHelpers
         /// <summary>Gets the prefix the generated worker for each call site is named with.</summary>
         internal string WorkerMethodPrefix { get; init; } = string.Empty;
 
-        /// <summary>Gets the two objects a generated worker binds, in its own parameter order.</summary>
-        internal string WorkerArguments { get; init; } = string.Empty;
+        /// <summary>Gets what a generated worker calls the object it reads from.</summary>
+        internal string WorkerSourceParameterName { get; init; } = string.Empty;
+
+        /// <summary>Gets what a generated worker calls the object it writes to.</summary>
+        internal string WorkerTargetParameterName { get; init; } = string.Empty;
+
+        /// <summary>Gets a value indicating whether the binding drives both sides.</summary>
+        internal bool IsTwoWay { get; init; }
+
+        /// <summary>Gets what a generated worker returns when a registered hook refuses the binding.</summary>
+        internal string HookRefusalValue { get; init; } = string.Empty;
+
+        /// <summary>Gets the local a generated worker holds the source side's observation in.</summary>
+        internal string SourceObservableName { get; init; } = string.Empty;
+
+        /// <summary>Gets the local a generated worker holds the target side's observation in.</summary>
+        internal string TargetObservableName { get; init; } = string.Empty;
+
+        /// <summary>Gets the local the source side's converted values are held in, ahead of a scheduler stage.</summary>
+        internal string SourceConvertedName { get; init; } = string.Empty;
+
+        /// <summary>Gets the local the target side's converted values are held in, ahead of a scheduler stage.</summary>
+        internal string TargetConvertedName { get; init; } = string.Empty;
+
+        /// <summary>Gets the local the source side's values are held in once the subscription can read them.</summary>
+        internal string SourceScheduledName { get; init; } = string.Empty;
+
+        /// <summary>Gets the local the target side's values are held in once the subscription can read them.</summary>
+        internal string TargetScheduledName { get; init; } = string.Empty;
+
+        /// <summary>Gets what a generated worker calls the converter from the source side's type to the target's.</summary>
+        internal string ForwardConverterArgument { get; init; } = string.Empty;
+
+        /// <summary>Gets what a generated worker calls the converter from the target side's type to the source's.</summary>
+        internal string ReverseConverterArgument { get; init; } = string.Empty;
 
         /// <summary>Gets a value indicating whether the overload strips a <c>static</c> prefix off captured expressions.</summary>
         internal bool NormalizesStaticPrefix { get; init; }
@@ -792,6 +985,14 @@ internal static class BindingEmitterHelpers
         /// <summary>Gets the function rendering what the overload returns.</summary>
         internal Func<BindingTypeGroup, string> FormatReturnType { get; init; } =
             static _ => "global::System.IDisposable";
+
+        /// <summary>Gets the function rendering what a generated worker returns.</summary>
+        internal Func<BindingInvocationInfo, string> FormatWorkerReturnType { get; init; } =
+            static _ => "global::System.IDisposable";
+
+        /// <summary>Gets the function rendering the conversion and scheduler parameters a generated worker declares.</summary>
+        internal Func<BindingInvocationInfo, string> FormatWorkerParameters { get; init; } =
+            static _ => string.Empty;
 
         /// <summary>Gets the action appending the conversion and scheduler parameters this API takes.</summary>
         internal Action<StringBuilder, BindingTypeGroup> AppendExtraParameters { get; init; } =
@@ -804,6 +1005,9 @@ internal static class BindingEmitterHelpers
         /// <summary>Gets the action emitting the check that hands the binding to the runtime engine.</summary>
         internal Action<StringBuilder, BindingTypeGroup, string> EmitAffinityOverride { get; init; } =
             static (_, _, _) => { };
+
+        /// <summary>Gets the two objects a generated worker binds, in its own parameter order.</summary>
+        internal string WorkerArguments => $"{WorkerSourceParameterName}, {WorkerTargetParameterName}";
 
         /// <summary>Gets the parameter carrying the text of the selector for the side read from.</summary>
         internal string SourceExpressionParameter => SourceSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;

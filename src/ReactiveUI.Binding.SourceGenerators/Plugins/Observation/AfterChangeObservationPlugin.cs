@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Text;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -92,6 +93,50 @@ internal abstract class AfterChangeObservationPlugin
         AppendDeepChainRootSegment(sb, rootVar, segment, castTypeName, obsVarName);
     }
 
+    /// <summary>Emits the observation of one link past the first in a deep chain.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="prevVar">The variable holding the previous link's observation.</param>
+    /// <param name="curVar">The name of the local this link's observation is assigned to.</param>
+    /// <param name="lambdaParam">The name the switch lambda gives the parent value.</param>
+    /// <param name="segment">The property path segment being observed.</param>
+    /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
+    /// <param name="nullParentBehavior">What the link observes while its parent is null.</param>
+    /// <remarks>
+    /// The link switches onto whichever parent the previous one last produced, so the whole shape - the switch,
+    /// the null-parent test and the substitute observation - is the same whatever the mechanism. Only the
+    /// observation of a present parent differs, which is what each plugin supplies.
+    /// </remarks>
+    public void EmitDeepChainInnerSegment(
+        StringBuilder sb,
+        string prevVar,
+        string curVar,
+        string lambdaParam,
+        PropertyPathSegment segment,
+        bool isBeforeChange,
+        NullParentObservationBehavior nullParentBehavior)
+    {
+        var segType = segment.PropertyTypeFullName;
+
+        _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ")
+            .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
+            .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType);
+
+        if (isBeforeChange)
+        {
+            AppendUnchangingChainSegment(sb, lambdaParam, segment);
+        }
+        else
+        {
+            AppendChainSegmentObservation(sb, lambdaParam, segment);
+        }
+
+        _ = sb.Append("                : (global::System.IObservable<").Append(segType).Append(">)")
+            .Append(nullParentBehavior == NullParentObservationBehavior.EmitDefault
+                ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
+                : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance")
+            .AppendLine(");");
+    }
+
     /// <summary>Appends the after-change observation as a bare expression.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="rootVar">The variable holding the observed object.</param>
@@ -130,4 +175,25 @@ internal abstract class AfterChangeObservationPlugin
         PropertyPathSegment segment,
         string castTypeName,
         string obsVarName);
+
+    /// <summary>Appends the after-change observation of a chain link whose parent is present.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="lambdaParam">The name the switch lambda gives the parent value.</param>
+    /// <param name="segment">The property path segment being observed.</param>
+    protected abstract void AppendChainSegmentObservation(
+        StringBuilder sb,
+        string lambdaParam,
+        PropertyPathSegment segment);
+
+    /// <summary>Appends the read that stands in for a before-change observation of a chain link.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="lambdaParam">The name the switch lambda gives the parent value.</param>
+    /// <param name="segment">The property path segment being observed.</param>
+    private static void AppendUnchangingChainSegment(
+        StringBuilder sb,
+        string lambdaParam,
+        PropertyPathSegment segment) =>
+        _ = sb.AppendLine(">)").Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<")
+            .Append(segment.PropertyTypeFullName).Append(">(((").Append(segment.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").")
+            .Append(segment.PropertyName).AppendLine(")");
 }

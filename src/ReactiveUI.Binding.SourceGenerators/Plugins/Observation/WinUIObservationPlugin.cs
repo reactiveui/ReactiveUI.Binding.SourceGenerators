@@ -59,44 +59,6 @@ internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin, IOb
     }
 
     /// <inheritdoc/>
-    public void EmitDeepChainInnerSegment(
-        StringBuilder sb,
-        string prevVar,
-        string curVar,
-        string lambdaParam,
-        PropertyPathSegment segment,
-        bool isBeforeChange,
-        NullParentObservationBehavior nullParentBehavior)
-    {
-        var segType = segment.PropertyTypeFullName;
-        var declType = segment.DeclaringTypeFullName;
-        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-            ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
-            : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
-
-        if (isBeforeChange)
-        {
-            _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ")
-                .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
-                .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType)
-                .AppendLine(">)").Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType)
-                .Append(">(((").Append(declType).Append(')').Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(")")
-                .Append("                : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
-            return;
-        }
-
-        _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ")
-            .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
-            .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType)
-            .Append(">)new __WinUIDPObservable<").Append(segType).AppendLine(">(")
-            .Append("                    (global::Microsoft.UI.Xaml.DependencyObject)").Append(lambdaParam).AppendLine(",").Append("                    ")
-            .Append(declType).Append('.').Append(segment.PropertyName).AppendLine(DependencyPropertyFieldSuffix)
-            .Append("                    (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(declType).Append(GeneratedSyntax.ObserverCastClose)
-            .Append(segment.PropertyName).AppendLine(",").AppendLine("                    false)")
-            .Append("                : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
-    }
-
-    /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitInlineObservationVariable(
         StringBuilder sb,
@@ -134,6 +96,18 @@ internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin, IOb
             .Append(castTypeName).Append('.').Append(segment.PropertyName).AppendLine(DependencyPropertyFieldSuffix)
             .Append("                (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)
             .Append(segment.PropertyName).AppendLine(",").Append("                true);");
+
+    /// <inheritdoc/>
+    protected override void AppendChainSegmentObservation(
+        StringBuilder sb,
+        string lambdaParam,
+        PropertyPathSegment segment) =>
+        _ = sb.Append(">)new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append("                    (global::Microsoft.UI.Xaml.DependencyObject)").Append(lambdaParam).AppendLine(",")
+            .Append("                    ").Append(segment.DeclaringTypeFullName).Append('.').Append(segment.PropertyName)
+            .AppendLine(DependencyPropertyFieldSuffix)
+            .Append("                    (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(segment.DeclaringTypeFullName)
+            .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).AppendLine(",").AppendLine("                    false)");
 
     /// <inheritdoc/>
     protected override void AppendDeepChainRootSegment(
