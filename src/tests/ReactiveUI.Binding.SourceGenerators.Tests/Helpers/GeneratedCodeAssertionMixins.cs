@@ -59,11 +59,11 @@ internal static class GeneratedCodeAssertionMixins
             var source = result.GeneratedSources[hintName];
 
             var count = 0;
-            var at = source.IndexOf(text, StringComparison.Ordinal);
-            while (at >= 0)
+            var matchIndex = source.IndexOf(text, StringComparison.Ordinal);
+            while (matchIndex >= 0)
             {
                 count++;
-                at = source.IndexOf(text, at + text.Length, StringComparison.Ordinal);
+                matchIndex = source.IndexOf(text, matchIndex + text.Length, StringComparison.Ordinal);
             }
 
             await Assert.That(count).IsEqualTo(expected)

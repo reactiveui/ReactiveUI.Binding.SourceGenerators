@@ -36,18 +36,25 @@ public static class ObservationAffinityChecker
 
     /// <summary>Returns <see langword="true"/> if a registered <see cref="ICreatesObservableForProperty"/> outranks <paramref name="generatedAffinity"/>.</summary>
     /// <param name="type">The type being observed.</param>
+    /// <param name="propertyName">The property being observed on that type.</param>
     /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
     /// <param name="beforeChanged">Whether before-change (PropertyChanging) observation is requested.</param>
     /// <returns><see langword="true"/> if a user plugin should override the generated observation.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="type"/> is null.</exception>
-    public static bool HasHigherAffinityPlugin(Type type, int generatedAffinity, bool beforeChanged)
+    /// <remarks>
+    /// The property name is half the question. A plugin scores a type and a property together - the WPF, WinUI,
+    /// WinForms and KVO plugins all answer 0 for a property their mechanism does not reach, whatever the type -
+    /// so asking without one makes every mechanism-specific registration score 0 and lose by construction.
+    /// </remarks>
+    public static bool HasHigherAffinityPlugin(Type type, string propertyName, int generatedAffinity, bool beforeChanged)
     {
         ArgumentExceptionHelper.ThrowIfNull(type);
+        ArgumentExceptionHelper.ThrowIfNull(propertyName);
 
         var plugins = Resolve();
         for (var i = 0; i < plugins.Length; i++)
         {
-            if (plugins[i].GetAffinityForObject(type, string.Empty, beforeChanged) > generatedAffinity)
+            if (plugins[i].GetAffinityForObject(type, propertyName, beforeChanged) > generatedAffinity)
             {
                 return true;
             }

@@ -41,7 +41,7 @@ public class BindOneWayCodeGeneratorHelperTests
         var inv2 = ModelFactory.CreateBindingInvocationInfo(callerLineNumber: 20);
         var invocations = ImmutableArray.Create(inv1, inv2);
 
-        var groups = BindOneWayCodeGenerator.GroupByTypeSignature(invocations);
+        var groups = BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
         await Assert.That(groups.Count).IsEqualTo(1);
         await Assert.That(groups[0].Invocations.Length).IsEqualTo(ExpectedInvocationCount);
@@ -57,7 +57,7 @@ public class BindOneWayCodeGeneratorHelperTests
         var inv2 = ModelFactory.CreateBindingInvocationInfo(sourceTypeFullName: "global::TestApp.ViewModelB");
         var invocations = ImmutableArray.Create(inv1, inv2);
 
-        var groups = BindOneWayCodeGenerator.GroupByTypeSignature(invocations);
+        var groups = BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
         await Assert.That(groups.Count).IsEqualTo(ExpectedGroupCount);
     }
@@ -78,7 +78,7 @@ public class BindOneWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true);
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, BindOneWayCodeGenerator.DispatchApi, true, false, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -101,7 +101,7 @@ public class BindOneWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindOneWayCodeGenerator.GenerateConcreteOverload(sb, group, false, false, false);
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, BindOneWayCodeGenerator.DispatchApi, false, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerFilePath");
@@ -124,7 +124,7 @@ public class BindOneWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindOneWayCodeGenerator.GenerateCallerArgExprOverload(sb, group, false);
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, BindOneWayCodeGenerator.DispatchApi, true, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("sourcePropertyExpression == ");
@@ -148,7 +148,7 @@ public class BindOneWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindOneWayCodeGenerator.GenerateCallerFilePathOverload(sb, group, false, false);
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, BindOneWayCodeGenerator.DispatchApi, false, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerLineNumber == 50");

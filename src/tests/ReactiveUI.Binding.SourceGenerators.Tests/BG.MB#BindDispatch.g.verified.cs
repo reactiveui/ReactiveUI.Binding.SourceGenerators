@@ -24,8 +24,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.MultipleBindings.MyViewModel), 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.MultipleBindings.MyView), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.MultipleBindings.MyViewModel), "Name", 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.MultipleBindings.MyView), "NameText", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.Bind(
                     view, viewModel, viewModelProperty, viewProperty, null, viewPropertyExpression);
@@ -73,12 +73,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.NameText, value))
+                {
+                    return;
+                }
+
                 view.NameText = value;
             }, "x => x.NameText");
 
             var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewObs, 1);
             var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__viewSkipped, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(viewModel.Name, value))
+                {
+                    return;
+                }
+
                 viewModel.Name = value;
             }, "x => x.Name");
 
@@ -110,8 +120,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.MultipleBindings.MyViewModel), 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.MultipleBindings.MyView), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.MultipleBindings.MyViewModel), "Age", 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.MultipleBindings.MyView), "AgeText", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.Bind(
                     view, viewModel, viewModelProperty, viewProperty, null, viewPropertyExpression);
@@ -159,12 +169,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(view.AgeText, value))
+                {
+                    return;
+                }
+
                 view.AgeText = value;
             }, "x => x.AgeText");
 
             var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewObs, 1);
             var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__viewSkipped, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(viewModel.Age, value))
+                {
+                    return;
+                }
+
                 viewModel.Age = value;
             }, "x => x.Age");
 

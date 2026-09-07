@@ -2,7 +2,9 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
+using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.CodeGeneration;
@@ -15,6 +17,70 @@ public class BindingEmitterHelpersTests
 
     /// <summary>The fully qualified name of a target property type.</summary>
     private const string StringTypeName = "global::System.String";
+
+    /// <summary>The fully qualified name of the view model a call site binds from.</summary>
+    private const string ViewModelTypeName = "global::TestApp.MyViewModel";
+
+    /// <summary>A type the view model derives from, which a view may expose it as.</summary>
+    private const string ViewModelBaseTypeName = "global::TestApp.ViewModelBase";
+
+    /// <summary>The name a view exposes its view model under.</summary>
+    private const string ViewModelPropertyName = "ViewModel";
+
+    /// <summary>The generated name of the view model a binding was handed.</summary>
+    private const string ViewModelVariableName = "viewModel";
+
+    /// <summary>A view exposing its view model as the concrete type is observed through it, unnarrowed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveViewModelObservation_ViewModelTypedExactly_ObservesTheViewWithoutNarrowing()
+    {
+        var observation = ResolveWithViewModelProperty(ViewModelTypeName);
+
+        await Assert.That(observation.RootVariable).IsEqualTo("view");
+        await Assert.That(observation.Path[0].ReadCastTypeFullName).IsNull();
+    }
+
+    /// <summary>
+    /// A view exposing its view model as a base is still holding the view model the call site named, so the
+    /// binding follows that property and the read narrows to the named type.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveViewModelObservation_ViewModelTypedAsABase_ObservesTheViewAndNarrowsTheRead()
+    {
+        var observation = ResolveWithViewModelProperty(ViewModelBaseTypeName);
+
+        await Assert.That(observation.RootVariable).IsEqualTo("view");
+        await Assert.That(observation.Path[0].ReadCastTypeFullName).IsEqualTo(ViewModelTypeName);
+    }
+
+    /// <summary>
+    /// The weakly typed declaration the non-generic view interface requires names no view model, so it is not
+    /// followed - the call site handed the view model over directly, and the view may never have been given one.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveViewModelObservation_ViewModelTypedAsObject_ObservesTheViewModelItWasHanded()
+    {
+        var observation = ResolveWithViewModelProperty("object");
+
+        await Assert.That(observation.RootVariable).IsEqualTo(ViewModelVariableName);
+    }
+
+    /// <summary>A view exposing no view model at all leaves the binding on the one it was handed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ResolveViewModelObservation_ViewDeclaresNoViewModel_ObservesTheViewModelItWasHanded()
+    {
+        var view = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
+        var observation = BindingEmitterHelpers.ResolveViewModelObservation(
+            ModelFactory.CreateBindingInvocationInfo(),
+            ModelFactory.CreateClassBindingInfo(implementsINPC: true),
+            view);
+
+        await Assert.That(observation.RootVariable).IsEqualTo(ViewModelVariableName);
+    }
 
     /// <summary>A supplied converter settles the conversion, so the registry is not asked for one.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -44,6 +110,115 @@ public class BindingEmitterHelpersTests
         var group = Group(hasConversion: false, sourceType: IntTypeName, targetType: StringTypeName);
 
         await Assert.That(BindingEmitterHelpers.RequiresRegistryConversion(group)).IsTrue();
+    }
+
+    /// <summary>
+    /// A chain is tested link by link. A plugin scores a type and a property together, so a registration
+    /// aimed at the leaf takes the binding even though the root resolves to something else.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityOverride_DeepSourcePath_TestsEveryLink()
+    {
+        var sb = new StringBuilder();
+
+        BindingEmitterHelpers.EmitAffinityOverride(sb, DeepSourceGroup(), "BindOneWay", "source, target", false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("typeof(global::TestApp.MyViewModel), \"Address\"");
+        await Assert.That(result).Contains("typeof(global::TestApp.Address), \"City\"");
+        await Assert.That(result).Contains("|| ");
+    }
+
+    /// <summary>A two-way binding observes both sides, so either side's registration is enough to take it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityOverride_ObservingTheTarget_TestsBothSides()
+    {
+        var sb = new StringBuilder();
+
+        BindingEmitterHelpers.EmitAffinityOverride(sb, DeepSourceGroup(), "BindTwoWay", "source, target", true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("typeof(global::TestApp.MyViewModel), \"Address\"");
+        await Assert.That(result).Contains("typeof(global::TestApp.MyView), \"Text\"");
+    }
+
+    /// <summary>
+    /// A binding API that takes neither a converter nor a scheduler describes itself by leaving those members
+    /// unset, so the descriptor's own defaults have to emit nothing rather than require every API to say so.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindingDispatchApi_WithNoConversionOrSchedulerDeclared_EmitsNothingExtra()
+    {
+        var api = new BindingEmitterHelpers.BindingDispatchApi();
+        var group = Group(false, IntTypeName, IntTypeName);
+        var sb = new StringBuilder();
+
+        api.AppendExtraParameters(sb, group);
+        api.EmitAffinityOverride(sb, group, "\"Text\"");
+
+        await Assert.That(sb.ToString()).IsEmpty();
+        await Assert.That(api.FormatExtraArguments(group)).IsEmpty();
+        await Assert.That(api.FormatWorkerParameters(ModelFactory.CreateBindingInvocationInfo())).IsEmpty();
+    }
+
+    /// <summary>A binding API that hands back a plain disposable says so by leaving both return types unset.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindingDispatchApi_WithNoReturnTypeDeclared_HandsBackADisposable()
+    {
+        var api = new BindingEmitterHelpers.BindingDispatchApi();
+
+        await Assert.That(api.FormatReturnType(Group(false, IntTypeName, IntTypeName))).IsEqualTo("global::System.IDisposable");
+        await Assert.That(api.FormatWorkerReturnType(ModelFactory.CreateBindingInvocationInfo())).IsEqualTo("global::System.IDisposable");
+    }
+
+    /// <summary>The two objects a worker binds are named from the two parameters it declares them as.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindingDispatchApi_WorkerArguments_NamesBothParametersInTheirDeclaredOrder()
+    {
+        var api = new BindingEmitterHelpers.BindingDispatchApi { WorkerSourceParameterName = ViewModelVariableName, WorkerTargetParameterName = "view" };
+
+        await Assert.That(api.WorkerArguments).IsEqualTo($"{ViewModelVariableName}, view");
+    }
+
+    /// <summary>Resolves the observation for a view declaring its view model as the given type.</summary>
+    /// <param name="declaredType">The type the view declares its view model property as.</param>
+    /// <returns>The resolved observation.</returns>
+    private static BindingEmitterHelpers.ViewModelObservation ResolveWithViewModelProperty(string declaredType)
+    {
+        var view = ModelFactory.CreateClassBindingInfo(
+            implementsINPC: true,
+            properties: new EquatableArray<ObservablePropertyInfo>(
+                [ModelFactory.CreateObservablePropertyInfo(ViewModelPropertyName, declaredType)]));
+
+        return BindingEmitterHelpers.ResolveViewModelObservation(
+            ModelFactory.CreateBindingInvocationInfo(),
+            ModelFactory.CreateClassBindingInfo(implementsINPC: true),
+            view);
+    }
+
+    /// <summary>Builds a group whose source path walks two links.</summary>
+    /// <returns>The binding type group.</returns>
+    private static BindingTypeGroup DeepSourceGroup()
+    {
+        var sourcePath = new EquatableArray<PropertyPathSegment>(
+        [
+            ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+            ModelFactory.CreatePropertyPathSegment("City", StringTypeName, "global::TestApp.Address"),
+        ]);
+
+        return new(
+            ViewModelTypeName,
+            "global::TestApp.MyView",
+            StringTypeName,
+            StringTypeName,
+            false,
+            false,
+            [ModelFactory.CreateBindingInvocationInfo(sourcePropertyPath: sourcePath)]);
     }
 
     /// <summary>Builds a group fixing both property types and whether a converter was supplied.</summary>

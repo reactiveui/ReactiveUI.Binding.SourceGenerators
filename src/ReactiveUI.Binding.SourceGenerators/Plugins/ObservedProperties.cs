@@ -34,6 +34,20 @@ internal static class ObservedProperties
         return declared is null || declared.HasChangeEvent;
     }
 
+    /// <summary>Determines whether the consumer's own type declares the property.</summary>
+    /// <param name="classInfo">The declaring type's binding info.</param>
+    /// <param name="propertyName">The property being observed.</param>
+    /// <returns>True when this type declares the property itself.</returns>
+    /// <remarks>
+    /// The scan sees the consumer's declarations, so a property found here is one the consumer wrote and a
+    /// property missing from here comes from somewhere the scan cannot see - a base type in a referenced
+    /// assembly, which for a platform type is the platform itself. That is the question key-value observing
+    /// turns on: the Obj-C runtime backs the properties its own frameworks declare, not the ones an
+    /// application adds to a subclass of them.
+    /// </remarks>
+    internal static bool IsDeclaredByConsumer(ClassBindingInfo classInfo, string propertyName) =>
+        Find(classInfo, propertyName) is not null;
+
     /// <summary>Finds the declared property of that name.</summary>
     /// <param name="classInfo">The declaring type's binding info.</param>
     /// <param name="propertyName">The property name to find.</param>

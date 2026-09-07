@@ -24,7 +24,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel), "FirstName", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.OneWayBind(
                     view, viewModel, viewModelProperty, viewProperty, null, viewPropertyExpression);
@@ -72,7 +72,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
-                view.FirstNameText = value;
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.FirstNameText, value))
+                    {
+                        return;
+                    }
+
+                    view.FirstNameText = value;
             }, "x => x.FirstNameText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string>(
@@ -110,7 +115,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
-                view.LastNameText = value;
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.LastNameText, value))
+                    {
+                        return;
+                    }
+
+                    view.LastNameText = value;
             }, "x => x.LastNameText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyView, string>(

@@ -71,6 +71,14 @@ internal static class GeneratedTypeNames
     internal const string Observables = "global::ReactiveUI.Binding.Observables";
 
     /// <summary>
+    /// The observation of a property with no mechanism behind it, opened with its type argument. Emits the
+    /// current value and then stays open, because a source that completes ends the subscription that reads
+    /// it - which for a binding means the binding stops, and for a chain stage means a live subtree is torn
+    /// down. Only whole observations use this; a missing parent inside a chain is a different question.
+    /// </summary>
+    internal const string OpenUnchangingProperty = "new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<";
+
+    /// <summary>
     /// The scheduler abstraction the generated scheduler-taking overloads declare. ReactiveUI.Binding
     /// binds its shared source to this type; the System.Reactive leaf binds the same source to IScheduler.
     /// </summary>
@@ -175,4 +183,26 @@ internal static class GeneratedTypeNames
         string segmentTypeName,
         string parentVariable) =>
         $"new {SwitchMapSignal}<{segment.DeclaringTypeFullName}, {segmentTypeName}>({parentVariable},";
+
+    /// <summary>Renders the read of a segment's property from an object that has to be cast to reach it.</summary>
+    /// <param name="segment">The property being read.</param>
+    /// <param name="castTypeName">The type the object is cast to before the read.</param>
+    /// <param name="objectExpression">The expression producing the object.</param>
+    /// <returns>The rendered read.</returns>
+    /// <remarks>
+    /// A segment may also have to narrow what it read. A view exposing its view model as a base or an
+    /// interface still holds the view model the call site named, and the stage below is typed as that view
+    /// model - observables being covariant, only the read itself can bridge the two.
+    /// </remarks>
+    internal static string ReadProperty(
+        Models.PropertyPathSegment segment,
+        string castTypeName,
+        string objectExpression)
+    {
+        var read = $"(({castTypeName}){objectExpression}).{segment.PropertyName}";
+
+        return segment.ReadCastTypeFullName is null
+            ? read
+            : $"(({segment.ReadCastTypeFullName})(object){read})";
+    }
 }

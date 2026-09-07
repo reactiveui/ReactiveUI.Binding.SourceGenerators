@@ -8,34 +8,34 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 
 /// <summary>Tests that the source-generator-generated BindOneWay code works correctly at runtime.</summary>
-public class BindOneWayTests
+public partial class BindOneWayTests
 {
     /// <summary>The initial string property value used across the binding tests.</summary>
-    private const string HelloValue = "Hello";
+    private const string InitialPropertyValue = "Hello";
 
     /// <summary>The initial integer property test value.</summary>
     private const int IntValue = 42;
 
-    /// <summary>The updated integer property test value.</summary>
-    private const int UpdatedIntValue = 100;
+    /// <summary>The replacement integer property test value.</summary>
+    private const int ReplacementIntValue = 100;
 
     /// <summary>The initial double property test value.</summary>
     private const double DoubleValue = 3.14;
 
-    /// <summary>The updated double property test value.</summary>
-    private const double UpdatedDoubleValue = 2.71;
+    /// <summary>The replacement double property test value.</summary>
+    private const double ReplacementDoubleValue = 2.71;
 
     /// <summary>Verifies that BindOneWay syncs the initial string property value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task StringProperty_SyncsInitialValue()
     {
-        var source = new BigViewModel { Prop1 = HelloValue };
+        var source = new BigViewModel { Prop1 = InitialPropertyValue };
         var target = new BigView();
 
         using var binding = BindOneWayScenarios.StringProperty(source, target);
 
-        await Assert.That(target.ViewProp1).IsEqualTo(HelloValue);
+        await Assert.That(target.ViewProp1).IsEqualTo(InitialPropertyValue);
     }
 
     /// <summary>Verifies that BindOneWay syncs string property changes from source to target.</summary>
@@ -43,7 +43,7 @@ public class BindOneWayTests
     [Test]
     public async Task StringProperty_SyncsOnSourceChange()
     {
-        var source = new BigViewModel { Prop1 = HelloValue };
+        var source = new BigViewModel { Prop1 = InitialPropertyValue };
         var target = new BigView();
 
         using var binding = BindOneWayScenarios.StringProperty(source, target);
@@ -65,9 +65,9 @@ public class BindOneWayTests
 
         await Assert.That(target.ViewProp2).IsEqualTo(IntValue);
 
-        source.Prop2 = UpdatedIntValue;
+        source.Prop2 = ReplacementIntValue;
 
-        await Assert.That(target.ViewProp2).IsEqualTo(UpdatedIntValue);
+        await Assert.That(target.ViewProp2).IsEqualTo(ReplacementIntValue);
     }
 
     /// <summary>Verifies that BindOneWay syncs double property values.</summary>
@@ -82,9 +82,9 @@ public class BindOneWayTests
 
         await Assert.That(target.ViewProp3).IsEqualTo(DoubleValue);
 
-        source.Prop3 = UpdatedDoubleValue;
+        source.Prop3 = ReplacementDoubleValue;
 
-        await Assert.That(target.ViewProp3).IsEqualTo(UpdatedDoubleValue);
+        await Assert.That(target.ViewProp3).IsEqualTo(ReplacementDoubleValue);
     }
 
     /// <summary>Verifies that BindOneWay syncs bool property values.</summary>
@@ -109,7 +109,7 @@ public class BindOneWayTests
     [Test]
     public async Task Disposal_StopsSyncing()
     {
-        var source = new BigViewModel { Prop1 = HelloValue };
+        var source = new BigViewModel { Prop1 = InitialPropertyValue };
         var target = new BigView();
 
         var binding = BindOneWayScenarios.StringProperty(source, target);
@@ -117,6 +117,6 @@ public class BindOneWayTests
 
         source.Prop1 = "AfterDisposal";
 
-        await Assert.That(target.ViewProp1).IsEqualTo(HelloValue);
+        await Assert.That(target.ViewProp1).IsEqualTo(InitialPropertyValue);
     }
 }

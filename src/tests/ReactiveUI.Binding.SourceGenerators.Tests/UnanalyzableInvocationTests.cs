@@ -11,7 +11,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests;
 /// These tests craft source code that passes the syntax predicates but triggers
 /// early-return null paths in the semantic transform functions.
 /// </summary>
-public class ExtractorEdgeCaseTests
+public class UnanalyzableInvocationTests
 {
     /// <summary>The <c>BindCommandDispatch.g.cs</c> name these tests generate against.</summary>
     private const string BindCommandDispatchgcsName = "BindCommandDispatch.g.cs";

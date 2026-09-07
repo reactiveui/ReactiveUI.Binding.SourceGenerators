@@ -41,17 +41,42 @@ public class BindCommandCodeGeneratorHelperTests
     /// <summary>The <c>Volatile</c> name these tests generate against.</summary>
     private const string VolatileName = "Volatile";
 
-    /// <summary>Verifies CommandPropertyBindingPlugin.CanHandle returns true when HasCommandProperty is true.</summary>
+    /// <summary>The stream a command parameter reaches a registered binder as, whichever form the call site used.</summary>
+    private const string MappedParameterStreamFragment = "MapSignal<global::System.String, object>(withParameter";
+
+    /// <summary>The subscription that keeps the control's parameter following the observed property.</summary>
+    private const string ParameterStreamSubscriptionFragment =
+        "withParameter, __p => view.SaveButton.CommandParameter = __p";
+
+    /// <summary>A control that takes both a command and a parameter is driven by assigning them.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task CommandPropertyPlugin_CanHandle_WithCommandProperty_ReturnsTrue()
+    public async Task CommandPropertyPlugin_CanHandle_WithCommandAndParameterProperties_ReturnsTrue()
+    {
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
+
+        var plugin = new CommandPropertyBindingPlugin();
+        var result = plugin.CanHandle(inv);
+
+        await Assert.That(result).IsTrue();
+    }
+
+    /// <summary>
+    /// A control that takes a command but no parameter cannot carry one the call site supplied, so this
+    /// binder steps aside rather than binding the command and dropping the parameter silently.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyPlugin_CanHandle_WithoutParameterProperty_ReturnsFalse()
     {
         var inv = ModelFactory.CreateBindCommandInvocationInfo(hasCommandProperty: true);
 
         var plugin = new CommandPropertyBindingPlugin();
         var result = plugin.CanHandle(inv);
 
-        await Assert.That(result).IsTrue();
+        await Assert.That(result).IsFalse();
     }
 
     /// <summary>Verifies CommandPropertyBindingPlugin.CanHandle returns false when HasCommandProperty is false.</summary>
@@ -76,6 +101,7 @@ public class BindCommandCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: StringTypeName,
+            parameterIsReferenceType: true,
             hasCommandProperty: true,
             hasCommandParameterProperty: true);
 
@@ -89,10 +115,39 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains("MultipleDisposable");
     }
 
-    /// <summary>Verifies CommandPropertyBindingPlugin emits Command+CommandParameter+expression parameter code.</summary>
+    /// <summary>
+    /// A value-type parameter is recorded by a plain write. <c>Volatile</c> offers no overload for an
+    /// arbitrary value type, so emitting one would leave the consumer with code that does not compile.
+    /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task CommandPropertyPlugin_EmitBinding_ExpressionParam_EmitsDirectAccess()
+    public async Task CommandPropertyPlugin_EmitBinding_ValueTypeObservableParam_RecordsWithAPlainWrite()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            hasObservableParameter: true,
+            parameterTypeFullName: "global::System.Guid",
+            parameterIsReferenceType: false,
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
+
+        var plugin = new CommandPropertyBindingPlugin();
+        plugin.EmitBinding(sb, inv, ViewSaveButtonName, true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("global::System.Guid __latestParam = default;");
+        await Assert.That(result).Contains("withParameter, p => __latestParam = p);");
+        await Assert.That(result).Contains("var param = __latestParam;");
+        await Assert.That(result).DoesNotContain(VolatileName);
+    }
+
+    /// <summary>
+    /// A parameter named as a property is followed for as long as the command is bound, so the control's
+    /// parameter tracks it rather than freezing on the value it held when the command arrived.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyPlugin_EmitBinding_ExpressionParam_FollowsTheParameterStream()
     {
         var paramPath = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment(ParamName)]);
@@ -109,26 +164,50 @@ public class BindCommandCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ViewSaveButtonCommandCmdFragment);
-        await Assert.That(result).Contains("view.SaveButton.CommandParameter = viewModel.Param");
+        await Assert.That(result).Contains(ParameterStreamSubscriptionFragment);
         await Assert.That(result).DoesNotContain(VolatileName);
     }
 
-    /// <summary>Verifies CommandPropertyBindingPlugin emits Command-only code when no parameter.</summary>
+    /// <summary>With no parameter supplied, only the command is assigned as values arrive.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task CommandPropertyPlugin_EmitBinding_NoParam_EmitsCommandOnly()
+    public async Task CommandPropertyPlugin_EmitBinding_NoParam_AssignsOnlyTheCommand()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            hasCommandProperty: true);
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
 
         var plugin = new CommandPropertyBindingPlugin();
         plugin.EmitBinding(sb, inv, ViewSaveButtonName, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ViewSaveButtonCommandCmdFragment);
-        await Assert.That(result).DoesNotContain("CommandParameter");
+        await Assert.That(result).DoesNotContain("CommandParameter = viewModel");
         await Assert.That(result).DoesNotContain(VolatileName);
+    }
+
+    /// <summary>
+    /// A disposed binding leaves the control as it found it. Without that, a view rebound to a second view
+    /// model keeps executing the first one's command.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyPlugin_EmitBinding_RestoresTheControlOnDispose()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
+
+        var plugin = new CommandPropertyBindingPlugin();
+        plugin.EmitBinding(sb, inv, ViewSaveButtonName, false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("var __originalCommand = view.SaveButton.Command;");
+        await Assert.That(result).Contains("var __originalParameter = view.SaveButton.CommandParameter;");
+        await Assert.That(result).Contains("view.SaveButton.CommandParameter = __originalParameter;");
+        await Assert.That(result).Contains("view.SaveButton.Command = __originalCommand;");
     }
 
     /// <summary>Verifies EventEnabledBindingPlugin.CanHandle returns true when event and Enabled property exist.</summary>
@@ -183,6 +262,7 @@ public class BindCommandCodeGeneratorHelperTests
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
             hasObservableParameter: true,
             parameterTypeFullName: StringTypeName,
+            parameterIsReferenceType: true,
             resolvedEventName: ClickName,
             hasEnabledProperty: true);
 
@@ -506,7 +586,8 @@ public class BindCommandCodeGeneratorHelperTests
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
-            hasCommandProperty: true);
+            hasCommandProperty: true,
+            hasCommandParameterProperty: true);
         var viewModelClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
         BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, TESTSUFFIXName, false);
@@ -573,10 +654,10 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains("GetBinder<global::TestApp.MyButton>(true)");
     }
 
-    /// <summary>Verifies EmitCommandAffinityCheck with expression parameter emits ImmediateReturnSignal.</summary>
+    /// <summary>A registered binder is handed the observed parameter, not the value it held at one moment.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitCommandAffinityCheck_ExpressionParam_EmitsImmediateReturnSignal()
+    public async Task EmitCommandAffinityCheck_ExpressionParam_HandsTheBinderTheParameterStream()
     {
         const int GeneratedAffinity = 3;
         var paramPath = new EquatableArray<PropertyPathSegment>(
@@ -590,7 +671,7 @@ public class BindCommandCodeGeneratorHelperTests
         BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, ViewSaveButtonName, GeneratedAffinity, true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ImmediateReturnSignal<object>(viewModel.Param)");
+        await Assert.That(result).Contains(MappedParameterStreamFragment);
         await Assert.That(result).Contains("HasHigherAffinityPlugin<global::TestApp.MyButton>(3, true)");
     }
 
@@ -624,10 +705,10 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains("MapSignal<global::System.String, object>");
     }
 
-    /// <summary>Verifies BuildParameterObservableExpression returns ImmediateReturnSignal for expression parameter.</summary>
+    /// <summary>An expression parameter reaches a binder as the same mapped stream a supplied observable does.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BuildParameterObservableExpression_ExpressionParam_ReturnsImmediateReturnSignal()
+    public async Task BuildParameterObservableExpression_ExpressionParam_ReturnsTheObservedParameter()
     {
         var paramPath = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment(ParamName)]);
@@ -638,7 +719,7 @@ public class BindCommandCodeGeneratorHelperTests
 
         var result = BindCommandCodeGenerator.BuildParameterObservableExpression(inv);
 
-        await Assert.That(result).Contains("ImmediateReturnSignal<object>(viewModel.Param)");
+        await Assert.That(result).Contains(MappedParameterStreamFragment);
     }
 
     /// <summary>Verifies BuildParameterObservableExpression returns ImmutableEmptySignal when no parameter.</summary>
@@ -697,14 +778,14 @@ public class BindCommandCodeGeneratorHelperTests
     }
 
     /// <summary>
-    /// Verifies GenerateBindCommandMethod with an expression parameter reads the parameter value from the
-    /// view model at call time. The <c>Expression&lt;Func&lt;...&gt;&gt;</c> parameter itself lives on the
-    /// public overload (covered by <see cref="GenerateCallerArgExprOverload_WithExpressionParam_IncludesWithParameterExpr"/>);
-    /// the worker consumes the compile-time-extracted property path via a <c>ImmediateReturnSignal</c>.
+    /// The worker observes the compile-time-extracted parameter path into <c>withParameter</c>, so both the
+    /// generated binding and a registered binder consume the same stream. The
+    /// <c>Expression&lt;Func&lt;...&gt;&gt;</c> parameter itself lives on the public overload (covered by
+    /// <see cref="GenerateCallerArgExprOverload_WithExpressionParam_IncludesWithParameterExpr"/>).
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateBindCommandMethod_WithExpressionParam_ReadsParameterFromViewModel()
+    public async Task GenerateBindCommandMethod_WithExpressionParam_ObservesTheParameterProperty()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindCommandInvocationInfo(
@@ -717,8 +798,29 @@ public class BindCommandCodeGeneratorHelperTests
         BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, TESTSUFFIXName, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ImmediateReturnSignal<object>");
-        await Assert.That(result).Contains("viewModel.Param");
+        await Assert.That(result).Contains("var withParameter = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.String>");
+        await Assert.That(result).Contains(MappedParameterStreamFragment);
+    }
+
+    /// <summary>
+    /// A parameter whose type the extraction could not resolve is still observed. The stream is typed as
+    /// <c>object</c> so the binding compiles, rather than the parameter being dropped.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateBindCommandMethod_ExpressionParamWithNoResolvedType_ObservesItAsObject()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            hasExpressionParameter: true,
+            parameterTypeFullName: null,
+            parameterPropertyPath: new EquatableArray<PropertyPathSegment>(
+                [ModelFactory.CreatePropertyPathSegment(ParamName)]));
+
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, null, TESTSUFFIXName, false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("var withParameter = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<object>");
     }
 
     // ───────────────────────────────────────────────────────────────────────────

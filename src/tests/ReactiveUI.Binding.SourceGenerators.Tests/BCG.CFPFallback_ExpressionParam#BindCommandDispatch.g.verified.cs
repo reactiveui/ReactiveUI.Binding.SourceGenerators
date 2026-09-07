@@ -50,6 +50,11 @@ namespace ReactiveUI.Binding
             "Save",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.ExpressionParam.MyViewModel)__o).Save,
             true);
+        var withParameter = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            viewModel,
+            "CurrentItem",
+            (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.ExpressionParam.MyViewModel)__o).CurrentItem,
+            true);
 
             if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
                 .HasHigherAffinityPlugin<global::SharedScenarios.BindCommand.ExpressionParam.MyButton>(3, true))
@@ -62,7 +67,7 @@ namespace ReactiveUI.Binding
                     var __binderCmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, __cmd =>
                     {
                         __serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                        global::System.IObservable<object> __paramObs = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<object>(viewModel.CurrentItem);
+                        global::System.IObservable<object> __paramObs = new global::ReactiveUI.Primitives.Signals.MapSignal<string, object>(withParameter, __p => __p);
                         __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.ExpressionParam.MyButton>(
                             __cmd, view.SaveButton, __paramObs)
                             ?? global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -22,11 +23,20 @@ internal static class CodeGeneratorHelpers
     /// <summary>The indent every generated method parameter sits at: namespace, class, member, then parameter.</summary>
     internal const string ParameterIndent = "            ";
 
+    /// <summary>Opens the comparison of a captured expression against the text a call site spelled.</summary>
+    internal const string ExpressionTextComparison = " == \"";
+
+    /// <summary>Completes the name of the parameter that captures a selector's expression text.</summary>
+    internal const string ExpressionParameterSuffix = "Expression";
+
     /// <summary>Buffer capacity to reserve per property-path segment when building an access chain.</summary>
     private const int PerPathSegmentCapacity = 16;
 
     /// <summary>Room for one guarded step: the local, its null check, and the indentation each line carries.</summary>
     private const int GuardedAssignmentSegmentCapacity = 96;
+
+    /// <summary>The name a guarded assignment gives the local holding one walked intermediate.</summary>
+    private const string ParentLocalPrefix = "__parent";
 
     /// <summary>Extra buffer capacity for the escaping a string literal adds.</summary>
     private const int EscapeOverheadCapacity = 4;
@@ -72,14 +82,38 @@ internal static class CodeGeneratorHelpers
             return root;
         }
 
-        var sb = new PooledStringBuilder(root.Length + (path.Length * PerPathSegmentCapacity));
-        _ = sb.Append(root);
+        var chain = root;
         for (var i = 0; i < path.Length; i++)
         {
-            _ = sb.Append('.').Append(path[i].PropertyName);
+            chain = AppendSegmentRead(chain, path[i]);
         }
 
-        return sb.ToStringAndReturn();
+        return chain;
+    }
+
+    /// <summary>Reads one segment from the expression that produced its parent, narrowing where the path says to.</summary>
+    /// <param name="parent">The expression producing the object to read from.</param>
+    /// <param name="segment">The property being read.</param>
+    /// <returns>The expression producing the segment's value.</returns>
+    /// <remarks>
+    /// A view exposing its view model as a base or an interface still holds the view model the call site
+    /// named, so the read narrows to it and the rest of the path continues from there.
+    /// </remarks>
+    internal static string AppendSegmentRead(string parent, PropertyPathSegment segment)
+    {
+        var sb = new PooledStringBuilder(parent.Length + PerPathSegmentCapacity);
+        _ = sb.Append(parent).Append('.').Append(segment.PropertyName);
+
+        if (segment.ReadCastTypeFullName is null)
+        {
+            return sb.ToStringAndReturn();
+        }
+
+        var read = sb.ToStringAndReturn();
+        var cast = new PooledStringBuilder(read.Length + segment.ReadCastTypeFullName.Length + PerPathSegmentCapacity);
+
+        return cast.Append("((").Append(segment.ReadCastTypeFullName).Append(")(object)")
+            .Append(read).Append(')').ToStringAndReturn();
     }
 
     /// <summary>Builds a property access expression for use in a lambda body.</summary>
@@ -98,18 +132,26 @@ internal static class CodeGeneratorHelpers
     internal static string BuildPropertySetterChain(string root, EquatableArray<PropertyPathSegment> path) =>
         BuildPropertyAccessChain(root, path);
 
-    /// <summary>Builds the statements that assign to the end of a property path, skipping the write when the path cannot be walked.</summary>
+    /// <summary>Builds the statements that assign to the end of a property path, skipping writes that would not change it.</summary>
     /// <param name="root">The root variable name.</param>
     /// <param name="path">The property path segments.</param>
-    /// <param name="valueExpression">The expression producing the value to assign.</param>
+    /// <param name="valueExpression">The expression producing the value to assign, evaluated more than once.</param>
     /// <param name="indent">The indentation of the line the statements are emitted on.</param>
-    /// <returns>The assignment, preceded by a guard per intermediate when the path has more than one segment.</returns>
+    /// <returns>The assignment, preceded by its guards.</returns>
     /// <remarks>
+    /// <para>
+    /// A write that would not change the property is dropped. That is what keeps a two-way binding from
+    /// oscillating: writing the view raises the view's own change notification, which writes the view model,
+    /// which writes the view again. Comparing first breaks the loop at the first repetition, and it also
+    /// spares every binding the notifications a redundant write would raise. The comparison is the target's
+    /// own equality, so a type that overrides it decides what "unchanged" means.
+    /// </para>
+    /// <para>
     /// The read side of a chain tolerates a missing parent and still delivers a value, so a binding into a path
     /// whose intermediate is null would otherwise assign through it and throw inside the call that established
     /// the binding. Dropping the write instead matches what the runtime engine does when a chain getter fails.
-    /// Emitted as early returns rather than nesting so a long path stays flat, and only for a path that has an
-    /// intermediate at all.
+    /// Emitted as early returns rather than nesting so a long path stays flat.
+    /// </para>
     /// </remarks>
     internal static string BuildGuardedAssignment(
         string root,
@@ -117,19 +159,15 @@ internal static class CodeGeneratorHelpers
         string valueExpression,
         string indent)
     {
-        if (path.Length <= 1)
-        {
-            return $"{BuildPropertyAccessChain(root, path)} = {valueExpression};";
-        }
-
+        var leaf = path[path.Length - 1];
         var sb = new PooledStringBuilder(path.Length * GuardedAssignmentSegmentCapacity);
         var parent = root;
 
         for (var i = 0; i < path.Length - 1; i++)
         {
-            var local = $"__parent{i}";
-            _ = sb.Append("var ").Append(local).Append(" = ").Append(parent).Append('.')
-                .Append(path[i].PropertyName).Append(';').Append('\n')
+            var local = ParentLocalPrefix + i.ToString(CultureInfo.InvariantCulture);
+            _ = sb.Append("var ").Append(local).Append(" = ").Append(AppendSegmentRead(parent, path[i]))
+                .Append(';').Append('\n')
                 .Append(indent).Append("if (").Append(local).Append(" == null)").Append('\n')
                 .Append(indent).Append('{').Append('\n')
                 .Append(indent).Append("    return;").Append('\n')
@@ -140,7 +178,16 @@ internal static class CodeGeneratorHelpers
             parent = local;
         }
 
-        _ = sb.Append(parent).Append('.').Append(path[path.Length - 1].PropertyName)
+        _ = sb.Append("if (global::System.Collections.Generic.EqualityComparer<")
+            .Append(leaf.PropertyTypeFullName).Append(">.Default.Equals(")
+            .Append(parent).Append('.').Append(leaf.PropertyName).Append(", ")
+            .Append(valueExpression).Append("))").Append('\n')
+            .Append(indent).Append('{').Append('\n')
+            .Append(indent).Append("    return;").Append('\n')
+            .Append(indent).Append('}').Append('\n')
+            .Append('\n')
+            .Append(indent)
+            .Append(parent).Append('.').Append(leaf.PropertyName)
             .Append(" = ").Append(valueExpression).Append(';');
 
         return sb.ToStringAndReturn();
@@ -504,4 +551,233 @@ internal static class CodeGeneratorHelpers
         $"__value => {{ {toTypeFullName} __converted; "
         + $"{GeneratedTypeNames.RuntimeBindingConverter}.TryConvert<{fromTypeFullName}, {toTypeFullName}>(__value, null, null, out __converted); "
         + "return __converted; }";
+
+    /// <summary>Emits a whole dispatch file: the extension class, and one overload per group of call sites.</summary>
+    /// <typeparam name="TInvocation">The call-site model this API extracts.</typeparam>
+    /// <typeparam name="TGroup">The group of call sites that share one overload.</typeparam>
+    /// <param name="invocations">The detected call sites for this API.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    /// <param name="groupByTypeSignature">Collects the call sites into the groups that share an overload.</param>
+    /// <param name="emitGroup">Emits the overload and the workers for one group.</param>
+    /// <returns>The generated source, or <see langword="null"/> when there are no call sites.</returns>
+    /// <remarks>
+    /// Every API's file has the same outline - header, a run of groups, footer - and differs only in how call
+    /// sites group and what each group emits. Both are handed in, so the outline is written once.
+    /// </remarks>
+    internal static string? GenerateDispatchFile<TInvocation, TGroup>(
+        ImmutableArray<TInvocation> invocations,
+        in LanguageFeatures features,
+        Func<ImmutableArray<TInvocation>, List<TGroup>> groupByTypeSignature,
+        Action<StringBuilder, TGroup, LanguageFeatures> emitGroup)
+    {
+        if (invocations.IsDefaultOrEmpty)
+        {
+            return null;
+        }
+
+        var snapshot = features;
+        var sb = PooledBuilder.Rent(invocations.Length * PerInvocationBufferCapacity);
+        AppendExtensionClassHeader(sb, snapshot);
+        _ = sb.AppendLine();
+
+        var groups = groupByTypeSignature(invocations);
+        for (var g = 0; g < groups.Count; g++)
+        {
+            emitGroup(sb, groups[g], snapshot);
+        }
+
+        AppendExtensionClassFooter(sb);
+        _ = sb.AppendLine();
+
+        return PooledBuilder.ToStringAndReturn(sb);
+    }
+
+    /// <summary>Appends the documentation comment on a generated dispatch overload.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="apiName">The binding API the overload stands in for.</param>
+    /// <param name="sourceTypeFullName">The fully qualified type the binding reads from.</param>
+    /// <param name="targetTypeFullName">The fully qualified type the binding writes to.</param>
+    /// <param name="dispatchesOnExpressionText">Whether the overload keys on expression text rather than file and line.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendDispatchSummary(
+        StringBuilder sb,
+        string apiName,
+        string sourceTypeFullName,
+        string targetTypeFullName,
+        bool dispatchesOnExpressionText) =>
+        sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for ").Append(apiName)
+            .Append(" from ").Append(sourceTypeFullName).Append(" to ").Append(targetTypeFullName).AppendLine(".")
+            .AppendLine(dispatchesOnExpressionText
+                ? "        /// Uses CallerArgumentExpression for dispatch."
+                : "        /// Uses CallerFilePath + CallerLineNumber for dispatch.")
+            .AppendLine("        /// </summary>");
+
+    /// <summary>Appends the expression-text parameters a dispatch overload keys on, and opens its body.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="firstSelectorName">The name of the first selector parameter.</param>
+    /// <param name="secondSelectorName">The name of the second selector parameter.</param>
+    internal static void AppendExpressionDispatchParameters(
+        StringBuilder sb,
+        string firstSelectorName,
+        string secondSelectorName)
+    {
+        AppendExpressionParameter(sb, firstSelectorName, firstSelectorName + ExpressionParameterSuffix, true);
+        AppendExpressionParameter(sb, secondSelectorName, secondSelectorName + ExpressionParameterSuffix, true);
+        AppendCallerInfoDispatchParameters(sb);
+    }
+
+    /// <summary>Appends the file and line parameters every dispatch overload carries, and opens its body.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <remarks>
+    /// They are declared whether or not dispatch uses them, because the concrete overload only beats the
+    /// generic stub once their parameter lists match.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendCallerInfoDispatchParameters(StringBuilder sb) =>
+        sb.AppendLine("            [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = \"\",")
+            .AppendLine("            [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)")
+            .AppendLine(GeneratedSyntax.MemberBodyOpen);
+
+    /// <summary>Appends the strip that takes the <c>static</c> prefix off a captured expression.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="expressionParameterName">The parameter holding the captured expression text.</param>
+    /// <remarks>
+    /// A <c>static</c> lambda reaches the overload spelled with that prefix, which the recorded expression
+    /// text does not carry, so without the strip those call sites match nothing.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendStaticPrefixNormalization(StringBuilder sb, string expressionParameterName) =>
+        sb.Append(ParameterIndent).Append(expressionParameterName).Append(" = ").Append(expressionParameterName)
+            .AppendLine(".StartsWith(\"static \", global::System.StringComparison.Ordinal)")
+            .Append("                ? ").Append(expressionParameterName).AppendLine(".Substring(7)")
+            .Append("                : ").Append(expressionParameterName).AppendLine(";");
+
+    /// <summary>Appends that same strip for a run of numbered expression parameters.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="supportsCallerArgExpr">Whether dispatch matches on expression text at all.</param>
+    /// <param name="parameterPrefix">What the overload calls its selector parameters, before their index.</param>
+    /// <param name="count">How many selectors the overload declares.</param>
+    /// <remarks>
+    /// An overload taking several selectors captures the text of each, and any of them may have been written
+    /// as a <c>static</c> lambda. Below C# 10 there is no captured text to strip, so nothing is emitted.
+    /// </remarks>
+    internal static void AppendIndexedStaticPrefixNormalization(
+        StringBuilder sb,
+        bool supportsCallerArgExpr,
+        string parameterPrefix,
+        int count)
+    {
+        if (!supportsCallerArgExpr)
+        {
+            return;
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            var parameterName = $"{parameterPrefix}{i + 1}{ExpressionParameterSuffix}";
+            _ = sb.Append(ParameterIndent).Append(parameterName).Append(" = ").Append(parameterName)
+                .Append(".StartsWith(\"static \", global::System.StringComparison.Ordinal) ? ").Append(parameterName).Append(".Substring(7) : ")
+                .Append(parameterName).AppendLine(";");
+        }
+
+        _ = sb.AppendLine();
+    }
+
+    /// <summary>Appends the condition that matches a call site by the text of both its selectors.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="condition">The conditional keyword this branch opens with.</param>
+    /// <param name="firstParameterName">The parameter holding the first selector's text.</param>
+    /// <param name="firstExpressionText">The first selector as the call site spelled it.</param>
+    /// <param name="secondParameterName">The parameter holding the second selector's text.</param>
+    /// <param name="secondExpressionText">The second selector as the call site spelled it.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendExpressionDispatchCondition(
+        StringBuilder sb,
+        string condition,
+        string firstParameterName,
+        string firstExpressionText,
+        string secondParameterName,
+        string secondExpressionText) =>
+        sb.Append(ParameterIndent).Append(condition).Append(" (").Append(firstParameterName).Append(ExpressionTextComparison)
+            .Append(EscapeString(firstExpressionText)).AppendLine("\"")
+            .Append("                && ").Append(secondParameterName).Append(ExpressionTextComparison)
+            .Append(EscapeString(secondExpressionText)).AppendLine("\")")
+            .AppendLine(GeneratedSyntax.StatementBlockOpen);
+
+    /// <summary>Appends the condition that matches a call site by the file and line it sits on.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="condition">The conditional keyword this branch opens with.</param>
+    /// <param name="callerLineNumber">The line the call site sits on.</param>
+    /// <param name="pathSuffix">The tail of the path the call site's file ends with.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendCallerInfoDispatchCondition(
+        StringBuilder sb,
+        string condition,
+        int callerLineNumber,
+        string pathSuffix) =>
+        sb.Append(ParameterIndent).Append(condition).Append(" (callerLineNumber == ").Append(callerLineNumber).AppendLine()
+            .Append("                && callerFilePath.EndsWith(\"").Append(EscapeString(pathSuffix))
+            .AppendLine("\", global::System.StringComparison.OrdinalIgnoreCase))")
+            .AppendLine(GeneratedSyntax.StatementBlockOpen);
+
+    /// <summary>Appends the call a matched branch hands the binding to, and closes the branch.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="workerName">The generated method the branch dispatches to.</param>
+    /// <param name="arguments">The argument list to forward, in the worker's own parameter order.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendDispatchReturn(StringBuilder sb, string workerName, string arguments) =>
+        sb.Append("                return ").Append(workerName).Append('(').Append(arguments).AppendLine(");")
+            .AppendLine(GeneratedSyntax.StatementBlockClose);
+
+    /// <summary>Appends the condition that matches a call site by the text of each of its selectors.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="condition">The conditional keyword this branch opens with.</param>
+    /// <param name="selectorParameterPrefix">What the overload names its selectors before their index.</param>
+    /// <param name="expressionTexts">The selectors as the call site spelled them.</param>
+    /// <param name="count">How many of them the overload takes.</param>
+    internal static void AppendSelectorTextCondition(
+        StringBuilder sb,
+        string condition,
+        string selectorParameterPrefix,
+        EquatableArray<string> expressionTexts,
+        int count)
+    {
+        _ = sb.Append(ParameterIndent).Append(condition).Append(" (");
+
+        for (var i = 0; i < count; i++)
+        {
+            if (i > 0)
+            {
+                _ = sb.Append(" && ");
+            }
+
+            _ = sb.Append(selectorParameterPrefix).Append(i + 1).Append(ExpressionParameterSuffix)
+                .Append(ExpressionTextComparison).Append(EscapeString(expressionTexts[i])).Append('"');
+        }
+
+        _ = sb.AppendLine(")");
+    }
+
+    /// <summary>Appends the one-line condition that matches a call site by the file and line it sits on.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="condition">The conditional keyword this branch opens with.</param>
+    /// <param name="callerLineNumber">The line the call site sits on.</param>
+    /// <param name="pathSuffix">The tail of the path the call site's file ends with.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendInlineCallerInfoCondition(
+        StringBuilder sb,
+        string condition,
+        int callerLineNumber,
+        string pathSuffix) =>
+        sb.Append(ParameterIndent).Append(condition).Append(" (callerLineNumber == ").Append(callerLineNumber)
+            .Append(" && callerFilePath.EndsWith(\"").Append(EscapeString(pathSuffix)).Append("\",")
+            .AppendLine(" global::System.StringComparison.OrdinalIgnoreCase))");
+
+    /// <summary>Appends the throw that closes a binding dispatch overload when no call site matched.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendBindingDispatchFallthrough(StringBuilder sb) =>
+        sb.AppendLine("            throw new global::System.InvalidOperationException(")
+            .AppendLine("                \"No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.\");")
+            .AppendLine(GeneratedSyntax.MemberBodyClose);
 }

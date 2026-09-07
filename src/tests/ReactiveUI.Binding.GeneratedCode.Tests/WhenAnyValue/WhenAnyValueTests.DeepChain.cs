@@ -9,19 +9,16 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAnyValue;
 
 /// <summary>Edge case tests for WhenAnyValue covering disposal, deep chains, and multi-property change emission scenarios.</summary>
-public class WhenAnyValueEdgeCaseTests
+public partial class WhenAnyValueTests
 {
     /// <summary>The initial fixture value used in disposal and subscription tests.</summary>
     private const string InitialValue = "Initial";
 
     /// <summary>The initial nested city value used in deep-chain tests.</summary>
-    private const string Seattle = "Seattle";
+    private const string InitialCity = "Seattle";
 
-    /// <summary>The updated nested city value used in deep-chain tests.</summary>
-    private const string Portland = "Portland";
-
-    /// <summary>The expected emission count after an initial value plus one change.</summary>
-    private const int ExpectedEmissionCount = 2;
+    /// <summary>The replacement nested city value used in deep-chain tests.</summary>
+    private const string ReplacementCity = "Portland";
 
     /// <summary>The number of property changes applied in the rapid-change test.</summary>
     private const int ChangeCount = 100;
@@ -33,10 +30,10 @@ public class WhenAnyValueEdgeCaseTests
     private const int ExpectedTwelvePropertyCount = 13;
 
     /// <summary>The value written to a property to trigger a change notification.</summary>
-    private const string ChangedValue = "Changed";
+    private const string ReplacementName = "Changed";
 
     /// <summary>The initial child name used in nullable deep-chain tests.</summary>
-    private const string Alice = "Alice";
+    private const string InitialChildName = "Alice";
 
     /// <summary>The replacement child name used in nullable deep-chain tests.</summary>
     private const string Charlie = "Charlie";
@@ -90,14 +87,14 @@ public class WhenAnyValueEdgeCaseTests
     public async Task DeepChain_EmitsNestedPropertyValue()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = InitialCity;
         var values = new List<string>();
 
         using var sub = WhenAnyValueScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo(Seattle);
+        await Assert.That(values[0]).IsEqualTo(InitialCity);
     }
 
     /// <summary>Verifies that deep chain WhenAnyValue emits on nested property change.</summary>
@@ -106,16 +103,16 @@ public class WhenAnyValueEdgeCaseTests
     public async Task DeepChain_EmitsOnNestedPropertyChange()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = InitialCity;
         var values = new List<string>();
 
         using var sub = WhenAnyValueScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
-        vm.Address.City = Portland;
+        vm.Address.City = ReplacementCity;
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
-        await Assert.That(values).Contains(Portland);
+        await Assert.That(values).Contains(ReplacementCity);
     }
 
     /// <summary>Verifies that deep chain WhenAnyValue re-subscribes on intermediate object replacement.</summary>
@@ -124,16 +121,16 @@ public class WhenAnyValueEdgeCaseTests
     public async Task DeepChain_IntermediateObjectReplacement()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = InitialCity;
         var values = new List<string>();
 
         using var sub = WhenAnyValueScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
-        var newAddress = new Address { City = Portland };
+        var newAddress = new Address { City = ReplacementCity };
         vm.Address = newAddress;
 
-        await Assert.That(values).Contains(Portland);
+        await Assert.That(values).Contains(ReplacementCity);
 
         // Verify resubscription
         newAddress.City = "Eugene";
@@ -160,8 +157,8 @@ public class WhenAnyValueEdgeCaseTests
             .WhenAnyValue(fallbackHost, x => x.Child!.Name)
             .Subscribe(fallbackValues.Add);
 
-        generatedHost.Child = new() { Name = Alice };
-        fallbackHost.Child = new() { Name = Alice };
+        generatedHost.Child = new() { Name = InitialChildName };
+        fallbackHost.Child = new() { Name = InitialChildName };
         generatedHost.Child.Name = "Bob";
         fallbackHost.Child.Name = "Bob";
 
@@ -185,8 +182,8 @@ public class WhenAnyValueEdgeCaseTests
     [Test]
     public async Task DeepChain_ThreeLinks_DetachesOrphanedSubtreeLikeLegacyReactiveUI()
     {
-        var generatedMiddle = new TestViewModel { Child = new() { Name = Alice } };
-        var fallbackMiddle = new TestViewModel { Child = new() { Name = Alice } };
+        var generatedMiddle = new TestViewModel { Child = new() { Name = InitialChildName } };
+        var fallbackMiddle = new TestViewModel { Child = new() { Name = InitialChildName } };
         var generatedHost = new HostTestFixture { Child = generatedMiddle };
         var fallbackHost = new HostTestFixture { Child = fallbackMiddle };
         var generatedValues = new List<string>();
@@ -218,7 +215,7 @@ public class WhenAnyValueEdgeCaseTests
     [Test]
     public async Task DeepChain_NullLeaf_StillEmits()
     {
-        var host = new HostTestFixture { Child = new() { Name = Alice } };
+        var host = new HostTestFixture { Child = new() { Name = InitialChildName } };
         var values = new List<string>();
 
         using var sub = WhenAnyValueScenarios.DeepChain_ChildName(host)
@@ -302,12 +299,12 @@ public class WhenAnyValueEdgeCaseTests
         using var sub1 = obs.Subscribe(values1.Add);
         using var sub2 = obs.Subscribe(values2.Add);
 
-        fixture.Value1 = ChangedValue;
+        fixture.Value1 = ReplacementName;
 
         await Assert.That(values1.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
         await Assert.That(values2.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
-        await Assert.That(values1).Contains(ChangedValue);
-        await Assert.That(values2).Contains(ChangedValue);
+        await Assert.That(values1).Contains(ReplacementName);
+        await Assert.That(values2).Contains(ReplacementName);
     }
 
     /// <summary>

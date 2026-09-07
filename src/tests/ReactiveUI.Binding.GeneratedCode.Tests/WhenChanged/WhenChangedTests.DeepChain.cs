@@ -8,40 +8,34 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenChanged;
 
 /// <summary>
-/// Edge case tests for WhenChanged covering deep chain intermediate replacement,
-/// DistinctUntilChanged behavior, and multi-property with deep chains.
+/// Observation of a chain deeper than one property: replacing the intermediate object, suppressing a
+/// repeated value, and observing several deep chains at once.
 /// </summary>
-public class WhenChangedEdgeCaseTests
+public partial class WhenChangedTests
 {
-    /// <summary>The initial city value used by deep-chain tests.</summary>
-    private const string Seattle = "Seattle";
+    /// <summary>The city the deep-chain fixtures start out holding.</summary>
+    private const string DeepChainInitialCity = "Seattle";
 
-    /// <summary>The replacement city value used by deep-chain tests.</summary>
-    private const string Portland = "Portland";
+    /// <summary>The city a deep-chain fixture is moved to, so the observation has something to report.</summary>
+    private const string DeepChainReplacementCity = "Portland";
 
-    /// <summary>The second replacement city value used by deep-chain tests.</summary>
-    private const string Eugene = "Eugene";
+    /// <summary>The city a deep-chain fixture is moved to a second time.</summary>
+    private const string DeepChainSecondReplacementCity = "Eugene";
 
-    /// <summary>The simple property value used by multi-property tests.</summary>
-    private const string HelloValue = "Hello";
+    /// <summary>The age an integer-property fixture starts out holding.</summary>
+    private const int InitialAge = 25;
 
-    /// <summary>The minimum number of emissions expected after a change.</summary>
-    private const int MinEmissionsAfterChange = 2;
+    /// <summary>The age an integer-property fixture is moved to.</summary>
+    private const int ReplacementAge = 30;
 
-    /// <summary>The initial age value used by integer-property tests.</summary>
-    private const int AgeValue = 25;
-
-    /// <summary>The updated age value used by integer-property tests.</summary>
-    private const int UpdatedAgeValue = 30;
-
-    /// <summary>The value written to a property to trigger a change notification.</summary>
-    private const string ChangedValue = "Changed";
+    /// <summary>The name a fixture is moved to, so the observation has something to report.</summary>
+    private const string ReplacementName = "Changed";
 
     /// <summary>The value written after the subscription is disposed, which must not be observed.</summary>
     private const string AfterDisposalValue = "AfterDisposal";
 
     /// <summary>The initial name used by the fixtures in these tests.</summary>
-    private const string AliceName = "Alice";
+    private const string InitialChildName = "Alice";
 
     /// <summary>
     /// Verifies that replacing the intermediate object in a deep chain re-subscribes
@@ -52,24 +46,24 @@ public class WhenChangedEdgeCaseTests
     public async Task DeepChain_IntermediateObjectReplacement_ReSubscribes()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = DeepChainInitialCity;
         var values = new List<string>();
 
         using var sub = WhenChangedScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
-        await Assert.That(values[0]).IsEqualTo(Seattle);
+        await Assert.That(values[0]).IsEqualTo(DeepChainInitialCity);
 
         // Replace the entire Address object
-        var newAddress = new Address { City = Portland };
+        var newAddress = new Address { City = DeepChainReplacementCity };
         vm.Address = newAddress;
 
-        await Assert.That(values).Contains(Portland);
+        await Assert.That(values).Contains(DeepChainReplacementCity);
 
         // Change the new address's City
-        newAddress.City = Eugene;
+        newAddress.City = DeepChainSecondReplacementCity;
 
-        await Assert.That(values).Contains(Eugene);
+        await Assert.That(values).Contains(DeepChainSecondReplacementCity);
     }
 
     /// <summary>Verifies that after replacing the intermediate object, changes to the old object's property are no longer observed.</summary>
@@ -125,17 +119,17 @@ public class WhenChangedEdgeCaseTests
     public async Task DeepChain_DistinctUntilChanged_FiltersDuplicates()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = DeepChainInitialCity;
         var values = new List<string>();
 
         using var sub = WhenChangedScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo(Seattle);
+        await Assert.That(values[0]).IsEqualTo(DeepChainInitialCity);
 
         // Replace Address with one that has the same City — DistinctUntilChanged should filter
-        vm.Address = new() { City = Seattle };
+        vm.Address = new() { City = DeepChainInitialCity };
 
         await Assert.That(values.Count).IsEqualTo(1);
     }
@@ -145,22 +139,22 @@ public class WhenChangedEdgeCaseTests
     [Test]
     public async Task MultiProperty_WithDeepChain_EmitsOnNestedChange()
     {
-        var vm = new BigViewModel { Prop1 = HelloValue };
-        vm.Address.City = Seattle;
+        var vm = new BigViewModel { Prop1 = FirstPropertyValue };
+        vm.Address.City = DeepChainInitialCity;
         var values = new List<PropertyValues<string, string>>();
 
         using var sub = WhenChangedScenarios.MultiProperty_WithDeepChain(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0].Property1).IsEqualTo(Seattle);
-        await Assert.That(values[0].Property2).IsEqualTo(HelloValue);
+        await Assert.That(values[0].Property1).IsEqualTo(DeepChainInitialCity);
+        await Assert.That(values[0].Property2).IsEqualTo(FirstPropertyValue);
 
         // Change the nested property
-        vm.Address.City = Portland;
+        vm.Address.City = DeepChainReplacementCity;
 
-        await Assert.That(values[^1].Property1).IsEqualTo(Portland);
-        await Assert.That(values[^1].Property2).IsEqualTo(HelloValue);
+        await Assert.That(values[^1].Property1).IsEqualTo(DeepChainReplacementCity);
+        await Assert.That(values[^1].Property2).IsEqualTo(FirstPropertyValue);
     }
 
     /// <summary>Verifies that multi-property observation with a deep chain emits when the simple property changes.</summary>
@@ -168,8 +162,8 @@ public class WhenChangedEdgeCaseTests
     [Test]
     public async Task MultiProperty_WithDeepChain_EmitsOnSimpleChange()
     {
-        var vm = new BigViewModel { Prop1 = HelloValue };
-        vm.Address.City = Seattle;
+        var vm = new BigViewModel { Prop1 = FirstPropertyValue };
+        vm.Address.City = DeepChainInitialCity;
         var values = new List<PropertyValues<string, string>>();
 
         using var sub = WhenChangedScenarios.MultiProperty_WithDeepChain(vm)
@@ -178,7 +172,7 @@ public class WhenChangedEdgeCaseTests
         // Change the simple property
         vm.Prop1 = "World";
 
-        await Assert.That(values[^1].Property1).IsEqualTo(Seattle);
+        await Assert.That(values[^1].Property1).IsEqualTo(DeepChainInitialCity);
         await Assert.That(values[^1].Property2).IsEqualTo("World");
     }
 
@@ -187,22 +181,22 @@ public class WhenChangedEdgeCaseTests
     [Test]
     public async Task MultiProperty_WithDeepChain_IntermediateReplacement()
     {
-        var vm = new BigViewModel { Prop1 = HelloValue };
-        vm.Address.City = Seattle;
+        var vm = new BigViewModel { Prop1 = FirstPropertyValue };
+        vm.Address.City = DeepChainInitialCity;
         var values = new List<PropertyValues<string, string>>();
 
         using var sub = WhenChangedScenarios.MultiProperty_WithDeepChain(vm)
             .Subscribe(values.Add);
 
         // Replace the intermediate object
-        vm.Address = new() { City = Portland };
+        vm.Address = new() { City = DeepChainReplacementCity };
 
-        await Assert.That(values[^1].Property1).IsEqualTo(Portland);
+        await Assert.That(values[^1].Property1).IsEqualTo(DeepChainReplacementCity);
 
         // Change the new object's property
-        vm.Address.City = Eugene;
+        vm.Address.City = DeepChainSecondReplacementCity;
 
-        await Assert.That(values[^1].Property1).IsEqualTo(Eugene);
+        await Assert.That(values[^1].Property1).IsEqualTo(DeepChainSecondReplacementCity);
     }
 
     /// <summary>Verifies that multiple subscriptions to the same WhenChanged observable each receive independent emissions.</summary>
@@ -219,12 +213,12 @@ public class WhenChangedEdgeCaseTests
         using var sub1 = obs.Subscribe(values1.Add);
         using var sub2 = obs.Subscribe(values2.Add);
 
-        vm.Name = ChangedValue;
+        vm.Name = ReplacementName;
 
         await Assert.That(values1.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterChange);
         await Assert.That(values2.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterChange);
-        await Assert.That(values1).Contains(ChangedValue);
-        await Assert.That(values2).Contains(ChangedValue);
+        await Assert.That(values1).Contains(ReplacementName);
+        await Assert.That(values2).Contains(ReplacementName);
     }
 
     /// <summary>Verifies that disposing one subscription does not affect another.</summary>
@@ -255,7 +249,7 @@ public class WhenChangedEdgeCaseTests
     public async Task DeepChain_Disposal_StopsListening()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = DeepChainInitialCity;
         var values = new List<string>();
 
         var sub = WhenChangedScenarios.DeepChain_AddressCity(vm)
@@ -263,10 +257,10 @@ public class WhenChangedEdgeCaseTests
 
         sub.Dispose();
 
-        vm.Address.City = Portland;
+        vm.Address.City = DeepChainReplacementCity;
 
         await Assert.That(values.Count).IsEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo(Seattle);
+        await Assert.That(values[0]).IsEqualTo(DeepChainInitialCity);
     }
 
     /// <summary>Verifies that the deep chain disposal also stops listening after intermediate replacement.</summary>
@@ -275,18 +269,18 @@ public class WhenChangedEdgeCaseTests
     public async Task DeepChain_Disposal_AfterIntermediateReplacement()
     {
         var vm = new BigViewModel();
-        vm.Address.City = Seattle;
+        vm.Address.City = DeepChainInitialCity;
         var values = new List<string>();
 
         var sub = WhenChangedScenarios.DeepChain_AddressCity(vm)
             .Subscribe(values.Add);
 
-        vm.Address = new() { City = Portland };
+        vm.Address = new() { City = DeepChainReplacementCity };
         sub.Dispose();
 
-        vm.Address.City = Eugene;
+        vm.Address.City = DeepChainSecondReplacementCity;
 
-        await Assert.That(values).DoesNotContain(Eugene);
+        await Assert.That(values).DoesNotContain(DeepChainSecondReplacementCity);
     }
 
     /// <summary>Verifies that the int property WhenChanged emits the initial value and changes.</summary>
@@ -294,19 +288,19 @@ public class WhenChangedEdgeCaseTests
     [Test]
     public async Task SingleProperty_IntType_EmitsChanges()
     {
-        var vm = new TestViewModel { Age = AgeValue };
+        var vm = new TestViewModel { Age = InitialAge };
         var values = new List<int>();
 
         using var sub = WhenChangedScenarios.SingleProperty_Age(vm)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo(AgeValue);
+        await Assert.That(values[0]).IsEqualTo(InitialAge);
 
-        vm.Age = UpdatedAgeValue;
+        vm.Age = ReplacementAge;
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterChange);
-        await Assert.That(values).Contains(UpdatedAgeValue);
+        await Assert.That(values).Contains(ReplacementAge);
     }
 
     /// <summary>
@@ -317,14 +311,14 @@ public class WhenChangedEdgeCaseTests
     [Test]
     public async Task DeepChain_NullForgiving_EmitsWhenChildSet()
     {
-        var host = new HostTestFixture { Child = new() { Name = AliceName } };
+        var host = new HostTestFixture { Child = new() { Name = InitialChildName } };
         var values = new List<string>();
 
         using var sub = WhenChangedScenarios.DeepChain_ChildName(host)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(values[0]).IsEqualTo(AliceName);
+        await Assert.That(values[0]).IsEqualTo(InitialChildName);
 
         host.Child!.Name = "Bob";
 
@@ -350,7 +344,7 @@ public class WhenChangedEdgeCaseTests
     [Test]
     public async Task DeepChain_NullForgiving_ReSubscribesOnReplacement()
     {
-        var host = new HostTestFixture { Child = new() { Name = AliceName } };
+        var host = new HostTestFixture { Child = new() { Name = InitialChildName } };
         var values = new List<string>();
 
         using var sub = WhenChangedScenarios.DeepChain_ChildName(host)

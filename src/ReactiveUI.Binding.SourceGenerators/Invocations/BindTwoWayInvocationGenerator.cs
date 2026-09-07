@@ -34,9 +34,10 @@ internal static class BindTwoWayInvocationGenerator
                     data.Left.Left,
                     data.Left.Right,
                     data.Right,
-                    static (sb, group, f) => BindTwoWayCodeGenerator.GenerateConcreteOverload(
+                    static (sb, group, f) => BindingEmitterHelpers.GenerateDispatchOverload(
                         sb,
                         group,
+                        BindTwoWayCodeGenerator.DispatchApi,
                         f.SupportsCallerArgExpr,
                         f.SupportsNullable,
                         f.StubHasExpressionParameters),

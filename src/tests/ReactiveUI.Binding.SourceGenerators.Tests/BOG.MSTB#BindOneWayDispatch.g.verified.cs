@@ -31,7 +31,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 : targetPropertyExpression;
 
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.MultipleSameTypeBindings.MyViewModel), "FirstName", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindOneWay(
                     source, target, sourceProperty, targetProperty, null, targetPropertyExpression);
@@ -79,6 +79,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.FirstNameText, value))
+                {
+                    return;
+                }
+
                 target.FirstNameText = value;
             }, "x => x.FirstNameText");
         }
@@ -111,6 +116,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.LastNameText, value))
+                {
+                    return;
+                }
+
                 target.LastNameText = value;
             }, "x => x.LastNameText");
         }

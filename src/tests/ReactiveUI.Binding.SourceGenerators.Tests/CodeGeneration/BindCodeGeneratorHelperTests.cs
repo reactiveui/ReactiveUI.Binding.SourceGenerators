@@ -46,7 +46,7 @@ public class BindCodeGeneratorHelperTests
         var inv2 = ModelFactory.CreateBindingInvocationInfo(callerLineNumber: 20, methodName: "Bind");
         var invocations = ImmutableArray.Create(inv1, inv2);
 
-        var groups = BindCodeGenerator.GroupByTypeSignature(invocations);
+        var groups = BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
         const int expectedInvocationCount = 2;
         await Assert.That(groups.Count).IsEqualTo(1);
@@ -67,7 +67,7 @@ public class BindCodeGeneratorHelperTests
         var invocations = ImmutableArray.Create(inv1, inv2);
 
         const int ExpectedGroupCount = 2;
-        var groups = BindCodeGenerator.GroupByTypeSignature(invocations);
+        var groups = BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
         await Assert.That(groups.Count).IsEqualTo(ExpectedGroupCount);
     }
@@ -82,7 +82,7 @@ public class BindCodeGeneratorHelperTests
         var invocations = ImmutableArray.Create(inv1, inv2);
 
         const int ExpectedGroupCount = 2;
-        var groups = BindCodeGenerator.GroupByTypeSignature(invocations);
+        var groups = BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
         await Assert.That(groups.Count).IsEqualTo(ExpectedGroupCount);
     }
@@ -256,7 +256,7 @@ public class BindCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true);
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, BindCodeGenerator.DispatchApi, true, false, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");
@@ -279,7 +279,7 @@ public class BindCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindCodeGenerator.GenerateConcreteOverload(sb, group, false, false, false);
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, BindCodeGenerator.DispatchApi, false, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerFilePath.EndsWith");

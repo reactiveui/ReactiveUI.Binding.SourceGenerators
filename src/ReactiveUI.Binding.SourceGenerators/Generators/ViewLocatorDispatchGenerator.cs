@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -18,6 +19,21 @@ namespace ReactiveUI.Binding.SourceGenerators.Generators;
 /// </summary>
 internal static class ViewLocatorDispatchGenerator
 {
+    /// <summary>Opens the documentation comment on a generated resolver method.</summary>
+    private const string DocCommentOpen = "            /// <summary>";
+
+    /// <summary>Closes the documentation comment on a generated resolver method.</summary>
+    private const string DocCommentClose = "            /// </summary>";
+
+    /// <summary>Opens a comment naming the view a dispatch branch resolves.</summary>
+    private const string CommentLineOpen = "            // ";
+
+    /// <summary>Opens the test that narrows a resolved instance to a view type.</summary>
+    private const string InstanceTypeTestOpen = "            if (instance is ";
+
+    /// <summary>Closes a call that passes the requested contract through to a resolver.</summary>
+    private const string ContractResolverCall = "(contract);";
+
     /// <summary>The identifier prefix used for the per-view resolver methods emitted in the generated source.</summary>
     private const string ResolverMethodNamePrefix = "__ResolveView_";
 
@@ -155,36 +171,25 @@ internal static class ViewLocatorDispatchGenerator
     /// <param name="nullable">The nullable annotation to emit, or an empty string when unsupported.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EmitRegistrationHook(StringBuilder sb, string nullable) =>
-        sb.AppendLine().Append($$"""
-                                       /// <summary>
-                                       /// Triggers view dispatch registration when the generated bindings class is loaded.
-                                       /// </summary>
-                                       private static readonly bool __viewDispatchRegistered = __RegisterViewDispatch();
-
-                                       /// <summary>
-                                       /// Registers the source-generated view dispatch function with
-                                       /// <see cref="global::ReactiveUI.Binding.DefaultViewLocator"/>.
-                                       /// Called once via static field initializer when this class is first accessed.
-                                       /// </summary>
-                                       /// <returns>Always returns <see langword="true"/>.</returns>
-                                       private static bool __RegisterViewDispatch()
-                                       {
-                                           global::ReactiveUI.Binding.DefaultViewLocator.SetGeneratedViewDispatch(
-                                               __TryResolveView);
-                                           return true;
-                                       }
-
-                                       /// <summary>
-                                       /// Compile-time generated type-switch dispatch for view resolution.
-                                       /// Attempts to resolve a view for the given view model instance without reflection.
-                                       /// </summary>
-                                       /// <param name="instance">The view model instance to resolve a view for.</param>
-                                       /// <param name="contract">The contract string (empty string for default).</param>
-                                       /// <returns>The resolved view, or <see langword="null"/> if no generated mapping exists.</returns>
-                                       private static global::ReactiveUI.Binding.IViewFor{{nullable}} __TryResolveView(
-                                           object instance, string contract)
-                                       {
-                           """);
+        sb.AppendLine().AppendLine(DocCommentOpen)
+            .AppendLine("            /// Triggers view dispatch registration when the generated bindings class is loaded.")
+            .AppendLine(DocCommentClose)
+            .AppendLine("            private static readonly bool __viewDispatchRegistered = __RegisterViewDispatch();").AppendLine()
+            .AppendLine(DocCommentOpen).AppendLine("            /// Registers the source-generated view dispatch function with")
+            .AppendLine("            /// <see cref=\"global::ReactiveUI.Binding.DefaultViewLocator\"/>.")
+            .AppendLine("            /// Called once via static field initializer when this class is first accessed.")
+            .AppendLine(DocCommentClose).AppendLine("            /// <returns>Always returns <see langword=\"true\"/>.</returns>")
+            .AppendLine("            private static bool __RegisterViewDispatch()").AppendLine("            {")
+            .AppendLine("                global::ReactiveUI.Binding.DefaultViewLocator.SetGeneratedViewDispatch(")
+            .AppendLine("                    __TryResolveView);").AppendLine("                return true;").AppendLine("            }").AppendLine()
+            .AppendLine(DocCommentOpen).AppendLine("            /// Compile-time generated type-switch dispatch for view resolution.")
+            .AppendLine("            /// Attempts to resolve a view for the given view model instance without reflection.")
+            .AppendLine(DocCommentClose)
+            .AppendLine("            /// <param name=\"instance\">The view model instance to resolve a view for.</param>")
+            .AppendLine("            /// <param name=\"contract\">The contract string (empty string for default).</param>")
+            .AppendLine("            /// <returns>The resolved view, or <see langword=\"null\"/> if no generated mapping exists.</returns>")
+            .Append("            private static global::ReactiveUI.Binding.IViewFor").Append(nullable).AppendLine(" __TryResolveView(")
+            .AppendLine("                object instance, string contract)").Append("            {");
 
     /// <summary>Emits the singleton cache fields for <c>[SingleInstanceView]</c> views with a parameterless constructor.</summary>
     /// <param name="sb">The string builder to write to.</param>
@@ -196,12 +201,9 @@ internal static class ViewLocatorDispatchGenerator
             var reg = registrations[i];
             if (reg.IsSingleInstance && reg.HasParameterlessConstructor)
             {
-                _ = sb.AppendLine().Append($$"""
-                                                     /// <summary>
-                                                     /// Cached singleton instance for <see cref="{{reg.ViewFullyQualifiedName}}"/> (marked with [SingleInstanceView]).
-                                                     /// </summary>
-                                                     private static {{reg.ViewFullyQualifiedName}} __singletonView_{{i}};
-                                         """);
+                _ = sb.AppendLine().AppendLine(DocCommentOpen).Append("            /// Cached singleton instance for <see cref=\"")
+                    .Append(reg.ViewFullyQualifiedName).AppendLine("\"/> (marked with [SingleInstanceView]).").AppendLine(DocCommentClose)
+                    .Append("            private static ").Append(reg.ViewFullyQualifiedName).Append(" __singletonView_").Append(i).Append(';');
             }
         }
     }
@@ -269,26 +271,17 @@ internal static class ViewLocatorDispatchGenerator
         if (reg.Contract is not null)
         {
             var escapedLiteral = SymbolDisplay.FormatLiteral(reg.Contract, true);
-            _ = sb.Append($$"""
-                                    // {{reg.ViewModelFullyQualifiedName}} -> {{reg.ViewFullyQualifiedName}} [contract: {{escapedLiteral}}]
-                                    if (instance is {{reg.ViewModelFullyQualifiedName}})
-                                    {
-                                        if (contract == {{escapedLiteral}})
-                                        {
-                                            return {{resolverMethodName}}(contract);
-                                        }
-                                    }
-                        """);
+            _ = sb.Append(CommentLineOpen).Append(reg.ViewModelFullyQualifiedName).Append(" -> ").Append(reg.ViewFullyQualifiedName)
+                .Append(" [contract: ").Append(escapedLiteral).AppendLine("]").Append(InstanceTypeTestOpen)
+                .Append(reg.ViewModelFullyQualifiedName).AppendLine(")").AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                if (contract == ")
+                .Append(escapedLiteral).AppendLine(")").AppendLine("                {").Append("                    return ").Append(resolverMethodName)
+                .AppendLine(ContractResolverCall).AppendLine("                }").Append(GeneratedSyntax.StatementBlockClose);
         }
         else
         {
-            _ = sb.Append($$"""
-                                    // {{reg.ViewModelFullyQualifiedName}} -> {{reg.ViewFullyQualifiedName}}
-                                    if (instance is {{reg.ViewModelFullyQualifiedName}})
-                                    {
-                                        return {{resolverMethodName}}(contract);
-                                    }
-                        """);
+            _ = sb.Append(CommentLineOpen).Append(reg.ViewModelFullyQualifiedName).Append(" -> ").Append(reg.ViewFullyQualifiedName).AppendLine()
+                .Append(InstanceTypeTestOpen).Append(reg.ViewModelFullyQualifiedName).AppendLine(")").AppendLine(GeneratedSyntax.StatementBlockOpen)
+                .Append("                return ").Append(resolverMethodName).AppendLine(ContractResolverCall).Append(GeneratedSyntax.StatementBlockClose);
         }
     }
 
@@ -306,11 +299,8 @@ internal static class ViewLocatorDispatchGenerator
         string viewModelFqn,
         List<int> indices)
     {
-        _ = sb.Append($$"""
-                                // {{viewModelFqn}} — multiple views
-                                if (instance is {{viewModelFqn}})
-                                {
-                    """);
+        _ = sb.Append(CommentLineOpen).Append(viewModelFqn).AppendLine(" — multiple views").Append(InstanceTypeTestOpen)
+            .Append(viewModelFqn).AppendLine(")").Append(GeneratedSyntax.StatementBlockOpen);
 
         // Contract-specific branches first
         for (var j = 0; j < indices.Count; j++)
@@ -324,13 +314,9 @@ internal static class ViewLocatorDispatchGenerator
 
             var escapedLiteral = SymbolDisplay.FormatLiteral(reg.Contract, true);
             var resolverMethodName = ResolverMethodNamePrefix + idx;
-            _ = sb.AppendLine().Append($$"""
-                                                 // -> {{reg.ViewFullyQualifiedName}} [contract: {{escapedLiteral}}]
-                                                 if (contract == {{escapedLiteral}})
-                                                 {
-                                                     return {{resolverMethodName}}(contract);
-                                                 }
-                                     """);
+            _ = sb.AppendLine().Append("            // -> ").Append(reg.ViewFullyQualifiedName).Append(" [contract: ").Append(escapedLiteral)
+                .AppendLine("]").Append("            if (contract == ").Append(escapedLiteral).AppendLine(")").AppendLine(GeneratedSyntax.StatementBlockOpen)
+                .Append("                return ").Append(resolverMethodName).AppendLine(ContractResolverCall).Append(GeneratedSyntax.StatementBlockClose);
         }
 
         // Default (no-contract) branch last
@@ -344,16 +330,12 @@ internal static class ViewLocatorDispatchGenerator
             }
 
             var resolverMethodName = ResolverMethodNamePrefix + idx;
-            _ = sb.AppendLine().Append($$"""
-                                                 // -> {{reg.ViewFullyQualifiedName}} (default)
-                                                 return {{resolverMethodName}}(contract);
-                                     """);
+            _ = sb.AppendLine().Append("            // -> ").Append(reg.ViewFullyQualifiedName).AppendLine(" (default)").Append("            return ")
+                .Append(resolverMethodName).Append(ContractResolverCall);
             break; // Only one default per VM (deduplicated earlier)
         }
 
-        _ = sb.AppendLine().Append("""
-                                           }
-                               """);
+        _ = sb.AppendLine().Append(GeneratedSyntax.StatementBlockClose);
     }
 
     /// <summary>Generates a per-view-model resolver method.</summary>
@@ -375,34 +357,23 @@ internal static class ViewLocatorDispatchGenerator
             (false, false) => "        /// Service locator only — no direct construction available."
         };
 
-        _ = sb.AppendLine().Append($$"""
-
-                                             /// <summary>
-                                             /// Resolves a view for <see cref="{{reg.ViewModelFullyQualifiedName}}"/>.
-                                 {{strategyDoc}}
-                                             /// </summary>
-                                             /// <param name="contract">The contract string (empty string for default).</param>
-                                             /// <returns>The resolved view, or <see langword="null"/> if resolution fails.</returns>
-                                             private static global::ReactiveUI.Binding.IViewFor{{nullable}} {{methodName}}(string contract)
-                                             {
-                                                 // Normalize contract: empty string means no contract (null for Splat lookup).
-                                                 string{{nullable}} svcContract = contract.Length == 0 ? null : contract;
-
-                                                 // Prefer service-locator-registered view (supports DI-configured instances).
-                                                 var view = global::Splat.AppLocator.Current
-                                                     .GetService<global::ReactiveUI.Binding.IViewFor<{{reg.ViewModelFullyQualifiedName}}>>(
-                                                         svcContract);
-                                                 if (view != null)
-                                                 {
-                                                     return view;
-                                                 }
-                                 """);
+        _ = sb.AppendLine().AppendLine().AppendLine(DocCommentOpen).Append("            /// Resolves a view for <see cref=\"")
+            .Append(reg.ViewModelFullyQualifiedName).AppendLine("\"/>.").Append(strategyDoc).AppendLine().AppendLine(DocCommentClose)
+            .AppendLine("            /// <param name=\"contract\">The contract string (empty string for default).</param>")
+            .AppendLine("            /// <returns>The resolved view, or <see langword=\"null\"/> if resolution fails.</returns>")
+            .Append("            private static global::ReactiveUI.Binding.IViewFor").Append(nullable).Append(' ').Append(methodName)
+            .AppendLine("(string contract)").AppendLine(GeneratedSyntax.StatementBlockOpen)
+            .AppendLine("                // Normalize contract: empty string means no contract (null for Splat lookup).").Append("                string")
+            .Append(nullable).AppendLine(" svcContract = contract.Length == 0 ? null : contract;").AppendLine()
+            .AppendLine("                // Prefer service-locator-registered view (supports DI-configured instances).")
+            .AppendLine("                var view = global::Splat.AppLocator.Current")
+            .Append("                    .GetService<global::ReactiveUI.Binding.IViewFor<").Append(reg.ViewModelFullyQualifiedName).AppendLine(">>(")
+            .AppendLine("                        svcContract);").AppendLine("                if (view != null)").AppendLine("                {")
+            .AppendLine("                    return view;").Append("                }");
 
         EmitResolverFallback(sb, reg, index);
 
-        _ = sb.AppendLine().Append("""
-                                           }
-                               """);
+        _ = sb.AppendLine().Append(GeneratedSyntax.StatementBlockClose);
     }
 
     /// <summary>
@@ -425,27 +396,18 @@ internal static class ViewLocatorDispatchGenerator
 
         if (!reg.IsSingleInstance)
         {
-            _ = sb.Append($$"""
-
-                                            // Fallback: direct construction ({{reg.ViewFullyQualifiedName}} has a parameterless constructor).
-                                            return new {{reg.ViewFullyQualifiedName}}();
-                        """);
+            _ = sb.AppendLine().Append("                    // Fallback: direct construction (").Append(reg.ViewFullyQualifiedName)
+                .AppendLine(" has a parameterless constructor).").Append("                    return new ").Append(reg.ViewFullyQualifiedName)
+                .Append("();");
             return;
         }
 
         var fieldName = $"__singletonView_{index}";
-        _ = sb.Append($$"""
-
-                                        // Fallback: singleton construction ({{reg.ViewFullyQualifiedName}} has [SingleInstanceView]).
-                                        if ({{fieldName}} == null)
-                                        {
-                                            System.Threading.Interlocked.CompareExchange(
-                                                ref {{fieldName}},
-                                                new {{reg.ViewFullyQualifiedName}}(),
-                                                null);
-                                        }
-
-                                        return {{fieldName}};
-                    """);
+        _ = sb.AppendLine().Append("                    // Fallback: singleton construction (").Append(reg.ViewFullyQualifiedName)
+            .AppendLine(" has [SingleInstanceView]).").Append("                    if (").Append(fieldName).AppendLine(" == null)")
+            .AppendLine("                    {").AppendLine("                        System.Threading.Interlocked.CompareExchange(")
+            .Append("                            ref ").Append(fieldName).AppendLine(",").Append("                            new ")
+            .Append(reg.ViewFullyQualifiedName).AppendLine("(),").AppendLine("                            null);").AppendLine("                    }")
+            .AppendLine().Append("                    return ").Append(fieldName).Append(';');
     }
 }

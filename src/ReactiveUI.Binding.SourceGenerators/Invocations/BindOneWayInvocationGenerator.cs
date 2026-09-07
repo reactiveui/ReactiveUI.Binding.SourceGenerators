@@ -34,9 +34,10 @@ internal static class BindOneWayInvocationGenerator
                     data.Left.Left,
                     data.Left.Right,
                     data.Right,
-                    static (sb, group, f) => BindOneWayCodeGenerator.GenerateConcreteOverload(
+                    static (sb, group, f) => BindingEmitterHelpers.GenerateDispatchOverload(
                         sb,
                         group,
+                        BindOneWayCodeGenerator.DispatchApi,
                         f.SupportsCallerArgExpr,
                         f.SupportsNullable,
                         f.StubHasExpressionParameters),

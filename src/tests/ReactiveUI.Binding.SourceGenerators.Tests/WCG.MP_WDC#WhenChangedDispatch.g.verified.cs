@@ -26,7 +26,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             property2Expression = property2Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property2Expression.Substring(7) : property2Expression;
 
             // Allow user-registered plugins with higher affinity to override generated observation
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.MultiPropertyWithDeepChains.MyViewModel), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.MultiPropertyWithDeepChains.MyViewModel), "Address", 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.MultiPropertyWithDeepChains.AddressModel), "City", 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.MultiPropertyWithDeepChains.MyViewModel), "Name", 5, false))
             {
                 return new global::ReactiveUI.Primitives.Signals.MapSignal<global::ReactiveUI.Binding.PropertyValues<string, string>, string>(
                     global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanged(objectToMonitor, property1, property2),

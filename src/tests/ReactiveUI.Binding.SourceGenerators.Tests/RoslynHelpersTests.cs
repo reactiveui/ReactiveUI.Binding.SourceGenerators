@@ -143,11 +143,11 @@ public class RoslynHelpersTests
     public async Task SpecificPredicates_NonInvocation_ReturnFalse()
     {
         var node = SyntaxFactory.ParseExpression("x + y");
-        var ct = CancellationToken.None;
+        var cancellationToken = CancellationToken.None;
 
-        await Assert.That(RoslynHelpers.IsBindSpecificInvocation(node, ct)).IsFalse();
-        await Assert.That(RoslynHelpers.IsBindOneWaySpecificInvocation(node, ct)).IsFalse();
-        await Assert.That(RoslynHelpers.IsBindTwoWaySpecificInvocation(node, ct)).IsFalse();
-        await Assert.That(RoslynHelpers.IsOneWayBindSpecificInvocation(node, ct)).IsFalse();
+        await Assert.That(RoslynHelpers.IsBindSpecificInvocation(node, cancellationToken)).IsFalse();
+        await Assert.That(RoslynHelpers.IsBindOneWaySpecificInvocation(node, cancellationToken)).IsFalse();
+        await Assert.That(RoslynHelpers.IsBindTwoWaySpecificInvocation(node, cancellationToken)).IsFalse();
+        await Assert.That(RoslynHelpers.IsOneWayBindSpecificInvocation(node, cancellationToken)).IsFalse();
     }
 }

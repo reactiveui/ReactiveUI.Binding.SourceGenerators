@@ -17,8 +17,8 @@ public class BindCommandTests
     /// <summary>The observable command-parameter value.</summary>
     private const string ObsParam = "obs-param";
 
-    /// <summary>The updated observable command-parameter value.</summary>
-    private const string UpdatedValue = "updated";
+    /// <summary>The command parameter the observable is moved to.</summary>
+    private const string ReplacementValue = "updated";
 
     /// <summary>The number of clicks performed in the multiple-clicks test.</summary>
     private const int ExpectedClickCount = 3;
@@ -445,10 +445,10 @@ public class BindCommandTests
 
         using var binding = BindCommandScenarios.EventEnabledObsParam(vm, view, paramSubject);
 
-        paramSubject.OnNext(UpdatedValue);
+        paramSubject.OnNext(ReplacementValue);
         view.SaveButton.PerformClick();
 
-        await Assert.That(command.LastParameter).IsEqualTo(UpdatedValue);
+        await Assert.That(command.LastParameter).IsEqualTo(ReplacementValue);
     }
 
     // ── CommandProperty (Command + CommandParameter, no event) ──────────
@@ -486,7 +486,7 @@ public class BindCommandTests
     /// <summary>Verifies that changing the command updates the control's Command property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task CommandProperty_CommandChanges_ControlUpdated()
+    public async Task CommandProperty_CommandChanges_ControlTakesTheReplacement()
     {
         var vm = new SharedScenarios.BindCommand.CommandProperty.MyViewModel();
         var view = new SharedScenarios.BindCommand.CommandProperty.MyView();
@@ -530,6 +530,22 @@ public class BindCommandTests
         await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(TestItem);
     }
 
+    /// <summary>The control follows the parameter property, not the value it held when the command arrived.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyExprParam_ParameterPropertyChanges_UpdatesCommandParameter()
+    {
+        var vm = new SharedScenarios.BindCommand.CommandPropertyExprParam.MyViewModel { CurrentItem = TestItem };
+        var view = new SharedScenarios.BindCommand.CommandPropertyExprParam.MyView();
+        vm.Save = new TrackingCommand();
+
+        using var binding = BindCommandScenarios.CommandPropertyExprParam(vm, view);
+
+        vm.CurrentItem = ReplacementValue;
+
+        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(ReplacementValue);
+    }
+
     /// <summary>Verifies that observable parameter sets CommandParameter on the control.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -560,9 +576,9 @@ public class BindCommandTests
 
         using var binding = BindCommandScenarios.CommandPropertyObsParam(vm, view, paramSubject);
 
-        paramSubject.OnNext(UpdatedValue);
+        paramSubject.OnNext(ReplacementValue);
 
-        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(UpdatedValue);
+        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(ReplacementValue);
     }
 
     /// <summary>A simple <see cref="ICommand"/> implementation that tracks invocations for testing.</summary>

@@ -43,7 +43,7 @@ namespace ReactiveUI.Binding
             return serial;
         }
 
-        var interactionObs = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::ReactiveUI.Binding.IInteraction<string, bool>>(viewModel.Confirm);
+        var interactionObs = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>(viewModel.Confirm);
 
             var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(interactionObs, interaction =>
             {

@@ -64,7 +64,7 @@ internal static class RegistrationGenerator
 
         foreach (var kind in uniqueKinds)
         {
-            _ = sb.AppendLine($"            // Detected types for kind: {kind}");
+            _ = sb.Append("            // Detected types for kind: ").Append(kind).AppendLine();
         }
 
         _ = sb.AppendLine("""

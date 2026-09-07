@@ -500,4 +500,37 @@ public class CodeGeneratorHelpersTests
 
         await Assert.That(result).IsNull();
     }
+
+    /// <summary>A segment declared as the type the call site named is read straight off its parent.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AppendSegmentRead_SegmentNeedsNoNarrowing_ReadsThePropertyDirectly()
+    {
+        var segment = ModelFactory.CreatePropertyPathSegment(AddressName, MyViewModelTypeName);
+
+        var result = CodeGeneratorHelpers.AppendSegmentRead("viewModel", segment);
+
+        await Assert.That(result).IsEqualTo("viewModel.Address");
+    }
+
+    /// <summary>
+    /// A view exposing its view model as a base still holds the view model the call site named, so the read
+    /// narrows to it and the rest of the path continues from there.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AppendSegmentRead_SegmentCarriesAReadCast_NarrowsTheRead()
+    {
+        var segment = new PropertyPathSegment(
+            "ViewModel",
+            MyViewModelTypeName,
+            "global::TestApp.MyView",
+            true,
+            null,
+            MyViewModelTypeName);
+
+        var result = CodeGeneratorHelpers.AppendSegmentRead("view", segment);
+
+        await Assert.That(result).IsEqualTo("((global::TestApp.MyViewModel)(object)view.ViewModel)");
+    }
 }

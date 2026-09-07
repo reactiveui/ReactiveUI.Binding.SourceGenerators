@@ -26,13 +26,59 @@ public class ObservationAffinityCheckerTests
     /// <summary>A second plugin affinity used to check which of two plugins is selected.</summary>
     private const int AlternatePluginAffinity = 7;
 
+    /// <summary>The property these tests ask about.</summary>
+    private const string ObservedPropertyName = "Length";
+
+    /// <summary>A property a property-scoped plugin does not reach.</summary>
+    private const string UnscoredPropertyName = "Other";
+
     /// <summary>Verifies that passing a null type throws <see cref="ArgumentNullException"/>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasHigherAffinityPlugin_NullType_ThrowsArgumentNullException()
     {
-        var action = static () => ObservationAffinityChecker.HasHigherAffinityPlugin(null!, GeneratedAffinity, false);
+        var action = static () =>
+            ObservationAffinityChecker.HasHigherAffinityPlugin(null!, ObservedPropertyName, GeneratedAffinity, false);
         await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>Verifies that passing a null property name throws <see cref="ArgumentNullException"/>.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task HasHigherAffinityPlugin_NullPropertyName_ThrowsArgumentNullException()
+    {
+        var action = static () =>
+            ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), null!, GeneratedAffinity, false);
+        await Assert.That(action).ThrowsExactly<ArgumentNullException>();
+    }
+
+    /// <summary>
+    /// The property name reaches the plugin. Every mechanism-specific plugin scores a type and a property
+    /// together and answers 0 for a property its mechanism does not reach, so a plugin asked without one
+    /// could never win.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task HasHigherAffinityPlugin_PluginScoresOneProperty_OnlyThatPropertyIsTaken()
+    {
+        AppLocator.UnregisterAll<ICreatesObservableForProperty>();
+        try
+        {
+            AppLocator.Register<ICreatesObservableForProperty>(
+                static () => new PropertyScopedObservableForProperty(ObservedPropertyName, HigherPluginAffinity));
+
+            ObservationAffinityChecker.Refresh();
+
+            var matching = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
+            var other = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), UnscoredPropertyName, GeneratedAffinity, false);
+
+            await Assert.That(matching).IsTrue();
+            await Assert.That(other).IsFalse();
+        }
+        finally
+        {
+            RestoreDefaultPlugins();
+        }
     }
 
     /// <summary>Verifies that when no plugins are registered, the method returns false.</summary>
@@ -45,7 +91,7 @@ public class ObservationAffinityCheckerTests
         {
             ObservationAffinityChecker.Refresh();
 
-            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
 
             await Assert.That(result).IsFalse();
         }
@@ -67,7 +113,7 @@ public class ObservationAffinityCheckerTests
 
             ObservationAffinityChecker.Refresh();
 
-            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
 
             await Assert.That(result).IsFalse();
         }
@@ -92,7 +138,7 @@ public class ObservationAffinityCheckerTests
 
             ObservationAffinityChecker.Refresh();
 
-            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
 
             await Assert.That(result).IsFalse();
         }
@@ -114,7 +160,7 @@ public class ObservationAffinityCheckerTests
 
             ObservationAffinityChecker.Refresh();
 
-            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
 
             await Assert.That(result).IsTrue();
         }
@@ -137,8 +183,8 @@ public class ObservationAffinityCheckerTests
 
             ObservationAffinityChecker.Refresh();
 
-            var resultBeforeChanged = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, true);
-            var resultAfterChanged = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+            var resultBeforeChanged = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, true);
+            var resultAfterChanged = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
 
             await Assert.That(resultBeforeChanged).IsTrue();
             await Assert.That(resultAfterChanged).IsFalse();
@@ -165,7 +211,7 @@ public class ObservationAffinityCheckerTests
 
             ObservationAffinityChecker.Refresh();
 
-            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
 
             await Assert.That(result).IsTrue();
         }
@@ -188,7 +234,7 @@ public class ObservationAffinityCheckerTests
 
             ObservationAffinityChecker.Refresh();
 
-            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+            var result = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
 
             await Assert.That(result).IsFalse();
         }
@@ -207,15 +253,15 @@ public class ObservationAffinityCheckerTests
         try
         {
             ObservationAffinityChecker.Refresh();
-            var beforeRegistration = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+            var beforeRegistration = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
 
             AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(HigherPluginAffinity));
 
             // The resolved set is kept, so the new registration is invisible until the cache is dropped.
-            var beforeRefresh = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+            var beforeRefresh = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
 
             ObservationAffinityChecker.Refresh();
-            var afterRefresh = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), GeneratedAffinity, false);
+            var afterRefresh = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
 
             await Assert.That(beforeRegistration).IsFalse();
             await Assert.That(beforeRefresh).IsFalse();
@@ -233,6 +279,25 @@ public class ObservationAffinityCheckerTests
     {
         RuntimeObservationFallbackTests.EnsureInitialized();
         ObservationAffinityChecker.Refresh();
+    }
+
+    /// <summary>A plugin that reaches one property, the way the WPF, WinUI, WinForms and KVO plugins do.</summary>
+    /// <param name="scopedProperty">The only property this plugin scores.</param>
+    /// <param name="affinity">The affinity returned for that property.</param>
+    private sealed class PropertyScopedObservableForProperty(string scopedProperty, int affinity) : ICreatesObservableForProperty
+    {
+        /// <inheritdoc/>
+        public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged) =>
+            string.Equals(propertyName, scopedProperty, StringComparison.Ordinal) ? affinity : 0;
+
+        /// <inheritdoc/>
+        public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(
+            object sender,
+            System.Linq.Expressions.Expression expression,
+            string propertyName,
+            bool beforeChanged,
+            bool suppressWarnings) =>
+            throw new NotSupportedException("Not needed for affinity tests.");
     }
 
     /// <summary>A stub implementation of <see cref="ICreatesObservableForProperty"/> for testing.</summary>

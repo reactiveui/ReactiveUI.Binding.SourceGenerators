@@ -8,7 +8,7 @@ using ReactiveUI.Binding.GeneratedCode.TestModels.TestModels;
 namespace ReactiveUI.Binding.GeneratedCode.Tests.WhenAnyValue;
 
 /// <summary>Tests that the source-generator-generated WhenAnyValue code works correctly at runtime.</summary>
-public class WhenAnyValueTests
+public partial class WhenAnyValueTests
 {
     /// <summary>The expected emission count after an initial value plus one change.</summary>
     private const int ExpectedEmissionCount = 2;

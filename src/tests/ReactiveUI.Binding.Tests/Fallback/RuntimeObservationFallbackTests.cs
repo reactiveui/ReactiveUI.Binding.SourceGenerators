@@ -16,7 +16,7 @@ public class RuntimeObservationFallbackTests
     private const string InitialValue = "Initial";
 
     /// <summary>The value assigned to trigger a notification.</summary>
-    private const string ChangedValue = "Changed";
+    private const string NotifyingValue = "Changed";
 
     /// <summary>A sample name value used across the multi-property tests.</summary>
     private const string SampleName = "Alice";
@@ -45,11 +45,11 @@ public class RuntimeObservationFallbackTests
                 x => x.Name)
             .Subscribe(values.Add);
 
-        vm.Name = ChangedValue;
+        vm.Name = NotifyingValue;
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
         await Assert.That(values[0]).IsEqualTo(InitialValue);
-        await Assert.That(values[1]).IsEqualTo(ChangedValue);
+        await Assert.That(values[1]).IsEqualTo(NotifyingValue);
     }
 
     /// <summary>Verifies that WhenChanging emits before-change notifications.</summary>
@@ -67,7 +67,7 @@ public class RuntimeObservationFallbackTests
                 x => x.Name)
             .Subscribe(values.Add);
 
-        vm.Name = ChangedValue;
+        vm.Name = NotifyingValue;
 
         // Before-change should emit the old value at the time of notification
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);

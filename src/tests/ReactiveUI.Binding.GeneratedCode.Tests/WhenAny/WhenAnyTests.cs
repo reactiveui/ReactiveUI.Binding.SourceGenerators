@@ -16,8 +16,8 @@ public class WhenAnyTests
     /// <summary>The expected emission count after an initial value plus one change.</summary>
     private const int ExpectedEmissionCount = 2;
 
-    /// <summary>The updated age value used in change-emission tests.</summary>
-    private const int AgeValue = 25;
+    /// <summary>The replacement age value used in change-emission tests.</summary>
+    private const int InitialAge = 25;
 
     /// <summary>The age used by the two-property fixtures in these tests.</summary>
     private const int AdultAge = 30;
@@ -100,7 +100,7 @@ public class WhenAnyTests
 
         await Assert.That(values[^1]).IsEqualTo("Bob_30");
 
-        vm.Age = AgeValue;
+        vm.Age = InitialAge;
 
         await Assert.That(values[^1]).IsEqualTo("Bob_25");
     }

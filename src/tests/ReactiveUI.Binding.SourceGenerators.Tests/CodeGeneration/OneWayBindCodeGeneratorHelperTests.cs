@@ -41,7 +41,7 @@ public class OneWayBindCodeGeneratorHelperTests
         var inv2 = ModelFactory.CreateBindingInvocationInfo(callerLineNumber: 20, methodName: OneWayBindName);
         var invocations = ImmutableArray.Create(inv1, inv2);
 
-        var groups = OneWayBindCodeGenerator.GroupByTypeSignature(invocations);
+        var groups = BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
         await Assert.That(groups.Count).IsEqualTo(1);
         await Assert.That(groups[0].Invocations.Length).IsEqualTo(ExpectedInvocationCount);
@@ -61,7 +61,7 @@ public class OneWayBindCodeGeneratorHelperTests
             methodName: OneWayBindName);
         var invocations = ImmutableArray.Create(inv1, inv2);
 
-        var groups = OneWayBindCodeGenerator.GroupByTypeSignature(invocations);
+        var groups = BindingEmitterHelpers.GroupByTypeSignature(invocations);
 
         await Assert.That(groups.Count).IsEqualTo(ExpectedGroupCount);
     }
@@ -225,7 +225,7 @@ public class OneWayBindCodeGeneratorHelperTests
             false,
             [inv]);
 
-        OneWayBindCodeGenerator.GenerateConcreteOverload(sb, group, true, false, true);
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, OneWayBindCodeGenerator.DispatchApi, true, false, true);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("CallerArgumentExpression");

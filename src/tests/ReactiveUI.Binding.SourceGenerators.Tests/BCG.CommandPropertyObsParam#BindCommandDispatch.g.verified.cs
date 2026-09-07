@@ -78,29 +78,37 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             }
 
 
+            var __originalCommand = view.SaveButton.Command;
+            var __originalParameter = view.SaveButton.CommandParameter;
             string? __latestParam = default;
             var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
-                withParameter, p => System.Threading.Volatile.Write(ref __latestParam, p));
+                withParameter, p => global::System.Threading.Volatile.Write(ref __latestParam, p));
 
             var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
             var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
             {
                 serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                 view.SaveButton.Command = cmd;
-                var param = System.Threading.Volatile.Read(ref __latestParam);
+                var param = global::System.Threading.Volatile.Read(ref __latestParam);
                 view.SaveButton.CommandParameter = param;
                 if (cmd != null)
                 {
                     serial.Disposable = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
                         withParameter, p =>
                         {
-                            System.Threading.Volatile.Write(ref __latestParam, p);
+                            global::System.Threading.Volatile.Write(ref __latestParam, p);
                             view.SaveButton.CommandParameter = p;
                         });
                 }
             });
+
             return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(
-                new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, __paramSub), serial);
+                new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, __paramSub), serial),
+                new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>
+                {
+                    view.SaveButton.CommandParameter = __originalParameter;
+                    view.SaveButton.Command = __originalCommand;
+                }));
         }
 
     }

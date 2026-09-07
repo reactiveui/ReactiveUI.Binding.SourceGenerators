@@ -24,6 +24,9 @@ internal static class BindingEmitterHelpers
     /// <summary>The name a view exposes its view model under.</summary>
     private const string ViewModelPropertyName = "ViewModel";
 
+    /// <summary>The type the non-generic view interface declares the view model as, which names no view model.</summary>
+    private const string WeaklyTypedViewModel = "object";
+
     /// <summary>Opens a delegate parameter, ready for the two type arguments and the parameter name.</summary>
     private const string FuncParameterPrefix = ", global::System.Func<";
 
@@ -112,24 +115,17 @@ internal static class BindingEmitterHelpers
         string sourceVar,
         string targetVar,
         string direction,
-        string earlyReturn) => _ = sb.AppendLine($$"""
-                                    if ({{GeneratedTypeNames.BindingHooks}}.Any
-                                        && !{{GeneratedTypeNames.BindingHooks}}.ShouldBind(
-                                            {{sourceVar}},
-                                            {{targetVar}},
-                                            () => new {{GeneratedTypeNames.IObservedChange}}<object, object>[]
-                                            {
-                                                new {{GeneratedTypeNames.ObservedChange}}<object, object>({{sourceVar}}, null, {{sourceVar}}),
-                                            },
-                                            () => new {{GeneratedTypeNames.IObservedChange}}<object, object>[]
-                                            {
-                                                new {{GeneratedTypeNames.ObservedChange}}<object, object>({{targetVar}}, null, {{targetVar}}),
-                                            },
-                                            {{GeneratedTypeNames.BindingDirection}}.{{direction}}))
-                                    {
-                                        return {{earlyReturn}};
-                                    }
-                            """);
+        string earlyReturn) => _ = sb.Append("        if (").Append(GeneratedTypeNames.BindingHooks).AppendLine(".Any").Append("            && !")
+            .Append(GeneratedTypeNames.BindingHooks).AppendLine(".ShouldBind(").Append("                ").Append(sourceVar).AppendLine(",")
+            .Append("                ").Append(targetVar).AppendLine(",").Append("                () => new ")
+            .Append(GeneratedTypeNames.IObservedChange).AppendLine("<object, object>[]").AppendLine("                {")
+            .Append("                    new ").Append(GeneratedTypeNames.ObservedChange).Append("<object, object>(").Append(sourceVar)
+            .Append(", null, ").Append(sourceVar).AppendLine("),").AppendLine("                },").Append("                () => new ")
+            .Append(GeneratedTypeNames.IObservedChange).AppendLine("<object, object>[]").AppendLine("                {")
+            .Append("                    new ").Append(GeneratedTypeNames.ObservedChange).Append("<object, object>(").Append(targetVar)
+            .Append(", null, ").Append(targetVar).AppendLine("),").AppendLine("                },").Append("                ")
+            .Append(GeneratedTypeNames.BindingDirection).Append('.').Append(direction).AppendLine("))").AppendLine("        {")
+            .Append("            return ").Append(earlyReturn).AppendLine(";").AppendLine("        }");
 
     /// <summary>Emits the check that hands a binding to the runtime engine when a registered plugin outranks the generated one.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -156,21 +152,16 @@ internal static class BindingEmitterHelpers
         _ = sb.AppendLine(
             "            // A registered plugin that outranks the generated one drives the binding instead");
 
-        _ = sb.Append(
-            $"            if ({AffinityTest(group.SourceTypeFullName, first.SourcePropertyPath)}");
+        _ = sb.Append("            if (").Append(AffinityTest(group.SourceTypeFullName, first.SourcePropertyPath));
 
         if (observesTarget)
         {
-            _ = sb.AppendLine()
-                .Append($"                || {AffinityTest(group.TargetTypeFullName, first.TargetPropertyPath)}");
+            _ = sb.AppendLine().Append("                || ").Append(AffinityTest(group.TargetTypeFullName, first.TargetPropertyPath));
         }
 
-        _ = sb.AppendLine(")")
-            .AppendLine("            {")
-            .AppendLine($"                return {GeneratedTypeNames.RuntimeBindingFallback}.{fallbackMethod}(")
-            .AppendLine($"                    {arguments});")
-            .AppendLine("            }")
-            .AppendLine();
+        _ = sb.AppendLine(")").AppendLine("            {").Append("                return ").Append(GeneratedTypeNames.RuntimeBindingFallback)
+            .Append('.').Append(fallbackMethod).AppendLine("(").Append("                    ").Append(arguments).AppendLine(");")
+            .AppendLine("            }").AppendLine();
     }
 
     /// <summary>Groups call sites that can share one generated overload.</summary>
@@ -235,10 +226,10 @@ internal static class BindingEmitterHelpers
     {
         if (group.HasConversion)
         {
-            _ = sb.AppendLine($"""
-                                       global::System.Func<{group.SourcePropertyTypeFullName}, {group.TargetPropertyTypeFullName}> {forwardName},
-                                       global::System.Func<{group.TargetPropertyTypeFullName}, {group.SourcePropertyTypeFullName}> {reverseName},
-                           """);
+            _ = sb.Append(GeneratedSyntax.FuncParameterOpen).Append(group.SourcePropertyTypeFullName).Append(", ")
+                .Append(group.TargetPropertyTypeFullName).Append("> ").Append(forwardName).AppendLine(",").Append(GeneratedSyntax.FuncParameterOpen)
+                .Append(group.TargetPropertyTypeFullName).Append(", ").Append(group.SourcePropertyTypeFullName).Append("> ").Append(reverseName)
+                .AppendLine(",");
         }
 
         if (!group.HasScheduler)
@@ -246,7 +237,7 @@ internal static class BindingEmitterHelpers
             return;
         }
 
-        _ = sb.AppendLine($"            {GeneratedTypeNames.ISequencer} scheduler,");
+        _ = sb.Append("            ").Append(GeneratedTypeNames.ISequencer).AppendLine(" scheduler,");
     }
 
     /// <summary>Formats the extra arguments a two-way overload forwards to its generated method.</summary>
@@ -319,8 +310,8 @@ internal static class BindingEmitterHelpers
     {
         if (group.HasConversion)
         {
-            _ = sb.AppendLine(
-                $"            global::System.Func<{group.SourcePropertyTypeFullName}, {group.TargetPropertyTypeFullName}> {conversionParameterName},");
+            _ = sb.Append(GeneratedSyntax.FuncParameterOpen).Append(group.SourcePropertyTypeFullName).Append(", ")
+                .Append(group.TargetPropertyTypeFullName).Append("> ").Append(conversionParameterName).AppendLine(",");
         }
 
         if (!group.HasScheduler)
@@ -328,7 +319,7 @@ internal static class BindingEmitterHelpers
             return;
         }
 
-        _ = sb.AppendLine($"            {GeneratedTypeNames.ISequencer} scheduler,");
+        _ = sb.Append("            ").Append(GeneratedTypeNames.ISequencer).AppendLine(" scheduler,");
     }
 
     /// <summary>Formats the extra arguments for forwarding to the generated binding method.</summary>
@@ -433,16 +424,13 @@ internal static class BindingEmitterHelpers
         string resultVar,
         string fromTypeFullName,
         string toTypeFullName) =>
-        sb.AppendLine($$"""
-                                var {{resultVar}} = new {{GeneratedTypeNames.MapSignal}}<{{fromTypeFullName}}, {{toTypeFullName}}>(
-                                    {{sourceVar}},
-                                    __value =>
-                                    {
-                                        {{toTypeFullName}} __converted;
-                                        {{GeneratedTypeNames.RuntimeBindingConverter}}.TryConvert<{{fromTypeFullName}}, {{toTypeFullName}}>(__value, null, null, out __converted);
-                                        return __converted;
-                                    });
-                """);
+        sb.Append("                var ").Append(resultVar).Append(" = new ").Append(GeneratedTypeNames.MapSignal).Append('<')
+            .Append(fromTypeFullName).Append(", ").Append(toTypeFullName).AppendLine(">(").Append("                    ").Append(sourceVar)
+            .AppendLine(",").AppendLine("                    __value =>").AppendLine("                    {").Append("                        ")
+            .Append(toTypeFullName).AppendLine(" __converted;").Append("                        ").Append(GeneratedTypeNames.RuntimeBindingConverter)
+            .Append(".TryConvert<").Append(fromTypeFullName).Append(", ").Append(toTypeFullName)
+            .AppendLine(">(__value, null, null, out __converted);").AppendLine("                        return __converted;")
+            .AppendLine("                    });");
 
     /// <summary>Emits the stage that delivers a write to the view on the thread the view belongs to.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -467,8 +455,8 @@ internal static class BindingEmitterHelpers
             return sourceVar;
         }
 
-        _ = sb.AppendLine(
-            $"            var {resultVar} = {GeneratedTypeNames.BindingSchedulers}.ObserveOnMainThread({sourceVar});");
+        _ = sb.Append("            var ").Append(resultVar).Append(" = ").Append(GeneratedTypeNames.BindingSchedulers).Append(".ObserveOnMainThread(")
+            .Append(sourceVar).AppendLine(");");
 
         return resultVar;
     }
@@ -494,17 +482,25 @@ internal static class BindingEmitterHelpers
         ClassBindingInfo? sourceClassInfo,
         ClassBindingInfo? targetClassInfo)
     {
-        if (targetClassInfo is null || !DeclaresViewModel(targetClassInfo, inv.SourceTypeFullName))
+        var declaredType = targetClassInfo is null ? null : FindViewModelPropertyType(targetClassInfo);
+        if (declaredType is null)
         {
             return new("viewModel", inv.SourcePropertyPath, sourceClassInfo);
         }
+
+        // The stage below is typed as the view model the call site named, so a view exposing it as a base or
+        // an interface has to narrow on the way out. Observables convert the other way, so the read does it.
+        var readCast = string.Equals(declaredType, inv.SourceTypeFullName, StringComparison.Ordinal)
+            ? null
+            : inv.SourceTypeFullName;
 
         var viewModelSegment = new PropertyPathSegment(
             ViewModelPropertyName,
             inv.SourceTypeFullName,
             inv.TargetTypeFullName,
             true,
-            sourceClassInfo);
+            sourceClassInfo,
+            readCast);
 
         var source = inv.SourcePropertyPath;
         var rooted = new PropertyPathSegment[source.Length + 1];
@@ -517,39 +513,370 @@ internal static class BindingEmitterHelpers
         return new("view", new(rooted), targetClassInfo);
     }
 
-    /// <summary>Determines whether a view declares a view model property of the bound type.</summary>
+    /// <summary>Emits the whole concrete typed overload one binding API dispatches through.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group, which fixes the bound types for the whole overload.</param>
+    /// <param name="api">What distinguishes this API's overload from the other three.</param>
+    /// <param name="dispatchesOnExpressionText">Whether dispatch keys on expression text rather than file and line.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
+    /// <remarks>
+    /// The four property-binding APIs emit one overload shape between them: a receiver, the object it binds
+    /// against, a selector per side, whatever conversion and scheduler arguments the API takes, and then the
+    /// dispatch table. What actually differs is the naming and the trailing arguments, which
+    /// <paramref name="api"/> carries, so the shape is written here once.
+    /// </remarks>
+    internal static void GenerateDispatchOverload(
+        StringBuilder sb,
+        BindingTypeGroup group,
+        BindingDispatchApi api,
+        bool dispatchesOnExpressionText,
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
+    {
+        var first = group.Invocations[0];
+        var sourceLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.SourcePropertyPath, supportsNullable);
+        var targetLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.TargetPropertyPath, supportsNullable);
+
+        CodeGeneratorHelpers.AppendDispatchSummary(
+            sb,
+            api.Name,
+            group.SourceTypeFullName,
+            group.TargetTypeFullName,
+            dispatchesOnExpressionText);
+
+        _ = sb.Append("        public static ").Append(api.FormatReturnType(group)).Append(' ').Append(api.Name).AppendLine("(")
+            .Append("            this ").Append(api.ReceiverIsTarget ? group.TargetTypeFullName : group.SourceTypeFullName)
+            .Append(' ').Append(api.ReceiverParameterName).AppendLine(",")
+            .Append(CodeGeneratorHelpers.ParameterIndent)
+            .Append(api.ReceiverIsTarget ? group.SourceTypeFullName : group.TargetTypeFullName)
+            .Append(' ').Append(api.OtherParameterName).AppendLine(",")
+            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ").Append(sourceLeaf)
+            .Append(">> ").Append(api.SourceSelectorName).AppendLine(",")
+            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.TargetTypeFullName).Append(", ").Append(targetLeaf)
+            .Append(">> ").Append(api.TargetSelectorName).AppendLine(",");
+
+        api.AppendExtraParameters(sb, group);
+
+        if (dispatchesOnExpressionText)
+        {
+            AppendExpressionDispatchBody(sb, group, api);
+        }
+        else
+        {
+            AppendCallerInfoDispatchBody(sb, group, api, stubHasExpressionParameters);
+        }
+
+        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
+    }
+
+    /// <summary>Emits the head of a generated worker: its signature, the path it binds, and the hook guard.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="api">What distinguishes this API's worker from the other three.</param>
+    /// <param name="inv">The call site being emitted.</param>
+    /// <param name="suffix">The stable method-name suffix for this call site.</param>
+    /// <remarks>
+    /// Every binding worker opens the same way - it takes the two objects and whatever conversion and scheduler
+    /// arguments its API declares, records the path it binds, and offers the binding to a registered hook. What
+    /// varies is the naming and the direction, which <paramref name="api"/> carries.
+    /// </remarks>
+    internal static void AppendWorkerMethodHeader(
+        StringBuilder sb,
+        BindingDispatchApi api,
+        BindingInvocationInfo inv,
+        string suffix)
+    {
+        _ = sb.Append("        private static ").Append(api.FormatWorkerReturnType(inv)).Append(' ').Append(api.WorkerMethodPrefix).Append(suffix)
+            .Append('(').Append(inv.SourceTypeFullName).Append(' ').Append(api.WorkerSourceParameterName).Append(", ")
+            .Append(inv.TargetTypeFullName).Append(' ').Append(api.WorkerTargetParameterName).Append(api.FormatWorkerParameters(inv))
+            .AppendLine(")").AppendLine(GeneratedSyntax.MemberBodyOpen)
+            .Append("            // ").Append(api.Name).Append(": ").Append(CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath))
+            .Append(api.IsTwoWay ? " <-> " : " -> ").Append(CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath))
+            .Append(inv.HasConversion ? " (with conversion)" : string.Empty)
+            .Append(inv.HasScheduler ? " (with scheduler)" : string.Empty).AppendLine();
+
+        EmitBindingHookGuard(
+            sb,
+            api.WorkerSourceParameterName,
+            api.WorkerTargetParameterName,
+            api.IsTwoWay ? "TwoWay" : "OneWay",
+            api.HookRefusalValue);
+    }
+
+    /// <summary>Emits the conversion and scheduler stages a one-directional binding puts its values through.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="api">What this API calls the locals along the way.</param>
+    /// <param name="inv">The call site being emitted.</param>
+    /// <returns>The local the subscription should read from.</returns>
+    internal static string EmitSingleStreamStages(StringBuilder sb, BindingDispatchApi api, BindingInvocationInfo inv)
+    {
+        var forward = ForwardStage(api, inv);
+        var currentVar = forward.ObservableName;
+
+        if (inv.HasConversion)
+        {
+            currentVar = AppendMapStage(sb, forward, currentVar, inv.HasScheduler);
+        }
+
+        if (inv.HasScheduler)
+        {
+            currentVar = AppendObserveOnStage(sb, forward, currentVar);
+        }
+
+        return currentVar;
+    }
+
+    /// <summary>Emits those same stages for a binding that drives both sides.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="api">What this API calls the locals along the way.</param>
+    /// <param name="inv">The call site being emitted.</param>
+    /// <returns>The locals each direction's subscription should read from.</returns>
+    /// <remarks>
+    /// Each direction assigns across the same type gap in the opposite sense, so the two run the same stages
+    /// with their type arguments and converter swapped.
+    /// </remarks>
+    internal static BindingObservables EmitDualStreamStages(StringBuilder sb, BindingDispatchApi api, BindingInvocationInfo inv)
+    {
+        var forward = ForwardStage(api, inv);
+        var reverse = ReverseStage(api, inv);
+        var sourceVar = forward.ObservableName;
+        var targetVar = reverse.ObservableName;
+
+        if (inv.HasConversion)
+        {
+            sourceVar = AppendMapStage(sb, forward, sourceVar, inv.HasScheduler);
+            targetVar = AppendMapStage(sb, reverse, targetVar, inv.HasScheduler);
+        }
+
+        if (inv.HasScheduler)
+        {
+            sourceVar = AppendObserveOnStage(sb, forward, sourceVar);
+            targetVar = AppendObserveOnStage(sb, reverse, targetVar);
+        }
+
+        return new(sourceVar, targetVar);
+    }
+
+    /// <summary>Finds the type a view declares its view model property as.</summary>
     /// <param name="targetClassInfo">The view type's binding info.</param>
-    /// <param name="viewModelTypeFullName">The view model type the call site binds from.</param>
-    /// <returns><see langword="true"/> when the view exposes that view model.</returns>
-    private static bool DeclaresViewModel(ClassBindingInfo targetClassInfo, string viewModelTypeFullName)
+    /// <returns>The declared property type, or <see langword="null"/> when the view exposes no such property.</returns>
+    /// <remarks>
+    /// A view implementing <c>IViewFor&lt;T&gt;</c> declares the property twice - once weakly typed for the
+    /// non-generic interface, once as the view model itself. Only the typed declaration counts. The weak one
+    /// says nothing about which view model the view holds, and following it would point the binding at a
+    /// property the view may never have been given, where the call site handed the view model over directly.
+    /// </remarks>
+    private static string? FindViewModelPropertyType(ClassBindingInfo targetClassInfo)
     {
         var properties = targetClassInfo.Properties;
+
         for (var i = 0; i < properties.Length; i++)
         {
-            if (string.Equals(properties[i].PropertyName, ViewModelPropertyName, StringComparison.Ordinal)
-                && string.Equals(properties[i].PropertyTypeFullName, viewModelTypeFullName, StringComparison.Ordinal))
+            if (!string.Equals(properties[i].PropertyName, ViewModelPropertyName, StringComparison.Ordinal))
             {
-                return true;
+                continue;
+            }
+
+            var declaredType = properties[i].PropertyTypeFullName;
+            if (!string.Equals(declaredType, WeaklyTypedViewModel, StringComparison.Ordinal))
+            {
+                return declaredType;
             }
         }
 
-        return false;
+        return null;
     }
 
     /// <summary>Renders the affinity test for one side of a binding.</summary>
     /// <param name="typeFullName">The fully qualified name of the observed type.</param>
-    /// <param name="propertyPath">The path whose first segment carries how its declaring type notifies.</param>
-    /// <returns>The rendered call, without surrounding parentheses.</returns>
+    /// <param name="propertyPath">The path being observed, each segment carrying how its declaring type notifies.</param>
+    /// <returns>The rendered condition, without surrounding parentheses.</returns>
+    /// <remarks>
+    /// One test per link, because that is how the registration is resolved: a plugin scores a type and a
+    /// property together, so a chain can pick a different mechanism at every step and a registration that wins
+    /// at any one of them takes the whole binding. Asking about the root alone misses a registration aimed at
+    /// the leaf, and asking without the property name makes every mechanism-specific plugin score 0.
+    /// </remarks>
     private static string AffinityTest(string typeFullName, EquatableArray<PropertyPathSegment> propertyPath)
     {
-        var declaringType = propertyPath[0].DeclaringTypeInfo;
-        var plugin = declaringType is null
-            ? null
-            : Plugins.ObservationPluginRegistry.GetBestPlugin(declaringType);
+        var builder = new StringBuilder();
 
-        return
-            $"{GeneratedTypeNames.ObservationAffinityChecker}.HasHigherAffinityPlugin(typeof({typeFullName}), {plugin?.Affinity ?? 0}, false)";
+        for (var i = 0; i < propertyPath.Length; i++)
+        {
+            var segment = propertyPath[i];
+            var declaringType = segment.DeclaringTypeInfo;
+            var plugin = declaringType is null
+                ? null
+                : Plugins.ObservationPluginRegistry.GetBestPlugin(declaringType, segment.PropertyName);
+
+            // The root is the type the call site binds, which is what the observation is rooted on; every
+            // later link is observed on the type that declares it.
+            var observedType = i == 0 ? typeFullName : segment.DeclaringTypeFullName;
+
+            if (i > 0)
+            {
+                _ = builder.AppendLine().Append("                || ");
+            }
+
+            _ = builder
+                .Append(GeneratedTypeNames.ObservationAffinityChecker)
+                .Append(".HasHigherAffinityPlugin(typeof(")
+                .Append(observedType)
+                .Append("), \"")
+                .Append(segment.PropertyName)
+                .Append("\", ")
+                .Append(plugin?.Affinity ?? 0)
+                .Append(", false)");
+        }
+
+        return builder.ToString();
     }
+
+    /// <summary>Appends the body of an overload that matches a call site by the text of its selectors.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group.</param>
+    /// <param name="api">What distinguishes this API's overload from the other three.</param>
+    private static void AppendExpressionDispatchBody(StringBuilder sb, BindingTypeGroup group, BindingDispatchApi api)
+    {
+        CodeGeneratorHelpers.AppendExpressionDispatchParameters(sb, api.SourceSelectorName, api.TargetSelectorName);
+
+        if (api.NormalizesStaticPrefix)
+        {
+            CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, api.SourceExpressionParameter);
+            CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, api.TargetExpressionParameter);
+            _ = sb.AppendLine();
+        }
+
+        api.EmitAffinityOverride(sb, group, api.TargetExpressionParameter);
+        var extraArguments = api.FormatExtraArguments(group);
+
+        for (var i = 0; i < group.Invocations.Length; i++)
+        {
+            var inv = group.Invocations[i];
+
+            CodeGeneratorHelpers.AppendExpressionDispatchCondition(
+                sb,
+                CodeGeneratorHelpers.ConditionKeyword(i),
+                api.SourceExpressionParameter,
+                inv.SourceExpressionText,
+                api.TargetExpressionParameter,
+                inv.TargetExpressionText);
+            CodeGeneratorHelpers.AppendDispatchReturn(
+                sb,
+                api.WorkerMethodPrefix + BindingMethodSuffix(inv),
+                api.WorkerArguments + extraArguments);
+        }
+    }
+
+    /// <summary>Appends the body of an overload that matches a call site by the file and line it sits on.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group.</param>
+    /// <param name="api">What distinguishes this API's overload from the other three.</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
+    private static void AppendCallerInfoDispatchBody(
+        StringBuilder sb,
+        BindingTypeGroup group,
+        BindingDispatchApi api,
+        bool stubHasExpressionParameters)
+    {
+        if (stubHasExpressionParameters)
+        {
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, api.SourceSelectorName, api.SourceExpressionParameter, false);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, api.TargetSelectorName, api.TargetExpressionParameter, false);
+        }
+
+        CodeGeneratorHelpers.AppendCallerInfoDispatchParameters(sb);
+
+        api.EmitAffinityOverride(
+            sb,
+            group,
+            $"\"{CodeGeneratorHelpers.EscapeString(group.Invocations[0].TargetExpressionText)}\"");
+        var extraArguments = api.FormatExtraArguments(group);
+
+        for (var i = 0; i < group.Invocations.Length; i++)
+        {
+            var inv = group.Invocations[i];
+
+            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
+                sb,
+                CodeGeneratorHelpers.ConditionKeyword(i),
+                inv.CallerLineNumber,
+                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
+            CodeGeneratorHelpers.AppendDispatchReturn(
+                sb,
+                api.WorkerMethodPrefix + BindingMethodSuffix(inv),
+                api.WorkerArguments + extraArguments);
+        }
+    }
+
+    /// <summary>Describes the direction that carries the source side's values to the target side.</summary>
+    /// <param name="api">What this API calls the locals along the way.</param>
+    /// <param name="inv">The call site being emitted.</param>
+    /// <returns>The stage description.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static BindingStreamStage ForwardStage(BindingDispatchApi api, BindingInvocationInfo inv) =>
+        new(
+            api.SourceObservableName,
+            api.SourceConvertedName,
+            api.SourceScheduledName,
+            api.ForwardConverterArgument,
+            inv.SourcePropertyTypeFullName,
+            inv.TargetPropertyTypeFullName);
+
+    /// <summary>Describes the direction that carries the target side's values back to the source side.</summary>
+    /// <param name="api">What this API calls the locals along the way.</param>
+    /// <param name="inv">The call site being emitted.</param>
+    /// <returns>The stage description.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static BindingStreamStage ReverseStage(BindingDispatchApi api, BindingInvocationInfo inv) =>
+        new(
+            api.TargetObservableName,
+            api.TargetConvertedName,
+            api.TargetScheduledName,
+            api.ReverseConverterArgument,
+            inv.TargetPropertyTypeFullName,
+            inv.SourcePropertyTypeFullName);
+
+    /// <summary>Appends the stage that runs one direction's values through the converter the call site named.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="stage">The direction being emitted.</param>
+    /// <param name="sourceVar">The local holding the values to convert.</param>
+    /// <param name="hasScheduler">Whether a scheduler stage follows, which decides what the result is called.</param>
+    /// <returns>The local holding the converted values.</returns>
+    private static string AppendMapStage(StringBuilder sb, in BindingStreamStage stage, string sourceVar, bool hasScheduler)
+    {
+        var resultVar = hasScheduler ? stage.ConvertedName : stage.ScheduledName;
+
+        _ = sb.Append("        var ").Append(resultVar).Append(" = new ").Append(GeneratedTypeNames.MapSignal).Append('<')
+            .Append(stage.FromTypeFullName).Append(", ").Append(stage.ToTypeFullName).Append(">(").Append(sourceVar)
+            .Append(", ").Append(stage.ConverterArgument).AppendLine(");");
+
+        return resultVar;
+    }
+
+    /// <summary>Appends the stage that delivers one direction's values on the scheduler the call site named.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="stage">The direction being emitted.</param>
+    /// <param name="sourceVar">The local holding the values to route.</param>
+    /// <returns>The local holding the routed values.</returns>
+    private static string AppendObserveOnStage(StringBuilder sb, in BindingStreamStage stage, string sourceVar)
+    {
+        _ = sb.Append("        var ").Append(stage.ScheduledName).Append(" = ").Append(GeneratedTypeNames.LinqExtensions)
+            .Append(".ObserveOn<").Append(stage.ToTypeFullName).Append(">(").Append(sourceVar).AppendLine(", scheduler);");
+
+        return stage.ScheduledName;
+    }
+
+    /// <summary>Names the generated worker a binding call site dispatches to.</summary>
+    /// <param name="inv">The call site.</param>
+    /// <returns>The stable suffix its worker is named with.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string BindingMethodSuffix(BindingInvocationInfo inv) =>
+        CodeGeneratorHelpers.ComputeStableMethodSuffix(
+            inv.SourceTypeFullName,
+            inv.CallerFilePath,
+            inv.CallerLineNumber,
+            $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
 
     /// <summary>What a view-first binding observes, and from where.</summary>
     /// <param name="RootVariable">The generated method parameter the observation is rooted on.</param>
@@ -559,6 +886,21 @@ internal static class BindingEmitterHelpers
         string RootVariable,
         EquatableArray<PropertyPathSegment> Path,
         ClassBindingInfo? RootClassInfo);
+
+    /// <summary>One direction of a binding's value flow, and what the generated locals along it are called.</summary>
+    /// <param name="ObservableName">The local the direction's observation is held in.</param>
+    /// <param name="ConvertedName">The local the converted values are held in, ahead of a scheduler stage.</param>
+    /// <param name="ScheduledName">The local the values are held in once the subscription can read them.</param>
+    /// <param name="ConverterArgument">What the generated worker calls this direction's converter.</param>
+    /// <param name="FromTypeFullName">The type the values arrive as.</param>
+    /// <param name="ToTypeFullName">The type the assignment at the far end needs.</param>
+    internal readonly record struct BindingStreamStage(
+        string ObservableName,
+        string ConvertedName,
+        string ScheduledName,
+        string ConverterArgument,
+        string FromTypeFullName,
+        string ToTypeFullName);
 
     /// <summary>Everything a per-call-site binding emitter needs about one resolved call site.</summary>
     /// <param name="Invocation">The call site being emitted.</param>
@@ -572,4 +914,105 @@ internal static class BindingEmitterHelpers
         ClassBindingInfo? TargetClassInfo,
         string Suffix,
         LanguageFeatures Features);
+
+    /// <summary>What distinguishes one binding API's generated dispatch overload from another's.</summary>
+    /// <remarks>
+    /// Held as an object rather than passed as arguments because the set travels together and would otherwise
+    /// widen the emitter's signature past what any one call site can read.
+    /// </remarks>
+    internal sealed class BindingDispatchApi
+    {
+        /// <summary>Gets the name of the binding method this overload stands in for.</summary>
+        internal string Name { get; init; } = string.Empty;
+
+        /// <summary>Gets what the overload calls the object it extends.</summary>
+        internal string ReceiverParameterName { get; init; } = string.Empty;
+
+        /// <summary>Gets what the overload calls the object bound against the receiver.</summary>
+        internal string OtherParameterName { get; init; } = string.Empty;
+
+        /// <summary>Gets a value indicating whether the receiver is the side the binding writes to.</summary>
+        internal bool ReceiverIsTarget { get; init; }
+
+        /// <summary>Gets what the overload calls the selector for the side it reads from.</summary>
+        internal string SourceSelectorName { get; init; } = string.Empty;
+
+        /// <summary>Gets what the overload calls the selector for the side it writes to.</summary>
+        internal string TargetSelectorName { get; init; } = string.Empty;
+
+        /// <summary>Gets the prefix the generated worker for each call site is named with.</summary>
+        internal string WorkerMethodPrefix { get; init; } = string.Empty;
+
+        /// <summary>Gets what a generated worker calls the object it reads from.</summary>
+        internal string WorkerSourceParameterName { get; init; } = string.Empty;
+
+        /// <summary>Gets what a generated worker calls the object it writes to.</summary>
+        internal string WorkerTargetParameterName { get; init; } = string.Empty;
+
+        /// <summary>Gets a value indicating whether the binding drives both sides.</summary>
+        internal bool IsTwoWay { get; init; }
+
+        /// <summary>Gets what a generated worker returns when a registered hook refuses the binding.</summary>
+        internal string HookRefusalValue { get; init; } = string.Empty;
+
+        /// <summary>Gets the local a generated worker holds the source side's observation in.</summary>
+        internal string SourceObservableName { get; init; } = string.Empty;
+
+        /// <summary>Gets the local a generated worker holds the target side's observation in.</summary>
+        internal string TargetObservableName { get; init; } = string.Empty;
+
+        /// <summary>Gets the local the source side's converted values are held in, ahead of a scheduler stage.</summary>
+        internal string SourceConvertedName { get; init; } = string.Empty;
+
+        /// <summary>Gets the local the target side's converted values are held in, ahead of a scheduler stage.</summary>
+        internal string TargetConvertedName { get; init; } = string.Empty;
+
+        /// <summary>Gets the local the source side's values are held in once the subscription can read them.</summary>
+        internal string SourceScheduledName { get; init; } = string.Empty;
+
+        /// <summary>Gets the local the target side's values are held in once the subscription can read them.</summary>
+        internal string TargetScheduledName { get; init; } = string.Empty;
+
+        /// <summary>Gets what a generated worker calls the converter from the source side's type to the target's.</summary>
+        internal string ForwardConverterArgument { get; init; } = string.Empty;
+
+        /// <summary>Gets what a generated worker calls the converter from the target side's type to the source's.</summary>
+        internal string ReverseConverterArgument { get; init; } = string.Empty;
+
+        /// <summary>Gets a value indicating whether the overload strips a <c>static</c> prefix off captured expressions.</summary>
+        internal bool NormalizesStaticPrefix { get; init; }
+
+        /// <summary>Gets the function rendering what the overload returns.</summary>
+        internal Func<BindingTypeGroup, string> FormatReturnType { get; init; } =
+            static _ => "global::System.IDisposable";
+
+        /// <summary>Gets the function rendering what a generated worker returns.</summary>
+        internal Func<BindingInvocationInfo, string> FormatWorkerReturnType { get; init; } =
+            static _ => "global::System.IDisposable";
+
+        /// <summary>Gets the function rendering the conversion and scheduler parameters a generated worker declares.</summary>
+        internal Func<BindingInvocationInfo, string> FormatWorkerParameters { get; init; } =
+            static _ => string.Empty;
+
+        /// <summary>Gets the action appending the conversion and scheduler parameters this API takes.</summary>
+        internal Action<StringBuilder, BindingTypeGroup> AppendExtraParameters { get; init; } =
+            static (_, _) => { };
+
+        /// <summary>Gets the function rendering the conversion and scheduler arguments the worker takes.</summary>
+        internal Func<BindingTypeGroup, string> FormatExtraArguments { get; init; } =
+            static _ => string.Empty;
+
+        /// <summary>Gets the action emitting the check that hands the binding to the runtime engine.</summary>
+        internal Action<StringBuilder, BindingTypeGroup, string> EmitAffinityOverride { get; init; } =
+            static (_, _, _) => { };
+
+        /// <summary>Gets the two objects a generated worker binds, in its own parameter order.</summary>
+        internal string WorkerArguments => $"{WorkerSourceParameterName}, {WorkerTargetParameterName}";
+
+        /// <summary>Gets the parameter carrying the text of the selector for the side read from.</summary>
+        internal string SourceExpressionParameter => SourceSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
+
+        /// <summary>Gets the parameter carrying the text of the selector for the side written to.</summary>
+        internal string TargetExpressionParameter => TargetSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
+    }
 }

@@ -10,8 +10,8 @@ using ReactiveUI.Binding.Tests.TestModels;
 namespace ReactiveUI.Binding.Tests.ObservableForProperty;
 
 /// <summary>
-/// Tests for <see cref="ReactiveNotifyPropertyChangedMixins"/> covering remaining branch gaps
-/// including NestedObservedChanges, NotifyForProperty, and SubscribeToExpressionChain paths.
+/// Tests for <see cref="ReactiveNotifyPropertyChangedMixins"/>, the runtime bridge a binding falls back to
+/// when the generator could not resolve the observation at compile time.
 /// </summary>
 public class ReactiveNotifyPropertyChangedMixinTests
 {
@@ -19,13 +19,16 @@ public class ReactiveNotifyPropertyChangedMixinTests
     private const string InitialValue = "Initial";
 
     /// <summary>A changed property value used across notification tests.</summary>
-    private const string ChangedValue = "Changed";
+    private const string NotifyingValue = "Changed";
 
     /// <summary>The expected number of emissions after a single change (kicker plus one change).</summary>
     private const int ExpectedTwoEmissions = 2;
 
     /// <summary>The expected number of emissions after two successive changes (kicker plus two changes).</summary>
     private const int ExpectedThreeEmissions = 3;
+
+    /// <summary>The array an index expression with no indexer behind it reads from.</summary>
+    private static readonly string[] _arrayBackingTheIndexExpression = [InitialValue];
 
     /// <summary>
     /// Verifies that NestedObservedChanges returns a single-element observable with default value
@@ -77,7 +80,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(1);
 
         // Now change the property - should emit another notification
-        vm.Name = ChangedValue;
+        vm.Name = NotifyingValue;
 
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
@@ -187,10 +190,10 @@ public class ReactiveNotifyPropertyChangedMixinTests
         // No initial value should have been emitted
         await Assert.That(values.Count).IsEqualTo(0);
 
-        fixture.IsNotNullString = ChangedValue;
+        fixture.IsNotNullString = NotifyingValue;
 
         await Assert.That(values.Count).IsEqualTo(1);
-        await Assert.That(values[0].Value).IsEqualTo(ChangedValue);
+        await Assert.That(values[0].Value).IsEqualTo(NotifyingValue);
     }
 
     /// <summary>
@@ -293,7 +296,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(1);
 
         // Changing the property should trigger a PropertyChanging notification
-        vm.Name = ChangedValue;
+        vm.Name = NotifyingValue;
 
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
@@ -343,7 +346,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
                 skipInitial: false)
             .Subscribe(values.Add);
 
-        vm.Name = ChangedValue;
+        vm.Name = NotifyingValue;
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
@@ -372,9 +375,92 @@ public class ReactiveNotifyPropertyChangedMixinTests
         using var sub = ReactiveNotifyPropertyChangedMixins.NotifyForProperty(vm, body, false)
             .Subscribe(results.Add);
 
-        vm.Title = ChangedValue;
+        vm.Title = NotifyingValue;
 
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(1);
+    }
+
+    /// <summary>
+    /// A property holding null is observed as the default of the observed type, so a subscriber sees the
+    /// absence rather than the observation faulting on the way to reading it.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObservableForProperty_ByName_NullPropertyValue_EmitsTheDefault()
+    {
+        EnsureInitialized();
+
+        var fixture = new TestFixture();
+        var values = new List<int?>();
+
+        using var subscription = fixture.ObservableForProperty<TestFixture, int?>(
+            nameof(TestFixture.NullableInt),
+            false,
+            false,
+            true).Subscribe(x => values.Add(x.Value));
+
+        await Assert.That(values).Contains(static x => x is null);
+    }
+
+    /// <summary>
+    /// A property read as a type it does not hold is a caller error, and surfaces as the cast failure rather
+    /// than as a silently wrong value.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObservableForProperty_ByName_ValueOfAnotherType_SignalsInvalidCast()
+    {
+        EnsureInitialized();
+
+        var fixture = new TestFixture { IsNotNullString = InitialValue };
+
+        await Assert.That(() =>
+        {
+            using var subscription = fixture.ObservableForProperty<TestFixture, int>(
+                nameof(TestFixture.IsNotNullString),
+                false,
+                false,
+                true).Subscribe(static _ => { });
+        }).Throws<InvalidCastException>();
+    }
+
+    /// <summary>The overload that takes the whole set of options builds the same chain observation.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SubscribeToExpressionChain_WithSuppressedWarnings_ObservesTheChain()
+    {
+        EnsureInitialized();
+
+        var fixture = new TestFixture { IsNotNullString = InitialValue };
+        Expression<Func<TestFixture, string>> expr = x => x.IsNotNullString;
+        var values = new List<string>();
+
+        using var subscription = fixture
+            .SubscribeToExpressionChain<TestFixture, string>(expr.Body, false, false, true, true)
+            .Subscribe(x => values.Add(x.Value));
+
+        fixture.IsNotNullString = NotifyingValue;
+
+        await Assert.That(values).Contains(NotifyingValue);
+    }
+
+    /// <summary>
+    /// An array index reaches the member lookup as an index expression with no indexer behind it, so there
+    /// is no property to observe and the call is rejected rather than observing nothing.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task NotifyForProperty_WithSuppressedWarnings_ExpressionNamingNoMember_Throws()
+    {
+        EnsureInitialized();
+
+        var fixture = new TestFixture();
+        var arrayAccess = System.Linq.Expressions.Expression.ArrayAccess(
+            System.Linq.Expressions.Expression.Constant(_arrayBackingTheIndexExpression),
+            System.Linq.Expressions.Expression.Constant(0));
+
+        await Assert.That(() => ReactiveNotifyPropertyChangedMixins.NotifyForProperty(fixture, arrayAccess, false, true))
+            .ThrowsExactly<ArgumentException>();
     }
 
     /// <summary>Resets and initializes the ReactiveUI binding infrastructure for testing.</summary>

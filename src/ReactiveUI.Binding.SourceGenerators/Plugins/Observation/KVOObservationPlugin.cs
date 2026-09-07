@@ -55,8 +55,15 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         classInfo.InheritsNSObject;
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// Key-value observing reaches the properties the Apple frameworks declare, because those are the ones the
+    /// Obj-C runtime backs. A property an application adds to its own subclass of one of them is an ordinary
+    /// CLR property that no key path resolves, so it falls through to whatever mechanism the type also carries.
+    /// The runtime engine draws the same line by asking which assembly declares the member.
+    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) => true;
+    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
+        !ObservedProperties.IsDeclaredByConsumer(classInfo, propertyName);
 
     /// <inheritdoc/>
     public void EmitHelperClasses(StringBuilder sb)
@@ -75,14 +82,10 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         bool includeStartWith)
     {
         var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        _ = sb.Append($"new __KVOObservable<{segment.PropertyTypeFullName}>(")
-            .Append($"(global::Foundation.NSObject){rootVar}, ")
-            .Append($"\"{keyPath}\", ")
-            .Append($"(global::Foundation.NSObject __o) => (({castTypeName})__o).{segment.PropertyName}, ")
-            .Append(BoolLiteral(includeStartWith))
-            .Append(", ")
-            .Append(BoolLiteral(isBeforeChange))
-            .Append(')');
+        _ = sb.Append("new __KVOObservable<").Append(segment.PropertyTypeFullName).Append(">(").Append("(global::Foundation.NSObject)")
+            .Append(rootVar).Append(", ").Append('"').Append(keyPath).Append("\", ").Append("(global::Foundation.NSObject __o) => ((")
+            .Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).Append(", ").Append(BoolLiteral(includeStartWith)).Append(", ")
+            .Append(BoolLiteral(isBeforeChange)).Append(')');
     }
 
     /// <inheritdoc/>
@@ -95,14 +98,11 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         string varName)
     {
         var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        _ = sb.Append($"""
-                               var {varName} = new __KVOObservable<{segment.PropertyTypeFullName}>(
-                                   (global::Foundation.NSObject){rootVar},
-                                   "{keyPath}",
-                                   (global::Foundation.NSObject __o) => (({castTypeName})__o).{segment.PropertyName},
-                                   true,
-                                   {BoolLiteral(isBeforeChange)});
-                   """);
+        _ = sb.Append("            var ").Append(varName).Append(" = new __KVOObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append("                (global::Foundation.NSObject)").Append(rootVar).AppendLine(",").Append("                \"").Append(keyPath)
+            .AppendLine("\",").Append("                (global::Foundation.NSObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)
+            .Append(segment.PropertyName).AppendLine(",").AppendLine("                true,").Append("                ")
+            .Append(BoolLiteral(isBeforeChange)).Append(");");
     }
 
     /// <inheritdoc/>
@@ -115,14 +115,12 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         string obsVarName)
     {
         var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        _ = sb.AppendLine($"""
-                                   var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>)new __KVOObservable<{segment.PropertyTypeFullName}>(
-                                       (global::Foundation.NSObject){rootVar},
-                                       "{keyPath}",
-                                       (global::Foundation.NSObject __o) => (({castTypeName})__o).{segment.PropertyName},
-                                       false,
-                                       {BoolLiteral(isBeforeChange)});
-                       """);
+        _ = sb.Append("            var ").Append(obsVarName).Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName)
+            .Append(">)new __KVOObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append("                (global::Foundation.NSObject)").Append(rootVar).AppendLine(",").Append("                \"").Append(keyPath)
+            .AppendLine("\",").Append("                (global::Foundation.NSObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)
+            .Append(segment.PropertyName).AppendLine(",").AppendLine("                false,").Append("                ")
+            .Append(BoolLiteral(isBeforeChange)).AppendLine(");");
     }
 
     /// <inheritdoc/>
@@ -142,18 +140,14 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
             ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
             : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
 
-        _ = sb.AppendLine()
-            .AppendLine($"""
-                                 var {curVar} = {GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)}
-                                     {lambdaParam} => {lambdaParam} != null
-                                         ? (global::System.IObservable<{segType}>)new __KVOObservable<{segType}>(
-                                             (global::Foundation.NSObject){lambdaParam},
-                                             "{keyPath}",
-                                             (global::Foundation.NSObject __o) => (({declType})__o).{segment.PropertyName},
-                                             false,
-                                             {BoolLiteral(isBeforeChange)})
-                                         : (global::System.IObservable<{segType}>){nullParentObservable});
-                         """);
+        _ = sb.AppendLine().Append("        var ").Append(curVar).Append(" = ")
+            .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
+            .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType)
+            .Append(">)new __KVOObservable<").Append(segType).AppendLine(">(").Append("                    (global::Foundation.NSObject)")
+            .Append(lambdaParam).AppendLine(",").Append("                    \"").Append(keyPath).AppendLine("\",")
+            .Append("                    (global::Foundation.NSObject __o) => ((").Append(declType).Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName)
+            .AppendLine(",").AppendLine("                    false,").Append("                    ").Append(BoolLiteral(isBeforeChange)).AppendLine(")")
+            .Append("                : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
     }
 
     /// <inheritdoc/>
@@ -165,14 +159,10 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         string varName)
     {
         var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        _ = sb.AppendLine($"""
-                               var {varName} = new __KVOObservable<{segment.PropertyTypeFullName}>(
-                                   (global::Foundation.NSObject){rootVar},
-                                   "{keyPath}",
-                                   (global::Foundation.NSObject __o) => (({castTypeName})__o).{segment.PropertyName},
-                                   true,
-                                   false);
-                       """);
+        _ = sb.Append("        var ").Append(varName).Append(" = new __KVOObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append("            (global::Foundation.NSObject)").Append(rootVar).AppendLine(",").Append("            \"").Append(keyPath)
+            .AppendLine("\",").Append("            (global::Foundation.NSObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)
+            .Append(segment.PropertyName).AppendLine(",").AppendLine("            true,").AppendLine("            false);");
     }
 
     /// <summary>Renders a boolean as the lowercase C# literal text (<c>true</c>/<c>false</c>) for emission into generated source.</summary>

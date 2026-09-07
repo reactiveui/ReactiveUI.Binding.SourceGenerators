@@ -52,6 +52,18 @@ public class ObservationPluginTests
     /// <summary>The <c>ImmutableEmptySignal</c> name a suppressing inner segment emits for a missing parent.</summary>
     private const string ImmutableEmptySignalName = "ImmutableEmptySignal";
 
+    /// <summary>The observation a property with no mechanism for the asked timing gets, without completing.</summary>
+    private const string UnchangingPropertyObservableName = "UnchangingPropertyObservable";
+
+    /// <summary>A property an Android widget raises an event for.</summary>
+    private const string TextPropertyName = "Text";
+
+    /// <summary>The event an Android widget raises when its text changes.</summary>
+    private const string TextChangedEventName = "TextChanged";
+
+    /// <summary>A property no Android widget reports a change for.</summary>
+    private const string UnreportedPropertyName = "ContentDescription";
+
     /// <summary>The <c>source</c> name these tests generate against.</summary>
     private const string SourceName = "source";
 
@@ -100,7 +112,7 @@ public class ObservationPluginTests
     /// <summary>Verifies WPF plugin shallow observation before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WpfPlugin_EmitShallowObservation_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WpfPlugin_EmitShallowObservation_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = new WpfObservationPlugin();
         var sb = new StringBuilder();
@@ -108,7 +120,7 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, true, true);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WPF plugin shallow observation variable emits EventObservable.</summary>
@@ -130,7 +142,7 @@ public class ObservationPluginTests
     /// <summary>Verifies WPF plugin shallow observation variable before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WpfPlugin_EmitShallowObservationVariable_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WpfPlugin_EmitShallowObservationVariable_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = new WpfObservationPlugin();
         var sb = new StringBuilder();
@@ -138,7 +150,7 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WPF plugin deep chain root segment after-change emits EventObservable.</summary>
@@ -160,7 +172,7 @@ public class ObservationPluginTests
     /// <summary>Verifies WPF plugin deep chain root segment before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WpfPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WpfPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = new WpfObservationPlugin();
         var sb = new StringBuilder();
@@ -168,7 +180,7 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WPF plugin deep chain inner segment after-change emits EventObservable with Switch.</summary>
@@ -291,7 +303,7 @@ public class ObservationPluginTests
     /// <summary>Verifies WinForms plugin shallow observation variable before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinFormsPlugin_EmitShallowObservationVariable_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WinFormsPlugin_EmitShallowObservationVariable_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
@@ -299,13 +311,13 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyTextBoxTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WinForms plugin shallow observation before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinFormsPlugin_EmitShallowObservation_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WinFormsPlugin_EmitShallowObservation_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
@@ -313,7 +325,7 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyTextBoxTypeName, true, true);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WinForms plugin deep chain root segment after-change emits EventObservable.</summary>
@@ -335,7 +347,7 @@ public class ObservationPluginTests
     /// <summary>Verifies WinForms plugin deep chain root segment before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinFormsPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WinFormsPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
@@ -343,7 +355,7 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyTextBoxTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WinForms plugin deep chain inner segment after-change emits EventObservable.</summary>
@@ -425,7 +437,7 @@ public class ObservationPluginTests
     /// <summary>Verifies WinUI plugin shallow observation before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinUIPlugin_EmitShallowObservation_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WinUIPlugin_EmitShallowObservation_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
@@ -433,7 +445,7 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, true, true);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WinUI plugin shallow observation variable after-change emits WinUIDPObservable.</summary>
@@ -455,7 +467,7 @@ public class ObservationPluginTests
     /// <summary>Verifies WinUI plugin shallow observation variable before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinUIPlugin_EmitShallowObservationVariable_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WinUIPlugin_EmitShallowObservationVariable_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
@@ -463,7 +475,7 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WinUI plugin deep chain root segment after-change emits WinUIDPObservable.</summary>
@@ -483,7 +495,7 @@ public class ObservationPluginTests
     /// <summary>Verifies WinUI plugin deep chain root segment before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinUIPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WinUIPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsTheUnchangingValue()
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
@@ -491,7 +503,7 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WinUI plugin deep chain inner segment after-change emits WinUIDPObservable.</summary>
@@ -775,35 +787,67 @@ public class ObservationPluginTests
     }
 
     // ========== AndroidObservationPlugin ==========
-    /// <summary>Verifies Android plugin shallow observation variable emits ImmediateReturnSignal.</summary>
+    /// <summary>The variable form subscribes the same widget event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task AndroidPlugin_EmitShallowObservationVariable_EmitsImmediateReturnSignal()
+    public async Task AndroidPlugin_EmitShallowObservationVariable_SubscribesTheWidgetEvent()
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).Contains(TextChangedEventName);
         await Assert.That(result).Contains(Obs0Declaration);
     }
 
-    /// <summary>Verifies Android plugin deep chain root segment emits ImmediateReturnSignal.</summary>
+    /// <summary>The variable form of a property no widget reports reads once and stays open.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task AndroidPlugin_EmitDeepChainRootSegment_EmitsImmediateReturnSignal()
+    public async Task AndroidPlugin_EmitShallowObservationVariable_UnreportedProperty_EmitsTheUnchangingValue()
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = ModelFactory.CreatePropertyPathSegment(UnreportedPropertyName, StringName);
+
+        plugin.EmitShallowObservationVariable(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains(UnchangingPropertyObservableName);
+        await Assert.That(result).Contains(Obs0Declaration);
+    }
+
+    /// <summary>A chain rooted on a reported widget property subscribes that property's event.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AndroidPlugin_EmitDeepChainRootSegment_SubscribesTheWidgetEvent()
+    {
+        var plugin = new AndroidObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).Contains(TextChangedEventName);
+        await Assert.That(result).Contains(Obs0Declaration);
+    }
+
+    /// <summary>A chain rooted on a property no widget reports reads once and stays open.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AndroidPlugin_EmitDeepChainRootSegment_UnreportedProperty_EmitsTheUnchangingValue()
+    {
+        var plugin = new AndroidObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment(UnreportedPropertyName, StringName);
+
+        plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains(UnchangingPropertyObservableName);
         await Assert.That(result).Contains(Obs0Declaration);
     }
 
@@ -839,19 +883,35 @@ public class ObservationPluginTests
         await Assert.That(result).DoesNotContain(ImmutableEmptySignalName);
     }
 
-    /// <summary>Verifies Android plugin inline observation variable emits ImmediateReturnSignal.</summary>
+    /// <summary>The inline form subscribes the same widget event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task AndroidPlugin_EmitInlineObservationVariable_EmitsImmediateReturnSignal()
+    public async Task AndroidPlugin_EmitInlineObservationVariable_SubscribesTheWidgetEvent()
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
 
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyAndroidViewTypeName, SourceObsName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).Contains(TextChangedEventName);
+        await Assert.That(result).Contains(SourceObsDeclaration);
+    }
+
+    /// <summary>The inline form of a property no widget reports reads once and stays open.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AndroidPlugin_EmitInlineObservationVariable_UnreportedProperty_EmitsTheUnchangingValue()
+    {
+        var plugin = new AndroidObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment(UnreportedPropertyName, StringName);
+
+        plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyAndroidViewTypeName, SourceObsName);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains(UnchangingPropertyObservableName);
         await Assert.That(result).Contains(SourceObsDeclaration);
     }
 
@@ -967,18 +1027,67 @@ public class ObservationPluginTests
         await Assert.That(sb.ToString()).Contains("false, false)");
     }
 
-    /// <summary>Verifies Android plugin shallow observation emits ImmediateReturnSignal.</summary>
+    /// <summary>A widget property that raises an event is observed through that event.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task AndroidPlugin_EmitShallowObservation_EmitsImmediateReturnSignal()
+    public async Task AndroidPlugin_EmitShallowObservation_SubscribesTheWidgetEvent()
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, true);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        var result = sb.ToString();
+        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).Contains(TextChangedEventName);
+    }
+
+    /// <summary>A property no widget reports has nothing to subscribe, so it reads once and stays open.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AndroidPlugin_EmitShallowObservation_UnreportedProperty_EmitsTheUnchangingValue()
+    {
+        var plugin = new AndroidObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment(UnreportedPropertyName, StringName);
+
+        plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, true);
+
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
+    }
+
+    /// <summary>
+    /// A caller that only wants subsequent changes gets the observation without its opening value, so a
+    /// chain stage does not re-emit what the stage above it has already delivered.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AndroidPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
+    {
+        var plugin = new AndroidObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
+
+        plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).EndsWith(", false)");
+    }
+
+    /// <summary>A widget reports a change once it has happened, so before-change has nothing to subscribe.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AndroidPlugin_EmitShallowObservation_BeforeChange_EmitsTheUnchangingValue()
+    {
+        var plugin = new AndroidObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
+
+        plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, true, true);
+
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     // ========== INPCObservationPlugin ==========

@@ -36,6 +36,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             // BindTo: observable -> Caption
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(source, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.Caption, value))
+                {
+                    return;
+                }
+
                 target.Caption = value;
             }, "x => x.Caption");
         }

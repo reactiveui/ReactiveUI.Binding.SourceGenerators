@@ -28,9 +28,16 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// inference dominate it.
 /// </para>
 /// </param>
+/// <param name="ReadCastTypeFullName">
+/// The type the read is cast to, or <see langword="null"/> when the property already has the type the chain
+/// carries. A view is free to expose its view model as a base or an interface, and the stage below is typed as
+/// the view model itself, so the read has to narrow to it. Observables are covariant, which converts the other
+/// way, so nothing downstream can do this for us.
+/// </param>
 internal sealed record PropertyPathSegment(
     string PropertyName,
     string PropertyTypeFullName,
     string DeclaringTypeFullName,
     bool IsReferenceType,
-    ClassBindingInfo? DeclaringTypeInfo);
+    ClassBindingInfo? DeclaringTypeInfo,
+    string? ReadCastTypeFullName = null);

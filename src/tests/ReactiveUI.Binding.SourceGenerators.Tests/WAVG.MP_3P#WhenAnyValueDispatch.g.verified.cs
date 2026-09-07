@@ -28,7 +28,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             property3Expression = property3Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property3Expression.Substring(7) : property3Expression;
 
             // Allow user-registered plugins with higher affinity to override generated observation
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties.MyViewModel), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties.MyViewModel), "Name", 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties.MyViewModel), "Age", 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyThreeProperties.MyViewModel), "Score", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenAnyValue(objectToMonitor, property1, property2, property3);
             }

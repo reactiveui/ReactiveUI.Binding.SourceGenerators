@@ -19,11 +19,38 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class ObservationCodeGenerator
 {
+    /// <summary>Opens the lambda that reads the property back off a before-change notification.</summary>
+    private const string ChangingReaderLambdaOpen = "                (global::System.ComponentModel.INotifyPropertyChanging __o) => ((";
+
+    /// <summary>Passes the observed object to a before-change observation.</summary>
+    private const string ChangingSourceArgument = "                (global::System.ComponentModel.INotifyPropertyChanging)obj,";
+
+    /// <summary>Opens the branch a chain stage takes while its parent is present.</summary>
+    private const string ObservableTrueBranchOpen = "                ? (global::System.IObservable<";
+
+    /// <summary>Opens the branch a chain stage takes while its parent is null.</summary>
+    private const string ObservableFalseBranchOpen = "                : (global::System.IObservable<";
+
+    /// <summary>Tests that a chain stage's parent is present before observing it.</summary>
+    private const string ParentPresentTest = " != null";
+
+    /// <summary>Passes the observed object as the first argument of a generated call.</summary>
+    private const string MonitoredObjectArgument = "(objectToMonitor";
+
+    /// <summary>Opens the observation a property that never notifies is read through.</summary>
+    private const string UnchangingObservableOpen = ")new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<";
+
+    /// <summary>Opens a before-change observation cast to the interface the chain stage expects.</summary>
+    private const string ChangingObservableOpen = ">)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<";
+
     /// <summary>
     /// The maximum number of property expressions for which a runtime affinity check is emitted.
     /// This matches the available <c>RuntimeObservationFallback</c> method signatures.
     /// </summary>
     private const int MaxAffinityFallbackPropertyCount = 3;
+
+    /// <summary>The operator every observation ends with, so consecutive equal values are suppressed.</summary>
+    private const string DistinctUntilChangedCall = "global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged";
 
     /// <summary>
     /// Returns the fully qualified type name for casting the observer parameter back to the
@@ -63,35 +90,23 @@ internal static class ObservationCodeGenerator
     /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
     /// <param name="methodPrefix">The method name prefix ("WhenChanged", "WhenChanging", or "WhenAnyValue").</param>
     /// <returns>Generated source code string, or null if no invocations.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string? Generate(
         ImmutableArray<InvocationInfo> invocations,
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features,
-        string methodPrefix)
-    {
-        if (invocations.IsDefaultOrEmpty)
-        {
-            return null;
-        }
-
-        var sb = PooledBuilder.Rent(invocations.Length * CodeGeneratorHelpers.PerInvocationBufferCapacity);
-        var supportsCallerArgExpr = features.SupportsCallerArgExpr;
-        CodeGeneratorHelpers.AppendExtensionClassHeader(sb, features);
-        _ = sb.AppendLine();
-
-        // Group invocations by their method signature
-        var groups = GroupByTypeSignature(invocations);
-
-        for (var g = 0; g < groups.Count; g++)
-        {
-            GenerateGroup(sb, groups[g], allClasses, supportsCallerArgExpr, features.StubHasExpressionParameters, methodPrefix);
-        }
-
-        CodeGeneratorHelpers.AppendExtensionClassFooter(sb);
-        _ = sb.AppendLine();
-
-        return PooledBuilder.ToStringAndReturn(sb);
-    }
+        string methodPrefix) =>
+        CodeGeneratorHelpers.GenerateDispatchFile(
+            invocations,
+            features,
+            GroupByTypeSignature,
+            (sb, group, snapshot) => GenerateGroup(
+                sb,
+                group,
+                allClasses,
+                snapshot.SupportsCallerArgExpr,
+                snapshot.StubHasExpressionParameters,
+                methodPrefix));
 
     /// <summary>Generates an observation method for a single invocation.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -110,10 +125,8 @@ internal static class ObservationCodeGenerator
     {
         var selectorParam = inv.HasSelector ? $", {GetSelectorType(inv)} selector" : string.Empty;
 
-        _ = sb.AppendLine($$"""
-                                private static global::System.IObservable<{{inv.ReturnTypeFullName}}> __{{prefix}}_{{suffix}}({{inv.SourceTypeFullName}} obj{{selectorParam}})
-                                {
-                        """);
+        _ = sb.Append("        private static global::System.IObservable<").Append(inv.ReturnTypeFullName).Append("> __").Append(prefix).Append('_')
+            .Append(suffix).Append('(').Append(inv.SourceTypeFullName).Append(" obj").Append(selectorParam).AppendLine(")").AppendLine("        {");
 
         if (inv.PropertyPaths.Length == 1)
         {
@@ -246,9 +259,7 @@ internal static class ObservationCodeGenerator
         bool isBeforeChange)
     {
         var segment = path[0];
-        var plugin = classInfo is not null
-            ? ObservationPluginRegistry.GetBestPlugin(classInfo, segment.PropertyName)
-            : null;
+        var plugin = ResolveRootPlugin(classInfo, segment);
 
         if (plugin is not null)
         {
@@ -256,16 +267,16 @@ internal static class ObservationCodeGenerator
         }
         else if (IsINPChanging(classInfo) && isBeforeChange)
         {
-            _ = sb
-                .Append($"new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>((")
-                .Append($"""global::System.ComponentModel.INotifyPropertyChanging)obj, "{segment.PropertyName}", (global::System.ComponentModel.INotifyPropertyChanging __o) => (""")
-                .Append($"({GetTypeCastName(classInfo)})__o).{segment.PropertyName})");
+            _ = sb.Append("new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<").Append(segment.PropertyTypeFullName).Append(">((")
+                .Append("global::System.ComponentModel.INotifyPropertyChanging)obj, \"").Append(segment.PropertyName)
+                .Append("\", (global::System.ComponentModel.INotifyPropertyChanging __o) => (").Append('(').Append(GetTypeCastName(classInfo))
+                .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).Append(')');
         }
         else
         {
             var propertyAccess = $"obj.{segment.PropertyName}";
-            _ = sb.Append(
-                $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>({propertyAccess})");
+            _ = sb.Append("new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<").Append(segment.PropertyTypeFullName)
+                .Append(">(").Append(propertyAccess).Append(')');
         }
     }
 
@@ -286,9 +297,7 @@ internal static class ObservationCodeGenerator
         string varName)
     {
         var segment = path[0];
-        var plugin = classInfo is not null
-            ? ObservationPluginRegistry.GetBestPlugin(classInfo, segment.PropertyName)
-            : null;
+        var plugin = ResolveRootPlugin(classInfo, segment);
 
         if (plugin is not null)
         {
@@ -302,18 +311,18 @@ internal static class ObservationCodeGenerator
         }
         else if (IsINPChanging(classInfo) && isBeforeChange)
         {
-            _ = sb.Append($"""
-                                   var {varName} = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segment.PropertyTypeFullName}>(
-                                       (global::System.ComponentModel.INotifyPropertyChanging)obj,
-                                       "{segment.PropertyName}",
-                                       (global::System.ComponentModel.INotifyPropertyChanging __o) => (({GetTypeCastName(classInfo)})__o).{segment.PropertyName});
-                       """);
+            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(varName).Append(" = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<")
+                .Append(segment.PropertyTypeFullName).AppendLine(">(")
+                .AppendLine(ChangingSourceArgument).Append(GeneratedSyntax.QuotedArgumentOpen)
+                .Append(segment.PropertyName).AppendLine("\",")
+                .Append(ChangingReaderLambdaOpen).Append(GetTypeCastName(classInfo))
+                .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).Append(");");
         }
         else
         {
             var propertyAccess = $"obj.{segment.PropertyName}";
-            _ = sb.Append(
-                $"            var {varName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>({propertyAccess});");
+            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(varName).Append(" = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<")
+                .Append(segment.PropertyTypeFullName).Append(">(").Append(propertyAccess).Append(");");
         }
     }
 
@@ -336,9 +345,7 @@ internal static class ObservationCodeGenerator
         // First segment: observe root object for first property
         var seg0 = path[0];
         var obs0Var = $"{varName}_s0";
-        var rootPlugin = classInfo is not null
-            ? ObservationPluginRegistry.GetBestPlugin(classInfo, seg0.PropertyName)
-            : null;
+        var rootPlugin = ResolveRootPlugin(classInfo, seg0);
 
         if (rootPlugin is not null)
         {
@@ -346,26 +353,28 @@ internal static class ObservationCodeGenerator
         }
         else if (IsINPChanging(classInfo) && isBeforeChange)
         {
-            _ = sb.AppendLine($"""
-            var {obs0Var} = (global::System.IObservable<{seg0.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{seg0.PropertyTypeFullName}>(
-                (global::System.ComponentModel.INotifyPropertyChanging)obj,
-                "{seg0.PropertyName}",
-                (global::System.ComponentModel.INotifyPropertyChanging __o) => (({GetTypeCastName(classInfo)})__o).{seg0.PropertyName});
-""");
+            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(obs0Var).Append(" = (global::System.IObservable<").Append(seg0.PropertyTypeFullName)
+                .Append(ChangingObservableOpen).Append(seg0.PropertyTypeFullName).AppendLine(">(")
+                .AppendLine(ChangingSourceArgument).Append(GeneratedSyntax.QuotedArgumentOpen)
+                .Append(seg0.PropertyName).AppendLine("\",").Append(ChangingReaderLambdaOpen)
+                .Append(GetTypeCastName(classInfo)).Append(GeneratedSyntax.ObserverCastClose).Append(seg0.PropertyName).AppendLine(");");
         }
         else
         {
-            _ = sb
-                .Append($"            var {obs0Var} = (global::System.IObservable<{seg0.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{seg0.PropertyTypeFullName}>(obj.{seg0.PropertyName});");
+            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(obs0Var).Append(" = (global::System.IObservable<").Append(seg0.PropertyTypeFullName).Append('>')
+                .Append(UnchangingObservableOpen).Append(seg0.PropertyTypeFullName).Append(">(obj.")
+                .Append(seg0.PropertyName).AppendLine(");");
         }
 
         EmitDeepChainInnerSegments(sb, path, isBeforeChange, varName);
 
         var lastObsVar = $"{varName}_s{path.Length - 1}";
-        _ = sb.AppendLine(isBeforeChange
-            ? $"            var {varName} = {lastObsVar};"
-            : $"            var {varName} = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged({lastObsVar});");
+
+        // Distinct on both timings. The runtime engine asks for it whichever way it observes, so a
+        // before-change stream that repeated a value would emit where the runtime engine stayed quiet.
+        _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(varName)
+            .Append(" = ").Append(DistinctUntilChangedCall).Append('(')
+            .Append(lastObsVar).AppendLine(");");
     }
 
     /// <summary>
@@ -440,7 +449,7 @@ internal static class ObservationCodeGenerator
         var hasSelector = first.HasSelector;
 
         EmitOverloadSignature(sb, first, supportsCallerArgExpr, stubHasExpressionParameters, methodPrefix, propCount, hasSelector);
-        EmitStaticPrefixNormalization(sb, supportsCallerArgExpr, propCount);
+        CodeGeneratorHelpers.AppendIndexedStaticPrefixNormalization(sb, supportsCallerArgExpr, "property", propCount);
 
         // Emit runtime affinity check: allow user-registered plugins to override generated observation.
         // Only emit for overloads with <= 3 properties, matching RuntimeObservationFallback signatures.
@@ -465,8 +474,8 @@ internal static class ObservationCodeGenerator
     /// <param name="methodPrefix">The method name prefix.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GenerateRuntimeFallback(StringBuilder sb, string methodPrefix) =>
-    sb.AppendLine(
-    $"            throw new global::System.InvalidOperationException(\"No generated {methodPrefix} dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.\");");
+    sb.Append("            throw new global::System.InvalidOperationException(\"No generated ").Append(methodPrefix)
+        .AppendLine(" dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.\");");
 
     /// <summary>
     /// Emits a runtime affinity check at the top of a concrete overload method body.
@@ -491,14 +500,65 @@ internal static class ObservationCodeGenerator
 
         _ = sb.AppendLine(
         "            // Allow user-registered plugins with higher affinity to override generated observation")
-        .AppendLine(
-        $"            if ({ObservationAffinityChecker}.HasHigherAffinityPlugin(typeof({first.SourceTypeFullName}), {generatedAffinity}, {(isBeforeChange ? "true" : "false")}))")
+        .Append("            if (")
+        .Append(AffinityCondition(first, generatedAffinity, isBeforeChange))
+        .AppendLine(")")
         .AppendLine("            {");
 
         EmitAffinityFallbackReturn(sb, first, methodPrefix, propCount, hasSelector);
 
         _ = sb.AppendLine("            }")
         .AppendLine();
+    }
+
+    /// <summary>Renders the condition that hands an observation to the runtime engine.</summary>
+    /// <param name="first">The first invocation in the group, which fixes the observed paths.</param>
+    /// <param name="generatedAffinity">The affinity of the source generator's selected plugin.</param>
+    /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
+    /// <returns>The rendered condition, without surrounding parentheses.</returns>
+    /// <remarks>
+    /// One test per link of every observed path. A plugin scores a type and a property together, so a chain
+    /// can pick a different mechanism at every step and a registration that wins at any one of them takes the
+    /// whole observation. The property name is what makes the question answerable: the WPF, WinUI, WinForms
+    /// and KVO plugins all answer 0 for a property their mechanism does not reach, whatever the type.
+    /// </remarks>
+    internal static string AffinityCondition(InvocationInfo first, int generatedAffinity, bool isBeforeChange)
+    {
+        var builder = new StringBuilder();
+        var beforeChanged = isBeforeChange ? "true" : "false";
+        var paths = first.PropertyPaths;
+        var written = 0;
+
+        for (var p = 0; p < paths.Length; p++)
+        {
+            var path = paths[p];
+            for (var s = 0; s < path.Length; s++)
+            {
+                var segment = path[s];
+                var observedType = s == 0 ? first.SourceTypeFullName : segment.DeclaringTypeFullName;
+
+                if (written > 0)
+                {
+                    _ = builder.AppendLine().Append("                || ");
+                }
+
+                _ = builder
+                    .Append(ObservationAffinityChecker)
+                    .Append(".HasHigherAffinityPlugin(typeof(")
+                    .Append(observedType)
+                    .Append("), \"")
+                    .Append(segment.PropertyName)
+                    .Append("\", ")
+                    .Append(SegmentAffinity(segment, generatedAffinity))
+                    .Append(", ")
+                    .Append(beforeChanged)
+                    .Append(')');
+
+                written++;
+            }
+        }
+
+        return builder.ToString();
     }
 
     /// <summary>
@@ -524,24 +584,23 @@ internal static class ObservationCodeGenerator
         var propArgs = new PooledStringBuilder();
         for (var i = 0; i < propCount; i++)
         {
-            _ = propArgs.Append($", property{i + 1}");
+            _ = propArgs.Append(", property").Append(i + 1);
         }
 
         if (!hasSelector)
         {
             // No selector: direct call to RuntimeObservationFallback
-            _ = sb.AppendLine(
-            $"                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.{fallbackMethod}(objectToMonitor{propArgs});");
+            _ = sb.Append("                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.")
+            .Append(fallbackMethod).Append(MonitoredObjectArgument).Append(propArgs).AppendLine(");");
         }
         else if (propCount == 1)
         {
             // Single property with selector: wrap fallback with MapSignal
             var propType = first.PropertyPaths[0][first.PropertyPaths[0].Length - 1].PropertyTypeFullName;
-            _ = sb.AppendLine(
-            $"                return new global::ReactiveUI.Primitives.Signals.MapSignal<{propType}, {first.ReturnTypeFullName}>(")
-            .AppendLine(
-            $"                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.{fallbackMethod}(objectToMonitor{propArgs}),")
-            .AppendLine("                    selector);");
+            _ = sb.Append("                return new global::ReactiveUI.Primitives.Signals.MapSignal<").Append(propType).Append(", ")
+                .Append(first.ReturnTypeFullName).AppendLine(">(")
+                .Append("                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.").Append(fallbackMethod)
+                .Append(MonitoredObjectArgument).Append(propArgs).AppendLine("),").AppendLine("                    selector);");
         }
         else
         {
@@ -570,11 +629,11 @@ internal static class ObservationCodeGenerator
                 }
             }
 
-            _ = sb.AppendLine(
-            $"                return new global::ReactiveUI.Primitives.Signals.MapSignal<{valuesType}, {first.ReturnTypeFullName}>(")
-            .AppendLine(
-            $"                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.{fallbackMethod}(objectToMonitor{propArgs}),")
-            .AppendLine($"                    __t => selector({selectorArgs}));");
+            _ = sb.Append("                return new global::ReactiveUI.Primitives.Signals.MapSignal<").Append(valuesType).Append(", ")
+                .Append(first.ReturnTypeFullName).AppendLine(">(")
+                .Append("                    global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.").Append(fallbackMethod)
+                .Append(MonitoredObjectArgument).Append(propArgs).AppendLine("),").Append("                    __t => selector(").Append(selectorArgs)
+                .AppendLine("));");
 
             valuesType.Return();
             selectorArgs.Return();
@@ -612,17 +671,16 @@ internal static class ObservationCodeGenerator
         else if (IsINPChanging(classInfo) && isBeforeChange)
         {
             // INPChanging-only type (no INPC, no IReactiveObject) — can observe before-change
-            _ = sb.Append($"""
-            return new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{inv.ReturnTypeFullName}>(
-                (global::System.ComponentModel.INotifyPropertyChanging)obj,
-                "{propertyName}",
-                (global::System.ComponentModel.INotifyPropertyChanging __o) => (({inv.SourceTypeFullName})__o).{propertyName});
-""");
+            _ = sb.Append("            return new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<")
+                .Append(inv.ReturnTypeFullName).AppendLine(">(").AppendLine(ChangingSourceArgument)
+                .Append(GeneratedSyntax.QuotedArgumentOpen).Append(propertyName).AppendLine("\",")
+                .Append(ChangingReaderLambdaOpen).Append(inv.SourceTypeFullName)
+                .Append(GeneratedSyntax.ObserverCastClose).Append(propertyName).Append(");");
         }
         else
         {
-            _ = sb.Append(
-                $"            return new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{inv.ReturnTypeFullName}>({propertyAccess});");
+            _ = sb.Append("            return new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<")
+                .Append(inv.ReturnTypeFullName).Append(">(").Append(propertyAccess).Append(");");
         }
     }
 
@@ -639,9 +697,7 @@ internal static class ObservationCodeGenerator
     {
         var path = inv.PropertyPaths[0];
         var seg0 = path[0];
-        var rootPlugin = classInfo is not null
-            ? ObservationPluginRegistry.GetBestPlugin(classInfo, seg0.PropertyName)
-            : null;
+        var rootPlugin = ResolveRootPlugin(classInfo, seg0);
 
         // First segment: observe root object for first property
         if (rootPlugin is not null)
@@ -650,26 +706,24 @@ internal static class ObservationCodeGenerator
         }
         else if (IsINPChanging(classInfo) && isBeforeChange)
         {
-            _ = sb.AppendLine($"""
-            var __obs0 = (global::System.IObservable<{seg0.PropertyTypeFullName}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{seg0.PropertyTypeFullName}>(
-                (global::System.ComponentModel.INotifyPropertyChanging)obj,
-                "{seg0.PropertyName}",
-                (global::System.ComponentModel.INotifyPropertyChanging __o) => (({GetTypeCastName(classInfo)})__o).{seg0.PropertyName});
-""");
+            _ = sb.Append("            var __obs0 = (global::System.IObservable<").Append(seg0.PropertyTypeFullName)
+                .Append(ChangingObservableOpen).Append(seg0.PropertyTypeFullName).AppendLine(">(")
+                .AppendLine(ChangingSourceArgument).Append(GeneratedSyntax.QuotedArgumentOpen)
+                .Append(seg0.PropertyName).AppendLine("\",").Append(ChangingReaderLambdaOpen)
+                .Append(GetTypeCastName(classInfo)).Append(GeneratedSyntax.ObserverCastClose).Append(seg0.PropertyName).AppendLine(");");
         }
         else
         {
-            _ = sb
-                .Append($"            var __obs0 = (global::System.IObservable<{seg0.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{seg0.PropertyTypeFullName}>(obj.{seg0.PropertyName});");
+            _ = sb.Append("            var __obs0 = (global::System.IObservable<").Append(seg0.PropertyTypeFullName).Append('>')
+                .Append(UnchangingObservableOpen).Append(seg0.PropertyTypeFullName).Append(">(obj.")
+                .Append(seg0.PropertyName).AppendLine(");");
         }
 
         EmitObservationChainInnerSegments(sb, path, isBeforeChange);
 
         var lastObs = $"__obs{path.Length - 1}";
-        _ = sb.Append(isBeforeChange
-            ? $"            return {lastObs};"
-            : $"            return global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged({lastObs});");
+        _ = sb.Append("            return ").Append(DistinctUntilChangedCall).Append('(')
+            .Append(lastObs).Append(");");
     }
 
     /// <summary>
@@ -704,8 +758,9 @@ internal static class ObservationCodeGenerator
             else
             {
                 var propertyAccess = $"{rootVar}.{segment.PropertyName}";
-                _ = sb.AppendLine(
-                    $"        var {variableName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{propertyTypeFullName}>({propertyAccess});");
+                _ = sb.Append(GeneratedSyntax.InlineLocalDeclaration).Append(variableName)
+                    .Append(" = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<").Append(propertyTypeFullName).Append(">(")
+                    .Append(propertyAccess).AppendLine(");");
             }
         }
         else
@@ -728,6 +783,43 @@ internal static class ObservationCodeGenerator
         segment.DeclaringTypeInfo is null
             ? null
             : ObservationPluginRegistry.GetBestPlugin(segment.DeclaringTypeInfo, segment.PropertyName);
+
+    /// <summary>Resolves the mechanism for a property observed directly on the type a call site names.</summary>
+    /// <param name="classInfo">The type the call site observes, or null when it was never detected.</param>
+    /// <param name="segment">The property being observed.</param>
+    /// <returns>The mechanism to observe it through, or null when nothing reaches it.</returns>
+    /// <remarks>
+    /// The type a call site names advertises the mechanism, but only the type that declares the property knows
+    /// whether that property takes part in it - and the two differ for an inherited property, which the named
+    /// type's own member list does not mention. Answering from the named type alone treats every inherited
+    /// property as participating, which for a dependency object means emitting a companion field that an
+    /// inherited plain property does not have, and the consumer's build is what discovers it.
+    /// </remarks>
+    private static IObservationPlugin? ResolveRootPlugin(ClassBindingInfo? classInfo, PropertyPathSegment segment)
+    {
+        if (classInfo is null)
+        {
+            return null;
+        }
+
+        return ObservedProperties.IsDeclaredByConsumer(classInfo, segment.PropertyName)
+               || segment.DeclaringTypeInfo is null
+            ? ObservationPluginRegistry.GetBestPlugin(classInfo, segment.PropertyName)
+            : ObservationPluginRegistry.GetBestPlugin(segment.DeclaringTypeInfo, segment.PropertyName);
+    }
+
+    /// <summary>Reads the affinity of the mechanism the generator picked for one link of a path.</summary>
+    /// <param name="segment">The link being observed.</param>
+    /// <param name="fallbackAffinity">The affinity to report when the link's declaring type was never detected.</param>
+    /// <returns>The generated affinity for that link.</returns>
+    /// <remarks>
+    /// A detected type with no plugin observes by a plain read, which any registration outranks, so it scores
+    /// zero rather than inheriting the group's affinity.
+    /// </remarks>
+    private static int SegmentAffinity(PropertyPathSegment segment, int fallbackAffinity) =>
+        segment.DeclaringTypeInfo is null
+            ? fallbackAffinity
+            : ResolveSegmentPlugin(segment)?.Affinity ?? 0;
 
     /// <summary>
     /// Chains the segments after the root for the standalone observation method, which names its
@@ -777,27 +869,24 @@ internal static class ObservationCodeGenerator
             }
             else if (IsINPChanging(segInfo) && isBeforeChange)
             {
-                _ = sb.AppendLine()
-                    .AppendLine($"""
-                                         var {curVar} = {OpenChainSwitchMap(seg, segType, prevVar)}
-                                             {lambdaParam} => {lambdaParam} != null
-                                                 ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segType}>(
-                                                     (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
-                                                     "{seg.PropertyName}",
-                                                     (global::System.ComponentModel.INotifyPropertyChanging __o) => (({seg.DeclaringTypeFullName})__o).{seg.PropertyName})
-                                                 : (global::System.IObservable<{segType}>){nullParentObservable});
-                                 """);
+                _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ").Append(OpenChainSwitchMap(seg, segType, prevVar)).AppendLine()
+                    .Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
+                    .Append(ObservableTrueBranchOpen).Append(segType)
+                    .Append(ChangingObservableOpen).Append(segType).AppendLine(">(")
+                    .Append("                    (global::System.ComponentModel.INotifyPropertyChanging)").Append(lambdaParam).AppendLine(",")
+                    .Append("                    \"").Append(seg.PropertyName).AppendLine("\",")
+                    .Append("                    (global::System.ComponentModel.INotifyPropertyChanging __o) => ((").Append(seg.DeclaringTypeFullName)
+                    .Append(GeneratedSyntax.ObserverCastClose).Append(seg.PropertyName).AppendLine(")").Append(ObservableFalseBranchOpen).Append(segType)
+                    .Append(">)").Append(nullParentObservable).AppendLine(");");
             }
             else
             {
-                _ = sb.AppendLine()
-                    .AppendLine($"""
-                                         var {curVar} = {OpenChainSwitchMap(seg, segType, prevVar)}
-                                             {lambdaParam} => {lambdaParam} != null
-                                                 ? (global::System.IObservable<{segType}>)
-                                                     new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>((({seg.DeclaringTypeFullName}){lambdaParam}).{seg.PropertyName})
-                                                 : (global::System.IObservable<{segType}>){nullParentObservable});
-                                 """);
+                _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curVar).Append(" = ").Append(OpenChainSwitchMap(seg, segType, prevVar)).AppendLine()
+                    .Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
+                    .Append(ObservableTrueBranchOpen).Append(segType).AppendLine(">)")
+                    .Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((")
+                    .Append(seg.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").").Append(seg.PropertyName).AppendLine(")")
+                    .Append(ObservableFalseBranchOpen).Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
             }
         }
     }
@@ -850,27 +939,24 @@ internal static class ObservationCodeGenerator
             }
             else if (IsINPChanging(segInfo) && isBeforeChange)
             {
-                _ = sb.AppendLine()
-                    .AppendLine($"""
-                                         var {curObsVar} = {OpenChainSwitchMap(seg, segType, prevObsVar)}
-                                             {lambdaParam} => {lambdaParam} != null
-                                                 ? (global::System.IObservable<{segType}>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<{segType}>(
-                                                     (global::System.ComponentModel.INotifyPropertyChanging){lambdaParam},
-                                                     "{seg.PropertyName}",
-                                                     (global::System.ComponentModel.INotifyPropertyChanging __o) => (({seg.DeclaringTypeFullName})__o).{seg.PropertyName})
-                                                 : (global::System.IObservable<{segType}>){nullParentObservable});
-                                 """);
+                _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curObsVar).Append(" = ").Append(OpenChainSwitchMap(seg, segType, prevObsVar))
+                    .AppendLine().Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
+                    .Append(ObservableTrueBranchOpen).Append(segType)
+                    .Append(ChangingObservableOpen).Append(segType).AppendLine(">(")
+                    .Append("                    (global::System.ComponentModel.INotifyPropertyChanging)").Append(lambdaParam).AppendLine(",")
+                    .Append("                    \"").Append(seg.PropertyName).AppendLine("\",")
+                    .Append("                    (global::System.ComponentModel.INotifyPropertyChanging __o) => ((").Append(seg.DeclaringTypeFullName)
+                    .Append(GeneratedSyntax.ObserverCastClose).Append(seg.PropertyName).AppendLine(")").Append(ObservableFalseBranchOpen).Append(segType)
+                    .Append(">)").Append(nullParentObservable).AppendLine(");");
             }
             else
             {
-                _ = sb.AppendLine()
-                    .AppendLine($"""
-                  var {curObsVar} = {OpenChainSwitchMap(seg, segType, prevObsVar)}
-                      {lambdaParam} => {lambdaParam} != null
-                          ? (global::System.IObservable<{segType}>)
-                              new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>((({seg.DeclaringTypeFullName}){lambdaParam}).{seg.PropertyName})
-                          : (global::System.IObservable<{segType}>){nullParentObservable});
-          """);
+                _ = sb.AppendLine().Append(GeneratedSyntax.InlineLocalDeclaration).Append(curObsVar).Append(" = ").Append(OpenChainSwitchMap(seg, segType, prevObsVar))
+                    .AppendLine().Append("            ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
+                    .Append(ObservableTrueBranchOpen).Append(segType).AppendLine(">)")
+                    .Append("                    new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((")
+                    .Append(seg.DeclaringTypeFullName).Append(')').Append(lambdaParam).Append(").").Append(seg.PropertyName).AppendLine(")")
+                    .Append(ObservableFalseBranchOpen).Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
             }
         }
     }
@@ -902,9 +988,9 @@ internal static class ObservationCodeGenerator
         }
         else
         {
-            _ = sb
-                .Append($"            var __{variableName}_s0 = (global::System.IObservable<{seg0.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{seg0.PropertyTypeFullName}>({rootVar}.{seg0.PropertyName});");
+            _ = sb.Append("            var __").Append(variableName).Append("_s0 = (global::System.IObservable<").Append(seg0.PropertyTypeFullName)
+                .Append('>').Append(UnchangingObservableOpen).Append(seg0.PropertyTypeFullName)
+                .Append(">(").Append(rootVar).Append('.').Append(seg0.PropertyName).AppendLine(");");
         }
 
         for (var s = 1; s < propertyPath.Length; s++)
@@ -930,19 +1016,19 @@ internal static class ObservationCodeGenerator
 
             var segType = seg.PropertyTypeFullName;
             var declType = seg.DeclaringTypeFullName;
-            _ = sb.AppendLine()
-                .AppendLine($"""
-                                 var {curVar} = {OpenChainSwitchMap(seg, segType, prevVar)}
-                                     {lambdaParam} => {lambdaParam} != null
-                                         ? (global::System.IObservable<{segType}>)
-                                             new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>((({declType}){lambdaParam}).{seg.PropertyName})
-                                         : (global::System.IObservable<{segType}>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType})));
-                             """);
+            _ = sb.AppendLine().Append("    var ").Append(curVar).Append(" = ").Append(OpenChainSwitchMap(seg, segType, prevVar)).AppendLine()
+                .Append("        ").Append(lambdaParam).Append(" => ").Append(lambdaParam).AppendLine(ParentPresentTest)
+                .Append("            ? (global::System.IObservable<").Append(segType).AppendLine(">)")
+                .Append("                new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(((")
+                .Append(declType).Append(')').Append(lambdaParam).Append(").").Append(seg.PropertyName).AppendLine(")")
+                .Append("            : (global::System.IObservable<").Append(segType)
+                .Append(">)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<").Append(segType).Append(">(default(").Append(segType)
+                .AppendLine(")));");
         }
 
         var lastSeg = $"__{variableName}_s{propertyPath.Length - 1}";
-        _ = sb.AppendLine(
-            $"        var {variableName} = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged({lastSeg});");
+        _ = sb.Append(GeneratedSyntax.InlineLocalDeclaration).Append(variableName).Append(" = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(")
+            .Append(lastSeg).AppendLine(");");
     }
 
     /// <summary>
@@ -1059,24 +1145,21 @@ internal static class ObservationCodeGenerator
         int propCount,
         bool hasSelector)
     {
-        _ = sb.AppendLine($"""
-                               /// <summary>
-                               /// Concrete typed overload for {methodPrefix} on {first.SourceTypeFullName}.
-                               /// </summary>
-                               public static global::System.IObservable<{first.ReturnTypeFullName}> {methodPrefix}(
-                                   this {first.SourceTypeFullName} objectToMonitor,
-                       """);
+        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for ").Append(methodPrefix).Append(" on ")
+            .Append(first.SourceTypeFullName).AppendLine(".").AppendLine("        /// </summary>")
+            .Append("        public static global::System.IObservable<").Append(first.ReturnTypeFullName).Append("> ").Append(methodPrefix)
+            .AppendLine("(").Append("            this ").Append(first.SourceTypeFullName).AppendLine(" objectToMonitor,");
 
         for (var i = 0; i < propCount; i++)
         {
             var type = first.PropertyPaths[i][first.PropertyPaths[i].Length - 1].PropertyTypeFullName;
-            _ = sb.AppendLine(
-                $"            global::System.Linq.Expressions.Expression<global::System.Func<{first.SourceTypeFullName}, {type}>> property{i + 1},");
+            _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<").Append(first.SourceTypeFullName).Append(", ")
+                .Append(type).Append(">> property").Append(i + 1).AppendLine(",");
         }
 
         if (hasSelector)
         {
-            _ = sb.AppendLine($"            {GetSelectorType(first)} selector,");
+            _ = sb.Append("            ").Append(GetSelectorType(first)).AppendLine(" selector,");
         }
 
         if (stubHasExpressionParameters)
@@ -1096,27 +1179,6 @@ internal static class ObservationCodeGenerator
                                   [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
                               {
                       """);
-    }
-
-    /// <summary>Emits normalization that strips the <c>static</c> prefix from CallerArgumentExpression values.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
-    /// <param name="propCount">The number of property expressions.</param>
-    private static void EmitStaticPrefixNormalization(StringBuilder sb, bool supportsCallerArgExpr, int propCount)
-    {
-        if (!supportsCallerArgExpr)
-        {
-            return;
-        }
-
-        for (var i = 0; i < propCount; i++)
-        {
-            var paramName = $"property{i + 1}Expression";
-            _ = sb.AppendLine(
-                $"""            {paramName} = {paramName}.StartsWith("static ", global::System.StringComparison.Ordinal) ? {paramName}.Substring(7) : {paramName};""");
-        }
-
-        _ = sb.AppendLine();
     }
 
     /// <summary>Emits the if/else-if dispatch table that routes each matched invocation to its generated method.</summary>
@@ -1157,16 +1219,16 @@ internal static class ObservationCodeGenerator
             else
             {
                 var suffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-                _ = sb
-                    .Append($"""            {keyword} (callerLineNumber == {inv.CallerLineNumber} && callerFilePath.EndsWith("{CodeGeneratorHelpers.EscapeString(suffix)}",""")
+                _ = sb.Append("            ").Append(keyword).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber)
+                    .Append(" && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(suffix)).Append("\",")
                     .AppendLine(" global::System.StringComparison.OrdinalIgnoreCase))");
             }
 
             branchIndex++;
             _ = sb.AppendLine("            {");
             var selectorArg = hasSelector ? ", selector" : string.Empty;
-            _ = sb.AppendLine($"                return __{methodPrefix}_{MethodSuffix(inv)}(objectToMonitor{selectorArg});")
-                .AppendLine("            }");
+            _ = sb.Append("                return __").Append(methodPrefix).Append('_').Append(MethodSuffix(inv)).Append(MonitoredObjectArgument)
+                .Append(selectorArg).AppendLine(");").AppendLine("            }");
         }
     }
 
@@ -1181,11 +1243,11 @@ internal static class ObservationCodeGenerator
         string condition,
         int propCount)
     {
-        _ = sb.Append($"            {condition} (");
+        _ = sb.Append("            ").Append(condition).Append(" (");
         for (var p = 0; p < propCount; p++)
         {
-            _ = sb.Append(
-                $"property{p + 1}Expression == \"{CodeGeneratorHelpers.EscapeString(inv.ExpressionTexts[p])}\"");
+            _ = sb.Append("property").Append(p + 1).Append("Expression == \"").Append(CodeGeneratorHelpers.EscapeString(inv.ExpressionTexts[p]))
+                .Append('"');
             if (p < propCount - 1)
             {
                 _ = sb.Append(" && ");

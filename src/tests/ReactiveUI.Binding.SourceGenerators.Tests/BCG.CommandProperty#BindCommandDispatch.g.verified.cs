@@ -77,13 +77,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             }
 
 
+            var __originalCommand = view.SaveButton.Command;
+            var __originalParameter = view.SaveButton.CommandParameter;
             var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
             var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
             {
                 serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                 view.SaveButton.Command = cmd;
             });
-            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial);
+
+            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(
+                new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial),
+                new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>
+                {
+                    view.SaveButton.CommandParameter = __originalParameter;
+                    view.SaveButton.Command = __originalCommand;
+                }));
         }
 
     }

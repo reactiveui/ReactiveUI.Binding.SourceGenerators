@@ -38,10 +38,13 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains(DistinctUntilChangedFragment);
     }
 
-    /// <summary>Verifies GenerateDeepChainObservation for before-change does not add DistinctUntilChanged.</summary>
+    /// <summary>
+    /// Before-change observation is distinct too. The runtime engine asks for it whichever way it observes, so
+    /// a before-change stream that repeated a value would emit where the runtime engine stayed quiet.
+    /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateDeepChainObservation_BeforeChange_NoDistinctUntilChanged()
+    public async Task GenerateDeepChainObservation_BeforeChange_SuppressesRepeatedValues()
     {
         var sb = new StringBuilder();
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
@@ -60,7 +63,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains("PropertyChanging");
-        await Assert.That(result).DoesNotContain(DistinctUntilChangedName);
+        await Assert.That(result).Contains(DistinctUntilChangedName);
     }
 
     /// <summary>Verifies GenerateDeepChainVariable generates variable declarations for deep chain.</summary>
@@ -109,9 +112,7 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains($"{ImmutableEmptySignalName}<{StringTypeName}>.Instance");
     }
 
-    /// <summary>
-    /// Verifies GenerateDeepChainVariable with isBeforeChange=true generates PropertyChanging code and no DistinctUntilChanged.
-    /// </summary>
+    /// <summary>A before-change chain observes PropertyChanging, and suppresses repeated values as the runtime engine does.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenerateDeepChainVariable_BeforeChange_GeneratesPropertyChangingCode()
@@ -127,7 +128,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains("PropertyChanging");
-        await Assert.That(result).DoesNotContain(DistinctUntilChangedName);
+        await Assert.That(result).Contains(DistinctUntilChangedName);
     }
 
     /// <summary>Verifies EmitInlineObservation with single property INPC generates PropertyObservable.</summary>
@@ -156,7 +157,7 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>Verifies EmitInlineObservation with single property and no INPC generates ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitInlineObservation_SingleProperty_NoINPC_GeneratesImmediateReturnSignal()
+    public async Task EmitInlineObservation_SingleProperty_NoINPC_GeneratesTheUnchangingValue()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
@@ -173,7 +174,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(SourceObsDeclaration);
-        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies EmitInlineObservation with a deep chain generates a switch-map stage.</summary>

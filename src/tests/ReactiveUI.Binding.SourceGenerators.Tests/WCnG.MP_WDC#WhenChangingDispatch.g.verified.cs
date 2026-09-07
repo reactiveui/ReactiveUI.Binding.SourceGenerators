@@ -26,7 +26,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             property2Expression = property2Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property2Expression.Substring(7) : property2Expression;
 
             // Allow user-registered plugins with higher affinity to override generated observation
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel), 5, true))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel), "Address", 5, true)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel), "City", 5, true)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel), "Name", 5, true))
             {
                 return new global::ReactiveUI.Primitives.Signals.MapSignal<global::ReactiveUI.Binding.PropertyValues<string, string>, string>(
                     global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanging(objectToMonitor, property1, property2),
@@ -54,7 +56,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     "City",
                     (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel)__o).City)
                 : (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
-            var __propObs0 = __propObs0_s1;
+            var __propObs0 = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__propObs0_s1);
 
 
             var __propObs1 = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(

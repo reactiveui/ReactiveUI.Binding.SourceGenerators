@@ -44,6 +44,9 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
     /// <summary>Whether consecutive equal leaf values are suppressed.</summary>
     private readonly bool _isDistinct;
 
+    /// <summary>Whether the warning a property with no notification mechanism raises is suppressed.</summary>
+    private readonly bool _suppressWarnings;
+
     /// <summary>Initializes a new instance of the <see cref="ExpressionChainSink{TSender, TValue}"/> class.</summary>
     /// <param name="source">The root object of the chain.</param>
     /// <param name="expression">The full expression surfaced on the emitted change.</param>
@@ -51,13 +54,15 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
     /// <param name="beforeChange">Whether values are observed before they change.</param>
     /// <param name="skipInitial">Whether the initial value is suppressed.</param>
     /// <param name="isDistinct">Whether consecutive equal leaf values are suppressed.</param>
+    /// <param name="suppressWarnings">Whether the warning an unobservable property raises is suppressed.</param>
     public ExpressionChainSink(
         TSender? source,
         Expression? expression,
         Expression[] links,
         bool beforeChange,
         bool skipInitial,
-        bool isDistinct)
+        bool isDistinct,
+        bool suppressWarnings)
     {
         ArgumentExceptionHelper.ThrowIfNull(links);
         _source = source;
@@ -66,6 +71,7 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
         _beforeChange = beforeChange;
         _skipInitial = skipInitial;
         _isDistinct = isDistinct;
+        _suppressWarnings = suppressWarnings;
     }
 
     /// <inheritdoc/>
@@ -73,7 +79,16 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);
 
-        var sink = new Sink(observer, _source, _expression, _links, _beforeChange, _skipInitial, _isDistinct);
+        var sink = new Sink(
+            observer,
+            new ExpressionChainParameters<TSender>(
+                _source,
+                _expression,
+                _links,
+                _beforeChange,
+                _skipInitial,
+                _isDistinct,
+                _suppressWarnings));
         sink.Run();
         return sink;
     }
@@ -103,11 +118,22 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
         /// <summary>Whether consecutive equal leaf values are suppressed.</summary>
         private readonly bool _isDistinct;
 
+        /// <summary>Whether the warning a property with no notification mechanism raises is suppressed.</summary>
+        private readonly bool _suppressWarnings;
+
         /// <summary>The per-link watchers.</summary>
         private readonly Level[] _levels;
 
         /// <summary>Whether the next raw emission should be skipped (skip-initial).</summary>
         private bool _skipNext;
+
+        /// <summary>Whether the next emission is dropped if it repeats the last one.</summary>
+        /// <remarks>
+        /// Set when the kicker emits, and cleared by the emission after it. A notification that races the
+        /// subscribe-then-read window reports the value the kicker already pushed, and this collapses that
+        /// one repeat whatever the distinct setting is.
+        /// </remarks>
+        private bool _suppressNextIfSameAsLast;
 
         /// <summary>The last emitted leaf value, used by the distinct gate.</summary>
         private TValue _last = default!;
@@ -120,29 +146,20 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
 
         /// <summary>Initializes a new instance of the <see cref="Sink"/> class.</summary>
         /// <param name="downstream">The observer receiving the leaf observed changes.</param>
-        /// <param name="source">The root object of the chain.</param>
-        /// <param name="expression">The full expression surfaced on the emitted change.</param>
-        /// <param name="links">The member-access links of the chain, in order.</param>
-        /// <param name="beforeChange">Whether values are observed before they change.</param>
-        /// <param name="skipInitial">Whether the initial value is suppressed.</param>
-        /// <param name="isDistinct">Whether consecutive equal leaf values are suppressed.</param>
+        /// <param name="parameters">How the chain is to be observed.</param>
         public Sink(
             IObserver<IObservedChange<TSender, TValue>> downstream,
-            TSender? source,
-            Expression? expression,
-            Expression[] links,
-            bool beforeChange,
-            bool skipInitial,
-            bool isDistinct)
+            in ExpressionChainParameters<TSender> parameters)
         {
             _downstream = downstream;
-            _source = source;
-            _expression = expression;
-            _links = links;
-            _beforeChange = beforeChange;
-            _isDistinct = isDistinct;
-            _skipNext = skipInitial;
-            _levels = new Level[links.Length];
+            _source = parameters.Source;
+            _expression = parameters.Expression;
+            _links = parameters.Links;
+            _beforeChange = parameters.BeforeChange;
+            _isDistinct = parameters.IsDistinct;
+            _suppressWarnings = parameters.SuppressWarnings;
+            _skipNext = parameters.SkipInitial;
+            _levels = new Level[parameters.Links.Length];
         }
 
         /// <summary>Establishes the chain from the root value.</summary>
@@ -189,14 +206,16 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SetNextParent(int level, object? value) => _levels[level + 1].SetParent(value);
 
-        /// <summary>Handles a leaf raw emission: applies skip-initial, the non-null-parent filter, the cast and the distinct gate.</summary>
+        /// <summary>Handles a leaf raw emission: applies skip-initial, the non-null-parent filter, the cast, the kicker dedup and the distinct gate.</summary>
         /// <param name="parentMissing">Whether the leaf's parent was null.</param>
         /// <param name="value">The leaf value when the parent is present.</param>
-        private void Emit(bool parentMissing, object? value)
+        /// <param name="fromKicker">Whether this is the read that follows attaching a link subscription.</param>
+        private void Emit(bool parentMissing, object? value, bool fromKicker = false)
         {
             if (_skipNext)
             {
                 _skipNext = false;
+                _suppressNextIfSameAsLast = false;
                 return;
             }
 
@@ -220,14 +239,43 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
                 return;
             }
 
-            if (_isDistinct && _hasLast && EqualityComparer<TValue>.Default.Equals(typed, _last))
+            if (ShouldSuppress(typed, fromKicker))
             {
                 return;
             }
 
+            // A notification that raced the subscribe-then-read window is queued behind the gate and will
+            // report the value the kicker just pushed. Dropping the next equal value collapses that one
+            // repeat without changing what a caller sees when the value genuinely changes twice.
+            _suppressNextIfSameAsLast = fromKicker;
             _last = typed;
             _hasLast = true;
             _downstream.OnNext(new ObservedChange<TSender, TValue>(_source!, _expression, typed));
+        }
+
+        /// <summary>Decides whether an emission is dropped, by the kicker dedup or the distinct gate.</summary>
+        /// <param name="typed">The leaf value about to be emitted.</param>
+        /// <param name="fromKicker">Whether this is the read that follows attaching a link subscription.</param>
+        /// <returns><see langword="true"/> when the value is not emitted.</returns>
+        /// <remarks>The kicker itself is never dropped: it is the value the caller subscribed to receive.</remarks>
+        private bool ShouldSuppress(TValue typed, bool fromKicker)
+        {
+            if (fromKicker)
+            {
+                return false;
+            }
+
+            var repeatsLast = _hasLast && EqualityComparer<TValue>.Default.Equals(typed, _last);
+            if (_suppressNextIfSameAsLast)
+            {
+                _suppressNextIfSameAsLast = false;
+                if (repeatsLast)
+                {
+                    return true;
+                }
+            }
+
+            return _isDistinct && repeatsLast;
         }
 
         /// <summary>A single chain link's watcher: re-subscribes on parent change and reads the link's value.</summary>
@@ -286,11 +334,14 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
 
                 var link = _sink._links[_index];
 
-                // Kicker: propagate the current value immediately, then subscribe for updates.
-                Push(ReadValue(parent));
+                // Subscribe before reading, so a change between the two is reported rather than lost. The
+                // caller holds the gate, so a notification that races this window queues behind it and
+                // re-reports the value the kicker is about to push; the sink drops that one repeat.
                 _subscription.Disposable = ReactiveNotifyPropertyChangedMixins
-                    .NotifyForProperty(parent, link, _sink._beforeChange)
+                    .NotifyForProperty(parent, link, _sink._beforeChange, _sink._suppressWarnings)
                     .Subscribe(new Observer(this));
+
+                Push(ReadValue(parent), fromKicker: true);
             }
 
             /// <inheritdoc/>
@@ -326,11 +377,12 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
 
             /// <summary>Forwards this link's value to the next level, or emits it at the leaf.</summary>
             /// <param name="value">The value this link produced.</param>
-            private void Push(object? value)
+            /// <param name="fromKicker">Whether this is the read that follows attaching the subscription.</param>
+            private void Push(object? value, bool fromKicker = false)
             {
                 if (_isLeaf)
                 {
-                    _sink.Emit(parentMissing: false, value);
+                    _sink.Emit(parentMissing: false, value, fromKicker);
                 }
                 else
                 {

@@ -23,8 +23,8 @@ public class ObservableForPropertyTests
     /// <summary>The expected number of emitted changes when two notifications are produced.</summary>
     private const int ExpectedTwoChanges = 2;
 
-    /// <summary>The updated leaf value used in deep-chain tests.</summary>
-    private const int UpdatedLeafValue = 99;
+    /// <summary>The replacement leaf value used in deep-chain tests.</summary>
+    private const int ReplacementLeafValue = 99;
 
     /// <summary>Verifies that a single property emits on change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -164,7 +164,7 @@ public class ObservableForPropertyTests
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
 
         // Change the leaf value
-        fixture.Chain2!.Chain3!.Host!.SomeOtherParam = UpdatedLeafValue;
+        fixture.Chain2!.Chain3!.Host!.SomeOtherParam = ReplacementLeafValue;
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoChanges);
     }

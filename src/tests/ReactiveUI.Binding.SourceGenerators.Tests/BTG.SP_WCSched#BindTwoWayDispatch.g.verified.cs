@@ -34,8 +34,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 : targetPropertyExpression;
 
             // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel), 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView), 5, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel), "Count", 5, false)
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView), "CountText", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindTwoWay(
                     source, target, sourceProperty, targetProperty, global::ReactiveUI.Binding.Fallback.TwoWayConverters.Create(sourceToTargetConv, targetToSourceConv), scheduler, targetPropertyExpression);
@@ -86,12 +86,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(sourceBind, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.CountText, value))
+                {
+                    return;
+                }
+
                 target.CountText = value;
             }, "x => x.CountText");
 
             var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(targetBind, 1);
             var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__targetSkipped, value =>
             {
+                if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(source.Count, value))
+                {
+                    return;
+                }
+
                 source.Count = value;
             }, "x => x.Count");
 
