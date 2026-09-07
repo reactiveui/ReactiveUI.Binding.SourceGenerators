@@ -413,6 +413,43 @@ The separate analyzer package reports the following diagnostics:
 | RXUIBIND004 | Warning  | Type does not support before-change notifications (WhenChanging). WPF DependencyObjects, WinForms Components, and Android Views only support after-change notifications. |
 | RXUIBIND005 | Info     | Source type implements INotifyDataErrorInfo; validation state propagation is not generated and requires runtime engine or manual ErrorsChanged subscription.             |
 | RXUIBIND006 | Warning  | Expression contains an unsupported path segment (indexer, field, or method call). Only simple property access chains can be observed by the source generator.            |
+| RXUIBIND007 | Warning  | BindCommand control has no bindable event. Specify the `toEvent` parameter explicitly.                                                                                   |
+| RXUIBIND008 | Warning  | The property selected in a BindInteraction expression does not implement `IInteraction<TInput, TOutput>`.                                                                |
+| RXUIBIND009 | Warning  | The generated binding dispatch is out of reach from this file, so the call falls back to the runtime stub.                                                               |
+| RXUIBIND010 | Warning  | The observed path passes through a type that raises no notification, so it is read once and the observation stops following the path there.                              |
+
+## Where this differs from ReactiveUI
+
+Everything below is a deliberate difference from the reflection binding engine, and each one is here because
+generating the equivalent would put reflection back on the path that exists to remove it. Nothing else in the
+binding surface behaves differently.
+
+### `TriggerUpdate` and `signalViewUpdate` are not offered
+
+ReactiveUI's `Bind` accepts both: the first chooses which side wins the first write, the second replaces the
+view's own change stream with one the caller supplies. Neither has a generated overload, so asking for one does
+not compile rather than failing at run time.
+
+A generated binding is resolved from the two lambdas alone. An overload taking a caller-supplied stream has
+nothing to resolve at compile time and would have to hand the call to the runtime expression engine - which
+carries `[RequiresUnreferencedCode]` and breaks a `PublishAot` build for every consumer of that call site.
+
+The first write is instead decided the way ReactiveUI decides it by default: the view model side is applied
+first, and the view's own first value is then weighed against what was just written and dropped when equal.
+
+### A binding call made through a type parameter is not generated
+
+A generated overload has to name the bound types, and a call made through a type parameter names none - the
+type is only known once something closes it. Those call sites are left to the runtime stub, so a generic
+binding helper compiles and throws when it runs rather than emitting an overload naming a type parameter,
+which would fail the consumer's build outright.
+
+### A silent link in a path is reported at compile time, not at run time
+
+ReactiveUI logs a warning the first time it observes a property on a type that raises no notification.
+RXUIBIND010 reports the same thing while the consumer is building, which is the only place a generator can
+say it. The observation itself behaves the same either way: the value is read once and the path stops being
+followed at that link.
 
 ## Architecture
 

@@ -11,3 +11,4 @@
  RXUIBIND007 | Usage    | Warning  | Control has no bindable event                                                           
  RXUIBIND008 | Usage    | Warning  | Property is not an IInteraction                                                         
  RXUIBIND009 | Usage    | Warning  | Generated binding dispatch is out of reach for this file
+ RXUIBIND010 | Usage    | Warning  | Observed path passes through a type that raises no notification
