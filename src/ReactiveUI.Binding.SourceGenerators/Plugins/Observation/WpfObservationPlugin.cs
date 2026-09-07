@@ -77,8 +77,7 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
         // but we emit ImmediateReturnSignal as a safe fallback.
         if (isBeforeChange)
         {
-            _ = sb.Append(
-                $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}))");
+            _ = UnchangingObservationEmitter.AppendExpression(sb, rootVar, segment, castTypeName);
             return;
         }
 
@@ -103,8 +102,7 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
     {
         if (isBeforeChange)
         {
-            _ = sb.Append(
-                $"            var {varName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
+            _ = UnchangingObservationEmitter.AppendVariable(sb, rootVar, segment, castTypeName, varName);
             return;
         }
 
@@ -130,9 +128,8 @@ internal sealed class WpfObservationPlugin : IObservationPlugin
     {
         if (isBeforeChange)
         {
-            _ = sb
-                .Append($"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>(default({segment.PropertyTypeFullName}));");
+            _ = UnchangingObservationEmitter.AppendTypedVariable(sb, rootVar, segment, castTypeName, obsVarName)
+                .AppendLine();
             return;
         }
 

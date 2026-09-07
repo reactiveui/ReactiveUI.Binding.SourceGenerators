@@ -358,7 +358,7 @@ internal static class BindInteractionCodeGenerator
                             return serial;
                         }
 
-                        var interactionObs = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{{interactionType}}>(viewModel.{{propertyName}});
+                        var interactionObs = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{{interactionType}}>(viewModel.{{propertyName}});
                 """);
     }
 

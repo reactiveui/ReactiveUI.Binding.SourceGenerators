@@ -125,7 +125,7 @@ public partial class ObservationCodeGeneratorHelperTests
             false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies GenerateShallowPathObservation for single segment delegates to single property logic.</summary>
@@ -194,7 +194,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(PropObs0Declaration);
-        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies GenerateShallowPathObservation for before-change produces PropertyChanging code.</summary>
@@ -227,7 +227,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, classInfo, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>
@@ -245,7 +245,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, null, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>
@@ -286,7 +286,7 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>Verifies GenerateShallowObservableVariable with null classInfo generates ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateShallowObservableVariable_NullClassInfo_GeneratesImmediateReturnSignal()
+    public async Task GenerateShallowObservableVariable_NullClassInfo_GeneratesTheUnchangingValue()
     {
         var sb = new StringBuilder();
         var path = new EquatableArray<PropertyPathSegment>(
@@ -295,7 +295,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, null, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies GenerateShallowObservableVariable with IReactiveObject after-change generates PropertyObservable.</summary>

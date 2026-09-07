@@ -41,6 +41,9 @@ public class BindCommandCodeGeneratorHelperTests
     /// <summary>The <c>Volatile</c> name these tests generate against.</summary>
     private const string VolatileName = "Volatile";
 
+    /// <summary>The observation the command parameter gets when it is read from a property, without completing.</summary>
+    private const string UnchangingPropertyObservableName = "UnchangingPropertyObservable";
+
     /// <summary>Verifies CommandPropertyBindingPlugin.CanHandle returns true when HasCommandProperty is true.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -573,10 +576,10 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains("GetBinder<global::TestApp.MyButton>(true)");
     }
 
-    /// <summary>Verifies EmitCommandAffinityCheck with expression parameter emits ImmediateReturnSignal.</summary>
+    /// <summary>Verifies EmitCommandAffinityCheck with expression parameter emits the unchanging value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EmitCommandAffinityCheck_ExpressionParam_EmitsImmediateReturnSignal()
+    public async Task EmitCommandAffinityCheck_ExpressionParam_EmitsTheUnchangingValue()
     {
         const int GeneratedAffinity = 3;
         var paramPath = new EquatableArray<PropertyPathSegment>(
@@ -590,7 +593,7 @@ public class BindCommandCodeGeneratorHelperTests
         BindCommandCodeGenerator.EmitCommandAffinityCheck(sb, inv, ViewSaveButtonName, GeneratedAffinity, true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ImmediateReturnSignal<object>(viewModel.Param)");
+        await Assert.That(result).Contains($"{UnchangingPropertyObservableName}<object>(viewModel.Param)");
         await Assert.That(result).Contains("HasHigherAffinityPlugin<global::TestApp.MyButton>(3, true)");
     }
 
@@ -624,10 +627,10 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains("MapSignal<global::System.String, object>");
     }
 
-    /// <summary>Verifies BuildParameterObservableExpression returns ImmediateReturnSignal for expression parameter.</summary>
+    /// <summary>Verifies BuildParameterObservableExpression returns the unchanging value for an expression parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BuildParameterObservableExpression_ExpressionParam_ReturnsImmediateReturnSignal()
+    public async Task BuildParameterObservableExpression_ExpressionParam_ReturnsTheUnchangingValue()
     {
         var paramPath = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment(ParamName)]);
@@ -638,7 +641,7 @@ public class BindCommandCodeGeneratorHelperTests
 
         var result = BindCommandCodeGenerator.BuildParameterObservableExpression(inv);
 
-        await Assert.That(result).Contains("ImmediateReturnSignal<object>(viewModel.Param)");
+        await Assert.That(result).Contains($"{UnchangingPropertyObservableName}<object>(viewModel.Param)");
     }
 
     /// <summary>Verifies BuildParameterObservableExpression returns ImmutableEmptySignal when no parameter.</summary>
@@ -700,7 +703,7 @@ public class BindCommandCodeGeneratorHelperTests
     /// Verifies GenerateBindCommandMethod with an expression parameter reads the parameter value from the
     /// view model at call time. The <c>Expression&lt;Func&lt;...&gt;&gt;</c> parameter itself lives on the
     /// public overload (covered by <see cref="GenerateCallerArgExprOverload_WithExpressionParam_IncludesWithParameterExpr"/>);
-    /// the worker consumes the compile-time-extracted property path via a <c>ImmediateReturnSignal</c>.
+    /// the worker consumes the compile-time-extracted property path via an <c>UnchangingPropertyObservable</c>.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -717,7 +720,7 @@ public class BindCommandCodeGeneratorHelperTests
         BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, TESTSUFFIXName, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ImmediateReturnSignal<object>");
+        await Assert.That(result).Contains($"{UnchangingPropertyObservableName}<object>");
         await Assert.That(result).Contains("viewModel.Param");
     }
 

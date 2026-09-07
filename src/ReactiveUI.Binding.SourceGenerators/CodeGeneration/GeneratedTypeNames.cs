@@ -71,6 +71,14 @@ internal static class GeneratedTypeNames
     internal const string Observables = "global::ReactiveUI.Binding.Observables";
 
     /// <summary>
+    /// The observation of a property with no mechanism behind it, opened with its type argument. Emits the
+    /// current value and then stays open, because a source that completes ends the subscription that reads
+    /// it - which for a binding means the binding stops, and for a chain stage means a live subtree is torn
+    /// down. Only whole observations use this; a missing parent inside a chain is a different question.
+    /// </summary>
+    internal const string OpenUnchangingProperty = "new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<";
+
+    /// <summary>
     /// The scheduler abstraction the generated scheduler-taking overloads declare. ReactiveUI.Binding
     /// binds its shared source to this type; the System.Reactive leaf binds the same source to IScheduler.
     /// </summary>

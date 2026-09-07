@@ -77,7 +77,7 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         // Android View does not implement INPC. Emit ImmediateReturnSignal as POCO fallback.
         // Returns the current property value once, no ongoing observation.
         sb.Append(
-            $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName})");
+            $"new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName})");
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,8 +88,7 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         string castTypeName,
         bool isBeforeChange,
         string varName) =>
-        sb.Append(
-            $"            var {varName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
+        AppendUnchangingRead(sb, rootVar, segment, castTypeName, varName);
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,7 +101,7 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         string obsVarName) =>
         sb
             .Append($"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>")
-            .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
+            .AppendLine($")new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
 
     /// <inheritdoc/>
     public void EmitDeepChainInnerSegment(
@@ -138,6 +137,24 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         PropertyPathSegment segment,
         string castTypeName,
         string varName) =>
-        sb.AppendLine(
-            $"            var {varName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
+        AppendUnchangingRead(sb, rootVar, segment, castTypeName, varName).AppendLine();
+
+    /// <summary>Appends the one-shot read this platform's observation is, as a local declaration.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="rootVar">The variable the property is read from.</param>
+    /// <param name="segment">The property being read.</param>
+    /// <param name="castTypeName">The type the root is cast to before the read.</param>
+    /// <param name="varName">The local the observation is assigned to.</param>
+    /// <returns>The same string builder, so a caller can terminate the line as it needs.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static StringBuilder AppendUnchangingRead(
+        StringBuilder sb,
+        string rootVar,
+        PropertyPathSegment segment,
+        string castTypeName,
+        string varName) =>
+        sb.Append("            var ").Append(varName).Append(" = ")
+            .Append(GeneratedTypeNames.OpenUnchangingProperty).Append(segment.PropertyTypeFullName)
+            .Append(">(((").Append(castTypeName).Append(')').Append(rootVar).Append(").")
+            .Append(segment.PropertyName).Append(");");
 }

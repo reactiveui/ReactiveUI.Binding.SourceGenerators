@@ -421,7 +421,7 @@ internal static class BindCommandCodeGenerator
             // Read the parameter property at call time
             var paramAccess =
                 CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value);
-            return $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<object>({paramAccess})";
+            return $"new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<object>({paramAccess})";
         }
 
         return "global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<object>.Instance";

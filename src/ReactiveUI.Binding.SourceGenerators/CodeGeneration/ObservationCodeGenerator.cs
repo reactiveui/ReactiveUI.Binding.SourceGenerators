@@ -268,7 +268,7 @@ internal static class ObservationCodeGenerator
         {
             var propertyAccess = $"obj.{segment.PropertyName}";
             _ = sb.Append(
-                $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>({propertyAccess})");
+                $"new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{segment.PropertyTypeFullName}>({propertyAccess})");
         }
     }
 
@@ -316,7 +316,7 @@ internal static class ObservationCodeGenerator
         {
             var propertyAccess = $"obj.{segment.PropertyName}";
             _ = sb.Append(
-                $"            var {varName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segment.PropertyTypeFullName}>({propertyAccess});");
+                $"            var {varName} = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{segment.PropertyTypeFullName}>({propertyAccess});");
         }
     }
 
@@ -360,7 +360,7 @@ internal static class ObservationCodeGenerator
         {
             _ = sb
                 .Append($"            var {obs0Var} = (global::System.IObservable<{seg0.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{seg0.PropertyTypeFullName}>(obj.{seg0.PropertyName});");
+                .AppendLine($")new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{seg0.PropertyTypeFullName}>(obj.{seg0.PropertyName});");
         }
 
         EmitDeepChainInnerSegments(sb, path, isBeforeChange, varName);
@@ -679,7 +679,7 @@ internal static class ObservationCodeGenerator
         else
         {
             _ = sb.Append(
-                $"            return new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{inv.ReturnTypeFullName}>({propertyAccess});");
+                $"            return new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{inv.ReturnTypeFullName}>({propertyAccess});");
         }
     }
 
@@ -718,7 +718,7 @@ internal static class ObservationCodeGenerator
         {
             _ = sb
                 .Append($"            var __obs0 = (global::System.IObservable<{seg0.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{seg0.PropertyTypeFullName}>(obj.{seg0.PropertyName});");
+                .AppendLine($")new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{seg0.PropertyTypeFullName}>(obj.{seg0.PropertyName});");
         }
 
         EmitObservationChainInnerSegments(sb, path, isBeforeChange);
@@ -761,7 +761,7 @@ internal static class ObservationCodeGenerator
             {
                 var propertyAccess = $"{rootVar}.{segment.PropertyName}";
                 _ = sb.AppendLine(
-                    $"        var {variableName} = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{propertyTypeFullName}>({propertyAccess});");
+                    $"        var {variableName} = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{propertyTypeFullName}>({propertyAccess});");
             }
         }
         else
@@ -973,7 +973,7 @@ internal static class ObservationCodeGenerator
         {
             _ = sb
                 .Append($"            var __{variableName}_s0 = (global::System.IObservable<{seg0.PropertyTypeFullName}>")
-                .AppendLine($")new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{seg0.PropertyTypeFullName}>({rootVar}.{seg0.PropertyName});");
+                .AppendLine($")new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{seg0.PropertyTypeFullName}>({rootVar}.{seg0.PropertyName});");
         }
 
         for (var s = 1; s < propertyPath.Length; s++)

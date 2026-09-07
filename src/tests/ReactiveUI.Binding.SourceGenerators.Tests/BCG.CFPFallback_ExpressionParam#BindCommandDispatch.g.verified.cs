@@ -62,7 +62,7 @@ namespace ReactiveUI.Binding
                     var __binderCmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, __cmd =>
                     {
                         __serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                        global::System.IObservable<object> __paramObs = new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<object>(viewModel.CurrentItem);
+                        global::System.IObservable<object> __paramObs = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<object>(viewModel.CurrentItem);
                         __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.ExpressionParam.MyButton>(
                             __cmd, view.SaveButton, __paramObs)
                             ?? global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
