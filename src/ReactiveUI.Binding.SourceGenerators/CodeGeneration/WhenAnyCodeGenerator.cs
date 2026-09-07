@@ -16,6 +16,9 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class WhenAnyCodeGenerator
 {
+    /// <summary>What the generated overload names its selector parameters before their index.</summary>
+    private const string SelectorParameterPrefix = "property";
+
     /// <summary>Generates concrete typed overloads and observation methods for WhenAny invocations.</summary>
     /// <param name="invocations">All detected WhenAny invocations.</param>
     /// <param name="allClasses">All detected class binding info for type mechanism lookup.</param>
@@ -335,14 +338,20 @@ internal static class WhenAnyCodeGenerator
 
             if (supportsCallerArgExpr)
             {
-                EmitCallerArgExprCondition(sb, inv, condition, propCount);
+                CodeGeneratorHelpers.AppendSelectorTextCondition(
+                    sb,
+                    condition,
+                    SelectorParameterPrefix,
+                    inv.ExpressionTexts,
+                    propCount);
             }
             else
             {
-                var suffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-                _ = sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber)
-                    .Append(" && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(suffix)).Append("\",")
-                    .AppendLine(" global::System.StringComparison.OrdinalIgnoreCase))");
+                CodeGeneratorHelpers.AppendInlineCallerInfoCondition(
+                    sb,
+                    condition,
+                    inv.CallerLineNumber,
+                    CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
             }
 
             var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
@@ -353,30 +362,5 @@ internal static class WhenAnyCodeGenerator
             _ = sb.AppendLine("            {").Append("                return __WhenAny_").Append(methodSuffix)
                 .AppendLine("(objectToMonitor, selector);").AppendLine("            }");
         }
-    }
-
-    /// <summary>Emits the CallerArgumentExpression match condition for a single invocation in the dispatch table.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="inv">The invocation info.</param>
-    /// <param name="condition">The conditional keyword (<c>"if"</c> or <c>"else if"</c>).</param>
-    /// <param name="propCount">The number of property expressions.</param>
-    private static void EmitCallerArgExprCondition(
-        StringBuilder sb,
-        InvocationInfo inv,
-        string condition,
-        int propCount)
-    {
-        _ = sb.Append("            ").Append(condition).Append(" (");
-        for (var p = 0; p < propCount; p++)
-        {
-            _ = sb.Append("property").Append(p + 1).Append("Expression == \"").Append(CodeGeneratorHelpers.EscapeString(inv.ExpressionTexts[p]))
-                .Append('"');
-            if (p < propCount - 1)
-            {
-                _ = sb.Append(" && ");
-            }
-        }
-
-        _ = sb.AppendLine(")");
     }
 }

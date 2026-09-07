@@ -151,7 +151,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateCallerArgExprOverload(sb, group, false);
+        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, true, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("sourcePropertyExpression == ");
@@ -180,7 +180,7 @@ public class BindTwoWayCodeGeneratorHelperTests
             false,
             [inv]);
 
-        BindTwoWayCodeGenerator.GenerateCallerFilePathOverload(sb, group, false, false);
+        BindTwoWayCodeGenerator.GenerateConcreteOverload(sb, group, false, false, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("callerLineNumber == 55");

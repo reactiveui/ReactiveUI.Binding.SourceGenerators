@@ -513,6 +513,63 @@ internal static class BindingEmitterHelpers
         return new("view", new(rooted), targetClassInfo);
     }
 
+    /// <summary>Emits the whole concrete typed overload one binding API dispatches through.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group, which fixes the bound types for the whole overload.</param>
+    /// <param name="api">What distinguishes this API's overload from the other three.</param>
+    /// <param name="dispatchesOnExpressionText">Whether dispatch keys on expression text rather than file and line.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
+    /// <remarks>
+    /// The four property-binding APIs emit one overload shape between them: a receiver, the object it binds
+    /// against, a selector per side, whatever conversion and scheduler arguments the API takes, and then the
+    /// dispatch table. What actually differs is the naming and the trailing arguments, which
+    /// <paramref name="api"/> carries, so the shape is written here once.
+    /// </remarks>
+    internal static void GenerateDispatchOverload(
+        StringBuilder sb,
+        BindingTypeGroup group,
+        BindingDispatchApi api,
+        bool dispatchesOnExpressionText,
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
+    {
+        var first = group.Invocations[0];
+        var sourceLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.SourcePropertyPath, supportsNullable);
+        var targetLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.TargetPropertyPath, supportsNullable);
+
+        CodeGeneratorHelpers.AppendDispatchSummary(
+            sb,
+            api.Name,
+            group.SourceTypeFullName,
+            group.TargetTypeFullName,
+            dispatchesOnExpressionText);
+
+        _ = sb.Append("        public static ").Append(api.FormatReturnType(group)).Append(' ').Append(api.Name).AppendLine("(")
+            .Append("            this ").Append(api.ReceiverIsTarget ? group.TargetTypeFullName : group.SourceTypeFullName)
+            .Append(' ').Append(api.ReceiverParameterName).AppendLine(",")
+            .Append(CodeGeneratorHelpers.ParameterIndent)
+            .Append(api.ReceiverIsTarget ? group.SourceTypeFullName : group.TargetTypeFullName)
+            .Append(' ').Append(api.OtherParameterName).AppendLine(",")
+            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ").Append(sourceLeaf)
+            .Append(">> ").Append(api.SourceSelectorName).AppendLine(",")
+            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.TargetTypeFullName).Append(", ").Append(targetLeaf)
+            .Append(">> ").Append(api.TargetSelectorName).AppendLine(",");
+
+        api.AppendExtraParameters(sb, group);
+
+        if (dispatchesOnExpressionText)
+        {
+            AppendExpressionDispatchBody(sb, group, api);
+        }
+        else
+        {
+            AppendCallerInfoDispatchBody(sb, group, api, stubHasExpressionParameters);
+        }
+
+        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
+    }
+
     /// <summary>Finds the type a view declares its view model property as.</summary>
     /// <param name="targetClassInfo">The view type's binding info.</param>
     /// <returns>The declared property type, or <see langword="null"/> when the view exposes no such property.</returns>
@@ -588,6 +645,94 @@ internal static class BindingEmitterHelpers
         return builder.ToString();
     }
 
+    /// <summary>Appends the body of an overload that matches a call site by the text of its selectors.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group.</param>
+    /// <param name="api">What distinguishes this API's overload from the other three.</param>
+    private static void AppendExpressionDispatchBody(StringBuilder sb, BindingTypeGroup group, BindingDispatchApi api)
+    {
+        CodeGeneratorHelpers.AppendExpressionDispatchParameters(sb, api.SourceSelectorName, api.TargetSelectorName);
+
+        if (api.NormalizesStaticPrefix)
+        {
+            CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, api.SourceExpressionParameter);
+            CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, api.TargetExpressionParameter);
+            _ = sb.AppendLine();
+        }
+
+        api.EmitAffinityOverride(sb, group, api.TargetExpressionParameter);
+        var extraArguments = api.FormatExtraArguments(group);
+
+        for (var i = 0; i < group.Invocations.Length; i++)
+        {
+            var inv = group.Invocations[i];
+
+            CodeGeneratorHelpers.AppendExpressionDispatchCondition(
+                sb,
+                CodeGeneratorHelpers.ConditionKeyword(i),
+                api.SourceExpressionParameter,
+                inv.SourceExpressionText,
+                api.TargetExpressionParameter,
+                inv.TargetExpressionText);
+            CodeGeneratorHelpers.AppendDispatchReturn(
+                sb,
+                api.WorkerMethodPrefix + BindingMethodSuffix(inv),
+                api.WorkerArguments + extraArguments);
+        }
+    }
+
+    /// <summary>Appends the body of an overload that matches a call site by the file and line it sits on.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group.</param>
+    /// <param name="api">What distinguishes this API's overload from the other three.</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
+    private static void AppendCallerInfoDispatchBody(
+        StringBuilder sb,
+        BindingTypeGroup group,
+        BindingDispatchApi api,
+        bool stubHasExpressionParameters)
+    {
+        if (stubHasExpressionParameters)
+        {
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, api.SourceSelectorName, api.SourceExpressionParameter, false);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, api.TargetSelectorName, api.TargetExpressionParameter, false);
+        }
+
+        CodeGeneratorHelpers.AppendCallerInfoDispatchParameters(sb);
+
+        api.EmitAffinityOverride(
+            sb,
+            group,
+            $"\"{CodeGeneratorHelpers.EscapeString(group.Invocations[0].TargetExpressionText)}\"");
+        var extraArguments = api.FormatExtraArguments(group);
+
+        for (var i = 0; i < group.Invocations.Length; i++)
+        {
+            var inv = group.Invocations[i];
+
+            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
+                sb,
+                CodeGeneratorHelpers.ConditionKeyword(i),
+                inv.CallerLineNumber,
+                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
+            CodeGeneratorHelpers.AppendDispatchReturn(
+                sb,
+                api.WorkerMethodPrefix + BindingMethodSuffix(inv),
+                api.WorkerArguments + extraArguments);
+        }
+    }
+
+    /// <summary>Names the generated worker a binding call site dispatches to.</summary>
+    /// <param name="inv">The call site.</param>
+    /// <returns>The stable suffix its worker is named with.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string BindingMethodSuffix(BindingInvocationInfo inv) =>
+        CodeGeneratorHelpers.ComputeStableMethodSuffix(
+            inv.SourceTypeFullName,
+            inv.CallerFilePath,
+            inv.CallerLineNumber,
+            $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
+
     /// <summary>What a view-first binding observes, and from where.</summary>
     /// <param name="RootVariable">The generated method parameter the observation is rooted on.</param>
     /// <param name="Path">The property path walked from that root.</param>
@@ -609,4 +754,61 @@ internal static class BindingEmitterHelpers
         ClassBindingInfo? TargetClassInfo,
         string Suffix,
         LanguageFeatures Features);
+
+    /// <summary>What distinguishes one binding API's generated dispatch overload from another's.</summary>
+    /// <remarks>
+    /// Held as an object rather than passed as arguments because the set travels together and would otherwise
+    /// widen the emitter's signature past what any one call site can read.
+    /// </remarks>
+    internal sealed class BindingDispatchApi
+    {
+        /// <summary>Gets the name of the binding method this overload stands in for.</summary>
+        internal string Name { get; init; } = string.Empty;
+
+        /// <summary>Gets what the overload calls the object it extends.</summary>
+        internal string ReceiverParameterName { get; init; } = string.Empty;
+
+        /// <summary>Gets what the overload calls the object bound against the receiver.</summary>
+        internal string OtherParameterName { get; init; } = string.Empty;
+
+        /// <summary>Gets a value indicating whether the receiver is the side the binding writes to.</summary>
+        internal bool ReceiverIsTarget { get; init; }
+
+        /// <summary>Gets what the overload calls the selector for the side it reads from.</summary>
+        internal string SourceSelectorName { get; init; } = string.Empty;
+
+        /// <summary>Gets what the overload calls the selector for the side it writes to.</summary>
+        internal string TargetSelectorName { get; init; } = string.Empty;
+
+        /// <summary>Gets the prefix the generated worker for each call site is named with.</summary>
+        internal string WorkerMethodPrefix { get; init; } = string.Empty;
+
+        /// <summary>Gets the two objects a generated worker binds, in its own parameter order.</summary>
+        internal string WorkerArguments { get; init; } = string.Empty;
+
+        /// <summary>Gets a value indicating whether the overload strips a <c>static</c> prefix off captured expressions.</summary>
+        internal bool NormalizesStaticPrefix { get; init; }
+
+        /// <summary>Gets the function rendering what the overload returns.</summary>
+        internal Func<BindingTypeGroup, string> FormatReturnType { get; init; } =
+            static _ => "global::System.IDisposable";
+
+        /// <summary>Gets the action appending the conversion and scheduler parameters this API takes.</summary>
+        internal Action<StringBuilder, BindingTypeGroup> AppendExtraParameters { get; init; } =
+            static (_, _) => { };
+
+        /// <summary>Gets the function rendering the conversion and scheduler arguments the worker takes.</summary>
+        internal Func<BindingTypeGroup, string> FormatExtraArguments { get; init; } =
+            static _ => string.Empty;
+
+        /// <summary>Gets the action emitting the check that hands the binding to the runtime engine.</summary>
+        internal Action<StringBuilder, BindingTypeGroup, string> EmitAffinityOverride { get; init; } =
+            static (_, _, _) => { };
+
+        /// <summary>Gets the parameter carrying the text of the selector for the side read from.</summary>
+        internal string SourceExpressionParameter => SourceSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
+
+        /// <summary>Gets the parameter carrying the text of the selector for the side written to.</summary>
+        internal string TargetExpressionParameter => TargetSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
+    }
 }

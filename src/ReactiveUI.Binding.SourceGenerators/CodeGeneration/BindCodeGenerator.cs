@@ -49,6 +49,24 @@ internal static class BindCodeGenerator
     /// <summary>Name of the generated local holding the view side observable.</summary>
     private const string ViewObservableName = "viewObs";
 
+    /// <summary>What distinguishes this API's generated dispatch overload from the other three.</summary>
+    private static readonly BindingEmitterHelpers.BindingDispatchApi DispatchApi = new()
+    {
+        Name = "Bind",
+        ReceiverParameterName = "view",
+        OtherParameterName = "viewModel",
+        ReceiverIsTarget = true,
+        SourceSelectorName = "viewModelProperty",
+        TargetSelectorName = "viewProperty",
+        WorkerMethodPrefix = "__Bind_",
+        WorkerArguments = "viewModel, view",
+        NormalizesStaticPrefix = false,
+        FormatReturnType = FormatReturnType,
+        AppendExtraParameters = AppendExtraParameters,
+        FormatExtraArguments = FormatExtraArgs,
+        EmitAffinityOverride = EmitAffinityOverride,
+    };
+
     /// <summary>Groups Bind invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The Bind invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
@@ -62,122 +80,9 @@ internal static class BindCodeGenerator
     /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is available.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
-    internal static void GenerateConcreteOverload(
-        StringBuilder sb,
-        BindingTypeGroup group,
-        bool supportsCallerArgExpr,
-        bool supportsNullable,
-        bool stubHasExpressionParameters)
-    {
-        if (supportsCallerArgExpr)
-        {
-            GenerateCallerArgExprOverload(sb, group, supportsNullable);
-        }
-        else
-        {
-            GenerateCallerFilePathOverload(sb, group, supportsNullable, stubHasExpressionParameters);
-        }
-    }
-
-    /// <summary>Generates the CallerArgumentExpression-based overload for Bind dispatch.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="group">The binding type group.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    internal static void GenerateCallerArgExprOverload(
-        StringBuilder sb,
-        BindingTypeGroup group,
-        bool supportsNullable)
-    {
-        var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
-        var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
-        var returnType = FormatReturnType(group);
-
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for Bind from ").Append(group.SourceTypeFullName)
-            .Append(" to ").Append(group.TargetTypeFullName).AppendLine(".").AppendLine("        /// Uses CallerArgumentExpression for dispatch.")
-            .AppendLine("        /// </summary>").Append("        public static ").Append(returnType).AppendLine(" Bind(").Append("            this ")
-            .Append(group.TargetTypeFullName).AppendLine(" view,").Append("            ").Append(group.SourceTypeFullName).AppendLine(" viewModel,")
-            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ")
-            .Append(sourcePropType).AppendLine(">> viewModelProperty,")
-            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.TargetTypeFullName).Append(", ")
-            .Append(targetPropType).AppendLine(">> viewProperty,");
-
-        AppendExtraParameters(sb, group);
-
-        CodeGeneratorHelpers.AppendExpressionDispatchParameters(sb, SourceSelectorName, TargetSelectorName);
-
-        EmitAffinityOverride(sb, group, "viewPropertyExpression");
-
-        for (var i = 0; i < group.Invocations.Length; i++)
-        {
-            var inv = group.Invocations[i];
-
-            CodeGeneratorHelpers.AppendExpressionDispatchCondition(
-                sb,
-                CodeGeneratorHelpers.ConditionKeyword(i),
-                SourceExpressionParameter,
-                inv.SourceExpressionText,
-                TargetExpressionParameter,
-                inv.TargetExpressionText);
-            AppendDispatchReturn(sb, group, inv);
-        }
-
-        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
-    }
-
-    /// <summary>Generates the CallerFilePath-based overload for Bind dispatch.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="group">The binding type group.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
-    internal static void GenerateCallerFilePathOverload(
-        StringBuilder sb,
-        BindingTypeGroup group,
-        bool supportsNullable,
-        bool stubHasExpressionParameters)
-    {
-        var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
-        var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
-        var returnType = FormatReturnType(group);
-
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for Bind from ").Append(group.SourceTypeFullName)
-            .Append(" to ").Append(group.TargetTypeFullName).AppendLine(".")
-            .AppendLine("        /// Uses CallerFilePath + CallerLineNumber for dispatch.").AppendLine("        /// </summary>")
-            .Append("        public static ").Append(returnType).AppendLine(" Bind(").Append("            this ").Append(group.TargetTypeFullName)
-            .AppendLine(" view,").Append("            ").Append(group.SourceTypeFullName).AppendLine(" viewModel,")
-            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ")
-            .Append(sourcePropType).AppendLine(">> viewModelProperty,")
-            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.TargetTypeFullName).Append(", ")
-            .Append(targetPropType).AppendLine(">> viewProperty,");
-
-        AppendExtraParameters(sb, group);
-
-        if (stubHasExpressionParameters)
-        {
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, SourceSelectorName, SourceExpressionParameter, false);
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, TargetSelectorName, TargetExpressionParameter, false);
-        }
-
-        CodeGeneratorHelpers.AppendCallerInfoDispatchParameters(sb);
-
-        EmitAffinityOverride(
-            sb,
-            group,
-            $"\"{CodeGeneratorHelpers.EscapeString(group.Invocations[0].TargetExpressionText)}\"");
-
-        for (var i = 0; i < group.Invocations.Length; i++)
-        {
-            var inv = group.Invocations[i];
-
-            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
-                sb,
-                CodeGeneratorHelpers.ConditionKeyword(i),
-                inv.CallerLineNumber,
-                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
-            AppendDispatchReturn(sb, group, inv);
-        }
-
-        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void GenerateConcreteOverload(StringBuilder sb, BindingTypeGroup group, bool supportsCallerArgExpr, bool supportsNullable, bool stubHasExpressionParameters) =>
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, DispatchApi, supportsCallerArgExpr, supportsNullable, stubHasExpressionParameters);
 
     /// <summary>Generates a private Bind method for a specific invocation.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -441,19 +346,4 @@ internal static class BindCodeGenerator
             $"view, viewModel, viewModelProperty, viewProperty, {convertersArg}{schedulerArg}, {bindingExpression}",
             true);
     }
-
-    /// <summary>Appends the call a matched dispatch branch hands the binding to.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="group">The binding type group, which fixes the arguments the worker takes.</param>
-    /// <param name="inv">The call site the branch matched.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void AppendDispatchReturn(StringBuilder sb, BindingTypeGroup group, BindingInvocationInfo inv) =>
-        CodeGeneratorHelpers.AppendDispatchReturn(
-            sb,
-            WorkerMethodPrefix + CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.SourceTypeFullName,
-                inv.CallerFilePath,
-                inv.CallerLineNumber,
-                $"{inv.SourceExpressionText}|{inv.TargetExpressionText}"),
-            WorkerArguments + FormatExtraArgs(group));
 }

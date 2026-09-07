@@ -55,6 +55,23 @@ internal static class BindTwoWayCodeGenerator
     /// <summary>Name of the generated local holding the target side observable.</summary>
     private const string TargetObservableName = "targetObs";
 
+    /// <summary>What distinguishes this API's generated dispatch overload from the other three.</summary>
+    private static readonly BindingEmitterHelpers.BindingDispatchApi DispatchApi = new()
+    {
+        Name = "BindTwoWay",
+        ReceiverParameterName = "source",
+        OtherParameterName = "target",
+        ReceiverIsTarget = false,
+        SourceSelectorName = "sourceProperty",
+        TargetSelectorName = "targetProperty",
+        WorkerMethodPrefix = "__BindTwoWay_",
+        WorkerArguments = "source, target",
+        NormalizesStaticPrefix = true,
+        AppendExtraParameters = AppendExtraParameters,
+        FormatExtraArguments = FormatExtraArgs,
+        EmitAffinityOverride = EmitAffinityOverride,
+    };
+
     /// <summary>Groups BindTwoWay invocations by their type signature for overload generation.</summary>
     /// <param name="invocations">The BindTwoWay invocations to group.</param>
     /// <returns>A list of grouped invocations sharing the same type signature.</returns>
@@ -68,119 +85,9 @@ internal static class BindTwoWayCodeGenerator
     /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is available.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
-    internal static void GenerateConcreteOverload(
-        StringBuilder sb,
-        BindingTypeGroup group,
-        bool supportsCallerArgExpr,
-        bool supportsNullable,
-        bool stubHasExpressionParameters)
-    {
-        if (supportsCallerArgExpr)
-        {
-            GenerateCallerArgExprOverload(sb, group, supportsNullable);
-        }
-        else
-        {
-            GenerateCallerFilePathOverload(sb, group, supportsNullable, stubHasExpressionParameters);
-        }
-    }
-
-    /// <summary>Generates the CallerArgumentExpression-based overload for BindTwoWay dispatch.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="group">The binding type group.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    internal static void GenerateCallerArgExprOverload(
-        StringBuilder sb,
-        BindingTypeGroup group,
-        bool supportsNullable)
-    {
-        var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
-        var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindTwoWay from ").Append(group.SourceTypeFullName)
-            .Append(" to ").Append(group.TargetTypeFullName).AppendLine(".").AppendLine("        /// Uses CallerArgumentExpression for dispatch.")
-            .AppendLine("        /// </summary>").AppendLine("        public static global::System.IDisposable BindTwoWay(").Append("            this ")
-            .Append(group.SourceTypeFullName).AppendLine(" source,").Append("            ").Append(group.TargetTypeFullName).AppendLine(" target,")
-            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ")
-            .Append(sourcePropType).AppendLine(">> sourceProperty,").Append(GeneratedSyntax.SelectorParameterOpen)
-            .Append(group.TargetTypeFullName).Append(", ").Append(targetPropType).AppendLine(">> targetProperty,");
-
-        AppendExtraParameters(sb, group);
-
-        CodeGeneratorHelpers.AppendExpressionDispatchParameters(sb, SourceSelectorName, TargetSelectorName);
-        CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, SourceExpressionParameter);
-        CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, TargetExpressionParameter);
-        _ = sb.AppendLine();
-
-        EmitAffinityOverride(sb, group, TargetExpressionParameter);
-
-        for (var i = 0; i < group.Invocations.Length; i++)
-        {
-            var inv = group.Invocations[i];
-
-            CodeGeneratorHelpers.AppendExpressionDispatchCondition(
-                sb,
-                CodeGeneratorHelpers.ConditionKeyword(i),
-                SourceExpressionParameter,
-                inv.SourceExpressionText,
-                TargetExpressionParameter,
-                inv.TargetExpressionText);
-            AppendDispatchReturn(sb, group, inv);
-        }
-
-        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
-    }
-
-    /// <summary>Generates the CallerFilePath-based overload for BindTwoWay dispatch.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="group">The binding type group.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
-    internal static void GenerateCallerFilePathOverload(
-        StringBuilder sb,
-        BindingTypeGroup group,
-        bool supportsNullable,
-        bool stubHasExpressionParameters)
-    {
-        var sourcePropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].SourcePropertyPath, supportsNullable);
-        var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindTwoWay from ").Append(group.SourceTypeFullName)
-            .Append(" to ").Append(group.TargetTypeFullName).AppendLine(".")
-            .AppendLine("        /// Uses CallerFilePath + CallerLineNumber for dispatch.").AppendLine("        /// </summary>")
-            .AppendLine("        public static global::System.IDisposable BindTwoWay(").Append("            this ").Append(group.SourceTypeFullName)
-            .AppendLine(" source,").Append("            ").Append(group.TargetTypeFullName).AppendLine(" target,")
-            .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ")
-            .Append(sourcePropType).AppendLine(">> sourceProperty,").Append(GeneratedSyntax.SelectorParameterOpen)
-            .Append(group.TargetTypeFullName).Append(", ").Append(targetPropType).AppendLine(">> targetProperty,");
-
-        AppendExtraParameters(sb, group);
-
-        if (stubHasExpressionParameters)
-        {
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, SourceSelectorName, SourceExpressionParameter, false);
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, TargetSelectorName, TargetExpressionParameter, false);
-        }
-
-        CodeGeneratorHelpers.AppendCallerInfoDispatchParameters(sb);
-
-        EmitAffinityOverride(
-            sb,
-            group,
-            $"\"{CodeGeneratorHelpers.EscapeString(group.Invocations[0].TargetExpressionText)}\"");
-
-        for (var i = 0; i < group.Invocations.Length; i++)
-        {
-            var inv = group.Invocations[i];
-
-            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
-                sb,
-                CodeGeneratorHelpers.ConditionKeyword(i),
-                inv.CallerLineNumber,
-                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
-            AppendDispatchReturn(sb, group, inv);
-        }
-
-        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void GenerateConcreteOverload(StringBuilder sb, BindingTypeGroup group, bool supportsCallerArgExpr, bool supportsNullable, bool stubHasExpressionParameters) =>
+        BindingEmitterHelpers.GenerateDispatchOverload(sb, group, DispatchApi, supportsCallerArgExpr, supportsNullable, stubHasExpressionParameters);
 
     /// <summary>Generates a private BindTwoWay method for a specific invocation.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -354,19 +261,4 @@ internal static class BindTwoWayCodeGenerator
             .Append(CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText)).AppendLine("\");").AppendLine()
             .AppendLine("            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);").AppendLine("        }")
             .AppendLine();
-
-    /// <summary>Appends the call a matched dispatch branch hands the binding to.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="group">The binding type group, which fixes the arguments the worker takes.</param>
-    /// <param name="inv">The call site the branch matched.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void AppendDispatchReturn(StringBuilder sb, BindingTypeGroup group, BindingInvocationInfo inv) =>
-        CodeGeneratorHelpers.AppendDispatchReturn(
-            sb,
-            WorkerMethodPrefix + CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.SourceTypeFullName,
-                inv.CallerFilePath,
-                inv.CallerLineNumber,
-                $"{inv.SourceExpressionText}|{inv.TargetExpressionText}"),
-            WorkerArguments + FormatExtraArgs(group));
 }

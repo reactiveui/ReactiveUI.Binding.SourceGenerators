@@ -23,6 +23,9 @@ internal static class CodeGeneratorHelpers
     /// <summary>The indent every generated method parameter sits at: namespace, class, member, then parameter.</summary>
     internal const string ParameterIndent = "            ";
 
+    /// <summary>Opens the comparison of a captured expression against the text a call site spelled.</summary>
+    internal const string ExpressionTextComparison = " == \"";
+
     /// <summary>Completes the name of the parameter that captures a selector's expression text.</summary>
     internal const string ExpressionParameterSuffix = "Expression";
 
@@ -624,9 +627,9 @@ internal static class CodeGeneratorHelpers
         string firstExpressionText,
         string secondParameterName,
         string secondExpressionText) =>
-        sb.Append(ParameterIndent).Append(condition).Append(" (").Append(firstParameterName).Append(" == \"")
+        sb.Append(ParameterIndent).Append(condition).Append(" (").Append(firstParameterName).Append(ExpressionTextComparison)
             .Append(EscapeString(firstExpressionText)).AppendLine("\"")
-            .Append("                && ").Append(secondParameterName).Append(" == \"")
+            .Append("                && ").Append(secondParameterName).Append(ExpressionTextComparison)
             .Append(EscapeString(secondExpressionText)).AppendLine("\")")
             .AppendLine(GeneratedSyntax.StatementBlockOpen);
 
@@ -654,6 +657,50 @@ internal static class CodeGeneratorHelpers
     internal static void AppendDispatchReturn(StringBuilder sb, string workerName, string arguments) =>
         sb.Append("                return ").Append(workerName).Append('(').Append(arguments).AppendLine(");")
             .AppendLine(GeneratedSyntax.StatementBlockClose);
+
+    /// <summary>Appends the condition that matches a call site by the text of each of its selectors.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="condition">The conditional keyword this branch opens with.</param>
+    /// <param name="selectorParameterPrefix">What the overload names its selectors before their index.</param>
+    /// <param name="expressionTexts">The selectors as the call site spelled them.</param>
+    /// <param name="count">How many of them the overload takes.</param>
+    internal static void AppendSelectorTextCondition(
+        StringBuilder sb,
+        string condition,
+        string selectorParameterPrefix,
+        EquatableArray<string> expressionTexts,
+        int count)
+    {
+        _ = sb.Append(ParameterIndent).Append(condition).Append(" (");
+
+        for (var i = 0; i < count; i++)
+        {
+            if (i > 0)
+            {
+                _ = sb.Append(" && ");
+            }
+
+            _ = sb.Append(selectorParameterPrefix).Append(i + 1).Append(ExpressionParameterSuffix)
+                .Append(ExpressionTextComparison).Append(EscapeString(expressionTexts[i])).Append('"');
+        }
+
+        _ = sb.AppendLine(")");
+    }
+
+    /// <summary>Appends the one-line condition that matches a call site by the file and line it sits on.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="condition">The conditional keyword this branch opens with.</param>
+    /// <param name="callerLineNumber">The line the call site sits on.</param>
+    /// <param name="pathSuffix">The tail of the path the call site's file ends with.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendInlineCallerInfoCondition(
+        StringBuilder sb,
+        string condition,
+        int callerLineNumber,
+        string pathSuffix) =>
+        sb.Append(ParameterIndent).Append(condition).Append(" (callerLineNumber == ").Append(callerLineNumber)
+            .Append(" && callerFilePath.EndsWith(\"").Append(EscapeString(pathSuffix)).Append("\",")
+            .AppendLine(" global::System.StringComparison.OrdinalIgnoreCase))");
 
     /// <summary>Appends the throw that closes a binding dispatch overload when no call site matched.</summary>
     /// <param name="sb">The string builder to append to.</param>
