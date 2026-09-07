@@ -373,17 +373,29 @@ All benchmarks use 1,000 property changes per iteration. Measured on AMD Ryzen 7
 The ReactiveUI expression-tree engine cannot run under NativeAOT due to its use of runtime reflection and expression
 compilation. The source-generated engine runs under NativeAOT with an additional 6x speedup over JIT.
 
-#### Binding (BindOneWay / BindTwoWay)
+#### Binding (BindOneWay / BindTwoWay / Bind)
 
 **Source-Generated:**
 
 | Method        | Runtime        |    Mean | Allocated |
 |---------------|----------------|--------:|----------:|
 | BindOneWay    | .NET 10.0      |  286 us |     64 KB |
-| BindTwoWay    | .NET 10.0      |  387 us |     88 KB |
+| BindTwoWay    | .NET 10.0      |  237 us |   87.8 KB |
+| Bind          | .NET 10.0      |  124 us |   42.2 KB |
 | First Binding | .NET 10.0      | 13.4 us |    1.3 KB |
 | BindOneWay    | NativeAOT 10.0 |   47 us |     65 KB |
-| BindTwoWay    | NativeAOT 10.0 |   58 us |     88 KB |
+| BindTwoWay    | NativeAOT 10.0 |   58 us |   88.4 KB |
+| Bind          | NativeAOT 10.0 |   25 us |   42.7 KB |
+
+Each figure is one binding created and then driven through 1,000 property changes.
+
+Watching a two-way binding costs almost nothing, because a subscriber shares the binding's own upstream
+subscription rather than re-projecting the two observed sides:
+
+| Method                  | Runtime   |    Mean | Allocated |
+|-------------------------|-----------|--------:|----------:|
+| Bind                    | .NET 10.0 |  124 us |   42.2 KB |
+| Bind + observed changes | .NET 10.0 |  125 us |   42.3 KB |
 
 **ReactiveUI Expression-Tree Engine:**
 
