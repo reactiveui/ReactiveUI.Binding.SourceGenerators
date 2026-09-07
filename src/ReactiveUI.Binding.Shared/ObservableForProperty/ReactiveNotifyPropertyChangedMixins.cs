@@ -16,7 +16,6 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 /// This is a runtime fallback bridge class — the source generator produces optimized
 /// code that bypasses this entirely at compile time.
 /// </summary>
-[ExcludeFromCodeCoverage]
 [EditorBrowsable(EditorBrowsableState.Never)]
 [RequiresUnreferencedCode(
     "Creating Expressions requires unreferenced code because the members being referenced by the Expression may be trimmed.")]

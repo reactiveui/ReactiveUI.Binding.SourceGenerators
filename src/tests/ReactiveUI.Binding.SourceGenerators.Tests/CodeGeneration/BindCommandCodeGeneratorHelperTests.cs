@@ -802,6 +802,27 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains(MappedParameterStreamFragment);
     }
 
+    /// <summary>
+    /// A parameter whose type the extraction could not resolve is still observed. The stream is typed as
+    /// <c>object</c> so the binding compiles, rather than the parameter being dropped.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateBindCommandMethod_ExpressionParamWithNoResolvedType_ObservesItAsObject()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateBindCommandInvocationInfo(
+            hasExpressionParameter: true,
+            parameterTypeFullName: null,
+            parameterPropertyPath: new EquatableArray<PropertyPathSegment>(
+                [ModelFactory.CreatePropertyPathSegment(ParamName)]));
+
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, null, TESTSUFFIXName, false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("var withParameter = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<object>");
+    }
+
     // ───────────────────────────────────────────────────────────────────────────
     // Nullability annotations (C# 8+ targets emit nullable-aware syntax; C# 7.3 does not)
     // ───────────────────────────────────────────────────────────────────────────

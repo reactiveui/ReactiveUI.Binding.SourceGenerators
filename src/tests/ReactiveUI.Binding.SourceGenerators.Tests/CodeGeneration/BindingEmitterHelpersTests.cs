@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -108,6 +109,38 @@ public class BindingEmitterHelpersTests
         await Assert.That(BindingEmitterHelpers.RequiresRegistryConversion(group)).IsTrue();
     }
 
+    /// <summary>
+    /// A chain is tested link by link. A plugin scores a type and a property together, so a registration
+    /// aimed at the leaf takes the binding even though the root resolves to something else.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityOverride_DeepSourcePath_TestsEveryLink()
+    {
+        var sb = new StringBuilder();
+
+        BindingEmitterHelpers.EmitAffinityOverride(sb, DeepSourceGroup(), "BindOneWay", "source, target", false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("typeof(global::TestApp.MyViewModel), \"Address\"");
+        await Assert.That(result).Contains("typeof(global::TestApp.Address), \"City\"");
+        await Assert.That(result).Contains("|| ");
+    }
+
+    /// <summary>A two-way binding observes both sides, so either side's registration is enough to take it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task EmitAffinityOverride_ObservingTheTarget_TestsBothSides()
+    {
+        var sb = new StringBuilder();
+
+        BindingEmitterHelpers.EmitAffinityOverride(sb, DeepSourceGroup(), "BindTwoWay", "source, target", true);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains("typeof(global::TestApp.MyViewModel), \"Address\"");
+        await Assert.That(result).Contains("typeof(global::TestApp.MyView), \"Text\"");
+    }
+
     /// <summary>Resolves the observation for a view declaring its view model as the given type.</summary>
     /// <param name="declaredType">The type the view declares its view model property as.</param>
     /// <returns>The resolved observation.</returns>
@@ -122,6 +155,26 @@ public class BindingEmitterHelpersTests
             ModelFactory.CreateBindingInvocationInfo(),
             ModelFactory.CreateClassBindingInfo(implementsINPC: true),
             view);
+    }
+
+    /// <summary>Builds a group whose source path walks two links.</summary>
+    /// <returns>The binding type group.</returns>
+    private static BindingTypeGroup DeepSourceGroup()
+    {
+        var sourcePath = new EquatableArray<PropertyPathSegment>(
+        [
+            ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
+            ModelFactory.CreatePropertyPathSegment("City", StringTypeName, "global::TestApp.Address"),
+        ]);
+
+        return new(
+            ViewModelTypeName,
+            "global::TestApp.MyView",
+            StringTypeName,
+            StringTypeName,
+            false,
+            false,
+            [ModelFactory.CreateBindingInvocationInfo(sourcePropertyPath: sourcePath)]);
     }
 
     /// <summary>Builds a group fixing both property types and whether a converter was supplied.</summary>

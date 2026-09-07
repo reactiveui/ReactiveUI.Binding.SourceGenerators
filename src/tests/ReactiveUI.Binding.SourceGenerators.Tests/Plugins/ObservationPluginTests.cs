@@ -1057,6 +1057,25 @@ public class ObservationPluginTests
         await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
+    /// <summary>
+    /// A caller that only wants subsequent changes gets the observation without its opening value, so a
+    /// chain stage does not re-emit what the stage above it has already delivered.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task AndroidPlugin_EmitShallowObservation_NoStartWith_EmitsFalse()
+    {
+        var plugin = new AndroidObservationPlugin();
+        var sb = new StringBuilder();
+        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
+
+        plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, false);
+
+        var result = sb.ToString();
+        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).EndsWith(", false)");
+    }
+
     /// <summary>A widget reports a change once it has happened, so before-change has nothing to subscribe.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
