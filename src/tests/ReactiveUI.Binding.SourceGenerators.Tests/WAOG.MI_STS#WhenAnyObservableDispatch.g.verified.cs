@@ -34,11 +34,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenAnyObservable_7FFFC6DF44F563AC(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel obj)
         {
-            var __obsProperty = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
+            var __obsPropertyMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,
                 "Command1",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel)__o).Command1,
                 true);
+            var __obsPropertyRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel), "Command1", 5, false);
+            var __obsProperty = __obsPropertyRegistration == null
+                ? (global::System.IObservable<global::System.IObservable<string>>)__obsPropertyMechanism
+                : (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<string>>(
+                    __obsPropertyRegistration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel, global::System.IObservable<string>>>)(__e => __e.Command1)).Body,
+                    "Command1",
+                    (object __o) => ((global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel)__o).Command1,
+                    false,
+                    true);
 
             return new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty,
                 __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
@@ -46,11 +57,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenAnyObservable_7FFFC6DF47F56865(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel obj)
         {
-            var __obsProperty = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
+            var __obsPropertyMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,
                 "Command2",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel)__o).Command2,
                 true);
+            var __obsPropertyRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel), "Command2", 5, false);
+            var __obsProperty = __obsPropertyRegistration == null
+                ? (global::System.IObservable<global::System.IObservable<string>>)__obsPropertyMechanism
+                : (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<string>>(
+                    __obsPropertyRegistration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel, global::System.IObservable<string>>>)(__e => __e.Command2)).Body,
+                    "Command2",
+                    (object __o) => ((global::SharedScenarios.WhenAnyObservable.MultipleInvocationsSameType.MyViewModel)__o).Command2,
+                    false,
+                    true);
 
             return new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty,
                 __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);

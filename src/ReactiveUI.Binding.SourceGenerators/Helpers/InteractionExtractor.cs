@@ -70,10 +70,7 @@ internal static class InteractionExtractor
         var isTaskHandler = DetermineHandlerVariant(methodSymbol, out var dontCareTypeFullName);
 
         // Get types
-        var viewTypeFullName = InvalidOperationExceptionHelper.EnsureNotNull(
-            ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type),
-            "view type display name");
-
+        var viewTypeFullName = ResolveViewType(memberAccess, semanticModel, ct, out var viewClassInfo);
         var viewModelTypeFullName = InvalidOperationExceptionHelper.EnsureNotNull(
             ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type),
             "view model type display name");
@@ -93,7 +90,37 @@ internal static class InteractionExtractor
             isTaskHandler,
             dontCareTypeFullName,
             Constants.BindInteractionMethodName,
-            expressionText);
+            expressionText,
+            viewClassInfo);
+    }
+
+    /// <summary>Names the view type the call was made on, and reads how it notifies from the same symbol.</summary>
+    /// <param name="memberAccess">The member access naming the view the call was made on.</param>
+    /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <param name="viewClassInfo">How the view notifies, or <see langword="null"/> when the symbol names no type.</param>
+    /// <returns>The fully qualified view type name.</returns>
+    /// <remarks>
+    /// This API takes no lambda rooted on the view, so no property path carries the view's mechanism the way
+    /// the other view-first APIs' paths do, and the declaration scan only sees types the consumer writes.
+    /// Reading it from the symbol is what lets a view declared in a referenced assembly still be followed
+    /// through the view model it holds.
+    /// </remarks>
+    private static string ResolveViewType(
+        MemberAccessExpressionSyntax memberAccess,
+        SemanticModel semanticModel,
+        CancellationToken ct,
+        out ClassBindingInfo? viewClassInfo)
+    {
+        var viewTypeSymbol = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type;
+
+        viewClassInfo = viewTypeSymbol is INamedTypeSymbol namedViewType
+            ? TypeDetectionExtractor.ExtractFromSymbol(namedViewType, semanticModel.Compilation, ct)
+            : null;
+
+        return InvalidOperationExceptionHelper.EnsureNotNull(
+            ExtractorValidation.GetTypeDisplayName(viewTypeSymbol),
+            "view type display name");
     }
 
     /// <summary>

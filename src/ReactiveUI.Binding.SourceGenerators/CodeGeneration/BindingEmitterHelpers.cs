@@ -86,8 +86,8 @@ internal static class BindingEmitterHelpers
                     sb,
                     new(
                         inv,
-                        CodeGeneratorHelpers.FindClassInfo(allClasses, inv.SourceTypeFullName),
-                        CodeGeneratorHelpers.FindClassInfo(allClasses, inv.TargetTypeFullName),
+                        CodeGeneratorHelpers.ResolveObservedTypeInfo(allClasses, inv.SourceTypeFullName, inv.SourcePropertyPath),
+                        CodeGeneratorHelpers.ResolveObservedTypeInfo(allClasses, inv.TargetTypeFullName, inv.TargetPropertyPath),
                         suffix,
                         snapshot));
             }
@@ -126,43 +126,6 @@ internal static class BindingEmitterHelpers
             .Append(", null, ").Append(targetVar).AppendLine("),").AppendLine("                },").Append("                ")
             .Append(GeneratedTypeNames.BindingDirection).Append('.').Append(direction).AppendLine("))").AppendLine("        {")
             .Append("            return ").Append(earlyReturn).AppendLine(";").AppendLine("        }");
-
-    /// <summary>Emits the check that hands a binding to the runtime engine when a registered plugin outranks the generated one.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="group">The binding type group, which fixes the bound types for the whole overload.</param>
-    /// <param name="fallbackMethod">The <c>RuntimeBindingFallback</c> method that reproduces this binding.</param>
-    /// <param name="arguments">The full argument list to forward, in the fallback method's own parameter order.</param>
-    /// <param name="observesTarget">Whether the binding observes the target as well as the source.</param>
-    /// <remarks>
-    /// The generator picks each side's observation mechanism from the types it can see at compile time. A
-    /// consumer that registers a higher-affinity <c>ICreatesObservableForProperty</c> expects it to apply to
-    /// bindings as well as to <c>WhenChanged</c>, so the affinity is tested before dispatch and the binding
-    /// routes to the runtime engine when the registration wins. A two-way binding observes both sides, so
-    /// either side's registration is enough to take it.
-    /// </remarks>
-    internal static void EmitAffinityOverride(
-        StringBuilder sb,
-        BindingTypeGroup group,
-        string fallbackMethod,
-        string arguments,
-        bool observesTarget)
-    {
-        var first = group.Invocations[0];
-
-        _ = sb.AppendLine(
-            "            // A registered plugin that outranks the generated one drives the binding instead");
-
-        _ = sb.Append("            if (").Append(AffinityTest(group.SourceTypeFullName, first.SourcePropertyPath));
-
-        if (observesTarget)
-        {
-            _ = sb.AppendLine().Append("                || ").Append(AffinityTest(group.TargetTypeFullName, first.TargetPropertyPath));
-        }
-
-        _ = sb.AppendLine(")").AppendLine("            {").Append("                return ").Append(GeneratedTypeNames.RuntimeBindingFallback)
-            .Append('.').Append(fallbackMethod).AppendLine("(").Append("                    ").Append(arguments).AppendLine(");")
-            .AppendLine("            }").AppendLine();
-    }
 
     /// <summary>Groups call sites that can share one generated overload.</summary>
     /// <param name="invocations">The detected call sites.</param>
@@ -392,21 +355,6 @@ internal static class BindingEmitterHelpers
         !inv.HasConversion
         && !string.Equals(inv.SourcePropertyTypeFullName, inv.TargetPropertyTypeFullName, StringComparison.Ordinal);
 
-    /// <summary>Determines whether the two sides of a whole group differ in type with no converter supplied.</summary>
-    /// <param name="group">The binding type group.</param>
-    /// <returns><see langword="true"/> when the conversion has to come from the registry.</returns>
-    /// <remarks>
-    /// The group fixes both property types, so the affinity override can ask this once for the overload rather
-    /// than per call site.
-    /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool RequiresRegistryConversion(BindingTypeGroup group) =>
-        !group.HasConversion
-        && !string.Equals(
-            group.SourcePropertyTypeFullName,
-            group.TargetPropertyTypeFullName,
-            StringComparison.Ordinal);
-
     /// <summary>Emits a stage that converts observed values to the type the other side declares.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="sourceVar">The variable holding the values to convert.</param>
@@ -477,40 +425,69 @@ internal static class BindingEmitterHelpers
     /// the machinery a deep chain already uses.
     /// </para>
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static ViewModelObservation ResolveViewModelObservation(
         BindingInvocationInfo inv,
         ClassBindingInfo? sourceClassInfo,
-        ClassBindingInfo? targetClassInfo)
+        ClassBindingInfo? targetClassInfo) =>
+        ResolveViewModelObservation(
+            inv.SourceTypeFullName,
+            inv.TargetTypeFullName,
+            inv.SourcePropertyPath,
+            sourceClassInfo,
+            targetClassInfo);
+
+    /// <summary>Decides what a view-first API observes: the view model it was handed, or the view's own.</summary>
+    /// <param name="viewModelTypeFullName">The fully qualified view model type the call site named.</param>
+    /// <param name="viewTypeFullName">The fully qualified view type the call site was made on.</param>
+    /// <param name="viewModelPropertyPath">The path the call site walks from the view model.</param>
+    /// <param name="viewModelClassInfo">The view model type's binding info, when it was detected.</param>
+    /// <param name="viewClassInfo">The view type's binding info, which lists the properties it declares.</param>
+    /// <returns>The root to observe from, the path to walk, and the root type's binding info.</returns>
+    /// <remarks>
+    /// Every view-first API resolves this the same way, so the property binders, the command binder and the
+    /// interaction binder share one answer rather than each deciding for itself. A registration or a view model
+    /// swap that reached a bound property but not a bound command would be the kind of divergence nobody could
+    /// see from the call site.
+    /// </remarks>
+    internal static ViewModelObservation ResolveViewModelObservation(
+        string viewModelTypeFullName,
+        string viewTypeFullName,
+        EquatableArray<PropertyPathSegment> viewModelPropertyPath,
+        ClassBindingInfo? viewModelClassInfo,
+        ClassBindingInfo? viewClassInfo)
     {
-        var declaredType = targetClassInfo is null ? null : FindViewModelPropertyType(targetClassInfo);
+        var declaredType = viewClassInfo is null ? null : FindViewModelPropertyType(viewClassInfo);
         if (declaredType is null)
         {
-            return new("viewModel", inv.SourcePropertyPath, sourceClassInfo);
+            return new("viewModel", viewModelPropertyPath, viewModelClassInfo);
         }
 
         // The stage below is typed as the view model the call site named, so a view exposing it as a base or
         // an interface has to narrow on the way out. Observables convert the other way, so the read does it.
-        var readCast = string.Equals(declaredType, inv.SourceTypeFullName, StringComparison.Ordinal)
+        var readCast = string.Equals(declaredType, viewModelTypeFullName, StringComparison.Ordinal)
             ? null
-            : inv.SourceTypeFullName;
+            : viewModelTypeFullName;
 
+        // The view declares this property, so the view's mechanism is the one that reports it changing. Taking
+        // the view model's would observe the wrong type - a dependency-object view holding a notifying view
+        // model would be watched as though the view notified the way its view model does.
         var viewModelSegment = new PropertyPathSegment(
             ViewModelPropertyName,
-            inv.SourceTypeFullName,
-            inv.TargetTypeFullName,
+            viewModelTypeFullName,
+            viewTypeFullName,
             true,
-            sourceClassInfo,
+            viewClassInfo,
             readCast);
 
-        var source = inv.SourcePropertyPath;
-        var rooted = new PropertyPathSegment[source.Length + 1];
+        var rooted = new PropertyPathSegment[viewModelPropertyPath.Length + 1];
         rooted[0] = viewModelSegment;
-        for (var i = 0; i < source.Length; i++)
+        for (var i = 0; i < viewModelPropertyPath.Length; i++)
         {
-            rooted[i + 1] = source[i];
+            rooted[i + 1] = viewModelPropertyPath[i];
         }
 
-        return new("view", new(rooted), targetClassInfo);
+        return new("view", new(rooted), viewClassInfo);
     }
 
     /// <summary>Emits the whole concrete typed overload one binding API dispatches through.</summary>
@@ -687,51 +664,6 @@ internal static class BindingEmitterHelpers
         return null;
     }
 
-    /// <summary>Renders the affinity test for one side of a binding.</summary>
-    /// <param name="typeFullName">The fully qualified name of the observed type.</param>
-    /// <param name="propertyPath">The path being observed, each segment carrying how its declaring type notifies.</param>
-    /// <returns>The rendered condition, without surrounding parentheses.</returns>
-    /// <remarks>
-    /// One test per link, because that is how the registration is resolved: a plugin scores a type and a
-    /// property together, so a chain can pick a different mechanism at every step and a registration that wins
-    /// at any one of them takes the whole binding. Asking about the root alone misses a registration aimed at
-    /// the leaf, and asking without the property name makes every mechanism-specific plugin score 0.
-    /// </remarks>
-    private static string AffinityTest(string typeFullName, EquatableArray<PropertyPathSegment> propertyPath)
-    {
-        var builder = new StringBuilder();
-
-        for (var i = 0; i < propertyPath.Length; i++)
-        {
-            var segment = propertyPath[i];
-            var declaringType = segment.DeclaringTypeInfo;
-            var plugin = declaringType is null
-                ? null
-                : Plugins.ObservationPluginRegistry.GetBestPlugin(declaringType, segment.PropertyName);
-
-            // The root is the type the call site binds, which is what the observation is rooted on; every
-            // later link is observed on the type that declares it.
-            var observedType = i == 0 ? typeFullName : segment.DeclaringTypeFullName;
-
-            if (i > 0)
-            {
-                _ = builder.AppendLine().Append("                || ");
-            }
-
-            _ = builder
-                .Append(GeneratedTypeNames.ObservationAffinityChecker)
-                .Append(".HasHigherAffinityPlugin(typeof(")
-                .Append(observedType)
-                .Append("), \"")
-                .Append(segment.PropertyName)
-                .Append("\", ")
-                .Append(plugin?.Affinity ?? 0)
-                .Append(", false)");
-        }
-
-        return builder.ToString();
-    }
-
     /// <summary>Appends the body of an overload that matches a call site by the text of its selectors.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
@@ -747,7 +679,6 @@ internal static class BindingEmitterHelpers
             _ = sb.AppendLine();
         }
 
-        api.EmitAffinityOverride(sb, group, api.TargetExpressionParameter);
         var extraArguments = api.FormatExtraArguments(group);
 
         for (var i = 0; i < group.Invocations.Length; i++)
@@ -787,10 +718,6 @@ internal static class BindingEmitterHelpers
 
         CodeGeneratorHelpers.AppendCallerInfoDispatchParameters(sb);
 
-        api.EmitAffinityOverride(
-            sb,
-            group,
-            $"\"{CodeGeneratorHelpers.EscapeString(group.Invocations[0].TargetExpressionText)}\"");
         var extraArguments = api.FormatExtraArguments(group);
 
         for (var i = 0; i < group.Invocations.Length; i++)
@@ -1001,10 +928,6 @@ internal static class BindingEmitterHelpers
         /// <summary>Gets the function rendering the conversion and scheduler arguments the worker takes.</summary>
         internal Func<BindingTypeGroup, string> FormatExtraArguments { get; init; } =
             static _ => string.Empty;
-
-        /// <summary>Gets the action emitting the check that hands the binding to the runtime engine.</summary>
-        internal Action<StringBuilder, BindingTypeGroup, string> EmitAffinityOverride { get; init; } =
-            static (_, _, _) => { };
 
         /// <summary>Gets the two objects a generated worker binds, in its own parameter order.</summary>
         internal string WorkerArguments => $"{WorkerSourceParameterName}, {WorkerTargetParameterName}";

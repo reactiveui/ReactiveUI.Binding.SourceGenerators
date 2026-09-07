@@ -590,7 +590,7 @@ public class BindCommandCodeGeneratorHelperTests
             hasCommandParameterProperty: true);
         var viewModelClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, TESTSUFFIXName, false);
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, null, TESTSUFFIXName, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__BindCommand_TESTSUFFIX");
@@ -609,7 +609,7 @@ public class BindCommandCodeGeneratorHelperTests
             hasEnabledProperty: true);
         var viewModelClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, TESTSUFFIXName, false);
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, null, TESTSUFFIXName, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("__BindCommand_TESTSUFFIX");
@@ -628,7 +628,7 @@ public class BindCommandCodeGeneratorHelperTests
             resolvedEventName: null);
         var viewModelClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, TESTSUFFIXName, false);
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, null, TESTSUFFIXName, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains("No bindable event found");
@@ -771,7 +771,7 @@ public class BindCommandCodeGeneratorHelperTests
             parameterTypeFullName: StringTypeName);
         var viewModelClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, TESTSUFFIXName, false);
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, null, TESTSUFFIXName, false);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(IObservableGlobalSystemStringWithParameterFragment);
@@ -795,10 +795,11 @@ public class BindCommandCodeGeneratorHelperTests
                 [ModelFactory.CreatePropertyPathSegment(ParamName)]));
         var viewModelClassInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true);
 
-        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, TESTSUFFIXName, false);
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, viewModelClassInfo, null, TESTSUFFIXName, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("var withParameter = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.String>");
+        await Assert.That(result).Contains("var withParameterMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.String>");
+        await Assert.That(result).Contains("var withParameter = withParameterRegistration == null");
         await Assert.That(result).Contains(MappedParameterStreamFragment);
     }
 
@@ -817,10 +818,10 @@ public class BindCommandCodeGeneratorHelperTests
             parameterPropertyPath: new EquatableArray<PropertyPathSegment>(
                 [ModelFactory.CreatePropertyPathSegment(ParamName)]));
 
-        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, null, TESTSUFFIXName, false);
+        BindCommandCodeGenerator.GenerateBindCommandMethod(sb, inv, null, null, TESTSUFFIXName, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("var withParameter = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<object>");
+        await Assert.That(result).Contains("var withParameterMechanism = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<object>");
     }
 
     // ───────────────────────────────────────────────────────────────────────────

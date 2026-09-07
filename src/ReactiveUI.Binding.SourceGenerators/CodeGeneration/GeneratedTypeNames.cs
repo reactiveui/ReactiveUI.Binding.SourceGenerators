@@ -131,11 +131,8 @@ internal static class GeneratedTypeNames
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.ObservationAffinityChecker</c>.</summary>
     internal const string ObservationAffinityChecker = "global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker";
 
-    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.RuntimeBindingFallback</c>.</summary>
-    internal const string RuntimeBindingFallback = "global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback";
-
-    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.TwoWayConverters</c>.</summary>
-    internal const string TwoWayConverters = "global::ReactiveUI.Binding.Fallback.TwoWayConverters";
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Observables.PluginPropertyObservable</c>.</summary>
+    internal const string PluginPropertyObservable = "global::ReactiveUI.Binding.Observables.PluginPropertyObservable";
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingSchedulers</c>.</summary>
     internal const string BindingSchedulers = "global::ReactiveUI.Binding.BindingSchedulers";

@@ -63,77 +63,209 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, string, string, string, string, string, string, string, string, string, string, string>> __WhenAnyValue_7FFFC43E653A6144(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture obj)
         {
-            var __propObs0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value1",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value1,
                 true);
+            var __propObs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value1", 5, false);
+            var __propObs0 = __propObs0Registration == null
+                ? (global::System.IObservable<string>)__propObs0Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value1)).Body,
+                    "Value1",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value1,
+                    false,
+                    true);
 
-            var __propObs1 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value2",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value2,
                 true);
+            var __propObs1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value2", 5, false);
+            var __propObs1 = __propObs1Registration == null
+                ? (global::System.IObservable<string>)__propObs1Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs1Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value2)).Body,
+                    "Value2",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value2,
+                    false,
+                    true);
 
-            var __propObs2 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs2Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value3",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value3,
                 true);
+            var __propObs2Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value3", 5, false);
+            var __propObs2 = __propObs2Registration == null
+                ? (global::System.IObservable<string>)__propObs2Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs2Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value3)).Body,
+                    "Value3",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value3,
+                    false,
+                    true);
 
-            var __propObs3 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs3Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value4",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value4,
                 true);
+            var __propObs3Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value4", 5, false);
+            var __propObs3 = __propObs3Registration == null
+                ? (global::System.IObservable<string>)__propObs3Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs3Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value4)).Body,
+                    "Value4",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value4,
+                    false,
+                    true);
 
-            var __propObs4 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs4Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value5",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value5,
                 true);
+            var __propObs4Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value5", 5, false);
+            var __propObs4 = __propObs4Registration == null
+                ? (global::System.IObservable<string>)__propObs4Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs4Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value5)).Body,
+                    "Value5",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value5,
+                    false,
+                    true);
 
-            var __propObs5 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs5Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value6",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value6,
                 true);
+            var __propObs5Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value6", 5, false);
+            var __propObs5 = __propObs5Registration == null
+                ? (global::System.IObservable<string>)__propObs5Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs5Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value6)).Body,
+                    "Value6",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value6,
+                    false,
+                    true);
 
-            var __propObs6 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs6Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value7",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value7,
                 true);
+            var __propObs6Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value7", 5, false);
+            var __propObs6 = __propObs6Registration == null
+                ? (global::System.IObservable<string>)__propObs6Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs6Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value7)).Body,
+                    "Value7",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value7,
+                    false,
+                    true);
 
-            var __propObs7 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs7Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value8",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value8,
                 true);
+            var __propObs7Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value8", 5, false);
+            var __propObs7 = __propObs7Registration == null
+                ? (global::System.IObservable<string>)__propObs7Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs7Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value8)).Body,
+                    "Value8",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value8,
+                    false,
+                    true);
 
-            var __propObs8 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs8Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value9",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value9,
                 true);
+            var __propObs8Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value9", 5, false);
+            var __propObs8 = __propObs8Registration == null
+                ? (global::System.IObservable<string>)__propObs8Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs8Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value9)).Body,
+                    "Value9",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value9,
+                    false,
+                    true);
 
-            var __propObs9 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs9Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value10",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value10,
                 true);
+            var __propObs9Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value10", 5, false);
+            var __propObs9 = __propObs9Registration == null
+                ? (global::System.IObservable<string>)__propObs9Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs9Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value10)).Body,
+                    "Value10",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value10,
+                    false,
+                    true);
 
-            var __propObs10 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs10Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value11",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value11,
                 true);
+            var __propObs10Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value11", 5, false);
+            var __propObs10 = __propObs10Registration == null
+                ? (global::System.IObservable<string>)__propObs10Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs10Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value11)).Body,
+                    "Value11",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value11,
+                    false,
+                    true);
 
-            var __propObs11 = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            var __propObs11Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
                 obj,
                 "Value12",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value12,
                 true);
+            var __propObs11Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture), "Value12", 5, false);
+            var __propObs11 = __propObs11Registration == null
+                ? (global::System.IObservable<string>)__propObs11Mechanism
+                : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __propObs11Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string>>)(__e => __e.Value12)).Body,
+                    "Value12",
+                    (object __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture)__o).Value12,
+                    false,
+                    true);
 
             return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
                 __propObs0,

@@ -33,14 +33,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 ? targetPropertyExpression.Substring(7)
                 : targetPropertyExpression;
 
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel), "Count", 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView), "CountText", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindTwoWay(
-                    source, target, sourceProperty, targetProperty, global::ReactiveUI.Binding.Fallback.TwoWayConverters.Create(sourceToTargetConv, targetToSourceConv), scheduler, targetPropertyExpression);
-            }
-
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.CountText")
             {
@@ -69,16 +61,38 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
         }
-        var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
+        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             source,
             "Count",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel)__o).Count,
             true);
-        var targetObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel), "Count", 5, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<int>)sourceObsMechanism
+            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                sourceObsRegistration,
+                source,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel, int>>)(__e => __e.Count)).Body,
+                "Count",
+                (object __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyViewModel)__o).Count,
+                false,
+                true);
+        var targetObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
             target,
             "CountText",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView)__o).CountText,
             true);
+        var targetObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView), "CountText", 5, false);
+        var targetObs = targetObsRegistration == null
+            ? (global::System.IObservable<string>)targetObsMechanism
+            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                targetObsRegistration,
+                target,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView, string>>)(__e => __e.CountText)).Body,
+                "CountText",
+                (object __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyWithConvertersAndScheduler.MyView)__o).CountText,
+                false,
+                true);
         var __srcSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, sourceToTargetConv);
         var __tgtSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(targetObs, targetToSourceConv);
         var sourceBind = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<string>(__srcSelected, scheduler);

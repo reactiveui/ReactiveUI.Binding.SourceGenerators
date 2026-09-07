@@ -256,8 +256,8 @@ internal static class CodeGeneratorHelpers
         var needsEscape = false;
         for (var i = 0; i < value.Length; i++)
         {
-            var c = value[i];
-            if (c is not ('\\' or '"'))
+            var character = value[i];
+            if (character is not ('\\' or '"'))
             {
                 continue;
             }
@@ -274,18 +274,18 @@ internal static class CodeGeneratorHelpers
         var sb = new PooledStringBuilder(value.Length + EscapeOverheadCapacity);
         for (var i = 0; i < value.Length; i++)
         {
-            var c = value[i];
-            if (c == '\\')
+            var character = value[i];
+            if (character == '\\')
             {
                 _ = sb.Append("\\\\");
             }
-            else if (c == '"')
+            else if (character == '"')
             {
                 _ = sb.Append("\\\"");
             }
             else
             {
-                _ = sb.Append(c);
+                _ = sb.Append(character);
             }
         }
 
@@ -537,20 +537,6 @@ internal static class CodeGeneratorHelpers
 
         return kept.Count == invocations.Length ? invocations : [.. kept];
     }
-
-    /// <summary>Renders the conversion a binding applies when the two sides differ and no converter was supplied.</summary>
-    /// <param name="fromTypeFullName">The fully qualified type being converted from.</param>
-    /// <param name="toTypeFullName">The fully qualified type being converted to.</param>
-    /// <returns>A lambda expression that defers to the registered binding type converters.</returns>
-    /// <remarks>
-    /// This is the same registry lookup the generated body performs, written as an expression so a binding
-    /// handed to the runtime engine keeps converting exactly as the generated one would have. Emitting it
-    /// rather than calling a generic helper keeps both type arguments inferable at the call site.
-    /// </remarks>
-    internal static string FormatRegistryConversionLambda(string fromTypeFullName, string toTypeFullName) =>
-        $"__value => {{ {toTypeFullName} __converted; "
-        + $"{GeneratedTypeNames.RuntimeBindingConverter}.TryConvert<{fromTypeFullName}, {toTypeFullName}>(__value, null, null, out __converted); "
-        + "return __converted; }";
 
     /// <summary>Emits a whole dispatch file: the extension class, and one overload per group of call sites.</summary>
     /// <typeparam name="TInvocation">The call-site model this API extracts.</typeparam>

@@ -23,13 +23,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel), "Name", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.OneWayBind(
-                    view, viewModel, viewModelProperty, viewProperty, null, viewPropertyExpression);
-            }
-
             if (viewModelPropertyExpression == "x => x.Name"
                 && viewPropertyExpression == "x => x.NameText")
             {
@@ -58,11 +51,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return null;
         }
-        var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
             viewModel,
             "Name",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel)__o).Name,
             true);
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel), "Name", 5, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<string>)sourceObsMechanism
+            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                sourceObsRegistration,
+                viewModel,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel, string>>)(__e => __e.Name)).Body,
+                "Name",
+                (object __o) => ((global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel)__o).Name,
+                false,
+                true);
             var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
@@ -96,13 +100,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel), "Age", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.OneWayBind(
-                    view, viewModel, viewModelProperty, viewProperty, null, viewPropertyExpression);
-            }
-
             if (viewModelPropertyExpression == "x => x.Age"
                 && viewPropertyExpression == "x => x.AgeText")
             {
@@ -131,11 +128,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return null;
         }
-        var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
+        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             viewModel,
             "Age",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel)__o).Age,
             true);
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel), "Age", 5, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<int>)sourceObsMechanism
+            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                sourceObsRegistration,
+                viewModel,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel, int>>)(__e => __e.Age)).Body,
+                "Age",
+                (object __o) => ((global::SharedScenarios.OneWayBind.MultipleBindings.MyViewModel)__o).Age,
+                false,
+                true);
             var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>

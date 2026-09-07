@@ -30,14 +30,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 ? targetPropertyExpression.Substring(7)
                 : targetPropertyExpression;
 
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyViewModel), "Count", 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyView), "DisplayCount", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindTwoWay(
-                    source, target, sourceProperty, targetProperty, null, targetPropertyExpression);
-            }
-
             if (sourcePropertyExpression == "x => x.Count"
                 && targetPropertyExpression == "x => x.DisplayCount")
             {
@@ -66,16 +58,38 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
         }
-        var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
+        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             source,
             "Count",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyViewModel)__o).Count,
             true);
-        var targetObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyViewModel), "Count", 5, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<int>)sourceObsMechanism
+            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                sourceObsRegistration,
+                source,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyViewModel, int>>)(__e => __e.Count)).Body,
+                "Count",
+                (object __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyViewModel)__o).Count,
+                false,
+                true);
+        var targetObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             target,
             "DisplayCount",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyView)__o).DisplayCount,
             true);
+        var targetObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyView), "DisplayCount", 5, false);
+        var targetObs = targetObsRegistration == null
+            ? (global::System.IObservable<int>)targetObsMechanism
+            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                targetObsRegistration,
+                target,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyView, int>>)(__e => __e.DisplayCount)).Body,
+                "DisplayCount",
+                (object __o) => ((global::SharedScenarios.BindTwoWay.SinglePropertyIntToInt.MyView)__o).DisplayCount,
+                false,
+                true);
             var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>

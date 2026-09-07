@@ -30,14 +30,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 ? targetPropertyExpression.Substring(7)
                 : targetPropertyExpression;
 
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::TestApp.MyViewModel), "Name", 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::TestApp.MyAppleView), "Text", 0, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindTwoWay(
-                    source, target, sourceProperty, targetProperty, null, targetPropertyExpression);
-            }
-
             if (sourcePropertyExpression == "x => x.Name"
                 && targetPropertyExpression == "x => x.Text")
             {
@@ -66,17 +58,39 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
         }
-        var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
             source,
             "Name",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyViewModel)__o).Name,
             true);
-        var targetObs = new __KVOObservable<string>(
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::TestApp.MyViewModel), "Name", 5, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<string>)sourceObsMechanism
+            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                sourceObsRegistration,
+                source,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyViewModel, string>>)(__e => __e.Name)).Body,
+                "Name",
+                (object __o) => ((global::TestApp.MyViewModel)__o).Name,
+                false,
+                true);
+        var targetObsMechanism = new __KVOObservable<string>(
             (global::Foundation.NSObject)target,
             "text",
             (global::Foundation.NSObject __o) => ((global::TestApp.MyAppleView)__o).Text,
             true,
             false);
+        var targetObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::TestApp.MyAppleView), "Text", 15, false);
+        var targetObs = targetObsRegistration == null
+            ? (global::System.IObservable<string>)targetObsMechanism
+            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                targetObsRegistration,
+                target,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyAppleView, string>>)(__e => __e.Text)).Body,
+                "Text",
+                (object __o) => ((global::TestApp.MyAppleView)__o).Text,
+                false,
+                true);
             var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>

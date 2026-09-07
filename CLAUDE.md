@@ -378,13 +378,22 @@ gets the same veto. That is the "better" half of the divergence: same outcome, n
 **A registered plugin still outranks the generated observation.** The generator picks a mechanism from the
 types it can see at compile time, but `ICreatesObservableForProperty` is registered at run time and the
 highest affinity wins - which is how ReactiveUI resolves the observation behind `Bind` and `OneWayBind`, not
-just behind `WhenChanged`. Every generated binding therefore tests
-`ObservationAffinityChecker.HasHigherAffinityPlugin` against the affinity of the plugin it was generated
-from, and hands the binding to `RuntimeBindingFallback` when the registration wins. A two-way binding
-observes both sides, so either side's registration is enough to take it.
+just behind `WhenChanged`. The choice is made per observed link rather than per binding:
+`ObservationAffinityChecker.FindHigherAffinityPlugin` is asked for a registration outranking the affinity
+that link was generated from, and the link observes through `PluginPropertyObservable` when one wins and
+through the generated mechanism when none does. A two-way binding observes both sides, so either side's
+registration takes that side.
 
-Leaving that out is not a divergence anyone could see: the registration would apply to `WhenChanged` and
-silently not to a binding of the same property. The check has to be on the path of every binding, so the
+**The registration drives the observation without an expression engine.** `PluginPropertyObservable`
+subscribes to the registration for *when* the property changed and reads the value through the accessor the
+generator emitted, so the honouring of a plugin costs no reflection. Everything the plugin needs is fixed at
+compile time - the declaring type, the property name, the getter, and a lambda the compiler turns into member
+tokens - which is what keeps a consumer publishing ahead-of-time free of trim and AOT warnings. Nothing on a
+generated path reaches the runtime expression engine; routing a whole binding to it instead would put
+`[RequiresUnreferencedCode]` back on every call site.
+
+Leaving the override out is not a divergence anyone could see: the registration would apply to `WhenChanged`
+and silently not to a binding of the same property. The check has to be on the path of every binding, so the
 registered set is resolved once and kept rather than re-read from the locator per call - re-reading cost
 ~141 B and ~1.2 us per binding created, which a view full of bindings pays for repeatedly. `Refresh()`
 drops the cache for a host that registers a plugin after its first binding.

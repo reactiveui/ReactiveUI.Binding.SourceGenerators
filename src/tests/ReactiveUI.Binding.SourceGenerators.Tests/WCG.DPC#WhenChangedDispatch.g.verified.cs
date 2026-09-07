@@ -21,13 +21,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             property1Expression = property1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property1Expression.Substring(7) : property1Expression;
 
-            // Allow user-registered plugins with higher affinity to override generated observation
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.DeepPropertyChain.ParentViewModel), "Child", 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.DeepPropertyChain.ChildModel), "Name", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanged(objectToMonitor, property1);
-            }
-
             if (property1Expression == "x => x.Child.Name")
             {
                 return __WhenChanged_7FFFCA2DD50C8513(objectToMonitor);
@@ -45,11 +38,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         var __obs1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanged.DeepPropertyChain.ChildModel, string>(__obs0,
             __parent1 => __parent1 != null
-                ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                    (global::System.ComponentModel.INotifyPropertyChanged)__parent1,
+                ? global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<string>(
+                    __parent1,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.DeepPropertyChain.ChildModel, string>>)(__e => __e.Name)).Body,
                     "Name",
-                    (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.DeepPropertyChain.ChildModel)__o).Name,
-                    false)
+                    false,
+                    5,
+                    (object __o) => ((global::SharedScenarios.WhenChanged.DeepPropertyChain.ChildModel)__o).Name,
+                    new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+                        (global::System.ComponentModel.INotifyPropertyChanged)__parent1,
+                        "Name",
+                        (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.DeepPropertyChain.ChildModel)__o).Name,
+                        false))
                 : (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
             return global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obs1);
         }

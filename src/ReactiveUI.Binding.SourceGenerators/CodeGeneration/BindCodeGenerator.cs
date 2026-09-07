@@ -43,7 +43,6 @@ internal static class BindCodeGenerator
         AppendExtraParameters = AppendExtraParameters,
         FormatWorkerParameters = FormatExtraMethodParams,
         FormatExtraArguments = FormatExtraArgs,
-        EmitAffinityOverride = EmitAffinityOverride,
     };
 
     /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
@@ -216,49 +215,5 @@ internal static class BindCodeGenerator
             inv.SourcePropertyTypeFullName);
 
         return new(convertedViewModelVar, convertedViewVar);
-    }
-
-    /// <summary>Names the conversions the fallback needs, matching whatever the generated body would apply.</summary>
-    /// <param name="group">The binding type group.</param>
-    /// <returns>The converter-pair argument, trailed by a comma, or empty when both sides share a type.</returns>
-    private static string FormatFallbackConverters(BindingTypeGroup group)
-    {
-        if (group.HasConversion)
-        {
-            return $"{TwoWayConverters}.Create({ForwardConverterName}, {ReverseConverterName}), ";
-        }
-
-        if (!BindingEmitterHelpers.RequiresRegistryConversion(group))
-        {
-            return string.Empty;
-        }
-
-        var forward = CodeGeneratorHelpers.FormatRegistryConversionLambda(
-            group.SourcePropertyTypeFullName,
-            group.TargetPropertyTypeFullName);
-        var reverse = CodeGeneratorHelpers.FormatRegistryConversionLambda(
-            group.TargetPropertyTypeFullName,
-            group.SourcePropertyTypeFullName);
-
-        // Both arguments are lambdas, which cannot drive inference, so the pair names its types outright.
-        return
-            $"{TwoWayConverters}.Create<{group.SourcePropertyTypeFullName}, {group.TargetPropertyTypeFullName}>({forward}, {reverse}), ";
-    }
-
-    /// <summary>Emits the check that hands the binding to the runtime engine when a registered plugin outranks the generated one.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="group">The binding type group, which fixes both bound types for the whole overload.</param>
-    /// <param name="bindingExpression">The C# expression naming the bound view property, used when a write faults.</param>
-    private static void EmitAffinityOverride(StringBuilder sb, BindingTypeGroup group, string bindingExpression)
-    {
-        var convertersArg = FormatFallbackConverters(group);
-        var schedulerArg = group.HasScheduler ? "scheduler" : "null";
-
-        BindingEmitterHelpers.EmitAffinityOverride(
-            sb,
-            group,
-            "Bind",
-            $"view, viewModel, viewModelProperty, viewProperty, {convertersArg}{schedulerArg}, {bindingExpression}",
-            true);
     }
 }

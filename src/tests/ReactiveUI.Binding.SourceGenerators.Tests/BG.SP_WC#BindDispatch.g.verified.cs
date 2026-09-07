@@ -25,14 +25,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel), "Count", 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView), "CountText", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.Bind(
-                    view, viewModel, viewModelProperty, viewProperty, global::ReactiveUI.Binding.Fallback.TwoWayConverters.Create(viewModelToViewConverter, viewToViewModelConverter), null, viewPropertyExpression);
-            }
-
             if (viewModelPropertyExpression == "x => x.Count"
                 && viewPropertyExpression == "x => x.CountText")
             {
@@ -61,16 +53,38 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return null;
         }
-        var vmObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
+        var vmObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             viewModel,
             "Count",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel)__o).Count,
             true);
-        var viewObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+        var vmObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel), "Count", 5, false);
+        var vmObs = vmObsRegistration == null
+            ? (global::System.IObservable<int>)vmObsMechanism
+            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                vmObsRegistration,
+                viewModel,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel, int>>)(__e => __e.Count)).Body,
+                "Count",
+                (object __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyViewModel)__o).Count,
+                false,
+                true);
+        var viewObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
             view,
             "CountText",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView)__o).CountText,
             true);
+        var viewObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView), "CountText", 5, false);
+        var viewObs = viewObsRegistration == null
+            ? (global::System.IObservable<string>)viewObsMechanism
+            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                viewObsRegistration,
+                view,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView, string>>)(__e => __e.CountText)).Body,
+                "CountText",
+                (object __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConverters.MyView)__o).CountText,
+                false,
+                true);
         var vmBind = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(vmObs, viewModelToViewConverter);
         var viewBind = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(viewObs, viewToViewModelConverter);
             var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(vmBind);

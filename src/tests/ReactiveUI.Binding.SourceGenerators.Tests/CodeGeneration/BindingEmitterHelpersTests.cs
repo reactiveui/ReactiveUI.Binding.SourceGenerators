@@ -87,9 +87,11 @@ public class BindingEmitterHelpersTests
     [Test]
     public async Task RequiresRegistryConversion_ConverterSupplied_ReturnsFalse()
     {
-        var group = Group(hasConversion: true, sourceType: IntTypeName, targetType: StringTypeName);
+        var invocation = ModelFactory.CreateBindingInvocationInfo(
+            sourcePropertyTypeFullName: IntTypeName,
+            hasConversion: true);
 
-        await Assert.That(BindingEmitterHelpers.RequiresRegistryConversion(group)).IsFalse();
+        await Assert.That(BindingEmitterHelpers.RequiresRegistryConversion(invocation)).IsFalse();
     }
 
     /// <summary>Two sides of the same type need no conversion at all.</summary>
@@ -97,9 +99,9 @@ public class BindingEmitterHelpersTests
     [Test]
     public async Task RequiresRegistryConversion_SameTypeBothSides_ReturnsFalse()
     {
-        var group = Group(hasConversion: false, sourceType: StringTypeName, targetType: StringTypeName);
+        var invocation = ModelFactory.CreateBindingInvocationInfo();
 
-        await Assert.That(BindingEmitterHelpers.RequiresRegistryConversion(group)).IsFalse();
+        await Assert.That(BindingEmitterHelpers.RequiresRegistryConversion(invocation)).IsFalse();
     }
 
     /// <summary>Differing sides with no supplied converter are what the registry exists to serve.</summary>
@@ -107,41 +109,9 @@ public class BindingEmitterHelpersTests
     [Test]
     public async Task RequiresRegistryConversion_DifferingTypesNoConverter_ReturnsTrue()
     {
-        var group = Group(hasConversion: false, sourceType: IntTypeName, targetType: StringTypeName);
+        var invocation = ModelFactory.CreateBindingInvocationInfo(sourcePropertyTypeFullName: IntTypeName);
 
-        await Assert.That(BindingEmitterHelpers.RequiresRegistryConversion(group)).IsTrue();
-    }
-
-    /// <summary>
-    /// A chain is tested link by link. A plugin scores a type and a property together, so a registration
-    /// aimed at the leaf takes the binding even though the root resolves to something else.
-    /// </summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task EmitAffinityOverride_DeepSourcePath_TestsEveryLink()
-    {
-        var sb = new StringBuilder();
-
-        BindingEmitterHelpers.EmitAffinityOverride(sb, DeepSourceGroup(), "BindOneWay", "source, target", false);
-
-        var result = sb.ToString();
-        await Assert.That(result).Contains("typeof(global::TestApp.MyViewModel), \"Address\"");
-        await Assert.That(result).Contains("typeof(global::TestApp.Address), \"City\"");
-        await Assert.That(result).Contains("|| ");
-    }
-
-    /// <summary>A two-way binding observes both sides, so either side's registration is enough to take it.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task EmitAffinityOverride_ObservingTheTarget_TestsBothSides()
-    {
-        var sb = new StringBuilder();
-
-        BindingEmitterHelpers.EmitAffinityOverride(sb, DeepSourceGroup(), "BindTwoWay", "source, target", true);
-
-        var result = sb.ToString();
-        await Assert.That(result).Contains("typeof(global::TestApp.MyViewModel), \"Address\"");
-        await Assert.That(result).Contains("typeof(global::TestApp.MyView), \"Text\"");
+        await Assert.That(BindingEmitterHelpers.RequiresRegistryConversion(invocation)).IsTrue();
     }
 
     /// <summary>
@@ -157,7 +127,6 @@ public class BindingEmitterHelpersTests
         var sb = new StringBuilder();
 
         api.AppendExtraParameters(sb, group);
-        api.EmitAffinityOverride(sb, group, "\"Text\"");
 
         await Assert.That(sb.ToString()).IsEmpty();
         await Assert.That(api.FormatExtraArguments(group)).IsEmpty();
@@ -199,26 +168,6 @@ public class BindingEmitterHelpersTests
             ModelFactory.CreateBindingInvocationInfo(),
             ModelFactory.CreateClassBindingInfo(implementsINPC: true),
             view);
-    }
-
-    /// <summary>Builds a group whose source path walks two links.</summary>
-    /// <returns>The binding type group.</returns>
-    private static BindingTypeGroup DeepSourceGroup()
-    {
-        var sourcePath = new EquatableArray<PropertyPathSegment>(
-        [
-            ModelFactory.CreatePropertyPathSegment("Address", "global::TestApp.Address"),
-            ModelFactory.CreatePropertyPathSegment("City", StringTypeName, "global::TestApp.Address"),
-        ]);
-
-        return new(
-            ViewModelTypeName,
-            "global::TestApp.MyView",
-            StringTypeName,
-            StringTypeName,
-            false,
-            false,
-            [ModelFactory.CreateBindingInvocationInfo(sourcePropertyPath: sourcePath)]);
     }
 
     /// <summary>Builds a group fixing both property types and whether a converter was supplied.</summary>

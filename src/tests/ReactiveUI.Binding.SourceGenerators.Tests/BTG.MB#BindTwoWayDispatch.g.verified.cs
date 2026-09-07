@@ -30,14 +30,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 ? targetPropertyExpression.Substring(7)
                 : targetPropertyExpression;
 
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel), "Name", 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyView), "NameText", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindTwoWay(
-                    source, target, sourceProperty, targetProperty, null, targetPropertyExpression);
-            }
-
             if (sourcePropertyExpression == "x => x.Name"
                 && targetPropertyExpression == "x => x.NameText")
             {
@@ -66,16 +58,38 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
         }
-        var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
             source,
             "Name",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel)__o).Name,
             true);
-        var targetObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel), "Name", 5, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<string>)sourceObsMechanism
+            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                sourceObsRegistration,
+                source,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel, string>>)(__e => __e.Name)).Body,
+                "Name",
+                (object __o) => ((global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel)__o).Name,
+                false,
+                true);
+        var targetObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
             target,
             "NameText",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.MultipleBindings.MyView)__o).NameText,
             true);
+        var targetObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyView), "NameText", 5, false);
+        var targetObs = targetObsRegistration == null
+            ? (global::System.IObservable<string>)targetObsMechanism
+            : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                targetObsRegistration,
+                target,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.MultipleBindings.MyView, string>>)(__e => __e.NameText)).Body,
+                "NameText",
+                (object __o) => ((global::SharedScenarios.BindTwoWay.MultipleBindings.MyView)__o).NameText,
+                false,
+                true);
             var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
@@ -123,14 +137,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 ? targetPropertyExpression.Substring(7)
                 : targetPropertyExpression;
 
-            // A registered plugin that outranks the generated one drives the binding instead
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel), "Age", 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyView), "AgeDisplay", 5, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindTwoWay(
-                    source, target, sourceProperty, targetProperty, null, targetPropertyExpression);
-            }
-
             if (sourcePropertyExpression == "x => x.Age"
                 && targetPropertyExpression == "x => x.AgeDisplay")
             {
@@ -159,16 +165,38 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
         }
-        var sourceObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
+        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             source,
             "Age",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel)__o).Age,
             true);
-        var targetObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel), "Age", 5, false);
+        var sourceObs = sourceObsRegistration == null
+            ? (global::System.IObservable<int>)sourceObsMechanism
+            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                sourceObsRegistration,
+                source,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel, int>>)(__e => __e.Age)).Body,
+                "Age",
+                (object __o) => ((global::SharedScenarios.BindTwoWay.MultipleBindings.MyViewModel)__o).Age,
+                false,
+                true);
+        var targetObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
             target,
             "AgeDisplay",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindTwoWay.MultipleBindings.MyView)__o).AgeDisplay,
             true);
+        var targetObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindTwoWay.MultipleBindings.MyView), "AgeDisplay", 5, false);
+        var targetObs = targetObsRegistration == null
+            ? (global::System.IObservable<int>)targetObsMechanism
+            : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
+                targetObsRegistration,
+                target,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.MultipleBindings.MyView, int>>)(__e => __e.AgeDisplay)).Body,
+                "AgeDisplay",
+                (object __o) => ((global::SharedScenarios.BindTwoWay.MultipleBindings.MyView)__o).AgeDisplay,
+                false,
+                true);
             var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>

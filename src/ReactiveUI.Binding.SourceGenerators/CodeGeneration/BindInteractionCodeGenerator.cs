@@ -18,7 +18,14 @@ internal static class BindInteractionCodeGenerator
     private const string WorkerMethodPrefix = "__BindInteraction_";
 
     /// <summary>The arguments a generated worker takes, in its own parameter order.</summary>
-    private const string WorkerArguments = "viewModel, handler";
+    /// <remarks>
+    /// The view comes first because the interaction is observed through whichever view model the view holds,
+    /// so the worker needs the view itself rather than only the instance the call site handed over.
+    /// </remarks>
+    private const string WorkerArguments = "view, viewModel, handler";
+
+    /// <summary>Closes the view parameter of a generated binding worker.</summary>
+    private const string ViewParameterSuffix = " view,";
 
     /// <summary>Closes the view model parameter of a generated binding worker.</summary>
     private const string ViewModelParameterSuffix = " viewModel,";
@@ -183,11 +190,13 @@ internal static class BindInteractionCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The BindInteraction invocation info.</param>
     /// <param name="viewModelClassInfo">The view model type class binding info.</param>
+    /// <param name="viewClassInfo">The view type class binding info, which says whether it exposes a view model.</param>
     /// <param name="suffix">The stable method name suffix.</param>
     internal static void GenerateBindInteractionMethod(
         StringBuilder sb,
         BindInteractionInvocationInfo inv,
         ClassBindingInfo? viewModelClassInfo,
+        ClassBindingInfo? viewClassInfo,
         string suffix)
     {
         var handlerType = inv.IsTaskHandler
@@ -199,11 +208,12 @@ internal static class BindInteractionCodeGenerator
         var pathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.InteractionPropertyPath);
 
         _ = sb.Append("        private static global::System.IDisposable __BindInteraction_").Append(suffix).AppendLine("(").Append("            ")
+            .Append(inv.ViewTypeFullName).AppendLine(ViewParameterSuffix).Append("            ")
             .Append(inv.ViewModelTypeFullName).AppendLine(ViewModelParameterSuffix).Append("            ").Append(handlerType).AppendLine(" handler)")
             .AppendLine("        {").Append("            // BindInteraction: ").Append(pathComment).AppendLine()
             .AppendLine("            var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();").AppendLine();
 
-        EmitInteractionObservation(sb, inv, viewModelClassInfo, interactionType);
+        EmitInteractionObservation(sb, inv, viewModelClassInfo, viewClassInfo, interactionType);
 
         // Subscribe to the interaction observable and register the handler
         const string registerCall = "interaction.RegisterHandler(handler)";
@@ -267,7 +277,8 @@ internal static class BindInteractionCodeGenerator
             GenerateBindInteractionMethod(
                 sb,
                 inv,
-                CodeGeneratorHelpers.FindClassInfo(allClasses, inv.ViewModelTypeFullName),
+                CodeGeneratorHelpers.ResolveObservedTypeInfo(allClasses, inv.ViewModelTypeFullName, inv.InteractionPropertyPath),
+                inv.ViewClassInfo ?? CodeGeneratorHelpers.FindClassInfo(allClasses, inv.ViewTypeFullName),
                 MethodSuffix(inv));
         }
     }
@@ -279,23 +290,32 @@ internal static class BindInteractionCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The BindInteraction invocation info.</param>
     /// <param name="viewModelClassInfo">The view model type's binding info, when known.</param>
+    /// <param name="viewClassInfo">The view type's binding info, which says whether it exposes a view model.</param>
     /// <param name="interactionType">The fully qualified interaction type being observed.</param>
     private static void EmitInteractionObservation(
         StringBuilder sb,
         BindInteractionInvocationInfo inv,
         ClassBindingInfo? viewModelClassInfo,
+        ClassBindingInfo? viewClassInfo,
         string interactionType)
     {
         AppendViewModelGuard(sb);
 
-        if (inv.InteractionPropertyPath.Length != 1)
+        var observation = BindingEmitterHelpers.ResolveViewModelObservation(
+            inv.ViewModelTypeFullName,
+            inv.ViewTypeFullName,
+            inv.InteractionPropertyPath,
+            viewModelClassInfo,
+            viewClassInfo);
+
+        if (observation.Path.Length != 1)
         {
             ObservationCodeGenerator.EmitInlineObservation(
                 sb,
-                "viewModel",
-                inv.InteractionPropertyPath,
+                observation.RootVariable,
+                observation.Path,
                 interactionType,
-                viewModelClassInfo,
+                observation.RootClassInfo,
                 "interactionObs");
             return;
         }

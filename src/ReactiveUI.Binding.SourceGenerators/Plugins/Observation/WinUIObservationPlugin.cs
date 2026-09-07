@@ -33,7 +33,7 @@ internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin, IOb
     private static readonly int WinUIAffinity = BindingAffinity.WinUiDependencyObject;
 
     /// <inheritdoc/>
-    public int Affinity => WinUIAffinity;
+    public override int Affinity => WinUIAffinity;
 
     /// <inheritdoc/>
     public string ObservationKind => "WinUIDP";
@@ -102,12 +102,12 @@ internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin, IOb
         StringBuilder sb,
         string lambdaParam,
         PropertyPathSegment segment) =>
-        _ = sb.Append(">)new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+        _ = sb.Append("                    new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
             .Append("                    (global::Microsoft.UI.Xaml.DependencyObject)").Append(lambdaParam).AppendLine(",")
             .Append("                    ").Append(segment.DeclaringTypeFullName).Append('.').Append(segment.PropertyName)
             .AppendLine(DependencyPropertyFieldSuffix)
             .Append("                    (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(segment.DeclaringTypeFullName)
-            .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).AppendLine(",").AppendLine("                    false)");
+            .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).AppendLine(",").Append("                    false)");
 
     /// <inheritdoc/>
     protected override void AppendDeepChainRootSegment(
@@ -117,7 +117,7 @@ internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin, IOb
         string castTypeName,
         string obsVarName) =>
         _ = sb.Append("            var ").Append(obsVarName).Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName)
-            .Append(">)new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
+            .Append("                    new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
             .Append("                (global::Microsoft.UI.Xaml.DependencyObject)").Append(rootVar).AppendLine(",").Append("                ")
             .Append(castTypeName).Append('.').Append(segment.PropertyName).AppendLine(DependencyPropertyFieldSuffix)
             .Append("                (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)

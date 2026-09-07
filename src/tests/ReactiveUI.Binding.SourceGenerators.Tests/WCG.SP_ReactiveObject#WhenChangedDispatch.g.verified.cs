@@ -21,12 +21,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             property1Expression = property1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property1Expression.Substring(7) : property1Expression;
 
-            // Allow user-registered plugins with higher affinity to override generated observation
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.SinglePropertyReactiveObject.MyViewModel), "Name", 10, false))
-            {
-                return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanged(objectToMonitor, property1);
-            }
-
             if (property1Expression == "x => x.Name")
             {
                 return __WhenChanged_0000039705C7F4BC(objectToMonitor);

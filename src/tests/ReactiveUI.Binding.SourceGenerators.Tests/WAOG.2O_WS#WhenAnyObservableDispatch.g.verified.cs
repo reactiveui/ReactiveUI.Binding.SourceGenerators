@@ -34,20 +34,42 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenAnyObservable_7FFFE3651E3C40DF(global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel obj, global::System.Func<int, string, string> selector)
         {
-            var __obsProperty0 = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<int>>(
+            var __obsProperty0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<int>>(
                 obj,
                 "Count",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel)__o).Count,
                 true);
+            var __obsProperty0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel), "Count", 5, false);
+            var __obsProperty0 = __obsProperty0Registration == null
+                ? (global::System.IObservable<global::System.IObservable<int>>)__obsProperty0Mechanism
+                : (global::System.IObservable<global::System.IObservable<int>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<int>>(
+                    __obsProperty0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel, global::System.IObservable<int>>>)(__e => __e.Count)).Body,
+                    "Count",
+                    (object __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel)__o).Count,
+                    false,
+                    true);
 
             var __switched0 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<int>, int>(__obsProperty0,
                 __obs => __obs ?? (global::System.IObservable<int>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<int>.Instance);
 
-            var __obsProperty1 = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
+            var __obsProperty1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(
                 obj,
                 "Message",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel)__o).Message,
                 true);
+            var __obsProperty1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel), "Message", 5, false);
+            var __obsProperty1 = __obsProperty1Registration == null
+                ? (global::System.IObservable<global::System.IObservable<string>>)__obsProperty1Mechanism
+                : (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<string>>(
+                    __obsProperty1Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel, global::System.IObservable<string>>>)(__e => __e.Message)).Body,
+                    "Message",
+                    (object __o) => ((global::SharedScenarios.WhenAnyObservable.TwoObservablesWithSelector.MyViewModel)__o).Message,
+                    false,
+                    true);
 
             var __switched1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty1,
                 __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);

@@ -142,11 +142,14 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
 
         _ = sb.AppendLine().Append("        var ").Append(curVar).Append(" = ")
             .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
-            .Append(" => ").Append(lambdaParam).AppendLine(" != null").Append("                ? (global::System.IObservable<").Append(segType)
-            .Append(">)new __KVOObservable<").Append(segType).AppendLine(">(").Append("                    (global::Foundation.NSObject)")
+            .Append(" => ").Append(lambdaParam).AppendLine(" != null");
+
+        ChainRegistrationEmitter.AppendChoiceOpen(sb, lambdaParam, segment, Affinity, isBeforeChange);
+
+        _ = sb.Append("                    new __KVOObservable<").Append(segType).AppendLine(">(").Append("                    (global::Foundation.NSObject)")
             .Append(lambdaParam).AppendLine(",").Append("                    \"").Append(keyPath).AppendLine("\",")
             .Append("                    (global::Foundation.NSObject __o) => ((").Append(declType).Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName)
-            .AppendLine(",").AppendLine("                    false,").Append("                    ").Append(BoolLiteral(isBeforeChange)).AppendLine(")")
+            .AppendLine(",").AppendLine("                    false,").Append("                    ").Append(BoolLiteral(isBeforeChange)).AppendLine("))")
             .Append("                : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
     }
 

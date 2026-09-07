@@ -114,15 +114,15 @@ internal static class CommandExtractor
             SemanticModel semanticModel,
             CancellationToken ct)
     {
-        for (var a = WithParameterSearchStartIndex; a < args.Count; a++)
+        for (var argumentIndex = WithParameterSearchStartIndex; argumentIndex < args.Count; argumentIndex++)
         {
-            var paramPath = SyntaxHelpers.ExtractPropertyPathFromLambda(args[a].Expression, semanticModel, ct);
+            var paramPath = SyntaxHelpers.ExtractPropertyPathFromLambda(args[argumentIndex].Expression, semanticModel, ct);
             if (paramPath is not null)
             {
                 return new ParameterLambda(
                     paramPath,
                     paramPath[^1].PropertyTypeFullName,
-                    CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[a].Expression.ToString()));
+                    CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(args[argumentIndex].Expression.ToString()));
             }
         }
 
@@ -247,14 +247,14 @@ internal static class CommandExtractor
             }
 
             // Find matching argument
-            for (var a = 0; a < args.Count; a++)
+            for (var argumentIndex = 0; argumentIndex < args.Count; argumentIndex++)
             {
-                if (!IsToEventArgument(args[a], a, i))
+                if (!IsToEventArgument(args[argumentIndex], argumentIndex, i))
                 {
                     continue;
                 }
 
-                var constant = semanticModel.GetConstantValue(args[a].Expression, ct);
+                var constant = semanticModel.GetConstantValue(args[argumentIndex].Expression, ct);
                 return constant is { HasValue: true, Value: string eventName } && !string.IsNullOrEmpty(eventName)
                     ? eventName
                     : null;
