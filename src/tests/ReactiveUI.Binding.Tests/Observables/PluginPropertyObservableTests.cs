@@ -220,6 +220,43 @@ public class PluginPropertyObservableTests
         await Assert.That(observed).IsEquivalentTo(InitialOnly);
     }
 
+    /// <summary>
+    /// A fault that races past disposal is dropped rather than reported. The registration is told to stop, but
+    /// it may already be part way through faulting, and an observation that has ended must not raise on it.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Subscribe_FaultedAfterDisposal_ReportsNothingFurther()
+    {
+        var fixture = new ObservedFixture { Name = InitialName };
+        var notifications = new PluginNotifications();
+        var faults = new List<Exception>();
+
+        var subscription = Build(fixture, notifications).Subscribe(new RecordingObserver<string>([], faults));
+        subscription.Dispose();
+
+        notifications.FaultPastUnsubscription(new InvalidOperationException("after disposal"));
+
+        await Assert.That(faults).IsEmpty();
+    }
+
+    /// <summary>A completion that races past disposal is dropped, for the same reason a fault is.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Subscribe_CompletedAfterDisposal_ReportsNothingFurther()
+    {
+        var fixture = new ObservedFixture { Name = InitialName };
+        var notifications = new PluginNotifications();
+        var observer = new RecordingObserver<string>([], []);
+
+        var subscription = Build(fixture, notifications).Subscribe(observer);
+        subscription.Dispose();
+
+        notifications.CompletePastUnsubscription();
+
+        await Assert.That(observer.Completed).IsFalse();
+    }
+
     /// <summary>Names the observed property the way generated code does, as a compiler-built expression.</summary>
     /// <returns>The body of a lambda naming the property.</returns>
     private static System.Linq.Expressions.Expression NameExpression()
@@ -311,6 +348,15 @@ public class PluginPropertyObservableTests
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RaisePastUnsubscription(object sender) =>
             _lastObserver?.OnNext(new ObservedChange<object, object?>(sender, null, null));
+
+        /// <summary>Faults whoever subscribed last, whether or not it has since unsubscribed.</summary>
+        /// <param name="error">The fault to report.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void FaultPastUnsubscription(Exception error) => _lastObserver?.OnError(error);
+
+        /// <summary>Completes whoever subscribed last, whether or not it has since unsubscribed.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CompletePastUnsubscription() => _lastObserver?.OnCompleted();
 
         /// <summary>Faults every subscriber.</summary>
         /// <param name="error">The fault to report.</param>

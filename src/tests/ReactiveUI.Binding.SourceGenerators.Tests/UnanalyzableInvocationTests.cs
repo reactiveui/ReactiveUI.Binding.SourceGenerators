@@ -216,6 +216,51 @@ public class UnanalyzableInvocationTests
     }
 
     /// <summary>
+    /// A BindInteraction call whose view is a type parameter names no type a generated overload could
+    /// declare, so no dispatch is emitted for it. Emitting one puts the type parameter's own name in the
+    /// consumer's build, which does not compile.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindInteraction_GenericViewParameter_GeneratesNoDispatch()
+    {
+        const string source = """
+                              using System.ComponentModel;
+                              using System.Threading.Tasks;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                                      public Interaction<string, bool> Confirm { get; set; } = new Interaction<string, bool>();
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static void Execute<TView>(TView view, MyViewModel vm)
+                                          where TView : class, IViewFor
+                                      {
+                                          view.BindInteraction(vm, x => x.Confirm, ctx =>
+                                          {
+                                              ctx.SetOutput(true);
+                                              return Task.CompletedTask;
+                                          });
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+        await result.CompilationSucceeds();
+        await result.DoesNotHaveGeneratedSource(BindInteractionDispatchgcsName);
+    }
+
+    /// <summary>
     /// Verifies that a BindOneWay call with a non-lambda expression (method group) is skipped.
     /// Exercises the property path null guard in BindingExtractor (line 63).
     /// </summary>

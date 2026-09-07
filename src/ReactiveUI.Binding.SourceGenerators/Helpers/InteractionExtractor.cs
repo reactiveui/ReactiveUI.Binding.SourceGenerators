@@ -50,27 +50,23 @@ internal static class InteractionExtractor
             return null;
         }
 
-        // Resolve TInput, TOutput from the IInteraction<TInput, TOutput> type
-        // Re-resolve via the semantic model to get the actual type arguments
-        ResolveInteractionTypeArguments(
+        ResolveValidatedInteractionTypes(
             propertyNameArg,
             semanticModel,
             ct,
             out var inputTypeFullName,
             out var outputTypeFullName);
 
-        inputTypeFullName =
-            InvalidOperationExceptionHelper.EnsureNotNullOrEmpty(inputTypeFullName, "interaction TInput type argument");
-        outputTypeFullName =
-            InvalidOperationExceptionHelper.EnsureNotNullOrEmpty(
-                outputTypeFullName,
-                "interaction TOutput type argument");
-
         // Determine handler type (Task vs Observable)
         var isTaskHandler = DetermineHandlerVariant(methodSymbol, out var dontCareTypeFullName);
 
         // Get types
         var viewTypeFullName = ResolveViewType(memberAccess, semanticModel, ct, out var viewClassInfo);
+        if (viewTypeFullName is null)
+        {
+            return null;
+        }
+
         var viewModelTypeFullName = InvalidOperationExceptionHelper.EnsureNotNull(
             ExtractorValidation.GetTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type),
             "view model type display name");
@@ -94,33 +90,57 @@ internal static class InteractionExtractor
             viewClassInfo);
     }
 
+    /// <summary>Resolves the interaction's two type arguments, refusing a call site that names neither.</summary>
+    /// <param name="propertyNameArg">The lambda naming the interaction property.</param>
+    /// <param name="semanticModel">The semantic model.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <param name="inputTypeFullName">The fully qualified interaction input type.</param>
+    /// <param name="outputTypeFullName">The fully qualified interaction output type.</param>
+    private static void ResolveValidatedInteractionTypes(
+        ExpressionSyntax propertyNameArg,
+        SemanticModel semanticModel,
+        CancellationToken ct,
+        out string inputTypeFullName,
+        out string outputTypeFullName)
+    {
+        ResolveInteractionTypeArguments(propertyNameArg, semanticModel, ct, out var input, out var output);
+
+        inputTypeFullName =
+            InvalidOperationExceptionHelper.EnsureNotNullOrEmpty(input, "interaction TInput type argument");
+        outputTypeFullName =
+            InvalidOperationExceptionHelper.EnsureNotNullOrEmpty(output, "interaction TOutput type argument");
+    }
+
     /// <summary>Names the view type the call was made on, and reads how it notifies from the same symbol.</summary>
     /// <param name="memberAccess">The member access naming the view the call was made on.</param>
     /// <param name="semanticModel">The semantic model.</param>
     /// <param name="ct">The cancellation token.</param>
-    /// <param name="viewClassInfo">How the view notifies, or <see langword="null"/> when the symbol names no type.</param>
-    /// <returns>The fully qualified view type name.</returns>
+    /// <param name="viewClassInfo">How the view notifies, or <see langword="null"/> when no type was named.</param>
+    /// <returns>The fully qualified view type name, or <see langword="null"/> when the view names no type.</returns>
     /// <remarks>
     /// This API takes no lambda rooted on the view, so no property path carries the view's mechanism the way
     /// the other view-first APIs' paths do, and the declaration scan only sees types the consumer writes.
     /// Reading it from the symbol is what lets a view declared in a referenced assembly still be followed
     /// through the view model it holds.
     /// </remarks>
-    private static string ResolveViewType(
+    private static string? ResolveViewType(
         MemberAccessExpressionSyntax memberAccess,
         SemanticModel semanticModel,
         CancellationToken ct,
         out ClassBindingInfo? viewClassInfo)
     {
-        var viewTypeSymbol = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type;
+        viewClassInfo = null;
 
-        viewClassInfo = viewTypeSymbol is INamedTypeSymbol namedViewType
-            ? TypeDetectionExtractor.ExtractFromSymbol(namedViewType, semanticModel.Compilation, ct)
-            : null;
+        // A type parameter names no type a generated overload could declare, so emitting one would put the
+        // parameter's own name in the consumer's build. The call site is left to the runtime stub instead.
+        if (semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type is not INamedTypeSymbol viewTypeSymbol)
+        {
+            return null;
+        }
 
-        return InvalidOperationExceptionHelper.EnsureNotNull(
-            ExtractorValidation.GetTypeDisplayName(viewTypeSymbol),
-            "view type display name");
+        viewClassInfo = TypeDetectionExtractor.ExtractFromSymbol(viewTypeSymbol, semanticModel.Compilation, ct);
+
+        return ExtractorValidation.GetTypeDisplayName(viewTypeSymbol);
     }
 
     /// <summary>
