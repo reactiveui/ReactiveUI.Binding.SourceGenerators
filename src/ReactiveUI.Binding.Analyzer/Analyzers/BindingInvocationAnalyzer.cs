@@ -518,7 +518,8 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            if (model.GetSymbolInfo(parent).Symbol is not IPropertySymbol { Type: INamedTypeSymbol linkType })
+            if (model.GetSymbolInfo(parent, context.CancellationToken).Symbol
+                is not IPropertySymbol { Type: INamedTypeSymbol linkType })
             {
                 continue;
             }
