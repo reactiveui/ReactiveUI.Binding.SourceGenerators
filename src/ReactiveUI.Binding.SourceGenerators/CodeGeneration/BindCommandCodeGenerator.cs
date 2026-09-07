@@ -333,6 +333,20 @@ internal static class BindCommandCodeGenerator
             viewModelClassInfo,
             "commandObs");
 
+        // A parameter named as a property is observed, not read once. The control has to see each value the
+        // property takes, the same as it would from a caller-supplied stream; reading it when the command
+        // arrives leaves the control holding whatever it happened to be at that moment.
+        if (inv is { HasObservableParameter: false, HasExpressionParameter: true, ParameterPropertyPath: not null })
+        {
+            ObservationCodeGenerator.EmitInlineObservation(
+                sb,
+                "viewModel",
+                inv.ParameterPropertyPath.Value,
+                inv.ParameterTypeFullName ?? "object",
+                viewModelClassInfo,
+                "withParameter");
+        }
+
         // Try plugins in affinity order (highest first) via registry
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
         var generatedAffinity = plugin is not null ? plugin.Affinity : -1;
@@ -408,24 +422,15 @@ internal static class BindCommandCodeGenerator
     /// <summary>Builds the parameter observable expression string for custom binder fallback code.</summary>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <returns>The parameter observable expression to embed in generated code.</returns>
-    internal static string BuildParameterObservableExpression(BindCommandInvocationInfo inv)
-    {
-        if (inv.HasObservableParameter)
-        {
-            // Cast the typed observable to IObservable<object> via Select
-            return $"new global::ReactiveUI.Primitives.Signals.MapSignal<{inv.ParameterTypeFullName}, object>(withParameter, __p => __p)";
-        }
-
-        if (inv is { HasExpressionParameter: true, ParameterPropertyPath: not null })
-        {
-            // Read the parameter property at call time
-            var paramAccess =
-                CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value);
-            return $"new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<object>({paramAccess})";
-        }
-
-        return "global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<object>.Instance";
-    }
+    /// <remarks>
+    /// Both parameter forms reach the binder as a stream: <c>withParameter</c> is either the caller's own
+    /// observable or the observation of the named property, so a registered binder sees each value the
+    /// parameter takes rather than the one it happened to hold when the command arrived.
+    /// </remarks>
+    internal static string BuildParameterObservableExpression(BindCommandInvocationInfo inv) =>
+        inv.HasObservableParameter || inv is { HasExpressionParameter: true, ParameterPropertyPath: not null }
+            ? $"new global::ReactiveUI.Primitives.Signals.MapSignal<{inv.ParameterTypeFullName}, object>(withParameter, __p => __p)"
+            : "global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<object>.Instance";
 
     /// <summary>Emits one expression-text comparison branch per call site in the group.</summary>
     /// <param name="sb">The string builder to append to.</param>

@@ -57,6 +57,11 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             "Save",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.CommandPropertyExprParam.MyViewModel)__o).Save,
             true);
+        var withParameter = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            viewModel,
+            "CurrentItem",
+            (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.CommandPropertyExprParam.MyViewModel)__o).CurrentItem,
+            true);
 
             if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
                 .HasHigherAffinityPlugin<global::SharedScenarios.BindCommand.CommandPropertyExprParam.WpfLikeButton>(5, false))
@@ -69,7 +74,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     var __binderCmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, __cmd =>
                     {
                         __serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                        global::System.IObservable<object> __paramObs = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<object>(viewModel.CurrentItem);
+                        global::System.IObservable<object> __paramObs = new global::ReactiveUI.Primitives.Signals.MapSignal<string, object>(withParameter, __p => __p);
                         __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.CommandPropertyExprParam.WpfLikeButton>(
                             __cmd, view.SaveButton, __paramObs)
                             ?? global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
@@ -81,13 +86,14 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             var __originalCommand = view.SaveButton.Command;
             var __originalParameter = view.SaveButton.CommandParameter;
-        var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
-        var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
-        {
-            serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                    view.SaveButton.CommandParameter = viewModel.CurrentItem;
-                    view.SaveButton.Command = cmd;
-                });
+            var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
+            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
+            {
+                serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                serial.Disposable = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
+                    withParameter, __p => view.SaveButton.CommandParameter = __p);
+                view.SaveButton.Command = cmd;
+            });
 
             return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(
                 new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial),

@@ -530,6 +530,22 @@ public class BindCommandTests
         await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(TestItem);
     }
 
+    /// <summary>The control follows the parameter property, not the value it held when the command arrived.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task CommandPropertyExprParam_ParameterPropertyChanges_UpdatesCommandParameter()
+    {
+        var vm = new SharedScenarios.BindCommand.CommandPropertyExprParam.MyViewModel { CurrentItem = TestItem };
+        var view = new SharedScenarios.BindCommand.CommandPropertyExprParam.MyView();
+        vm.Save = new TrackingCommand();
+
+        using var binding = BindCommandScenarios.CommandPropertyExprParam(vm, view);
+
+        vm.CurrentItem = UpdatedValue;
+
+        await Assert.That(view.SaveButton.CommandParameter).IsEqualTo(UpdatedValue);
+    }
+
     /// <summary>Verifies that observable parameter sets CommandParameter on the control.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

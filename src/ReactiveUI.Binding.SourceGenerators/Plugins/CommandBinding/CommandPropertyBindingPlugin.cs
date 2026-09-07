@@ -4,7 +4,6 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
-using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
@@ -56,29 +55,28 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
             return;
         }
 
-        var parameterWrite = inv is { HasExpressionParameter: true, ParameterPropertyPath: not null }
-            ? CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value)
-            : null;
+        var tracksParameter = inv is { HasExpressionParameter: true, ParameterPropertyPath: not null };
 
         _ = sb.AppendLine();
         AppendCapturedOriginals(sb, controlAccess);
 
-        _ = sb.AppendLine("""
-                                  var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
-                                  var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
-                                  {
-                                      serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                          """);
+        _ = sb.AppendLine("            var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();")
+            .AppendLine("            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>")
+            .AppendLine("            {")
+            .AppendLine("                serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;");
 
-        if (parameterWrite is not null)
+        if (tracksParameter)
         {
-            _ = sb.Append("                    ").Append(controlAccess).Append(".CommandParameter = ")
-                .Append(parameterWrite).AppendLine(";");
+            // The parameter is a stream, so the control follows every value the property takes for as long as
+            // the command is bound. Subscribing lands the current value before the command is assigned.
+            _ = sb.AppendLine("                serial.Disposable = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(")
+                .Append("                    withParameter, __p => ").Append(controlAccess)
+                .AppendLine(".CommandParameter = __p);");
         }
 
         // The command is assigned last, so the control never sees one with a parameter still to arrive.
-        _ = sb.Append("                    ").Append(controlAccess).AppendLine(".Command = cmd;")
-            .AppendLine("                });")
+        _ = sb.Append("                ").Append(controlAccess).AppendLine(".Command = cmd;")
+            .AppendLine("            });")
             .AppendLine();
 
         AppendRestoringReturn(sb, controlAccess, "new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial)");
@@ -91,6 +89,31 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
     private static void AppendCapturedOriginals(StringBuilder sb, string controlAccess) =>
         sb.Append("            var __originalCommand = ").Append(controlAccess).AppendLine(".Command;")
             .Append("            var __originalParameter = ").Append(controlAccess).AppendLine(".CommandParameter;");
+
+    /// <summary>Renders the write that records the parameter a later command emission will be given.</summary>
+    /// <param name="inv">The BindCommand invocation info.</param>
+    /// <param name="valueExpression">The expression producing the value to record.</param>
+    /// <returns>The rendered write, without a trailing semicolon.</returns>
+    /// <remarks>
+    /// The volatile write is what makes a parameter arriving on one thread visible to a command arriving on
+    /// another, and it is only available for a reference type - <c>Volatile</c> offers no overload for an
+    /// arbitrary value type, so a parameter such as a <c>Guid</c> would not compile. Those are recorded by a
+    /// plain write, which is what the runtime engine does for every parameter it boxes.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string WriteLatestParameter(BindCommandInvocationInfo inv, string valueExpression) =>
+        inv.ParameterIsReferenceType
+            ? $"global::System.Threading.Volatile.Write(ref __latestParam, {valueExpression})"
+            : $"__latestParam = {valueExpression}";
+
+    /// <summary>Renders the read that recovers the parameter a command emission should be given.</summary>
+    /// <param name="inv">The BindCommand invocation info.</param>
+    /// <returns>The rendered read.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string ReadLatestParameter(BindCommandInvocationInfo inv) =>
+        inv.ParameterIsReferenceType
+            ? "global::System.Threading.Volatile.Read(ref __latestParam)"
+            : "__latestParam";
 
     /// <summary>Appends the return that disposes the binding and puts the control back as it was found.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -130,30 +153,32 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
         _ = sb.AppendLine();
         AppendCapturedOriginals(sb, controlAccess);
 
-        _ = sb.AppendLine($$"""
-                                    {{inv.ParameterTypeFullName}}{{(supportsNullable && inv.ParameterIsReferenceType ? "?" : string.Empty)}} __latestParam = default;
-                                    var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
-                                        withParameter, p => System.Threading.Volatile.Write(ref __latestParam, p));
+        var nullableSuffix = supportsNullable && inv.ParameterIsReferenceType ? "?" : string.Empty;
+        var writeLatest = WriteLatestParameter(inv, "p");
 
-                                    var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
-                                    var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
-                                    {
-                                        serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
-                                        {{controlAccess}}.Command = cmd;
-                                        var param = System.Threading.Volatile.Read(ref __latestParam);
-                                        {{controlAccess}}.CommandParameter = param;
-                                        if (cmd != null)
-                                        {
-                                            serial.Disposable = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
-                                                withParameter, p =>
-                                                {
-                                                    System.Threading.Volatile.Write(ref __latestParam, p);
-                                                    {{controlAccess}}.CommandParameter = p;
-                                                });
-                                        }
-                                    });
-
-                            """);
+        _ = sb.Append("            ").Append(inv.ParameterTypeFullName).Append(nullableSuffix)
+            .AppendLine(" __latestParam = default;")
+            .AppendLine("            var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(")
+            .Append("                withParameter, p => ").Append(writeLatest).AppendLine(");")
+            .AppendLine()
+            .AppendLine("            var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();")
+            .AppendLine("            var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>")
+            .AppendLine("            {")
+            .AppendLine("                serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;")
+            .Append("                ").Append(controlAccess).AppendLine(".Command = cmd;")
+            .Append("                var param = ").Append(ReadLatestParameter(inv)).AppendLine(";")
+            .Append("                ").Append(controlAccess).AppendLine(".CommandParameter = param;")
+            .AppendLine("                if (cmd != null)")
+            .AppendLine("                {")
+            .AppendLine("                    serial.Disposable = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(")
+            .AppendLine("                        withParameter, p =>")
+            .AppendLine("                        {")
+            .Append("                            ").Append(writeLatest).AppendLine(";")
+            .Append("                            ").Append(controlAccess).AppendLine(".CommandParameter = p;")
+            .AppendLine("                        });")
+            .AppendLine("                }")
+            .AppendLine("            });")
+            .AppendLine();
 
         AppendRestoringReturn(
             sb,
