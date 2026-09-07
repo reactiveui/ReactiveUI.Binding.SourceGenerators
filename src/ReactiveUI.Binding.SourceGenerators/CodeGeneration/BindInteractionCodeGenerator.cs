@@ -278,7 +278,7 @@ internal static class BindInteractionCodeGenerator
                 sb,
                 inv,
                 CodeGeneratorHelpers.ResolveObservedTypeInfo(allClasses, inv.ViewModelTypeFullName, inv.InteractionPropertyPath),
-                inv.ViewClassInfo ?? CodeGeneratorHelpers.FindClassInfo(allClasses, inv.ViewTypeFullName),
+                inv.ViewClassInfo,
                 MethodSuffix(inv));
         }
     }
