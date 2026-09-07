@@ -22,7 +22,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             property1Expression = property1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? property1Expression.Substring(7) : property1Expression;
 
             // Allow user-registered plugins with higher affinity to override generated observation
-            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::TestApp.MyAppleView), "Text", 15, false))
+            if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::TestApp.MyAppleView), "Text", 5, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeObservationFallback.WhenChanged(objectToMonitor, property1);
             }
@@ -36,7 +36,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenChanged_000018C06482B4BD(global::TestApp.MyAppleView obj)
         {
-            return new __KVOObservable<string>((global::Foundation.NSObject)obj, "text", (global::Foundation.NSObject __o) => ((global::TestApp.MyAppleView)__o).Text, true, false);
+            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Text", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyAppleView)__o).Text, true);
         }
 
     }

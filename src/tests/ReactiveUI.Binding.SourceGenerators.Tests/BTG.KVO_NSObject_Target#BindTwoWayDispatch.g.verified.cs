@@ -32,7 +32,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             // A registered plugin that outranks the generated one drives the binding instead
             if (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::TestApp.MyViewModel), "Name", 5, false)
-                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::TestApp.MyAppleView), "Text", 15, false))
+                || global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(global::TestApp.MyAppleView), "Text", 0, false))
             {
                 return global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback.BindTwoWay(
                     source, target, sourceProperty, targetProperty, null, targetPropertyExpression);

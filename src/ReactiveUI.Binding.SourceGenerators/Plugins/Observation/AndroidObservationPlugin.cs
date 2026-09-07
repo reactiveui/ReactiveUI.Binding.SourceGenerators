@@ -56,8 +56,15 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
         classInfo.InheritsAndroidView;
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// Only the widget properties that raise an event of their own. Everything else on an Android view changes
+    /// silently, so claiming it would replace a mechanism the type may genuinely carry with one that reports
+    /// nothing. A property the consumer declared on its own subclass is its own, not the widget's.
+    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) => true;
+    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
+        AndroidWidgetEvents.FindChangeEvent(propertyName) is not null
+        && !ObservedProperties.IsDeclaredByConsumer(classInfo, propertyName);
 
     /// <inheritdoc/>
     public void EmitHelperClasses(StringBuilder sb)
@@ -66,42 +73,71 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
     }
 
     /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitShallowObservation(
         StringBuilder sb,
         string rootVar,
         PropertyPathSegment segment,
         string castTypeName,
         bool isBeforeChange,
-        bool includeStartWith) =>
-        // Android View does not implement INPC. Emit ImmediateReturnSignal as POCO fallback.
-        // Returns the current property value once, no ongoing observation.
-        sb.Append(
-            $"new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName})");
+        bool includeStartWith)
+    {
+        var changeEvent = ChangeEventOrUnchanging(sb, rootVar, segment, castTypeName, isBeforeChange);
+        if (changeEvent is null)
+        {
+            return;
+        }
+
+        _ = EventObservationEmitter.AppendExpression(
+            sb,
+            rootVar,
+            segment,
+            castTypeName,
+            changeEvent,
+            includeStartWith);
+    }
 
     /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitShallowObservationVariable(
         StringBuilder sb,
         string rootVar,
         PropertyPathSegment segment,
         string castTypeName,
         bool isBeforeChange,
-        string varName) =>
-        AppendUnchangingRead(sb, rootVar, segment, castTypeName, varName);
+        string varName)
+    {
+        var changeEvent = AndroidWidgetEvents.FindChangeEvent(segment.PropertyName);
+        if (isBeforeChange || changeEvent is null)
+        {
+            _ = UnchangingObservationEmitter.AppendVariable(sb, rootVar, segment, castTypeName, varName);
+            return;
+        }
+
+        _ = EventObservationEmitter.AppendVariable(sb, rootVar, segment, castTypeName, changeEvent, varName);
+    }
 
     /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitDeepChainRootSegment(
         StringBuilder sb,
         string rootVar,
         PropertyPathSegment segment,
         string castTypeName,
         bool isBeforeChange,
-        string obsVarName) =>
-        sb
-            .Append($"            var {obsVarName} = (global::System.IObservable<{segment.PropertyTypeFullName}>")
-            .AppendLine($")new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<{segment.PropertyTypeFullName}>((({castTypeName}){rootVar}).{segment.PropertyName});");
+        string obsVarName)
+    {
+        var changeEvent = AndroidWidgetEvents.FindChangeEvent(segment.PropertyName);
+        if (isBeforeChange || changeEvent is null)
+        {
+            _ = UnchangingObservationEmitter.AppendTypedVariable(sb, rootVar, segment, castTypeName, obsVarName)
+                .AppendLine();
+            return;
+        }
+
+        _ = sb.Append("            var ").Append(obsVarName)
+            .Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName).Append(">)");
+        _ = EventObservationEmitter
+            .AppendExpression(sb, rootVar, segment, castTypeName, changeEvent, true)
+            .AppendLine(";");
+    }
 
     /// <inheritdoc/>
     public void EmitDeepChainInnerSegment(
@@ -130,31 +166,48 @@ internal sealed class AndroidObservationPlugin : IObservationPlugin
     }
 
     /// <inheritdoc/>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EmitInlineObservationVariable(
         StringBuilder sb,
         string rootVar,
         PropertyPathSegment segment,
         string castTypeName,
-        string varName) =>
-        AppendUnchangingRead(sb, rootVar, segment, castTypeName, varName).AppendLine();
+        string varName)
+    {
+        var changeEvent = AndroidWidgetEvents.FindChangeEvent(segment.PropertyName);
 
-    /// <summary>Appends the one-shot read this platform's observation is, as a local declaration.</summary>
+        _ = changeEvent is null
+            ? UnchangingObservationEmitter.AppendVariable(sb, rootVar, segment, castTypeName, varName)
+            : EventObservationEmitter.AppendVariable(sb, rootVar, segment, castTypeName, changeEvent, varName);
+
+        _ = sb.AppendLine();
+    }
+
+    /// <summary>Resolves the event the property reports on, falling back to the unchanging observation.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="rootVar">The variable the property is read from.</param>
-    /// <param name="segment">The property being read.</param>
-    /// <param name="castTypeName">The type the root is cast to before the read.</param>
-    /// <param name="varName">The local the observation is assigned to.</param>
-    /// <returns>The same string builder, so a caller can terminate the line as it needs.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static StringBuilder AppendUnchangingRead(
+    /// <param name="segment">The property being observed.</param>
+    /// <param name="castTypeName">The type the root is cast to.</param>
+    /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
+    /// <returns>The event name, or <see langword="null"/> once the fallback has been appended instead.</returns>
+    /// <remarks>
+    /// A widget reports a change once it has happened and has nothing to say before it, so a before-change
+    /// observation takes the unchanging answer whatever the property is.
+    /// </remarks>
+    private static string? ChangeEventOrUnchanging(
         StringBuilder sb,
         string rootVar,
         PropertyPathSegment segment,
         string castTypeName,
-        string varName) =>
-        sb.Append("            var ").Append(varName).Append(" = ")
-            .Append(GeneratedTypeNames.OpenUnchangingProperty).Append(segment.PropertyTypeFullName)
-            .Append(">(((").Append(castTypeName).Append(')').Append(rootVar).Append(").")
-            .Append(segment.PropertyName).Append(");");
+        bool isBeforeChange)
+    {
+        var changeEvent = AndroidWidgetEvents.FindChangeEvent(segment.PropertyName);
+        if (!isBeforeChange && changeEvent is not null)
+        {
+            return changeEvent;
+        }
+
+        _ = UnchangingObservationEmitter.AppendExpression(sb, rootVar, segment, castTypeName);
+
+        return null;
+    }
 }

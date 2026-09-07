@@ -55,8 +55,15 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
         classInfo.InheritsNSObject;
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// Key-value observing reaches the properties the Apple frameworks declare, because those are the ones the
+    /// Obj-C runtime backs. A property an application adds to its own subclass of one of them is an ordinary
+    /// CLR property that no key path resolves, so it falls through to whatever mechanism the type also carries.
+    /// The runtime engine draws the same line by asking which assembly declares the member.
+    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) => true;
+    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
+        !ObservedProperties.IsDeclaredByConsumer(classInfo, propertyName);
 
     /// <inheritdoc/>
     public void EmitHelperClasses(StringBuilder sb)
