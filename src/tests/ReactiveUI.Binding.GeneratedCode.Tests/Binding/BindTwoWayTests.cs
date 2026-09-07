@@ -11,15 +11,15 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 public partial class BindTwoWayTests
 {
     /// <summary>The initial string property value used across the binding tests.</summary>
-    private const string HelloValue = "Hello";
+    private const string InitialPropertyValue = "Hello";
 
     /// <summary>The initial integer property test value.</summary>
     private const int IntValue = 42;
 
-    /// <summary>The updated integer property test value.</summary>
-    private const int UpdatedIntValue = 100;
+    /// <summary>The replacement integer property test value.</summary>
+    private const int ReplacementIntValue = 100;
 
-    /// <summary>The second updated integer property test value.</summary>
+    /// <summary>The second replacement integer property test value.</summary>
     private const int SecondIntValue = 200;
 
     /// <summary>The value written to the view side to prove the target-to-source direction.</summary>
@@ -30,12 +30,12 @@ public partial class BindTwoWayTests
     [Test]
     public async Task StringProperty_SyncsSourceToTarget()
     {
-        var source = new BigViewModel { Prop1 = HelloValue };
+        var source = new BigViewModel { Prop1 = InitialPropertyValue };
         var target = new BigView();
 
         using var binding = BindTwoWayScenarios.StringProperty(source, target);
 
-        await Assert.That(target.ViewProp1).IsEqualTo(HelloValue);
+        await Assert.That(target.ViewProp1).IsEqualTo(InitialPropertyValue);
 
         source.Prop1 = "World";
 
@@ -47,7 +47,7 @@ public partial class BindTwoWayTests
     [Test]
     public async Task StringProperty_SyncsTargetToSource()
     {
-        var source = new BigViewModel { Prop1 = HelloValue };
+        var source = new BigViewModel { Prop1 = InitialPropertyValue };
         var target = new BigView();
 
         using var binding = BindTwoWayScenarios.StringProperty(source, target);
@@ -69,8 +69,8 @@ public partial class BindTwoWayTests
 
         await Assert.That(target.ViewProp2).IsEqualTo(IntValue);
 
-        source.Prop2 = UpdatedIntValue;
-        await Assert.That(target.ViewProp2).IsEqualTo(UpdatedIntValue);
+        source.Prop2 = ReplacementIntValue;
+        await Assert.That(target.ViewProp2).IsEqualTo(ReplacementIntValue);
 
         target.ViewProp2 = SecondIntValue;
         await Assert.That(source.Prop2).IsEqualTo(SecondIntValue);
@@ -81,16 +81,16 @@ public partial class BindTwoWayTests
     [Test]
     public async Task Disposal_StopsSyncing()
     {
-        var source = new BigViewModel { Prop1 = HelloValue };
+        var source = new BigViewModel { Prop1 = InitialPropertyValue };
         var target = new BigView();
 
         var binding = BindTwoWayScenarios.StringProperty(source, target);
-        await Assert.That(target.ViewProp1).IsEqualTo(HelloValue);
+        await Assert.That(target.ViewProp1).IsEqualTo(InitialPropertyValue);
 
         binding.Dispose();
 
         source.Prop1 = "AfterDisposal";
-        await Assert.That(target.ViewProp1).IsEqualTo(HelloValue);
+        await Assert.That(target.ViewProp1).IsEqualTo(InitialPropertyValue);
 
         target.ViewProp1 = FromTargetValue;
         await Assert.That(source.Prop1).IsEqualTo("AfterDisposal");

@@ -11,19 +11,19 @@ namespace ReactiveUI.Binding.GeneratedCode.Tests.Binding;
 public class BindCompatTests
 {
     /// <summary>The initial property value used across the binding tests.</summary>
-    private const string HelloValue = "Hello";
+    private const string InitialPropertyValue = "Hello";
 
     /// <summary>Verifies that Bind syncs the initial value from view model to view.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Bind_SyncsInitialValue()
     {
-        var vm = new TestViewModel { Name = HelloValue };
+        var vm = new TestViewModel { Name = InitialPropertyValue };
         var view = new TestView();
 
         using var binding = BindCompatScenarios.StringProperty(view, vm);
 
-        await Assert.That(view.DisplayName).IsEqualTo(HelloValue);
+        await Assert.That(view.DisplayName).IsEqualTo(InitialPropertyValue);
     }
 
     /// <summary>Verifies that Bind syncs changes from view model to view.</summary>
@@ -31,7 +31,7 @@ public class BindCompatTests
     [Test]
     public async Task Bind_SyncsSourceToView()
     {
-        var vm = new TestViewModel { Name = HelloValue };
+        var vm = new TestViewModel { Name = InitialPropertyValue };
         var view = new TestView();
 
         using var binding = BindCompatScenarios.StringProperty(view, vm);
@@ -46,7 +46,7 @@ public class BindCompatTests
     [Test]
     public async Task Bind_SyncsViewToSource()
     {
-        var vm = new TestViewModel { Name = HelloValue };
+        var vm = new TestViewModel { Name = InitialPropertyValue };
         var view = new TestView();
 
         using var binding = BindCompatScenarios.StringProperty(view, vm);
@@ -61,7 +61,7 @@ public class BindCompatTests
     [Test]
     public async Task Bind_Disposal_StopsSyncing()
     {
-        var vm = new TestViewModel { Name = HelloValue };
+        var vm = new TestViewModel { Name = InitialPropertyValue };
         var view = new TestView();
 
         var binding = BindCompatScenarios.StringProperty(view, vm);
@@ -69,6 +69,6 @@ public class BindCompatTests
 
         vm.Name = "AfterDisposal";
 
-        await Assert.That(view.DisplayName).IsEqualTo(HelloValue);
+        await Assert.That(view.DisplayName).IsEqualTo(InitialPropertyValue);
     }
 }

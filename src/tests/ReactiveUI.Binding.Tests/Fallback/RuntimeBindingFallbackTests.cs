@@ -16,7 +16,7 @@ public class RuntimeBindingFallbackTests
     private const string InitialValue = "Initial";
 
     /// <summary>The value assigned to trigger a notification.</summary>
-    private const string ChangedValue = "Changed";
+    private const string NotifyingValue = "Changed";
 
     /// <summary>The age the source starts with, used by the converting binding.</summary>
     private const int InitialAge = 30;
@@ -52,10 +52,10 @@ public class RuntimeBindingFallbackTests
             BindingExpression);
 
         var afterBind = target.Name;
-        source.Name = ChangedValue;
+        source.Name = NotifyingValue;
 
         await Assert.That(afterBind).IsEqualTo(InitialValue);
-        await Assert.That(target.Name).IsEqualTo(ChangedValue);
+        await Assert.That(target.Name).IsEqualTo(NotifyingValue);
     }
 
     /// <summary>Verifies that the binding stops writing once it is disposed.</summary>
@@ -77,7 +77,7 @@ public class RuntimeBindingFallbackTests
             BindingExpression);
 
         binding.Dispose();
-        source.Name = ChangedValue;
+        source.Name = NotifyingValue;
 
         await Assert.That(target.Name).IsEqualTo(InitialValue);
     }
@@ -126,9 +126,9 @@ public class RuntimeBindingFallbackTests
             ImmediateSequencer.Instance,
             BindingExpression);
 
-        source.Name = ChangedValue;
+        source.Name = NotifyingValue;
 
-        await Assert.That(target.Name).IsEqualTo(ChangedValue);
+        await Assert.That(target.Name).IsEqualTo(NotifyingValue);
     }
 
     /// <summary>Verifies that a null target is rejected.</summary>
@@ -213,12 +213,12 @@ public class RuntimeBindingFallbackTests
             BindingExpression);
 
         var afterBind = target.Name;
-        source.Name = ChangedValue;
+        source.Name = NotifyingValue;
         var afterSourceEdit = target.Name;
         target.Name = "FromTarget";
 
         await Assert.That(afterBind).IsEqualTo(InitialValue);
-        await Assert.That(afterSourceEdit).IsEqualTo(ChangedValue);
+        await Assert.That(afterSourceEdit).IsEqualTo(NotifyingValue);
         await Assert.That(source.Name).IsEqualTo("FromTarget");
     }
 
@@ -290,9 +290,9 @@ public class RuntimeBindingFallbackTests
             null,
             BindingExpression);
 
-        viewModel.Name = ChangedValue;
+        viewModel.Name = NotifyingValue;
 
-        await Assert.That(view.Caption).IsEqualTo(ChangedValue);
+        await Assert.That(view.Caption).IsEqualTo(NotifyingValue);
         await Assert.That(binding.Direction).IsEqualTo(BindingDirection.OneWay);
         await Assert.That(binding.View).IsSameReferenceAs(view);
     }
@@ -364,11 +364,11 @@ public class RuntimeBindingFallbackTests
 
         using var changeSubscription = binding.Changed.Subscribe(changes.Add);
 
-        viewModel.Name = ChangedValue;
+        viewModel.Name = NotifyingValue;
         var afterViewModelEdit = view.Caption;
         view.Caption = "FromView";
 
-        await Assert.That(afterViewModelEdit).IsEqualTo(ChangedValue);
+        await Assert.That(afterViewModelEdit).IsEqualTo(NotifyingValue);
         await Assert.That(viewModel.Name).IsEqualTo("FromView");
         await Assert.That(binding.Direction).IsEqualTo(BindingDirection.TwoWay);
         await Assert.That(changes.Exists(static c => c.FromViewModel)).IsTrue();

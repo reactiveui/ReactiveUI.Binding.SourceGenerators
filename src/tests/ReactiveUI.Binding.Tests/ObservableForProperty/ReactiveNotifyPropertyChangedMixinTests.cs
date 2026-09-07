@@ -19,7 +19,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
     private const string InitialValue = "Initial";
 
     /// <summary>A changed property value used across notification tests.</summary>
-    private const string ChangedValue = "Changed";
+    private const string NotifyingValue = "Changed";
 
     /// <summary>The expected number of emissions after a single change (kicker plus one change).</summary>
     private const int ExpectedTwoEmissions = 2;
@@ -77,7 +77,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(1);
 
         // Now change the property - should emit another notification
-        vm.Name = ChangedValue;
+        vm.Name = NotifyingValue;
 
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
@@ -187,10 +187,10 @@ public class ReactiveNotifyPropertyChangedMixinTests
         // No initial value should have been emitted
         await Assert.That(values.Count).IsEqualTo(0);
 
-        fixture.IsNotNullString = ChangedValue;
+        fixture.IsNotNullString = NotifyingValue;
 
         await Assert.That(values.Count).IsEqualTo(1);
-        await Assert.That(values[0].Value).IsEqualTo(ChangedValue);
+        await Assert.That(values[0].Value).IsEqualTo(NotifyingValue);
     }
 
     /// <summary>
@@ -293,7 +293,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(1);
 
         // Changing the property should trigger a PropertyChanging notification
-        vm.Name = ChangedValue;
+        vm.Name = NotifyingValue;
 
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
@@ -343,7 +343,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
                 skipInitial: false)
             .Subscribe(values.Add);
 
-        vm.Name = ChangedValue;
+        vm.Name = NotifyingValue;
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
     }
@@ -372,7 +372,7 @@ public class ReactiveNotifyPropertyChangedMixinTests
         using var sub = ReactiveNotifyPropertyChangedMixins.NotifyForProperty(vm, body, false)
             .Subscribe(results.Add);
 
-        vm.Title = ChangedValue;
+        vm.Title = NotifyingValue;
 
         await Assert.That(results.Count).IsGreaterThanOrEqualTo(1);
     }

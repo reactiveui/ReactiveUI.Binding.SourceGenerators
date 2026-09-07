@@ -26,7 +26,7 @@ public class PropertyObservableInitialEmitSerializationTests
     private const string InitialName = "Alice";
 
     /// <summary>The property value a competing thread writes.</summary>
-    private const string UpdatedName = "Bob";
+    private const string ReplacementName = "Bob";
 
     /// <summary>
     /// How long to give a competing thread to complete its emit while the initial emit is still on the
@@ -56,7 +56,7 @@ public class PropertyObservableInitialEmitSerializationTests
 
         // Drive a whole mutation through the source the instant the handler is attached, so the handler
         // has already emitted by the time the constructor reads the property.
-        source.AfterHandlerAttached = () => RunToCompletionOnAnotherThread(() => source.Name = UpdatedName);
+        source.AfterHandlerAttached = () => RunToCompletionOnAnotherThread(() => source.Name = ReplacementName);
 
         var observable = new PropertyObservable<string?>(
             source,
@@ -67,7 +67,7 @@ public class PropertyObservableInitialEmitSerializationTests
         using (observable.Subscribe(recorder))
         {
             await AssertNoErrors(recorder);
-            await AssertSequence(recorder.Snapshot(), UpdatedName);
+            await AssertSequence(recorder.Snapshot(), ReplacementName);
         }
     }
 
@@ -132,7 +132,7 @@ public class PropertyObservableInitialEmitSerializationTests
                 competitor = new(() =>
                 {
                     competitorStarted.Set();
-                    source.Name = UpdatedName;
+                    source.Name = ReplacementName;
                 }) { IsBackground = true };
 
                 competitor.Start();
@@ -153,7 +153,7 @@ public class PropertyObservableInitialEmitSerializationTests
 
             await AssertNoErrors(recorder);
             await Assert.That(recorder.MaxConcurrentEmissions).IsEqualTo(1);
-            await AssertSequence(recorder.Snapshot(), InitialName, UpdatedName);
+            await AssertSequence(recorder.Snapshot(), InitialName, ReplacementName);
         }
     }
 
@@ -320,10 +320,10 @@ public class PropertyObservableInitialEmitSerializationTests
             static x => ((ConventionalRaiseOrderViewModel)x).Name,
             distinctUntilChanged: true).Subscribe(recorder));
 
-        source.Name = UpdatedName;
+        source.Name = ReplacementName;
 
         await Assert.That(source.HandlerWasInvoked).IsFalse();
-        await AssertSequence(recorder.Snapshot(), UpdatedName);
+        await AssertSequence(recorder.Snapshot(), ReplacementName);
     }
 
     /// <summary>
@@ -345,10 +345,10 @@ public class PropertyObservableInitialEmitSerializationTests
             static x => ((RaiseBeforeWriteViewModel)x).Name,
             distinctUntilChanged: true).Subscribe(recorder));
 
-        source.Name = UpdatedName;
+        source.Name = ReplacementName;
 
         await Assert.That(source.HandlerWasInvoked).IsFalse();
-        await Assert.That(source.Name).IsEqualTo(UpdatedName);
+        await Assert.That(source.Name).IsEqualTo(ReplacementName);
         await AssertSequence(recorder.Snapshot(), InitialName);
     }
 

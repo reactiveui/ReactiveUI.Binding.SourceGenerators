@@ -12,7 +12,7 @@ public partial class BindOneWayTests
     /// <summary>The initial deep-chain city value.</summary>
     private const string InitialCity = "Seattle";
 
-    /// <summary>The updated deep-chain city value.</summary>
+    /// <summary>The replacement deep-chain city value.</summary>
     private const string ReplacementCity = "Portland";
 
     /// <summary>The pre-set source property value.</summary>

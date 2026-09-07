@@ -17,7 +17,7 @@ public partial class WhenAnyValueTests
     /// <summary>The initial nested city value used in deep-chain tests.</summary>
     private const string InitialCity = "Seattle";
 
-    /// <summary>The updated nested city value used in deep-chain tests.</summary>
+    /// <summary>The replacement nested city value used in deep-chain tests.</summary>
     private const string ReplacementCity = "Portland";
 
     /// <summary>The number of property changes applied in the rapid-change test.</summary>
@@ -30,7 +30,7 @@ public partial class WhenAnyValueTests
     private const int ExpectedTwelvePropertyCount = 13;
 
     /// <summary>The value written to a property to trigger a change notification.</summary>
-    private const string ChangedValue = "Changed";
+    private const string ReplacementName = "Changed";
 
     /// <summary>The initial child name used in nullable deep-chain tests.</summary>
     private const string Alice = "Alice";
@@ -299,12 +299,12 @@ public partial class WhenAnyValueTests
         using var sub1 = obs.Subscribe(values1.Add);
         using var sub2 = obs.Subscribe(values2.Add);
 
-        fixture.Value1 = ChangedValue;
+        fixture.Value1 = ReplacementName;
 
         await Assert.That(values1.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
         await Assert.That(values2.Count).IsGreaterThanOrEqualTo(ExpectedEmissionCount);
-        await Assert.That(values1).Contains(ChangedValue);
-        await Assert.That(values2).Contains(ChangedValue);
+        await Assert.That(values1).Contains(ReplacementName);
+        await Assert.That(values2).Contains(ReplacementName);
     }
 
     /// <summary>

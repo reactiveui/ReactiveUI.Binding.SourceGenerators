@@ -17,8 +17,8 @@ internal static class Program
     /// <summary>A sample name value used across the WhenChanged scenarios.</summary>
     private const string Alice = "Alice";
 
-    /// <summary>The updated string value used to assert change propagation.</summary>
-    private const string UpdatedName = "Updated";
+    /// <summary>The replacement string value used to assert change propagation.</summary>
+    private const string ReplacementName = "Updated";
 
     /// <summary>The initial source name value used in the binding scenarios.</summary>
     private const string SourceName = "Source";
@@ -26,8 +26,8 @@ internal static class Program
     /// <summary>The initial age value used in the two-property scenario.</summary>
     private const int InitialAge = 30;
 
-    /// <summary>The updated age value used to assert change propagation.</summary>
-    private const int UpdatedAge = 31;
+    /// <summary>The replacement age value used to assert change propagation.</summary>
+    private const int ReplacementAge = 31;
 
     /// <summary>The value set before the binding is disposed, which must survive the disposal.</summary>
     private const string BeforeDisposal = "Before";
@@ -92,8 +92,8 @@ internal static class Program
         using var sub = vm.WhenChanged(x => x.Name, x => x.Age).Subscribe(v => last = v);
         AssertEqual("WhenChanged two-prop name", Alice, last.Property1);
         AssertEqual("WhenChanged two-prop age", InitialAge, last.Property2);
-        vm.Age = UpdatedAge;
-        AssertEqual("WhenChanged two-prop age update", UpdatedAge, last.Property2);
+        vm.Age = ReplacementAge;
+        AssertEqual("WhenChanged two-prop age update", ReplacementAge, last.Property2);
     }
 
     /// <summary>WhenChanged on the view type produces a dispatch entry required by BindTwoWay.</summary>
@@ -103,8 +103,8 @@ internal static class Program
         string? last = null;
         using var sub = view.WhenChanged(x => x.DisplayName).Subscribe(v => last = v);
         AssertEqual("WhenChanged on view initial", "ViewVal", last);
-        view.DisplayName = UpdatedName;
-        AssertEqual("WhenChanged on view after set", UpdatedName, last);
+        view.DisplayName = ReplacementName;
+        AssertEqual("WhenChanged on view after set", ReplacementName, last);
     }
 
     /// <summary>BindOneWay propagates source changes to the target property.</summary>
@@ -114,8 +114,8 @@ internal static class Program
         var target = new AotView();
         using var binding = source.BindOneWay(target, x => x.Name, x => x.DisplayName);
         AssertEqual("BindOneWay initial", SourceName, target.DisplayName);
-        source.Name = UpdatedName;
-        AssertEqual("BindOneWay after set", UpdatedName, target.DisplayName);
+        source.Name = ReplacementName;
+        AssertEqual("BindOneWay after set", ReplacementName, target.DisplayName);
     }
 
     /// <summary>BindTwoWay propagates changes in both directions between source and target.</summary>

@@ -16,8 +16,8 @@ public partial class WhenChangingTests
     /// <summary>The city the first change moves to, which the second change then leaves behind.</summary>
     private const string ReplacementCity = "Portland";
 
-    /// <summary>The updated value for the integer property in two-property tests.</summary>
-    private const int UpdatedIntValue = 2;
+    /// <summary>The replacement value for the integer property in two-property tests.</summary>
+    private const int ReplacementIntValue = 2;
 
     /// <summary>Verifies that deep chain WhenChanging emits the initial nested property value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -117,7 +117,7 @@ public partial class WhenChangingTests
             .Subscribe(values.Add);
 
         vm.Prop1 = "B";
-        vm.Prop2 = UpdatedIntValue;
+        vm.Prop2 = ReplacementIntValue;
 
         // Should have at least 3 emissions: initial + 2 changes
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(MinEmissionsAfterTwoChanges);

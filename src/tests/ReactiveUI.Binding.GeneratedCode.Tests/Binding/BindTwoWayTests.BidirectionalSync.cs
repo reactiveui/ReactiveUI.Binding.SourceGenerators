@@ -15,8 +15,8 @@ public partial class BindTwoWayTests
     /// <summary>The initial double property test value.</summary>
     private const double InitialMeasurement = 3.14;
 
-    /// <summary>The updated double property test value.</summary>
-    private const double UpdatedMeasurement = 2.71;
+    /// <summary>The replacement double property test value.</summary>
+    private const double ReplacementMeasurement = 2.71;
 
     /// <summary>The square root of two double property test value.</summary>
     private const double ThirdMeasurement = 1.41;
@@ -50,8 +50,8 @@ public partial class BindTwoWayTests
         var target = new BigView();
         using var binding = BindTwoWayScenarios.DoubleProperty(source, target);
         await Assert.That(target.ViewProp3).IsEqualTo(InitialMeasurement);
-        source.Prop3 = UpdatedMeasurement;
-        await Assert.That(target.ViewProp3).IsEqualTo(UpdatedMeasurement);
+        source.Prop3 = ReplacementMeasurement;
+        await Assert.That(target.ViewProp3).IsEqualTo(ReplacementMeasurement);
         target.ViewProp3 = ThirdMeasurement;
         await Assert.That(source.Prop3).IsEqualTo(ThirdMeasurement);
     }
