@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
@@ -12,6 +13,18 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// <summary>Generates concrete typed extension method overloads and binding methods for BindCommand invocations.</summary>
 internal static class BindCommandCodeGenerator
 {
+    /// <summary>The parameter carrying the text of the selector naming the command.</summary>
+    private const string CommandExpressionParameter = "propertyNameExpression";
+
+    /// <summary>The parameter carrying the text of the selector naming the control.</summary>
+    private const string ControlExpressionParameter = "controlNameExpression";
+
+    /// <summary>The generated worker each dispatch branch hands the binding to.</summary>
+    private const string WorkerMethodPrefix = "__BindCommand_";
+
+    /// <summary>The two objects a generated worker binds, in its own parameter order.</summary>
+    private const string WorkerArguments = "view, viewModel";
+
     /// <summary>Closes the view parameter of a generated binding worker.</summary>
     private const string ViewParameterSuffix = " view,";
 
@@ -422,19 +435,15 @@ internal static class BindCommandCodeGenerator
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.ViewTypeFullName,
-                inv.CallerFilePath,
-                inv.CallerLineNumber,
-                $"{inv.CommandExpressionText}|{inv.ControlExpressionText}");
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
-            var escapedCmdExpr = CodeGeneratorHelpers.EscapeString(inv.CommandExpressionText);
-            var escapedCtrlExpr = CodeGeneratorHelpers.EscapeString(inv.ControlExpressionText);
 
-            _ = sb.Append("            ").Append(condition).Append(" (propertyNameExpression == \"").Append(escapedCmdExpr).AppendLine("\"")
-                .Append("                && controlNameExpression == \"").Append(escapedCtrlExpr).AppendLine("\")").AppendLine(GeneratedSyntax.StatementBlockOpen)
-                .Append("                return __BindCommand_").Append(methodSuffix).Append("(view, viewModel").Append(extraArgs).AppendLine(");")
-                .AppendLine(GeneratedSyntax.StatementBlockClose);
+            CodeGeneratorHelpers.AppendExpressionDispatchCondition(
+                sb,
+                CodeGeneratorHelpers.ConditionKeyword(i),
+                CommandExpressionParameter,
+                inv.CommandExpressionText,
+                ControlExpressionParameter,
+                inv.ControlExpressionText);
+            CodeGeneratorHelpers.AppendDispatchReturn(sb, WorkerMethodPrefix + MethodSuffix(inv), WorkerArguments + extraArgs);
         }
     }
 
@@ -457,21 +466,26 @@ internal static class BindCommandCodeGenerator
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.ViewTypeFullName,
-                inv.CallerFilePath,
-                inv.CallerLineNumber,
-                $"{inv.CommandExpressionText}|{inv.ControlExpressionText}");
-            var pathSuffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
 
-            _ = sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).AppendLine()
-                .Append("                && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(pathSuffix))
-                .AppendLine("\", global::System.StringComparison.OrdinalIgnoreCase))").AppendLine(GeneratedSyntax.StatementBlockOpen)
-                .Append("                return __BindCommand_").Append(methodSuffix).Append("(view, viewModel").Append(extraArgs).AppendLine(");")
-                .AppendLine(GeneratedSyntax.StatementBlockClose);
+            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
+                sb,
+                CodeGeneratorHelpers.ConditionKeyword(i),
+                inv.CallerLineNumber,
+                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
+            CodeGeneratorHelpers.AppendDispatchReturn(sb, WorkerMethodPrefix + MethodSuffix(inv), WorkerArguments + extraArgs);
         }
     }
+
+    /// <summary>Names the generated worker a call site dispatches to.</summary>
+    /// <param name="inv">The call site.</param>
+    /// <returns>The stable suffix its worker is named with.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string MethodSuffix(BindCommandInvocationInfo inv) =>
+        CodeGeneratorHelpers.ComputeStableMethodSuffix(
+            inv.ViewTypeFullName,
+            inv.CallerFilePath,
+            inv.CallerLineNumber,
+            $"{inv.CommandExpressionText}|{inv.ControlExpressionText}");
 
     /// <summary>Groups BindCommand invocations by type signature for overload generation.</summary>
     /// <param name="ViewTypeFullName">The fully qualified view type.</param>

@@ -19,6 +19,24 @@ internal static class BindOneWayCodeGenerator
     /// <summary>What this API calls the conversion argument in its generated signatures.</summary>
     private const string ConversionParameterName = "conversionFunc";
 
+    /// <summary>What this API calls the selector for the side it reads from.</summary>
+    private const string SourceSelectorName = "sourceProperty";
+
+    /// <summary>What this API calls the selector for the side it writes to.</summary>
+    private const string TargetSelectorName = "targetProperty";
+
+    /// <summary>The parameter carrying the text of the selector for the side read from.</summary>
+    private const string SourceExpressionParameter = SourceSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
+
+    /// <summary>The parameter carrying the text of the selector for the side written to.</summary>
+    private const string TargetExpressionParameter = TargetSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
+
+    /// <summary>The generated worker each dispatch branch hands the binding to.</summary>
+    private const string WorkerMethodPrefix = "__BindOneWay_";
+
+    /// <summary>The two objects a generated worker binds, in its own parameter order.</summary>
+    private const string WorkerArguments = "source, target";
+
     /// <summary>Name of the emitted local holding the source property observation, before conversion or scheduling.</summary>
     private const string SourceObservableVariable = "sourceObs";
 
@@ -82,46 +100,28 @@ internal static class BindOneWayCodeGenerator
 
         AppendExtraParameters(sb, group);
 
-        _ = sb.AppendLine("""
-                                  [global::System.Runtime.CompilerServices.CallerArgumentExpression("sourceProperty")] string sourcePropertyExpression = "",
-                                  [global::System.Runtime.CompilerServices.CallerArgumentExpression("targetProperty")] string targetPropertyExpression = "",
-                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                              {
-                                  sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                                      ? sourcePropertyExpression.Substring(7)
-                                      : sourcePropertyExpression;
-                                  targetPropertyExpression = targetPropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                                      ? targetPropertyExpression.Substring(7)
-                                      : targetPropertyExpression;
+        CodeGeneratorHelpers.AppendExpressionDispatchParameters(sb, SourceSelectorName, TargetSelectorName);
+        CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, SourceExpressionParameter);
+        CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, TargetExpressionParameter);
+        _ = sb.AppendLine();
 
-                      """);
-
-        EmitAffinityOverride(sb, group, "targetPropertyExpression");
+        EmitAffinityOverride(sb, group, TargetExpressionParameter);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.SourceTypeFullName,
-                inv.CallerFilePath,
-                inv.CallerLineNumber,
-                $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
-            var escapedSourceExpr = CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText);
-            var escapedTargetExpr = CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText);
 
-            _ = sb.Append("            ").Append(condition).Append(" (sourcePropertyExpression == \"").Append(escapedSourceExpr).AppendLine("\"")
-                .Append("                && targetPropertyExpression == \"").Append(escapedTargetExpr).AppendLine("\")").AppendLine(GeneratedSyntax.StatementBlockOpen)
-                .Append("                return __BindOneWay_").Append(methodSuffix).Append("(source, target").Append(FormatExtraArgs(group))
-                .AppendLine(");").AppendLine("            }");
+            CodeGeneratorHelpers.AppendExpressionDispatchCondition(
+                sb,
+                CodeGeneratorHelpers.ConditionKeyword(i),
+                SourceExpressionParameter,
+                inv.SourceExpressionText,
+                TargetExpressionParameter,
+                inv.TargetExpressionText);
+            AppendDispatchReturn(sb, group, inv);
         }
 
-        _ = sb.AppendLine("""
-                                  throw new global::System.InvalidOperationException(
-                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                              }
-                      """);
+        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
     }
 
     /// <summary>
@@ -153,15 +153,11 @@ internal static class BindOneWayCodeGenerator
 
         if (stubHasExpressionParameters)
         {
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, "sourceProperty", "sourcePropertyExpression", false);
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, "targetProperty", "targetPropertyExpression", false);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, SourceSelectorName, SourceExpressionParameter, false);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, TargetSelectorName, TargetExpressionParameter, false);
         }
 
-        _ = sb.AppendLine("""
-                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                              {
-                      """);
+        CodeGeneratorHelpers.AppendCallerInfoDispatchParameters(sb);
 
         EmitAffinityOverride(
             sb,
@@ -171,26 +167,16 @@ internal static class BindOneWayCodeGenerator
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.SourceTypeFullName,
-                inv.CallerFilePath,
-                inv.CallerLineNumber,
-                $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
-            var pathSuffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
 
-            _ = sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).AppendLine()
-                .Append("                && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(pathSuffix))
-                .AppendLine("\", global::System.StringComparison.OrdinalIgnoreCase))").AppendLine(GeneratedSyntax.StatementBlockOpen)
-                .Append("                return __BindOneWay_").Append(methodSuffix).Append("(source, target").Append(FormatExtraArgs(group))
-                .AppendLine(");").AppendLine("            }");
+            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
+                sb,
+                CodeGeneratorHelpers.ConditionKeyword(i),
+                inv.CallerLineNumber,
+                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
+            AppendDispatchReturn(sb, group, inv);
         }
 
-        _ = sb.AppendLine("""
-                                  throw new global::System.InvalidOperationException(
-                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                              }
-                      """);
+        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
     }
 
     /// <summary>
@@ -307,4 +293,19 @@ internal static class BindOneWayCodeGenerator
 
         return currentVar;
     }
+
+    /// <summary>Appends the call a matched dispatch branch hands the binding to.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group, which fixes the arguments the worker takes.</param>
+    /// <param name="inv">The call site the branch matched.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AppendDispatchReturn(StringBuilder sb, BindingTypeGroup group, BindingInvocationInfo inv) =>
+        CodeGeneratorHelpers.AppendDispatchReturn(
+            sb,
+            WorkerMethodPrefix + CodeGeneratorHelpers.ComputeStableMethodSuffix(
+                inv.SourceTypeFullName,
+                inv.CallerFilePath,
+                inv.CallerLineNumber,
+                $"{inv.SourceExpressionText}|{inv.TargetExpressionText}"),
+            WorkerArguments + FormatExtraArgs(group));
 }

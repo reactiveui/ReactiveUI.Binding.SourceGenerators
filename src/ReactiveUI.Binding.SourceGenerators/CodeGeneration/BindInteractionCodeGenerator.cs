@@ -14,6 +14,12 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// <summary>Generates concrete typed extension method overloads and binding methods for BindInteraction invocations.</summary>
 internal static class BindInteractionCodeGenerator
 {
+    /// <summary>The generated worker each dispatch branch hands the binding to.</summary>
+    private const string WorkerMethodPrefix = "__BindInteraction_";
+
+    /// <summary>The arguments a generated worker takes, in its own parameter order.</summary>
+    private const string WorkerArguments = "viewModel, handler";
+
     /// <summary>Closes the view model parameter of a generated binding worker.</summary>
     private const string ViewModelParameterSuffix = " viewModel,";
 
@@ -174,24 +180,14 @@ internal static class BindInteractionCodeGenerator
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.ViewTypeFullName,
-                inv.CallerFilePath,
-                inv.CallerLineNumber,
-                inv.ExpressionText);
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
-            var escapedExpr = CodeGeneratorHelpers.EscapeString(inv.ExpressionText);
 
-            _ = sb.Append("            ").Append(condition).Append(" (propertyNameExpression == \"").Append(escapedExpr).AppendLine("\")")
-                .AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                return __BindInteraction_").Append(methodSuffix).AppendLine("(viewModel, handler);")
-                .AppendLine("            }");
+            _ = sb.Append(CodeGeneratorHelpers.ParameterIndent).Append(CodeGeneratorHelpers.ConditionKeyword(i))
+                .Append(" (propertyNameExpression == \"").Append(CodeGeneratorHelpers.EscapeString(inv.ExpressionText)).AppendLine("\")")
+                .AppendLine(GeneratedSyntax.StatementBlockOpen);
+            CodeGeneratorHelpers.AppendDispatchReturn(sb, WorkerMethodPrefix + MethodSuffix(inv), WorkerArguments);
         }
 
-        _ = sb.AppendLine("""
-                                  throw new global::System.InvalidOperationException(
-                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                              }
-                      """);
+        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
     }
 
     /// <summary>Generates the CallerFilePath-based overload for BindInteraction dispatch.</summary>
@@ -229,25 +225,16 @@ internal static class BindInteractionCodeGenerator
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.ViewTypeFullName,
-                inv.CallerFilePath,
-                inv.CallerLineNumber,
-                inv.ExpressionText);
-            var pathSuffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
 
-            _ = sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).AppendLine()
-                .Append("                && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(pathSuffix))
-                .AppendLine("\", global::System.StringComparison.OrdinalIgnoreCase))").AppendLine(GeneratedSyntax.StatementBlockOpen)
-                .Append("                return __BindInteraction_").Append(methodSuffix).AppendLine("(viewModel, handler);").AppendLine("            }");
+            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
+                sb,
+                CodeGeneratorHelpers.ConditionKeyword(i),
+                inv.CallerLineNumber,
+                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
+            CodeGeneratorHelpers.AppendDispatchReturn(sb, WorkerMethodPrefix + MethodSuffix(inv), WorkerArguments);
         }
 
-        _ = sb.AppendLine("""
-                                  throw new global::System.InvalidOperationException(
-                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                              }
-                      """);
+        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
     }
 
     /// <summary>Generates a private BindInteraction method for a specific invocation.</summary>
@@ -342,6 +329,17 @@ internal static class BindInteractionCodeGenerator
                                   return serial;
                               }
                       """);
+
+    /// <summary>Names the generated worker a call site dispatches to.</summary>
+    /// <param name="inv">The call site.</param>
+    /// <returns>The stable suffix its worker is named with.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string MethodSuffix(BindInteractionInvocationInfo inv) =>
+        CodeGeneratorHelpers.ComputeStableMethodSuffix(
+            inv.ViewTypeFullName,
+            inv.CallerFilePath,
+            inv.CallerLineNumber,
+            inv.ExpressionText);
 
     /// <summary>Groups BindInteraction invocations by type signature for overload generation.</summary>
     /// <param name="ViewTypeFullName">The fully qualified view type.</param>

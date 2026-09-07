@@ -23,6 +23,9 @@ internal static class CodeGeneratorHelpers
     /// <summary>The indent every generated method parameter sits at: namespace, class, member, then parameter.</summary>
     internal const string ParameterIndent = "            ";
 
+    /// <summary>Completes the name of the parameter that captures a selector's expression text.</summary>
+    internal const string ExpressionParameterSuffix = "Expression";
+
     /// <summary>Buffer capacity to reserve per property-path segment when building an access chain.</summary>
     private const int PerPathSegmentCapacity = 16;
 
@@ -545,4 +548,118 @@ internal static class CodeGeneratorHelpers
         $"__value => {{ {toTypeFullName} __converted; "
         + $"{GeneratedTypeNames.RuntimeBindingConverter}.TryConvert<{fromTypeFullName}, {toTypeFullName}>(__value, null, null, out __converted); "
         + "return __converted; }";
+
+    /// <summary>Appends the documentation comment on a generated dispatch overload.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="apiName">The binding API the overload stands in for.</param>
+    /// <param name="sourceTypeFullName">The fully qualified type the binding reads from.</param>
+    /// <param name="targetTypeFullName">The fully qualified type the binding writes to.</param>
+    /// <param name="dispatchesOnExpressionText">Whether the overload keys on expression text rather than file and line.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendDispatchSummary(
+        StringBuilder sb,
+        string apiName,
+        string sourceTypeFullName,
+        string targetTypeFullName,
+        bool dispatchesOnExpressionText) =>
+        sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for ").Append(apiName)
+            .Append(" from ").Append(sourceTypeFullName).Append(" to ").Append(targetTypeFullName).AppendLine(".")
+            .AppendLine(dispatchesOnExpressionText
+                ? "        /// Uses CallerArgumentExpression for dispatch."
+                : "        /// Uses CallerFilePath + CallerLineNumber for dispatch.")
+            .AppendLine("        /// </summary>");
+
+    /// <summary>Appends the expression-text parameters a dispatch overload keys on, and opens its body.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="firstSelectorName">The name of the first selector parameter.</param>
+    /// <param name="secondSelectorName">The name of the second selector parameter.</param>
+    internal static void AppendExpressionDispatchParameters(
+        StringBuilder sb,
+        string firstSelectorName,
+        string secondSelectorName)
+    {
+        AppendExpressionParameter(sb, firstSelectorName, firstSelectorName + ExpressionParameterSuffix, true);
+        AppendExpressionParameter(sb, secondSelectorName, secondSelectorName + ExpressionParameterSuffix, true);
+        AppendCallerInfoDispatchParameters(sb);
+    }
+
+    /// <summary>Appends the file and line parameters every dispatch overload carries, and opens its body.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <remarks>
+    /// They are declared whether or not dispatch uses them, because the concrete overload only beats the
+    /// generic stub once their parameter lists match.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendCallerInfoDispatchParameters(StringBuilder sb) =>
+        sb.AppendLine("            [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = \"\",")
+            .AppendLine("            [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)")
+            .AppendLine(GeneratedSyntax.MemberBodyOpen);
+
+    /// <summary>Appends the strip that takes the <c>static</c> prefix off a captured expression.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="expressionParameterName">The parameter holding the captured expression text.</param>
+    /// <remarks>
+    /// A <c>static</c> lambda reaches the overload spelled with that prefix, which the recorded expression
+    /// text does not carry, so without the strip those call sites match nothing.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendStaticPrefixNormalization(StringBuilder sb, string expressionParameterName) =>
+        sb.Append(ParameterIndent).Append(expressionParameterName).Append(" = ").Append(expressionParameterName)
+            .AppendLine(".StartsWith(\"static \", global::System.StringComparison.Ordinal)")
+            .Append("                ? ").Append(expressionParameterName).AppendLine(".Substring(7)")
+            .Append("                : ").Append(expressionParameterName).AppendLine(";");
+
+    /// <summary>Appends the condition that matches a call site by the text of both its selectors.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="condition">The conditional keyword this branch opens with.</param>
+    /// <param name="firstParameterName">The parameter holding the first selector's text.</param>
+    /// <param name="firstExpressionText">The first selector as the call site spelled it.</param>
+    /// <param name="secondParameterName">The parameter holding the second selector's text.</param>
+    /// <param name="secondExpressionText">The second selector as the call site spelled it.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendExpressionDispatchCondition(
+        StringBuilder sb,
+        string condition,
+        string firstParameterName,
+        string firstExpressionText,
+        string secondParameterName,
+        string secondExpressionText) =>
+        sb.Append(ParameterIndent).Append(condition).Append(" (").Append(firstParameterName).Append(" == \"")
+            .Append(EscapeString(firstExpressionText)).AppendLine("\"")
+            .Append("                && ").Append(secondParameterName).Append(" == \"")
+            .Append(EscapeString(secondExpressionText)).AppendLine("\")")
+            .AppendLine(GeneratedSyntax.StatementBlockOpen);
+
+    /// <summary>Appends the condition that matches a call site by the file and line it sits on.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="condition">The conditional keyword this branch opens with.</param>
+    /// <param name="callerLineNumber">The line the call site sits on.</param>
+    /// <param name="pathSuffix">The tail of the path the call site's file ends with.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendCallerInfoDispatchCondition(
+        StringBuilder sb,
+        string condition,
+        int callerLineNumber,
+        string pathSuffix) =>
+        sb.Append(ParameterIndent).Append(condition).Append(" (callerLineNumber == ").Append(callerLineNumber).AppendLine()
+            .Append("                && callerFilePath.EndsWith(\"").Append(EscapeString(pathSuffix))
+            .AppendLine("\", global::System.StringComparison.OrdinalIgnoreCase))")
+            .AppendLine(GeneratedSyntax.StatementBlockOpen);
+
+    /// <summary>Appends the call a matched branch hands the binding to, and closes the branch.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="workerName">The generated method the branch dispatches to.</param>
+    /// <param name="arguments">The argument list to forward, in the worker's own parameter order.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendDispatchReturn(StringBuilder sb, string workerName, string arguments) =>
+        sb.Append("                return ").Append(workerName).Append('(').Append(arguments).AppendLine(");")
+            .AppendLine(GeneratedSyntax.StatementBlockClose);
+
+    /// <summary>Appends the throw that closes a binding dispatch overload when no call site matched.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendBindingDispatchFallthrough(StringBuilder sb) =>
+        sb.AppendLine("            throw new global::System.InvalidOperationException(")
+            .AppendLine("                \"No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.\");")
+            .AppendLine(GeneratedSyntax.MemberBodyClose);
 }

@@ -16,6 +16,24 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </summary>
 internal static class BindCodeGenerator
 {
+    /// <summary>What this API calls the selector for the side it reads from.</summary>
+    private const string SourceSelectorName = "viewModelProperty";
+
+    /// <summary>What this API calls the selector for the side it writes to.</summary>
+    private const string TargetSelectorName = "viewProperty";
+
+    /// <summary>The parameter carrying the text of the selector for the side read from.</summary>
+    private const string SourceExpressionParameter = SourceSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
+
+    /// <summary>The parameter carrying the text of the selector for the side written to.</summary>
+    private const string TargetExpressionParameter = TargetSelectorName + CodeGeneratorHelpers.ExpressionParameterSuffix;
+
+    /// <summary>The generated worker each dispatch branch hands the binding to.</summary>
+    private const string WorkerMethodPrefix = "__Bind_";
+
+    /// <summary>The two objects a generated worker binds, in its own parameter order.</summary>
+    private const string WorkerArguments = "viewModel, view";
+
     /// <summary>The indentation a statement inside the emitted subscription body sits at.</summary>
     private const string SubscriptionBodyIndent = "                ";
 
@@ -85,39 +103,25 @@ internal static class BindCodeGenerator
 
         AppendExtraParameters(sb, group);
 
-        _ = sb.AppendLine("""
-                                  [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
-                                  [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
-                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                              {
-                      """);
+        CodeGeneratorHelpers.AppendExpressionDispatchParameters(sb, SourceSelectorName, TargetSelectorName);
 
         EmitAffinityOverride(sb, group, "viewPropertyExpression");
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
-            var escapedSourceExpr = CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText);
-            var escapedTargetExpr = CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText);
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.SourceTypeFullName,
-                inv.CallerFilePath,
-                inv.CallerLineNumber,
-                $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
 
-            _ = sb.Append("            ").Append(condition).Append(" (viewModelPropertyExpression == \"").Append(escapedSourceExpr).AppendLine("\"")
-                .Append("                && viewPropertyExpression == \"").Append(escapedTargetExpr).AppendLine("\")").AppendLine(GeneratedSyntax.StatementBlockOpen)
-                .Append("                return __Bind_").Append(methodSuffix).Append("(viewModel, view").Append(FormatExtraArgs(group)).AppendLine(");")
-                .AppendLine("            }");
+            CodeGeneratorHelpers.AppendExpressionDispatchCondition(
+                sb,
+                CodeGeneratorHelpers.ConditionKeyword(i),
+                SourceExpressionParameter,
+                inv.SourceExpressionText,
+                TargetExpressionParameter,
+                inv.TargetExpressionText);
+            AppendDispatchReturn(sb, group, inv);
         }
 
-        _ = sb.AppendLine("""
-                                  throw new global::System.InvalidOperationException(
-                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                              }
-                      """);
+        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
     }
 
     /// <summary>Generates the CallerFilePath-based overload for Bind dispatch.</summary>
@@ -149,15 +153,11 @@ internal static class BindCodeGenerator
 
         if (stubHasExpressionParameters)
         {
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, "viewModelProperty", "viewModelPropertyExpression", false);
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, "viewProperty", "viewPropertyExpression", false);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, SourceSelectorName, SourceExpressionParameter, false);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, TargetSelectorName, TargetExpressionParameter, false);
         }
 
-        _ = sb.AppendLine("""
-                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                              {
-                      """);
+        CodeGeneratorHelpers.AppendCallerInfoDispatchParameters(sb);
 
         EmitAffinityOverride(
             sb,
@@ -167,26 +167,16 @@ internal static class BindCodeGenerator
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
-            var suffix = CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath);
-            var condition = CodeGeneratorHelpers.ConditionKeyword(i);
-            var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
-                inv.SourceTypeFullName,
-                inv.CallerFilePath,
-                inv.CallerLineNumber,
-                $"{inv.SourceExpressionText}|{inv.TargetExpressionText}");
 
-            _ = sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).AppendLine()
-                .Append("                && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(suffix))
-                .AppendLine("\", global::System.StringComparison.OrdinalIgnoreCase))").AppendLine(GeneratedSyntax.StatementBlockOpen)
-                .Append("                return __Bind_").Append(methodSuffix).Append("(viewModel, view").Append(FormatExtraArgs(group)).AppendLine(");")
-                .AppendLine("            }");
+            CodeGeneratorHelpers.AppendCallerInfoDispatchCondition(
+                sb,
+                CodeGeneratorHelpers.ConditionKeyword(i),
+                inv.CallerLineNumber,
+                CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
+            AppendDispatchReturn(sb, group, inv);
         }
 
-        _ = sb.AppendLine("""
-                                  throw new global::System.InvalidOperationException(
-                                      "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.");
-                              }
-                      """);
+        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
     }
 
     /// <summary>Generates a private Bind method for a specific invocation.</summary>
@@ -451,4 +441,19 @@ internal static class BindCodeGenerator
             $"view, viewModel, viewModelProperty, viewProperty, {convertersArg}{schedulerArg}, {bindingExpression}",
             true);
     }
+
+    /// <summary>Appends the call a matched dispatch branch hands the binding to.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group, which fixes the arguments the worker takes.</param>
+    /// <param name="inv">The call site the branch matched.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AppendDispatchReturn(StringBuilder sb, BindingTypeGroup group, BindingInvocationInfo inv) =>
+        CodeGeneratorHelpers.AppendDispatchReturn(
+            sb,
+            WorkerMethodPrefix + CodeGeneratorHelpers.ComputeStableMethodSuffix(
+                inv.SourceTypeFullName,
+                inv.CallerFilePath,
+                inv.CallerLineNumber,
+                $"{inv.SourceExpressionText}|{inv.TargetExpressionText}"),
+            WorkerArguments + FormatExtraArgs(group));
 }
