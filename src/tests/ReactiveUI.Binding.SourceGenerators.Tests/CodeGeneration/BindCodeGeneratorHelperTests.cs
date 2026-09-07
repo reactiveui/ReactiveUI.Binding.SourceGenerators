@@ -308,7 +308,7 @@ public class BindCodeGeneratorHelperTests
         await Assert.That(result).Contains("ReactiveBinding");
         await Assert.That(result).Contains("view.Text = value");
         await Assert.That(result).Contains("viewModel.Name = value");
-        await Assert.That(result).Contains("Skip");
+        await Assert.That(result).DoesNotContain("Skip");
     }
 
     /// <summary>Verifies AppendExtraParameters appends conversion parameters.</summary>

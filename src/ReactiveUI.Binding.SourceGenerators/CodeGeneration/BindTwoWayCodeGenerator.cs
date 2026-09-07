@@ -107,7 +107,11 @@ internal static class BindTwoWayCodeGenerator
             TargetObservableName);
 
         var (sourceVar, targetVar) = BindingEmitterHelpers.EmitDualStreamStages(sb, DispatchApi, inv);
+
+        // Both directions are routed, and the source direction first, so its initial value is queued ahead of
+        // the target's. That ordering is what seeds the target before the target's own first value is weighed.
         sourceVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, sourceVar, "targetThreadObs");
+        targetVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, targetVar, "sourceThreadObs");
 
         EmitTwoWaySubscription(sb, inv, sourceVar, targetVar, targetAccess, sourceSetAccess);
     }
@@ -140,6 +144,13 @@ internal static class BindTwoWayCodeGenerator
     /// <param name="targetVar">The target observable variable name to subscribe to.</param>
     /// <param name="targetAccess">The target property setter access chain.</param>
     /// <param name="sourceSetAccess">The source property setter access chain.</param>
+    /// <remarks>
+    /// The target's own first value is weighed rather than dropped by position. Both observations report what
+    /// they hold when subscribed, and the source is subscribed first, so by the time the target reports the
+    /// target already carries the source's value and the equality guard drops it. Dropping the first value
+    /// positionally instead would eat a real change wherever the target reports nothing to begin with - a chain
+    /// through a null intermediate does exactly that.
+    /// </remarks>
     private static void EmitTwoWaySubscription(
         StringBuilder sb,
         BindingInvocationInfo inv,
@@ -149,8 +160,8 @@ internal static class BindTwoWayCodeGenerator
         string sourceSetAccess) => _ = sb.AppendLine().Append("            var d1 = ").Append(BindingErrors).Append(".Subscribe(").Append(sourceVar)
             .AppendLine(", value =>").AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(targetAccess).AppendLine()
             .Append("            }, \"").Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");").AppendLine()
-            .Append("            var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(").Append(targetVar).AppendLine(", 1);")
-            .Append("            var d2 = ").Append(BindingErrors).AppendLine(".Subscribe(__targetSkipped, value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
+            .Append("            var d2 = ").Append(BindingErrors).Append(".Subscribe(").Append(targetVar).AppendLine(", value =>")
+            .AppendLine(GeneratedSyntax.StatementBlockOpen)
             .Append("                ").Append(sourceSetAccess).AppendLine().Append("            }, \"")
             .Append(CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText)).AppendLine("\");").AppendLine()
             .AppendLine("            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);").AppendLine("        }")

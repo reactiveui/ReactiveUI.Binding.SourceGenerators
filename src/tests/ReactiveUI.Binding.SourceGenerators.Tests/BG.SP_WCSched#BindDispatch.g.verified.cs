@@ -91,32 +91,36 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         var vmBind = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<string>(__vmSelected, scheduler);
         var viewBind = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<int>(__viewSelected, scheduler);
 
-            var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(vmBind, value =>
+            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(vmBind, v => new global::ReactiveUI.Binding.BindingChange(v, true));
+            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<int, global::ReactiveUI.Binding.BindingChange>(viewBind, v => new global::ReactiveUI.Binding.BindingChange(v, false));
+            var __sides = new global::ReactiveUI.Primitives.Advanced.MergeSignal<global::ReactiveUI.Binding.BindingChange>(__vmTagged, __viewTagged);
+            var changed = new global::ReactiveUI.Binding.Observables.AppliedChangeObservable();
+
+            var disposable = global::ReactiveUI.Binding.BindingErrors.Subscribe(__sides, __change =>
             {
-                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.CountText, value))
+                if (__change.FromViewModel)
+                {
+                    var value = (string)__change.Value;
+                    if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.CountText, value))
                 {
                     return;
                 }
 
                 view.CountText = value;
-            }, "x => x.CountText");
-
-            var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewBind, 1);
-            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__viewSkipped, value =>
-            {
-                if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(viewModel.Count, value))
+                }
+                else
+                {
+                    var value = (int)__change.Value;
+                    if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(viewModel.Count, value))
                 {
                     return;
                 }
 
                 viewModel.Count = value;
-            }, "x => x.Count");
+                }
 
-            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(vmBind, v => new global::ReactiveUI.Binding.BindingChange(v, true));
-            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<int, global::ReactiveUI.Binding.BindingChange>(__viewSkipped, v => new global::ReactiveUI.Binding.BindingChange(v, false));
-            var changed = new global::ReactiveUI.Primitives.Advanced.MergeSignal<global::ReactiveUI.Binding.BindingChange>(__vmTagged, __viewTagged);
-
-            var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
+                changed.OnNext(__change);
+            }, "x => x.Count / x => x.CountText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, global::ReactiveUI.Binding.BindingChange>(
                 view,

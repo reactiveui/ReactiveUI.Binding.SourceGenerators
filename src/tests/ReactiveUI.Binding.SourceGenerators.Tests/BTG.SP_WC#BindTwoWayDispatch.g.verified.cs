@@ -95,6 +95,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         var sourceBind = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, sourceToTargetConv);
         var targetBind = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(targetObs, targetToSourceConv);
             var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceBind);
+            var sourceThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(targetBind);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
@@ -106,8 +107,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 target.CountText = value;
             }, "x => x.CountText");
 
-            var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(targetBind, 1);
-            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__targetSkipped, value =>
+            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(sourceThreadObs, value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(source.Count, value))
                 {
