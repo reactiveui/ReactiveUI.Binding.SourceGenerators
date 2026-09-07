@@ -18,6 +18,12 @@ public class ExpressionChainTests
     /// <summary>The value a fixture starts out holding.</summary>
     private const string StartValue = "Start";
 
+    /// <summary>The value a before-change fixture starts out holding.</summary>
+    private const string InitialValue = "Before";
+
+    /// <summary>The value the first change moves to, which the second change then leaves behind.</summary>
+    private const string ReplacementValue = "After";
+
     /// <summary>Verifies basic usage notifies on change.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -46,14 +52,19 @@ public class ExpressionChainTests
         await Assert.That(values[1]).IsEqualTo("End");
     }
 
-    /// <summary>Verifies that before-change notification works via expression chain.</summary>
+    /// <summary>
+    /// A before-change chain reports the value a property is about to leave behind. The first change leaves
+    /// the value the initial emission already carried, and a repeat that immediately follows the initial read
+    /// is the one the subscribe-then-read window can produce on its own, so it is dropped. The second change
+    /// leaves a value nobody has seen, and is reported.
+    /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WithBeforeChange_NotifiesBeforeChange()
+    public async Task WithBeforeChange_ReportsTheValueEachChangeLeavesBehind()
     {
         EnsureInitialized();
 
-        var fixture = new TestFixture { IsNotNullString = "Before" };
+        var fixture = new TestFixture { IsNotNullString = InitialValue };
         Expression<Func<TestFixture, string>> expr = x => x.IsNotNullString;
         var values = new List<string>();
 
@@ -66,11 +77,13 @@ public class ExpressionChainTests
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
+        await Assert.That(values[0]).IsEqualTo(InitialValue);
 
-        fixture.IsNotNullString = "After";
+        fixture.IsNotNullString = ReplacementValue;
+        fixture.IsNotNullString = "Third";
 
-        // Should have received a notification (before-change)
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(ExpectedTwoEmissions);
+        await Assert.That(values[1]).IsEqualTo(ReplacementValue);
     }
 
     /// <summary>Verifies that skipInitial skips the first emission.</summary>

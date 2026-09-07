@@ -238,17 +238,66 @@ public static class ReactiveNotifyPropertyChangedMixins
         /// <returns>An observable which notifies about observed changes.</returns>
         [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the observed shape.")]
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<IObservedChange<TSender, TValue>> SubscribeToExpressionChain<TValue>(
             Expression? expression,
             bool beforeChange,
             bool skipInitial,
-            bool isDistinct)
+            bool isDistinct) =>
+            CreateExpressionChain<TSender, TValue>(item, expression, beforeChange, skipInitial, isDistinct, false);
+
+        /// <summary>
+        /// Creates an observable which will subscribe to each property and sub-property
+        /// specified in the Expression, providing updates to the last value in the chain.
+        /// </summary>
+        /// <typeparam name="TValue">The end value we want to subscribe to.</typeparam>
+        /// <param name="expression">An expression which will point towards the property.</param>
+        /// <param name="beforeChange">If we are interested in notifications before the property value is changed.</param>
+        /// <param name="skipInitial">If we don't want to get a notification about the default value of the property.</param>
+        /// <param name="isDistinct">If set to true, values are filtered with DistinctUntilChanged.</param>
+        /// <param name="suppressWarnings">If set to true, a property that cannot notify is observed quietly.</param>
+        /// <returns>An observable which notifies about observed changes.</returns>
+        [SuppressMessage("Design", "SST2307:Type parameters should be inferable", Justification = "Specified explicitly by the caller; it identifies the observed shape.")]
+        [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IObservable<IObservedChange<TSender, TValue>> SubscribeToExpressionChain<TValue>(
+            Expression? expression,
+            bool beforeChange,
+            bool skipInitial,
+            bool isDistinct,
+            bool suppressWarnings) =>
+            CreateExpressionChain<TSender, TValue>(item, expression, beforeChange, skipInitial, isDistinct, suppressWarnings);
+
+        /// <summary>Builds the chain observation both overloads hand back.</summary>
+        /// <typeparam name="TValue">The end value we want to subscribe to.</typeparam>
+        /// <param name="source">The root object of the chain.</param>
+        /// <param name="expression">An expression which will point towards the property.</param>
+        /// <param name="beforeChange">If we are interested in notifications before the property value is changed.</param>
+        /// <param name="skipInitial">If we don't want to get a notification about the default value of the property.</param>
+        /// <param name="isDistinct">If set to true, values are filtered with DistinctUntilChanged.</param>
+        /// <param name="suppressWarnings">If set to true, a property that cannot notify is observed quietly.</param>
+        /// <returns>An observable which notifies about observed changes.</returns>
+        [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+        private static ExpressionChainSink<TSender, TValue> CreateExpressionChain<TValue>(
+            TSender? source,
+            Expression? expression,
+            bool beforeChange,
+            bool skipInitial,
+            bool isDistinct,
+            bool suppressWarnings)
         {
             // Single fused switching engine: one watcher per link, re-subscribing deeper links when an
             // intermediate value changes, with skip-initial, the non-null-parent filter, the cast to TValue,
             // and the distinct gate applied inline.
             var links = new List<Expression>(Reflection.Rewrite(expression).GetExpressionChain()).ToArray();
-            return new ExpressionChainSink<TSender, TValue>(item, expression, links, beforeChange, skipInitial, isDistinct);
+            return new(
+                source,
+                expression,
+                links,
+                beforeChange,
+                skipInitial,
+                isDistinct,
+                suppressWarnings);
         }
 
     }
@@ -287,10 +336,36 @@ public static class ReactiveNotifyPropertyChangedMixins
     /// <exception cref="ArgumentException"><paramref name="expression"/> does not point at a member, so no property name can be resolved from it.</exception>
     /// <exception cref="InvalidOperationException">No registered <see cref="ICreatesObservableForProperty"/> bids a positive affinity for the property on <paramref name="sender"/>'s type.</exception>
     [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IObservable<IObservedChange<object?, object?>> NotifyForProperty(
         object sender,
         Expression expression,
-        bool beforeChange)
+        bool beforeChange) =>
+        NotifyForProperty(sender, expression, beforeChange, false);
+
+    /// <summary>
+    /// Gets property change notifications for a single property on an object by resolving the
+    /// best <see cref="ICreatesObservableForProperty"/> implementation from the service locator.
+    /// </summary>
+    /// <param name="sender">The object to observe.</param>
+    /// <param name="expression">The expression identifying the property to observe.</param>
+    /// <param name="beforeChange">If <see langword="true"/>, subscribes to before-change notifications.</param>
+    /// <param name="suppressWarnings">If <see langword="true"/>, the plugin stays quiet about a property that cannot notify.</param>
+    /// <returns>An observable of observed changes for the property.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="expression"/> does not point at a member, so no property name can be resolved from it.</exception>
+    /// <exception cref="InvalidOperationException">No registered <see cref="ICreatesObservableForProperty"/> bids a positive affinity for the property on <paramref name="sender"/>'s type.</exception>
+    /// <remarks>
+    /// The suppression reaches the plugin rather than being dropped here. A caller that already knows the
+    /// property cannot notify - a binding that chose this path deliberately - would otherwise be warned once
+    /// per subscription about something it cannot act on.
+    /// </remarks>
+    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+    internal static IObservable<IObservedChange<object?, object?>> NotifyForProperty(
+        object sender,
+        Expression expression,
+        bool beforeChange,
+        bool suppressWarnings)
     {
         ArgumentExceptionHelper.ThrowIfNull(expression);
 
@@ -304,7 +379,7 @@ public static class ReactiveNotifyPropertyChangedMixins
         {
             null => throw new InvalidOperationException(
                 $"Could not find a ICreatesObservableForProperty for {sender.GetType()} property {propertyName}. {BrokenLocatorAdvice}"),
-            _ => result.GetNotificationForProperty(sender, expression, propertyName, beforeChange)
+            _ => result.GetNotificationForProperty(sender, expression, propertyName, beforeChange, suppressWarnings)
         };
     }
 
