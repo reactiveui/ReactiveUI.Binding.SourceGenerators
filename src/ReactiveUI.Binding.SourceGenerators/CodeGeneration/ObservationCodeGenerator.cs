@@ -249,9 +249,7 @@ internal static class ObservationCodeGenerator
         bool isBeforeChange)
     {
         var segment = path[0];
-        var plugin = classInfo is not null
-            ? ObservationPluginRegistry.GetBestPlugin(classInfo, segment.PropertyName)
-            : null;
+        var plugin = ResolveRootPlugin(classInfo, segment);
 
         if (plugin is not null)
         {
@@ -289,9 +287,7 @@ internal static class ObservationCodeGenerator
         string varName)
     {
         var segment = path[0];
-        var plugin = classInfo is not null
-            ? ObservationPluginRegistry.GetBestPlugin(classInfo, segment.PropertyName)
-            : null;
+        var plugin = ResolveRootPlugin(classInfo, segment);
 
         if (plugin is not null)
         {
@@ -339,9 +335,7 @@ internal static class ObservationCodeGenerator
         // First segment: observe root object for first property
         var seg0 = path[0];
         var obs0Var = $"{varName}_s0";
-        var rootPlugin = classInfo is not null
-            ? ObservationPluginRegistry.GetBestPlugin(classInfo, seg0.PropertyName)
-            : null;
+        var rootPlugin = ResolveRootPlugin(classInfo, seg0);
 
         if (rootPlugin is not null)
         {
@@ -696,9 +690,7 @@ internal static class ObservationCodeGenerator
     {
         var path = inv.PropertyPaths[0];
         var seg0 = path[0];
-        var rootPlugin = classInfo is not null
-            ? ObservationPluginRegistry.GetBestPlugin(classInfo, seg0.PropertyName)
-            : null;
+        var rootPlugin = ResolveRootPlugin(classInfo, seg0);
 
         // First segment: observe root object for first property
         if (rootPlugin is not null)
@@ -784,6 +776,30 @@ internal static class ObservationCodeGenerator
         segment.DeclaringTypeInfo is null
             ? null
             : ObservationPluginRegistry.GetBestPlugin(segment.DeclaringTypeInfo, segment.PropertyName);
+
+    /// <summary>Resolves the mechanism for a property observed directly on the type a call site names.</summary>
+    /// <param name="classInfo">The type the call site observes, or null when it was never detected.</param>
+    /// <param name="segment">The property being observed.</param>
+    /// <returns>The mechanism to observe it through, or null when nothing reaches it.</returns>
+    /// <remarks>
+    /// The type a call site names advertises the mechanism, but only the type that declares the property knows
+    /// whether that property takes part in it - and the two differ for an inherited property, which the named
+    /// type's own member list does not mention. Answering from the named type alone treats every inherited
+    /// property as participating, which for a dependency object means emitting a companion field that an
+    /// inherited plain property does not have, and the consumer's build is what discovers it.
+    /// </remarks>
+    private static IObservationPlugin? ResolveRootPlugin(ClassBindingInfo? classInfo, PropertyPathSegment segment)
+    {
+        if (classInfo is null)
+        {
+            return null;
+        }
+
+        return ObservedProperties.IsDeclaredByConsumer(classInfo, segment.PropertyName)
+               || segment.DeclaringTypeInfo is null
+            ? ObservationPluginRegistry.GetBestPlugin(classInfo, segment.PropertyName)
+            : ObservationPluginRegistry.GetBestPlugin(segment.DeclaringTypeInfo, segment.PropertyName);
+    }
 
     /// <summary>Reads the affinity of the mechanism the generator picked for one link of a path.</summary>
     /// <param name="segment">The link being observed.</param>

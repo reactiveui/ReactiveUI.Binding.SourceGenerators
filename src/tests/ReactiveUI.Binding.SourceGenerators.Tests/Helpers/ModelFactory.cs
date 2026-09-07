@@ -21,13 +21,15 @@ internal static class ModelFactory
     /// <param name="type">The fully qualified property type.</param>
     /// <param name="declaringType">The fully qualified declaring type.</param>
     /// <param name="isReferenceType">Whether the property type is a reference type (controls nullable selector annotation).</param>
+    /// <param name="declaringTypeInfo">How the declaring type notifies, when the scenario turns on it.</param>
     /// <returns>A new property path segment.</returns>
     internal static PropertyPathSegment CreatePropertyPathSegment(
         string name = "Name",
         string type = StringTypeName,
         string declaringType = MyViewModelTypeName,
-        bool isReferenceType = true) =>
-        new(name, type, declaringType, isReferenceType, null);
+        bool isReferenceType = true,
+        ClassBindingInfo? declaringTypeInfo = null) =>
+        new(name, type, declaringType, isReferenceType, declaringTypeInfo);
 
     /// <summary>Creates an <see cref="InvocationInfo"/> with sensible defaults for a single-property WhenChanged invocation.</summary>
     /// <param name="callerFilePath">The caller file path.</param>

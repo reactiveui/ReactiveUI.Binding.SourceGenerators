@@ -55,6 +55,9 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>The observation a property with no mechanism behind it gets: one value, without completing.</summary>
     private const string UnchangingPropertyObservableName = "UnchangingPropertyObservable";
 
+    /// <summary>A property the bound type inherits rather than declares.</summary>
+    private const string InheritedPropertyName = "Caption";
+
     /// <summary>The <c>WhenChanged</c> name these tests generate against.</summary>
     private const string WhenChangedName = "WhenChanged";
 

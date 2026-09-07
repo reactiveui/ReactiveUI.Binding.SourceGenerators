@@ -214,6 +214,50 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains(INotifyPropertyChangingName);
     }
 
+    /// <summary>
+    /// A dependency object advertises the mechanism, but an inherited plain property takes no part in it. The
+    /// type that declares the property is what knows that, and answering from the bound type alone would emit
+    /// a companion field the property does not have - which only the consumer's build would discover.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateShallowPathObservation_InheritedPlainProperty_DoesNotTakeTheDependencyPropertyPath()
+    {
+        var sb = new StringBuilder();
+        var declaringType = ModelFactory.CreateClassBindingInfo(
+            inheritsWpfDependencyObject: true,
+            properties: new EquatableArray<ObservablePropertyInfo>(
+                [ModelFactory.CreateObservablePropertyInfo(InheritedPropertyName)]));
+        var path = new EquatableArray<PropertyPathSegment>(
+            [ModelFactory.CreatePropertyPathSegment(InheritedPropertyName, declaringTypeInfo: declaringType)]);
+
+        // The bound type declares nothing of its own, so it can say only that it is a dependency object.
+        var boundType = ModelFactory.CreateClassBindingInfo(inheritsWpfDependencyObject: true);
+
+        ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, boundType, false);
+
+        await Assert.That(sb.ToString()).DoesNotContain($"{InheritedPropertyName}Property");
+    }
+
+    /// <summary>An inherited dependency property does take that path, because the companion field is inherited too.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateShallowPathObservation_InheritedDependencyProperty_TakesTheDependencyPropertyPath()
+    {
+        var sb = new StringBuilder();
+        var declaringType = ModelFactory.CreateClassBindingInfo(
+            inheritsWpfDependencyObject: true,
+            properties: new EquatableArray<ObservablePropertyInfo>(
+                [ModelFactory.CreateObservablePropertyInfo(InheritedPropertyName, isDependencyProperty: true)]));
+        var path = new EquatableArray<PropertyPathSegment>(
+            [ModelFactory.CreatePropertyPathSegment(InheritedPropertyName, declaringTypeInfo: declaringType)]);
+        var boundType = ModelFactory.CreateClassBindingInfo(inheritsWpfDependencyObject: true);
+
+        ObservationCodeGenerator.GenerateShallowPathObservation(sb, path, boundType, false);
+
+        await Assert.That(sb.ToString()).Contains($"{InheritedPropertyName}Property");
+    }
+
     /// <summary>Verifies GenerateShallowPathObservation with no interface generates Observable.Return.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
