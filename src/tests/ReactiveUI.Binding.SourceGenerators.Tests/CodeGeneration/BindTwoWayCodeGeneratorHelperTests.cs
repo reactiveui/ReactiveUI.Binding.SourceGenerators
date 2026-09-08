@@ -350,10 +350,14 @@ public class BindTwoWayCodeGeneratorHelperTests
         await Assert.That(result).Contains("scheduler");
     }
 
-    /// <summary>Verifies GenerateBindTwoWayMethod generates Skip(1) on target observable.</summary>
+    /// <summary>
+    /// The target's first value is weighed rather than dropped by position, and both directions are routed.
+    /// Dropping the first value positionally eats a real change wherever the target reports nothing to begin
+    /// with, and routing only the source direction leaves the write back running wherever the view raised it.
+    /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateBindTwoWayMethod_AlwaysGeneratesSkipOne()
+    public async Task GenerateBindTwoWayMethod_RoutesBothDirectionsAndWeighsTheTargetsFirstValue()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(isTwoWay: true, methodName: BindTwoWayName);
@@ -366,7 +370,9 @@ public class BindTwoWayCodeGeneratorHelperTests
         BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(sb, inv, sourceClassInfo, targetClassInfo, TEST00000000TESTName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("Skip");
+        await Assert.That(result).DoesNotContain("Skip");
+        await Assert.That(result).Contains("targetThreadObs");
+        await Assert.That(result).Contains("sourceThreadObs");
     }
 
     /// <summary>Verifies AppendExtraParameters appends conversion parameters with correct types.</summary>

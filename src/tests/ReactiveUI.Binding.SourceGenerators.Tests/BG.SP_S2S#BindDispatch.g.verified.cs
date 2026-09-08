@@ -83,34 +83,38 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::SharedScenarios.Bind.SinglePropertyStringToString.MyView)__o).NameText,
                 false,
                 true);
-            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(vmObs);
 
-            var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
+            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(vmObs, v => new global::ReactiveUI.Binding.BindingChange(v, true));
+            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(viewObs, v => new global::ReactiveUI.Binding.BindingChange(v, false));
+            var __sides = new global::ReactiveUI.Primitives.Advanced.MergeSignal<global::ReactiveUI.Binding.BindingChange>(__vmTagged, __viewTagged);
+            var __routed = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(__sides);
+            var changed = new global::ReactiveUI.Binding.Observables.AppliedChangeObservable();
+
+            var disposable = global::ReactiveUI.Binding.BindingErrors.Subscribe(__routed, __change =>
             {
-                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.NameText, value))
+                if (__change.FromViewModel)
+                {
+                    var value = (string)__change.Value;
+                    if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.NameText, value))
                 {
                     return;
                 }
 
                 view.NameText = value;
-            }, "x => x.NameText");
-
-            var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(viewObs, 1);
-            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__viewSkipped, value =>
-            {
-                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(viewModel.Name, value))
+                }
+                else
+                {
+                    var value = (string)__change.Value;
+                    if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(viewModel.Name, value))
                 {
                     return;
                 }
 
                 viewModel.Name = value;
-            }, "x => x.Name");
+                }
 
-            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(viewThreadObs, v => new global::ReactiveUI.Binding.BindingChange(v, true));
-            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(__viewSkipped, v => new global::ReactiveUI.Binding.BindingChange(v, false));
-            var changed = new global::ReactiveUI.Primitives.Advanced.MergeSignal<global::ReactiveUI.Binding.BindingChange>(__vmTagged, __viewTagged);
-
-            var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);
+                changed.OnNext(__change);
+            }, "x => x.Name / x => x.NameText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyStringToString.MyView, global::ReactiveUI.Binding.BindingChange>(
                 view,

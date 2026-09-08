@@ -108,8 +108,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 target.CountText = value;
             }, "x => x.CountText");
 
-            var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(targetBind, 1);
-            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__targetSkipped, value =>
+            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetBind, value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(source.Count, value))
                 {

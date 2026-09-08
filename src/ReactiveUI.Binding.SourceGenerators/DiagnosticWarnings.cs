@@ -38,6 +38,16 @@ internal static class DiagnosticWarnings
         true,
         NoObservablePropertiesDescription);
 
+    /// <summary>RXUIBIND010: A type in the middle of an observed path raises no notification.</summary>
+    internal static readonly DiagnosticDescriptor SilentPathLink = new(
+        "RXUIBIND010",
+        "Observed path passes through a type that raises no notification",
+        "Type '{0}' raises no notification, so '{1}' is read once and the observation stops following the path there",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        SilentPathLinkDescription);
+
     /// <summary>RXUIBIND003: Expression contains private/protected member.</summary>
     internal static readonly DiagnosticDescriptor PrivateMember = new(
         "RXUIBIND003",
@@ -158,4 +168,10 @@ internal static class DiagnosticWarnings
     /// <summary>The string description of the invalid interaction type warning.</summary>
     private const string InvalidInteractionTypeDescription =
         "The property selected in the BindInteraction expression must implement IInteraction<TInput, TOutput>.";
+
+    /// <summary>The string description of the silent path link warning.</summary>
+    private const string SilentPathLinkDescription =
+        "A type in the middle of an observed path that raises no notification is read once and never again, "
+        + "so the observation stops following the path at that link and never sees a later value. "
+        + "Give the type a notification mechanism, or observe a path that does not pass through it.";
 }

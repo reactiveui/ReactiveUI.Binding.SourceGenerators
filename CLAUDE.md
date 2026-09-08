@@ -514,6 +514,7 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 | RXUIBIND007 | Warning | BindCommand control has no bindable event |
 | RXUIBIND008 | Warning | Property does not implement IInteraction |
 | RXUIBIND009 | Warning | Generated binding dispatch is out of reach from this file |
+| RXUIBIND010 | Warning | Observed path passes through a type that raises no notification |
 
 ## Code Style & Quality Requirements
 

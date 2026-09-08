@@ -108,7 +108,6 @@ internal static class BindCodeGenerator
 
         var (viewModelVar, viewVar) = BindingEmitterHelpers.EmitDualStreamStages(sb, DispatchApi, inv);
         (viewModelVar, viewVar) = EmitRegistryConversionStages(sb, inv, viewModelVar, viewVar);
-        viewModelVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, viewModelVar, "viewThreadObs");
 
         EmitTwoWaySubscription(sb, inv, viewModelVar, viewVar, viewPropertyAccess, viewModelSetAccess);
     }
@@ -146,36 +145,71 @@ internal static class BindCodeGenerator
     internal static string FormatMethodReturnType(BindingInvocationInfo inv) =>
         $"global::ReactiveUI.Binding.IReactiveBinding<{inv.TargetTypeFullName}, {BindingChange}>";
 
-    /// <summary>Emits the two-way subscription, change-stream merge, and <c>ReactiveBinding</c> return block.</summary>
+    /// <summary>Emits the two-way pipeline and the <c>ReactiveBinding</c> return block.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
-    /// <param name="viewModelVar">The view model observable variable name to subscribe to.</param>
-    /// <param name="viewVar">The view observable variable name to subscribe to.</param>
+    /// <param name="viewModelVar">The view model observable variable name.</param>
+    /// <param name="viewVar">The view observable variable name.</param>
     /// <param name="viewPropertyAccess">The view property setter access chain.</param>
     /// <param name="viewModelSetAccess">The view model property setter access chain.</param>
+    /// <remarks>
+    /// Both directions become one stream, which is then routed once and applied once. Three things follow from
+    /// that, and none of them hold when each direction is wired on its own.
+    /// <para>
+    /// The view model side is merged first, so its value reaches the view before the view's own first value is
+    /// weighed - and the guard, seeing them equal, drops that one. Dropping the view's first value by position
+    /// would eat a real change wherever the view reports nothing to begin with, which a chain through a null
+    /// intermediate does.
+    /// </para>
+    /// <para>
+    /// Routing the merged stream carries the view's read and the view model's write, not just the write to the
+    /// view. Routing one direction leaves the other running wherever its notification was raised.
+    /// </para>
+    /// <para>
+    /// What was applied is published to a subject the caller subscribes to, so a subscriber shares the one
+    /// upstream subscription rather than attaching another set of handlers, and never sees a value the guard
+    /// refused to write.
+    /// </para>
+    /// </remarks>
     private static void EmitTwoWaySubscription(
         StringBuilder sb,
         BindingInvocationInfo inv,
         string viewModelVar,
         string viewVar,
         string viewPropertyAccess,
-        string viewModelSetAccess) => _ = sb.AppendLine().Append("            var d1 = ").Append(BindingErrors).Append(".Subscribe(")
-            .Append(viewModelVar).AppendLine(", value =>").AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(viewPropertyAccess)
-            .AppendLine().Append("            }, \"").Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");")
-            .AppendLine().Append("            var __viewSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(").Append(viewVar)
-            .AppendLine(", 1);").Append("            var d2 = ").Append(BindingErrors).AppendLine(".Subscribe(__viewSkipped, value =>")
-            .AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(viewModelSetAccess).AppendLine().Append("            }, \"")
-            .Append(CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText)).AppendLine("\");").AppendLine()
+        string viewModelSetAccess)
+    {
+        _ = sb.AppendLine()
             .Append("            var __vmTagged = new ").Append(MapSignal).Append('<').Append(inv.TargetPropertyTypeFullName).Append(", ")
             .Append(BindingChange).Append(">(").Append(viewModelVar).Append(", v => new ").Append(BindingChange).AppendLine("(v, true));")
             .Append("            var __viewTagged = new ").Append(MapSignal).Append('<').Append(inv.SourcePropertyTypeFullName).Append(", ")
-            .Append(BindingChange).Append(">(__viewSkipped, v => new ").Append(BindingChange).AppendLine("(v, false));")
-            .Append("            var changed = new ").Append(MergeSignal).Append('<').Append(BindingChange).AppendLine(">(__vmTagged, __viewTagged);")
-            .AppendLine().AppendLine("            var disposable = new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(d1, d2);")
+            .Append(BindingChange).Append(">(").Append(viewVar).Append(", v => new ").Append(BindingChange).AppendLine("(v, false));")
+            .Append("            var __sides = new ").Append(MergeSignal).Append('<').Append(BindingChange).AppendLine(">(__vmTagged, __viewTagged);");
+
+        var routedVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, "__sides", "__routed");
+
+        _ = sb.AppendLine("            var changed = new global::ReactiveUI.Binding.Observables.AppliedChangeObservable();")
+            .AppendLine().Append("            var disposable = ").Append(BindingErrors).Append(".Subscribe(").Append(routedVar).AppendLine(", __change =>")
+            .AppendLine(GeneratedSyntax.StatementBlockOpen)
+            .AppendLine("                if (__change.FromViewModel)")
+            .AppendLine("                {")
+            .Append("                    var value = (").Append(inv.TargetPropertyTypeFullName).AppendLine(")__change.Value;")
+            .Append("                    ").Append(viewPropertyAccess).AppendLine()
+            .AppendLine("                }")
+            .AppendLine("                else")
+            .AppendLine("                {")
+            .Append("                    var value = (").Append(inv.SourcePropertyTypeFullName).AppendLine(")__change.Value;")
+            .Append("                    ").Append(viewModelSetAccess).AppendLine()
+            .AppendLine("                }")
+            .AppendLine()
+            .AppendLine("                changed.OnNext(__change);")
+            .Append("            }, \"").Append(CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText)).Append(" / ")
+            .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");")
             .AppendLine().Append("            return new global::ReactiveUI.Binding.ReactiveBinding<").Append(inv.TargetTypeFullName).Append(", ")
             .Append(BindingChange).AppendLine(">(").AppendLine("                view,").AppendLine("                changed,")
             .AppendLine("                global::ReactiveUI.Binding.BindingDirection.TwoWay,").AppendLine("                disposable);")
             .AppendLine("        }").AppendLine();
+    }
 
     /// <summary>Emits the stages that convert each direction to the type the other side declares.</summary>
     /// <param name="sb">The string builder to append to.</param>

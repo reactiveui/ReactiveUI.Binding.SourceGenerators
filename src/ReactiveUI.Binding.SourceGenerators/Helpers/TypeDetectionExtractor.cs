@@ -83,9 +83,10 @@ internal static class TypeDetectionExtractor
         const int TypicalObservablePropertyCount = 16;
 
         var properties = new List<ObservablePropertyInfo>(TypicalObservablePropertyCount);
-        var members = typeSymbol.GetMembers();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var members = CollectMembersThroughOwnBases(typeSymbol, ct);
 
-        for (var i = 0; i < members.Length; i++)
+        for (var i = 0; i < members.Count; i++)
         {
             ct.ThrowIfCancellationRequested();
             if (members[i] is not IPropertySymbol property)
@@ -93,45 +94,98 @@ internal static class TypeDetectionExtractor
                 continue;
             }
 
-            if (property.IsStatic || property.IsWriteOnly)
+            if (property.IsStatic || property.IsWriteOnly || !seen.Add(property.Name))
             {
                 continue;
             }
 
-            var hasPublicGetter = property.GetMethod!.DeclaredAccessibility == Accessibility.Public;
-            var isIndexer = property.IsIndexer;
-
-            // A mechanism the type carries does not settle how any one property notifies: the dependency
-            // property field and the change event are declared per property, so record both here.
-            var isDependencyProperty = false;
-            var hasChangeEvent = false;
-            var dependencyPropertyName = $"{property.Name}Property";
-            var changeEventName = $"{property.Name}Changed";
-
-            for (var j = 0; j < members.Length; j++)
-            {
-                var member = members[j];
-
-                if (member is IFieldSymbol { IsStatic: true } && member.Name == dependencyPropertyName)
-                {
-                    isDependencyProperty = true;
-                }
-                else if (member is IEventSymbol && member.Name == changeEventName)
-                {
-                    hasChangeEvent = true;
-                }
-            }
+            FindCompanionMembers(members, property.Name, out var isDependencyProperty, out var hasChangeEvent);
 
             properties.Add(new(
                 property.Name,
                 property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                hasPublicGetter,
-                isIndexer,
+                property.GetMethod!.DeclaredAccessibility == Accessibility.Public,
+                property.IsIndexer,
                 isDependencyProperty,
-                hasChangeEvent));
+                hasChangeEvent,
+                SymbolEqualityComparer.Default.Equals(property.ContainingType, typeSymbol)));
         }
 
         return new([.. properties]);
+    }
+
+    /// <summary>Finds the dependency-property field and change event a property notifies through.</summary>
+    /// <param name="members">The members of the type and of the bases its own assembly declares.</param>
+    /// <param name="propertyName">The property being described.</param>
+    /// <param name="isDependencyProperty">Set when a companion <c>{PropertyName}Property</c> field is declared.</param>
+    /// <param name="hasChangeEvent">Set when a companion <c>{PropertyName}Changed</c> event is declared.</param>
+    /// <remarks>
+    /// A mechanism the type carries does not settle how any one property notifies: the dependency property
+    /// field and the change event are declared per property, so both are recorded per property.
+    /// </remarks>
+    private static void FindCompanionMembers(
+        List<ISymbol> members,
+        string propertyName,
+        out bool isDependencyProperty,
+        out bool hasChangeEvent)
+    {
+        isDependencyProperty = false;
+        hasChangeEvent = false;
+
+        var dependencyPropertyName = $"{propertyName}Property";
+        var changeEventName = $"{propertyName}Changed";
+
+        for (var i = 0; i < members.Count; i++)
+        {
+            var member = members[i];
+
+            if (member is IFieldSymbol { IsStatic: true } && member.Name == dependencyPropertyName)
+            {
+                isDependencyProperty = true;
+            }
+            else if (member is IEventSymbol && member.Name == changeEventName)
+            {
+                hasChangeEvent = true;
+            }
+        }
+    }
+
+    /// <summary>Collects the members of a type and of the bases its own assembly declares.</summary>
+    /// <param name="typeSymbol">The type to collect from.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The members, most-derived first.</returns>
+    /// <remarks>
+    /// A property a type inherits is still a property a call site can name, and whether it notifies is settled
+    /// by the base that declares it. Reading only the type's own members leaves every inherited property
+    /// unknown, which the mechanism predicates have to treat as reachable - so a plain property inherited from
+    /// a base with no dependency-property field and no change event would still be observed as though it had
+    /// one.
+    /// <para>
+    /// The walk stops at the assembly boundary. A base the consumer wrote is worth reading and cheap; a
+    /// platform base is neither, and its properties genuinely are backed by the mechanism the type advertises,
+    /// which is what the unknown answer already assumes.
+    /// </para>
+    /// </remarks>
+    private static List<ISymbol> CollectMembersThroughOwnBases(INamedTypeSymbol typeSymbol, CancellationToken ct)
+    {
+        const int TypicalMemberCount = 32;
+
+        var members = new List<ISymbol>(TypicalMemberCount);
+        var assembly = typeSymbol.ContainingAssembly;
+
+        for (var type = typeSymbol; type is not null; type = type.BaseType)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            if (!SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, assembly))
+            {
+                break;
+            }
+
+            members.AddRange(type.GetMembers());
+        }
+
+        return members;
     }
 
     /// <summary>Walks <c>AllInterfaces</c> to detect notification interfaces.</summary>

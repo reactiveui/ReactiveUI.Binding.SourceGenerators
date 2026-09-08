@@ -89,6 +89,7 @@ namespace ReactiveUI.Binding
                 false,
                 true);
             var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
+            var sourceThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(targetObs);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
@@ -100,8 +101,7 @@ namespace ReactiveUI.Binding
                 target.FirstNameText = value;
             }, "x => x.FirstNameText");
 
-            var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(targetObs, 1);
-            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__targetSkipped, value =>
+            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(sourceThreadObs, value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(source.FirstName, value))
                 {
@@ -166,6 +166,7 @@ namespace ReactiveUI.Binding
                 false,
                 true);
             var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
+            var sourceThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(targetObs);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
@@ -177,8 +178,7 @@ namespace ReactiveUI.Binding
                 target.LastNameText = value;
             }, "x => x.LastNameText");
 
-            var __targetSkipped = global::ReactiveUI.Primitives.LinqExtensions.Skip(targetObs, 1);
-            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(__targetSkipped, value =>
+            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(sourceThreadObs, value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(source.LastName, value))
                 {

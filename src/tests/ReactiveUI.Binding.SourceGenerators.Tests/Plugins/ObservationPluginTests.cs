@@ -109,10 +109,13 @@ public class ObservationPluginTests
         await Assert.That(result).Contains("TextProperty");
     }
 
-    /// <summary>Verifies WPF plugin shallow observation before-change emits ImmediateReturnSignal.</summary>
+    /// <summary>
+    /// A dependency property has one change stream and hands it over whatever the caller asked for, so a
+    /// before-change observation keeps tracking rather than reading the property once.
+    /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WpfPlugin_EmitShallowObservation_BeforeChange_EmitsTheUnchangingValue()
+    public async Task WpfPlugin_EmitShallowObservation_BeforeChange_KeepsReportingFromTheLiveStream()
     {
         var plugin = new WpfObservationPlugin();
         var sb = new StringBuilder();
@@ -120,7 +123,9 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, true, true);
 
-        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
+        var result = sb.ToString();
+        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).DoesNotContain(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WPF plugin shallow observation variable emits EventObservable.</summary>
@@ -139,10 +144,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(EventObservableName);
     }
 
-    /// <summary>Verifies WPF plugin shallow observation variable before-change emits ImmediateReturnSignal.</summary>
+    /// <summary>The same holds when the observation is assigned to a local.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WpfPlugin_EmitShallowObservationVariable_BeforeChange_EmitsTheUnchangingValue()
+    public async Task WpfPlugin_EmitShallowObservationVariable_BeforeChange_KeepsReportingFromTheLiveStream()
     {
         var plugin = new WpfObservationPlugin();
         var sb = new StringBuilder();
@@ -150,7 +155,9 @@ public class ObservationPluginTests
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
+        var result = sb.ToString();
+        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).DoesNotContain(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WPF plugin deep chain root segment after-change emits EventObservable.</summary>
@@ -169,10 +176,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(Obs0Declaration);
     }
 
-    /// <summary>Verifies WPF plugin deep chain root segment before-change emits ImmediateReturnSignal.</summary>
+    /// <summary>The chain's first link keeps reporting too, so the links below it keep switching.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WpfPlugin_EmitDeepChainRootSegment_BeforeChange_EmitsTheUnchangingValue()
+    public async Task WpfPlugin_EmitDeepChainRootSegment_BeforeChange_KeepsReportingFromTheLiveStream()
     {
         var plugin = new WpfObservationPlugin();
         var sb = new StringBuilder();
@@ -180,7 +187,9 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
-        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
+        var result = sb.ToString();
+        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).DoesNotContain(UnchangingPropertyObservableName);
     }
 
     /// <summary>Verifies WPF plugin deep chain inner segment after-change emits EventObservable with Switch.</summary>
@@ -199,10 +208,10 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(SwitchName);
     }
 
-    /// <summary>Verifies WPF plugin deep chain inner segment before-change emits ImmediateReturnSignal.</summary>
+    /// <summary>An inner link keeps reporting as well, so a change below the root is still seen.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WpfPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WpfPlugin_EmitDeepChainInnerSegment_BeforeChange_KeepsReportingFromTheLiveStream()
     {
         var plugin = new WpfObservationPlugin();
         var sb = new StringBuilder();
@@ -210,7 +219,9 @@ public class ObservationPluginTests
 
         plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        var result = sb.ToString();
+        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).Contains(SwitchName);
     }
 
     /// <summary>A WPF inner segment that is not the leaf pushes the leaf's default value down the chain.</summary>

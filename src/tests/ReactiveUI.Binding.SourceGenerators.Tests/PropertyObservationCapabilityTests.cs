@@ -113,6 +113,52 @@ public class PropertyObservationCapabilityTests
                                                              }
                                                              """;
 
+    /// <summary>A dependency object inheriting a plain CLR property from a base the consumer wrote.</summary>
+    private const string InheritedClrPropertySource = """
+                                                      using System;
+                                                      using ReactiveUI.Binding;
+
+                                                      namespace System.Windows
+                                                      {
+                                                          public class DependencyObject { }
+                                                      }
+
+                                                      namespace Consumer
+                                                      {
+                                                          public class BaseControl : System.Windows.DependencyObject
+                                                          {
+                                                              public string Caption { get; set; }
+                                                          }
+
+                                                          public class DerivedControl : BaseControl
+                                                          {
+                                                          }
+
+                                                          public static class Usage
+                                                          {
+                                                              public static IObservable<string> Observe(DerivedControl control)
+                                                              {
+                                                                  return control.WhenChanged(x => x.Caption);
+                                                              }
+                                                          }
+                                                      }
+                                                      """;
+
+    /// <summary>
+    /// A plain property inherited from a base the consumer wrote does not take the dependency-property path.
+    /// The base is readable, so whether the property has a companion field is a question with an answer, and
+    /// emitting the field name anyway names one that was never declared.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task WhenChanged_OnAnInheritedClrProperty_DoesNotTakeTheDependencyPropertyPath()
+    {
+        var result = TestHelper.RunGenerator(InheritedClrPropertySource, LanguageVersion.CSharp10);
+
+        await result.CompilationSucceeds();
+        await result.GeneratedSourceDoesNotContain("WhenChangedDispatch.g.cs", "CaptionProperty");
+    }
+
     /// <summary>
     /// An inherited property stays observable. The observed type lists only what it declares, so a property it
     /// inherits is unknown to that list rather than absent from the mechanism, and withdrawing observation over

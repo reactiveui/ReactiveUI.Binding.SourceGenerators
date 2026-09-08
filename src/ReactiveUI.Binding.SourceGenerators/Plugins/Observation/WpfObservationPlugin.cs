@@ -60,6 +60,15 @@ internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin, IObse
     public bool RequiresHelperClasses => false;
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// A dependency property has one change stream and hands it over whatever the caller asked for, so a
+    /// before-change observation keeps tracking the property and receives each value once it has settled. It
+    /// does not withdraw the mechanism the way a component's change event does, and reading the property once
+    /// instead would leave the observation silent for every change after the first.
+    /// </remarks>
+    protected override bool AnswersBeforeChangeWithLiveStream => true;
+
+    /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.InheritsWpfDependencyObject;

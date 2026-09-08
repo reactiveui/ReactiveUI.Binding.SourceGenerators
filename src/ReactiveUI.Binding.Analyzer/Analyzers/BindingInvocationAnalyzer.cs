@@ -15,12 +15,15 @@ namespace ReactiveUI.Binding.Analyzer.Analyzers;
 /// <summary>
 /// Analyzes binding and observation invocations (WhenChanged, WhenChanging, BindOneWay, BindTwoWay,
 /// OneWayBind, Bind, BindTo, BindCommand, BindInteraction) for common issues. The generic lambda checks
-/// (RXUIBIND001/003/006) apply to every recognized extension method; the remaining checks are
+/// (RXUIBIND001/003/006/010) apply to every recognized extension method; the remaining checks are
 /// method-specific (RXUIBIND004, RXUIBIND005, RXUIBIND007, RXUIBIND008).
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class BindingInvocationAnalyzer : DiagnosticAnalyzer
 {
+    /// <summary>The parameter type a property path arrives as, which marks it out from the other arguments.</summary>
+    private const string ExpressionParameterTypePrefix = "System.Linq.Expressions.Expression<";
+
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(
@@ -30,7 +33,8 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             DiagnosticWarnings.ValidationNotGenerated,
             DiagnosticWarnings.UnsupportedPathSegment,
             DiagnosticWarnings.NoBindableEvent,
-            DiagnosticWarnings.InvalidInteractionType);
+            DiagnosticWarnings.InvalidInteractionType,
+            DiagnosticWarnings.SilentPathLink);
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
@@ -64,6 +68,9 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
 
         // Check RXUIBIND006: Unsupported path segments (indexer, field, method call)
         CheckUnsupportedPathSegment(context, arguments);
+
+        // Check RXUIBIND010: A link in the middle of the path that raises no notification
+        CheckSilentPathLink(context, arguments);
 
         // Check RXUIBIND004: Before-change support
         if (methodName == Constants.WhenChangingMethodName)
@@ -112,7 +119,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             var parameterType = arg.Parameter!.Type;
 
             var typeDisplay = parameterType.ToDisplayString();
-            if (!typeDisplay.StartsWith("System.Linq.Expressions.Expression<", StringComparison.Ordinal))
+            if (!typeDisplay.StartsWith(ExpressionParameterTypePrefix, StringComparison.Ordinal))
             {
                 continue;
             }
@@ -379,7 +386,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             var parameterType = arg.Parameter!.Type;
 
             var typeDisplay = parameterType.ToDisplayString();
-            if (!typeDisplay.StartsWith("System.Linq.Expressions.Expression<", StringComparison.Ordinal))
+            if (!typeDisplay.StartsWith(ExpressionParameterTypePrefix, StringComparison.Ordinal))
             {
                 continue;
             }
@@ -397,6 +404,35 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             }
 
             WalkForUnsupportedSegments(context, body);
+        }
+    }
+
+    /// <summary>Checks for RXUIBIND010: an observed path passing through a type that raises no notification.</summary>
+    /// <param name="context">The operation analysis context.</param>
+    /// <param name="arguments">The invocation arguments to inspect.</param>
+    /// <remarks>
+    /// Only links past the first are reported. The type the call site is made on is already answered for by the
+    /// warning on the type itself, whereas a type reached part way along a path is never named at the call site
+    /// and is where an observation silently stops following.
+    /// </remarks>
+    internal static void CheckSilentPathLink(
+        in OperationAnalysisContext context,
+        ImmutableArray<IArgumentOperation> arguments)
+    {
+        for (var i = 0; i < arguments.Length; i++)
+        {
+            if (!IsExpressionArgument(arguments[i], out var lambda))
+            {
+                continue;
+            }
+
+            var body = GetLambdaBody(lambda!);
+            if (body is null)
+            {
+                continue;
+            }
+
+            ReportSilentLinks(context, body);
         }
     }
 
@@ -463,6 +499,57 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     internal static ExpressionSyntax? GetLambdaBody(LambdaExpressionSyntax lambda) =>
         lambda.Body as ExpressionSyntax;
+
+    /// <summary>Reports every link past the first whose declaring type raises no notification.</summary>
+    /// <param name="context">The operation analysis context.</param>
+    /// <param name="body">The lambda body naming the observed path.</param>
+    private static void ReportSilentLinks(in OperationAnalysisContext context, ExpressionSyntax body)
+    {
+        var model = context.Operation.SemanticModel!;
+
+        // The path is written outermost-first, so walking down it reaches the root last. Every access whose
+        // own receiver is itself an access is a link past the first.
+        for (var current = body as MemberAccessExpressionSyntax;
+            current is not null;
+            current = current.Expression as MemberAccessExpressionSyntax)
+        {
+            if (current.Expression is not MemberAccessExpressionSyntax parent)
+            {
+                continue;
+            }
+
+            if (model.GetSymbolInfo(parent, context.CancellationToken).Symbol
+                is not IPropertySymbol { Type: INamedTypeSymbol linkType })
+            {
+                continue;
+            }
+
+            if (TypeAnalyzer.HasObservableMechanism(linkType, context.Compilation))
+            {
+                continue;
+            }
+
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    DiagnosticWarnings.SilentPathLink,
+                    parent.GetLocation(),
+                    linkType.Name,
+                    parent.ToString()));
+        }
+    }
+
+    /// <summary>Determines whether an argument is an inline lambda passed as an expression tree.</summary>
+    /// <param name="argument">The argument to inspect.</param>
+    /// <param name="lambda">The lambda, when the argument is one.</param>
+    /// <returns><see langword="true"/> when the argument is an expression-tree lambda.</returns>
+    private static bool IsExpressionArgument(IArgumentOperation argument, out LambdaExpressionSyntax? lambda)
+    {
+        lambda = null;
+
+        return argument.Parameter!.Type.ToDisplayString()
+                .StartsWith(ExpressionParameterTypePrefix, StringComparison.Ordinal)
+            && (lambda = argument.Value.Syntax as LambdaExpressionSyntax) is not null;
+    }
 
     /// <summary>Determines whether a non-empty constant <c>toEvent</c> argument was explicitly supplied.</summary>
     /// <param name="arguments">The invocation arguments to inspect.</param>
