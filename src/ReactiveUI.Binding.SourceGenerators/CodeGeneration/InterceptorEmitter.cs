@@ -137,6 +137,28 @@ internal static class InterceptorEmitter
         _ = sb.Append("            ").Append(selectorType).AppendLine(" selector)");
     }
 
+    /// <summary>Closes a parameter list whose last entry was written expecting another to follow.</summary>
+    /// <param name="builder">The builder whose trailing separator becomes the closing parenthesis.</param>
+    /// <remarks>
+    /// The parameter writers are shared with the dispatch overloads, which always have the caller-info
+    /// parameters coming after, so each entry ends in a separator. An interceptor takes none of those, so the
+    /// last separator written is the one that has to close the list instead.
+    /// </remarks>
+    internal static void CloseParameterList(StringBuilder builder)
+    {
+        for (var i = builder.Length - 1; i >= 0; i--)
+        {
+            if (builder[i] != ',')
+            {
+                continue;
+            }
+
+            builder.Length = i;
+            _ = builder.AppendLine(")");
+            return;
+        }
+    }
+
     /// <summary>Gathers the call sites of a group under the body each of them reaches.</summary>
     /// <param name="group">The type group whose call sites are being gathered.</param>
     /// <param name="suffixOf">Names the body a call site reaches.</param>

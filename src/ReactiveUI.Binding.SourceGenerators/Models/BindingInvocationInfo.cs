@@ -24,6 +24,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="SourceExpressionText">The original expression text of the source lambda argument.</param>
 /// <param name="TargetExpressionText">The original expression text of the target lambda argument.</param>
 /// <param name="HasConverterOverride">Whether the invocation uses an explicit <c>IBindingTypeConverter</c> parameter.</param>
+/// <param name="Interceptor">
+/// Where this call site is, for a build that claims call sites outright rather than competing for them.
+/// </param>
 internal sealed record BindingInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -39,4 +42,5 @@ internal sealed record BindingInvocationInfo(
     string MethodName,
     string SourceExpressionText,
     string TargetExpressionText,
-    bool HasConverterOverride);
+    bool HasConverterOverride,
+    InterceptorLocation Interceptor = default);

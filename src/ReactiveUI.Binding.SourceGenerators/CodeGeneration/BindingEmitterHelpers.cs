@@ -547,6 +547,83 @@ internal static class BindingEmitterHelpers
         CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
     }
 
+    /// <summary>Emits whichever of the two ways this group's call sites are reached.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group.</param>
+    /// <param name="api">What distinguishes this API's output from the other three.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    /// <remarks>
+    /// The four APIs choose between the same two shapes on the same condition, so the choice is made here
+    /// rather than repeated at each of their four call sites.
+    /// </remarks>
+    internal static void EmitOverloadOrInterceptors(
+        StringBuilder sb,
+        BindingTypeGroup group,
+        BindingDispatchApi api,
+        in LanguageFeatures features)
+    {
+        if (features.SupportsInterceptors)
+        {
+            GenerateInterceptors(sb, group, api, features.SupportsNullable);
+            return;
+        }
+
+        GenerateDispatchOverload(
+            sb,
+            group,
+            api,
+            features.SupportsCallerArgExpr,
+            features.SupportsNullable,
+            features.StubHasExpressionParameters);
+    }
+
+    /// <summary>Emits one interceptor per generated worker, claiming every call site that reaches it.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group.</param>
+    /// <param name="api">What distinguishes this API's output from the other three.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <remarks>
+    /// The signature is the overload's without the dispatch parameters: an interceptor is reached by name
+    /// rather than matched, so it takes only what the call site passes and forwards straight to the worker.
+    /// </remarks>
+    internal static void GenerateInterceptors(
+        StringBuilder sb,
+        BindingTypeGroup group,
+        BindingDispatchApi api,
+        bool supportsNullable)
+    {
+        var first = group.Invocations[0];
+        var sourceLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.SourcePropertyPath, supportsNullable);
+        var targetLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.TargetPropertyPath, supportsNullable);
+        var extraArguments = api.FormatExtraArguments(group);
+
+        foreach (var entry in GroupCallSitesByWorker(group))
+        {
+            foreach (var callSite in entry.Value)
+            {
+                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, "        ");
+            }
+
+            _ = sb.Append("        internal static ").Append(api.FormatReturnType(group)).Append(" __Intercept_")
+                .Append(api.Name).Append('_').Append(entry.Key).AppendLine("(")
+                .Append("            ").Append(api.ReceiverIsTarget ? group.TargetTypeFullName : group.SourceTypeFullName)
+                .Append(' ').Append(api.ReceiverParameterName).AppendLine(",")
+                .Append(CodeGeneratorHelpers.ParameterIndent)
+                .Append(api.ReceiverIsTarget ? group.SourceTypeFullName : group.TargetTypeFullName)
+                .Append(' ').Append(api.OtherParameterName).AppendLine(",")
+                .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.SourceTypeFullName).Append(", ").Append(sourceLeaf)
+                .Append(">> ").Append(api.SourceSelectorName).AppendLine(",")
+                .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.TargetTypeFullName).Append(", ").Append(targetLeaf)
+                .Append(">> ").Append(api.TargetSelectorName).AppendLine(",");
+
+            api.AppendExtraParameters(sb, group);
+            InterceptorEmitter.CloseParameterList(sb);
+
+            _ = sb.Append("            => ").Append(api.WorkerMethodPrefix).Append(entry.Key).Append('(')
+                .Append(api.WorkerArguments).Append(extraArguments).AppendLine(");").AppendLine();
+        }
+    }
+
     /// <summary>Emits the head of a generated worker: its signature, the path it binds, and the hook guard.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="api">What distinguishes this API's worker from the other three.</param>
@@ -632,6 +709,37 @@ internal static class BindingEmitterHelpers
         }
 
         return new(sourceVar, targetVar);
+    }
+
+    /// <summary>Gathers the call sites of a group under the worker each of them reaches.</summary>
+    /// <param name="group">The binding type group whose call sites are being gathered.</param>
+    /// <returns>Each generated worker, against every call site that resolves to it.</returns>
+    /// <remarks>
+    /// A call site the compiler declined to describe is left out: nothing can claim it, and it keeps whatever
+    /// the call already resolved to.
+    /// </remarks>
+    private static Dictionary<string, List<BindingInvocationInfo>> GroupCallSitesByWorker(BindingTypeGroup group)
+    {
+        var claimed = new Dictionary<string, List<BindingInvocationInfo>>(StringComparer.Ordinal);
+        for (var i = 0; i < group.Invocations.Length; i++)
+        {
+            var inv = group.Invocations[i];
+            if (!inv.Interceptor.IsAvailable)
+            {
+                continue;
+            }
+
+            var suffix = BindingMethodSuffix(inv);
+            if (!claimed.TryGetValue(suffix, out var callSites))
+            {
+                callSites = [];
+                claimed[suffix] = callSites;
+            }
+
+            callSites.Add(inv);
+        }
+
+        return claimed;
     }
 
     /// <summary>Finds the type a view declares its view model property as.</summary>
