@@ -2,7 +2,9 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+#if NET8_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
@@ -30,6 +32,9 @@ namespace RxUiDynamicChain;
 [MemoryDiagnoser]
 [EventPipeProfiler(EventPipeProfile.GcVerbose)]
 [MarkdownExporterAttribute.GitHub]
+#if NET8_0_OR_GREATER
+[RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+#endif
 public class RxUiDynamicChainBaseline
 {
     /// <summary>Represents the number of property change events to be triggered during the benchmark tests.</summary>
@@ -75,7 +80,6 @@ public class RxUiDynamicChainBaseline
         _vm = new() { Name = "Initial", Age = 0, Child = new() { Value = "ChildInitial" } };
 
     /// <summary>One chain: subscribe, fire N changes, dispose.</summary>
-    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     [Benchmark(Description = "Single Chain")]
     public void SingleChain()
     {
@@ -90,7 +94,6 @@ public class RxUiDynamicChainBaseline
     }
 
     /// <summary>Two chains combined: subscribe, fire N changes on each, dispose.</summary>
-    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     [Benchmark(Description = "Two Chains")]
     public void TwoChains()
     {
@@ -106,7 +109,6 @@ public class RxUiDynamicChainBaseline
     }
 
     /// <summary>A chain through an intermediate: subscribe, fire N changes on the leaf, dispose.</summary>
-    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     [Benchmark(Description = "Deep Chain")]
     public void DeepChain()
     {
@@ -122,7 +124,6 @@ public class RxUiDynamicChainBaseline
 
     /// <summary>Cold start: subscribe, read the initial value, dispose. No property changes.</summary>
     /// <returns>The observed value.</returns>
-    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     [Benchmark(Description = "First Observation")]
     public object? FirstObservation()
     {

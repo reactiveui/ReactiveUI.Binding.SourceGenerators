@@ -2,7 +2,9 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+#if NET8_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
@@ -19,7 +21,7 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// </summary>
 /// <remarks>
 /// No NativeAOT job: these overloads walk members by reflection and say so with
-/// <see cref="RequiresUnreferencedCodeAttribute"/>, so an ahead-of-time published run is not a
+/// <c>RequiresUnreferencedCode</c>, so an ahead-of-time published run is not a
 /// configuration they support.
 /// </remarks>
 [SimpleJob(RuntimeMoniker.Net80)]
@@ -27,6 +29,9 @@ namespace ReactiveUI.Binding.Benchmarks;
 [MemoryDiagnoser]
 [EventPipeProfiler(EventPipeProfile.GcVerbose)]
 [MarkdownExporterAttribute.GitHub]
+#if NET8_0_OR_GREATER
+[RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
+#endif
 public class WhenAnyDynamicBenchmark
 {
     /// <summary>Represents the number of property change events to be triggered during the benchmark tests.</summary>
@@ -59,7 +64,6 @@ public class WhenAnyDynamicBenchmark
         _vm = new() { Name = "Initial", Age = 0, Child = new() { Value = "ChildInitial" } };
 
     /// <summary>One chain: subscribe, fire N changes, dispose.</summary>
-    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     [Benchmark(Description = "Single Chain")]
     public void SingleChain()
     {
@@ -74,7 +78,6 @@ public class WhenAnyDynamicBenchmark
     }
 
     /// <summary>Two chains combined: subscribe, fire N changes on each, dispose.</summary>
-    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     [Benchmark(Description = "Two Chains")]
     public void TwoChains()
     {
@@ -90,7 +93,6 @@ public class WhenAnyDynamicBenchmark
     }
 
     /// <summary>A chain through an intermediate: subscribe, fire N changes on the leaf, dispose.</summary>
-    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     [Benchmark(Description = "Deep Chain")]
     public void DeepChain()
     {
@@ -106,7 +108,6 @@ public class WhenAnyDynamicBenchmark
 
     /// <summary>Cold start: subscribe, read the initial value, dispose. No property changes.</summary>
     /// <returns>The observed value.</returns>
-    [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
     [Benchmark(Description = "First Observation")]
     public object? FirstObservation()
     {
