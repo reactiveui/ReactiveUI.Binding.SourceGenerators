@@ -31,6 +31,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="HasCommandProperty">Whether the control type has a settable Command property (ICommand).</param>
 /// <param name="HasCommandParameterProperty">Whether the control type has a settable CommandParameter property.</param>
 /// <param name="HasEnabledProperty">Whether the control type has a settable Enabled property (bool).</param>
+/// <param name="Interceptor">
+/// Where this call site is, for a build that claims call sites outright rather than competing for them.
+/// </param>
 internal sealed record BindCommandInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -53,4 +56,5 @@ internal sealed record BindCommandInvocationInfo(
     string? ParameterExpressionText,
     bool HasCommandProperty,
     bool HasCommandParameterProperty,
-    bool HasEnabledProperty);
+    bool HasEnabledProperty,
+    InterceptorLocation Interceptor = default);

@@ -335,12 +335,20 @@ internal static class WhenAnyObservableCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features)
     {
-        GenerateConcreteOverload(
-            sb,
-            group,
-            features.SupportsCallerArgExpr,
-            features.SupportsNullable,
-            features.StubHasExpressionParameters);
+        if (features.SupportsInterceptors)
+        {
+            GenerateInterceptors(sb, group, features.SupportsNullable);
+        }
+        else
+        {
+            GenerateConcreteOverload(
+                sb,
+                group,
+                features.SupportsCallerArgExpr,
+                features.SupportsNullable,
+                features.StubHasExpressionParameters);
+        }
+
         _ = sb.AppendLine();
 
         for (var i = 0; i < group.Invocations.Length; i++)
@@ -351,6 +359,49 @@ internal static class WhenAnyObservableCodeGenerator
                 inv,
                 CodeGeneratorHelpers.ResolveObservedTypeInfo(allClasses, inv.SourceTypeFullName, inv.PropertyPaths[0]),
                 ObservationMethodSuffix(inv));
+        }
+    }
+
+    /// <summary>Emits one interceptor per generated observation, claiming every call site that reaches it.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The group of call sites being claimed.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    private static void GenerateInterceptors(StringBuilder sb, TypeGroup group, bool supportsNullable)
+    {
+        foreach (var entry in InterceptorEmitter.GroupCallSites(
+            group.Invocations,
+            static x => x.Interceptor,
+            ObservationMethodSuffix))
+        {
+            var first = entry.Value[0];
+            var propCount = first.PropertyPaths.Length;
+
+            foreach (var callSite in entry.Value)
+            {
+                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, "        ");
+            }
+
+            _ = sb.Append("        internal static global::System.IObservable<").Append(first.ReturnTypeFullName)
+                .Append("> __Intercept_WhenAnyObservable_").Append(entry.Key).AppendLine("(")
+                .Append("            ").Append(first.SourceTypeFullName).AppendLine(" objectToMonitor,");
+
+            for (var i = 0; i < propCount; i++)
+            {
+                var innerType = first.InnerObservableTypeFullNames[i];
+                var obsType = $"global::System.IObservable<{innerType}>{(supportsNullable ? "?" : string.Empty)}";
+                _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<")
+                    .Append(first.SourceTypeFullName).Append(", ").Append(obsType).Append(">> obs").Append(i + 1).AppendLine(",");
+            }
+
+            if (first.HasSelector)
+            {
+                _ = sb.Append("            ").Append(GetSelectorType(first)).AppendLine(" selector,");
+            }
+
+            InterceptorEmitter.CloseParameterList(sb);
+
+            _ = sb.Append("            => __WhenAnyObservable_").Append(entry.Key).Append("(objectToMonitor")
+                .Append(first.HasSelector ? ", selector" : string.Empty).AppendLine(");").AppendLine();
         }
     }
 

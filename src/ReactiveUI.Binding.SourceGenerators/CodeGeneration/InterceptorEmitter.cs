@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
@@ -19,6 +20,9 @@ namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 /// </remarks>
 internal static class InterceptorEmitter
 {
+    /// <summary>The indentation a member of the generated class is written at.</summary>
+    internal const string MemberIndent = "        ";
+
     /// <summary>The attribute a generated method carries to claim a call site.</summary>
     private const string AttributeName = "global::System.Runtime.CompilerServices.InterceptsLocation";
 
@@ -95,7 +99,7 @@ internal static class InterceptorEmitter
 
             foreach (var callSite in entry.Value)
             {
-                AppendAttribute(builder, callSite.Interceptor, "        ");
+                AppendAttribute(builder, callSite.Interceptor, MemberIndent);
             }
 
             _ = builder.Append("        internal static global::System.IObservable<").Append(first.ReturnTypeFullName)
@@ -159,6 +163,44 @@ internal static class InterceptorEmitter
         }
     }
 
+    /// <summary>Gathers call sites under the generated method each of them reaches.</summary>
+    /// <typeparam name="T">The per-call-site model this API extracts.</typeparam>
+    /// <param name="invocations">The call sites of one group.</param>
+    /// <param name="locationOf">Reads where a call site is.</param>
+    /// <param name="suffixOf">Names the generated method a call site reaches.</param>
+    /// <returns>Each generated method, against every call site that resolves to it.</returns>
+    /// <remarks>
+    /// Every API claims its call sites the same way, so the gathering is written once over whatever model the
+    /// API happens to carry. A call site the compiler declined to describe is left out: nothing can claim it,
+    /// and it keeps whatever the call already resolved to.
+    /// </remarks>
+    internal static Dictionary<string, List<T>> GroupCallSites<T>(
+        IReadOnlyList<T> invocations,
+        Func<T, InterceptorLocation> locationOf,
+        Func<T, string> suffixOf)
+    {
+        var claimed = new Dictionary<string, List<T>>(StringComparer.Ordinal);
+        for (var i = 0; i < invocations.Count; i++)
+        {
+            var invocation = invocations[i];
+            if (!locationOf(invocation).IsAvailable)
+            {
+                continue;
+            }
+
+            var suffix = suffixOf(invocation);
+            if (!claimed.TryGetValue(suffix, out var callSites))
+            {
+                callSites = [];
+                claimed[suffix] = callSites;
+            }
+
+            callSites.Add(invocation);
+        }
+
+        return claimed;
+    }
+
     /// <summary>Gathers the call sites of a group under the body each of them reaches.</summary>
     /// <param name="group">The type group whose call sites are being gathered.</param>
     /// <param name="suffixOf">Names the body a call site reaches.</param>
@@ -167,29 +209,9 @@ internal static class InterceptorEmitter
     /// A call site the compiler declined to describe is left out: nothing can claim it, and it keeps whatever
     /// the call already resolved to.
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Dictionary<string, List<InvocationInfo>> GroupCallSitesByBody(
         ObservationCodeGenerator.TypeGroup group,
-        Func<InvocationInfo, string> suffixOf)
-    {
-        var claimed = new Dictionary<string, List<InvocationInfo>>(StringComparer.Ordinal);
-        for (var i = 0; i < group.Invocations.Length; i++)
-        {
-            var inv = group.Invocations[i];
-            if (!inv.Interceptor.IsAvailable)
-            {
-                continue;
-            }
-
-            var suffix = suffixOf(inv);
-            if (!claimed.TryGetValue(suffix, out var callSites))
-            {
-                callSites = [];
-                claimed[suffix] = callSites;
-            }
-
-            callSites.Add(inv);
-        }
-
-        return claimed;
-    }
+        Func<InvocationInfo, string> suffixOf) =>
+        GroupCallSites(group.Invocations, static x => x.Interceptor, suffixOf);
 }

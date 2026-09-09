@@ -235,17 +235,54 @@ internal static class BindInteractionCodeGenerator
         BindInteractionTypeGroup group,
         string dispatchSummaryLine)
     {
+        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindInteraction on ")
+            .Append(group.ViewTypeFullName).AppendLine(".").AppendLine(dispatchSummaryLine)
+            .AppendLine("        /// </summary>").AppendLine("        public static global::System.IDisposable BindInteraction(");
+
+        AppendInteractionParameters(sb, group, true);
+    }
+
+    /// <summary>Appends the view, view model, selector and handler parameters every generated BindInteraction member declares.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The BindInteraction type group whose types the parameters are written from.</param>
+    /// <param name="isExtensionMethod">Whether the view parameter is the extension receiver.</param>
+    private static void AppendInteractionParameters(
+        StringBuilder sb,
+        BindInteractionTypeGroup group,
+        bool isExtensionMethod)
+    {
         var handlerType = group.IsTaskHandler
             ? $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.Threading.Tasks.Task>"
             : $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.IObservable<{group.DontCareTypeFullName}>>";
 
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindInteraction on ")
-            .Append(group.ViewTypeFullName).AppendLine(".").AppendLine(dispatchSummaryLine)
-            .AppendLine("        /// </summary>").AppendLine("        public static global::System.IDisposable BindInteraction(")
-            .Append("            this ").Append(group.ViewTypeFullName).AppendLine(" view,").Append("            ").Append(group.ViewModelTypeFullName)
-            .AppendLine(ViewModelParameterSuffix).Append("            ").Append(Expression).Append('<').Append(Func).Append('<').Append(group.ViewModelTypeFullName)
-            .Append(", ").Append(IInteraction).Append('<').Append(group.InputTypeFullName).Append(", ").Append(group.OutputTypeFullName)
-            .AppendLine(">>> propertyName,").Append("            ").Append(handlerType).AppendLine(" handler,");
+        _ = sb.Append(isExtensionMethod ? "            this " : CodeGeneratorHelpers.ParameterIndent).Append(group.ViewTypeFullName)
+            .AppendLine(ViewParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent).Append(group.ViewModelTypeFullName)
+            .AppendLine(ViewModelParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent).Append(Expression).Append('<').Append(Func).Append('<')
+            .Append(group.ViewModelTypeFullName).Append(", ").Append(IInteraction).Append('<').Append(group.InputTypeFullName).Append(", ")
+            .Append(group.OutputTypeFullName).AppendLine(">>> propertyName,").Append(CodeGeneratorHelpers.ParameterIndent).Append(handlerType)
+            .AppendLine(" handler,");
+    }
+
+    /// <summary>Emits one interceptor per generated binding, claiming every call site that reaches it.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The group of call sites being claimed.</param>
+    private static void GenerateInterceptors(StringBuilder sb, BindInteractionTypeGroup group)
+    {
+        foreach (var entry in InterceptorEmitter.GroupCallSites(group.Invocations, static x => x.Interceptor, MethodSuffix))
+        {
+            foreach (var callSite in entry.Value)
+            {
+                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, InterceptorEmitter.MemberIndent);
+            }
+
+            _ = sb.Append("        internal static global::System.IDisposable __Intercept_BindInteraction_").Append(entry.Key).AppendLine("(");
+
+            AppendInteractionParameters(sb, group, false);
+            InterceptorEmitter.CloseParameterList(sb);
+
+            _ = sb.Append("            => ").Append(WorkerMethodPrefix).Append(entry.Key).Append('(').Append(WorkerArguments)
+                .AppendLine(");").AppendLine();
+        }
     }
 
     /// <summary>Emits the overload and the workers for one group of call sites.</summary>
@@ -268,7 +305,15 @@ internal static class BindInteractionCodeGenerator
             }
             : group;
 
-        GenerateConcreteOverload(sb, collapsed, features.SupportsCallerArgExpr, features.StubHasExpressionParameters);
+        if (features.SupportsInterceptors)
+        {
+            GenerateInterceptors(sb, collapsed);
+        }
+        else
+        {
+            GenerateConcreteOverload(sb, collapsed, features.SupportsCallerArgExpr, features.StubHasExpressionParameters);
+        }
+
         _ = sb.AppendLine();
 
         for (var i = 0; i < collapsed.Invocations.Length; i++)

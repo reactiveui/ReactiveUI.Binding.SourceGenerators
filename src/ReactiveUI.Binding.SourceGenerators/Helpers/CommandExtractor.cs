@@ -66,9 +66,6 @@ internal static class CommandExtractor
             return null;
         }
 
-        var commandTypeFullName = commandPropertyPath[^1].PropertyTypeFullName;
-        var controlTypeFullName = controlPropertyPath[^1].PropertyTypeFullName;
-
         // Determine parameter overload (Expression vs IObservable withParameter)
         var parameterOverload = DetectParameterOverload(methodSymbol, args, semanticModel, ct);
 
@@ -82,8 +79,8 @@ internal static class CommandExtractor
             viewModelTypeFullName,
             new(commandPropertyPath),
             new(controlPropertyPath),
-            commandTypeFullName,
-            controlTypeFullName,
+            commandPropertyPath[^1].PropertyTypeFullName,
+            controlPropertyPath[^1].PropertyTypeFullName,
             parameterOverload.HasObservableParameter,
             parameterOverload.HasExpressionParameter,
             parameterOverload.ParameterTypeFullName,
@@ -97,7 +94,8 @@ internal static class CommandExtractor
             parameterOverload.ParameterExpressionText,
             capabilities.HasCommand,
             capabilities.HasCommandParameter,
-            capabilities.HasEnabled);
+            capabilities.HasEnabled,
+            InterceptableLocationReader.Read(semanticModel, invocation, ct));
     }
 
     /// <summary>Searches invocation arguments for a valid <c>withParameter</c> lambda expression.</summary>

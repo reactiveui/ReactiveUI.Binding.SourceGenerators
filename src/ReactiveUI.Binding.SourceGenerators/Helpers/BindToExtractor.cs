@@ -84,7 +84,8 @@ internal static class BindToExtractor
             targetPropertyTypeFullName,
             hasConversionHint,
             hasConverterOverride,
-            targetExpressionText);
+            targetExpressionText,
+            InterceptableLocationReader.Read(semanticModel, invocation, ct));
     }
 
     /// <summary>

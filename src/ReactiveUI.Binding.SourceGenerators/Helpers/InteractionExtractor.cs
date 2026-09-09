@@ -87,7 +87,8 @@ internal static class InteractionExtractor
             dontCareTypeFullName,
             Constants.BindInteractionMethodName,
             expressionText,
-            viewClassInfo);
+            viewClassInfo,
+            InterceptableLocationReader.Read(semanticModel, invocation, ct));
     }
 
     /// <summary>Resolves the interaction's two type arguments, refusing a call site that names neither.</summary>

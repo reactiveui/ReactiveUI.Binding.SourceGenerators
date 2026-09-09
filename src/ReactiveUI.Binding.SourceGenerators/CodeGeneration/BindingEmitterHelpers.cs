@@ -718,29 +718,9 @@ internal static class BindingEmitterHelpers
     /// A call site the compiler declined to describe is left out: nothing can claim it, and it keeps whatever
     /// the call already resolved to.
     /// </remarks>
-    private static Dictionary<string, List<BindingInvocationInfo>> GroupCallSitesByWorker(BindingTypeGroup group)
-    {
-        var claimed = new Dictionary<string, List<BindingInvocationInfo>>(StringComparer.Ordinal);
-        for (var i = 0; i < group.Invocations.Length; i++)
-        {
-            var inv = group.Invocations[i];
-            if (!inv.Interceptor.IsAvailable)
-            {
-                continue;
-            }
-
-            var suffix = BindingMethodSuffix(inv);
-            if (!claimed.TryGetValue(suffix, out var callSites))
-            {
-                callSites = [];
-                claimed[suffix] = callSites;
-            }
-
-            callSites.Add(inv);
-        }
-
-        return claimed;
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static Dictionary<string, List<BindingInvocationInfo>> GroupCallSitesByWorker(BindingTypeGroup group) =>
+        InterceptorEmitter.GroupCallSites(group.Invocations, static x => x.Interceptor, BindingMethodSuffix);
 
     /// <summary>Finds the type a view declares its view model property as.</summary>
     /// <param name="targetClassInfo">The view type's binding info.</param>

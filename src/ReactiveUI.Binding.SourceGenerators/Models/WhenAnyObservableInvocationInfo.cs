@@ -17,6 +17,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="ReturnTypeFullName">The fully qualified return type of the observation.</param>
 /// <param name="HasSelector">Whether the invocation includes a selector/projection function (CombineLatest variant).</param>
 /// <param name="ExpressionTexts">The original expression text of each lambda argument, used for CallerArgumentExpression dispatch.</param>
+/// <param name="Interceptor">
+/// Where this call site is, for a build that claims call sites outright rather than competing for them.
+/// </param>
 internal sealed record WhenAnyObservableInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -25,4 +28,5 @@ internal sealed record WhenAnyObservableInvocationInfo(
     EquatableArray<string> InnerObservableTypeFullNames,
     string ReturnTypeFullName,
     bool HasSelector,
-    EquatableArray<string> ExpressionTexts);
+    EquatableArray<string> ExpressionTexts,
+    InterceptorLocation Interceptor = default);
