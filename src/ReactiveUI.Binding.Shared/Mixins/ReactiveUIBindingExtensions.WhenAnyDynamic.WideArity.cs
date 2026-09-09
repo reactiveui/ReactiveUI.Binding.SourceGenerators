@@ -61,10 +61,8 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        return ObserveDynamicChain(sender, property1, isDistinct).Select(selector);
+        var chains = Chains(sender, selector, isDistinct, property1);
+        return chains[0].Select(selector);
     }
 
     /// <summary>Observes 2 dynamically-typed property chains and combines them with a selector.</summary>
@@ -103,13 +101,8 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        return CombineLatestObservable.Create(
-            ObserveDynamicChain(sender, property1, isDistinct),
-            ObserveDynamicChain(sender, property2, isDistinct),
-            selector);
+        var chains = Chains(sender, selector, isDistinct, property1, property2);
+        return CombineLatestObservable.Create(chains[0], chains[1], selector);
     }
 
     /// <summary>Observes 3 dynamically-typed property chains and combines them with a selector.</summary>
@@ -152,14 +145,8 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        return CombineLatestObservable.Create(
-            ObserveDynamicChain(sender, property1, isDistinct),
-            ObserveDynamicChain(sender, property2, isDistinct),
-            ObserveDynamicChain(sender, property3, isDistinct),
-            selector);
+        var chains = Chains(sender, selector, isDistinct, property1, property2, property3);
+        return CombineLatestObservable.Create(chains[0], chains[1], chains[2], selector);
     }
 
     /// <summary>Observes 4 dynamically-typed property chains and combines them with a selector.</summary>
@@ -216,15 +203,8 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        return CombineLatestObservable.Create(
-            ObserveDynamicChain(sender, property1, isDistinct),
-            ObserveDynamicChain(sender, property2, isDistinct),
-            ObserveDynamicChain(sender, property3, isDistinct),
-            ObserveDynamicChain(sender, property4, isDistinct),
-            selector);
+        var chains = Chains(sender, selector, isDistinct, property1, property2, property3, property4);
+        return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], selector);
     }
 
     /// <summary>Observes 5 dynamically-typed property chains and combines them with a selector.</summary>
@@ -287,16 +267,8 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        return CombineLatestObservable.Create(
-            ObserveDynamicChain(sender, property1, isDistinct),
-            ObserveDynamicChain(sender, property2, isDistinct),
-            ObserveDynamicChain(sender, property3, isDistinct),
-            ObserveDynamicChain(sender, property4, isDistinct),
-            ObserveDynamicChain(sender, property5, isDistinct),
-            selector);
+        var chains = Chains(sender, selector, isDistinct, property1, property2, property3, property4, property5);
+        return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], selector);
     }
 
     /// <summary>Observes 6 dynamically-typed property chains and combines them with a selector.</summary>
@@ -366,17 +338,8 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        return CombineLatestObservable.Create(
-            ObserveDynamicChain(sender, property1, isDistinct),
-            ObserveDynamicChain(sender, property2, isDistinct),
-            ObserveDynamicChain(sender, property3, isDistinct),
-            ObserveDynamicChain(sender, property4, isDistinct),
-            ObserveDynamicChain(sender, property5, isDistinct),
-            ObserveDynamicChain(sender, property6, isDistinct),
-            selector);
+        var chains = Chains(sender, selector, isDistinct, property1, property2, property3, property4, property5, property6);
+        return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], selector);
     }
 
     /// <summary>Observes 7 dynamically-typed property chains and combines them with a selector.</summary>
@@ -453,18 +416,8 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        return CombineLatestObservable.Create(
-            ObserveDynamicChain(sender, property1, isDistinct),
-            ObserveDynamicChain(sender, property2, isDistinct),
-            ObserveDynamicChain(sender, property3, isDistinct),
-            ObserveDynamicChain(sender, property4, isDistinct),
-            ObserveDynamicChain(sender, property5, isDistinct),
-            ObserveDynamicChain(sender, property6, isDistinct),
-            ObserveDynamicChain(sender, property7, isDistinct),
-            selector);
+        var chains = Chains(sender, selector, isDistinct, property1, property2, property3, property4, property5, property6, property7);
+        return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], chains[6], selector);
     }
 
     /// <summary>Observes 8 dynamically-typed property chains and combines them with a selector.</summary>
@@ -547,19 +500,8 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        return CombineLatestObservable.Create(
-            ObserveDynamicChain(sender, property1, isDistinct),
-            ObserveDynamicChain(sender, property2, isDistinct),
-            ObserveDynamicChain(sender, property3, isDistinct),
-            ObserveDynamicChain(sender, property4, isDistinct),
-            ObserveDynamicChain(sender, property5, isDistinct),
-            ObserveDynamicChain(sender, property6, isDistinct),
-            ObserveDynamicChain(sender, property7, isDistinct),
-            ObserveDynamicChain(sender, property8, isDistinct),
-            selector);
+        var chains = Chains(sender, selector, isDistinct, property1, property2, property3, property4, property5, property6, property7, property8);
+        return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], chains[6], chains[7], selector);
     }
 
     /// <summary>Observes 9 dynamically-typed property chains and combines them with a selector.</summary>
@@ -648,20 +590,8 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        return CombineLatestObservable.Create(
-            ObserveDynamicChain(sender, property1, isDistinct),
-            ObserveDynamicChain(sender, property2, isDistinct),
-            ObserveDynamicChain(sender, property3, isDistinct),
-            ObserveDynamicChain(sender, property4, isDistinct),
-            ObserveDynamicChain(sender, property5, isDistinct),
-            ObserveDynamicChain(sender, property6, isDistinct),
-            ObserveDynamicChain(sender, property7, isDistinct),
-            ObserveDynamicChain(sender, property8, isDistinct),
-            ObserveDynamicChain(sender, property9, isDistinct),
-            selector);
+        var chains = Chains(sender, selector, isDistinct, property1, property2, property3, property4, property5, property6, property7, property8, property9);
+        return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], chains[6], chains[7], chains[8], selector);
     }
 
     /// <summary>Observes 10 dynamically-typed property chains and combines them with a selector.</summary>
@@ -756,21 +686,8 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        return CombineLatestObservable.Create(
-            ObserveDynamicChain(sender, property1, isDistinct),
-            ObserveDynamicChain(sender, property2, isDistinct),
-            ObserveDynamicChain(sender, property3, isDistinct),
-            ObserveDynamicChain(sender, property4, isDistinct),
-            ObserveDynamicChain(sender, property5, isDistinct),
-            ObserveDynamicChain(sender, property6, isDistinct),
-            ObserveDynamicChain(sender, property7, isDistinct),
-            ObserveDynamicChain(sender, property8, isDistinct),
-            ObserveDynamicChain(sender, property9, isDistinct),
-            ObserveDynamicChain(sender, property10, isDistinct),
-            selector);
+        var chains = Chains(sender, selector, isDistinct, property1, property2, property3, property4, property5, property6, property7, property8, property9, property10);
+        return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], chains[6], chains[7], chains[8], chains[9], selector);
     }
 
     /// <summary>Observes 11 dynamically-typed property chains and combines them with a selector.</summary>
@@ -871,22 +788,8 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        return CombineLatestObservable.Create(
-            ObserveDynamicChain(sender, property1, isDistinct),
-            ObserveDynamicChain(sender, property2, isDistinct),
-            ObserveDynamicChain(sender, property3, isDistinct),
-            ObserveDynamicChain(sender, property4, isDistinct),
-            ObserveDynamicChain(sender, property5, isDistinct),
-            ObserveDynamicChain(sender, property6, isDistinct),
-            ObserveDynamicChain(sender, property7, isDistinct),
-            ObserveDynamicChain(sender, property8, isDistinct),
-            ObserveDynamicChain(sender, property9, isDistinct),
-            ObserveDynamicChain(sender, property10, isDistinct),
-            ObserveDynamicChain(sender, property11, isDistinct),
-            selector);
+        var chains = Chains(sender, selector, isDistinct, property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, property11);
+        return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], chains[6], chains[7], chains[8], chains[9], chains[10], selector);
     }
 
     /// <summary>Observes 12 dynamically-typed property chains and combines them with a selector.</summary>
@@ -993,23 +896,40 @@ public static partial class ReactiveUIBindingExtensions
         bool isDistinct)
         where TSender : class
     {
+        var chains = Chains(sender, selector, isDistinct, property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, property11, property12);
+        return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], chains[6], chains[7], chains[8], chains[9], chains[10], chains[11], selector);
+    }
+
+    /// <summary>Subscribes to every chain an overload was handed, after refusing a missing argument.</summary>
+    /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
+    /// <param name="sender">The object the chains are rooted on.</param>
+    /// <param name="selector">The projection the caller supplied, which is required.</param>
+    /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
+    /// <param name="properties">The expressions naming the chains.</param>
+    /// <returns>One observation per chain, in the order the chains were given.</returns>
+    /// <remarks>
+    /// Every arity funnels its argument checks and its subscriptions through here, so each overload is the
+    /// signature and nothing else. The array is built once when the observable is created rather than per
+    /// notification, so a higher arity costs one allocation at subscription and nothing while it reports.
+    /// </remarks>
+    [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
+    private static IObservable<IObservedChange<TSender, object?>>[] Chains<TSender>(
+        TSender sender,
+        object selector,
+        bool isDistinct,
+        params Expression?[] properties)
+        where TSender : class
+    {
         ArgumentExceptionHelper.ThrowIfNull(sender);
         ArgumentExceptionHelper.ThrowIfNull(selector);
 
-        return CombineLatestObservable.Create(
-            ObserveDynamicChain(sender, property1, isDistinct),
-            ObserveDynamicChain(sender, property2, isDistinct),
-            ObserveDynamicChain(sender, property3, isDistinct),
-            ObserveDynamicChain(sender, property4, isDistinct),
-            ObserveDynamicChain(sender, property5, isDistinct),
-            ObserveDynamicChain(sender, property6, isDistinct),
-            ObserveDynamicChain(sender, property7, isDistinct),
-            ObserveDynamicChain(sender, property8, isDistinct),
-            ObserveDynamicChain(sender, property9, isDistinct),
-            ObserveDynamicChain(sender, property10, isDistinct),
-            ObserveDynamicChain(sender, property11, isDistinct),
-            ObserveDynamicChain(sender, property12, isDistinct),
-            selector);
+        var chains = new IObservable<IObservedChange<TSender, object?>>[properties.Length];
+        for (var i = 0; i < properties.Length; i++)
+        {
+            chains[i] = ObserveDynamicChain(sender, properties[i], isDistinct);
+        }
+
+        return chains;
     }
 
     /// <summary>Subscribes to one property chain named by a run-time expression.</summary>
