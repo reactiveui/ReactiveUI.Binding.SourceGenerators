@@ -96,8 +96,7 @@ internal static class BindToExtractor
     /// <returns>The observable value type, or null if the receiver is not an observable.</returns>
     internal static ITypeSymbol? GetObservableValueType(ITypeSymbol? receiver)
     {
-        if (receiver is INamedTypeSymbol { Name: "IObservable", TypeArguments.Length: 1 } direct
-            && direct.ContainingNamespace?.ToDisplayString() == "System")
+        if (receiver is INamedTypeSymbol direct && IsFrameworkObservable(direct))
         {
             return direct.TypeArguments[0];
         }
@@ -106,8 +105,7 @@ internal static class BindToExtractor
         // that implements nothing; a separate guard for it could never be taken from the only caller.
         foreach (var iface in receiver?.AllInterfaces ?? System.Collections.Immutable.ImmutableArray<INamedTypeSymbol>.Empty)
         {
-            if (iface is { Name: "IObservable", TypeArguments.Length: 1 }
-                && iface.ContainingNamespace?.ToDisplayString() == "System")
+            if (IsFrameworkObservable(iface))
             {
                 return iface.TypeArguments[0];
             }
@@ -115,6 +113,17 @@ internal static class BindToExtractor
 
         return null;
     }
+
+    /// <summary>Determines whether a type is the framework's own <c>System.IObservable&lt;T&gt;</c>.</summary>
+    /// <param name="type">The type to judge.</param>
+    /// <returns><see langword="true"/> when it is that interface rather than one of the same name.</returns>
+    /// <remarks>
+    /// Asked of the receiver and of each interface it implements, so the shape and the namespace are described
+    /// once. A type belonging to no namespace at all - an array or a pointer - answers no rather than throwing.
+    /// </remarks>
+    private static bool IsFrameworkObservable(INamedTypeSymbol type) =>
+        type is { Name: "IObservable", TypeArguments.Length: 1 }
+        && type.ContainingNamespace?.ToDisplayString() == "System";
 
     /// <summary>
     /// Scans the method parameters to detect the presence of a <c>conversionHint</c> parameter

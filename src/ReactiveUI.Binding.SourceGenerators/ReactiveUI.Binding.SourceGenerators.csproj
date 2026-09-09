@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="ReactiveUI.Binding.SourceGenerators.Tests"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.SourceGenerators.Tests.Roslyn413"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +29,9 @@
     <None Include="build\ReactiveUI.Binding.SourceGenerators.props"
           Pack="true"
           PackagePath="build\ReactiveUI.Binding.SourceGenerators.props;buildTransitive\ReactiveUI.Binding.SourceGenerators.props"/>
+    <None Include="build\ReactiveUI.Binding.SourceGenerators.targets"
+          Pack="true"
+          PackagePath="build\ReactiveUI.Binding.SourceGenerators.targets;buildTransitive\ReactiveUI.Binding.SourceGenerators.targets"/>
   </ItemGroup>
 
   <!-- Roslyn 4.8.0 baseline (VS 2022 17.8, .NET 8.0.1xx SDK). The generator ships in the

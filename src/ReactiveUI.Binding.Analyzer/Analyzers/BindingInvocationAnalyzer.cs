@@ -24,9 +24,10 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     /// <summary>The parameter type a property path arrives as, which marks it out from the other arguments.</summary>
     private const string ExpressionParameterTypePrefix = "System.Linq.Expressions.Expression<";
 
-    /// <inheritdoc/>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(
+    /// <summary>The diagnostics this analyzer reports.</summary>
+    private static readonly ImmutableArray<DiagnosticDescriptor> ReportedDiagnostics =
+        new[]
+        {
             DiagnosticWarnings.NonInlineLambda,
             DiagnosticWarnings.PrivateMember,
             DiagnosticWarnings.NoBeforeChangeSupport,
@@ -34,7 +35,11 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
             DiagnosticWarnings.UnsupportedPathSegment,
             DiagnosticWarnings.NoBindableEvent,
             DiagnosticWarnings.InvalidInteractionType,
-            DiagnosticWarnings.SilentPathLink);
+            DiagnosticWarnings.SilentPathLink,
+        }.ToImmutableArray();
+
+    /// <inheritdoc/>
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ReportedDiagnostics;
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)

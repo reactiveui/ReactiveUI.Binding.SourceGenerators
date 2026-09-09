@@ -80,7 +80,7 @@ internal static class InterceptorEmitter
     /// <param name="group">The type group whose call sites are being claimed.</param>
     /// <param name="methodPrefix">The method name prefix the generated bodies carry.</param>
     /// <param name="suffixOf">Names the body a call site reaches.</param>
-    /// <param name="appendParameters">Writes the parameters after the receiver, closing the list.</param>
+    /// <param name="appendParameterList">Writes the whole parameter list, closing it.</param>
     /// <remarks>
     /// The grouping and the attribute are the whole of what every API shares here, so they live in one place
     /// and each API supplies only the signature it is being called with. Call sites that reach one body are
@@ -91,7 +91,7 @@ internal static class InterceptorEmitter
         ObservationCodeGenerator.TypeGroup group,
         string methodPrefix,
         Func<InvocationInfo, string> suffixOf,
-        Action<StringBuilder, InvocationInfo> appendParameters)
+        Action<StringBuilder, InvocationInfo> appendParameterList)
     {
         foreach (var entry in GroupCallSitesByBody(group, suffixOf))
         {
@@ -103,63 +103,12 @@ internal static class InterceptorEmitter
             }
 
             _ = builder.Append("        internal static global::System.IObservable<").Append(first.ReturnTypeFullName)
-                .Append("> __Intercept_").Append(methodPrefix).Append('_').Append(entry.Key).AppendLine("(")
-                .Append("            ").Append(first.SourceTypeFullName).AppendLine(" objectToMonitor,");
+                .Append("> __Intercept_").Append(methodPrefix).Append('_').Append(entry.Key).AppendLine("(");
 
-            appendParameters(builder, first);
+            appendParameterList(builder, first);
 
             _ = builder.Append("            => __").Append(methodPrefix).Append('_').Append(entry.Key)
-                .Append("(objectToMonitor").Append(first.HasSelector ? ", selector" : string.Empty).AppendLine(");");
-        }
-    }
-
-    /// <summary>Emits the observed-property parameters, and the projection when the overload takes one.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="first">The invocation whose types the parameters are written from.</param>
-    /// <param name="propCount">How many observed properties the overload takes.</param>
-    /// <param name="selectorType">The projection's type, or <see langword="null"/> when it takes none.</param>
-    internal static void AppendPropertyParameters(
-        StringBuilder sb,
-        InvocationInfo first,
-        int propCount,
-        string? selectorType)
-    {
-        var hasSelector = selectorType is not null;
-        for (var i = 0; i < propCount; i++)
-        {
-            var type = first.PropertyPaths[i][first.PropertyPaths[i].Length - 1].PropertyTypeFullName;
-            _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<")
-                .Append(first.SourceTypeFullName).Append(", ").Append(type).Append(">> property").Append(i + 1);
-            _ = hasSelector || i < propCount - 1 ? sb.AppendLine(",") : sb.AppendLine(")");
-        }
-
-        if (!hasSelector)
-        {
-            return;
-        }
-
-        _ = sb.Append("            ").Append(selectorType).AppendLine(" selector)");
-    }
-
-    /// <summary>Closes a parameter list whose last entry was written expecting another to follow.</summary>
-    /// <param name="builder">The builder whose trailing separator becomes the closing parenthesis.</param>
-    /// <remarks>
-    /// The parameter writers are shared with the dispatch overloads, which always have the caller-info
-    /// parameters coming after, so each entry ends in a separator. An interceptor takes none of those, so the
-    /// last separator written is the one that has to close the list instead.
-    /// </remarks>
-    internal static void CloseParameterList(StringBuilder builder)
-    {
-        for (var i = builder.Length - 1; i >= 0; i--)
-        {
-            if (builder[i] != ',')
-            {
-                continue;
-            }
-
-            builder.Length = i;
-            _ = builder.AppendLine(")");
-            return;
+                .Append("(objectToMonitor").Append(first.HasSelector ? ", selector" : string.Empty).AppendLine(");").AppendLine();
         }
     }
 

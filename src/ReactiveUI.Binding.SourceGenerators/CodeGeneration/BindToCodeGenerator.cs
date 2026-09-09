@@ -63,7 +63,7 @@ internal static class BindToCodeGenerator
 
             if (features.SupportsInterceptors)
             {
-                GenerateInterceptors(sb, group, features.SupportsNullable);
+                GenerateInterceptors(sb, group, in features);
             }
             else
             {
@@ -177,12 +177,9 @@ internal static class BindToCodeGenerator
             .AppendLine("        /// Uses CallerArgumentExpression for dispatch.").AppendLine("        /// </summary>").Append("        public static ")
             .Append(GeneratedTypeNames.IDisposable).AppendLine(" BindTo(");
 
-        AppendBindToParameters(sb, group, supportsNullable, true);
-        AppendExtraParameters(sb, group);
+        AppendParameterList(sb, group, true, supportsNullable, true);
 
-        _ = sb.Append(GeneratedSyntax.ParameterAttributeOpen).Append(CallerArgumentExpression).AppendLine("(\"property\")] string propertyExpression = \"\",")
-            .Append(GeneratedSyntax.ParameterAttributeOpen).Append(CallerFilePath).AppendLine("] string callerFilePath = \"\",").Append(GeneratedSyntax.ParameterAttributeOpen).Append(CallerLineNumber)
-            .AppendLine("] int callerLineNumber = 0)").AppendLine(GeneratedSyntax.MemberBodyOpen)
+        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen)
             .AppendLine("            propertyExpression = propertyExpression.StartsWith(\"static \", global::System.StringComparison.Ordinal) ? propertyExpression.Substring(7) : propertyExpression;")
             .AppendLine();
 
@@ -220,16 +217,9 @@ internal static class BindToCodeGenerator
             .AppendLine("        /// Uses CallerFilePath + CallerLineNumber for dispatch.").AppendLine("        /// </summary>")
             .Append("        public static ").Append(GeneratedTypeNames.IDisposable).AppendLine(" BindTo(");
 
-        AppendBindToParameters(sb, group, supportsNullable, true);
-        AppendExtraParameters(sb, group);
+        AppendParameterList(sb, group, false, supportsNullable, stubHasExpressionParameters);
 
-        if (stubHasExpressionParameters)
-        {
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, "property", "propertyExpression", false);
-        }
-
-        _ = sb.Append(GeneratedSyntax.ParameterAttributeOpen).Append(CallerFilePath).AppendLine("] string callerFilePath = \"\",").Append(GeneratedSyntax.ParameterAttributeOpen)
-            .Append(CallerLineNumber).AppendLine("] int callerLineNumber = 0)").AppendLine(GeneratedSyntax.MemberBodyOpen);
+        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
         var extraArguments = FormatExtraArgs(group);
 
@@ -356,10 +346,13 @@ internal static class BindToCodeGenerator
     /// <summary>Emits one interceptor per generated binding, claiming every call site that reaches it.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group of call sites being claimed.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    private static void GenerateInterceptors(StringBuilder sb, BindToTypeGroup group, bool supportsNullable)
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    private static void GenerateInterceptors(StringBuilder sb, BindToTypeGroup group, in LanguageFeatures features)
     {
         var extraArguments = FormatExtraArgs(group);
+        var dispatchesOnExpressionText = features.SupportsCallerArgExpr;
+        var supportsNullable = features.SupportsNullable;
+        var stubHasExpressionParameters = features.StubHasExpressionParameters;
 
         foreach (var entry in InterceptorEmitter.GroupCallSites(group.Invocations, static x => x.Interceptor, BindToMethodSuffix))
         {
@@ -371,31 +364,45 @@ internal static class BindToCodeGenerator
             _ = sb.Append("        internal static ").Append(GeneratedTypeNames.IDisposable).Append(" __Intercept_BindTo_")
                 .Append(entry.Key).AppendLine("(");
 
-            AppendBindToParameters(sb, group, supportsNullable, false);
-            AppendExtraParameters(sb, group);
-            InterceptorEmitter.CloseParameterList(sb);
+            AppendParameterList(sb, group, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
 
             AppendWorkerInvocation(sb, ForwardingBodyPrefix, entry.Key, extraArguments);
             _ = sb.AppendLine();
         }
     }
 
-    /// <summary>Appends the observable, target and property parameters every generated <c>BindTo</c> member declares.</summary>
+    /// <summary>Writes the parameters a <c>BindTo</c> member declares, closing the list.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group whose types the parameters are written from.</param>
+    /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
-    /// <param name="isExtensionMethod">Whether the observable parameter is the extension receiver.</param>
-    private static void AppendBindToParameters(
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameter.</param>
+    /// <remarks>
+    /// One list serves the overload and the interceptor, because both have to be the stub's signature: the
+    /// overload only wins resolution against a candidate it is otherwise indistinguishable from, and an
+    /// interceptor is refused outright unless its signature is the intercepted method's.
+    /// </remarks>
+    private static void AppendParameterList(
         StringBuilder sb,
         BindToTypeGroup group,
+        bool dispatchesOnExpressionText,
         bool supportsNullable,
-        bool isExtensionMethod)
+        bool stubHasExpressionParameters)
     {
         var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
 
-        _ = sb.Append(isExtensionMethod ? "            this " : "            ").Append(ObservableOf(group.SourceValueTypeFullName))
+        _ = sb.Append("            this ").Append(ObservableOf(group.SourceValueTypeFullName))
             .AppendLine(" source,").Append("            ").Append(group.TargetTypeFullName).AppendLine(" target,")
             .Append("            ").Append(PropertyExpression(group.TargetTypeFullName, targetPropType)).AppendLine(" property,");
+
+        AppendExtraParameters(sb, group);
+
+        if (dispatchesOnExpressionText || stubHasExpressionParameters)
+        {
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "property", "propertyExpression", dispatchesOnExpressionText);
+        }
+
+        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
     }
 
     /// <summary>Appends the call forwarding the bound stream and target on to the generated worker.</summary>

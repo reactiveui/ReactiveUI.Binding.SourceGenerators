@@ -127,11 +127,10 @@ internal static class BindInteractionCodeGenerator
         StringBuilder sb,
         BindInteractionTypeGroup group)
     {
-        AppendOverloadSignature(sb, group, "        /// Uses CallerArgumentExpression for dispatch.");
+        AppendOverloadSummary(sb, group, "        /// Uses CallerArgumentExpression for dispatch.");
+        AppendParameterList(sb, group, true, true);
 
-        _ = sb.AppendLine("            [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"propertyName\")] string propertyNameExpression = \"\",")
-            .AppendLine("            [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = \"\",")
-            .AppendLine("            [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)").AppendLine("        {")
+        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen)
             .Append("            propertyNameExpression = propertyNameExpression.StartsWith(\"static \", global::System.StringComparison.Ordinal)")
             .AppendLine(" ? propertyNameExpression.Substring(7) : propertyNameExpression;")
             .AppendLine();
@@ -158,18 +157,10 @@ internal static class BindInteractionCodeGenerator
         BindInteractionTypeGroup group,
         bool stubHasExpressionParameters)
     {
-        AppendOverloadSignature(sb, group, "        /// Uses CallerFilePath + CallerLineNumber for dispatch.");
+        AppendOverloadSummary(sb, group, "        /// Uses CallerFilePath + CallerLineNumber for dispatch.");
+        AppendParameterList(sb, group, false, stubHasExpressionParameters);
 
-        if (stubHasExpressionParameters)
-        {
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, "propertyName", "propertyNameExpression", false);
-        }
-
-        _ = sb.AppendLine("""
-            [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-            [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-        {
-""");
+        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -230,44 +221,59 @@ internal static class BindInteractionCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindInteraction type group.</param>
     /// <param name="dispatchSummaryLine">The documentation line naming what the overload matches a call site on.</param>
-    private static void AppendOverloadSignature(
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AppendOverloadSummary(
         StringBuilder sb,
         BindInteractionTypeGroup group,
-        string dispatchSummaryLine)
-    {
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindInteraction on ")
+        string dispatchSummaryLine) =>
+        sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindInteraction on ")
             .Append(group.ViewTypeFullName).AppendLine(".").AppendLine(dispatchSummaryLine)
             .AppendLine("        /// </summary>").AppendLine("        public static global::System.IDisposable BindInteraction(");
 
-        AppendInteractionParameters(sb, group, true);
-    }
-
-    /// <summary>Appends the view, view model, selector and handler parameters every generated BindInteraction member declares.</summary>
+    /// <summary>Writes the parameters a BindInteraction member declares, closing the list.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindInteraction type group whose types the parameters are written from.</param>
-    /// <param name="isExtensionMethod">Whether the view parameter is the extension receiver.</param>
-    private static void AppendInteractionParameters(
+    /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameter.</param>
+    /// <remarks>
+    /// One list serves the overload and the interceptor, because both have to be the stub's signature: the
+    /// overload only wins resolution against a candidate it is otherwise indistinguishable from, and an
+    /// interceptor is refused outright unless its signature is the intercepted method's.
+    /// </remarks>
+    private static void AppendParameterList(
         StringBuilder sb,
         BindInteractionTypeGroup group,
-        bool isExtensionMethod)
+        bool dispatchesOnExpressionText,
+        bool stubHasExpressionParameters)
     {
         var handlerType = group.IsTaskHandler
             ? $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.Threading.Tasks.Task>"
             : $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.IObservable<{group.DontCareTypeFullName}>>";
 
-        _ = sb.Append(isExtensionMethod ? "            this " : CodeGeneratorHelpers.ParameterIndent).Append(group.ViewTypeFullName)
+        _ = sb.Append("            this ").Append(group.ViewTypeFullName)
             .AppendLine(ViewParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent).Append(group.ViewModelTypeFullName)
             .AppendLine(ViewModelParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent).Append(Expression).Append('<').Append(Func).Append('<')
             .Append(group.ViewModelTypeFullName).Append(", ").Append(IInteraction).Append('<').Append(group.InputTypeFullName).Append(", ")
             .Append(group.OutputTypeFullName).AppendLine(">>> propertyName,").Append(CodeGeneratorHelpers.ParameterIndent).Append(handlerType)
             .AppendLine(" handler,");
+
+        if (dispatchesOnExpressionText || stubHasExpressionParameters)
+        {
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "propertyName", "propertyNameExpression", dispatchesOnExpressionText);
+        }
+
+        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
     }
 
     /// <summary>Emits one interceptor per generated binding, claiming every call site that reaches it.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group of call sites being claimed.</param>
-    private static void GenerateInterceptors(StringBuilder sb, BindInteractionTypeGroup group)
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    private static void GenerateInterceptors(StringBuilder sb, BindInteractionTypeGroup group, in LanguageFeatures features)
     {
+        var dispatchesOnExpressionText = features.SupportsCallerArgExpr;
+        var stubHasExpressionParameters = features.StubHasExpressionParameters;
+
         foreach (var entry in InterceptorEmitter.GroupCallSites(group.Invocations, static x => x.Interceptor, MethodSuffix))
         {
             foreach (var callSite in entry.Value)
@@ -277,8 +283,7 @@ internal static class BindInteractionCodeGenerator
 
             _ = sb.Append("        internal static global::System.IDisposable __Intercept_BindInteraction_").Append(entry.Key).AppendLine("(");
 
-            AppendInteractionParameters(sb, group, false);
-            InterceptorEmitter.CloseParameterList(sb);
+            AppendParameterList(sb, group, dispatchesOnExpressionText, stubHasExpressionParameters);
 
             _ = sb.Append("            => ").Append(WorkerMethodPrefix).Append(entry.Key).Append('(').Append(WorkerArguments)
                 .AppendLine(");").AppendLine();
@@ -307,7 +312,7 @@ internal static class BindInteractionCodeGenerator
 
         if (features.SupportsInterceptors)
         {
-            GenerateInterceptors(sb, collapsed);
+            GenerateInterceptors(sb, collapsed, in features);
         }
         else
         {

@@ -56,15 +56,25 @@
        generator is not run over this project's own source. -->
   <ItemGroup>
     <ProjectReference Include="..\ReactiveUI.Binding.SourceGenerators\ReactiveUI.Binding.SourceGenerators.csproj" PrivateAssets="all" ReferenceOutputAssembly="false"/>
+    <ProjectReference Include="..\ReactiveUI.Binding.SourceGenerators.Roslyn413\ReactiveUI.Binding.SourceGenerators.Roslyn413.csproj" PrivateAssets="all" ReferenceOutputAssembly="false"/>
+    <ProjectReference Include="..\ReactiveUI.Binding.Analyzer.Roslyn413\ReactiveUI.Binding.Analyzer.Roslyn413.csproj" PrivateAssets="all" ReferenceOutputAssembly="false"/>
   </ItemGroup>
 
   <!-- Packed as plain files rather than through TargetsForTfmSpecificContentInPackage: that hook runs once
        per target framework, and the analyzer folder is framework-agnostic, so it would offer the same path
-       six times over. -->
+       six times over.
+
+       One slot per compiler generation, because what the generator can do differs between them: the 4.13
+       build claims each call site with an interceptor, the 4.8 build offers an overload that has to win
+       extension-method lookup. The accompanying .targets is what keeps a consumer whose build does not
+       narrow the slots itself from loading both. -->
   <ItemGroup>
-    <None Include="..\ReactiveUI.Binding.SourceGenerators\bin\$(Configuration)\netstandard2.0\ReactiveUI.Binding.SourceGenerators.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
-    <None Include="..\ReactiveUI.Binding.Analyzer\bin\$(Configuration)\netstandard2.0\ReactiveUI.Binding.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    <None Include="..\ReactiveUI.Binding.SourceGenerators\bin\$(Configuration)\netstandard2.0\ReactiveUI.Binding.SourceGenerators.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.8/cs" Visible="false"/>
+    <None Include="..\ReactiveUI.Binding.Analyzer\bin\$(Configuration)\netstandard2.0\ReactiveUI.Binding.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.8/cs" Visible="false"/>
+    <None Include="..\ReactiveUI.Binding.SourceGenerators.Roslyn413\bin\$(Configuration)\netstandard2.0\ReactiveUI.Binding.SourceGenerators.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.13/cs" Visible="false"/>
+    <None Include="..\ReactiveUI.Binding.Analyzer.Roslyn413\bin\$(Configuration)\netstandard2.0\ReactiveUI.Binding.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.13/cs" Visible="false"/>
     <None Include="..\ReactiveUI.Binding.SourceGenerators\build\ReactiveUI.Binding.SourceGenerators.props" Pack="true" PackagePath="build\$(MSBuildProjectName).props;buildTransitive\$(MSBuildProjectName).props" Visible="false"/>
+    <None Include="..\ReactiveUI.Binding.SourceGenerators\build\ReactiveUI.Binding.SourceGenerators.targets" Pack="true" PackagePath="build\$(MSBuildProjectName).targets;buildTransitive\$(MSBuildProjectName).targets" Visible="false"/>
   </ItemGroup>
 
   <!-- DateOnly and TimeOnly only exist on .NET 6+. Their converters are guarded with

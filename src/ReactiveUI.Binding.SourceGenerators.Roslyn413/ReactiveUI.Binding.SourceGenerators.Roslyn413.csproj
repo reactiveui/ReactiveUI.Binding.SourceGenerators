@@ -46,5 +46,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="ReactiveUI.Binding.SourceGenerators.Tests"/>
+    <InternalsVisibleTo Include="ReactiveUI.Binding.SourceGenerators.Tests.Roslyn413"/>
   </ItemGroup>
 </Project>

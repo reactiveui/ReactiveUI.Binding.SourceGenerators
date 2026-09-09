@@ -29,6 +29,17 @@ internal static class CodeGeneratorHelpers
     /// <summary>Completes the name of the parameter that captures a selector's expression text.</summary>
     internal const string ExpressionParameterSuffix = "Expression";
 
+    /// <summary>The caller-info parameters every runtime stub ends with, closing the parameter list.</summary>
+    /// <remarks>
+    /// Emitted by the interceptors as well as the dispatch overloads. The stub declares them, so both have to:
+    /// an overload that omits them is merely applicable rather than better, and an interceptor that omits them
+    /// is refused as a signature that is not the intercepted method's.
+    /// </remarks>
+    internal const string CallerInfoParameterList = """
+                    [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
+                    [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
+        """;
+
     /// <summary>Buffer capacity to reserve per property-path segment when building an access chain.</summary>
     private const int PerPathSegmentCapacity = 16;
 
@@ -597,32 +608,6 @@ internal static class CodeGeneratorHelpers
                 ? "        /// Uses CallerArgumentExpression for dispatch."
                 : "        /// Uses CallerFilePath + CallerLineNumber for dispatch.")
             .AppendLine("        /// </summary>");
-
-    /// <summary>Appends the expression-text parameters a dispatch overload keys on, and opens its body.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="firstSelectorName">The name of the first selector parameter.</param>
-    /// <param name="secondSelectorName">The name of the second selector parameter.</param>
-    internal static void AppendExpressionDispatchParameters(
-        StringBuilder sb,
-        string firstSelectorName,
-        string secondSelectorName)
-    {
-        AppendExpressionParameter(sb, firstSelectorName, firstSelectorName + ExpressionParameterSuffix, true);
-        AppendExpressionParameter(sb, secondSelectorName, secondSelectorName + ExpressionParameterSuffix, true);
-        AppendCallerInfoDispatchParameters(sb);
-    }
-
-    /// <summary>Appends the file and line parameters every dispatch overload carries, and opens its body.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <remarks>
-    /// They are declared whether or not dispatch uses them, because the concrete overload only beats the
-    /// generic stub once their parameter lists match.
-    /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendCallerInfoDispatchParameters(StringBuilder sb) =>
-        sb.AppendLine("            [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = \"\",")
-            .AppendLine("            [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)")
-            .AppendLine(GeneratedSyntax.MemberBodyOpen);
 
     /// <summary>Appends the strip that takes the <c>static</c> prefix off a captured expression.</summary>
     /// <param name="sb">The string builder to append to.</param>

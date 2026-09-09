@@ -5,8 +5,8 @@
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using NSubstitute;
 using ReactiveUI.Binding.Analyzer.Analyzers;
+using ReactiveUI.Binding.Tests.Shared;
 
 namespace ReactiveUI.Binding.Analyzer.Tests.Helpers;
 
@@ -86,21 +86,19 @@ public class AnalyzerHelpersTests
     [Test]
     public async Task IsBindingExtensionMethod_NullContainingType_ReturnsFalse()
     {
-        var methodSymbol = Substitute.For<IMethodSymbol>();
-        _ = methodSymbol.ContainingType.Returns((INamedTypeSymbol?)null);
+        var methodSymbol = RoslynSymbolProbe.MethodWithNoContainingType();
 
         var result = AnalyzerHelpers.IsBindingExtensionMethod(methodSymbol);
 
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>Verifies that ExtractFirstTypeArgument returns null when TypeArguments is empty (using a substitute method symbol).</summary>
+    /// <summary>Verifies that ExtractFirstTypeArgument returns null for a method that names no type arguments.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task ExtractFirstTypeArgument_EmptyTypeArguments_ReturnsNull_Substitute()
+    public async Task ExtractFirstTypeArgument_MethodNamesNoTypeArguments_ReturnsNull()
     {
-        var methodSymbol = Substitute.For<IMethodSymbol>();
-        _ = methodSymbol.TypeArguments.Returns([]);
+        var methodSymbol = RoslynSymbolProbe.MethodWithNoContainingType();
 
         var result = AnalyzerHelpers.ExtractFirstTypeArgument(methodSymbol);
 

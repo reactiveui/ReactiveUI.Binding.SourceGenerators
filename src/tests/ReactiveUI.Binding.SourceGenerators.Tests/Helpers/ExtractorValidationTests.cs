@@ -5,8 +5,8 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using NSubstitute;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
+using ReactiveUI.Binding.Tests.Shared;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -19,8 +19,36 @@ public class ExtractorValidationTests
     /// <summary>The <c>string</c> name these tests generate against.</summary>
     private const string StringName = "string";
 
+    /// <summary>The <c>int</c> name these tests generate against.</summary>
+    private const string IntName = "int";
+
     /// <summary>A class name no recognized extension class uses.</summary>
     private const string UnknownClassName = "CustomExtensions";
+
+    /// <summary>A class declaring one parameter under each name and shape these tests look for.</summary>
+    private const string SelectorProbeSource = """
+                                               namespace Probe
+                                               {
+                                                   public class Holder
+                                                   {
+                                                       public void TakesSelector(System.Func<string> selector)
+                                                       {
+                                                       }
+
+                                                       public void TakesAnotherName(System.Func<string> otherParam)
+                                                       {
+                                                       }
+
+                                                       public void TakesConversion(System.Func<int> conversionFunc)
+                                                       {
+                                                       }
+
+                                                       public void TakesPlainType(string selector)
+                                                       {
+                                                       }
+                                                   }
+                                               }
+                                               """;
 
     /// <summary>Verifies that the stub extension class name is recognized.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -265,17 +293,7 @@ public class ExtractorValidationTests
     [Test]
     public async Task FindSelectorReturnType_NoMatchingParameter_ReturnsNull()
     {
-        var typeArg = Substitute.For<ITypeSymbol>();
-        _ = typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns(StringName);
-
-        var funcType = Substitute.For<INamedTypeSymbol>();
-        _ = funcType.TypeArguments.Returns([typeArg]);
-
-        var param = Substitute.For<IParameterSymbol>();
-        _ = param.Name.Returns("otherParam");
-        _ = param.Type.Returns(funcType);
-
-        var parameters = ImmutableArray.Create(param);
+        var parameters = RoslynSymbolProbe.MethodParameters(SelectorProbeSource, "TakesAnotherName");
 
         var result = ExtractorValidation.FindSelectorReturnType(parameters, SelectorName);
 
@@ -287,17 +305,7 @@ public class ExtractorValidationTests
     [Test]
     public async Task FindSelectorReturnType_MatchingParameter_ReturnsType()
     {
-        var typeArg = Substitute.For<ITypeSymbol>();
-        _ = typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns(StringName);
-
-        var funcType = Substitute.For<INamedTypeSymbol>();
-        _ = funcType.TypeArguments.Returns([typeArg]);
-
-        var param = Substitute.For<IParameterSymbol>();
-        _ = param.Name.Returns(SelectorName);
-        _ = param.Type.Returns(funcType);
-
-        var parameters = ImmutableArray.Create(param);
+        var parameters = RoslynSymbolProbe.MethodParameters(SelectorProbeSource, "TakesSelector");
 
         var result = ExtractorValidation.FindSelectorReturnType(parameters, SelectorName);
 
@@ -309,21 +317,11 @@ public class ExtractorValidationTests
     [Test]
     public async Task FindSelectorReturnType_MultipleNames_MatchesSecondName()
     {
-        var typeArg = Substitute.For<ITypeSymbol>();
-        _ = typeArg.ToDisplayString(Arg.Any<SymbolDisplayFormat>()).Returns("int");
-
-        var funcType = Substitute.For<INamedTypeSymbol>();
-        _ = funcType.TypeArguments.Returns([typeArg]);
-
-        var param = Substitute.For<IParameterSymbol>();
-        _ = param.Name.Returns("conversionFunc");
-        _ = param.Type.Returns(funcType);
-
-        var parameters = ImmutableArray.Create(param);
+        var parameters = RoslynSymbolProbe.MethodParameters(SelectorProbeSource, "TakesConversion");
 
         var result = ExtractorValidation.FindSelectorReturnType(parameters, SelectorName, "conversionFunc");
 
-        await Assert.That(result).IsEqualTo("int");
+        await Assert.That(result).IsEqualTo(IntName);
     }
 
     /// <summary>Verifies that FindSelectorReturnType skips parameters with non-generic types.</summary>
@@ -331,14 +329,7 @@ public class ExtractorValidationTests
     [Test]
     public async Task FindSelectorReturnType_NonGenericType_ReturnsNull()
     {
-        var nonGenericType = Substitute.For<INamedTypeSymbol>();
-        _ = nonGenericType.TypeArguments.Returns([]);
-
-        var param = Substitute.For<IParameterSymbol>();
-        _ = param.Name.Returns(SelectorName);
-        _ = param.Type.Returns(nonGenericType);
-
-        var parameters = ImmutableArray.Create(param);
+        var parameters = RoslynSymbolProbe.MethodParameters(SelectorProbeSource, "TakesPlainType");
 
         var result = ExtractorValidation.FindSelectorReturnType(parameters, SelectorName);
 
@@ -367,18 +358,6 @@ public class ExtractorValidationTests
         var result = ExtractorValidation.IsRecognizedExtensionClass(UnnamedGroupingIn(UnknownClassName));
 
         await Assert.That(result).IsFalse();
-    }
-
-    /// <summary>A grouping type with nothing enclosing it has no name to be judged by.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task IsRecognizedExtensionClass_UnnamedGroupingWithNoEnclosingClass_ReturnsFalse()
-    {
-        var orphan = Substitute.For<INamedTypeSymbol>();
-        _ = orphan.Name.Returns(string.Empty);
-        _ = orphan.ContainingType.Returns((INamedTypeSymbol?)null);
-
-        await Assert.That(ExtractorValidation.IsRecognizedExtensionClass(orphan)).IsFalse();
     }
 
     /// <summary>
@@ -450,20 +429,40 @@ public class ExtractorValidationTests
     }
 
     /// <summary>
-    /// Builds a grouping type with no name of its own, nested in a class of the given name. A source-declared
-    /// extension block takes this shape, which no compiled identifier can spell.
+    /// Compiles an extension block and returns the grouping type the compiler declares its members in: a type
+    /// with no name of its own, nested one level inside the class that names the API. Read from source rather
+    /// than from an emitted image, which is the spelling that has no name at all.
     /// </summary>
-    /// <param name="className">The name to give the enclosing class.</param>
+    /// <param name="className">The name to give the enclosing static class.</param>
     /// <returns>The unnamed grouping type.</returns>
+    /// <exception cref="InvalidOperationException">The compiler declared no unnamed nested type.</exception>
     private static INamedTypeSymbol UnnamedGroupingIn(string className)
     {
-        var enclosing = Substitute.For<INamedTypeSymbol>();
-        _ = enclosing.Name.Returns(className);
+        var compilation = TestHelper.CreateCompilation(
+            $$"""
+              public static class {{className}}
+              {
+                  extension(int value)
+                  {
+                      public int Doubled => value * 2;
+                  }
+              }
+              """,
+            LanguageVersion.Preview);
 
-        var grouping = Substitute.For<INamedTypeSymbol>();
-        _ = grouping.Name.Returns(string.Empty);
-        _ = grouping.ContainingType.Returns(enclosing);
+        var outer = compilation.GetTypeByMetadataName(className)
+            ?? throw new InvalidOperationException($"'{className}' did not compile.");
 
-        return grouping;
+        var nested = outer.GetTypeMembers();
+        for (var i = 0; i < nested.Length; i++)
+        {
+            if (nested[i].Name.Length == 0)
+            {
+                return nested[i];
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"The compiler declared no unnamed grouping type inside '{className}'.");
     }
 }

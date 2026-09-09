@@ -38,8 +38,8 @@ public class MixinShadowAnalyzer : DiagnosticAnalyzer
         $"{Constants.ReactiveRuntimeNamespace}.{Constants.StubExtensionClassName}";
 
     /// <summary>The API names this package generates bindings for.</summary>
-    private static readonly ImmutableHashSet<string> GeneratedApiNames = ImmutableHashSet.Create(
-        StringComparer.Ordinal,
+    private static readonly ImmutableHashSet<string> GeneratedApiNames = new[]
+    {
         Constants.WhenChangedMethodName,
         Constants.WhenChangingMethodName,
         Constants.WhenAnyMethodName,
@@ -51,11 +51,15 @@ public class MixinShadowAnalyzer : DiagnosticAnalyzer
         Constants.BindMethodName,
         Constants.BindToMethodName,
         Constants.BindCommandMethodName,
-        Constants.BindInteractionMethodName);
+        Constants.BindInteractionMethodName,
+    }.ToImmutableHashSet(StringComparer.Ordinal);
+
+    /// <summary>The diagnostics this analyzer reports.</summary>
+    private static readonly ImmutableArray<DiagnosticDescriptor> ReportedDiagnostics =
+        new[] { DiagnosticWarnings.MixinShadowsGeneratedBinding }.ToImmutableArray();
 
     /// <inheritdoc/>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(DiagnosticWarnings.MixinShadowsGeneratedBinding);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ReportedDiagnostics;
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
