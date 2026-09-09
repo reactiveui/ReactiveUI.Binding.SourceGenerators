@@ -29,6 +29,12 @@ internal static class InterceptorEmitter
     /// <summary>Room for the declaration, which is a fixed block of text.</summary>
     private const int DeclarationCapacity = 640;
 
+    /// <summary>Writes the parameter list one API's members declare, closing it.</summary>
+    /// <param name="builder">The string builder to append to.</param>
+    /// <param name="first">The invocation whose types the parameters are written from.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    internal delegate void ParameterListWriter(StringBuilder builder, InvocationInfo first, in LanguageFeatures features);
+
     /// <summary>Writes the attribute that binds a generated method to one call site.</summary>
     /// <param name="builder">The builder receiving the attribute line.</param>
     /// <param name="location">The call site the compiler described.</param>
@@ -80,18 +86,24 @@ internal static class InterceptorEmitter
     /// <param name="group">The type group whose call sites are being claimed.</param>
     /// <param name="methodPrefix">The method name prefix the generated bodies carry.</param>
     /// <param name="suffixOf">Names the body a call site reaches.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot, handed to the writer.</param>
     /// <param name="appendParameterList">Writes the whole parameter list, closing it.</param>
     /// <remarks>
     /// The grouping and the attribute are the whole of what every API shares here, so they live in one place
     /// and each API supplies only the signature it is being called with. Call sites that reach one body are
     /// claimed by one method carrying an attribute each, which is what the attribute allowing repeats is for.
+    /// <para>
+    /// The feature snapshot travels as an argument rather than being closed over, so the writer each API hands
+    /// in captures nothing and the compiler caches one delegate for the whole compilation.
+    /// </para>
     /// </remarks>
     internal static void GenerateInterceptors(
         StringBuilder builder,
         ObservationCodeGenerator.TypeGroup group,
         string methodPrefix,
         Func<InvocationInfo, string> suffixOf,
-        Action<StringBuilder, InvocationInfo> appendParameterList)
+        in LanguageFeatures features,
+        ParameterListWriter appendParameterList)
     {
         foreach (var entry in GroupCallSitesByBody(group, suffixOf))
         {
@@ -105,7 +117,7 @@ internal static class InterceptorEmitter
             _ = builder.Append("        internal static global::System.IObservable<").Append(first.ReturnTypeFullName)
                 .Append("> __Intercept_").Append(methodPrefix).Append('_').Append(entry.Key).AppendLine("(");
 
-            appendParameterList(builder, first);
+            appendParameterList(builder, first, in features);
 
             _ = builder.Append("            => __").Append(methodPrefix).Append('_').Append(entry.Key)
                 .Append("(objectToMonitor").Append(first.HasSelector ? ", selector" : string.Empty).AppendLine(");").AppendLine();

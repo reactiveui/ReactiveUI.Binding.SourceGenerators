@@ -67,7 +67,6 @@
             ],
             "groupName": "test tooling",
             "matchPackageNames": [
-                "/^NSubstitute(\\.|$)/",
                 "/^BenchmarkDotNet(\\.|$)/"
             ]
         }

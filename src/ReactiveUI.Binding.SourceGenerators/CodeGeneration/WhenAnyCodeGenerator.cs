@@ -248,21 +248,18 @@ internal static class WhenAnyCodeGenerator
     {
         if (features.SupportsInterceptors)
         {
-            var supportsCallerArgExpr = features.SupportsCallerArgExpr;
-            var supportsNullable = features.SupportsNullable;
-            var stubHasExpressionParameters = features.StubHasExpressionParameters;
-
             InterceptorEmitter.GenerateInterceptors(
                 sb,
                 group,
                 Constants.WhenAnyMethodName,
                 ObservationMethodSuffix,
-                (builder, first) => AppendParameterList(
+                in features,
+                static (StringBuilder builder, InvocationInfo first, in LanguageFeatures snapshot) => AppendParameterList(
                     builder,
                     first,
-                    supportsCallerArgExpr,
-                    supportsNullable,
-                    stubHasExpressionParameters));
+                    snapshot.SupportsCallerArgExpr,
+                    snapshot.SupportsNullable,
+                    snapshot.StubHasExpressionParameters));
         }
         else
         {

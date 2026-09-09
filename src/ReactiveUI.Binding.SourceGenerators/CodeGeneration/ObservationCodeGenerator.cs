@@ -943,7 +943,7 @@ internal static class ObservationCodeGenerator
         // Either claim each call site outright, or emit the overload that competes for them all.
         if (features.SupportsInterceptors)
         {
-            GenerateInterceptors(sb, group, methodPrefix, features.SupportsCallerArgExpr, features.StubHasExpressionParameters);
+            GenerateInterceptors(sb, group, methodPrefix, in features);
         }
         else
         {
@@ -983,8 +983,7 @@ internal static class ObservationCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The type group whose call sites are being claimed.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
-    /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
-    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
     /// <remarks>
     /// Call sites that share a source type and the same expressions produce one observation between them, and
     /// the attribute may be applied repeatedly, so they are claimed by a single method carrying one attribute
@@ -996,18 +995,18 @@ internal static class ObservationCodeGenerator
         StringBuilder sb,
         TypeGroup group,
         string methodPrefix,
-        bool supportsCallerArgExpr,
-        bool stubHasExpressionParameters) =>
+        in LanguageFeatures features) =>
         InterceptorEmitter.GenerateInterceptors(
             sb,
             group,
             methodPrefix,
             MethodSuffix,
-            (builder, first) => AppendParameterList(
+            in features,
+            static (StringBuilder builder, InvocationInfo first, in LanguageFeatures snapshot) => AppendParameterList(
                 builder,
                 first,
-                supportsCallerArgExpr,
-                stubHasExpressionParameters,
+                snapshot.SupportsCallerArgExpr,
+                snapshot.StubHasExpressionParameters,
                 first.PropertyPaths.Length,
                 first.HasSelector));
 
