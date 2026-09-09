@@ -12,3 +12,4 @@
  RXUIBIND008 | Usage    | Warning  | Property is not an IInteraction                                                         
  RXUIBIND009 | Usage    | Warning  | Generated binding dispatch is out of reach for this file
  RXUIBIND010 | Usage    | Warning  | Observed path passes through a type that raises no notification
+ RXUIBIND011 | Usage    | Warning  | Binding call resolved to ReactiveUI's own mixin

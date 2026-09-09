@@ -515,6 +515,7 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 | RXUIBIND008 | Warning | Property does not implement IInteraction |
 | RXUIBIND009 | Warning | Generated binding dispatch is out of reach from this file |
 | RXUIBIND010 | Warning | Observed path passes through a type that raises no notification |
+| RXUIBIND011 | Warning | Binding call resolved to ReactiveUI's own mixin |
 
 ## Code Style & Quality Requirements
 

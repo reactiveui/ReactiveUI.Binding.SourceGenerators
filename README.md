@@ -482,6 +482,7 @@ The separate analyzer package reports the following diagnostics:
 | RXUIBIND008 | Warning  | The property selected in a BindInteraction expression does not implement `IInteraction<TInput, TOutput>`.                                                                |
 | RXUIBIND009 | Warning  | The generated binding dispatch is out of reach from this file, so the call falls back to the runtime stub.                                                               |
 | RXUIBIND010 | Warning  | The observed path passes through a type that raises no notification, so it is read once and the observation stops following the path there.                              |
+| RXUIBIND011 | Warning  | The call resolved to ReactiveUI's own mixin, so nothing is generated for it and it takes the runtime expression engine. Import `ReactiveUI.Binding` in the file.          |
 
 ## Where this differs from ReactiveUI
 

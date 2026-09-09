@@ -48,6 +48,16 @@ internal static class DiagnosticWarnings
         true,
         SilentPathLinkDescription);
 
+    /// <summary>RXUIBIND011: A binding call resolved to ReactiveUI's mixin rather than a generated overload.</summary>
+    internal static readonly DiagnosticDescriptor MixinShadowsGeneratedBinding = new(
+        "RXUIBIND011",
+        "Binding call resolved to ReactiveUI's own mixin",
+        "'{0}' resolved to ReactiveUI's '{1}', so this call generates nothing and takes the runtime expression engine",
+        UsageCategory,
+        DiagnosticSeverity.Warning,
+        true,
+        MixinShadowsGeneratedBindingDescription);
+
     /// <summary>RXUIBIND003: Expression contains private/protected member.</summary>
     internal static readonly DiagnosticDescriptor PrivateMember = new(
         "RXUIBIND003",
@@ -168,6 +178,15 @@ internal static class DiagnosticWarnings
     /// <summary>The string description of the invalid interaction type warning.</summary>
     private const string InvalidInteractionTypeDescription =
         "The property selected in the BindInteraction expression must implement IInteraction<TInput, TOutput>.";
+
+    /// <summary>The string description of the shadowed binding warning.</summary>
+    private const string MixinShadowsGeneratedBindingDescription =
+        "Which method a binding call reaches is decided by extension-method lookup. Where ReactiveUI's own "
+        + "namespace is imported and this package's is not, the call binds to ReactiveUI's mixin and the "
+        + "generator never sees it: no dispatch is emitted, and the call takes the runtime expression engine "
+        + "that a generated binding exists to avoid. Nothing else reports this, because the call was never "
+        + "recognised as one to generate for. Import 'ReactiveUI.Binding' in the file to restore the generated "
+        + "overload, which lookup prefers over the generic one.";
 
     /// <summary>The string description of the silent path link warning.</summary>
     private const string SilentPathLinkDescription =
