@@ -15,17 +15,24 @@ namespace ReactiveUI.Binding.Expressions;
 /// <summary>Helper class for handling reflection and expression-tree related operations.</summary>
 public static class Reflection
 {
-    /// <summary>Singleton instance of the <see cref="ExpressionRewriter"/> used for rewriting expression trees.</summary>
+    /// <summary>Reported when an expression yields no chain to walk.</summary>
     private const string EmptyExpressionChainMessage = "Expression chain must contain at least one element.";
 
     /// <summary>The shared rewriter instance used to simplify expressions before inspection.</summary>
-    private static readonly ExpressionRewriter ExpressionRewriterInstance = new();
+    /// <remarks>
+    /// Built on first use rather than in a static initializer. The rewriter reads runtime types by
+    /// reflection and says so, and a static constructor has nowhere to carry that annotation.
+    /// </remarks>
+    private static ExpressionRewriter? _expressionRewriter;
 
     /// <summary>Uses the expression re-writer to simplify the expression down to its simplest expression.</summary>
     /// <param name="expression">The expression to rewrite.</param>
     /// <returns>The rewritten expression.</returns>
+    [RequiresUnreferencedCode(
+        "Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Expression Rewrite(Expression? expression) => ExpressionRewriterInstance.Visit(expression);
+    public static Expression Rewrite(Expression? expression) =>
+        (_expressionRewriter ??= new()).Visit(expression);
 
     /// <summary>Converts an expression that points to a property chain into a dotted path string.</summary>
     /// <param name="expression">The expression to generate the property names from.</param>
