@@ -15,7 +15,6 @@ namespace ReactiveUI.Binding;
 /// over these generic stubs due to having fewer optional parameters (or matching type specificity).
 /// Supports 1-16 property selectors for observation APIs (WhenChanged, WhenChanging, WhenAnyValue).
 /// </summary>
-[ExcludeFromCodeCoverage]
 public static partial class ReactiveUIBindingExtensions
 {
     /// <summary>

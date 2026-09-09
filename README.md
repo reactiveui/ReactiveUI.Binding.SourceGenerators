@@ -146,6 +146,7 @@ Platform-specific packages provide DependencyProperty observation and other plat
 | `WhenChanging`      | Observe property changes (before value changes, requires `INotifyPropertyChanging`) |
 | `WhenAnyValue`      | ReactiveUI compatibility shim -- same semantics as `WhenChanged`                    |
 | `WhenAny`           | Multi-property observation with selector                                            |
+| `WhenAnyDynamic`    | Observe a chain given as an `Expression` built at run time (reflection, not AOT-safe) |
 | `WhenAnyObservable` | Observe and switch between observable properties                                    |
 | `BindOneWay`        | One-way binding from source to target                                               |
 | `BindTwoWay`        | Two-way binding between source and target                                           |
@@ -177,6 +178,28 @@ IObservable<string> fullName = vm.WhenChanged(
 // Before-change observation (requires INotifyPropertyChanging)
 IObservable<string> nameChanging = vm.WhenChanging(x => x.Name);
 ```
+
+### Observing a Chain Named at Run Time
+
+`WhenAnyDynamic` takes the chain as a `System.Linq.Expressions.Expression` the caller built, rather than as a
+lambda the compiler could read. Arities 1 to 12 are available, each with and without the distinct gate.
+
+```csharp
+// The chain is a value, so it can be assembled from a property name, a configuration entry, or a caller.
+Expression chain = ((Expression<Func<MyViewModel, string>>)(x => x.Address.City)).Body;
+
+IObservable<string?> cityObs = vm.WhenAnyDynamic(chain, static c => (string?)c.Value);
+
+IObservable<string> fullName = vm.WhenAnyDynamic(
+    firstNameChain,
+    lastNameChain,
+    static (first, last) => $"{first.Value} {last.Value}");
+```
+
+There is nothing for a generator to resolve in an expression built at run time, so the chain is walked by
+reflection. Every overload carries `[RequiresUnreferencedCode]`, which makes this the one part of the observation
+surface that is not trimming- or AOT-safe and reports each call site in a `PublishAot` build. Where the chain is
+known at compile time, `WhenChanged` and `WhenAny` observe the same thing with no reflection.
 
 ### One-Way Binding
 
@@ -412,6 +435,36 @@ subscription rather than re-projecting the two observed sides:
 | One-Way Binding (.NET 10.0) | 8.9x faster |            8.2x less |
 | Two-Way Binding (.NET 10.0) | 8.1x faster |            8.5x less |
 | First Binding (.NET 10.0)   | 4.1x faster |            9.6x less |
+
+#### Chains Named at Run Time (WhenAnyDynamic)
+
+| Method            | Runtime   |   Mean | Allocated |
+|-------------------|-----------|-------:|----------:|
+| Single Chain      | .NET 10.0 | 278 us |  102.7 KB |
+| Two Chains        | .NET 10.0 | 595 us |  190.2 KB |
+| Deep Chain        | .NET 10.0 | 354 us |  103.3 KB |
+| First Observation | .NET 10.0 | 7.3 us |    1.1 KB |
+| Single Chain      | .NET 8.0  | 347 us |  102.7 KB |
+| Two Chains        | .NET 8.0  | 691 us |  190.1 KB |
+| Deep Chain        | .NET 8.0  | 419 us |  103.3 KB |
+| First Observation | .NET 8.0  | 7.9 us |    1.1 KB |
+
+This is the one part of the surface where the two engines are level. Both walk the chain by reflection and
+allocate the same objects doing it, so the numbers land on top of each other; the gain is in resolving the chain
+at compile time instead:
+
+| Single chain, .NET 10.0     |   Mean | Allocated |
+|-----------------------------|-------:|----------:|
+| Generated (`WhenChanged`)   | 175 us |   63.4 KB |
+| `WhenAnyDynamic`            | 278 us |  102.7 KB |
+| ReactiveUI `WhenAnyDynamic` | 299 us |  102.6 KB |
+
+Most of the gap to the generated path is the `IObservedChange` handed to the selector - 40 bytes per
+notification, which the signature has to produce, against a generated observation that emits the value itself.
+
+Two chains fire twice the notifications of one, so their 190 KB is 95 bytes per notification against a single
+chain's 103: combining a higher arity costs one subscription, not a per-notification charge. Every arity observes
+each of its chains through the same walk and differs only in how many it combines.
 
 ## Diagnostics
 
