@@ -33,6 +33,8 @@
         <Project Path="benchmarks/ReactiveUI.Binding.Benchmarks/ReactiveUI.Binding.Benchmarks.csproj"/>
         <Project Path="benchmarks/ReactiveUI.Binding.Generator.Benchmarks/ReactiveUI.Binding.Generator.Benchmarks.csproj"/>
         <Project
+            Path="benchmarks/ReactiveUI.Binding.Generator.Benchmarks.Roslyn413/ReactiveUI.Binding.Generator.Benchmarks.Roslyn413.csproj"/>
+        <Project
             Path="benchmarks/ReactiveUI.Binding.Benchmarks.ReactiveUI/ReactiveUI.Binding.Benchmarks.ReactiveUI.csproj"/>
     </Folder>
     <Folder Name="/tests/">

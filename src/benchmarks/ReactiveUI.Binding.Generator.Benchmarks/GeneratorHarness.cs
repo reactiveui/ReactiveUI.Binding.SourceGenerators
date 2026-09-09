@@ -15,13 +15,34 @@ internal static class GeneratorHarness
     /// <summary>The assembly name given to the throwaway compilation the generator runs against.</summary>
     private const string CompilationAssemblyName = "Corpus";
 
-    /// <summary>Builds a compilation over the corpus source.</summary>
-    /// <param name="sourceText">The corpus source text.</param>
-    /// <returns>The compilation.</returns>
-    internal static CSharpCompilation BuildCompilation(string sourceText)
+    /// <summary>The feature a build lists interceptable namespaces under.</summary>
+    private const string InterceptorsNamespacesFeature = "InterceptorsNamespaces";
+
+    /// <summary>The namespace the generator emits interceptors into.</summary>
+    private const string InterceptorNamespace = "ReactiveUI.Binding.Generated.Interceptors";
+
+    /// <summary>
+    /// The parse options of a build that lists the generated namespace, which is what the shipped targets set
+    /// wherever the compiler can honour an interceptor emitted into it.
+    /// </summary>
+    /// <param name="intercept">Whether the build lists the namespace.</param>
+    /// <returns>The parse options.</returns>
+    internal static CSharpParseOptions ParseOptions(bool intercept)
     {
         var parseOptions = new CSharpParseOptions(LanguageVersion.CSharp10);
-        var syntaxTree = CSharpSyntaxTree.ParseText(sourceText, parseOptions);
+
+        return intercept
+            ? parseOptions.WithFeatures([new KeyValuePair<string, string>(InterceptorsNamespacesFeature, InterceptorNamespace)])
+            : parseOptions;
+    }
+
+    /// <summary>Builds a compilation over the corpus source.</summary>
+    /// <param name="sourceText">The corpus source text.</param>
+    /// <param name="intercept">Whether the build lists the generated namespace for interception.</param>
+    /// <returns>The compilation.</returns>
+    internal static CSharpCompilation BuildCompilation(string sourceText, bool intercept)
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(sourceText, ParseOptions(intercept));
 
         var references = new List<MetadataReference>(Basic.Reference.Assemblies.Net80.References.All)
         {
@@ -38,12 +59,13 @@ internal static class GeneratorHarness
     }
 
     /// <summary>Creates a cold generator driver, carrying no caches from a previous run.</summary>
+    /// <param name="intercept">Whether the build lists the generated namespace for interception.</param>
     /// <returns>The generator driver.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static GeneratorDriver CreateDriver() =>
+    internal static GeneratorDriver CreateDriver(bool intercept) =>
         CSharpGeneratorDriver.Create(
             [new BindingGenerator().AsSourceGenerator()],
             null,
-            new(LanguageVersion.CSharp10),
+            ParseOptions(intercept),
             null);
 }
