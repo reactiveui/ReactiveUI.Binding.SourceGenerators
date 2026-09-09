@@ -61,6 +61,13 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// Primitives types, and only the ones that flavour actually offers are shifted onto it - the parts that ship in
 /// the shared core, the disposables among them, keep their names in both. Empty for a lean consumer.
 /// </param>
+/// <param name="SupportsInterceptors">
+/// Whether generated code claims each call site outright instead of competing for it. This needs both halves:
+/// a compiler that can describe a call site, which is settled by the analyzer slot the package resolved to, and
+/// a consumer that has opted the generated namespace into interception. Where it holds, none of the placement
+/// this record otherwise describes applies - lookup never sees an interceptor, so there is no namespace to
+/// reach, no import to emit, and no expression text to match at run time.
+/// </param>
 internal readonly record struct LanguageFeatures(
     bool SupportsCallerArgExpr,
     bool SupportsNullable,
@@ -70,4 +77,5 @@ internal readonly record struct LanguageFeatures(
     bool StubHasExpressionParameters = false,
     bool UsesReactiveRuntime = false,
     EquatableArray<string> RuntimeNamespaceMembers = default,
-    EquatableArray<string> PrimitivesNamespaceMembers = default);
+    EquatableArray<string> PrimitivesNamespaceMembers = default,
+    bool SupportsInterceptors = false);

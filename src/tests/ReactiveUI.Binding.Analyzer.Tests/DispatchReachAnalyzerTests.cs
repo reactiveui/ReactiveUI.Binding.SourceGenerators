@@ -5,6 +5,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using ReactiveUI.Binding.Analyzer.Analyzers;
 using ReactiveUI.Binding.Analyzer.Tests.Helpers;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
@@ -120,6 +121,43 @@ public class DispatchReachAnalyzerTests
             RootNamespace);
 
         await Assert.That(diagnostics.Any(static d => d.Id == DiagnosticId)).IsFalse();
+    }
+
+    /// <summary>
+    /// The reach of a dispatch overload decides nothing where the call site is claimed outright, so a build
+    /// that lists the generated namespace is not warned - on the compiler that can honour the listing. On one
+    /// that cannot, the overloads are still what serves the call and the warning stands.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ListingTheGeneratedNamespace_IsReportedOnlyWhereInterceptionCannotBeHonoured()
+    {
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            SourceIn(UnrelatedNamespace, GrantsInternals),
+            AnalyzerTestHelper.InterceptingParseOptionsFor(LanguageVersion.CSharp7_3),
+            RootNamespace);
+
+        await Assert.That(diagnostics.Any(static d => d.Id == DiagnosticId))
+            .IsEqualTo(!InterceptableLocationReader.IsSupported);
+    }
+
+    /// <summary>
+    /// Listing another package's namespace is not this package's opt-in, so the call is reported whichever
+    /// compiler is building it.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ListingAnotherPackagesNamespace_IsReported()
+    {
+        var parseOptions = new CSharpParseOptions(LanguageVersion.CSharp7_3)
+            .WithFeatures([new KeyValuePair<string, string>("InterceptorsNamespaces", "Some.Other.Package")]);
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<DispatchReachAnalyzer>(
+            SourceIn(UnrelatedNamespace, GrantsInternals),
+            parseOptions,
+            RootNamespace);
+
+        await Assert.That(diagnostics.Count(static d => d.Id == DiagnosticId)).IsEqualTo(1);
     }
 
     /// <summary>With no root namespace there is nowhere else to emit, so the shared namespace is kept.</summary>

@@ -139,7 +139,7 @@ public class SchedulerOverloadRuntimeTests
     [Test]
     public async Task BindOneWay_WithASchedulerOnTheLatestLanguageVersion_DispatchesToGeneratedCode()
     {
-        var result = TestHelper.RunGenerator(SchedulerOverloadSource, LanguageVersion.Preview);
+        var result = TestHelper.RunGenerator(SchedulerOverloadSource, LanguageVersion.CSharp14);
 
         await result.CompilationSucceeds();
         await result.GeneratedSourceContains(DispatchFileName, SchedulerParameter);

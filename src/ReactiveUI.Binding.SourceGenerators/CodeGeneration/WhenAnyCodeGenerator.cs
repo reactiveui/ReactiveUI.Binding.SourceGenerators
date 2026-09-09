@@ -56,36 +56,11 @@ internal static class WhenAnyCodeGenerator
 
         _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for WhenAny on ").Append(first.SourceTypeFullName)
             .AppendLine(".").AppendLine("        /// </summary>").Append("        public static global::System.IObservable<")
-            .Append(first.ReturnTypeFullName).AppendLine("> WhenAny(").Append("            this ").Append(first.SourceTypeFullName)
-            .AppendLine(" objectToMonitor,");
+            .Append(first.ReturnTypeFullName).AppendLine("> WhenAny(");
 
-        for (var i = 0; i < propCount; i++)
-        {
-            var type = CodeGeneratorHelpers.NullableSelectorLeafType(first.PropertyPaths[i], supportsNullable);
-            _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<").Append(first.SourceTypeFullName).Append(", ")
-                .Append(type).Append(">> property").Append(i + 1).AppendLine(",");
-        }
+        AppendParameterList(sb, first, supportsCallerArgExpr, supportsNullable, stubHasExpressionParameters);
 
-        // WhenAny always has a selector that takes IObservedChange parameters
-        _ = sb.Append("            ").Append(GetWhenAnySelectorType(first)).AppendLine(" selector,");
-
-        if (stubHasExpressionParameters)
-        {
-            for (var i = 0; i < propCount; i++)
-            {
-                CodeGeneratorHelpers.AppendExpressionParameter(
-                    sb,
-                    $"property{i + 1}",
-                    $"property{i + 1}Expression",
-                    supportsCallerArgExpr);
-            }
-        }
-
-        _ = sb.AppendLine("""
-                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                              {
-                      """);
+        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
         CodeGeneratorHelpers.AppendIndexedStaticPrefixNormalization(sb, supportsCallerArgExpr, "property", propCount);
         EmitDispatchTable(sb, group, supportsCallerArgExpr, propCount);
@@ -271,12 +246,31 @@ internal static class WhenAnyCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features)
     {
-        GenerateConcreteOverload(
-            sb,
-            group,
-            features.SupportsCallerArgExpr,
-            features.SupportsNullable,
-            features.StubHasExpressionParameters);
+        if (features.SupportsInterceptors)
+        {
+            InterceptorEmitter.GenerateInterceptors(
+                sb,
+                group,
+                Constants.WhenAnyMethodName,
+                ObservationMethodSuffix,
+                in features,
+                static (StringBuilder builder, InvocationInfo first, in LanguageFeatures snapshot) => AppendParameterList(
+                    builder,
+                    first,
+                    snapshot.SupportsCallerArgExpr,
+                    snapshot.SupportsNullable,
+                    snapshot.StubHasExpressionParameters));
+        }
+        else
+        {
+            GenerateConcreteOverload(
+                sb,
+                group,
+                features.SupportsCallerArgExpr,
+                features.SupportsNullable,
+                features.StubHasExpressionParameters);
+        }
+
         _ = sb.AppendLine();
 
         for (var i = 0; i < group.Invocations.Length; i++)
@@ -288,6 +282,51 @@ internal static class WhenAnyCodeGenerator
                 CodeGeneratorHelpers.ResolveObservedTypeInfo(allClasses, inv.SourceTypeFullName, inv.PropertyPaths[0]),
                 ObservationMethodSuffix(inv));
         }
+    }
+
+    /// <summary>Writes the parameters a WhenAny member declares, closing the list.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="first">The invocation whose types the parameters are written from.</param>
+    /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters.</param>
+    /// <remarks>
+    /// One list serves the overload and the interceptor, because both have to be the stub's signature. WhenAny
+    /// always projects, so the projection is unconditional rather than optional.
+    /// </remarks>
+    private static void AppendParameterList(
+        StringBuilder sb,
+        InvocationInfo first,
+        bool supportsCallerArgExpr,
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
+    {
+        var propCount = first.PropertyPaths.Length;
+
+        _ = sb.Append("            this ").Append(first.SourceTypeFullName).AppendLine(" objectToMonitor,");
+
+        for (var i = 0; i < propCount; i++)
+        {
+            var type = CodeGeneratorHelpers.NullableSelectorLeafType(first.PropertyPaths[i], supportsNullable);
+            _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<").Append(first.SourceTypeFullName).Append(", ")
+                .Append(type).Append(">> property").Append(i + 1).AppendLine(",");
+        }
+
+        _ = sb.Append("            ").Append(GetWhenAnySelectorType(first)).AppendLine(" selector,");
+
+        if (stubHasExpressionParameters)
+        {
+            for (var i = 0; i < propCount; i++)
+            {
+                CodeGeneratorHelpers.AppendExpressionParameter(
+                    sb,
+                    $"property{i + 1}",
+                    $"property{i + 1}Expression",
+                    supportsCallerArgExpr);
+            }
+        }
+
+        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
     }
 
     /// <summary>Emits the if/else-if dispatch table that routes each matched WhenAny invocation to its generated method.</summary>

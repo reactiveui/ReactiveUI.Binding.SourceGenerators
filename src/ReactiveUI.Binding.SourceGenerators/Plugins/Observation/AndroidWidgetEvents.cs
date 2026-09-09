@@ -21,40 +21,69 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// </remarks>
 internal static class AndroidWidgetEvents
 {
-    /// <summary>The property each reporting widget raises an event for, and the event it raises.</summary>
-    private static readonly Dictionary<string, string> _changeEvents = new(StringComparer.Ordinal)
-    {
-        // TextView and everything built on it.
-        ["Text"] = "TextChanged",
-
-        // NumberPicker.
-        ["Value"] = "ValueChanged",
-
-        // RatingBar.
-        ["Rating"] = "RatingBarChange",
-
-        // CompoundButton, and so CheckBox, RadioButton and Switch.
-        ["Checked"] = "CheckedChange",
-
-        // CalendarView.
-        ["Date"] = "DateChange",
-
-        // TabHost.
-        ["CurrentTab"] = "TabChanged",
-
-        // TimePicker, whose hour and minute are named one way from API 23 and the other before it.
-        ["Hour"] = "TimeChanged",
-        ["Minute"] = "TimeChanged",
-        ["CurrentHour"] = "TimeChanged",
-        ["CurrentMinute"] = "TimeChanged",
-
-        // AdapterView, and so Spinner and ListView.
-        ["SelectedItem"] = "ItemSelected",
-    };
-
     /// <summary>Finds the event a widget raises when the named property changes.</summary>
     /// <param name="propertyName">The property being observed.</param>
     /// <returns>The event name, or <see langword="null"/> when no widget reports that property.</returns>
-    internal static string? FindChangeEvent(string propertyName) =>
-        _changeEvents.TryGetValue(propertyName, out var changeEvent) ? changeEvent : null;
+    /// <remarks>
+    /// Compared in order rather than looked up: the set is closed and known here, so nothing is built at
+    /// startup and nothing is held for the life of the generator.
+    /// </remarks>
+    internal static string? FindChangeEvent(string propertyName)
+    {
+        // TextView and everything built on it.
+        if (propertyName == "Text")
+        {
+            return "TextChanged";
+        }
+
+        // NumberPicker.
+        if (propertyName == "Value")
+        {
+            return "ValueChanged";
+        }
+
+        // RatingBar.
+        if (propertyName == "Rating")
+        {
+            return "RatingBarChange";
+        }
+
+        // CompoundButton, and so CheckBox, RadioButton and Switch.
+        if (propertyName == "Checked")
+        {
+            return "CheckedChange";
+        }
+
+        // CalendarView.
+        if (propertyName == "Date")
+        {
+            return "DateChange";
+        }
+
+        // TabHost.
+        if (propertyName == "CurrentTab")
+        {
+            return "TabChanged";
+        }
+
+        // AdapterView, and so Spinner and ListView.
+        if (propertyName == "SelectedItem")
+        {
+            return "ItemSelected";
+        }
+
+        return IsTimePickerField(propertyName) ? "TimeChanged" : null;
+    }
+
+    /// <summary>Determines whether a name is one of the fields TimePicker reports its time change for.</summary>
+    /// <param name="propertyName">The property being observed.</param>
+    /// <returns><see langword="true"/> when TimePicker reports it.</returns>
+    /// <remarks>
+    /// The one widget in the list that names the same two values two ways: the hour and the minute are
+    /// <c>Hour</c> and <c>Minute</c> from API 23, and <c>CurrentHour</c> and <c>CurrentMinute</c> before it.
+    /// All four report on the same event.
+    /// </remarks>
+    private static bool IsTimePickerField(string propertyName) =>
+        propertyName == "Hour" || propertyName == "Minute"
+        || propertyName == "CurrentHour" || propertyName == "CurrentMinute";
 }

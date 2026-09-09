@@ -58,6 +58,17 @@ internal static class Constants
     /// </summary>
     internal const string GeneratedNamespaceRoot = "ReactiveUI.Binding.Generated";
 
+    /// <summary>The namespace interceptors are emitted into.</summary>
+    /// <remarks>
+    /// Fixed rather than derived from the consumer, because nothing has to reach it: an interceptor claims its
+    /// call site by name and is never found by lookup. Being fixed is what lets the shipped props opt exactly
+    /// this namespace into interception without knowing anything about the project it is opting in.
+    /// </remarks>
+    internal const string InterceptorNamespace = "ReactiveUI.Binding.Generated.Interceptors";
+
+    /// <summary>The build property a consumer's compiler reads the interception opt-in from.</summary>
+    internal const string InterceptorsNamespacesFeature = "InterceptorsNamespaces";
+
     /// <summary>Fully qualified name of the attribute that exposes an assembly's internals to another.</summary>
     internal const string InternalsVisibleToAttributeFullName =
         "global::System.Runtime.CompilerServices.InternalsVisibleToAttribute";

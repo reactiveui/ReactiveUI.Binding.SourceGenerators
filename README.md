@@ -24,6 +24,7 @@ generation. Zero reflection, fully AOT/trimming safe, 3-7x faster than the legac
 
 - [What does it do?](#what-does-it-do)
 - [How does it work?](#how-does-it-work)
+- [How a call site reaches its generated code](#how-a-call-site-reaches-its-generated-code)
 - [How do I install?](#how-do-i-install)
 - [Supported APIs](#supported-apis)
 - [Usage Examples](#usage-examples)
@@ -61,8 +62,9 @@ generation. Zero reflection, fully AOT/trimming safe, 3-7x faster than the legac
 ## What does it do?
 
 ReactiveUI.Binding.SourceGenerators is an incremental source generator that analyses your `WhenChanged`, `WhenChanging`,
-`WhenAnyValue`, `WhenAny`, `WhenAnyObservable`, `BindOneWay`, `BindTwoWay`, `OneWayBind`, and `Bind` call sites at
-compile time and emits optimised, strongly-typed observation and binding code. It eliminates:
+`WhenAnyValue`, `WhenAny`, `WhenAnyObservable`, `BindOneWay`, `BindTwoWay`, `OneWayBind`, `Bind`, `BindTo`,
+`BindCommand`, and `BindInteraction` call sites at compile time and emits optimised, strongly-typed observation and
+binding code. It eliminates:
 
 - **Runtime expression-tree compilation** -- no `Expression<Func<T>>` evaluation at runtime
 - **Reflection** -- all property access is generated as direct member access
@@ -80,31 +82,60 @@ WPF DependencyObject, WinUI DependencyObject, Apple KVO, WinForms Component, And
 observation factories via a `[ModuleInitializer]`.
 
 **Pipeline B (Invocation Detection)** scans method invocations and extracts lambda property paths at compile time. Each
-call site is identified by `[CallerFilePath]` + `[CallerLineNumber]`, and the generator emits a per-call-site optimised
-method that is dispatched to at runtime via a generated lookup table.
+call site gets its own optimised method with direct property access:
 
 ```csharp
 // You write:
 var obs = vm.WhenChanged(x => x.Name);
 
-// The generator emits a dispatch stub that captures caller info:
-public static IObservable<TReturn> WhenChanged<TObj, TReturn>(
-    this TObj obj, Expression<Func<TObj, TReturn>> property,
-    [CallerFilePath] string callerFilePath = "",
-    [CallerLineNumber] int callerLineNumber = 0) where TObj : class
-{
-    if (__GeneratedBindingDispatcher.TryGetWhenChanged(callerFilePath, callerLineNumber, obj, out var result))
-        return (IObservable<TReturn>)result!;
-    throw new InvalidOperationException("No generated binding found.");
-}
-
-// And a per-call-site method with direct property access:
+// The generator emits a per-call-site method with direct property access:
 private static IObservable<string> __WhenChanged_0(MyViewModel obj)
 {
     return new PropertyObservable<string>(
         obj, "Name", static o => ((MyViewModel)o).Name, true);
 }
 ```
+
+## How a call site reaches its generated code
+
+Two mechanisms. Your compiler picks one.
+
+**Roslyn 4.13 or newer: the call is intercepted.** The generator points the compiler at your exact call and says "run
+this instead". No name lookup is involved, so it works from any file and any language version - including
+`<LangVersion>7.3</LangVersion>` and .NET Framework 4.6.2:
+
+```csharp
+[InterceptsLocation(1, "j8MnGMWiKja+66BWQ5M81agPAABQcm9ncmFtLmNz")]  // vm.WhenChanged(x => x.Name) on line 12
+internal static IObservable<string> __Intercept_WhenChanged_7FFF(
+    this MyViewModel objectToMonitor,
+    Expression<Func<MyViewModel, string>> property1, /* caller-info parameters */)
+    => __WhenChanged_7FFF(objectToMonitor);
+```
+
+**Roslyn 4.8 to 4.12: a concrete overload competes for the call.** It beats the generic runtime stub because a
+non-generic method wins overload resolution - but only when extension-method lookup finds it. RXUIBIND009 warns when it
+will not.
+
+Either way the same generated method runs, so bindings behave identically.
+
+### What the package ships
+
+The generator and its analyzer are packed once per compiler generation:
+
+```
+analyzers/dotnet/roslyn4.8/cs/    <- Roslyn 4.8 - 4.12
+analyzers/dotnet/roslyn4.13/cs/   <- Roslyn 4.13+
+```
+
+The .NET SDK picks the highest folder your compiler supports. A legacy non-SDK project is handed both, so the package's
+targets delete the one you are not being served by - the generator never runs twice.
+
+Two knobs:
+
+| Setting                                                | Effect                                                       |
+|--------------------------------------------------------|--------------------------------------------------------------|
+| `<ReactiveUIBindingUseInterceptors>false</...>`         | Use the overloads even on a compiler that could intercept     |
+| Roslyn older than 4.8                                   | Build fails with **RXUIBIND100** rather than silently generating nothing |
 
 ## How do I install?
 
@@ -152,6 +183,7 @@ Platform-specific packages provide DependencyProperty observation and other plat
 | `BindTwoWay`        | Two-way binding between source and target                                           |
 | `OneWayBind`        | ReactiveUI compatibility shim for one-way binding                                   |
 | `Bind`              | ReactiveUI compatibility shim for two-way binding                                   |
+| `BindTo`            | Apply an observable stream to a target property                                     |
 | `BindCommand`       | Bind a command property to a UI element                                             |
 | `BindInteraction`   | Bind an interaction to a handler                                                    |
 
@@ -480,8 +512,15 @@ The separate analyzer package reports the following diagnostics:
 | RXUIBIND006 | Warning  | Expression contains an unsupported path segment (indexer, field, or method call). Only simple property access chains can be observed by the source generator.            |
 | RXUIBIND007 | Warning  | BindCommand control has no bindable event. Specify the `toEvent` parameter explicitly.                                                                                   |
 | RXUIBIND008 | Warning  | The property selected in a BindInteraction expression does not implement `IInteraction<TInput, TOutput>`.                                                                |
-| RXUIBIND009 | Warning  | The generated binding dispatch is out of reach from this file, so the call falls back to the runtime stub.                                                               |
+| RXUIBIND009 | Warning  | The generated binding dispatch is out of reach from this file, so the call falls back to the runtime stub. Not reported where the call site is claimed by an interceptor. |
 | RXUIBIND010 | Warning  | The observed path passes through a type that raises no notification, so it is read once and the observation stops following the path there.                              |
+| RXUIBIND011 | Warning  | The call resolved to ReactiveUI's own mixin, so nothing is generated for it and it takes the runtime expression engine. Import `ReactiveUI.Binding` in the file.          |
+
+The package's own targets report one build error of their own:
+
+| ID          | Description                                                                                                     |
+|-------------|-----------------------------------------------------------------------------------------------------------------|
+| RXUIBIND100 | The compiler building the project is older than the oldest analyzer slot, so no generator would be loaded at all. |
 
 ## Where this differs from ReactiveUI
 

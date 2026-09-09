@@ -18,6 +18,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="HasSelector">Whether the invocation includes a selector/projection function.</param>
 /// <param name="MethodName">The name of the invoked method (e.g., WhenChanged, WhenChanging, WhenAnyValue).</param>
 /// <param name="ExpressionTexts">The original expression text of each lambda argument, used for CallerArgumentExpression dispatch.</param>
+/// <param name="Interceptor">
+/// Where this call site is, for a build that claims call sites outright rather than competing for them.
+/// Reports that it describes nothing on a compiler that cannot describe one, and for a call the compiler
+/// refuses to let anything intercept.
+/// </param>
 internal sealed record InvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -27,4 +32,5 @@ internal sealed record InvocationInfo(
     bool IsBeforeChange,
     bool HasSelector,
     string MethodName,
-    EquatableArray<string> ExpressionTexts);
+    EquatableArray<string> ExpressionTexts,
+    InterceptorLocation Interceptor = default);

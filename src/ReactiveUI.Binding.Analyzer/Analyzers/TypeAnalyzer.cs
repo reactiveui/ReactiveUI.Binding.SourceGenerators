@@ -15,9 +15,12 @@ namespace ReactiveUI.Binding.Analyzer.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class TypeAnalyzer : DiagnosticAnalyzer
 {
+    /// <summary>The diagnostics this analyzer reports.</summary>
+    private static readonly ImmutableArray<DiagnosticDescriptor> ReportedDiagnostics =
+        new[] { DiagnosticWarnings.NoObservableProperties }.ToImmutableArray();
+
     /// <inheritdoc/>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(DiagnosticWarnings.NoObservableProperties);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ReportedDiagnostics;
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
@@ -39,6 +42,14 @@ public class TypeAnalyzer : DiagnosticAnalyzer
 
         var methodSymbol = invocationOp.TargetMethod;
         if (!AnalyzerHelpers.IsBindingExtensionMethod(methodSymbol))
+        {
+            return;
+        }
+
+        // The check reads the first type argument, which every other API names the observed object with.
+        // BindTo names the value type of a stream the caller already built, and nothing about that type is
+        // ever observed, so asking whether it notifies has no answer worth reporting.
+        if (methodSymbol.Name == Constants.BindToMethodName)
         {
             return;
         }

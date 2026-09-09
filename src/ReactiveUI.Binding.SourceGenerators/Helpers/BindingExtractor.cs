@@ -86,7 +86,8 @@ internal static class BindingExtractor
             methodName,
             CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(sourcePropertyArg.ToString()),
             CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString()),
-            hasConverterOverride);
+            hasConverterOverride,
+            InterceptableLocationReader.Read(semanticModel, invocation, ct));
     }
 
     /// <summary>

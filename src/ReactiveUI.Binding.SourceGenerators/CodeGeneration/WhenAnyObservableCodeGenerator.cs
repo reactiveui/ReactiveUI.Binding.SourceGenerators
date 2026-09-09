@@ -68,39 +68,11 @@ internal static class WhenAnyObservableCodeGenerator
 
         _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for WhenAnyObservable on ")
             .Append(first.SourceTypeFullName).AppendLine(".").AppendLine("        /// </summary>")
-            .Append("        public static global::System.IObservable<").Append(first.ReturnTypeFullName).AppendLine("> WhenAnyObservable(")
-            .Append("            this ").Append(first.SourceTypeFullName).AppendLine(" objectToMonitor,");
+            .Append("        public static global::System.IObservable<").Append(first.ReturnTypeFullName).AppendLine("> WhenAnyObservable(");
 
-        for (var i = 0; i < propCount; i++)
-        {
-            var innerType = first.InnerObservableTypeFullNames[i];
-            var obsType = $"global::System.IObservable<{innerType}>{(supportsNullable ? "?" : string.Empty)}";
-            _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<").Append(first.SourceTypeFullName).Append(", ")
-                .Append(obsType).Append(">> obs").Append(i + 1).AppendLine(",");
-        }
+        AppendParameterList(sb, first, supportsCallerArgExpr, supportsNullable, stubHasExpressionParameters);
 
-        if (hasSelector)
-        {
-            _ = sb.Append("            ").Append(GetSelectorType(first)).AppendLine(" selector,");
-        }
-
-        if (stubHasExpressionParameters)
-        {
-            for (var i = 0; i < propCount; i++)
-            {
-                CodeGeneratorHelpers.AppendExpressionParameter(
-                    sb,
-                    $"obs{i + 1}",
-                    $"obs{i + 1}Expression",
-                    supportsCallerArgExpr);
-            }
-        }
-
-        _ = sb.AppendLine("""
-                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                              {
-                      """);
+        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
         CodeGeneratorHelpers.AppendIndexedStaticPrefixNormalization(sb, supportsCallerArgExpr, "obs", propCount);
         EmitDispatchTable(sb, group, supportsCallerArgExpr, propCount, hasSelector);
@@ -335,12 +307,20 @@ internal static class WhenAnyObservableCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features)
     {
-        GenerateConcreteOverload(
-            sb,
-            group,
-            features.SupportsCallerArgExpr,
-            features.SupportsNullable,
-            features.StubHasExpressionParameters);
+        if (features.SupportsInterceptors)
+        {
+            GenerateInterceptors(sb, group, in features);
+        }
+        else
+        {
+            GenerateConcreteOverload(
+                sb,
+                group,
+                features.SupportsCallerArgExpr,
+                features.SupportsNullable,
+                features.StubHasExpressionParameters);
+        }
+
         _ = sb.AppendLine();
 
         for (var i = 0; i < group.Invocations.Length; i++)
@@ -352,6 +332,88 @@ internal static class WhenAnyObservableCodeGenerator
                 CodeGeneratorHelpers.ResolveObservedTypeInfo(allClasses, inv.SourceTypeFullName, inv.PropertyPaths[0]),
                 ObservationMethodSuffix(inv));
         }
+    }
+
+    /// <summary>Emits one interceptor per generated observation, claiming every call site that reaches it.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The group of call sites being claimed.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    private static void GenerateInterceptors(StringBuilder sb, TypeGroup group, in LanguageFeatures features)
+    {
+        var supportsCallerArgExpr = features.SupportsCallerArgExpr;
+        var supportsNullable = features.SupportsNullable;
+        var stubHasExpressionParameters = features.StubHasExpressionParameters;
+
+        foreach (var entry in InterceptorEmitter.GroupCallSites(
+            group.Invocations,
+            static x => x.Interceptor,
+            ObservationMethodSuffix))
+        {
+            var first = entry.Value[0];
+
+            foreach (var callSite in entry.Value)
+            {
+                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, InterceptorEmitter.MemberIndent);
+            }
+
+            _ = sb.Append("        internal static global::System.IObservable<").Append(first.ReturnTypeFullName)
+                .Append("> __Intercept_WhenAnyObservable_").Append(entry.Key).AppendLine("(");
+
+            AppendParameterList(sb, first, supportsCallerArgExpr, supportsNullable, stubHasExpressionParameters);
+
+            _ = sb.Append("            => __WhenAnyObservable_").Append(entry.Key).Append("(objectToMonitor")
+                .Append(first.HasSelector ? ", selector" : string.Empty).AppendLine(");").AppendLine();
+        }
+    }
+
+    /// <summary>Writes the parameters a WhenAnyObservable member declares, closing the list.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="first">The invocation whose types the parameters are written from.</param>
+    /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters.</param>
+    /// <remarks>
+    /// One list serves the overload and the interceptor, because both have to be the stub's signature: the
+    /// overload only wins resolution against a candidate it is otherwise indistinguishable from, and an
+    /// interceptor is refused outright unless its signature is the intercepted method's.
+    /// </remarks>
+    private static void AppendParameterList(
+        StringBuilder sb,
+        WhenAnyObservableInvocationInfo first,
+        bool supportsCallerArgExpr,
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
+    {
+        var propCount = first.PropertyPaths.Length;
+
+        _ = sb.Append("            this ").Append(first.SourceTypeFullName).AppendLine(" objectToMonitor,");
+
+        for (var i = 0; i < propCount; i++)
+        {
+            var innerType = first.InnerObservableTypeFullNames[i];
+            var obsType = $"global::System.IObservable<{innerType}>{(supportsNullable ? "?" : string.Empty)}";
+            _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<").Append(first.SourceTypeFullName).Append(", ")
+                .Append(obsType).Append(">> obs").Append(i + 1).AppendLine(",");
+        }
+
+        if (first.HasSelector)
+        {
+            _ = sb.Append("            ").Append(GetSelectorType(first)).AppendLine(" selector,");
+        }
+
+        if (stubHasExpressionParameters)
+        {
+            for (var i = 0; i < propCount; i++)
+            {
+                CodeGeneratorHelpers.AppendExpressionParameter(
+                    sb,
+                    $"obs{i + 1}",
+                    $"obs{i + 1}Expression",
+                    supportsCallerArgExpr);
+            }
+        }
+
+        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
     }
 
     /// <summary>Emits the if/else-if dispatch table that routes each matched invocation to its generated method.</summary>

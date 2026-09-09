@@ -26,6 +26,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// a referenced assembly is still followed through the view model it holds rather than reduced to the instance
 /// the call was handed.
 /// </param>
+/// <param name="Interceptor">
+/// Where this call site is, for a build that claims call sites outright rather than competing for them.
+/// </param>
 internal sealed record BindInteractionInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -38,4 +41,5 @@ internal sealed record BindInteractionInvocationInfo(
     string? DontCareTypeFullName,
     string MethodName,
     string ExpressionText,
-    ClassBindingInfo? ViewClassInfo = null);
+    ClassBindingInfo? ViewClassInfo = null,
+    InterceptorLocation Interceptor = default);

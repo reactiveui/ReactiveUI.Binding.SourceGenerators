@@ -26,12 +26,19 @@ public class GenerationBenchmarks
     public int Pairs { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the build lists the generated namespace, which is what decides
+    /// between claiming each call site outright and offering an overload that competes for them all.
+    /// </summary>
+    [Params(false, true)]
+    public bool Intercept { get; set; }
+
+    /// <summary>
     /// Builds the corpus compilation once per parameter set. Loading a framework's worth of metadata
     /// references costs far more than a generation pass and is work the host build does once, so measuring it
     /// per iteration would bury what this benchmark is for.
     /// </summary>
     [GlobalSetup]
-    public void Setup() => _compilation = GeneratorHarness.BuildCompilation(GeneratorCorpus.Build(Pairs));
+    public void Setup() => _compilation = GeneratorHarness.BuildCompilation(GeneratorCorpus.Build(Pairs), Intercept);
 
     /// <summary>Runs a whole cold generation: syntax scan, extraction, and emission.</summary>
     /// <returns>The number of generated characters, returned so the work cannot be optimized away.</returns>
@@ -41,7 +48,7 @@ public class GenerationBenchmarks
     {
         // A fresh driver per iteration: a reused one would serve the next iteration from its caches and
         // measure the incremental path rather than the cold generation a consumer's build pays for.
-        var driver = GeneratorHarness.CreateDriver();
+        var driver = GeneratorHarness.CreateDriver(Intercept);
         var result = driver.RunGenerators(_compilation).GetRunResult();
 
         var characters = 0;

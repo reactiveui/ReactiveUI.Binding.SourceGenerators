@@ -34,13 +34,11 @@ internal static class BindTwoWayInvocationGenerator
                     data.Left.Left,
                     data.Left.Right,
                     data.Right,
-                    static (sb, group, f) => BindingEmitterHelpers.GenerateDispatchOverload(
+                    static (sb, group, f) => BindingEmitterHelpers.EmitOverloadOrInterceptors(
                         sb,
                         group,
                         BindTwoWayCodeGenerator.DispatchApi,
-                        f.SupportsCallerArgExpr,
-                        f.SupportsNullable,
-                        f.StubHasExpressionParameters),
+                        in f),
                     static (sb, c) => BindTwoWayCodeGenerator.GenerateBindTwoWayMethod(
                         sb,
                         c.Invocation,

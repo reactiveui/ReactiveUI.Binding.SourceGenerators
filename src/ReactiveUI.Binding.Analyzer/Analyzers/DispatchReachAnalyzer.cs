@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 using ReactiveUI.Binding.Helpers;
 using ReactiveUI.Binding.SourceGenerators;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
 
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
 
@@ -29,9 +30,12 @@ public class DispatchReachAnalyzer : DiagnosticAnalyzer
     /// <summary>The analyzer config key a build exposes the root namespace under.</summary>
     private const string RootNamespaceKey = "build_property.RootNamespace";
 
+    /// <summary>The diagnostics this analyzer reports.</summary>
+    private static readonly ImmutableArray<DiagnosticDescriptor> ReportedDiagnostics =
+        new[] { DiagnosticWarnings.DispatchOutOfReach }.ToImmutableArray();
+
     /// <inheritdoc/>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(DiagnosticWarnings.DispatchOutOfReach);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ReportedDiagnostics;
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
@@ -68,7 +72,15 @@ public class DispatchReachAnalyzer : DiagnosticAnalyzer
 
         // Read the language version from the tree rather than the compilation: it is a parse option, so a
         // compilation can hold trees that differ, and the reach of a generated overload follows the file.
-        if (invocation.Syntax.SyntaxTree.Options is not CSharpParseOptions { LanguageVersion: < LanguageVersion.CSharp10 })
+        if (invocation.Syntax.SyntaxTree.Options is not CSharpParseOptions { LanguageVersion: < LanguageVersion.CSharp10 } parseOptions)
+        {
+            return;
+        }
+
+        // An interceptor replaces the call the compiler already bound, so nothing about it goes through
+        // extension-method lookup and no namespace has to be in reach. Where this build emits interceptors
+        // instead of overloads, the file's namespace stops deciding anything.
+        if (InterceptableLocationReader.IsInterceptionEnabled(parseOptions))
         {
             return;
         }

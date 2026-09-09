@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NSubstitute"/>
     <PackageReference Include="TUnit"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
     <PackageReference Include="Verify.SourceGenerators"/>
@@ -26,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Shared\TransitiveAssemblyResolver.cs" Link="Shared\TransitiveAssemblyResolver.cs"/>
+    <Compile Include="..\Shared\RoslynSymbolProbe.cs" Link="Shared\RoslynSymbolProbe.cs"/>
   </ItemGroup>
 
   <PropertyGroup>

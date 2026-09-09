@@ -2,10 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using NSubstitute;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
@@ -64,43 +62,22 @@ public class BindToExtractorTests
         await Assert.That(BindToExtractor.GetObservableValueType(FieldType("Probe.Lookalike"))).IsNull();
 
     /// <summary>
-    /// A type with no containing namespace is not taken for the framework interface. Source cannot produce
-    /// one - every declared type lands in the global namespace at worst - so the guard is asserted directly.
+    /// An array is no named type, so it is neither the interface nor a candidate for implementing it, and the
+    /// walk over its interfaces finds only the ones every array carries.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GetObservableValueType_ReceiverHasNoContainingNamespace_ReturnsNull() =>
-        await Assert.That(BindToExtractor.GetObservableValueType(NamespacelessObservable())).IsNull();
+    public async Task GetObservableValueType_ReceiverIsArray_ReturnsNull() =>
+        await Assert.That(BindToExtractor.GetObservableValueType(FieldType("string[]"))).IsNull();
 
-    /// <summary>An implemented interface with no containing namespace is likewise not the framework one.</summary>
+    /// <summary>
+    /// The framework interface takes exactly one type argument, so one of the same name and namespace taking
+    /// another number is a different contract and carries no element type to bind.
+    /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GetObservableValueType_ImplementedInterfaceHasNoContainingNamespace_ReturnsNull()
-    {
-        // The interface is built first: NSubstitute rejects configuring one substitute inside another's Returns.
-        var lookalike = NamespacelessObservable();
-        var interfaces = ImmutableArray.Create(lookalike);
-
-        var receiver = Substitute.For<INamedTypeSymbol>();
-        _ = receiver.Name.Returns("Holder");
-        _ = receiver.AllInterfaces.Returns(interfaces);
-
-        await Assert.That(BindToExtractor.GetObservableValueType(receiver)).IsNull();
-    }
-
-    /// <summary>Builds a single-argument type named like the framework interface but belonging to no namespace.</summary>
-    /// <returns>The namespaceless type.</returns>
-    private static INamedTypeSymbol NamespacelessObservable()
-    {
-        var element = Substitute.For<ITypeSymbol>();
-        var type = Substitute.For<INamedTypeSymbol>();
-        _ = type.Name.Returns("IObservable");
-        _ = type.TypeArguments.Returns([element]);
-        _ = type.ContainingNamespace.Returns((INamespaceSymbol?)null);
-        _ = type.AllInterfaces.Returns(ImmutableArray<INamedTypeSymbol>.Empty);
-
-        return type;
-    }
+    public async Task GetObservableValueType_ReceiverIsSameNameWithTwoTypeArguments_ReturnsNull() =>
+        await Assert.That(BindToExtractor.GetObservableValueType(FieldType("System.IObservable<int, string>"))).IsNull();
 
     /// <summary>Resolves a type by declaring a field of it in a probe compilation.</summary>
     /// <param name="declaredType">The type to resolve, as it is written in source.</param>
@@ -110,6 +87,13 @@ public class BindToExtractorTests
     {
         var compilation = TestHelper.CreateCompilation(
             $$"""
+              namespace System
+              {
+                  public interface IObservable<T1, T2>
+                  {
+                  }
+              }
+
               namespace Probe
               {
                   public class Feed : System.IObservable<int>

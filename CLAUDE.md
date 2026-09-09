@@ -223,6 +223,9 @@ src/
 │       ├── PooledStringBuilder.cs               # char[]-backed builder for generated fragments
 │       └── RuntimeFlavourRewriter.cs            # Retargets output onto the .Reactive package
 │
+├── ReactiveUI.Binding.SourceGenerators.Roslyn413/ # The same generator source against Roslyn 4.13
+├── ReactiveUI.Binding.Analyzer.Roslyn413/         # The same analyzer source against Roslyn 4.13
+│
 ├── ReactiveUI.Binding.Analyzer/                 # Roslyn analyzer (netstandard2.0)
 │   └── Analyzers/
 │       ├── BindingInvocationAnalyzer.cs          # RXUIBIND001, 003, 004, 005, 006, 007, 008
@@ -515,6 +518,7 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 | RXUIBIND008 | Warning | Property does not implement IInteraction |
 | RXUIBIND009 | Warning | Generated binding dispatch is out of reach from this file |
 | RXUIBIND010 | Warning | Observed path passes through a type that raises no notification |
+| RXUIBIND011 | Warning | Binding call resolved to ReactiveUI's own mixin |
 
 ## Code Style & Quality Requirements
 
@@ -743,9 +747,9 @@ build keeps working right up until Wine starts. Each copy chains to the reposito
 - **Runtime library targets:** net8.0;net9.0;net10.0;net462;net472;net481
 - **No shallow clones:** Repository requires full clone for Nerdbank.GitVersioning
 - **Where the analyzers ship:** `ReactiveUI.Binding` and `ReactiveUI.Binding.Reactive` each pack the generator
-  and analyzer DLLs into `analyzers/dotnet/cs`, so referencing a runtime package is all a consumer needs.
-  `ReactiveUI.Binding.SourceGenerators` is a compatibility package that ships only the MSBuild props: a second
-  copy of the same assemblies under a different package root loads as a second generator and emits every
-  dispatch file twice, which fails the consumer's build
+  and analyzer DLLs into `analyzers/dotnet/roslyn4.8/cs` and `analyzers/dotnet/roslyn4.13/cs`, so referencing a
+  runtime package is all a consumer needs. `ReactiveUI.Binding.SourceGenerators` is a compatibility package that
+  ships only the MSBuild props and targets: a second copy of the same assemblies under a different package root
+  loads as a second generator and emits every dispatch file twice, which fails the consumer's build
 
 **Philosophy:** Generate zero-reflection, AOT-compatible property observation and binding code at compile-time. Support all ReactiveUI platform notification mechanisms. Fall back to runtime expression analysis only when compile-time analysis is not possible.

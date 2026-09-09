@@ -76,7 +76,8 @@ internal static class WhenAnyObservableExtractor
             new([.. innerObservableTypes]),
             returnTypeFullName,
             hasSelector,
-            new([.. expressionTexts]));
+            new([.. expressionTexts]),
+            InterceptableLocationReader.Read(semanticModel, invocation, ct));
     }
 
     /// <summary>

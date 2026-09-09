@@ -989,4 +989,52 @@ public class TypeAnalyzerTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
         await Assert.That(diagnostics.Length).IsEqualTo(0);
     }
+
+    /// <summary>
+    /// Verifies RXUIBIND002 stays silent for <c>BindTo</c>, whose first type argument is the value type of a
+    /// stream the caller already built rather than an object anything observes.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RXUIBIND002_BindToStreamOfPlainValues_NoDiagnostic()
+    {
+        const string Source = """
+                              using System;
+                              using System.ComponentModel;
+                              using System.Linq.Expressions;
+
+                              namespace ReactiveUI.Binding
+                              {
+                                  public static class __ReactiveUIGeneratedBindings
+                                  {
+                                      public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
+                                          this IObservable<TValue> source,
+                                          TTarget target,
+                                          Expression<Func<TTarget, TTargetValue>> property)
+                                          => throw new NotImplementedException();
+                                  }
+                              }
+
+                              namespace TestApp
+                              {
+                                  public class MyView : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+                                      public string Caption { get; set; } = "";
+                                  }
+
+                                  public class Usage
+                                  {
+                                      public void Test(IObservable<string> names)
+                                      {
+                                          var view = new MyView();
+                                          ReactiveUI.Binding.__ReactiveUIGeneratedBindings.BindTo(names, view, v => v.Caption);
+                                      }
+                                  }
+                              }
+                              """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<TypeAnalyzer>(Source);
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+    }
 }

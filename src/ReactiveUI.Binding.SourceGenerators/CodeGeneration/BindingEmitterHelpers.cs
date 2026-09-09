@@ -511,10 +511,6 @@ internal static class BindingEmitterHelpers
         bool supportsNullable,
         bool stubHasExpressionParameters)
     {
-        var first = group.Invocations[0];
-        var sourceLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.SourcePropertyPath, supportsNullable);
-        var targetLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.TargetPropertyPath, supportsNullable);
-
         CodeGeneratorHelpers.AppendDispatchSummary(
             sb,
             api.Name,
@@ -522,8 +518,49 @@ internal static class BindingEmitterHelpers
             group.TargetTypeFullName,
             dispatchesOnExpressionText);
 
-        _ = sb.Append("        public static ").Append(api.FormatReturnType(group)).Append(' ').Append(api.Name).AppendLine("(")
-            .Append("            this ").Append(api.ReceiverIsTarget ? group.TargetTypeFullName : group.SourceTypeFullName)
+        _ = sb.Append("        public static ").Append(api.FormatReturnType(group)).Append(' ').Append(api.Name).AppendLine("(");
+
+        AppendParameterList(sb, group, api, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
+
+        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
+
+        if (dispatchesOnExpressionText)
+        {
+            AppendExpressionDispatchBody(sb, group, api);
+        }
+        else
+        {
+            AppendCallerInfoDispatchBody(sb, group, api);
+        }
+
+        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
+    }
+
+    /// <summary>Writes the parameters a binding member declares, closing the list.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group.</param>
+    /// <param name="api">What distinguishes this API's output from the other three.</param>
+    /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters.</param>
+    /// <remarks>
+    /// One list serves the overload and the interceptor, because both have to be the stub's signature: the
+    /// overload only wins resolution against a candidate it is otherwise indistinguishable from, and an
+    /// interceptor is refused outright unless its signature is the intercepted method's.
+    /// </remarks>
+    internal static void AppendParameterList(
+        StringBuilder sb,
+        BindingTypeGroup group,
+        BindingDispatchApi api,
+        bool dispatchesOnExpressionText,
+        bool supportsNullable,
+        bool stubHasExpressionParameters)
+    {
+        var first = group.Invocations[0];
+        var sourceLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.SourcePropertyPath, supportsNullable);
+        var targetLeaf = CodeGeneratorHelpers.NullableSelectorLeafType(first.TargetPropertyPath, supportsNullable);
+
+        _ = sb.Append("            this ").Append(api.ReceiverIsTarget ? group.TargetTypeFullName : group.SourceTypeFullName)
             .Append(' ').Append(api.ReceiverParameterName).AppendLine(",")
             .Append(CodeGeneratorHelpers.ParameterIndent)
             .Append(api.ReceiverIsTarget ? group.SourceTypeFullName : group.TargetTypeFullName)
@@ -535,16 +572,81 @@ internal static class BindingEmitterHelpers
 
         api.AppendExtraParameters(sb, group);
 
-        if (dispatchesOnExpressionText)
+        if (dispatchesOnExpressionText || stubHasExpressionParameters)
         {
-            AppendExpressionDispatchBody(sb, group, api);
-        }
-        else
-        {
-            AppendCallerInfoDispatchBody(sb, group, api, stubHasExpressionParameters);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, api.SourceSelectorName, api.SourceExpressionParameter, dispatchesOnExpressionText);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, api.TargetSelectorName, api.TargetExpressionParameter, dispatchesOnExpressionText);
         }
 
-        CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
+        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
+    }
+
+    /// <summary>Emits whichever of the two ways this group's call sites are reached.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group.</param>
+    /// <param name="api">What distinguishes this API's output from the other three.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    /// <remarks>
+    /// The four APIs choose between the same two shapes on the same condition, so the choice is made here
+    /// rather than repeated at each of their four call sites.
+    /// </remarks>
+    internal static void EmitOverloadOrInterceptors(
+        StringBuilder sb,
+        BindingTypeGroup group,
+        BindingDispatchApi api,
+        in LanguageFeatures features)
+    {
+        if (features.SupportsInterceptors)
+        {
+            GenerateInterceptors(sb, group, api, in features);
+            return;
+        }
+
+        GenerateDispatchOverload(
+            sb,
+            group,
+            api,
+            features.SupportsCallerArgExpr,
+            features.SupportsNullable,
+            features.StubHasExpressionParameters);
+    }
+
+    /// <summary>Emits one interceptor per generated worker, claiming every call site that reaches it.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The binding type group.</param>
+    /// <param name="api">What distinguishes this API's output from the other three.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    /// <remarks>
+    /// The signature is the overload's, because the compiler refuses an interceptor whose signature is not the
+    /// intercepted method's. What the interceptor does with it differs: the call site is already known, so the
+    /// dispatch parameters go unread and the body forwards straight to the worker.
+    /// </remarks>
+    internal static void GenerateInterceptors(
+        StringBuilder sb,
+        BindingTypeGroup group,
+        BindingDispatchApi api,
+        in LanguageFeatures features)
+    {
+        var extraArguments = api.FormatExtraArguments(group);
+        var dispatchesOnExpressionText = features.SupportsCallerArgExpr;
+        var supportsNullable = features.SupportsNullable;
+        var stubHasExpressionParameters = features.StubHasExpressionParameters;
+
+        foreach (var entry in GroupCallSitesByWorker(group))
+        {
+            foreach (var callSite in entry.Value)
+            {
+                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, InterceptorEmitter.MemberIndent);
+            }
+
+            _ = sb.Append("        internal static ").Append(api.FormatReturnType(group)).Append(" __Intercept_")
+                .Append(api.Name).Append('_').Append(entry.Key).AppendLine("(");
+
+            AppendParameterList(sb, group, api, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
+
+            _ = sb.Append("            => ").Append(api.WorkerMethodPrefix).Append(entry.Key).Append('(')
+                .Append(api.WorkerArguments).Append(extraArguments).AppendLine(");").AppendLine();
+        }
     }
 
     /// <summary>Emits the head of a generated worker: its signature, the path it binds, and the hook guard.</summary>
@@ -634,6 +736,17 @@ internal static class BindingEmitterHelpers
         return new(sourceVar, targetVar);
     }
 
+    /// <summary>Gathers the call sites of a group under the worker each of them reaches.</summary>
+    /// <param name="group">The binding type group whose call sites are being gathered.</param>
+    /// <returns>Each generated worker, against every call site that resolves to it.</returns>
+    /// <remarks>
+    /// A call site the compiler declined to describe is left out: nothing can claim it, and it keeps whatever
+    /// the call already resolved to.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static Dictionary<string, List<BindingInvocationInfo>> GroupCallSitesByWorker(BindingTypeGroup group) =>
+        InterceptorEmitter.GroupCallSites(group.Invocations, static x => x.Interceptor, BindingMethodSuffix);
+
     /// <summary>Finds the type a view declares its view model property as.</summary>
     /// <param name="targetClassInfo">The view type's binding info.</param>
     /// <returns>The declared property type, or <see langword="null"/> when the view exposes no such property.</returns>
@@ -670,8 +783,6 @@ internal static class BindingEmitterHelpers
     /// <param name="api">What distinguishes this API's overload from the other three.</param>
     private static void AppendExpressionDispatchBody(StringBuilder sb, BindingTypeGroup group, BindingDispatchApi api)
     {
-        CodeGeneratorHelpers.AppendExpressionDispatchParameters(sb, api.SourceSelectorName, api.TargetSelectorName);
-
         if (api.NormalizesStaticPrefix)
         {
             CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, api.SourceExpressionParameter);
@@ -703,21 +814,11 @@ internal static class BindingEmitterHelpers
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
     /// <param name="api">What distinguishes this API's overload from the other three.</param>
-    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     private static void AppendCallerInfoDispatchBody(
         StringBuilder sb,
         BindingTypeGroup group,
-        BindingDispatchApi api,
-        bool stubHasExpressionParameters)
+        BindingDispatchApi api)
     {
-        if (stubHasExpressionParameters)
-        {
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, api.SourceSelectorName, api.SourceExpressionParameter, false);
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, api.TargetSelectorName, api.TargetExpressionParameter, false);
-        }
-
-        CodeGeneratorHelpers.AppendCallerInfoDispatchParameters(sb);
-
         var extraArguments = api.FormatExtraArguments(group);
 
         for (var i = 0; i < group.Invocations.Length; i++)

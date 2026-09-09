@@ -28,6 +28,9 @@ internal static class BindCommandCodeGenerator
     /// <summary>Closes the view parameter of a generated binding worker.</summary>
     private const string ViewParameterSuffix = " view,";
 
+    /// <summary>The caller-supplied parameter stream a worker takes on top of the two bound objects.</summary>
+    private const string ObservableParameterArgument = ", withParameter";
+
     /// <summary>Generates concrete typed overloads and binding methods for BindCommand invocations.</summary>
     /// <param name="invocations">All detected BindCommand invocations.</param>
     /// <param name="allClasses">All detected class binding info.</param>
@@ -128,21 +131,10 @@ internal static class BindCommandCodeGenerator
         BindCommandTypeGroup group,
         bool supportsNullable)
     {
-        AppendOverloadSignature(sb, group, supportsNullable, "        /// Uses CallerArgumentExpression for dispatch.");
-
-        _ = sb.AppendLine("            [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"propertyName\")] string propertyNameExpression = \"\",")
-            .AppendLine("            [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"controlName\")] string controlNameExpression = \"\",");
-
-        if (group.HasExpressionParameter)
-        {
-            _ = sb.AppendLine("""
-                                      [global::System.Runtime.CompilerServices.CallerArgumentExpression("withParameter")] string withParameterExpression = "",
-                          """);
-        }
+        AppendOverloadSummary(sb, group, "        /// Uses CallerArgumentExpression for dispatch.");
+        AppendParameterList(sb, group, true, supportsNullable, true);
 
         _ = sb.AppendLine("""
-                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
                               {
                                   propertyNameExpression = propertyNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
                                       ? propertyNameExpression.Substring(7)
@@ -168,24 +160,10 @@ internal static class BindCommandCodeGenerator
         bool supportsNullable,
         bool stubHasExpressionParameters)
     {
-        AppendOverloadSignature(sb, group, supportsNullable, "        /// Uses CallerFilePath + CallerLineNumber for dispatch.");
+        AppendOverloadSummary(sb, group, "        /// Uses CallerFilePath + CallerLineNumber for dispatch.");
+        AppendParameterList(sb, group, false, supportsNullable, stubHasExpressionParameters);
 
-        if (stubHasExpressionParameters)
-        {
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, "propertyName", "propertyNameExpression", false);
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, "controlName", "controlNameExpression", false);
-
-            if (group.HasExpressionParameter)
-            {
-                CodeGeneratorHelpers.AppendExpressionParameter(sb, "withParameter", "withParameterExpression", false);
-            }
-        }
-
-        _ = sb.AppendLine("""
-                                  [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
-                                  [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
-                              {
-                      """);
+        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
         EmitFilePathDispatchBranches(sb, group);
         EmitDispatchFallthrough(sb);
@@ -367,7 +345,6 @@ internal static class BindCommandCodeGenerator
     /// <summary>Appends the signature both dispatch overloads declare, up to the parameters that identify a call site.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindCommand type group.</param>
-    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="dispatchSummaryLine">The documentation line naming what the overload matches a call site on.</param>
     /// <remarks>
     /// The command selector is nullable - a command property may be null - matching the runtime stub's
@@ -376,18 +353,37 @@ internal static class BindCommandCodeGenerator
     /// generated overload rather than falling through to the runtime fallback. The expression-form parameter
     /// selector is nullable for a reference-type parameter, for the same reason: the lambda may return null.
     /// </remarks>
-    private static void AppendOverloadSignature(
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AppendOverloadSummary(
         StringBuilder sb,
         BindCommandTypeGroup group,
+        string dispatchSummaryLine) =>
+        sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindCommand on ").Append(group.ViewTypeFullName)
+            .AppendLine(".").AppendLine(dispatchSummaryLine).AppendLine("        /// </summary>")
+            .AppendLine("        public static global::System.IDisposable BindCommand(");
+
+    /// <summary>Writes the parameters a BindCommand member declares, closing the list.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The BindCommand type group whose types the parameters are written from.</param>
+    /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters.</param>
+    /// <remarks>
+    /// One list serves the overload and the interceptor, because both have to be the stub's signature: the
+    /// overload only wins resolution against a candidate it is otherwise indistinguishable from, and an
+    /// interceptor is refused outright unless its signature is the intercepted method's.
+    /// </remarks>
+    private static void AppendParameterList(
+        StringBuilder sb,
+        BindCommandTypeGroup group,
+        bool dispatchesOnExpressionText,
         bool supportsNullable,
-        string dispatchSummaryLine)
+        bool stubHasExpressionParameters)
     {
         var commandType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].CommandPropertyPath, supportsNullable);
 
-        _ = sb.AppendLine("        /// <summary>").Append("        /// Concrete typed overload for BindCommand on ").Append(group.ViewTypeFullName)
-            .AppendLine(".").AppendLine(dispatchSummaryLine).AppendLine("        /// </summary>")
-            .AppendLine("        public static global::System.IDisposable BindCommand(").Append("            this ").Append(group.ViewTypeFullName)
-            .AppendLine(ViewParameterSuffix).Append("            ").Append(group.ViewModelTypeFullName).AppendLine(" viewModel,")
+        _ = sb.Append("            this ").Append(group.ViewTypeFullName)
+            .AppendLine(ViewParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent).Append(group.ViewModelTypeFullName).AppendLine(" viewModel,")
             .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.ViewModelTypeFullName).Append(", ")
             .Append(commandType).AppendLine(">> propertyName,").Append(GeneratedSyntax.SelectorParameterOpen)
             .Append(group.ViewTypeFullName).Append(", ").Append(group.ControlTypeFullName).AppendLine(">> controlName,");
@@ -407,6 +403,46 @@ internal static class BindCommandCodeGenerator
         }
 
         _ = sb.Append("            string").Append(supportsNullable ? "?" : string.Empty).AppendLine(" toEvent = null,");
+
+        if (dispatchesOnExpressionText || stubHasExpressionParameters)
+        {
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "propertyName", CommandExpressionParameter, dispatchesOnExpressionText);
+            CodeGeneratorHelpers.AppendExpressionParameter(sb, "controlName", ControlExpressionParameter, dispatchesOnExpressionText);
+
+            if (group.HasExpressionParameter)
+            {
+                CodeGeneratorHelpers.AppendExpressionParameter(sb, "withParameter", "withParameterExpression", dispatchesOnExpressionText);
+            }
+        }
+
+        _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
+    }
+
+    /// <summary>Emits one interceptor per generated binding, claiming every call site that reaches it.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The group of call sites being claimed.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    private static void GenerateInterceptors(StringBuilder sb, BindCommandTypeGroup group, in LanguageFeatures features)
+    {
+        var extraArgs = group.HasObservableParameter ? ObservableParameterArgument : string.Empty;
+        var dispatchesOnExpressionText = features.SupportsCallerArgExpr;
+        var supportsNullable = features.SupportsNullable;
+        var stubHasExpressionParameters = features.StubHasExpressionParameters;
+
+        foreach (var entry in InterceptorEmitter.GroupCallSites(group.Invocations, static x => x.Interceptor, MethodSuffix))
+        {
+            foreach (var callSite in entry.Value)
+            {
+                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, InterceptorEmitter.MemberIndent);
+            }
+
+            _ = sb.Append("        internal static global::System.IDisposable __Intercept_BindCommand_").Append(entry.Key).AppendLine("(");
+
+            AppendParameterList(sb, group, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
+
+            _ = sb.Append("            => ").Append(WorkerMethodPrefix).Append(entry.Key).Append('(').Append(WorkerArguments)
+                .Append(extraArgs).AppendLine(");").AppendLine();
+        }
     }
 
     /// <summary>Emits the overload and the workers for one group of call sites.</summary>
@@ -429,12 +465,20 @@ internal static class BindCommandCodeGenerator
             }
             : group;
 
-        GenerateConcreteOverload(
-            sb,
-            collapsed,
-            features.SupportsCallerArgExpr,
-            features.SupportsNullable,
-            features.StubHasExpressionParameters);
+        if (features.SupportsInterceptors)
+        {
+            GenerateInterceptors(sb, collapsed, in features);
+        }
+        else
+        {
+            GenerateConcreteOverload(
+                sb,
+                collapsed,
+                features.SupportsCallerArgExpr,
+                features.SupportsNullable,
+                features.StubHasExpressionParameters);
+        }
+
         _ = sb.AppendLine();
 
         for (var i = 0; i < collapsed.Invocations.Length; i++)
@@ -455,7 +499,7 @@ internal static class BindCommandCodeGenerator
     /// <param name="group">The BindCommand type group.</param>
     private static void EmitExpressionDispatchBranches(StringBuilder sb, BindCommandTypeGroup group)
     {
-        var extraArgs = group.HasObservableParameter ? ", withParameter" : string.Empty;
+        var extraArgs = group.HasObservableParameter ? ObservableParameterArgument : string.Empty;
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -486,7 +530,7 @@ internal static class BindCommandCodeGenerator
     /// <param name="group">The BindCommand type group.</param>
     private static void EmitFilePathDispatchBranches(StringBuilder sb, BindCommandTypeGroup group)
     {
-        var extraArgs = group.HasObservableParameter ? ", withParameter" : string.Empty;
+        var extraArgs = group.HasObservableParameter ? ObservableParameterArgument : string.Empty;
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {

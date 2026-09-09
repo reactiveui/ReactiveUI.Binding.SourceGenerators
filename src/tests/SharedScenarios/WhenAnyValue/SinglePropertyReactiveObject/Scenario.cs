@@ -4,7 +4,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using ReactiveUI;
+using ReactiveUI.Binding;
 
 namespace SharedScenarios.WhenAnyValue.SinglePropertyReactiveObject;
 
