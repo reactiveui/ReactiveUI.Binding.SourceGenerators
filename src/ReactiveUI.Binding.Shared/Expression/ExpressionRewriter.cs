@@ -31,6 +31,8 @@ namespace ReactiveUI.Binding.Expressions;
 /// <item><description><see cref="ExpressionType.Convert"/> is stripped.</description></item>
 /// </list>
 /// </remarks>
+[RequiresUnreferencedCode(
+    "Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
 internal sealed class ExpressionRewriter : ExpressionVisitor
 {
     /// <inheritdoc/>
@@ -141,8 +143,6 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
     }
 
     /// <inheritdoc/>
-    [RequiresUnreferencedCode(
-        "Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
     protected override Expression VisitBinary(BinaryExpression node)
     {
         if (node.Right is not ConstantExpression)
@@ -159,8 +159,6 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
     }
 
     /// <inheritdoc/>
-    [RequiresUnreferencedCode(
-        "Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
     protected override Expression VisitUnary(UnaryExpression node)
     {
         // Visit() only routes Convert and ArrayLength here, so no fallthrough is needed.
@@ -178,8 +176,6 @@ internal sealed class ExpressionRewriter : ExpressionVisitor
     }
 
     /// <inheritdoc/>
-    [RequiresUnreferencedCode(
-        "Expression rewriting uses reflection over runtime types which may be removed by trimming.")]
     protected override Expression VisitMethodCall(MethodCallExpression node)
     {
         if (!node.Method.IsSpecialName || !AllConstant(node.Arguments))
