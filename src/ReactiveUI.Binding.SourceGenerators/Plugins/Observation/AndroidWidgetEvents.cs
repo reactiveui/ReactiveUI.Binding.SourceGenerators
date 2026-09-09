@@ -25,34 +25,65 @@ internal static class AndroidWidgetEvents
     /// <param name="propertyName">The property being observed.</param>
     /// <returns>The event name, or <see langword="null"/> when no widget reports that property.</returns>
     /// <remarks>
-    /// A switch rather than a lookup table: the set is closed and known here, so the compiler turns it into a
-    /// jump over the name with nothing built at startup and nothing held for the life of the generator.
+    /// Compared in order rather than looked up: the set is closed and known here, so nothing is built at
+    /// startup and nothing is held for the life of the generator.
     /// </remarks>
-    internal static string? FindChangeEvent(string propertyName) => propertyName switch
+    internal static string? FindChangeEvent(string propertyName)
     {
         // TextView and everything built on it.
-        "Text" => "TextChanged",
+        if (propertyName == "Text")
+        {
+            return "TextChanged";
+        }
 
         // NumberPicker.
-        "Value" => "ValueChanged",
+        if (propertyName == "Value")
+        {
+            return "ValueChanged";
+        }
 
         // RatingBar.
-        "Rating" => "RatingBarChange",
+        if (propertyName == "Rating")
+        {
+            return "RatingBarChange";
+        }
 
         // CompoundButton, and so CheckBox, RadioButton and Switch.
-        "Checked" => "CheckedChange",
+        if (propertyName == "Checked")
+        {
+            return "CheckedChange";
+        }
 
         // CalendarView.
-        "Date" => "DateChange",
+        if (propertyName == "Date")
+        {
+            return "DateChange";
+        }
 
         // TabHost.
-        "CurrentTab" => "TabChanged",
-
-        // TimePicker, whose hour and minute are named one way from API 23 and the other before it.
-        "Hour" or "Minute" or "CurrentHour" or "CurrentMinute" => "TimeChanged",
+        if (propertyName == "CurrentTab")
+        {
+            return "TabChanged";
+        }
 
         // AdapterView, and so Spinner and ListView.
-        "SelectedItem" => "ItemSelected",
-        _ => null,
-    };
+        if (propertyName == "SelectedItem")
+        {
+            return "ItemSelected";
+        }
+
+        return IsTimePickerField(propertyName) ? "TimeChanged" : null;
+    }
+
+    /// <summary>Determines whether a name is one of the fields TimePicker reports its time change for.</summary>
+    /// <param name="propertyName">The property being observed.</param>
+    /// <returns><see langword="true"/> when TimePicker reports it.</returns>
+    /// <remarks>
+    /// The one widget in the list that names the same two values two ways: the hour and the minute are
+    /// <c>Hour</c> and <c>Minute</c> from API 23, and <c>CurrentHour</c> and <c>CurrentMinute</c> before it.
+    /// All four report on the same event.
+    /// </remarks>
+    private static bool IsTimePickerField(string propertyName) =>
+        propertyName == "Hour" || propertyName == "Minute"
+        || propertyName == "CurrentHour" || propertyName == "CurrentMinute";
 }
