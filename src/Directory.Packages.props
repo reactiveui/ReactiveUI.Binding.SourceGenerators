@@ -6,19 +6,19 @@
 
   <!-- MAUI version varies by target framework -->
   <PropertyGroup>
-    <MauiVersion Condition="$(TargetFramework.StartsWith('net10'))">10.0.100</MauiVersion>
-    <MauiVersion Condition="$(TargetFramework.StartsWith('net11'))">11.0.0-preview.7.26406.9</MauiVersion>
+    <MauiVersion Condition="$(TargetFramework.StartsWith('net10'))">10.0.101</MauiVersion>
+    <MauiVersion Condition="$(TargetFramework.StartsWith('net11'))">11.0.0-rc.1.26451.6</MauiVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <!-- StyleSharp.Analyzers, PerformanceSharp.Analyzers and SecuritySharp.Analyzers ship from the
          same release pipeline and always share a version. -->
-    <RoslynCommonAnalyzersVersion>3.46.1</RoslynCommonAnalyzersVersion>
+    <RoslynCommonAnalyzersVersion>3.46.2</RoslynCommonAnalyzersVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Testing Framework -->
-    <PackageVersion Include="TUnit" Version="1.66.16"/>
+    <PackageVersion Include="TUnit" Version="1.66.27"/>
     <PackageVersion Include="Verify.TUnit" Version="32.0.0"/>
     <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0"/>
 
@@ -36,15 +36,17 @@
       run against; it must stay at or above what their own tooling requires
       (Basic.Reference.Assemblies needs >= 4.11, BenchmarkDotNet needs >= 4.14).
       Running the generator on a newer Roslyn than it was built against is the
-      normal, supported direction.
+      normal, supported direction, and it is also what lets the suite name a
+      language version by its constant rather than as whatever preview happens
+      to be current.
 
       Microsoft.CodeAnalysis.Analyzers is a build-time-only analyzer package
       (the RS#### authoring rules) with no impact on the end-user-facing Roslyn
       version, so it tracks the latest stable release independently.
     -->
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0"/>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.9.0"/>
 
     <!-- Test Infrastructure -->
     <PackageVersion Include="Basic.Reference.Assemblies.Net110" Version="1.8.11"/>
@@ -64,8 +66,8 @@
     <PackageVersion Include="PerformanceSharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
     <PackageVersion Include="SecuritySharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
     <PackageVersion Include="Roslynator.Analyzers" Version="5.0.0"/>
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.400"/>
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.33.0.1635"/>
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.401"/>
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.34.0.3385"/>
     <PackageVersion Include="Blazor.Common.Analyzers" Version="2.1.0"/>
 
     <!-- MAUI -->

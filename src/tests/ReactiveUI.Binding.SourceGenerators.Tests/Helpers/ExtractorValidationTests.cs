@@ -448,7 +448,7 @@ public class ExtractorValidationTests
                   }
               }
               """,
-            LanguageVersion.Preview);
+            LanguageVersion.CSharp14);
 
         var outer = compilation.GetTypeByMetadataName(className)
             ?? throw new InvalidOperationException($"'{className}' did not compile.");

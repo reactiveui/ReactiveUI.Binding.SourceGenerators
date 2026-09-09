@@ -24,7 +24,7 @@ public static class AnalyzerTestHelper
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync<TAnalyzer>(string source)
         where TAnalyzer : DiagnosticAnalyzer, new() =>
-        GetDiagnosticsAsync<TAnalyzer>(source, null, null);
+        GetDiagnosticsAsync<TAnalyzer>(source, (LanguageVersion?)null, null);
 
     /// <summary>
     /// Runs an analyzer against source compiled at a given language version, with the root namespace reported
@@ -36,13 +36,31 @@ public static class AnalyzerTestHelper
     /// <param name="rootNamespace">The root namespace the build exposes, or null for none.</param>
     /// <returns>The analyzer diagnostics.</returns>
     [SuppressMessage("Design", "SST2307:Type parameter is not inferable", Justification = "the analyzer under test is specified explicitly by the caller")]
-    public static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync<TAnalyzer>(
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync<TAnalyzer>(
         string source,
         LanguageVersion? languageVersion,
         string? rootNamespace)
+        where TAnalyzer : DiagnosticAnalyzer, new() =>
+        GetDiagnosticsAsync<TAnalyzer>(source, ParseOptionsFor(languageVersion), rootNamespace);
+
+    /// <summary>
+    /// Runs an analyzer against source parsed exactly as the caller asks, which is how a scenario reaches the
+    /// options a language version alone cannot express.
+    /// </summary>
+    /// <typeparam name="TAnalyzer">The analyzer to run.</typeparam>
+    /// <param name="source">The source to analyze.</param>
+    /// <param name="parseOptions">The options the source is parsed with, or null for the default.</param>
+    /// <param name="rootNamespace">The root namespace the build exposes, or null for none.</param>
+    /// <returns>The analyzer diagnostics.</returns>
+    [SuppressMessage("Design", "SST2307:Type parameter is not inferable", Justification = "the analyzer under test is specified explicitly by the caller")]
+    public static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync<TAnalyzer>(
+        string source,
+        CSharpParseOptions? parseOptions,
+        string? rootNamespace)
         where TAnalyzer : DiagnosticAnalyzer, new()
     {
-        var compilation = CreateCompilation(source, languageVersion);
+        var compilation = CreateCompilation(source, parseOptions);
         var analyzer = new TAnalyzer();
 
         AnalyzerOptions? analyzerOptions = rootNamespace is null
@@ -61,19 +79,46 @@ public static class AnalyzerTestHelper
         ];
     }
 
+    /// <summary>The parse options a build produces from a language version, which is what the tests usually name.</summary>
+    /// <param name="languageVersion">The language version, or null for the default.</param>
+    /// <returns>The parse options, or null for the default.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static CSharpParseOptions? ParseOptionsFor(LanguageVersion? languageVersion) =>
+        languageVersion.HasValue ? new CSharpParseOptions(languageVersion.Value) : null;
+
+    /// <summary>
+    /// The parse options of a build that has the package's targets on it, which list the generated namespace so
+    /// the compiler honours an interceptor emitted into it.
+    /// </summary>
+    /// <param name="languageVersion">The language version, or null for the default.</param>
+    /// <returns>The parse options, carrying the opt-in.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static CSharpParseOptions InterceptingParseOptionsFor(LanguageVersion? languageVersion) =>
+        (ParseOptionsFor(languageVersion) ?? new CSharpParseOptions())
+            .WithFeatures([new KeyValuePair<string, string>(
+                SourceGenerators.Constants.InterceptorsNamespacesFeature,
+                SourceGenerators.Constants.InterceptorNamespace)]);
+
     /// <summary>Creates a CSharpCompilation from the specified source code with required assembly references.</summary>
     /// <param name="source">The source code to compile into a CSharpCompilation.</param>
     /// <returns>A CSharpCompilation object representing the compiled source code.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static CSharpCompilation CreateCompilation(string source) => CreateCompilation(source, null);
+    internal static CSharpCompilation CreateCompilation(string source) => CreateCompilation(source, (LanguageVersion?)null);
 
     /// <summary>Creates a compilation from source at a given language version.</summary>
     /// <param name="source">The source to compile.</param>
     /// <param name="languageVersion">The language version, or null for the default.</param>
     /// <returns>The compilation.</returns>
-    internal static CSharpCompilation CreateCompilation(string source, LanguageVersion? languageVersion)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static CSharpCompilation CreateCompilation(string source, LanguageVersion? languageVersion) =>
+        CreateCompilation(source, ParseOptionsFor(languageVersion));
+
+    /// <summary>Creates a compilation from source parsed exactly as the caller asks.</summary>
+    /// <param name="source">The source to compile.</param>
+    /// <param name="parseOptions">The options the source is parsed with, or null for the default.</param>
+    /// <returns>The compilation.</returns>
+    internal static CSharpCompilation CreateCompilation(string source, CSharpParseOptions? parseOptions)
     {
-        var parseOptions = languageVersion.HasValue ? new CSharpParseOptions(languageVersion.Value) : null;
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
         var addedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

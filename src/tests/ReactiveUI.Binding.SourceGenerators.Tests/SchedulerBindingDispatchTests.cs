@@ -73,7 +73,7 @@ public class SchedulerBindingDispatchTests
     {
         var result = TestHelper.RunGenerator(
             SchedulerBindingSource,
-            LanguageVersion.Preview,
+            LanguageVersion.CSharp14,
             "SchedulerProbe");
 
         await result.CompilationSucceeds();
@@ -87,7 +87,7 @@ public class SchedulerBindingDispatchTests
     {
         var result = TestHelper.RunGenerator(
             SchedulerBindingSource,
-            LanguageVersion.Preview,
+            LanguageVersion.CSharp14,
             "SchedulerProbe");
 
         await result.CompilationSucceeds();

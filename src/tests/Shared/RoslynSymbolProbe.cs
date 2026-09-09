@@ -38,7 +38,7 @@ internal static class RoslynSymbolProbe
 
         return CSharpCompilation.Create(
             "SymbolProbe",
-            [CSharpSyntaxTree.ParseText(source, new(LanguageVersion.Latest))],
+            [CSharpSyntaxTree.ParseText(source, new(LanguageVersion.CSharp14))],
             references,
             new(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
     }
