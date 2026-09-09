@@ -271,12 +271,25 @@ internal static class WhenAnyCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features)
     {
-        GenerateConcreteOverload(
-            sb,
-            group,
-            features.SupportsCallerArgExpr,
-            features.SupportsNullable,
-            features.StubHasExpressionParameters);
+        if (features.SupportsInterceptors)
+        {
+            InterceptorEmitter.GenerateInterceptors(
+                sb,
+                group,
+                Constants.WhenAnyMethodName,
+                ObservationMethodSuffix,
+                AppendWhenAnyParameters);
+        }
+        else
+        {
+            GenerateConcreteOverload(
+                sb,
+                group,
+                features.SupportsCallerArgExpr,
+                features.SupportsNullable,
+                features.StubHasExpressionParameters);
+        }
+
         _ = sb.AppendLine();
 
         for (var i = 0; i < group.Invocations.Length; i++)
@@ -289,6 +302,18 @@ internal static class WhenAnyCodeGenerator
                 ObservationMethodSuffix(inv));
         }
     }
+
+    /// <summary>Writes the parameters a WhenAny interceptor takes after the observed object.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="first">The invocation whose types the parameters are written from.</param>
+    /// <remarks>WhenAny always projects, so the projection closes the list rather than being optional.</remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AppendWhenAnyParameters(StringBuilder sb, InvocationInfo first) =>
+        InterceptorEmitter.AppendPropertyParameters(
+            sb,
+            first,
+            first.PropertyPaths.Length,
+            GetWhenAnySelectorType(first));
 
     /// <summary>Emits the if/else-if dispatch table that routes each matched WhenAny invocation to its generated method.</summary>
     /// <param name="sb">The string builder to append to.</param>
