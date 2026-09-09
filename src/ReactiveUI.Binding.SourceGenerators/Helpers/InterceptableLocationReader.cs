@@ -66,6 +66,26 @@ internal static class InterceptableLocationReader
         return false;
     }
 
+    /// <summary>Determines whether an interceptor emitted for this compilation would be honoured.</summary>
+    /// <param name="parseOptions">The consumer's parse options, which carry the opt-in the build set.</param>
+    /// <returns><see langword="true"/> when this build can describe a call site and the project listed the namespace.</returns>
+    /// <remarks>
+    /// The one question both the generator and the analyzer ask before deciding whether the dispatch overloads
+    /// still matter, so the two answer it the same way. Which build is loaded settles the first half outright,
+    /// which is why the baseline never reads the options at all.
+    /// </remarks>
+    internal static bool IsInterceptionEnabled(ParseOptions parseOptions)
+    {
+#if ROSLYN_4_13
+        return IsOptedIn(parseOptions);
+#else
+
+        // The baseline compiler describes no call site, so there is no interceptor for a listing to honour.
+        _ = parseOptions;
+        return false;
+#endif
+    }
+
     /// <summary>Describes a call site, when the host compiler can.</summary>
     /// <param name="semanticModel">The model the invocation was bound in.</param>
     /// <param name="invocation">The call site.</param>

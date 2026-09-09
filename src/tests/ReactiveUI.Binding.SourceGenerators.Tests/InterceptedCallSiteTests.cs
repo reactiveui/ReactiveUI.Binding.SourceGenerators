@@ -136,6 +136,8 @@ public class InterceptedCallSiteTests
                                                     public IInteraction<string, bool> Confirm { get; set; }
 
                                                     public IObservable<int> Ticks { get; set; }
+
+                                                    public IObservable<int> Pulses { get; set; }
                                                 }
 
                                                 public class Button
@@ -173,6 +175,7 @@ public class InterceptedCallSiteTests
                                                         GC.KeepAlive(person.WhenAnyValue(x => x.Age));
                                                         GC.KeepAlive(person.WhenAny(x => x.Name, c => c.Value));
                                                         GC.KeepAlive(person.WhenAnyObservable(x => x.Ticks));
+                                                        GC.KeepAlive(person.WhenAnyObservable(x => x.Ticks, x => x.Pulses, (a, b) => a + b));
 
                                                         person.BindOneWay(view, x => x.Name, v => v.Display);
                                                         person.BindTwoWay(view, x => x.Name, v => v.Display);
@@ -180,6 +183,7 @@ public class InterceptedCallSiteTests
                                                         view.Bind(person, x => x.Name, v => v.Display);
                                                         names.BindTo(view, v => v.Display);
                                                         view.BindCommand(person, x => x.Save, v => v.SaveButton);
+                                                        view.BindCommand(person, x => x.Save, v => v.SaveButton, names);
                                                         view.BindInteraction(person, x => x.Confirm, Handle);
                                                     }
 

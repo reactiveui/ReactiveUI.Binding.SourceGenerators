@@ -119,11 +119,14 @@ internal static class BindToExtractor
     /// <returns><see langword="true"/> when it is that interface rather than one of the same name.</returns>
     /// <remarks>
     /// Asked of the receiver and of each interface it implements, so the shape and the namespace are described
-    /// once. A type belonging to no namespace at all - an array or a pointer - answers no rather than throwing.
+    /// once. Both a lookalike declared elsewhere and one of the same name taking a different number of type
+    /// arguments answer no. A named type always belongs to a namespace, the global one at worst, so there is
+    /// none to account for; the shapes that belong to no namespace - an array, a pointer, a function pointer -
+    /// are not named types and never arrive here.
     /// </remarks>
     private static bool IsFrameworkObservable(INamedTypeSymbol type) =>
         type is { Name: "IObservable", TypeArguments.Length: 1 }
-        && type.ContainingNamespace?.ToDisplayString() == "System";
+        && type.ContainingNamespace.ToDisplayString() == "System";
 
     /// <summary>
     /// Scans the method parameters to detect the presence of a <c>conversionHint</c> parameter

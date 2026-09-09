@@ -105,6 +105,40 @@ public class InterceptableLocationReaderTests
         await Assert.That(location.IsAvailable).IsEqualTo(InterceptableLocationReader.IsSupported);
     }
 
+    /// <summary>
+    /// A call the compiler declines to describe reports that nothing was described, on either build. The
+    /// callee here is an element of an array of delegates rather than a name the compiler can attach an
+    /// interceptor to, which is a shape no interceptor can claim however new the compiler is.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Read_CallSiteTheCompilerCannotDescribe_ReportsNothingDescribed()
+    {
+        const string Source = """
+                              namespace Probe
+                              {
+                                  public static class Holder
+                                  {
+                                      public static System.Func<int, string>[] Table = null!;
+
+                                      public static string Read() => Table[0](1);
+                                  }
+                              }
+                              """;
+
+        var compilation = TestHelper.CreateCompilation(Source, LanguageVersion.CSharp10);
+        var tree = compilation.SyntaxTrees.First();
+        var root = await tree.GetRootAsync();
+        var invocation = root.DescendantNodes().OfType<InvocationExpressionSyntax>().First();
+
+        var location = InterceptableLocationReader.Read(
+            compilation.GetSemanticModel(tree),
+            invocation,
+            CancellationToken.None);
+
+        await Assert.That(location.IsAvailable).IsFalse();
+    }
+
     /// <summary>An undescribed call site carries no data, whichever build produced it.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

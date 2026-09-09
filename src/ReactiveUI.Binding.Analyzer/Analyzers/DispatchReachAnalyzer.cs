@@ -80,7 +80,7 @@ public class DispatchReachAnalyzer : DiagnosticAnalyzer
         // An interceptor replaces the call the compiler already bound, so nothing about it goes through
         // extension-method lookup and no namespace has to be in reach. Where this build emits interceptors
         // instead of overloads, the file's namespace stops deciding anything.
-        if (InterceptableLocationReader.IsSupported && InterceptableLocationReader.IsOptedIn(parseOptions))
+        if (InterceptableLocationReader.IsInterceptionEnabled(parseOptions))
         {
             return;
         }

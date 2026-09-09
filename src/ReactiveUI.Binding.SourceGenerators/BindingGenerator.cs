@@ -309,8 +309,7 @@ public class BindingGenerator : IIncrementalGenerator
 
                 // An interceptor claims its call site outright, so where one can be emitted none of the
                 // placement below applies: there is no namespace for lookup to reach and no import to scope.
-                var supportsInterceptors = InterceptableLocationReader.IsSupported
-                    && InterceptableLocationReader.IsOptedIn(parseOptions);
+                var supportsInterceptors = InterceptableLocationReader.IsInterceptionEnabled(parseOptions);
 
                 var dispatchNamespace = supportsGlobalUsings
                     ? SelectGeneratedNamespace(configOptions, compilation)

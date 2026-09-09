@@ -61,11 +61,23 @@ public class BindToExtractorTests
     public async Task GetObservableValueType_ReceiverImplementsLookalikeInterface_ReturnsNull() =>
         await Assert.That(BindToExtractor.GetObservableValueType(FieldType("Probe.Lookalike"))).IsNull();
 
-    /// <summary>A type belonging to no namespace at all is not taken for the framework interface.</summary>
+    /// <summary>
+    /// An array is no named type, so it is neither the interface nor a candidate for implementing it, and the
+    /// walk over its interfaces finds only the ones every array carries.
+    /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GetObservableValueType_ReceiverHasNoContainingNamespace_ReturnsNull() =>
+    public async Task GetObservableValueType_ReceiverIsArray_ReturnsNull() =>
         await Assert.That(BindToExtractor.GetObservableValueType(FieldType("string[]"))).IsNull();
+
+    /// <summary>
+    /// The framework interface takes exactly one type argument, so one of the same name and namespace taking
+    /// another number is a different contract and carries no element type to bind.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GetObservableValueType_ReceiverIsSameNameWithTwoTypeArguments_ReturnsNull() =>
+        await Assert.That(BindToExtractor.GetObservableValueType(FieldType("System.IObservable<int, string>"))).IsNull();
 
     /// <summary>Resolves a type by declaring a field of it in a probe compilation.</summary>
     /// <param name="declaredType">The type to resolve, as it is written in source.</param>
@@ -75,6 +87,13 @@ public class BindToExtractorTests
     {
         var compilation = TestHelper.CreateCompilation(
             $$"""
+              namespace System
+              {
+                  public interface IObservable<T1, T2>
+                  {
+                  }
+              }
+
               namespace Probe
               {
                   public class Feed : System.IObservable<int>
