@@ -19,6 +19,7 @@
     </Folder>
     <Project Path="ReactiveUI.Binding/ReactiveUI.Binding.csproj"/>
     <Project Path="ReactiveUI.Binding.SourceGenerators/ReactiveUI.Binding.SourceGenerators.csproj"/>
+    <Project Path="ReactiveUI.Binding.SourceGenerators.Roslyn413/ReactiveUI.Binding.SourceGenerators.Roslyn413.csproj"/>
     <Project Path="ReactiveUI.Binding.Analyzer/ReactiveUI.Binding.Analyzer.csproj"/>
     <Project Path="ReactiveUI.Binding.Wpf/ReactiveUI.Binding.Wpf.csproj"/>
     <Project Path="ReactiveUI.Binding.WinForms/ReactiveUI.Binding.WinForms.csproj"/>

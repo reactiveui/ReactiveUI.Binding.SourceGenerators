@@ -123,7 +123,8 @@ internal static class ObservationExtractor
             isBeforeChange,
             hasSelector,
             expectedMethodName,
-            new([.. expressionTexts]));
+            new([.. expressionTexts]),
+            InterceptableLocationReader.Read(semanticModel, invocation, ct));
     }
 
     /// <summary>

@@ -104,8 +104,7 @@ internal static class ObservationCodeGenerator
                 sb,
                 group,
                 allClasses,
-                snapshot.SupportsCallerArgExpr,
-                snapshot.StubHasExpressionParameters,
+                in snapshot,
                 methodPrefix));
 
     /// <summary>Generates an observation method for a single invocation.</summary>
@@ -932,19 +931,30 @@ internal static class ObservationCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The type group to generate code for.</param>
     /// <param name="allClasses">All detected class binding info for type mechanism lookup.</param>
-    /// <param name="supportsCallerArgExpr">Whether the target language version supports CallerArgumentExpression.</param>
-    /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot, which settles the dispatch.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
     private static void GenerateGroup(
         StringBuilder sb,
         TypeGroup group,
         ImmutableArray<ClassBindingInfo> allClasses,
-        bool supportsCallerArgExpr,
-        bool stubHasExpressionParameters,
+        in LanguageFeatures features,
         string methodPrefix)
     {
-        // Generate the concrete typed extension method overload
-        GenerateConcreteOverload(sb, group, supportsCallerArgExpr, stubHasExpressionParameters, methodPrefix);
+        // Either claim each call site outright, or emit the overload that competes for them all.
+        if (features.SupportsInterceptors)
+        {
+            GenerateInterceptors(sb, group, methodPrefix);
+        }
+        else
+        {
+            GenerateConcreteOverload(
+                sb,
+                group,
+                features.SupportsCallerArgExpr,
+                features.StubHasExpressionParameters,
+                methodPrefix);
+        }
+
         _ = sb.AppendLine();
 
         // Generate the observation methods for each invocation in this group. Call sites that share the
@@ -967,6 +977,97 @@ internal static class ObservationCodeGenerator
 
             GenerateObservationMethod(sb, inv, classInfo, suffix, inv.IsBeforeChange, methodPrefix);
         }
+    }
+
+    /// <summary>Emits one interceptor per generated observation, claiming every call site that reaches it.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="group">The type group whose call sites are being claimed.</param>
+    /// <param name="methodPrefix">The method name prefix.</param>
+    /// <remarks>
+    /// Call sites that share a source type and the same expressions produce one observation between them, and
+    /// the attribute may be applied repeatedly, so they are claimed by a single method carrying one attribute
+    /// each. A call site the compiler declined to describe is left alone: it keeps whatever the call already
+    /// resolved to, which is the same outcome an unreachable dispatch overload produces.
+    /// </remarks>
+    private static void GenerateInterceptors(StringBuilder sb, TypeGroup group, string methodPrefix)
+    {
+        foreach (var entry in GroupCallSitesByObservation(group))
+        {
+            var first = entry.Value[0];
+            var propCount = first.PropertyPaths.Length;
+
+            foreach (var callSite in entry.Value)
+            {
+                InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, "        ");
+            }
+
+            _ = sb.Append("        internal static global::System.IObservable<").Append(first.ReturnTypeFullName)
+                .Append("> __Intercept_").Append(methodPrefix).Append('_').Append(entry.Key).AppendLine("(")
+                .Append("            ").Append(first.SourceTypeFullName).AppendLine(" objectToMonitor,");
+
+            AppendPropertyParameters(sb, first, propCount, first.HasSelector);
+
+            _ = sb.Append("            => __").Append(methodPrefix).Append('_').Append(entry.Key)
+                .Append("(objectToMonitor").Append(first.HasSelector ? ", selector" : string.Empty).AppendLine(");");
+        }
+    }
+
+    /// <summary>Gathers the call sites of a group under the observation each of them reaches.</summary>
+    /// <param name="group">The type group whose call sites are being gathered.</param>
+    /// <returns>Each generated observation, against every call site that resolves to it.</returns>
+    /// <remarks>
+    /// A call site the compiler declined to describe is left out: nothing can claim it, and it keeps whatever
+    /// the call already resolved to.
+    /// </remarks>
+    private static Dictionary<string, List<InvocationInfo>> GroupCallSitesByObservation(TypeGroup group)
+    {
+        var claimed = new Dictionary<string, List<InvocationInfo>>(StringComparer.Ordinal);
+        for (var i = 0; i < group.Invocations.Length; i++)
+        {
+            var inv = group.Invocations[i];
+            if (!inv.Interceptor.IsAvailable)
+            {
+                continue;
+            }
+
+            var suffix = MethodSuffix(inv);
+            if (!claimed.TryGetValue(suffix, out var callSites))
+            {
+                callSites = [];
+                claimed[suffix] = callSites;
+            }
+
+            callSites.Add(inv);
+        }
+
+        return claimed;
+    }
+
+    /// <summary>Emits the observed-property parameters, and the projection when the overload takes one.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="first">The invocation whose types the parameters are written from.</param>
+    /// <param name="propCount">How many observed properties the overload takes.</param>
+    /// <param name="hasSelector">Whether the overload takes a projection after them.</param>
+    private static void AppendPropertyParameters(
+        StringBuilder sb,
+        InvocationInfo first,
+        int propCount,
+        bool hasSelector)
+    {
+        for (var i = 0; i < propCount; i++)
+        {
+            var type = first.PropertyPaths[i][first.PropertyPaths[i].Length - 1].PropertyTypeFullName;
+            _ = sb.Append("            global::System.Linq.Expressions.Expression<global::System.Func<")
+                .Append(first.SourceTypeFullName).Append(", ").Append(type).Append(">> property").Append(i + 1);
+            _ = hasSelector || i < propCount - 1 ? sb.AppendLine(",") : sb.AppendLine(")");
+        }
+
+        if (!hasSelector)
+        {
+            return;
+        }
+
+        _ = sb.Append("            ").Append(GetSelectorType(first)).AppendLine(" selector)");
     }
 
     /// <summary>Emits the trailing projection lambda that gathers a selector-less <c>CombineLatest</c> into one emission.</summary>

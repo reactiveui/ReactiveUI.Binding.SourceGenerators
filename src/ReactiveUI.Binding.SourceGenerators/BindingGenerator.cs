@@ -233,6 +233,14 @@ public class BindingGenerator : IIncrementalGenerator
                     .Append(Constants.GeneratedExtensionClassName)
                     .Append("\n    {\n    }\n}\n");
 
+                if (features.SupportsInterceptors)
+                {
+                    // No framework declares the interception attribute, so the compilation that carries the
+                    // interceptors has to. Once for all of them: each dispatch file is another part of the
+                    // same class, but the attribute is a type of its own and would collide with itself.
+                    _ = sb.Append('\n').Append(CodeGeneration.InterceptorEmitter.BuildAttributeDeclaration());
+                }
+
                 CodeGeneration.CodeGeneratorHelpers.AddGeneratedSource(
                     ctx,
                     "GeneratedBindingsAttributes.g.cs",
@@ -298,20 +306,30 @@ public class BindingGenerator : IIncrementalGenerator
                 var sharedNamespace = usesReactiveRuntime
                     ? Constants.ReactiveRuntimeNamespace
                     : Constants.SharedGeneratedNamespace;
-                var generatedNamespace = supportsGlobalUsings
+
+                // An interceptor claims its call site outright, so where one can be emitted none of the
+                // placement below applies: there is no namespace for lookup to reach and no import to scope.
+                var supportsInterceptors = InterceptableLocationReader.IsSupported
+                    && InterceptableLocationReader.IsOptedIn(parseOptions);
+
+                var dispatchNamespace = supportsGlobalUsings
                     ? SelectGeneratedNamespace(configOptions, compilation)
                     : SelectSharedTierNamespace(configOptions, compilation, sharedNamespace);
+                var generatedNamespace = supportsInterceptors
+                    ? Constants.InterceptorNamespace
+                    : dispatchNamespace;
 
                 return new LanguageFeatures(
                     supportsCallerArgExpr,
                     languageVersion >= LanguageVersion.CSharp8,
                     emitGeneratedCodeMarkers,
                     generatedNamespace,
-                    supportsGlobalUsings,
+                    supportsGlobalUsings && !supportsInterceptors,
                     callerArgExprAvailable,
                     usesReactiveRuntime,
                     runtimeNamespaceMembers,
-                    primitivesNamespaceMembers);
+                    primitivesNamespaceMembers,
+                    supportsInterceptors);
             });
 
     /// <summary>

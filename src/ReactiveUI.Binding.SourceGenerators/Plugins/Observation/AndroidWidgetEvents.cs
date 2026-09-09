@@ -21,40 +21,38 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// </remarks>
 internal static class AndroidWidgetEvents
 {
-    /// <summary>The property each reporting widget raises an event for, and the event it raises.</summary>
-    private static readonly Dictionary<string, string> _changeEvents = new(StringComparer.Ordinal)
-    {
-        // TextView and everything built on it.
-        ["Text"] = "TextChanged",
-
-        // NumberPicker.
-        ["Value"] = "ValueChanged",
-
-        // RatingBar.
-        ["Rating"] = "RatingBarChange",
-
-        // CompoundButton, and so CheckBox, RadioButton and Switch.
-        ["Checked"] = "CheckedChange",
-
-        // CalendarView.
-        ["Date"] = "DateChange",
-
-        // TabHost.
-        ["CurrentTab"] = "TabChanged",
-
-        // TimePicker, whose hour and minute are named one way from API 23 and the other before it.
-        ["Hour"] = "TimeChanged",
-        ["Minute"] = "TimeChanged",
-        ["CurrentHour"] = "TimeChanged",
-        ["CurrentMinute"] = "TimeChanged",
-
-        // AdapterView, and so Spinner and ListView.
-        ["SelectedItem"] = "ItemSelected",
-    };
-
     /// <summary>Finds the event a widget raises when the named property changes.</summary>
     /// <param name="propertyName">The property being observed.</param>
     /// <returns>The event name, or <see langword="null"/> when no widget reports that property.</returns>
-    internal static string? FindChangeEvent(string propertyName) =>
-        _changeEvents.TryGetValue(propertyName, out var changeEvent) ? changeEvent : null;
+    /// <remarks>
+    /// A switch rather than a lookup table: the set is closed and known here, so the compiler turns it into a
+    /// jump over the name with nothing built at startup and nothing held for the life of the generator.
+    /// </remarks>
+    internal static string? FindChangeEvent(string propertyName) => propertyName switch
+    {
+        // TextView and everything built on it.
+        "Text" => "TextChanged",
+
+        // NumberPicker.
+        "Value" => "ValueChanged",
+
+        // RatingBar.
+        "Rating" => "RatingBarChange",
+
+        // CompoundButton, and so CheckBox, RadioButton and Switch.
+        "Checked" => "CheckedChange",
+
+        // CalendarView.
+        "Date" => "DateChange",
+
+        // TabHost.
+        "CurrentTab" => "TabChanged",
+
+        // TimePicker, whose hour and minute are named one way from API 23 and the other before it.
+        "Hour" or "Minute" or "CurrentHour" or "CurrentMinute" => "TimeChanged",
+
+        // AdapterView, and so Spinner and ListView.
+        "SelectedItem" => "ItemSelected",
+        _ => null,
+    };
 }
