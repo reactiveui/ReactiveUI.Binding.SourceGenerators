@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests;
 /// mechanisms can tell apart differs: expression text is shared by such call sites, while file and line are
 /// not. These scenarios pin that each mechanism generates exactly the bodies it can actually reach.
 /// </summary>
-public class RepeatedCallSiteDispatchTests
+public partial class RepeatedCallSiteDispatchTests
 {
     /// <summary>The dispatch file BindOneWay call sites are generated into.</summary>
     private const string DispatchFileName = "BindOneWayDispatch.g.cs";
@@ -70,42 +70,8 @@ public class RepeatedCallSiteDispatchTests
                                                  }
                                                  """;
 
-    /// <summary>
-    /// Expression-text dispatch cannot tell the two call sites apart, so a second body would be unreachable
-    /// and is not emitted.
-    /// </summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task RepeatedCallSites_UnderExpressionDispatch_GenerateOneBindingMethod()
-    {
-        var result = TestHelper.RunGenerator(
-            RepeatedBindingSource,
-            LanguageVersion.CSharp10,
-            ProbeRootNamespace);
-
-        await result.CompilationSucceeds();
-        await result.GeneratedSourceContainsCount(DispatchFileName, BindingMethodDeclaration, 1);
-    }
-
-    /// <summary>File-and-line dispatch reaches each call site separately, so both keep a body of their own.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task RepeatedCallSites_UnderFileAndLineDispatch_GenerateABindingMethodEach()
-    {
-        var result = TestHelper.RunGenerator(
-            RepeatedBindingSource,
-            LanguageVersion.CSharp7_3,
-            ProbeRootNamespace);
-
-        await result.GeneratedSourceContainsCount(DispatchFileName, BindingMethodDeclaration, BodyPerCallSite);
-    }
-
-    /// <summary>Two BindTo call sites spelled identically share one generated binding method.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task RepeatedBindTo_UnderExpressionDispatch_GeneratesOneBindingMethod()
-    {
-        const string source = """
+    /// <summary>Two BindTo call sites applying the same stream to the same property, spelled identically.</summary>
+    private const string RepeatedBindToSource = """
                               using System;
                               using System.ComponentModel;
                               using ReactiveUI.Binding;
@@ -134,21 +100,8 @@ public class RepeatedCallSiteDispatchTests
                               }
                               """;
 
-        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10, ProbeRootNamespace);
-
-        await result.CompilationSucceeds();
-        await result.GeneratedSourceContainsCount(
-            "BindToDispatch.g.cs",
-            "private static global::System.IDisposable __BindTo_",
-            1);
-    }
-
-    /// <summary>Two BindCommand call sites spelled identically share one generated binding method.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task RepeatedBindCommand_UnderExpressionDispatch_GeneratesOneBindingMethod()
-    {
-        const string source = """
+    /// <summary>Two BindCommand call sites binding the same command to the same control, spelled identically.</summary>
+    private const string RepeatedBindCommandSource = """
                               using System;
                               using System.ComponentModel;
                               using System.Windows.Input;
@@ -198,20 +151,8 @@ public class RepeatedCallSiteDispatchTests
                               }
                               """;
 
-        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10, ProbeRootNamespace);
-
-        await result.GeneratedSourceContainsCount(
-            "BindCommandDispatch.g.cs",
-            "__BindCommand_",
-            NamedOncePerBranchAndDeclaration);
-    }
-
-    /// <summary>Two BindInteraction call sites spelled identically share one generated binding method.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task RepeatedBindInteraction_UnderExpressionDispatch_GeneratesOneBindingMethod()
-    {
-        const string source = """
+    /// <summary>Two BindInteraction call sites binding the same interaction, spelled identically.</summary>
+    private const string RepeatedBindInteractionSource = """
                               using System;
                               using System.ComponentModel;
                               using System.Threading.Tasks;
@@ -252,7 +193,69 @@ public class RepeatedCallSiteDispatchTests
                               }
                               """;
 
-        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10, ProbeRootNamespace);
+    /// <summary>
+    /// Expression-text dispatch cannot tell the two call sites apart, so a second body would be unreachable
+    /// and is not emitted.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RepeatedCallSites_UnderExpressionDispatch_GenerateOneBindingMethod()
+    {
+        var result = TestHelper.RunGenerator(
+            RepeatedBindingSource,
+            LanguageVersion.CSharp10,
+            ProbeRootNamespace);
+
+        await result.CompilationSucceeds();
+        await result.GeneratedSourceContainsCount(DispatchFileName, BindingMethodDeclaration, 1);
+    }
+
+    /// <summary>File-and-line dispatch reaches each call site separately, so both keep a body of their own.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RepeatedCallSites_UnderFileAndLineDispatch_GenerateABindingMethodEach()
+    {
+        var result = TestHelper.RunGenerator(
+            RepeatedBindingSource,
+            LanguageVersion.CSharp7_3,
+            ProbeRootNamespace);
+
+        await result.GeneratedSourceContainsCount(DispatchFileName, BindingMethodDeclaration, BodyPerCallSite);
+    }
+
+    /// <summary>Two BindTo call sites spelled identically share one generated binding method.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RepeatedBindTo_UnderExpressionDispatch_GeneratesOneBindingMethod()
+    {
+        var result = TestHelper.RunGenerator(RepeatedBindToSource, LanguageVersion.CSharp10, ProbeRootNamespace);
+
+        await result.CompilationSucceeds();
+        await result.GeneratedSourceContainsCount(
+            "BindToDispatch.g.cs",
+            "private static global::System.IDisposable __BindTo_",
+            1);
+    }
+
+    /// <summary>Two BindCommand call sites spelled identically share one generated binding method.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RepeatedBindCommand_UnderExpressionDispatch_GeneratesOneBindingMethod()
+    {
+        var result = TestHelper.RunGenerator(RepeatedBindCommandSource, LanguageVersion.CSharp10, ProbeRootNamespace);
+
+        await result.GeneratedSourceContainsCount(
+            "BindCommandDispatch.g.cs",
+            "__BindCommand_",
+            NamedOncePerBranchAndDeclaration);
+    }
+
+    /// <summary>Two BindInteraction call sites spelled identically share one generated binding method.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task RepeatedBindInteraction_UnderExpressionDispatch_GeneratesOneBindingMethod()
+    {
+        var result = TestHelper.RunGenerator(RepeatedBindInteractionSource, LanguageVersion.CSharp10, ProbeRootNamespace);
 
         await result.GeneratedSourceContainsCount(
             "BindInteractionDispatch.g.cs",
