@@ -174,4 +174,16 @@ internal static class RoslynHelpers
         {
             Name.Identifier.Text: Constants.BindToMethodName
         };
+
+    /// <summary>Pipeline B predicate: detects InvokeCommand invocations (observable stream to a command).</summary>
+    /// <param name="node">The syntax node to check.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>true if the node is an InvokeCommand invocation; otherwise, false.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsInvokeCommandInvocation(SyntaxNode node, CancellationToken ct) =>
+        node is InvocationExpressionSyntax invocation
+        && invocation.Expression is MemberAccessExpressionSyntax
+        {
+            Name.Identifier.Text: Constants.InvokeCommandMethodName
+        };
 }

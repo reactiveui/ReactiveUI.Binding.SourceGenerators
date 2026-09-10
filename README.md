@@ -63,7 +63,7 @@ generation. Zero reflection, fully AOT/trimming safe, 3-7x faster than the legac
 
 ReactiveUI.Binding.SourceGenerators is an incremental source generator that analyses your `WhenChanged`, `WhenChanging`,
 `WhenAnyValue`, `WhenAny`, `WhenAnyObservable`, `BindOneWay`, `BindTwoWay`, `OneWayBind`, `Bind`, `BindTo`,
-`BindCommand`, and `BindInteraction` call sites at compile time and emits optimised, strongly-typed observation and
+`BindCommand`, `BindInteraction`, and `InvokeCommand` call sites at compile time and emits optimised, strongly-typed observation and
 binding code. It eliminates:
 
 - **Runtime expression-tree compilation** -- no `Expression<Func<T>>` evaluation at runtime
@@ -186,6 +186,7 @@ Platform-specific packages provide DependencyProperty observation and other plat
 | `BindTo`            | Apply an observable stream to a target property                                     |
 | `BindCommand`       | Bind a command property to a UI element                                             |
 | `BindInteraction`   | Bind an interaction to a handler                                                    |
+| `InvokeCommand`     | Execute a command with each value an observable produces                            |
 
 All APIs support single properties, deep property chains (e.g. `x => x.Address.City`), and multi-property observation (
 up to 12 properties for `WhenAnyValue`/`WhenChanged`).
@@ -270,6 +271,20 @@ IObservable<string> obs = vm.WhenAnyValue(x => x.Name);
 IDisposable binding = view.OneWayBind(vm, x => x.Name, x => x.NameLabel);
 IDisposable binding = view.Bind(vm, x => x.Name, x => x.NameTextBox);
 ```
+
+### Invoking a Command
+
+```csharp
+// Execute the command a view model property holds with each value the stream produces. The value is the
+// command parameter, and a value the command refuses through CanExecute is dropped.
+IDisposable invocation = searchText.InvokeCommand(vm, x => x.Search);
+
+// Execute a command the caller already has, which needs no property to observe.
+IDisposable invocation = searchText.InvokeCommand(vm.Search);
+```
+
+A `ReactiveCommand` is reached through these overloads like any other `ICommand`; the parameter arrives as
+`object` rather than the command's declared input type.
 
 ### Scheduler Overloads
 

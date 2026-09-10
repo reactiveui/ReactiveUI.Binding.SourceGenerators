@@ -213,7 +213,8 @@ src/
 │   │   ├── WhenChangingInvocationGenerator.cs   # Before-change observation
 │   │   ├── BindOneWayInvocationGenerator.cs     # One-way binding
 │   │   ├── BindTwoWayInvocationGenerator.cs     # Two-way binding
-│   │   └── WhenAnyValueInvocationGenerator.cs   # WhenAnyValue compat shim
+│   │   ├── WhenAnyValueInvocationGenerator.cs   # WhenAnyValue compat shim
+│   │   └── InvokeCommandInvocationGenerator.cs  # Stream-driven command execution
 │   ├── Helpers/                                 # Extraction and validation helpers
 │   │   ├── ViewRegistrationExtractor.cs         # IViewFor<T> → ViewRegistrationInfo extraction
 │   │   └── ...                                  # ExtractorValidation, SymbolHelpers, etc.
@@ -263,7 +264,7 @@ generic type inference dominate the `GcVerbose` trace), so a second semantic pas
 not affordable. It also means a type from a *referenced* assembly is observed correctly even though the
 declaration scan never sees it.
 
-**Pipeline B (Invocation Detection)**: Scans method invocations (`WhenChanged`, `WhenChanging`, `BindOneWay`, `BindTwoWay`, `WhenAnyValue`) → extracts lambda property paths → generates optimized per-call-site observation/binding code. Uses **CallerFilePath + CallerLineNumber dispatch**: API stubs capture caller info, generated dispatch table routes to compile-time generated methods.
+**Pipeline B (Invocation Detection)**: Scans method invocations (`WhenChanged`, `WhenChanging`, `BindOneWay`, `BindTwoWay`, `WhenAnyValue`, `InvokeCommand`) → extracts lambda property paths → generates optimized per-call-site observation/binding code. Uses **CallerFilePath + CallerLineNumber dispatch**: API stubs capture caller info, generated dispatch table routes to compile-time generated methods.
 
 **Pipeline C (View Dispatch)**: Scans classes implementing `IViewFor<T>` → extracts `ViewRegistrationInfo` POCOs (VM FQN, View FQN, constructor availability, `[ViewContract]` contract, `[SingleInstanceView]` flag) → generates `ViewDispatch.g.cs` with a type-switch dispatch function. Supports contract-based multi-view resolution (contract checks emitted before default), singleton caching via `Interlocked.CompareExchange`, and 3-tier resolution (service locator → direct construction → null). Views can be excluded with `[ExcludeFromViewRegistration]`.
 
