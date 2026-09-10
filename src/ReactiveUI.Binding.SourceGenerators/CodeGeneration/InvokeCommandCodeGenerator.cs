@@ -100,10 +100,8 @@ internal static class InvokeCommandCodeGenerator
     /// <param name="features">The consumer compilation's language-feature snapshot.</param>
     /// <remarks>
     /// Call sites spelling the same selector reach the same worker, so the worker is keyed by the target type and
-    /// that text rather than by the call site. Under expression-text dispatch their branches are identical too,
-    /// and all but the first would be unreachable, so the group is collapsed to one call site per distinct
-    /// selector. Interception claims each call site by name, so nothing is collapsed there: a dropped call site
-    /// would carry no attribute and lose its generated invocation.
+    /// that text rather than by the call site. Whether the group also collapses to one of those call sites is the
+    /// snapshot's to say, because every API answers it the same way.
     /// </remarks>
     private static void EmitGroup(
         StringBuilder sb,
@@ -111,8 +109,7 @@ internal static class InvokeCommandCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features)
     {
-        var collapsible = features.SupportsCallerArgExpr && !features.SupportsInterceptors;
-        var emitted = collapsible
+        var emitted = features.CollapsesIndistinguishableCallSites
             ? group with
             {
                 Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
