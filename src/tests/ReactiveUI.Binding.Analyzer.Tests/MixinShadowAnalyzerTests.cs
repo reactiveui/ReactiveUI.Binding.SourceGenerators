@@ -171,6 +171,17 @@ public class MixinShadowAnalyzerTests
         await Assert.That(diagnostics.Count(static d => d.Id == DiagnosticId)).IsEqualTo(1);
     }
 
+    /// <summary>An InvokeCommand answered by ReactiveUI's mixin is reported like any other generated API.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task MixinCall_ToInvokeCommand_IsReported()
+    {
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync<MixinShadowAnalyzer>(
+            Source(ReactiveUiNamespace, "InvokeCommand", BindingPackage));
+
+        await Assert.That(diagnostics.Count(static d => d.Id == DiagnosticId)).IsEqualTo(1);
+    }
+
     /// <summary>Without this package there is no generated overload to have lost, so nothing is reported.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

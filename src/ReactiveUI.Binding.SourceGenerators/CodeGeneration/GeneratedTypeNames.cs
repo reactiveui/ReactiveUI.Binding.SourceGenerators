@@ -67,6 +67,15 @@ internal static class GeneratedTypeNames
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.IBindingTypeConverter</c>.</summary>
     internal const string IBindingTypeConverter = "global::ReactiveUI.Binding.IBindingTypeConverter";
 
+    /// <summary>The fully qualified name of <c>System.Windows.Input.ICommand</c>.</summary>
+    internal const string ICommand = "global::System.Windows.Input.ICommand";
+
+    /// <summary>The subscription that holds nothing, handed back where there is nothing to disconnect.</summary>
+    internal const string EmptyDisposable = "global::ReactiveUI.Primitives.Disposables.EmptyDisposable";
+
+    /// <summary>The runtime gate that offers each value to a command and executes the ones it accepts.</summary>
+    internal const string CommandInvoker = "global::ReactiveUI.Binding.CommandBinding.CommandInvoker";
+
     /// <summary>The <c>ReactiveUI.Binding.Observables</c> namespace prefix (no trailing dot).</summary>
     internal const string Observables = "global::ReactiveUI.Binding.Observables";
 

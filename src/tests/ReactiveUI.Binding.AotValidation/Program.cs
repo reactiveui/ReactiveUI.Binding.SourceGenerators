@@ -32,6 +32,9 @@ internal static class Program
     /// <summary>The value set before the binding is disposed, which must survive the disposal.</summary>
     private const string BeforeDisposal = "Before";
 
+    /// <summary>The number of executions expected after the initial value and one change.</summary>
+    private const int ExpectedTwoExecutions = 2;
+
     /// <summary>
     /// Sink for scenario results. This validation harness runs standalone under Native AOT with no host
     /// or logging infrastructure, so its report goes straight to the process output stream.
@@ -57,6 +60,7 @@ internal static class Program
         ValidateBindOneWayDisposal();
         ValidateOneWayBind();
         ValidateBind();
+        ValidateInvokeCommand();
 
         Report(string.Empty);
         Report($"AOT Validation: {_passed} passed, {_failed} failed");
@@ -167,6 +171,22 @@ internal static class Program
         AssertEqual("Bind view model to view", "FromViewModel", view.DisplayName);
         view.DisplayName = "FromView";
         AssertEqual("Bind view to view model", "FromView", viewModel.Name);
+    }
+
+    /// <summary>InvokeCommand executes the command a view model holds with each observed value.</summary>
+    private static void ValidateInvokeCommand()
+    {
+        var viewModel = new AotViewModel { Name = InitialName };
+        var command = new AotCommand();
+        viewModel.Save = command;
+
+        using var invocation = viewModel.WhenChanged(x => x.Name).InvokeCommand(viewModel, x => x.Save);
+        AssertEqual("InvokeCommand initial", 1, command.ExecuteCount);
+        AssertEqual("InvokeCommand initial parameter", InitialName, command.LastParameter as string);
+
+        viewModel.Name = ReplacementName;
+        AssertEqual("InvokeCommand after set", ExpectedTwoExecutions, command.ExecuteCount);
+        AssertEqual("InvokeCommand parameter after set", ReplacementName, command.LastParameter as string);
     }
 
     /// <summary>Compares an expected and actual value, recording a pass or failure to the console.</summary>

@@ -8,7 +8,7 @@ using ReactiveUI.Binding.Analyzer.Tests.Helpers;
 namespace ReactiveUI.Binding.Analyzer.Tests;
 
 /// <summary>Tests for <see cref="TypeAnalyzer"/>.</summary>
-public class TypeAnalyzerTests
+public partial class TypeAnalyzerTests
 {
     /// <summary>The diagnostic id reported when a type has no observable properties.</summary>
     private const string NoObservablePropertiesDiagnosticId = "RXUIBIND002";

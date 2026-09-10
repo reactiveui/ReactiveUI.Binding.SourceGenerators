@@ -100,7 +100,22 @@ internal static class AnalyzerHelpers
     /// <param name="methodSymbol">The method symbol to extract from.</param>
     /// <returns>The first type argument as <see cref="INamedTypeSymbol"/>, or null.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static INamedTypeSymbol? ExtractFirstTypeArgument(IMethodSymbol methodSymbol) => methodSymbol.TypeArguments.IsEmpty ? null : methodSymbol.TypeArguments[0] as INamedTypeSymbol;
+    internal static INamedTypeSymbol? ExtractFirstTypeArgument(IMethodSymbol methodSymbol) => ExtractTypeArgument(methodSymbol, 0);
+
+    /// <summary>
+    /// Extracts one of a method's type arguments as an <see cref="INamedTypeSymbol"/>. Returns null when the
+    /// method has fewer arguments than that, or when the one asked for is not a named type.
+    /// </summary>
+    /// <param name="methodSymbol">The method symbol to extract from.</param>
+    /// <param name="index">Which type argument to read.</param>
+    /// <returns>The type argument as <see cref="INamedTypeSymbol"/>, or null.</returns>
+    /// <remarks>
+    /// Which argument names the observed object differs by API: most name it first, while the ones taking a
+    /// stream the caller already built name that stream's value type there instead.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static INamedTypeSymbol? ExtractTypeArgument(IMethodSymbol methodSymbol, int index) =>
+        methodSymbol.TypeArguments.Length <= index ? null : methodSymbol.TypeArguments[index] as INamedTypeSymbol;
 
     /// <summary>
     /// Determines whether a method's first type argument lacks any observable notification mechanism.
@@ -110,12 +125,29 @@ internal static class AnalyzerHelpers
     /// <param name="compilation">The current compilation.</param>
     /// <param name="sourceType">The resolved source type, if the check matched.</param>
     /// <returns><c>true</c> if the type has no observable mechanism.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool LacksObservableMechanism(
         IMethodSymbol methodSymbol,
         Compilation compilation,
+        out INamedTypeSymbol? sourceType) =>
+        LacksObservableMechanism(methodSymbol, compilation, 0, out sourceType);
+
+    /// <summary>
+    /// Determines whether the type argument naming this API's observed object lacks any observable notification
+    /// mechanism. Returns <c>false</c> when the method has no such argument (a non-generic dispatch overload).
+    /// </summary>
+    /// <param name="methodSymbol">The method symbol.</param>
+    /// <param name="compilation">The current compilation.</param>
+    /// <param name="typeArgumentIndex">Which type argument names the observed object.</param>
+    /// <param name="sourceType">The resolved source type, if the check matched.</param>
+    /// <returns><c>true</c> if the type has no observable mechanism.</returns>
+    internal static bool LacksObservableMechanism(
+        IMethodSymbol methodSymbol,
+        Compilation compilation,
+        int typeArgumentIndex,
         out INamedTypeSymbol? sourceType)
     {
-        sourceType = ExtractFirstTypeArgument(methodSymbol);
+        sourceType = ExtractTypeArgument(methodSymbol, typeArgumentIndex);
         return sourceType is not null && !TypeAnalyzer.HasObservableMechanism(sourceType, compilation);
     }
 

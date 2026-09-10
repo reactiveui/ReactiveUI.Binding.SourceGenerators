@@ -52,6 +52,7 @@ public class MixinShadowAnalyzer : DiagnosticAnalyzer
         Constants.BindToMethodName,
         Constants.BindCommandMethodName,
         Constants.BindInteractionMethodName,
+        Constants.InvokeCommandMethodName,
     }.ToImmutableHashSet(StringComparer.Ordinal);
 
     /// <summary>The diagnostics this analyzer reports.</summary>

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.ComponentModel;
+using System.Windows.Input;
 
 namespace ReactiveUI.Binding.AotValidation;
 
@@ -65,4 +66,21 @@ public class AotViewModel : INotifyPropertyChanged, INotifyPropertyChanging
             PropertyChanged?.Invoke(this, new(nameof(Child)));
         }
     } = new();
+
+    /// <summary>Gets or sets the command a stream of values is invoked against.</summary>
+    public ICommand? Save
+    {
+        get => field;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            PropertyChanging?.Invoke(this, new(nameof(Save)));
+            field = value;
+            PropertyChanged?.Invoke(this, new(nameof(Save)));
+        }
+    }
 }

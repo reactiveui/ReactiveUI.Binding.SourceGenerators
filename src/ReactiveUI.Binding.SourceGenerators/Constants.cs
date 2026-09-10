@@ -136,6 +136,9 @@ internal static class Constants
     /// <summary>Method name for binding an observable stream to a target property (<c>BindTo</c>).</summary>
     internal const string BindToMethodName = "BindTo";
 
+    /// <summary>Method name for executing a command with each value a stream produces (<c>InvokeCommand</c>).</summary>
+    internal const string InvokeCommandMethodName = "InvokeCommand";
+
     /// <summary>Metadata name for the open generic <c>IViewFor&lt;T&gt;</c> interface used for view resolution.</summary>
     internal const string IViewForGenericMetadataName = "ReactiveUI.Binding.IViewFor`1";
 

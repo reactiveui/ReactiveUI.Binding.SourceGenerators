@@ -88,6 +88,7 @@ public class BindingGenerator : IIncrementalGenerator
         var bindCommand = Detect(in context, RoslynHelpers.IsBindCommandInvocation, CommandExtractor.ExtractBindCommandInvocation);
         var bindInteraction = Detect(in context, RoslynHelpers.IsBindInteractionInvocation, InteractionExtractor.ExtractBindInteractionInvocation);
         var bindTo = Detect(in context, RoslynHelpers.IsBindToInvocation, BindToExtractor.ExtractBindToInvocation);
+        var invokeCommand = Detect(in context, RoslynHelpers.IsInvokeCommandInvocation, InvokeCommandExtractor.ExtractInvokeCommandInvocation);
 
         // Each invocation generator receives the language-feature snapshot to control dispatch/output
         WhenChangedInvocationGenerator.Register(context, whenChanged, allClasses, languageFeatures);
@@ -102,6 +103,7 @@ public class BindingGenerator : IIncrementalGenerator
         BindInteractionInvocationGenerator.Register(context, bindInteraction, allClasses, languageFeatures);
         BindCommandInvocationGenerator.Register(context, bindCommand, allClasses, languageFeatures);
         BindToInvocationGenerator.Register(context, bindTo, languageFeatures);
+        InvokeCommandInvocationGenerator.Register(context, invokeCommand, allClasses, languageFeatures);
     }
 
     /// <summary>Reads the C# language version the consumer is compiling with.</summary>

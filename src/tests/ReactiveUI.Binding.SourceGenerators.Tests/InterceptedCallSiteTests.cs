@@ -182,6 +182,7 @@ public class InterceptedCallSiteTests
                                                         view.OneWayBind(person, x => x.Name, v => v.Summary);
                                                         view.Bind(person, x => x.Name, v => v.Display);
                                                         names.BindTo(view, v => v.Display);
+                                                        names.InvokeCommand(person, x => x.Save);
                                                         view.BindCommand(person, x => x.Save, v => v.SaveButton);
                                                         view.BindCommand(person, x => x.Save, v => v.SaveButton, names);
                                                         view.BindInteraction(person, x => x.Confirm, Handle);
@@ -215,6 +216,7 @@ public class InterceptedCallSiteTests
         "BindToDispatch.g.cs",
         "BindCommandDispatch.g.cs",
         "BindInteractionDispatch.g.cs",
+        "InvokeCommandDispatch.g.cs",
     ];
 
     /// <summary>Every generated API is claimed the same way, so each emitter's tier follows one decision.</summary>

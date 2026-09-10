@@ -493,6 +493,7 @@ public static class TestHelper
         "BindInteractionGeneratorTests" => "BIG",
         "BindCommandGeneratorTests" => "BCG",
         "BindToGeneratorTests" => "BToG",
+        "InvokeCommandGeneratorTests" => "ICG",
         "ViewLocatorDispatchGeneratorTests" => "VDG",
         _ => typeName
     };
