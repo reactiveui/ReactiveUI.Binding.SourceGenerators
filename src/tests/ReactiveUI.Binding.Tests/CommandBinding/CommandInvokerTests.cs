@@ -21,6 +21,9 @@ public class CommandInvokerTests
     /// <summary>The number of executions expected after offering two accepted values.</summary>
     private const int TwoExecutions = 2;
 
+    /// <summary>The message a faulted sequence carries.</summary>
+    private const string FaultMessage = "faulted";
+
     /// <summary>Each value the sequence produces is offered to the command as its parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -178,7 +181,21 @@ public class CommandInvokerTests
 
         using var invocation = CommandInvoker.Invoke(values, command);
 
-        await Assert.That(() => values.Observer!.OnError(new InvalidOperationException("faulted")))
+        await Assert.That(() => values.Observer!.OnError(new InvalidOperationException(FaultMessage)))
+            .Throws<InvalidOperationException>();
+    }
+
+    /// <summary>A fault in the values is surfaced while a command is being observed, too.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Invoke_ObservedCommand_ValuesFault_SurfacesTheFault()
+    {
+        var commands = new Subject<ICommand?>();
+        var values = new ManualObservable<string>();
+
+        using var invocation = CommandInvoker.Invoke(values, commands);
+
+        await Assert.That(() => values.Observer!.OnError(new InvalidOperationException(FaultMessage)))
             .Throws<InvalidOperationException>();
     }
 
@@ -192,7 +209,7 @@ public class CommandInvokerTests
 
         using var invocation = CommandInvoker.Invoke(values, commands);
 
-        await Assert.That(() => commands.Observer!.OnError(new InvalidOperationException("faulted")))
+        await Assert.That(() => commands.Observer!.OnError(new InvalidOperationException(FaultMessage)))
             .Throws<InvalidOperationException>();
     }
 

@@ -102,6 +102,120 @@ public class InvokeCommandGeneratorTests
         await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchgcsName);
     }
 
+    /// <summary>A call the model could not resolve names no method to read arguments against.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task UnresolvedCall_GeneratesNoDispatch()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using System.Windows.Input;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                                      public ICommand? Save { get; set; }
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static void Execute(MyViewModel vm)
+                                      {
+                                          undefinedValues.InvokeCommand(vm, x => x.Save);
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+        await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchgcsName);
+    }
+
+    /// <summary>
+    /// A target held in a type parameter is named by nothing a generated member could declare, so the call site
+    /// is declined rather than emitted with the parameter's own name in it.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenericTargetParameter_GeneratesNoDispatch()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using System.Windows.Input;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public interface IHasCommand : INotifyPropertyChanged
+                                  {
+                                      ICommand? Save { get; }
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static IDisposable Execute<TTarget>(IObservable<string> values, TTarget target)
+                                          where TTarget : class, IHasCommand
+                                      {
+                                          return values.InvokeCommand(target, x => x.Save);
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+        await result.CompilationSucceeds();
+        await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchgcsName);
+    }
+
+    /// <summary>A selector whose body is no property path leaves nothing to observe.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task SelectorWithoutAPropertyPath_GeneratesNoDispatch()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using System.Windows.Input;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public class MyViewModel : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                                      public ICommand? Save { get; set; }
+
+                                      public ICommand? Resolve() => Save;
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static IDisposable Execute(IObservable<string> values, MyViewModel vm)
+                                      {
+                                          return values.InvokeCommand(vm, x => x.Resolve());
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+        await result.CompilationSucceeds();
+        await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchgcsName);
+    }
+
     /// <summary>A receiver that is no stream of values has nothing to drive an execution.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
