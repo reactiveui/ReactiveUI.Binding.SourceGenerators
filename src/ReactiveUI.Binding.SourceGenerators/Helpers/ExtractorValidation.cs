@@ -90,14 +90,23 @@ internal static class ExtractorValidation
     /// <param name="type">The type symbol, which may be null.</param>
     /// <returns>The fully qualified type name, or <see langword="null"/> when no overload could name it.</returns>
     /// <remarks>
+    /// <para>
     /// A call made through a type parameter binds to whatever closes it, which the call site does not name.
     /// Writing the parameter's own name into an overload puts an identifier no consumer declared into their
     /// build, so the whole compilation fails over generated code they cannot edit - including every unrelated
     /// call site in the project. Declining the call site leaves it on the runtime stub instead.
+    /// </para>
+    /// <para>
+    /// A static type fails the same way and reaches here by a different route: a call written through the
+    /// stub's declaring class - <c>ReactiveUIBindingExtensions.WhenChanged(vm, x => x.Name)</c> - puts that
+    /// class where the observed object goes, and no member can declare a parameter of it or close a generic
+    /// over it. Such a call resolves against that class's own members, so neither a generated overload nor an
+    /// interceptor matching the call written on an instance is a candidate for it either way.
+    /// </para>
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static string? GetDeclarableTypeDisplayName(ITypeSymbol? type) =>
-        type is INamedTypeSymbol named ? GetTypeDisplayName(named) : null;
+        type is INamedTypeSymbol { IsStatic: false } named ? GetTypeDisplayName(named) : null;
 
     /// <summary>
     /// Searches method parameters for a selector or conversion function parameter

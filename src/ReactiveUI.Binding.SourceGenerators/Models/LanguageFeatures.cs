@@ -78,4 +78,16 @@ internal readonly record struct LanguageFeatures(
     bool UsesReactiveRuntime = false,
     EquatableArray<string> RuntimeNamespaceMembers = default,
     EquatableArray<string> PrimitivesNamespaceMembers = default,
-    bool SupportsInterceptors = false);
+    bool SupportsInterceptors = false)
+{
+    /// <summary>Gets a value indicating whether call sites a dispatch cannot tell apart collapse to one.</summary>
+    /// <remarks>
+    /// Binding the same pair of properties from more than one place is ordinary, and expression-text dispatch
+    /// keys on the selectors as written: the first matching branch wins, so the later ones are unreachable and
+    /// only drag a binding method along. An interceptor instead names the call site it replaces, so dropping one
+    /// leaves it carrying no attribute - on the runtime engine while the call site beside it is generated. The
+    /// rule lives here because each API would otherwise decide it separately, and the one that forgot would
+    /// silently lose a binding rather than fail to compile.
+    /// </remarks>
+    internal bool CollapsesIndistinguishableCallSites => SupportsCallerArgExpr && !SupportsInterceptors;
+}

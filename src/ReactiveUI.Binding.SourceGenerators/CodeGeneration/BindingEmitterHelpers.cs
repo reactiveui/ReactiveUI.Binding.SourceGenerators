@@ -61,7 +61,7 @@ internal static class BindingEmitterHelpers
 
         for (var g = 0; g < groups.Count; g++)
         {
-            var group = snapshot.SupportsCallerArgExpr
+            var group = snapshot.CollapsesIndistinguishableCallSites
                 ? groups[g] with
                 {
                     Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(

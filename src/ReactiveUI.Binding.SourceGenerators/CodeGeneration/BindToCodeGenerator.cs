@@ -52,7 +52,7 @@ internal static class BindToCodeGenerator
 
         for (var g = 0; g < groups.Count; g++)
         {
-            var group = supportsCallerArgExpr
+            var group = features.CollapsesIndistinguishableCallSites
                 ? groups[g] with
                 {
                     Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(

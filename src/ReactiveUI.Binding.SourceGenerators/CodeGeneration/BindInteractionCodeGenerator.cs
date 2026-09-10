@@ -301,7 +301,7 @@ internal static class BindInteractionCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features)
     {
-        var collapsed = features.SupportsCallerArgExpr
+        var collapsed = features.CollapsesIndistinguishableCallSites
             ? group with
             {
                 Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
