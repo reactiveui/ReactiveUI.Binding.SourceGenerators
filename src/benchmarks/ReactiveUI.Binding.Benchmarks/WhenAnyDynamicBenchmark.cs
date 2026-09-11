@@ -31,7 +31,9 @@ namespace ReactiveUI.Binding.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [SimpleJob(RuntimeMoniker.Net11_0)]
 [MemoryDiagnoser]
+#if !BENCH_NETFX
 [EventPipeProfiler(EventPipeProfile.GcVerbose)]
+#endif
 [MarkdownExporterAttribute.GitHub]
 #if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]

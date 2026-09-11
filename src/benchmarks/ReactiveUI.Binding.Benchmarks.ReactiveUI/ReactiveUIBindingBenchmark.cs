@@ -17,7 +17,9 @@ namespace ReactiveUI.Binding.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net10_0)]
 [SimpleJob(RuntimeMoniker.Net11_0)]
 [MemoryDiagnoser]
+#if !BENCH_NETFX
 [EventPipeProfiler(EventPipeProfile.GcVerbose)]
+#endif
 [MarkdownExporterAttribute.GitHub]
 [DebuggerDisplay("Expression-tree binding over {PropertyChangeCount} changes")]
 public class ReactiveUIBindingBenchmark

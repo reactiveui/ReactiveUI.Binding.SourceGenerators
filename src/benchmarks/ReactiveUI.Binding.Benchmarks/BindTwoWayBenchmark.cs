@@ -20,7 +20,9 @@ namespace ReactiveUI.Binding.Benchmarks;
 [SimpleJob(RuntimeMoniker.NativeAot10_0, id: nameof(RuntimeMoniker.NativeAot10_0))]
 [SimpleJob(RuntimeMoniker.NativeAot11_0, id: nameof(RuntimeMoniker.NativeAot11_0))]
 [MemoryDiagnoser]
+#if !BENCH_NETFX
 [EventPipeProfiler(EventPipeProfile.GcVerbose)]
+#endif
 [MarkdownExporterAttribute.GitHub]
 public class BindTwoWayBenchmark
 {

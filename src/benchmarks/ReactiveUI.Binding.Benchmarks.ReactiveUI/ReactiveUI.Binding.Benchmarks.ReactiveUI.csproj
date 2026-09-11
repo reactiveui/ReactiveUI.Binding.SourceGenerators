@@ -3,9 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">net8.0;net10.0;net11.0;net462</TargetFrameworks>
-    <!-- The net462 job can only be launched on Windows, so the attribute that declares it is gated too. -->
-    <DefineConstants Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(DefineConstants);BENCH_NETFX</DefineConstants>
+    <!--
+      BenchNetFx adds the net462 leg, which only Windows can launch. It also drops the EventPipe
+      profiler, because that diagnoser refuses any job below .NET Core 3.0 and its validator stops
+      the whole run rather than the one job.
+    -->
+    <TargetFrameworks Condition="'$(BenchNetFx)' == 'true' and $([MSBuild]::IsOsPlatform('Windows'))">net8.0;net10.0;net11.0;net462</TargetFrameworks>
+    <DefineConstants Condition="'$(BenchNetFx)' == 'true' and $([MSBuild]::IsOsPlatform('Windows'))">$(DefineConstants);BENCH_NETFX</DefineConstants>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsAotCompatible>false</IsAotCompatible>

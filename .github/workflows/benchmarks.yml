@@ -16,6 +16,10 @@ on:
                 description: 'BenchmarkDotNet filter, e.g. *WhenChanged* or *'
                 type: string
                 default: '*'
+            include_netfx:
+                description: 'Add the net462 leg. Drops the EventPipe profiler, which refuses jobs below .NET Core 3.0.'
+                type: boolean
+                default: false
 
 permissions:
     contents: read
@@ -56,11 +60,15 @@ jobs:
                   # input cannot extend it.
                   SUITE: ${{ inputs.suite }}
                   FILTER: ${{ inputs.filter }}
+                  INCLUDE_NETFX: ${{ inputs.include_netfx }}
               run: |
                   $projects = @()
                   if ($env:SUITE -eq 'runtime'   -or $env:SUITE -eq 'all') { $projects += 'benchmarks/ReactiveUI.Binding.Benchmarks/ReactiveUI.Binding.Benchmarks.csproj' }
                   if ($env:SUITE -eq 'baseline'  -or $env:SUITE -eq 'all') { $projects += 'benchmarks/ReactiveUI.Binding.Benchmarks.ReactiveUI/ReactiveUI.Binding.Benchmarks.ReactiveUI.csproj' }
                   if ($env:SUITE -eq 'generator' -or $env:SUITE -eq 'all') { $projects += 'benchmarks/ReactiveUI.Binding.Generator.Benchmarks/ReactiveUI.Binding.Generator.Benchmarks.csproj' }
+
+                  $properties = @()
+                  if ($env:INCLUDE_NETFX -eq 'true') { $properties += '--property:BenchNetFx=true' }
 
                   foreach ($project in $projects) {
                       $name = [System.IO.Path]::GetFileNameWithoutExtension($project)
@@ -68,7 +76,7 @@ jobs:
 
                       # The host TFM only launches the switcher; each benchmark's SimpleJob attributes
                       # decide which runtimes are actually measured.
-                      dotnet run --project $project -c Release -f net10.0 -- `
+                      dotnet run --project $project -c Release -f net10.0 @properties -- `
                           --filter $env:FILTER `
                           --artifacts "$env:GITHUB_WORKSPACE/benchmark-artifacts/$name" `
                           --exporters github json html csv
@@ -76,6 +84,11 @@ jobs:
 
                       Write-Host '::endgroup::'
                   }
+
+                  # BenchmarkDotNet reports a validation error and exits zero, so a run that measured
+                  # nothing looks identical to a clean one. The reports are the evidence it ran.
+                  $produced = Get-ChildItem -Path "$env:GITHUB_WORKSPACE/benchmark-artifacts" -Recurse -Filter '*-report-github.md' -ErrorAction SilentlyContinue
+                  if ($produced.Count -eq 0) { throw 'No benchmark reports were produced. Check the validation errors above.' }
 
             - name: Collect the reports into the run summary
               if: always()
@@ -142,5 +155,5 @@ jobs:
               with:
                   name: benchmark-reports
                   path: benchmark-artifacts/**
-                  if-no-files-found: warn
+                  if-no-files-found: error
                   retention-days: 30

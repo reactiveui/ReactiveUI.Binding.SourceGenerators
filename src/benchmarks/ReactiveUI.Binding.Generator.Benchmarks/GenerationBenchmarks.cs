@@ -15,7 +15,9 @@ namespace ReactiveUI.Binding.Generator.Benchmarks;
 /// driver into setup would let one iteration's caches serve the next.
 /// </remarks>
 [MemoryDiagnoser]
+#if !BENCH_NETFX
 [EventPipeProfiler(EventPipeProfile.GcVerbose)]
+#endif
 public class GenerationBenchmarks
 {
     /// <summary>The corpus compilation, built once per parameter set.</summary>
