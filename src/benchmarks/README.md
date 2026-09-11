@@ -3,8 +3,44 @@
 This folder measures two different things. One is what a consumer's application pays at run time when a
 binding fires. The other is what a consumer's build pays while the generator runs.
 
-Numbers are not published here. Hardware and runtime versions move, and a figure written down goes stale
-without anyone noticing. Run the suite and read your own.
+## What it costs
+
+Measured by the `Benchmarks` workflow on a GitHub-hosted Windows runner: two physical cores under Hyper-V,
+.NET 10.0.12. Each case drives a thousand property changes through one subscription or binding.
+
+Allocation is deterministic and compares directly. The timings carry real spread on a runner that size - the
+observation cases move by twenty to thirty per cent between iterations - so read them as the shape of the
+difference rather than as a score, and run the suite on your own hardware for a number you can hold someone
+to.
+
+| Observation | ReactiveUI's engine | `WhenChanged` | `WhenAnyValue` |
+|-------------|--------------------:|--------------:|---------------:|
+| One property | 145.6 us / 105.5 KB | 81.7 us / 65.5 KB | 79.5 us / 65.5 KB |
+| A deep chain | 120.9 us / 106.2 KB | 108.5 us / 66.2 KB | 107.6 us / 66.2 KB |
+| Two properties | 340.5 us / 195.6 KB | 182.4 us / 90.5 KB | 142.3 us / 90.5 KB |
+| Creating the subscription | 9.8 us / 1.5 KB | 9.9 us / 1.4 KB | 9.0 us / 1.4 KB |
+
+| Binding | ReactiveUI's engine | Generated |
+|---------|--------------------:|----------:|
+| `OneWayBind` | 287.8 us / 130.4 KB | 114.5 us / 88.5 KB |
+| `Bind` | 686.5 us / 932.3 KB | 53.6 us / 42.2 KB |
+| Creating a one-way binding | 22.5 us / 5.4 KB | 11.3 us / 2.6 KB |
+
+`BindOneWay` and `BindTwoWay` have no counterpart in the other engine to read against. They cost
+93.1 us / 65.4 KB and 105.9 us / 87.8 KB, and naming a scheduler lowers both rather than raising them
+(71.1 us and 90.9 us), because the write is then queued instead of applied inline.
+
+Published ahead of time, the generated path measures within a few per cent of the same code on the JIT:
+`WhenAnyValue` 83.6 us against 79.5 us, `BindOneWay` 93.3 us against 93.1 us, `Bind` 53.8 us against
+53.6 us. The expression-tree engine has no figure here because it cannot run under NativeAOT at all.
+
+The `Unsafe` overloads are the price of an expression the generator could not read: `WhenChanged` 146.5 us /
+103.1 KB against 81.7 us / 65.5 KB generated, `BindOneWay` 223.2 us / 221.4 KB against 93.1 us / 65.4 KB,
+`Bind` 405.5 us / 402.7 KB against 53.6 us / 42.2 KB.
+
+A generation pass costs 3.6 ms and 1.9 MB for one view-model and view pair, 52.3 ms and 29.5 MB for sixteen,
+and 213.6 ms and 118.1 MB for sixty-four. Whether the build claims call sites outright or offers a competing
+overload makes no measurable difference.
 
 ## The projects
 
@@ -127,10 +163,10 @@ The generated path removes reflection and expression compilation, so it wins on 
 against the baseline. Compare `WhenChangedBenchmark` against `ReactiveUIObservationBenchmark`, and
 `BindOneWayBenchmark` and `BindBenchmark` against `ReactiveUIBindingBenchmark`.
 
-A chain named at run time is the one place the two engines are level. Both walk the chain by reflection and
-allocate the same objects doing it, so `WhenAnyDynamicBenchmark` and `RxUiDynamicChainBaseline` land on top
-of each other. The gain there comes from writing the chain as a lambda instead, which
-`SingleChainGenerated` measures.
+A chain named at run time is the one place this library does not win. Both engines walk it by reflection and
+allocate the same objects doing it - 105.1 KB against 105.0 KB - and ReactiveUI is marginally the quicker of
+the two, at 118.0 us against 128.7 us. The gain there comes from writing the chain as a lambda instead, which
+`SingleChainGenerated` measures at 81.1 us / 65.5 KB.
 
 The expression-tree engine cannot run under NativeAOT at all, because it compiles expressions and reflects
 at run time. Only the generated path has a NativeAOT column to report.
