@@ -49,8 +49,17 @@ jobs:
             - name: Report the installed runtimes
               run: dotnet --info
 
+            # BenchmarkDotNet generates a project per job under the benchmark's own output folder, and the
+            # NativeAOT build writes below that again. From the runner's checkout path the linker's module
+            # definition file lands past 260 characters, so link.exe cannot open it and every NativeAOT job
+            # reports NA while the run still exits zero. Working from the drive root keeps it inside the limit.
+            - name: Clone the tree to a short path
+              run: |
+                  git clone --quiet "$env:GITHUB_WORKSPACE" C:\b
+                  git -C C:\b checkout --quiet --detach $env:GITHUB_SHA
+
             - name: Run the benchmarks
-              working-directory: src
+              working-directory: C:\b\src
               env:
                   # Taken through the environment rather than interpolated into the command, so the
                   # input cannot extend it.
@@ -83,6 +92,14 @@ jobs:
                   # nothing looks identical to a clean one. The reports are the evidence it ran.
                   $produced = Get-ChildItem -Path "$env:GITHUB_WORKSPACE/benchmark-artifacts" -Recurse -Filter '*-report-github.md' -ErrorAction SilentlyContinue
                   if ($produced.Count -eq 0) { throw 'No benchmark reports were produced. Check the validation errors above.' }
+
+                  # A job whose build fails still exports its rows, with every measurement written as NA.
+                  # Reading the tables is the only way to tell that apart from a run that measured.
+                  $unmeasured = foreach ($report in $produced) {
+                      $rows = @(Get-Content -Path $report.FullName | Where-Object { $_ -match '^\|' -and $_ -match '\|\s*NA\s*\|' })
+                      if ($rows.Count -gt 0) { '{0} ({1} rows)' -f ($report.Name -replace '-report-github\.md$', ''), $rows.Count }
+                  }
+                  if ($unmeasured) { throw "These benchmarks measured nothing: $($unmeasured -join '; ')" }
 
             - name: Collect the reports into the run summary
               if: always()
