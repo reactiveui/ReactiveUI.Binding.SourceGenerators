@@ -58,6 +58,11 @@ jobs:
                   git clone --quiet "$env:GITHUB_WORKSPACE" C:\b
                   git -C C:\b checkout --quiet --detach $env:GITHUB_SHA
 
+                  # Cloning leaves origin pointing at the checkout's own directory, which the git tasks
+                  # behind source linking reject as a URL. The packages the benchmarks reference do ship,
+                  # so they keep source linking and need a remote that names the repository.
+                  git -C C:\b remote set-url origin "https://github.com/$env:GITHUB_REPOSITORY"
+
             - name: Run the benchmarks
               working-directory: C:\b\src
               env:
