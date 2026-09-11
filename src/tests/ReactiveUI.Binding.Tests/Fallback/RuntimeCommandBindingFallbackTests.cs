@@ -38,4 +38,56 @@ public class RuntimeCommandBindingFallbackTests
 
         await Assert.That(parameters.Observer).IsNull();
     }
+
+    /// <summary>A control no registered binder reaches leaves the command unbound rather than faulting.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindCommand_WithAControlNoBinderReaches_BindsNothing()
+    {
+        RuntimeObservationFallbackTests.EnsureInitialized();
+        Locator.CurrentMutable.RegisterConstant<ICreatesCommandBinding>(new ClickCommandBinder());
+        var command = new RecordingStubCommand();
+        var viewModel = new DispatchStubViewModel { Run = command };
+
+        using var binding = RuntimeCommandBindingFallback.BindCommand<
+            DispatchStubView,
+            DispatchStubViewModel,
+            ICommand,
+            UnclaimedStubControl>(
+            new(),
+            viewModel,
+            x => x.Run,
+            x => x.Surface,
+            new ManualObservable<object?>(),
+            null,
+            BindingExpression);
+
+        await Assert.That(command.LastParameter).IsNull();
+    }
+
+    /// <summary>Naming an event does not find a binder for a control no binder reaches either.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindCommand_WithANamedEventAndAControlNoBinderReaches_BindsNothing()
+    {
+        RuntimeObservationFallbackTests.EnsureInitialized();
+        Locator.CurrentMutable.RegisterConstant<ICreatesCommandBinding>(new ClickCommandBinder());
+        var command = new RecordingStubCommand();
+        var viewModel = new DispatchStubViewModel { Run = command };
+
+        using var binding = RuntimeCommandBindingFallback.BindCommand<
+            DispatchStubView,
+            DispatchStubViewModel,
+            ICommand,
+            UnclaimedStubControl>(
+            new(),
+            viewModel,
+            x => x.Run,
+            x => x.Surface,
+            new ManualObservable<object?>(),
+            nameof(DispatchStubControl.Click),
+            BindingExpression);
+
+        await Assert.That(command.LastParameter).IsNull();
+    }
 }

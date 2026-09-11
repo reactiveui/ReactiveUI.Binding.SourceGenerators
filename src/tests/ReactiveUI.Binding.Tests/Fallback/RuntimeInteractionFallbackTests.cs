@@ -34,6 +34,28 @@ public class RuntimeInteractionFallbackTests
         await Assert.That(registrations).IsEqualTo(0);
     }
 
+    /// <summary>A property holding no interaction registers nothing, and does not fault the observation.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindInteraction_WhenThePropertyHoldsNoInteraction_RegistersNothing()
+    {
+        RuntimeObservationFallbackTests.EnsureInitialized();
+        var registrations = 0;
+        var viewModel = new DispatchStubViewModel { Confirm = null! };
+
+        using var binding = RuntimeInteractionFallback.BindInteraction(
+            viewModel,
+            x => x.Confirm,
+            _ =>
+            {
+                registrations++;
+                return new UnregisteredHandler();
+            },
+            BindingExpression);
+
+        await Assert.That(registrations).IsEqualTo(0);
+    }
+
     /// <summary>Stands in for the registration a handler would hand back.</summary>
     private sealed class UnregisteredHandler : IDisposable
     {

@@ -518,6 +518,53 @@ public class BindingDispatchStubTests
         await Assert.That(command.LastParameter).IsEqualTo(ReverseValue);
     }
 
+    /// <summary>A command binding named against an event reaches the command through that event.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindCommandUnsafe_WithANamedEvent_ExecutesThroughThatEvent()
+    {
+        RuntimeObservationFallbackTests.EnsureInitialized();
+        Locator.CurrentMutable.RegisterConstant<ICreatesCommandBinding>(new ClickCommandBinder());
+        var command = new RecordingStubCommand();
+        _viewModel.Run = command;
+
+        using var binding = ReactiveUIBindingExtensions.BindCommandUnsafe(
+            _view,
+            _viewModel,
+            x => x.Run,
+            x => x.Control,
+            _source,
+            nameof(DispatchStubControl.Click));
+
+        _source.Observer?.OnNext(BoundValue);
+        _view.Control.PerformClick();
+
+        await Assert.That(command.LastParameter).IsEqualTo(BoundValue);
+    }
+
+    /// <summary>A command binding with no view model has no parameter property to observe.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindCommandUnsafe_WithAParameterPropertyAndNoViewModel_BindsNothing()
+    {
+        RuntimeObservationFallbackTests.EnsureInitialized();
+        Locator.CurrentMutable.RegisterConstant<ICreatesCommandBinding>(new ClickCommandBinder());
+        var command = new RecordingStubCommand();
+        _viewModel.Run = command;
+
+        using var binding = ReactiveUIBindingExtensions.BindCommandUnsafe(
+            _view,
+            (DispatchStubViewModel?)null,
+            x => x.Run,
+            x => x.Control,
+            x => x.Parameter,
+            null);
+
+        _view.Control.PerformClick();
+
+        await Assert.That(command.LastParameter).IsNull();
+    }
+
     /// <summary>WhenAny refuses a call no generated dispatch claimed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
