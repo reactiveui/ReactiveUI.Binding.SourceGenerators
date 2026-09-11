@@ -17,14 +17,23 @@
 
 # ReactiveUI.Binding.SourceGenerators
 
-This library binds properties without reflection. A source generator reads each binding call site while you
-compile and writes the observation code for it. Nothing is looked up by name at run time, so a trimmed or
-ahead-of-time published application keeps working.
+You have a property. When it changes, something else needs to know: a label, a validation rule, another
+property. This library lets you say that in one line, and writes the wiring for you while you compile.
+
+> [!NOTE]
+> This is the binding engine, not an introduction to reactive programming. The
+> [WhenAny handbook](https://www.reactiveui.net/documentation/handbook/when-any/) teaches property
+> observation and the [data binding guide](https://www.reactiveui.net/documentation/handbook/data-binding/)
+> covers the binding verbs in depth. What follows gets you running, then explains what is specific to this
+> engine.
 
 ## Table of Contents
 
-- [What it does](#what-it-does)
-- [How it works](#how-it-works)
+- [The problem it solves](#the-problem-it-solves)
+- [Your first binding](#your-first-binding)
+- [How a property reports a change](#how-a-property-reports-a-change)
+- [A chain is decided one link at a time](#a-chain-is-decided-one-link-at-a-time)
+- [What the generator writes](#what-the-generator-writes)
 - [How a call site reaches its generated code](#how-a-call-site-reaches-its-generated-code)
 - [When nothing claims the call](#when-nothing-claims-the-call)
 - [Installing](#installing)
@@ -33,7 +42,7 @@ ahead-of-time published application keeps working.
 - [Supported APIs](#supported-apis)
 - [Examples](#examples)
 - [The view locator](#the-view-locator)
-- [Notification mechanisms](#notification-mechanisms)
+- [Which mechanism wins](#which-mechanism-wins)
 - [Rx library compatibility](#rx-library-compatibility)
 - [Performance](#performance)
 - [Diagnostics](#diagnostics)
@@ -63,33 +72,147 @@ ahead-of-time published application keeps working.
   </tbody>
 </table>
 
-## What it does
+## The problem it solves
 
-A property raises an event when it changes. Which event depends on the type that declares it.
+C# already tells you when a property changes. A class raises `PropertyChanged`, you attach a handler, you
+check which property the handler was told about, and you read the new value.
 
-The generator looks at that type while you compile, works out which event to listen to, and writes the code
-that subscribes. Your call site then just subscribes to the chain.
+That is fine for one property. It goes badly as soon as you want a path through two of them:
 
-ReactiveUI does the same job at run time instead. It compiles the expression tree, then finds each property by
-name. That costs time on every binding, and a trimmer cannot see which members the reflection will ask for.
+```csharp
+// Tell me when the city changes.
+viewModel.PropertyChanged += (sender, args) =>
+{
+    if (args.PropertyName != nameof(viewModel.Address))
+    {
+        return;
+    }
 
-Doing it at compile time removes both problems. The emitted code names every type and every member, so
-trimming and ahead-of-time publishing keep working. The base package also has no System.Reactive dependency,
-because generated code returns `IObservable<T>` from the BCL.
+    // Address was replaced. Detach from the old Address, attach to the new one,
+    // and start watching its City. Then undo all of it when you are finished.
+};
+```
 
-## How it works
+You write the path instead:
 
-The generator needs two things from your code.
+```csharp
+IObservable<string> city = viewModel.WhenChanged(x => x.Address.City);
+```
 
-First, which event each type raises. A class raising `PropertyChanged` is listened to one way, a WPF
-`DependencyObject` another, an `NSObject` another again. The generator records which mechanism reaches each
-property.
+That attaches to `Address` and to `City`, re-attaches further down when `Address` is replaced, and detaches
+everything when you dispose the subscription.
 
-Second, which properties each call site names. It reads the path out of the lambda and emits one method per
-call site, subscribing to the events those properties raise. A chain such as `x => x.Address.City` subscribes
-to each link, and re-subscribes further down when an intermediate object is replaced.
+The lambda is there to name the path. The generator reads the properties out of it, `Address` and then `City`,
+and emits the code that fetches each one and attaches to whichever event reports it changing.
 
-It also scans for `IViewFor<T>` and writes a type switch that resolves a view without reflection.
+## Your first binding
+
+**1. Install the package.**
+
+```
+dotnet add package ReactiveUI.Binding
+```
+
+**2. Raise `PropertyChanged` from your view model.** Any class that does this can be observed. There is no
+base class to inherit.
+
+```csharp
+public class PersonViewModel : INotifyPropertyChanged
+{
+    private string _name = "";
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            _name = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+        }
+    }
+}
+```
+
+**3. Observe a property.** You get an `IObservable<T>`, which hands you the current value and then every
+later one.
+
+```csharp
+var vm = new PersonViewModel { Name = "Ada" };
+
+IDisposable subscription = vm.WhenChanged(x => x.Name)
+    .Subscribe(name => Console.WriteLine(name));   // prints Ada
+
+vm.Name = "Grace";                                // prints Grace
+```
+
+**4. Or bind it straight to a control.** This writes `Name` into the label and keeps writing it.
+
+```csharp
+IDisposable binding = vm.BindOneWay(view, x => x.Name, v => v.NameLabel.Text);
+```
+
+**5. Dispose when you are done.** Both calls return an `IDisposable`. Disposing detaches every handler the
+binding attached.
+
+> [!TIP]
+> Keep your subscriptions in a `CompositeDisposable` and dispose that when the view goes away. A subscription
+> you never dispose keeps the view model alive.
+
+That is the whole surface you need to start. `WhenChanging`, `BindTwoWay`, `BindCommand` and the rest follow
+the same shape.
+
+## How a property reports a change
+
+`PropertyChanged` is one way for a property to report a change. It is not the only one. A WPF control does
+not raise it for `TextBox.Text`, and an iOS view does not raise it at all.
+
+So the first thing the generator works out is which mechanism the declaring type offers. Each one is a
+different event, attached a different way.
+
+| Mechanism | What it is | How it is observed | Before the change |
+|-----------|------------|--------------------|-------------------|
+| `INotifyPropertyChanged` | The BCL interface. One event for the whole object, naming the property that changed. | Attach to `PropertyChanged`, keep the events naming your property, read the getter. | no |
+| `INotifyPropertyChanging` | Its counterpart, raised before the value is replaced. | Attach to `PropertyChanging`, same shape. This is what `WhenChanging` needs. | yes |
+| `IReactiveObject` | ReactiveUI's interface. Raises both of the above. | As above, and it gets both halves for free. | yes |
+| WPF dependency property | A `TextBox.Text` is a `DependencyProperty`, not a CLR property, and raises no `PropertyChanged`. | `DependencyPropertyDescriptor.FromProperty(...)` gives a descriptor, then `AddValueChanged`. | see below |
+| WinUI and MAUI bindable property | The same idea on WinUI and MAUI. | `RegisterPropertyChangedCallback`, released with the token it hands back. | no |
+| WinForms component | WinForms has no single event. It has one per property, named by convention. | Find the `{PropertyName}Changed` event and attach to it. | no |
+| Apple KVO | Key-value observing. How an `NSObject` reports a change on Apple platforms. | `NSObject.AddObserver` with `NSKeyValueObservingOptions`. | yes |
+| Android view | An Android widget raises its own event, such as `TextView.TextChanged`. | Attach to that widget's event for that property. | no |
+
+> [!NOTE]
+> A type can offer more than one. A `ReactiveObject` in a WPF window implements `INotifyPropertyChanged` and
+> may also carry dependency properties. The generator takes the most specific mechanism that can actually
+> reach the property you named, so a plain CLR property on a `DependencyObject` still falls back to
+> `PropertyChanged`.
+
+Before-change observation needs the type to raise something before the value is replaced. Where it cannot,
+`WhenChanging` reads the value once and then stays silent, and RXUIBIND004 tells you so while you build. A
+WPF dependency property is the odd one out: it keeps a live subscription and delivers each new value.
+
+## A chain is decided one link at a time
+
+`x => x.Address.City` is two properties, and they need not use the same mechanism. `Address` might be a plain
+property on a view model that raises `PropertyChanged`, while `City` sits on a WPF control.
+
+The generator resolves each link separately, while you compile, and writes the right attach for each.
+
+```csharp
+// Address: INotifyPropertyChanged on the view model.
+// City:    a dependency property on the control it holds.
+vm.WhenChanged(x => x.Address.City);
+```
+
+When `Address` is replaced, the subscription below it is torn down and rebuilt against the new object. That
+is the part you would otherwise hand-write, and the part most easily got wrong.
+
+> [!WARNING]
+> If a link in the path raises nothing at all, the value is read once and the path is followed no further.
+> That is silent at run time, so the analyzer reports it as RXUIBIND010 while you build.
+
+## What the generator writes
 
 Here is what it emits for `vm.WhenChanged(x => x.Name)` on a class that raises `PropertyChanged`:
 
@@ -108,12 +231,20 @@ private static global::System.IObservable<string> __WhenChanged_7FFFD2E8D6FC818E
 }
 ```
 
-The last argument is the subscription the generator wrote. Everything it needs is fixed at compile time: the
-declaring type, the property name and the getter.
+The last argument is the subscription it chose. Everything that subscription needs is fixed at compile time:
+the declaring type, the property name, and a getter that is a direct call rather than a lookup.
 
-`Choose` offers the link to any `ICreatesObservableForProperty` you registered, and takes yours when it scores
-higher than the mechanism the generator picked. That is how a platform plugin still wins without costing any
-reflection.
+`Choose` offers the link to any `ICreatesObservableForProperty` you registered yourself, and takes yours when
+it scores higher than the mechanism the generator picked. That is how a platform plugin still wins, without
+costing any reflection.
+
+ReactiveUI does this same job at run time instead. It compiles the lambda into a delegate and then finds each
+property by name. That costs time on every binding, and a trimmer cannot see which members the reflection
+will ask for, so it may remove them.
+
+> [!IMPORTANT]
+> This is the reason the library exists. Doing the work at compile time is what makes a binding survive
+> `PublishTrimmed` and `PublishAot`, because the emitted code names every type and member it touches.
 
 ## How a call site reaches its generated code
 
@@ -207,16 +338,26 @@ namespaces. Reference one or the other, not both.
 
 ## Supported frameworks
 
-| Target | Versions |
-|--------|----------|
-| .NET | 8.0, 9.0, 10.0, 11.0 |
-| .NET Framework | 4.6.2, 4.7.2, 4.8.1 |
+| Target | Versions | Microsoft support ends |
+|--------|----------|------------------------|
+| .NET | 10.0, 11.0 | November 2028 for .NET 10 |
+| .NET | 8.0, 9.0 | 10 November 2026 |
+| .NET Framework | 4.7.2, 4.8.1 | tied to the Windows version |
+| .NET Framework | 4.6.2 | 12 January 2027 |
 
-The WPF and WinForms packages target the three .NET Framework versions and the Windows heads of .NET 8 to 11.
-The MAUI packages start at .NET 10 and add Android, iOS, macOS, Mac Catalyst and tvOS heads; the Apple heads
+> [!WARNING]
+> .NET 8 and .NET 9 both leave Microsoft support on 10 November 2026, and this library drops them at the same
+> time. .NET Framework 4.6.2 leaves support on 12 January 2027 and will be dropped then. Move to .NET 10 or
+> later, or to .NET Framework 4.7.2 or later, before those dates. See the
+> [.NET support policy](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core) and the
+> [.NET Framework support policy](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-framework).
+
+The WPF and WinForms packages target the .NET Framework versions and the Windows heads of .NET 8 to 11. The
+MAUI packages start at .NET 10 and add Android, iOS, macOS, Mac Catalyst and tvOS heads; the Apple heads
 build only on Windows and macOS.
 
-NativeAOT is supported on .NET 8 and later. The generated path is the only one that runs there at all.
+NativeAOT works on .NET 8 and later. The generated path is the only one that runs there at all, because the
+reflection engine compiles expressions at run time.
 
 ## Packages
 
@@ -394,32 +535,28 @@ once share one instance.
 Resolve through the generic overload where you can. The object-typed overload closes `IViewFor<>` over a
 runtime type, so it carries `[RequiresDynamicCode]` and is not safe to publish ahead of time.
 
-## Notification mechanisms
+## Which mechanism wins
 
-A type advertises a mechanism. A property either participates in it or does not, and every link of a chain is
-declared by its own type. So the generator picks a mechanism per property rather than per class.
+A type can offer several mechanisms, so each one carries a score. The highest score that can actually reach
+the property you named wins.
 
-| Mechanism | Keyed on | Before-change | Affinity |
-|-----------|----------|---------------|---------:|
-| Apple KVO | `Foundation.NSObject` | yes | 15 |
-| IReactiveObject | `ReactiveUI.IReactiveObject` | yes | 10 |
-| WinForms component | `System.ComponentModel.Component` | no | 8 |
-| WinUI dependency object | `Microsoft.UI.Xaml.DependencyObject` | no | 6 |
-| INotifyPropertyChanged | `System.ComponentModel.INotifyPropertyChanged` | yes | 5 |
-| Android view | `Android.Views.View` | no | 5 |
-| WPF dependency object | `System.Windows.DependencyObject` | no | 4 |
+| Mechanism | Type it keys on | Score |
+|-----------|-----------------|------:|
+| Apple KVO | `Foundation.NSObject` | 15 |
+| IReactiveObject | `ReactiveUI.IReactiveObject` | 10 |
+| WinForms component | `System.ComponentModel.Component` | 8 |
+| WinUI bindable property | `Microsoft.UI.Xaml.DependencyObject` | 6 |
+| INotifyPropertyChanged | `System.ComponentModel.INotifyPropertyChanged` | 5 |
+| Android view | `Android.Views.View` | 5 |
+| WPF dependency property | `System.Windows.DependencyObject` | 4 |
 
-The highest affinity that can reach the property wins. A dependency object's plain CLR property, or a
-component with no matching `Changed` event, falls through to the next mechanism. `INotifyPropertyChanged` and
-`Android.Views.View` share an affinity, and that tie is settled by the order the plugins are registered in,
-with `INotifyPropertyChanged` first.
+"Can reach" is the important half. A dependency object's plain CLR property is not a dependency property, and
+a component with no `{PropertyName}Changed` event has nothing to attach to, so both fall through to the next
+mechanism down. `INotifyPropertyChanged` and `Android.Views.View` share a score, and that tie goes to
+`INotifyPropertyChanged`.
 
-Before-change observation needs the type to raise `PropertyChanging`. Where it cannot, `WhenChanging` reads
-the value once and then stays silent, and RXUIBIND004 says so while you build. A WPF dependency property is
-the exception among the after-change mechanisms: it keeps a live subscription and delivers each new value.
-
-A plugin you register at run time outranks the generated observation when it scores higher. A tie goes to the
-generated code.
+An `ICreatesObservableForProperty` you register yourself is scored against the same scale, and takes the link
+when it scores higher. A tie goes to the generated code.
 
 ## Rx library compatibility
 
