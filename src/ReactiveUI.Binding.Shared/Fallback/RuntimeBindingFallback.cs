@@ -29,7 +29,7 @@ public static class RuntimeBindingFallback
     /// <param name="target">The object to write to.</param>
     /// <param name="sourceProperty">The property to observe.</param>
     /// <param name="targetProperty">The property to write.</param>
-    /// <param name="scheduler">The sequencer the write is delivered on, or null for the main thread.</param>
+    /// <param name="scheduler">The sequencer the write is delivered on, or null to write on the thread that owns it.</param>
     /// <param name="bindingExpression">The bound expression, named when a write faults.</param>
     /// <returns>A disposable that disconnects the binding.</returns>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
@@ -43,7 +43,7 @@ public static class RuntimeBindingFallback
         string bindingExpression)
         where TSource : class =>
         Write(
-            Schedule(RuntimeObservationFallback.WhenChanged(source, sourceProperty), scheduler),
+            Schedule(RuntimeObservationFallback.WhenChanged(source, sourceProperty), scheduler, target),
             target,
             targetProperty,
             bindingExpression);
@@ -58,7 +58,7 @@ public static class RuntimeBindingFallback
     /// <param name="sourceProperty">The property to observe.</param>
     /// <param name="targetProperty">The property to write.</param>
     /// <param name="conversion">Converts the observed value to the written one.</param>
-    /// <param name="scheduler">The sequencer the write is delivered on, or null for the main thread.</param>
+    /// <param name="scheduler">The sequencer the write is delivered on, or null to write on the thread that owns it.</param>
     /// <param name="bindingExpression">The bound expression, named when a write faults.</param>
     /// <returns>A disposable that disconnects the binding.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="conversion"/> is null.</exception>
@@ -80,7 +80,8 @@ public static class RuntimeBindingFallback
                 new MapSignal<TSourceProp, TTargetProp>(
                     RuntimeObservationFallback.WhenChanged(source, sourceProperty),
                     conversion),
-                scheduler),
+                scheduler,
+                target),
             target,
             targetProperty,
             bindingExpression);
@@ -94,7 +95,7 @@ public static class RuntimeBindingFallback
     /// <param name="target">The second object of the binding.</param>
     /// <param name="sourceProperty">The property on <paramref name="source"/>.</param>
     /// <param name="targetProperty">The property on <paramref name="target"/>.</param>
-    /// <param name="scheduler">The sequencer the target write is delivered on, or null for the main thread.</param>
+    /// <param name="scheduler">The sequencer the target write is delivered on, or null to write on the thread that owns it.</param>
     /// <param name="bindingExpression">The bound expression, named when a write faults.</param>
     /// <returns>A disposable that disconnects both directions.</returns>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
@@ -109,7 +110,7 @@ public static class RuntimeBindingFallback
         where TSource : class
         where TTarget : class =>
         JoinBothDirections(
-            Schedule(RuntimeObservationFallback.WhenChanged(source, sourceProperty), scheduler),
+            Schedule(RuntimeObservationFallback.WhenChanged(source, sourceProperty), scheduler, target),
             RuntimeObservationFallback.WhenChanged(target, targetProperty),
             source,
             target,
@@ -127,7 +128,7 @@ public static class RuntimeBindingFallback
     /// <param name="sourceProperty">The property on <paramref name="source"/>.</param>
     /// <param name="targetProperty">The property on <paramref name="target"/>.</param>
     /// <param name="converters">Converts source to target, and target back to source.</param>
-    /// <param name="scheduler">The sequencer the target write is delivered on, or null for the main thread.</param>
+    /// <param name="scheduler">The sequencer the target write is delivered on, or null to write on the thread that owns it.</param>
     /// <param name="bindingExpression">The bound expression, named when a write faults.</param>
     /// <returns>A disposable that disconnects both directions.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="converters"/> is null.</exception>
@@ -150,7 +151,8 @@ public static class RuntimeBindingFallback
                 new MapSignal<TSourceProp, TTargetProp>(
                     RuntimeObservationFallback.WhenChanged(source, sourceProperty),
                     converters.Forward),
-                scheduler),
+                scheduler,
+                target),
             new MapSignal<TTargetProp, TSourceProp>(
                 RuntimeObservationFallback.WhenChanged(target, targetProperty),
                 converters.Reverse),
@@ -169,7 +171,7 @@ public static class RuntimeBindingFallback
     /// <param name="viewModel">The view model being observed.</param>
     /// <param name="viewModelProperty">The property to observe.</param>
     /// <param name="viewProperty">The property to write.</param>
-    /// <param name="scheduler">The sequencer the write is delivered on, or null for the main thread.</param>
+    /// <param name="scheduler">The sequencer the write is delivered on, or null to write on the thread that owns it.</param>
     /// <param name="bindingExpression">The bound expression, named when a write faults.</param>
     /// <returns>The binding, which disconnects when disposed.</returns>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
@@ -186,7 +188,7 @@ public static class RuntimeBindingFallback
         OneWayBinding(
             view,
             viewProperty,
-            Schedule(RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty), scheduler),
+            Schedule(RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty), scheduler, view),
             bindingExpression);
 
     /// <summary>Binds a view-model property one way onto a view property of another type, applying a conversion.</summary>
@@ -199,7 +201,7 @@ public static class RuntimeBindingFallback
     /// <param name="viewModelProperty">The property to observe.</param>
     /// <param name="viewProperty">The property to write.</param>
     /// <param name="conversion">Converts the observed value to the view's type.</param>
-    /// <param name="scheduler">The sequencer the write is delivered on, or null for the main thread.</param>
+    /// <param name="scheduler">The sequencer the write is delivered on, or null to write on the thread that owns it.</param>
     /// <param name="bindingExpression">The bound expression, named when a write faults.</param>
     /// <returns>The binding, which disconnects when disposed.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="conversion"/> is null.</exception>
@@ -224,7 +226,8 @@ public static class RuntimeBindingFallback
                 new MapSignal<TViewModelProp, TViewProp>(
                     RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty),
                     conversion),
-                scheduler),
+                scheduler,
+                view),
             bindingExpression);
     }
 
@@ -236,7 +239,7 @@ public static class RuntimeBindingFallback
     /// <param name="viewModel">The view-model side of the binding.</param>
     /// <param name="viewModelProperty">The property on <paramref name="viewModel"/>.</param>
     /// <param name="viewProperty">The property on <paramref name="view"/>.</param>
-    /// <param name="scheduler">The sequencer the view write is delivered on, or null for the main thread.</param>
+    /// <param name="scheduler">The sequencer the view write is delivered on, or null to write on the thread that owns it.</param>
     /// <param name="bindingExpression">The bound expression, named when a write faults.</param>
     /// <returns>The binding, which disconnects both directions when disposed.</returns>
     [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
@@ -255,7 +258,7 @@ public static class RuntimeBindingFallback
             viewModel,
             viewModelProperty,
             viewProperty,
-            Schedule(RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty), scheduler),
+            Schedule(RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty), scheduler, view),
             RuntimeObservationFallback.WhenChanged(view, viewProperty).Skip(1),
             bindingExpression);
 
@@ -269,7 +272,7 @@ public static class RuntimeBindingFallback
     /// <param name="viewModelProperty">The property on <paramref name="viewModel"/>.</param>
     /// <param name="viewProperty">The property on <paramref name="view"/>.</param>
     /// <param name="converters">Converts view model to view, and view back to view model.</param>
-    /// <param name="scheduler">The sequencer the view write is delivered on, or null for the main thread.</param>
+    /// <param name="scheduler">The sequencer the view write is delivered on, or null to write on the thread that owns it.</param>
     /// <param name="bindingExpression">The bound expression, named when a write faults.</param>
     /// <returns>The binding, which disconnects both directions when disposed.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="converters"/> is null.</exception>
@@ -296,7 +299,8 @@ public static class RuntimeBindingFallback
                 new MapSignal<TViewModelProp, TViewProp>(
                     RuntimeObservationFallback.WhenChanged(viewModel, viewModelProperty),
                     converters.Forward),
-                scheduler),
+                scheduler,
+                view),
             new MapSignal<TViewProp, TViewModelProp>(
                 RuntimeObservationFallback.WhenChanged(view, viewProperty).Skip(1),
                 converters.Reverse),
@@ -312,7 +316,7 @@ public static class RuntimeBindingFallback
     /// <param name="targetProperty">The property to write.</param>
     /// <param name="conversionHint">An optional hint handed to the converter.</param>
     /// <param name="converterOverride">A converter that takes precedence over the registered ones.</param>
-    /// <param name="scheduler">The scheduler the writes are delivered on, or null for the main thread.</param>
+    /// <param name="scheduler">The scheduler the writes are delivered on, or null to write on the thread that owns it.</param>
     /// <param name="bindingExpression">The bound expression, named when a write faults.</param>
     /// <returns>A disposable that, when disposed, stops writing.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="targetProperty"/> is null.</exception>
@@ -352,7 +356,7 @@ public static class RuntimeBindingFallback
                 return result;
             });
 
-        return Write(Schedule(converted, scheduler), target, targetProperty, bindingExpression);
+        return Write(Schedule(converted, scheduler, target), target, targetProperty, bindingExpression);
     }
 
     /// <summary>Wraps a two-way pair of writes as the binding value the view-first APIs hand back.</summary>
@@ -422,11 +426,12 @@ public static class RuntimeBindingFallback
     /// <summary>Routes a sequence onto the sequencer a binding writes on.</summary>
     /// <typeparam name="T">The type of the observed values.</typeparam>
     /// <param name="values">The values feeding a write.</param>
-    /// <param name="scheduler">The sequencer to use, or null to fall back to the view's thread.</param>
+    /// <param name="scheduler">The sequencer to use, or null to ask which thread owns the written object.</param>
+    /// <param name="target">The object the write lands on, which is what owns the thread it lands from.</param>
     /// <returns>The sequence, observed on the chosen sequencer.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static IObservable<T> Schedule<T>(IObservable<T> values, ISequencer? scheduler) =>
-        scheduler is null ? BindingSchedulers.ObserveOnMainThread(values) : values.ObserveOn(scheduler);
+    private static IObservable<T> Schedule<T>(IObservable<T> values, ISequencer? scheduler, object? target) =>
+        scheduler is null ? BindingSchedulers.ObserveOnViewThread(values, target) : values.ObserveOn(scheduler);
 
     /// <summary>Wires a forward and a reverse write, dropping the target's initial value so it does not echo back.</summary>
     /// <typeparam name="TSource">The type declaring the source property.</typeparam>

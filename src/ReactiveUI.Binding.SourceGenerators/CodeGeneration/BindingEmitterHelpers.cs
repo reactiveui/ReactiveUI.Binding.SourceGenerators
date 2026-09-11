@@ -385,26 +385,34 @@ internal static class BindingEmitterHelpers
     /// <param name="inv">The binding invocation info.</param>
     /// <param name="sourceVar">The variable holding the values being written to the view.</param>
     /// <param name="resultVar">The name to give the routed observable.</param>
+    /// <param name="targetVar">The worker parameter naming the object the write lands on.</param>
     /// <returns>The variable to subscribe the write to.</returns>
     /// <remarks>
+    /// <para>
     /// A view model raises its notifications from whatever thread did the work, and the UI frameworks only allow
     /// a view to be touched from the thread that owns it. Where a call site named its own scheduler the caller
     /// has already said where the write lands, so this stays out of the way; otherwise the routing is decided at
     /// runtime by whichever platform package is present, which is the only place that can know.
+    /// </para>
+    /// <para>
+    /// The object being written is named rather than assumed, because thread affinity belongs to it: WPF allows
+    /// several UI threads, so a two-way binding routes each direction to whichever side that direction writes.
+    /// </para>
     /// </remarks>
     internal static string EmitViewThreadStage(
         StringBuilder sb,
         BindingInvocationInfo inv,
         string sourceVar,
-        string resultVar)
+        string resultVar,
+        string targetVar)
     {
         if (inv.HasScheduler)
         {
             return sourceVar;
         }
 
-        _ = sb.Append("            var ").Append(resultVar).Append(" = ").Append(GeneratedTypeNames.BindingSchedulers).Append(".ObserveOnMainThread(")
-            .Append(sourceVar).AppendLine(");");
+        _ = sb.Append("            var ").Append(resultVar).Append(" = ").Append(GeneratedTypeNames.BindingSchedulers).Append(".ObserveOnViewThread(")
+            .Append(sourceVar).Append(", ").Append(targetVar).AppendLine(");");
 
         return resultVar;
     }

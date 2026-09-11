@@ -43,6 +43,7 @@ property. This library lets you say that in one line, and writes the wiring for 
 - [Examples](#examples)
 - [The view locator](#the-view-locator)
 - [Which mechanism wins](#which-mechanism-wins)
+- [Which thread a binding writes on](#which-thread-a-binding-writes-on)
 - [Rx library compatibility](#rx-library-compatibility)
 - [Performance](#performance)
 - [Diagnostics](#diagnostics)
@@ -557,6 +558,37 @@ mechanism down. `INotifyPropertyChanged` and `Android.Views.View` share a score,
 
 An `ICreatesObservableForProperty` you register yourself is scored against the same scale, and takes the link
 when it scores higher. A tie goes to the generated code.
+
+## Which thread a binding writes on
+
+A view model raises its change notification on whichever thread did the work. A UI framework lets you touch a
+view only from the thread that owns it. A binding therefore moves the write for you, so an update from a
+background task lands where the view can take it.
+
+Which thread that is belongs to the object being written, not to the process, so the platform package asks the
+object.
+
+| Package | What it asks |
+|---------|--------------|
+| `ReactiveUI.Binding.Wpf` | The dispatcher the `DependencyObject` was created on. |
+| `ReactiveUI.Binding.WinForms` | The `Control`, which posts through its own window handle. |
+| `ReactiveUI.Binding.Maui` | The `IDispatcher` the `BindableObject` carries. |
+
+That distinction matters as soon as an application has more than one UI thread. WPF allows several, each owning
+its own windows, and a write sent to the wrong one throws exactly as an unmarshalled write does.
+
+A write that is already on the owning thread is applied inline, so setting a property on the UI thread and
+reading the control back on the next line behaves as it reads. Only a write from another thread waits for a
+turn of the message loop.
+
+> [!TIP]
+> Naming a scheduler on the binding wins outright - `vm.BindOneWay(view, x => x.Name, x => x.NameLabel,
+> scheduler: someScheduler)`. Use it when you want the write somewhere specific.
+
+An application can name one thread for everything else with
+`BindingSchedulers.UseSynchronizationContext(context)`. It is consulted only for targets no platform package
+claims. Where neither answers - a console host, a test, a platform with no thread affinity - writes are
+delivered inline and cost nothing.
 
 ## Rx library compatibility
 

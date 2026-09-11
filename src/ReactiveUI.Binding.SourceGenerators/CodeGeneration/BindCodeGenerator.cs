@@ -186,7 +186,7 @@ internal static class BindCodeGenerator
             .Append(BindingChange).Append(">(").Append(viewVar).Append(", v => new ").Append(BindingChange).AppendLine("(v, false));")
             .Append("            var __sides = new ").Append(MergeSignal).Append('<').Append(BindingChange).AppendLine(">(__vmTagged, __viewTagged);");
 
-        var routedVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, "__sides", "__routed");
+        var routedVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, "__sides", "__routed", "view");
 
         _ = sb.AppendLine("            var changed = new global::ReactiveUI.Binding.Observables.AppliedChangeObservable();")
             .AppendLine().Append("            var disposable = ").Append(BindingErrors).Append(".Subscribe(").Append(routedVar).AppendLine(", __change =>")

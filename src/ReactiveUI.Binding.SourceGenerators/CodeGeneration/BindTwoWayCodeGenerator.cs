@@ -78,12 +78,12 @@ internal static class BindTwoWayCodeGenerator
         string suffix)
     {
         var targetAccess = CodeGeneratorHelpers.BuildGuardedAssignment(
-            "target",
+            TargetParameterName,
             inv.TargetPropertyPath,
             "value",
             SubscriptionBodyIndent);
         var sourceSetAccess = CodeGeneratorHelpers.BuildGuardedAssignment(
-            "source",
+            SourceParameterName,
             inv.SourcePropertyPath,
             "value",
             SubscriptionBodyIndent);
@@ -92,7 +92,7 @@ internal static class BindTwoWayCodeGenerator
         // Emit inline observation code instead of delegating to WhenChanged dispatch
         ObservationCodeGenerator.EmitInlineObservation(
             sb,
-            "source",
+            SourceParameterName,
             inv.SourcePropertyPath,
             inv.SourcePropertyTypeFullName,
             sourceClassInfo,
@@ -100,7 +100,7 @@ internal static class BindTwoWayCodeGenerator
 
         ObservationCodeGenerator.EmitInlineObservation(
             sb,
-            "target",
+            TargetParameterName,
             inv.TargetPropertyPath,
             inv.TargetPropertyTypeFullName,
             targetClassInfo,
@@ -110,8 +110,8 @@ internal static class BindTwoWayCodeGenerator
 
         // Both directions are routed, and the source direction first, so its initial value is queued ahead of
         // the target's. That ordering is what seeds the target before the target's own first value is weighed.
-        sourceVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, sourceVar, "targetThreadObs");
-        targetVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, targetVar, "sourceThreadObs");
+        sourceVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, sourceVar, "targetThreadObs", TargetParameterName);
+        targetVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, targetVar, "sourceThreadObs", SourceParameterName);
 
         EmitTwoWaySubscription(sb, inv, sourceVar, targetVar, targetAccess, sourceSetAccess);
     }

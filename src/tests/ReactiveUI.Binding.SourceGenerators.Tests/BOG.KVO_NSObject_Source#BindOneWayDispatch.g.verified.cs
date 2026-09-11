@@ -75,7 +75,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::TestApp.MyAppleView)__o).Text,
                 false,
                 true);
-            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
+            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(sourceObs, target);
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {

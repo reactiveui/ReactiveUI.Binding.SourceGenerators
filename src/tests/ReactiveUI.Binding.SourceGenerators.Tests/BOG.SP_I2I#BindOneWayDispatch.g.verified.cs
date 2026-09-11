@@ -74,7 +74,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyIntToInt.MyViewModel)__o).Count,
                 false,
                 true);
-            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
+            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(sourceObs, target);
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {

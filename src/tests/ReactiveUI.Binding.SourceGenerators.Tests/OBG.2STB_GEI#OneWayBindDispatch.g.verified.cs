@@ -72,7 +72,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel)__o).FirstName,
                 false,
                 true);
-            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
+            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(sourceObs, view);
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
@@ -126,7 +126,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::SharedScenarios.OneWayBind.TwoSameTypeBindings.MyViewModel)__o).LastName,
                 false,
                 true);
-            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
+            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(sourceObs, view);
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
