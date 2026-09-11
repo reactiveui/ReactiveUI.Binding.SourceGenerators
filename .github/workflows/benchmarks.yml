@@ -16,10 +16,6 @@ on:
                 description: 'BenchmarkDotNet filter, e.g. *WhenChanged* or *'
                 type: string
                 default: '*'
-            include_netfx:
-                description: 'Add the net462 leg. Drops the EventPipe profiler, which refuses jobs below .NET Core 3.0.'
-                type: boolean
-                default: false
 
 permissions:
     contents: read
@@ -60,15 +56,13 @@ jobs:
                   # input cannot extend it.
                   SUITE: ${{ inputs.suite }}
                   FILTER: ${{ inputs.filter }}
-                  INCLUDE_NETFX: ${{ inputs.include_netfx }}
+
               run: |
                   $projects = @()
                   if ($env:SUITE -eq 'runtime'   -or $env:SUITE -eq 'all') { $projects += 'benchmarks/ReactiveUI.Binding.Benchmarks/ReactiveUI.Binding.Benchmarks.csproj' }
                   if ($env:SUITE -eq 'baseline'  -or $env:SUITE -eq 'all') { $projects += 'benchmarks/ReactiveUI.Binding.Benchmarks.ReactiveUI/ReactiveUI.Binding.Benchmarks.ReactiveUI.csproj' }
                   if ($env:SUITE -eq 'generator' -or $env:SUITE -eq 'all') { $projects += 'benchmarks/ReactiveUI.Binding.Generator.Benchmarks/ReactiveUI.Binding.Generator.Benchmarks.csproj' }
 
-                  $properties = @()
-                  if ($env:INCLUDE_NETFX -eq 'true') { $properties += '--property:BenchNetFx=true' }
 
                   foreach ($project in $projects) {
                       $name = [System.IO.Path]::GetFileNameWithoutExtension($project)
@@ -76,7 +70,7 @@ jobs:
 
                       # The host TFM only launches the switcher; each benchmark's SimpleJob attributes
                       # decide which runtimes are actually measured.
-                      dotnet run --project $project -c Release -f net10.0 @properties -- `
+                      dotnet run --project $project -c Release -f net10.0 -- `
                           --filter $env:FILTER `
                           --artifacts "$env:GITHUB_WORKSPACE/benchmark-artifacts/$name" `
                           --exporters github json html csv

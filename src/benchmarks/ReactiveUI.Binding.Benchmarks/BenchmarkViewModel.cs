@@ -4,6 +4,7 @@
 
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Windows.Input;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
@@ -67,4 +68,55 @@ public class BenchmarkViewModel : INotifyPropertyChanged, INotifyPropertyChangin
             PropertyChanged?.Invoke(this, new(nameof(Child)));
         }
     } = new();
+
+    /// <summary>Gets or sets the command an invocation or a command binding reaches.</summary>
+    public ICommand? Run
+    {
+        get => field;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            PropertyChanging?.Invoke(this, new(nameof(Run)));
+            field = value;
+            PropertyChanged?.Invoke(this, new(nameof(Run)));
+        }
+    }
+
+    /// <summary>Gets or sets the stream a WhenAnyObservable call switches to.</summary>
+    public IObservable<string>? Signal
+    {
+        get => field;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            PropertyChanging?.Invoke(this, new(nameof(Signal)));
+            field = value;
+            PropertyChanged?.Invoke(this, new(nameof(Signal)));
+        }
+    }
+
+    /// <summary>Gets or sets the second stream a WhenAnyObservable call combines.</summary>
+    public IObservable<string>? OtherSignal
+    {
+        get => field;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            PropertyChanging?.Invoke(this, new(nameof(OtherSignal)));
+            field = value;
+            PropertyChanged?.Invoke(this, new(nameof(OtherSignal)));
+        }
+    }
 }

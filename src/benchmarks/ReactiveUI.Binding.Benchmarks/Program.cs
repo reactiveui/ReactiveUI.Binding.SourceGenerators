@@ -11,6 +11,7 @@ internal static class Program
 {
     /// <summary>Runs the benchmark selected by the command line.</summary>
     /// <param name="args">The command-line arguments passed to the switcher.</param>
+    [STAThread]
     internal static void Main(string[] args) =>
         _ = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 }

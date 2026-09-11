@@ -560,14 +560,29 @@ when it scores higher. A tie goes to the generated code.
 
 ## Rx library compatibility
 
-`ReactiveUI.Binding` does not depend on System.Reactive. Generated code returns `IObservable<T>` from the
-BCL, so any Rx implementation can consume it.
+The observables and operators come from **ReactiveUI.Primitives**. That is the library this one is built on,
+and it is the only Rx dependency the lean package has.
+
+System.Reactive is reached through Primitives' own shim, **ReactiveUI.Primitives.Reactive**. Neither package
+here references System.Reactive directly.
+
+| Package | Depends on | Scheduler type |
+|---------|------------|----------------|
+| `ReactiveUI.Binding` | `ReactiveUI.Primitives` | `ISequencer` |
+| `ReactiveUI.Binding.Reactive` | `ReactiveUI.Primitives.Reactive` | `IScheduler` |
+
+Everything a binding hands back is an `IObservable<T>` from the BCL, so a consumer is not tied to either.
 
 | Library | How it works |
 |---------|--------------|
-| System.Reactive | Use `ReactiveUI.Binding.Reactive`, which types its schedulers as `IScheduler`. |
+| ReactiveUI.Primitives | The default. Reference `ReactiveUI.Binding`. |
+| System.Reactive | Reference `ReactiveUI.Binding.Reactive`, which takes it through the Primitives shim. |
 | R3 | R3 exposes its own `Observable<T>` class, so convert with `.ToObservable()`. |
 | Anything else | Any library that consumes `IObservable<T>` works as it is. |
+
+> [!NOTE]
+> Reference one runtime package or the other, never both. They share no type names, so referencing both puts
+> two copies of every binding API in scope.
 
 ## Performance
 
