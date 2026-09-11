@@ -17,26 +17,29 @@
 
 # ReactiveUI.Binding.SourceGenerators
 
-A C# source generator that replaces ReactiveUI's runtime expression-tree binding engine with compile-time code
-generation. Zero reflection, fully AOT/trimming safe, 3-7x faster than the legacy engine.
+This library binds properties without reflection. A source generator reads each binding call site while you
+compile and writes the observation code for it. Nothing is looked up by name at run time, so a trimmed or
+ahead-of-time published application keeps working.
 
 ## Table of Contents
 
-- [What does it do?](#what-does-it-do)
-- [How does it work?](#how-does-it-work)
+- [What it does](#what-it-does)
+- [How it works](#how-it-works)
 - [How a call site reaches its generated code](#how-a-call-site-reaches-its-generated-code)
 - [When nothing claims the call](#when-nothing-claims-the-call)
-- [How do I install?](#how-do-i-install)
-- [Supported APIs](#supported-apis)
-- [Usage Examples](#usage-examples)
-- [View Locator](#view-locator)
-- [Supported Notification Mechanisms](#supported-notification-mechanisms)
+- [Installing](#installing)
+- [Supported frameworks](#supported-frameworks)
 - [Packages](#packages)
-- [Rx Library Compatibility](#rx-library-compatibility)
+- [Supported APIs](#supported-apis)
+- [Examples](#examples)
+- [The view locator](#the-view-locator)
+- [Notification mechanisms](#notification-mechanisms)
+- [Rx library compatibility](#rx-library-compatibility)
 - [Performance](#performance)
 - [Diagnostics](#diagnostics)
-- [Architecture](#architecture)
-- [Core Team](#core-team)
+- [Where this differs from ReactiveUI](#where-this-differs-from-reactiveui)
+- [Layout](#layout)
+- [Core team](#core-team)
 - [Contribute](#contribute)
 
 ### Core Team
@@ -60,588 +63,481 @@ generation. Zero reflection, fully AOT/trimming safe, 3-7x faster than the legac
   </tbody>
 </table>
 
-## What does it do?
+## What it does
 
-ReactiveUI.Binding.SourceGenerators is an incremental source generator that analyses your `WhenChanged`, `WhenChanging`,
-`WhenAnyValue`, `WhenAny`, `WhenAnyObservable`, `BindOneWay`, `BindTwoWay`, `OneWayBind`, `Bind`, `BindTo`,
-`BindCommand`, `BindInteraction`, and `InvokeCommand` call sites at compile time and emits optimised, strongly-typed observation and
-binding code. It eliminates:
+ReactiveUI's binding engine reads a lambda at run time. It compiles the expression tree, then finds each
+property by name. That costs time on every binding, and it defeats a trimmer, which cannot see which members
+the reflection will ask for.
 
-- **Runtime expression-tree compilation** -- no `Expression<Func<T>>` evaluation at runtime
-- **Reflection** -- all property access is generated as direct member access
-- **System.Reactive dependency in the base package** -- generated code uses lightweight built-in observables
+This generator does the same work while you compile. It reads the lambda from the syntax tree and emits a
+method that reads the property directly. The emitted code names every type and every member, so a trimmer can
+see all of it.
 
-The result is binding code that is AOT-safe, trimming-safe, and significantly faster than the legacy ReactiveUI binding
-engine.
+Three things disappear as a result.
 
-## How does it work?
+- No expression tree is compiled at run time.
+- No member is found by name. Every property read is a direct call.
+- The base package does not depend on System.Reactive. Generated code returns `IObservable<T>` from the BCL.
 
-The generator runs two pipelines during compilation:
+## How it works
 
-**Pipeline A (Type Detection)** scans your types for notification mechanisms (INotifyPropertyChanged, IReactiveObject,
-WPF DependencyObject, WinUI DependencyObject, Apple KVO, WinForms Component, Android View) and registers per-type
-observation factories via a `[ModuleInitializer]`.
+The generator runs three pipelines while your project compiles.
 
-**Pipeline B (Invocation Detection)** scans method invocations and extracts lambda property paths at compile time. Each
-call site gets its own optimised method with direct property access:
+**Types.** It scans your classes for a notification mechanism. A class might raise `PropertyChanged`, or
+derive from a WPF `DependencyObject`, or inherit `NSObject`. Each mechanism is observed differently, so the
+generator records which one reaches each property.
+
+**Call sites.** It scans your binding calls and reads the property path out of each lambda. Every call site
+gets its own method.
+
+**Views.** It scans for `IViewFor<T>` implementations and writes a type switch that resolves a view without
+reflection.
+
+Here is a real emitted method for `vm.WhenChanged(x => x.Name)` on a class that raises `PropertyChanged`:
 
 ```csharp
-// You write:
-var obs = vm.WhenChanged(x => x.Name);
-
-// The generator emits a per-call-site method with direct property access:
-private static IObservable<string> __WhenChanged_0(MyViewModel obj)
+private static global::System.IObservable<string> __WhenChanged_7FFFD2E8D6FC818E(MyViewModel obj)
 {
-    return new PropertyObservable<string>(
-        obj, "Name", static o => ((MyViewModel)o).Name, true);
+    return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<string>(
+        obj,
+        ((Expression<Func<MyViewModel, string>>)(__e => __e.Name)).Body,
+        "Name",
+        false,
+        5,
+        (object __o) => ((MyViewModel)__o).Name,
+        new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
+            obj, "Name", (INotifyPropertyChanged __o) => ((MyViewModel)__o).Name, true));
 }
 ```
 
+The last argument is the generated observation. The `5` is the affinity the generator chose it with.
+`Choose` offers the link to any `ICreatesObservableForProperty` you registered at run time, and takes yours
+only when it scores higher. That is how a platform plugin still wins, without any of it costing reflection:
+the property name, the declaring type and the getter are all fixed at compile time.
+
 ## How a call site reaches its generated code
 
-Two mechanisms. Your compiler picks one.
+There are two mechanisms. Your compiler decides which one you get.
 
-**Roslyn 4.13 or newer: the call is intercepted.** The generator points the compiler at your exact call and says "run
-this instead". No name lookup is involved, so it works from any file and any language version - including
-`<LangVersion>7.3</LangVersion>` and .NET Framework 4.6.2:
+**Roslyn 4.13 and newer intercept the call.** The generator tells the compiler to run its method in place of
+yours. Nothing goes through name lookup, so this works from any file and any language version, including
+`<LangVersion>7.3</LangVersion>` on .NET Framework 4.6.2.
 
 ```csharp
-[InterceptsLocation(1, "j8MnGMWiKja+66BWQ5M81agPAABQcm9ncmFtLmNz")]  // vm.WhenChanged(x => x.Name) on line 12
+[InterceptsLocation(1, "j8MnGMWiKja+66BWQ5M81agPAABQcm9ncmFtLmNz")]  // vm.WhenChanged(x => x.Name), line 12
 internal static IObservable<string> __Intercept_WhenChanged_7FFF(
     this MyViewModel objectToMonitor,
     Expression<Func<MyViewModel, string>> property1, /* caller-info parameters */)
     => __WhenChanged_7FFF(objectToMonitor);
 ```
 
-**Roslyn 4.8 to 4.12: a concrete overload competes for the call.** It beats the generic runtime stub because a
-non-generic method wins overload resolution - but only when extension-method lookup finds it. RXUIBIND009 warns when it
-will not.
+**Roslyn 4.8 to 4.12 emit an overload that competes for the call.** A non-generic method beats the generic
+runtime stub, so the generated overload wins, but only where extension-method lookup finds it. RXUIBIND009
+tells you when it will not.
 
-Either way the same generated method runs, so bindings behave identically.
+Both routes run the same method, so a binding behaves the same either way.
+
+Set `ReactiveUIBindingUseInterceptors` to `false` to take the overloads on a compiler that could intercept.
+Set `ReactiveUIBindingEmitGeneratedCodeMarkers` to `false` to drop the `// <auto-generated/>` header from
+emitted files, which lets analyzer and compiler diagnostics inside them surface.
+
+The generator and analyzer are packed once per compiler generation:
+
+```
+analyzers/dotnet/roslyn4.8/cs/    <- Roslyn 4.8 to 4.12
+analyzers/dotnet/roslyn4.13/cs/   <- Roslyn 4.13 and newer
+```
+
+The .NET SDK picks the highest folder your compiler supports. A legacy non-SDK project is handed both, so the
+package's targets remove the one you are not being served by. Loading the generator twice would emit every
+dispatch file twice and fail your build.
 
 ## When nothing claims the call
 
-A generated overload wins overload resolution for every call site of its types, including the ones whose lambdas it
-could not read - an expression held in a variable, one assembled at run time, or a receiver typed as a type parameter.
-Those calls reach the runtime stub, which throws and names the overload that does resolve them:
+A generated overload wins overload resolution for every call site of its types. That includes the ones whose
+lambda it could not read: an expression held in a variable, one assembled at run time, or a receiver typed as
+a type parameter. Those calls reach the runtime stub, which throws and names the overload that does resolve
+them.
 
 ```csharp
 Expression<Func<MyViewModel, string>> selector = x => x.Name;
 
-vm.WhenChanged(selector);        // throws: no generated WhenChanged dispatch matched this call site
+vm.WhenChanged(selector);        // throws, and names WhenChangedUnsafe
 vm.WhenChangedUnsafe(selector);  // walks the chain by reflection
 ```
 
-Every API has an `Unsafe` twin:
+Thirteen APIs have an `Unsafe` twin.
 
-| Compile-time      | Reflection                                                     |
-|-------------------|----------------------------------------------------------------|
-| `WhenChanged`     | `WhenChangedUnsafe`                                            |
-| `WhenChanging`    | `WhenChangingUnsafe`                                           |
-| `WhenAnyValue`    | `WhenAnyValueUnsafe`                                           |
-| `BindOneWay`      | `BindOneWayUnsafe`                                             |
-| `BindTwoWay`      | `BindTwoWayUnsafe`                                             |
-| `Bind`            | `BindUnsafe`                                                   |
-| `OneWayBind`      | `OneWayBindUnsafe`                                             |
-| `BindTo`          | `BindToUnsafe`                                                 |
-| `BindCommand`     | `BindCommandUnsafe`                                            |
-| `BindInteraction` | `BindInteractionUnsafe`                                        |
-| `InvokeCommand`   | `InvokeCommandUnsafe`                                          |
-| `WhenAny`         | `WhenAnyUnsafe`                                                |
-| `WhenAnyObservable` | `WhenAnyObservableUnsafe`                                    |
+| Resolved while you compile | Resolved by reflection |
+|----------------------------|------------------------|
+| `WhenChanged` | `WhenChangedUnsafe` |
+| `WhenChanging` | `WhenChangingUnsafe` |
+| `WhenAnyValue` | `WhenAnyValueUnsafe` |
+| `WhenAny` | `WhenAnyUnsafe` |
+| `WhenAnyObservable` | `WhenAnyObservableUnsafe` |
+| `BindOneWay` | `BindOneWayUnsafe` |
+| `BindTwoWay` | `BindTwoWayUnsafe` |
+| `OneWayBind` | `OneWayBindUnsafe` |
+| `Bind` | `BindUnsafe` |
+| `BindTo` | `BindToUnsafe` |
+| `BindCommand` | `BindCommandUnsafe` |
+| `BindInteraction` | `BindInteractionUnsafe` |
+| `InvokeCommand` | `InvokeCommandUnsafe` |
 
-Every `Unsafe` overload carries `[RequiresUnreferencedCode]` and the unsuffixed names carry none, so a `PublishTrimmed`
-or `PublishAot` build reports the reflection at the call sites that asked for it and says nothing about the rest. That
-is what keeps a fully generated application free of IL2026 while leaving the runtime engine available to the call sites
-that need it. `RXUIBIND001`, `RXUIBIND006` and `RXUIBIND009` name those call sites while you build, before the throw.
+Every `Unsafe` overload carries `[RequiresUnreferencedCode]`. The overloads a generated dispatch displaces
+carry none. A `PublishTrimmed` or `PublishAot` build therefore reports the call sites that asked for
+reflection and says nothing about the rest. RXUIBIND001, RXUIBIND006 and RXUIBIND009 name those call sites
+while you build, before anything throws.
 
-The scheduler overloads follow the same split, in `ReactiveSchedulerUnsafeExtensions`.
+The scheduler overloads split the same way, and both halves live on `ReactiveSchedulerExtensions`.
 
-`WhenAnyDynamic` is the one API with no twin. It takes the chain as an `Expression` the caller built, so there is
-never a lambda for the generator to read and no compile-time half to offer - the unsuffixed overloads carry the
-annotation themselves.
+Two members have no compile-time half, so their unsuffixed names carry the annotation themselves.
 
-### What the package ships
+- `WhenAnyDynamic` takes the chain as an `Expression` you built. There is no lambda to read.
+- `ViewLocator`'s object-typed `ResolveView` closes `IViewFor<>` over a runtime type, so it carries
+  `[RequiresDynamicCode]`. The generic overload does not.
 
-The generator and its analyzer are packed once per compiler generation:
-
-```
-analyzers/dotnet/roslyn4.8/cs/    <- Roslyn 4.8 - 4.12
-analyzers/dotnet/roslyn4.13/cs/   <- Roslyn 4.13+
-```
-
-The .NET SDK picks the highest folder your compiler supports. A legacy non-SDK project is handed both, so the package's
-targets delete the one you are not being served by - the generator never runs twice.
-
-Two knobs:
-
-| Setting                                                | Effect                                                       |
-|--------------------------------------------------------|--------------------------------------------------------------|
-| `<ReactiveUIBindingUseInterceptors>false</...>`         | Use the overloads even on a compiler that could intercept     |
-| Roslyn older than 4.8                                   | Build fails with **RXUIBIND100** rather than silently generating nothing |
-
-## How do I install?
-
-Install the `ReactiveUI.Binding` NuGet package. The source generator is automatically included.
+## Installing
 
 ```
 dotnet add package ReactiveUI.Binding
 ```
 
-If you need `IScheduler` overloads (e.g. `ObserveOn`), also install the adapter package:
+The generator and the analyzer ship inside that package. There is nothing else to reference.
 
-```
-dotnet add package ReactiveUI.Binding.Reactive
-```
+Install `ReactiveUI.Binding.Reactive` instead if your application speaks System.Reactive. It is the same
+library compiled against `System.Reactive.Concurrency.IScheduler`, under the `ReactiveUI.Binding.Reactive.*`
+namespaces. Reference one or the other, not both.
 
-### Supported Frameworks
+## Supported frameworks
 
-| Target         | Versions            |
-|----------------|---------------------|
-| .NET           | 8.0, 9.0, 10.0      |
+| Target | Versions |
+|--------|----------|
+| .NET | 8.0, 9.0, 10.0, 11.0 |
 | .NET Framework | 4.6.2, 4.7.2, 4.8.1 |
-| NativeAOT      | .NET 10.0+          |
 
-### Platform Packages
+The WPF and WinForms packages target the three .NET Framework versions and the Windows heads of .NET 8 to 11.
+The MAUI packages start at .NET 10 and add Android, iOS, macOS, Mac Catalyst and tvOS heads; the Apple heads
+build only on Windows and macOS.
 
-Platform-specific packages provide DependencyProperty observation and other platform integrations:
+NativeAOT is supported on .NET 8 and later. The generated path is the only one that runs there at all.
 
-| Platform | Package                       |
-|----------|-------------------------------|
-| WPF      | `ReactiveUI.Binding.Wpf`      |
-| WinForms | `ReactiveUI.Binding.WinForms` |
-| MAUI     | `ReactiveUI.Binding.Maui`     |
+## Packages
+
+Ten packages ship. Each runtime package carries the generator and the analyzer; the platform packages inherit
+them.
+
+| Package | What it is |
+|---------|------------|
+| `ReactiveUI.Binding` | The runtime library. Lightweight observables, no System.Reactive dependency. |
+| `ReactiveUI.Binding.Reactive` | The same library against System.Reactive's `IScheduler`. |
+| `ReactiveUI.Binding.Wpf` | WPF dependency-property observation. |
+| `ReactiveUI.Binding.Wpf.Reactive` | The same, for a System.Reactive application. |
+| `ReactiveUI.Binding.WinForms` | WinForms component observation. |
+| `ReactiveUI.Binding.WinForms.Reactive` | The same, for a System.Reactive application. |
+| `ReactiveUI.Binding.Maui` | MAUI bindable-property observation. |
+| `ReactiveUI.Binding.Maui.Reactive` | The same, for a System.Reactive application. |
+| `ReactiveUI.Binding.SourceGenerators` | MSBuild props and targets only. A compatibility package. |
+| `ReactiveUI.Binding.Analyzer` | The analyzer project. Its assets ship inside the runtime packages. |
 
 ## Supported APIs
 
-| API                 | Description                                                                         |
-|---------------------|-------------------------------------------------------------------------------------|
-| `WhenChanged`       | Observe property changes (after value has changed)                                  |
-| `WhenChanging`      | Observe property changes (before value changes, requires `INotifyPropertyChanging`) |
-| `WhenAnyValue`      | ReactiveUI compatibility shim -- same semantics as `WhenChanged`                    |
-| `WhenAny`           | Multi-property observation with selector                                            |
-| `WhenAnyDynamic`    | Observe a chain given as an `Expression` built at run time (reflection, not AOT-safe) |
-| `WhenAnyObservable` | Observe and switch between observable properties                                    |
-| `BindOneWay`        | One-way binding from source to target                                               |
-| `BindTwoWay`        | Two-way binding between source and target                                           |
-| `OneWayBind`        | ReactiveUI compatibility shim for one-way binding                                   |
-| `Bind`              | ReactiveUI compatibility shim for two-way binding                                   |
-| `BindTo`            | Apply an observable stream to a target property                                     |
-| `BindCommand`       | Bind a command property to a UI element                                             |
-| `BindInteraction`   | Bind an interaction to a handler                                                    |
-| `InvokeCommand`     | Execute a command with each value an observable produces                            |
+| API | What it does | Properties per call |
+|-----|--------------|--------------------:|
+| `WhenChanged` | Observes a property after it changes. | 16 |
+| `WhenChanging` | Observes a property before it changes. | 16 |
+| `WhenAnyValue` | ReactiveUI's name for `WhenChanged`. | 16 |
+| `WhenAny` | Observes properties and hands each change to a selector. | 12 |
+| `WhenAnyObservable` | Observes properties that hold observables, and switches between them. | 12 |
+| `WhenAnyDynamic` | Observes a chain you built as an `Expression`. | 12 |
+| `BindOneWay` | Writes a source property to a target property. | 1 each side |
+| `BindTwoWay` | Carries a property both ways. | 1 each side |
+| `OneWayBind` | ReactiveUI's name for a one-way binding, written view first. | 1 each side |
+| `Bind` | ReactiveUI's name for a two-way binding, written view first. | 1 each side |
+| `BindTo` | Writes an observable's values to a target property. | 1 |
+| `BindCommand` | Binds a command to a control's event. | 1 |
+| `BindInteraction` | Registers a handler against an interaction a property holds. | 1 |
+| `InvokeCommand` | Executes a command with each value an observable produces. | 1 |
 
-All APIs support single properties, deep property chains (e.g. `x => x.Address.City`), and multi-property observation (
-up to 12 properties for `WhenAnyValue`/`WhenChanged`).
+Every one of them reads a single property, a deep chain such as `x => x.Address.City`, or several properties
+at once. A deep chain re-subscribes when an intermediate object is replaced.
 
-Each of them also has an `Unsafe` twin that resolves the expression by reflection, for the call sites the generator
-cannot read - see [When nothing claims the call](#when-nothing-claims-the-call).
+`BindOneWay`, `BindTwoWay`, `OneWayBind` and `Bind` also take a scheduler. No observation API does.
 
-## Usage Examples
+## Examples
 
-### Property Observation
+### Observing a property
 
 ```csharp
-// Single property
-IObservable<string> nameObs = vm.WhenChanged(x => x.Name);
+// One property.
+IObservable<string> name = vm.WhenChanged(x => x.Name);
 
-// Deep chain -- re-subscribes when intermediate objects change
-IObservable<string> cityObs = vm.WhenChanged(x => x.Address.City);
+// A chain. Replacing Address re-subscribes.
+IObservable<string> city = vm.WhenChanged(x => x.Address.City);
 
-// Multiple properties with selector
+// Several properties, combined by a selector.
 IObservable<string> fullName = vm.WhenChanged(
     x => x.FirstName,
     x => x.LastName,
     (first, last) => $"{first} {last}");
 
-// Before-change observation (requires INotifyPropertyChanging)
-IObservable<string> nameChanging = vm.WhenChanging(x => x.Name);
+// Before the change. The type has to raise PropertyChanging.
+IObservable<string> before = vm.WhenChanging(x => x.Name);
 ```
 
-### Observing a Chain Named at Run Time
-
-`WhenAnyDynamic` takes the chain as a `System.Linq.Expressions.Expression` the caller built, rather than as a
-lambda the compiler could read. Arities 1 to 12 are available, each with and without the distinct gate.
+### Binding
 
 ```csharp
-// The chain is a value, so it can be assembled from a property name, a configuration entry, or a caller.
-Expression chain = ((Expression<Func<MyViewModel, string>>)(x => x.Address.City)).Body;
-
-IObservable<string?> cityObs = vm.WhenAnyDynamic(chain, static c => (string?)c.Value);
-
-IObservable<string> fullName = vm.WhenAnyDynamic(
-    firstNameChain,
-    lastNameChain,
-    static (first, last) => $"{first.Value} {last.Value}");
-```
-
-There is nothing for a generator to resolve in an expression built at run time, so the chain is walked by
-reflection. Every overload carries `[RequiresUnreferencedCode]`, which makes this the one part of the observation
-surface that is not trimming- or AOT-safe and reports each call site in a `PublishAot` build. Where the chain is
-known at compile time, `WhenChanged` and `WhenAny` observe the same thing with no reflection.
-
-### One-Way Binding
-
-```csharp
-// Bind source property to target property
+// One way.
 IDisposable binding = vm.BindOneWay(view, x => x.Name, x => x.NameLabel);
 
-// With converter
-IDisposable binding = vm.BindOneWay(view,
-    x => x.Age,
-    x => x.AgeLabel,
-    age => $"Age: {age}");
-```
+// One way, converting on the way through.
+IDisposable converted = vm.BindOneWay(view, x => x.Age, x => x.AgeLabel, age => $"Age: {age}");
 
-### Two-Way Binding
+// Both ways.
+IDisposable twoWay = vm.BindTwoWay(view, x => x.Name, x => x.NameTextBox);
 
-```csharp
-// Bind source and target properties bidirectionally
-IDisposable binding = vm.BindTwoWay(view, x => x.Name, x => x.NameTextBox);
-
-// With converters
-IDisposable binding = vm.BindTwoWay(view,
+// Both ways, with a converter per direction.
+IDisposable pair = vm.BindTwoWay(
+    view,
     x => x.Age,
     x => x.AgeTextBox,
     age => age.ToString(),
     text => int.TryParse(text, out var n) ? n : 0);
+
+// On a scheduler.
+IDisposable scheduled = vm.BindOneWay(
+    view, x => x.Name, x => x.NameLabel, scheduler: RxApp.MainThreadScheduler);
 ```
 
-### ReactiveUI Compatibility
+`OneWayBind` and `Bind` are the same bindings written view first, for code moving across from ReactiveUI:
 
 ```csharp
-// WhenAnyValue is a drop-in replacement for ReactiveUI.WhenAnyValue
-IObservable<string> obs = vm.WhenAnyValue(x => x.Name);
-
-// OneWayBind / Bind match ReactiveUI's binding API
-IDisposable binding = view.OneWayBind(vm, x => x.Name, x => x.NameLabel);
-IDisposable binding = view.Bind(vm, x => x.Name, x => x.NameTextBox);
+IDisposable oneWay = view.OneWayBind(vm, x => x.Name, x => x.NameLabel);
+IDisposable twoWay = view.Bind(vm, x => x.Name, x => x.NameTextBox);
 ```
 
-### Invoking a Command
+### Running a command
 
 ```csharp
-// Execute the command a view model property holds with each value the stream produces. The value is the
-// command parameter, and a value the command refuses through CanExecute is dropped.
+// The command lives on a view model property. Each value becomes the command parameter,
+// and a value CanExecute refuses is dropped.
 IDisposable invocation = searchText.InvokeCommand(vm, x => x.Search);
 
-// Execute a command the caller already has, which needs no property to observe.
-IDisposable invocation = searchText.InvokeCommand(vm.Search);
+// The caller holds the command, so there is no property to observe.
+IDisposable direct = searchText.InvokeCommand(vm.Search);
 ```
 
-A `ReactiveCommand` is reached through these overloads like any other `ICommand`; the parameter arrives as
-`object` rather than the command's declared input type.
+A `ReactiveCommand` is reached like any other `ICommand`. The parameter arrives as `object` rather than the
+command's declared input type.
 
-### Scheduler Overloads
+### Observing a chain built at run time
 
-Scheduler overloads require the `ReactiveUI.Binding.Reactive` package:
+`WhenAnyDynamic` takes the chain as an `Expression` rather than a lambda, so it can be assembled from a
+property name or a configuration entry. Arities 1 to 12 are available, each with and without a distinct gate.
 
 ```csharp
-using ReactiveUI.Binding.Reactive;
-using System.Reactive.Concurrency;
+Expression chain = ((Expression<Func<MyViewModel, string>>)(x => x.Address.City)).Body;
 
-// Observe on a specific scheduler
-IObservable<string> obs = vm.WhenChanged(x => x.Name, RxApp.MainThreadScheduler);
-
-// Bind with scheduler
-IDisposable binding = vm.BindOneWay(view, x => x.Name, x => x.NameLabel,
-    scheduler: RxApp.MainThreadScheduler);
+IObservable<string?> city = vm.WhenAnyDynamic(chain, static c => (string?)c.Value);
 ```
 
-### View Locator
+There is nothing for a generator to read in an expression built at run time, so the chain is walked by
+reflection. Every overload carries `[RequiresUnreferencedCode]` and each call site is reported in a
+`PublishAot` build. Where the chain is known while you compile, `WhenChanged` and `WhenAny` observe the same
+thing with no reflection at all.
 
-The source generator automatically detects classes implementing `IViewFor<T>` and generates an AOT-safe view dispatch
-table. Views are resolved without reflection via a compile-time type-switch.
+## The view locator
+
+Implement `IViewFor<T>` and the generator registers the mapping for you.
 
 ```csharp
-// Implement IViewFor<T> and the generator registers the mapping automatically
-public class LoginView : ReactiveUI.Binding.IViewFor<LoginViewModel>
+public class LoginView : IViewFor<LoginViewModel>
 {
     public LoginViewModel ViewModel { get; set; }
-    object ReactiveUI.Binding.IViewFor.ViewModel
+
+    object IViewFor.ViewModel
     {
         get => ViewModel;
         set => ViewModel = (LoginViewModel)value;
     }
 }
 
-// Resolve a view at runtime
-IViewFor view = ViewLocator.Current.ResolveView(myViewModel);
+IViewFor? view = ViewLocator.GetCurrent().ResolveView(myViewModel);
 ```
 
-#### View Attributes
+Three attributes change what is registered.
 
-| Attribute                       | Description                                                                                                                                            |
-|---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `[ViewContract("name")]`        | Registers the view under a named contract, enabling multiple views per ViewModel. Pass the contract string to `ResolveView` to select a specific view. |
-| `[SingleInstanceView]`          | Caches a singleton instance of the view instead of creating a new one per resolution. Not suitable for views reused multiple times in the visual tree. |
-| `[ExcludeFromViewRegistration]` | Excludes the view from automatic source-generated registration (e.g. for base classes or test doubles).                                                |
+| Attribute | Effect |
+|-----------|--------|
+| `[ViewContract("name")]` | Registers the view under a contract, so one view model can have several views. Pass the contract to `ResolveView`. |
+| `[SingleInstanceView]` | Caches one instance instead of constructing a view per resolution. Unsuitable for a view used more than once in the tree. |
+| `[ExcludeFromViewRegistration]` | Leaves the view out of the generated registration. |
 
 ```csharp
-// Contract-based resolution: multiple views for one ViewModel
 [ViewContract("compact")]
-public class CompactDashboardView : IViewFor<DashboardViewModel> { /* ... */ }
+public class CompactDashboardView : IViewFor<DashboardViewModel> { }
 
-public class FullDashboardView : IViewFor<DashboardViewModel> { /* ... */ }
+public class FullDashboardView : IViewFor<DashboardViewModel> { }
 
-// Resolve the compact view
-var compactView = ViewLocator.Current.ResolveView(vm, "compact");
-
-// Resolve the default view
-var defaultView = ViewLocator.Current.ResolveView(vm);
+var compact = ViewLocator.GetCurrent().ResolveView(vm, "compact");
+var full = ViewLocator.GetCurrent().ResolveView(vm);
 ```
 
-#### Resolution Strategy
+A resolution is tried in three places, in order.
 
-The generated dispatch follows a 3-tier resolution strategy per view:
+1. The generated dispatch, which is a type switch with no reflection in it.
+2. A mapping you added at run time with `Map<TViewModel, TView>()`.
+3. The service locator, `Splat.AppLocator.Current`.
 
-1. **Service locator** -- checks `Splat.AppLocator.Current` for DI-registered views
-2. **Direct construction** -- falls back to `new View()` if a parameterless constructor exists
-3. **Singleton cache** -- for `[SingleInstanceView]`, caches and reuses a single instance (thread-safe via
-   `Interlocked.CompareExchange`)
+Inside the generated dispatch, a contract is matched before the default view. The view then comes from the
+service locator, and failing that from a constructor call, or from a cache when the view is marked
+`[SingleInstanceView]`. The cache is filled with `Interlocked.CompareExchange`, so two threads resolving at
+once share one instance.
 
-## Supported Notification Mechanisms
+Resolve through the generic overload where you can. The object-typed overload closes `IViewFor<>` over a
+runtime type, so it carries `[RequiresDynamicCode]` and is not safe to publish ahead of time.
 
-The source generator detects and generates optimised code for each platform's notification mechanism:
+## Notification mechanisms
 
-| Mechanism               | Interface / Base Type                           | WhenChanged | WhenChanging | Affinity |
-|-------------------------|-------------------------------------------------|:-----------:|:------------:|:--------:|
-| INotifyPropertyChanged  | `System.ComponentModel.INotifyPropertyChanged`  |     Yes     |      --      |    21    |
-| INotifyPropertyChanging | `System.ComponentModel.INotifyPropertyChanging` |     --      |     Yes      |    21    |
-| IReactiveObject         | `ReactiveUI.IReactiveObject`                    |     Yes     |     Yes      |    24    |
-| WPF DependencyObject    | `System.Windows.DependencyObject`               |     Yes     |      --      |    20    |
-| WinUI DependencyObject  | `Microsoft.UI.Xaml.DependencyObject`            |     Yes     |      --      |    22    |
-| Apple KVO (NSObject)    | `Foundation.NSObject`                           |     Yes     |      --      |    25    |
-| WinForms Component      | `System.ComponentModel.Component`               |     Yes     |      --      |    23    |
-| Android View            | `Android.Views.View`                            |     Yes     |      --      |    19    |
+A type advertises a mechanism. A property either participates in it or does not, and every link of a chain is
+declared by its own type. So the generator picks a mechanism per property rather than per class.
 
-Higher affinity values take priority when a type implements multiple mechanisms.
+| Mechanism | Keyed on | Before-change | Affinity |
+|-----------|----------|---------------|---------:|
+| Apple KVO | `Foundation.NSObject` | yes | 15 |
+| IReactiveObject | `ReactiveUI.IReactiveObject` | yes | 10 |
+| WinForms component | `System.ComponentModel.Component` | no | 8 |
+| WinUI dependency object | `Microsoft.UI.Xaml.DependencyObject` | no | 6 |
+| INotifyPropertyChanged | `System.ComponentModel.INotifyPropertyChanged` | yes | 5 |
+| Android view | `Android.Views.View` | no | 5 |
+| WPF dependency object | `System.Windows.DependencyObject` | no | 4 |
 
-## Packages
+The highest affinity that can reach the property wins. A dependency object's plain CLR property, or a
+component with no matching `Changed` event, falls through to the next mechanism. `INotifyPropertyChanged` and
+`Android.Views.View` share an affinity, and that tie is settled by the order the plugins are registered in,
+with `INotifyPropertyChanged` first.
 
-| Package                               | Description                                                                  | NuGet                                                                                                                                                  |
-|---------------------------------------|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ReactiveUI.Binding`                  | Runtime library with lightweight observables. No System.Reactive dependency. | [![NuGet](https://img.shields.io/nuget/v/ReactiveUI.Binding.svg)](https://www.nuget.org/packages/ReactiveUI.Binding)                                   |
-| `ReactiveUI.Binding.SourceGenerators` | Compatibility package; the generator ships inside the runtime packages.      | [![NuGet](https://img.shields.io/nuget/v/ReactiveUI.Binding.SourceGenerators.svg)](https://www.nuget.org/packages/ReactiveUI.Binding.SourceGenerators) |
-| `ReactiveUI.Binding.Reactive`         | System.Reactive adapter for IScheduler overloads.                            | [![NuGet](https://img.shields.io/nuget/v/ReactiveUI.Binding.Reactive.svg)](https://www.nuget.org/packages/ReactiveUI.Binding.Reactive)                 |
-| `ReactiveUI.Binding.Wpf`              | WPF DependencyProperty support.                                              | [![NuGet](https://img.shields.io/nuget/v/ReactiveUI.Binding.Wpf.svg)](https://www.nuget.org/packages/ReactiveUI.Binding.Wpf)                           |
-| `ReactiveUI.Binding.WinForms`         | WinForms Component support.                                                  | [![NuGet](https://img.shields.io/nuget/v/ReactiveUI.Binding.WinForms.svg)](https://www.nuget.org/packages/ReactiveUI.Binding.WinForms)                 |
-| `ReactiveUI.Binding.Maui`             | MAUI BindableProperty support.                                               | [![NuGet](https://img.shields.io/nuget/v/ReactiveUI.Binding.Maui.svg)](https://www.nuget.org/packages/ReactiveUI.Binding.Maui)                         |
+Before-change observation needs the type to raise `PropertyChanging`. Where it cannot, `WhenChanging` reads
+the value once and then stays silent, and RXUIBIND004 says so while you build. A WPF dependency property is
+the exception among the after-change mechanisms: it keeps a live subscription and delivers each new value.
 
-## Rx Library Compatibility
+A plugin you register at run time outranks the generated observation when it scores higher. A tie goes to the
+generated code.
 
-The base `ReactiveUI.Binding` package has **no dependency on System.Reactive**. All generated code returns
-`IObservable<T>` (the BCL interface), making it compatible with any Rx implementation.
+## Rx library compatibility
 
-| Library                      | Compatibility                                          | Notes                                                                                                                                                                                                                                   |
-|------------------------------|--------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **System.Reactive**          | Full support via `ReactiveUI.Binding.Reactive` adapter | IScheduler overloads, ObserveOn                                                                                                                                                                                                         |
-| **R3**                       | Compatible via `IObservable<T>`                        | Generated code returns `IObservable<T>` which R3 can consume via `.ToObservable()` conversion. R3 uses its own `Observable<T>` abstract class rather than `IObservable<T>`, so native R3 types are not used directly in generated code. |
-| **Other Rx implementations** | Works out of the box                                   | Any library that consumes `IObservable<T>` is compatible                                                                                                                                                                                |
+`ReactiveUI.Binding` does not depend on System.Reactive. Generated code returns `IObservable<T>` from the
+BCL, so any Rx implementation can consume it.
+
+| Library | How it works |
+|---------|--------------|
+| System.Reactive | Use `ReactiveUI.Binding.Reactive`, which types its schedulers as `IScheduler`. |
+| R3 | R3 exposes its own `Observable<T>` class, so convert with `.ToObservable()`. |
+| Anything else | Any library that consumes `IObservable<T>` works as it is. |
 
 ## Performance
 
-### Source-Generated vs ReactiveUI Expression-Tree Engine
+Removing the expression tree and the name lookups makes a binding several times faster and allocates several
+times less than the reflection engine, and it is the only path that runs under NativeAOT at all.
 
-All benchmarks use 1,000 property changes per iteration. Measured on AMD Ryzen 7 5800X, .NET SDK 10.0.102.
-
-#### Property Observation (WhenChanged vs WhenAnyValue)
-
-**Source-Generated (this project):**
-
-| Method            | Runtime        |    Mean | Allocated |
-|-------------------|----------------|--------:|----------:|
-| Single Property   | .NET 10.0      |  220 us |     63 KB |
-| Deep Chain        | .NET 10.0      |  304 us |     64 KB |
-| Two Properties    | .NET 10.0      |  315 us |     88 KB |
-| First Observation | .NET 10.0      |  9.9 us |    0.9 KB |
-| Single Property   | .NET 8.0       |  238 us |     63 KB |
-| Deep Chain        | .NET 8.0       |  310 us |     64 KB |
-| Two Properties    | .NET 8.0       |  328 us |     88 KB |
-| First Observation | .NET 8.0       | 11.1 us |    0.9 KB |
-| Single Property   | NativeAOT 10.0 |   36 us |     64 KB |
-| Deep Chain        | NativeAOT 10.0 |   42 us |     65 KB |
-| Two Properties    | NativeAOT 10.0 |   61 us |     89 KB |
-| First Observation | NativeAOT 10.0 |  4.9 us |    1.1 KB |
-
-**ReactiveUI Expression-Tree Engine (baseline):**
-
-| Method            | Runtime   |     Mean | Allocated |
-|-------------------|-----------|---------:|----------:|
-| Single Property   | .NET 10.0 | 1,032 us |    391 KB |
-| Deep Chain        | .NET 10.0 | 1,101 us |    395 KB |
-| Two Properties    | .NET 10.0 | 2,216 us |    759 KB |
-| First Observation | .NET 10.0 |  29.4 us |    4.9 KB |
-| Single Property   | .NET 8.0  | 1,086 us |    388 KB |
-| Deep Chain        | .NET 8.0  | 1,163 us |    391 KB |
-| Two Properties    | .NET 8.0  | 2,225 us |    760 KB |
-| First Observation | .NET 8.0  |  33.4 us |    4.9 KB |
-
-**Summary:**
-
-| Scenario                      |     Speedup | Allocation Reduction |
-|-------------------------------|------------:|---------------------:|
-| Single Property (.NET 10.0)   | 4.7x faster |            6.2x less |
-| Deep Chain (.NET 10.0)        | 3.6x faster |            6.2x less |
-| Two Properties (.NET 10.0)    | 7.0x faster |            8.6x less |
-| First Observation (.NET 10.0) | 3.0x faster |            5.4x less |
-
-The ReactiveUI expression-tree engine cannot run under NativeAOT due to its use of runtime reflection and expression
-compilation. The source-generated engine runs under NativeAOT with an additional 6x speedup over JIT.
-
-#### Binding (BindOneWay / BindTwoWay / Bind)
-
-**Source-Generated:**
-
-| Method        | Runtime        |    Mean | Allocated |
-|---------------|----------------|--------:|----------:|
-| BindOneWay    | .NET 10.0      |  286 us |     64 KB |
-| BindTwoWay    | .NET 10.0      |  237 us |   87.8 KB |
-| Bind          | .NET 10.0      |  124 us |   42.2 KB |
-| First Binding | .NET 10.0      | 13.4 us |    1.3 KB |
-| BindOneWay    | NativeAOT 10.0 |   47 us |     65 KB |
-| BindTwoWay    | NativeAOT 10.0 |   58 us |   88.4 KB |
-| Bind          | NativeAOT 10.0 |   25 us |   42.7 KB |
-
-Each figure is one binding created and then driven through 1,000 property changes.
-
-Watching a two-way binding costs almost nothing, because a subscriber shares the binding's own upstream
-subscription rather than re-projecting the two observed sides:
-
-| Method                  | Runtime   |    Mean | Allocated |
-|-------------------------|-----------|--------:|----------:|
-| Bind                    | .NET 10.0 |  124 us |   42.2 KB |
-| Bind + observed changes | .NET 10.0 |  125 us |   42.3 KB |
-
-**ReactiveUI Expression-Tree Engine:**
-
-| Method           | Runtime   |     Mean | Allocated |
-|------------------|-----------|---------:|----------:|
-| OneWayBind       | .NET 10.0 | 2,543 us |    522 KB |
-| Bind             | .NET 10.0 | 3,128 us |    746 KB |
-| First OneWayBind | .NET 10.0 |  55.6 us |   12.5 KB |
-
-**Summary:**
-
-| Scenario                    |     Speedup | Allocation Reduction |
-|-----------------------------|------------:|---------------------:|
-| One-Way Binding (.NET 10.0) | 8.9x faster |            8.2x less |
-| Two-Way Binding (.NET 10.0) | 8.1x faster |            8.5x less |
-| First Binding (.NET 10.0)   | 4.1x faster |            9.6x less |
-
-#### Chains Named at Run Time (WhenAnyDynamic)
-
-| Method            | Runtime   |   Mean | Allocated |
-|-------------------|-----------|-------:|----------:|
-| Single Chain      | .NET 10.0 | 278 us |  102.7 KB |
-| Two Chains        | .NET 10.0 | 595 us |  190.2 KB |
-| Deep Chain        | .NET 10.0 | 354 us |  103.3 KB |
-| First Observation | .NET 10.0 | 7.3 us |    1.1 KB |
-| Single Chain      | .NET 8.0  | 347 us |  102.7 KB |
-| Two Chains        | .NET 8.0  | 691 us |  190.1 KB |
-| Deep Chain        | .NET 8.0  | 419 us |  103.3 KB |
-| First Observation | .NET 8.0  | 7.9 us |    1.1 KB |
-
-This is the one part of the surface where the two engines are level. Both walk the chain by reflection and
-allocate the same objects doing it, so the numbers land on top of each other; the gain is in resolving the chain
-at compile time instead:
-
-| Single chain, .NET 10.0     |   Mean | Allocated |
-|-----------------------------|-------:|----------:|
-| Generated (`WhenChanged`)   | 175 us |   63.4 KB |
-| `WhenAnyDynamic`            | 278 us |  102.7 KB |
-| ReactiveUI `WhenAnyDynamic` | 299 us |  102.6 KB |
-
-Most of the gap to the generated path is the `IObservedChange` handed to the selector - 40 bytes per
-notification, which the signature has to produce, against a generated observation that emits the value itself.
-
-Two chains fire twice the notifications of one, so their 190 KB is 95 bytes per notification against a single
-chain's 103: combining a higher arity costs one subscription, not a per-notification charge. Every arity observes
-each of its chains through the same walk and differs only in how many it combines.
+The suite that measures this, what each benchmark covers, and how to run it are described in
+[src/benchmarks/README.md](src/benchmarks/README.md). Figures are deliberately not published here, because a
+number written into a document goes stale without anyone noticing.
 
 ## Diagnostics
 
-The separate analyzer package reports the following diagnostics:
+The analyzer ships inside the runtime packages and reports these.
 
-| ID          | Severity | Description                                                                                                                                                              |
-|-------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| RXUIBIND001 | Info     | Expression must be an inline lambda for compile-time optimisation. A variable or method reference needs the `Unsafe` overload.                                           |
-| RXUIBIND002 | Warning  | Type has no observable properties and does not implement any observable notification mechanism.                                                                          |
-| RXUIBIND003 | Warning  | Expression accesses a private or protected member which cannot be observed by a generated extension method.                                                              |
-| RXUIBIND004 | Warning  | Type does not support before-change notifications (WhenChanging). WPF DependencyObjects, WinForms Components, and Android Views only support after-change notifications. |
-| RXUIBIND005 | Info     | Source type implements INotifyDataErrorInfo; validation state propagation is not generated and requires runtime engine or manual ErrorsChanged subscription.             |
-| RXUIBIND006 | Warning  | Expression contains an unsupported path segment (indexer, field, or method call). Only simple property access chains are generated; the rest need the `Unsafe` overload.  |
-| RXUIBIND007 | Warning  | BindCommand control has no bindable event. Specify the `toEvent` parameter explicitly.                                                                                   |
-| RXUIBIND008 | Warning  | The property selected in a BindInteraction expression does not implement `IInteraction<TInput, TOutput>`.                                                                |
-| RXUIBIND009 | Warning  | The generated binding dispatch is out of reach from this file, so the call reaches the throwing stub. Not reported where the call site is claimed by an interceptor.      |
-| RXUIBIND010 | Warning  | The observed path passes through a type that raises no notification, so it is read once and the observation stops following the path there.                              |
-| RXUIBIND011 | Warning  | The call resolved to ReactiveUI's own mixin, so nothing is generated for it and it takes the runtime expression engine. Import `ReactiveUI.Binding` in the file.          |
+| ID | Severity | What it means |
+|----|----------|---------------|
+| RXUIBIND001 | Info | The expression is not an inline lambda, so nothing is generated. Name the `Unsafe` overload or the call will throw. |
+| RXUIBIND002 | Warning | The type has no observable property and raises no notification. |
+| RXUIBIND003 | Warning | The expression reads a private or protected member, which a generated extension method cannot. |
+| RXUIBIND004 | Warning | The type raises no before-change notification, so `WhenChanging` reads the value once and then stays silent. |
+| RXUIBIND005 | Info | The source implements `INotifyDataErrorInfo`. Validation state is not generated. |
+| RXUIBIND006 | Warning | The path contains an indexer, a field or a method call. Only property access is generated. |
+| RXUIBIND007 | Warning | The control named by `BindCommand` has no default bindable event. Pass `toEvent`. |
+| RXUIBIND008 | Warning | The property named by `BindInteraction` does not implement `IInteraction<TInput, TOutput>`. |
+| RXUIBIND009 | Warning | The generated dispatch is out of reach from this file, so the call throws. Not reported where an interceptor claims the call. |
+| RXUIBIND010 | Warning | The path passes through a type that raises no notification, so it is read once and followed no further. |
+| RXUIBIND011 | Warning | The call resolved to ReactiveUI's own mixin, so nothing is generated and it takes the runtime engine. |
 
-The package's own targets report one build error of their own:
+The package's targets report one error of their own.
 
-| ID          | Description                                                                                                     |
-|-------------|-----------------------------------------------------------------------------------------------------------------|
-| RXUIBIND100 | The compiler building the project is older than the oldest analyzer slot, so no generator would be loaded at all. |
+| ID | What it means |
+|----|---------------|
+| RXUIBIND100 | The compiler is older than Roslyn 4.8, so no generator would load. Upgrade to Visual Studio 2022 17.8 or the .NET 8.0.100 SDK. |
 
 ## Where this differs from ReactiveUI
 
-Everything below is a deliberate difference from the reflection binding engine, and each one is here because
-generating the equivalent would put reflection back on the path that exists to remove it. Nothing else in the
-binding surface behaves differently.
+Each difference below is deliberate. Generating the equivalent would put reflection back on the path that
+exists to remove it. Nothing else in the binding surface behaves differently.
 
 ### `TriggerUpdate` and `signalViewUpdate` are not offered
 
-ReactiveUI's `Bind` accepts both: the first chooses which side wins the first write, the second replaces the
-view's own change stream with one the caller supplies. Neither has a generated overload, so asking for one does
-not compile rather than failing at run time.
+ReactiveUI's `Bind` accepts both. The first chooses which side wins the first write. The second replaces the
+view's change stream with one you supply.
 
-A generated binding is resolved from the two lambdas alone. An overload taking a caller-supplied stream has
-nothing to resolve at compile time and would have to hand the call to the runtime expression engine - which
-carries `[RequiresUnreferencedCode]` and breaks a `PublishAot` build for every consumer of that call site.
+Neither has a generated overload, so asking for one does not compile. A generated binding is resolved from
+the two lambdas alone, and an overload taking a caller-supplied stream has nothing to resolve while you
+compile. It would have to hand the call to the runtime engine, which carries `[RequiresUnreferencedCode]` and
+breaks a `PublishAot` build for everyone who calls it.
 
-The first write is instead decided the way ReactiveUI decides it by default: the view model side is applied
-first, and the view's own first value is then weighed against what was just written and dropped when equal.
+The first write follows ReactiveUI's default. The view model side is applied first. The view's own first value
+is then weighed against what was just written, and dropped when the two are equal.
 
-### A binding call made through a type parameter is not generated
+### A binding made through a type parameter is not generated
 
-A generated overload has to name the bound types, and a call made through a type parameter names none - the
-type is only known once something closes it. Those call sites are left to the runtime stub, so a generic
-binding helper compiles and throws when it runs rather than emitting an overload naming a type parameter,
-which would fail the consumer's build outright. Calling the `Unsafe` twin from the helper binds it by
-reflection instead, and marks the helper as the reflection boundary it is.
+A generated overload has to name the bound types. A call made through a type parameter names none, because
+the type is only known once something closes it. Those call sites are left to the stub, so a generic binding
+helper compiles and throws when it runs. Emitting an overload that named a type parameter would fail your
+build outright. Call the `Unsafe` twin from the helper to bind it by reflection, which also marks the helper
+as the reflection boundary it is.
 
-### A silent link in a path is reported at compile time, not at run time
+### A silent link is reported while you build
 
 ReactiveUI logs a warning the first time it observes a property on a type that raises no notification.
-RXUIBIND010 reports the same thing while the consumer is building, which is the only place a generator can
-say it. The observation itself behaves the same either way: the value is read once and the path stops being
-followed at that link.
+RXUIBIND010 reports the same thing while you compile, which is the only place a generator can say it. The
+observation behaves the same either way: the value is read once, and the path is followed no further.
 
-## Architecture
+### A write that faults behaves identically
+
+A write that throws is logged against the bound expression, and rethrown as a `TargetInvocationException`
+only when it carries an inner exception. This is parity, not divergence, and it is not optional. A setter
+that throws on the notifying thread has no caller stack to surface on, so swallowing it would lose the
+failure entirely.
+
+## Layout
 
 ```
 src/
-  ReactiveUI.Binding/                        Runtime library, lightweight observables, IObservable<T>
-  ReactiveUI.Binding.SourceGenerators/       Incremental source generator (netstandard2.0)
-  ReactiveUI.Binding.Analyzer/              Roslyn analyzer for RXUIBIND diagnostics
-  ReactiveUI.Binding.Reactive/              System.Reactive adapter (IScheduler overloads)
-  ReactiveUI.Binding.Wpf/                   WPF DependencyProperty integration
-  ReactiveUI.Binding.WinForms/              WinForms Component integration
-  ReactiveUI.Binding.Maui/                  MAUI BindableProperty integration
+  ReactiveUI.Binding/                     Runtime package, lightweight observables
+  ReactiveUI.Binding.Reactive/            Runtime package, System.Reactive schedulers
+  ReactiveUI.Binding.Shared/              The runtime source, compiled by both packages above
+  ReactiveUI.Binding.SourceGenerators/    The generator, and the shipped props and targets
+  ReactiveUI.Binding.Analyzer/            The RXUIBIND analyzers
+  ReactiveUI.Binding.*.Roslyn413/         The same generator and analyzer against Roslyn 4.13
+  ReactiveUI.Binding.Wpf*/                WPF integration, one package per runtime flavour
+  ReactiveUI.Binding.WinForms*/           WinForms integration, one package per runtime flavour
+  ReactiveUI.Binding.Maui*/               MAUI integration, one package per runtime flavour
+  benchmarks/                             BenchmarkDotNet projects
+  tests/                                  Test projects and the shared scenario sources
 ```
 
-The generator and analyzer both target netstandard2.0 (Roslyn requirement). The runtime library targets .NET 8.0, 9.0,
-10.0, and .NET Framework 4.6.2-4.8.1. Generated output is C# 7.3 compatible to support the widest range of consumer
-projects.
+A `*.Shared` folder is source rather than a project. Each leaf compiles its own copy, which is how one body
+of code serves both runtime flavours: `ReactiveShim.props` keys on the `.Reactive` suffix, defines
+`REACTIVE_SHIM`, and aliases the scheduler type.
 
-A third pipeline scans for `IViewFor<T>` implementations and generates an AOT-safe view dispatch table (
-`ViewDispatch.g.cs`) with type-switch resolution, singleton caching, and contract-based selection.
+The generator and the analyzer target netstandard2.0, because Roslyn requires it. Generated output is C# 7.3
+compatible, so the oldest supported consumer can compile it.
 
 ## Contribute
 
-ReactiveUI.Binding.SourceGenerators is developed under an OSI-approved open source license, making it freely usable and
-distributable, even for commercial use. We value the people who are involved in this project, and we'd love to have you
-on board, especially if you are just getting started or have never contributed to open-source before.
+ReactiveUI.Binding.SourceGenerators is developed under an OSI-approved open source license, making it freely
+usable and distributable, even for commercial use. We value the people who are involved in this project, and
+we'd love to have you on board, especially if you are just getting started or have never contributed to
+open-source before.
 
 So here's to you, lovely person who wants to join us -- this is how you can support us:
 
