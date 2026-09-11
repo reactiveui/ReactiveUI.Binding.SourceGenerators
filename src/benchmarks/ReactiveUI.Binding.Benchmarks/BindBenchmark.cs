@@ -13,9 +13,14 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// and applied once, and the changes it wrote are published to whoever subscribes to the binding - so the cost
 /// of making one, of driving it from either side, and of watching what it did are all measured here.
 /// </summary>
+#if BENCH_NETFX
+[SimpleJob(RuntimeMoniker.Net462)]
+#endif
 [SimpleJob(RuntimeMoniker.Net80)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
+[SimpleJob(RuntimeMoniker.Net11_0)]
 [SimpleJob(RuntimeMoniker.NativeAot10_0, id: nameof(RuntimeMoniker.NativeAot10_0))]
+[SimpleJob(RuntimeMoniker.NativeAot11_0, id: nameof(RuntimeMoniker.NativeAot11_0))]
 [MemoryDiagnoser]
 [EventPipeProfiler(EventPipeProfile.GcVerbose)]
 [MarkdownExporterAttribute.GitHub]

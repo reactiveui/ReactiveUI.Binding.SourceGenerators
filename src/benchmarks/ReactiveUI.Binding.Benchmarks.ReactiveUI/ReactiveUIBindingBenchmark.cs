@@ -10,8 +10,12 @@ using BenchmarkDotNet.Jobs;
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>ReactiveUI expression-tree binding benchmarks for comparison.</summary>
+#if BENCH_NETFX
+[SimpleJob(RuntimeMoniker.Net462)]
+#endif
 [SimpleJob(RuntimeMoniker.Net80)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
+[SimpleJob(RuntimeMoniker.Net11_0)]
 [MemoryDiagnoser]
 [EventPipeProfiler(EventPipeProfile.GcVerbose)]
 [MarkdownExporterAttribute.GitHub]

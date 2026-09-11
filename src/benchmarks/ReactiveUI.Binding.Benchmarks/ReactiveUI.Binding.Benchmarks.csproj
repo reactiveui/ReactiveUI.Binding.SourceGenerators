@@ -3,7 +3,9 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">net8.0;net10.0;net462</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">net8.0;net10.0;net11.0;net462</TargetFrameworks>
+    <!-- The net462 job can only be launched on Windows, so the attribute that declares it is gated too. -->
+    <DefineConstants Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(DefineConstants);BENCH_NETFX</DefineConstants>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsAotCompatible>true</IsAotCompatible>

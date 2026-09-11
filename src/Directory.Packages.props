@@ -76,7 +76,8 @@
     <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" Condition="$(TargetFramework.StartsWith('net10'))"/>
 
     <!-- Benchmarking -->
-    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8"/>
+    <!-- The net11 and NativeAOT-11 runtime monikers arrive in 0.16; 0.15 tops out at 10. -->
+    <PackageVersion Include="BenchmarkDotNet" Version="0.16.0-preview.1"/>
 
     <!-- Test App Dependencies-->
     <PackageVersion Include="ReactiveUI" Version="24.2.0"/>

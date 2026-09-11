@@ -24,8 +24,12 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// <c>RequiresUnreferencedCode</c>, so an ahead-of-time published run is not a
 /// configuration they support.
 /// </remarks>
+#if BENCH_NETFX
+[SimpleJob(RuntimeMoniker.Net462)]
+#endif
 [SimpleJob(RuntimeMoniker.Net80)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
+[SimpleJob(RuntimeMoniker.Net11_0)]
 [MemoryDiagnoser]
 [EventPipeProfiler(EventPipeProfile.GcVerbose)]
 [MarkdownExporterAttribute.GitHub]

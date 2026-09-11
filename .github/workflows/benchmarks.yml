@@ -1,0 +1,146 @@
+name: Benchmarks
+
+on:
+    workflow_dispatch:
+        inputs:
+            suite:
+                description: 'Which benchmark suite to run'
+                type: choice
+                default: runtime
+                options:
+                    - runtime
+                    - baseline
+                    - generator
+                    - all
+            filter:
+                description: 'BenchmarkDotNet filter, e.g. *WhenChanged* or *'
+                type: string
+                default: '*'
+
+permissions:
+    contents: read
+
+# Windows runs every job the suite declares. net462 can only be launched there, and the
+# NativeAOT jobs need the C++ toolchain the Windows image already carries.
+jobs:
+    benchmark:
+        runs-on: windows-latest
+        timeout-minutes: 360
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
+
+            - name: Setup .NET 8 and 10
+              uses: actions/setup-dotnet@v6
+              with:
+                  dotnet-version: |
+                      8.0.x
+                      10.0.x
+
+            - name: Setup .NET 11
+              uses: actions/setup-dotnet@v6
+              with:
+                  dotnet-version: 11.0.x
+                  dotnet-quality: preview
+
+            - name: Report the installed runtimes
+              run: dotnet --info
+
+            - name: Run the benchmarks
+              working-directory: src
+              env:
+                  # Taken through the environment rather than interpolated into the command, so the
+                  # input cannot extend it.
+                  SUITE: ${{ inputs.suite }}
+                  FILTER: ${{ inputs.filter }}
+              run: |
+                  $projects = @()
+                  if ($env:SUITE -eq 'runtime'   -or $env:SUITE -eq 'all') { $projects += 'benchmarks/ReactiveUI.Binding.Benchmarks/ReactiveUI.Binding.Benchmarks.csproj' }
+                  if ($env:SUITE -eq 'baseline'  -or $env:SUITE -eq 'all') { $projects += 'benchmarks/ReactiveUI.Binding.Benchmarks.ReactiveUI/ReactiveUI.Binding.Benchmarks.ReactiveUI.csproj' }
+                  if ($env:SUITE -eq 'generator' -or $env:SUITE -eq 'all') { $projects += 'benchmarks/ReactiveUI.Binding.Generator.Benchmarks/ReactiveUI.Binding.Generator.Benchmarks.csproj' }
+
+                  foreach ($project in $projects) {
+                      $name = [System.IO.Path]::GetFileNameWithoutExtension($project)
+                      Write-Host "::group::$name"
+
+                      # The host TFM only launches the switcher; each benchmark's SimpleJob attributes
+                      # decide which runtimes are actually measured.
+                      dotnet run --project $project -c Release -f net10.0 -- `
+                          --filter $env:FILTER `
+                          --artifacts "$env:GITHUB_WORKSPACE/benchmark-artifacts/$name" `
+                          --exporters github json html csv
+                      if ($LASTEXITCODE -ne 0) { throw "$name exited with $LASTEXITCODE" }
+
+                      Write-Host '::endgroup::'
+                  }
+
+            - name: Collect the reports into the run summary
+              if: always()
+              env:
+                  SUITE: ${{ inputs.suite }}
+                  FILTER: ${{ inputs.filter }}
+              run: |
+                  $summary = $env:GITHUB_STEP_SUMMARY
+                  $root = "$env:GITHUB_WORKSPACE/benchmark-artifacts"
+
+                  # A step summary is capped at 1 MiB and is dropped whole once it is exceeded, so the
+                  # tables stop being appended before that and the artifact carries the rest.
+                  $budget = 900KB
+
+                  Add-Content -Path $summary -Value @(
+                      '# Benchmark results',
+                      '',
+                      "Suite ``$env:SUITE``, filter ``$env:FILTER``, commit ``$env:GITHUB_SHA``.",
+                      '',
+                      'Each section is one benchmark class. The runtimes measured are whichever jobs that',
+                      'class declares, so a class with no NativeAOT row cannot run ahead-of-time at all.',
+                      'Full JSON, HTML and CSV exports are attached to this run as `benchmark-reports`.',
+                      ''
+                  )
+
+                  if (-not (Test-Path $root)) {
+                      Add-Content -Path $summary -Value 'No benchmark artifacts were produced.'
+                      exit 0
+                  }
+
+                  $reports = Get-ChildItem -Path $root -Recurse -Filter '*-report-github.md' | Sort-Object FullName
+                  if ($reports.Count -eq 0) {
+                      Add-Content -Path $summary -Value 'No GitHub-markdown reports were exported.'
+                      exit 0
+                  }
+
+                  $skipped = @()
+                  foreach ($report in $reports) {
+                      $title = $report.Name -replace '-report-github\.md$', ''
+
+                      if ((Get-Item $summary).Length + $report.Length -gt $budget) {
+                          $skipped += $title
+                          continue
+                      }
+
+                      # BenchmarkDotNet's own exporter produces the table; collapsing each class keeps
+                      # the page scannable when the whole suite has run.
+                      Add-Content -Path $summary -Value @("<details><summary>$title</summary>", '')
+                      Get-Content -Path $report.FullName | Add-Content -Path $summary
+                      Add-Content -Path $summary -Value @('', '</details>', '')
+                  }
+
+                  if ($skipped.Count -gt 0) {
+                      Add-Content -Path $summary -Value @(
+                          '',
+                          "Omitted here to stay inside the summary limit: $($skipped -join ', '). Read them in the `benchmark-reports` artifact.",
+                          ''
+                      )
+                  }
+
+            - name: Upload the full reports
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: benchmark-reports
+                  path: benchmark-artifacts/**
+                  if-no-files-found: warn
+                  retention-days: 30

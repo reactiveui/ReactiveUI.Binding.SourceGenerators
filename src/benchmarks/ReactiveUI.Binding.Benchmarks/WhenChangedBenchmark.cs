@@ -9,9 +9,14 @@ using BenchmarkDotNet.Jobs;
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Source-generated WhenChanged benchmarks using lightweight observables.</summary>
+#if BENCH_NETFX
+[SimpleJob(RuntimeMoniker.Net462)]
+#endif
 [SimpleJob(RuntimeMoniker.Net80)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
+[SimpleJob(RuntimeMoniker.Net11_0)]
 [SimpleJob(RuntimeMoniker.NativeAot10_0, id: nameof(RuntimeMoniker.NativeAot10_0))]
+[SimpleJob(RuntimeMoniker.NativeAot11_0, id: nameof(RuntimeMoniker.NativeAot11_0))]
 [MemoryDiagnoser]
 [EventPipeProfiler(EventPipeProfile.GcVerbose)]
 [MarkdownExporterAttribute.GitHub]
