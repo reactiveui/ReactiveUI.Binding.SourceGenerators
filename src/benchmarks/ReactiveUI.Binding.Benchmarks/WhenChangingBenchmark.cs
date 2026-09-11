@@ -1,0 +1,77 @@
+// Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.
+// ReactiveUI Association Incorporated licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for full license information.
+
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
+using BenchmarkDotNet.Jobs;
+
+namespace ReactiveUI.Binding.Benchmarks;
+
+/// <summary>Source-generated WhenChanging benchmarks, which observe before the value is replaced.</summary>
+#if BENCH_NETFX
+[SimpleJob(RuntimeMoniker.Net462)]
+#endif
+[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.Net10_0)]
+[SimpleJob(RuntimeMoniker.Net11_0)]
+[SimpleJob(RuntimeMoniker.NativeAot10_0, id: nameof(RuntimeMoniker.NativeAot10_0))]
+[SimpleJob(RuntimeMoniker.NativeAot11_0, id: nameof(RuntimeMoniker.NativeAot11_0))]
+[MemoryDiagnoser]
+#if !BENCH_NETFX
+[EventPipeProfiler(EventPipeProfile.GcVerbose)]
+#endif
+[MarkdownExporterAttribute.GitHub]
+public class WhenChangingBenchmark
+{
+    /// <summary>How many property changes each benchmark drives through one subscription.</summary>
+    private const int PropertyChangeCount = 1_000;
+
+    /// <summary>The view model under observation.</summary>
+    private BenchmarkViewModel _vm = null!;
+
+    /// <summary>Builds a fresh view model before each iteration.</summary>
+    [IterationSetup]
+    public void Setup() =>
+        _vm = new() { Name = "Initial", Age = 0, Child = new() { Value = "ChildInitial" } };
+
+    /// <summary>One property, observed before each change.</summary>
+    [Benchmark(Description = "Single Property")]
+    public void SingleProperty()
+    {
+        var last = string.Empty;
+        using var sub = _vm.WhenChanging(x => x.Name)
+            .Subscribe(v => last = v);
+
+        for (var i = 0; i < PropertyChangeCount; i++)
+        {
+            _vm.Name = $"Name_{i}";
+        }
+    }
+
+    /// <summary>Two properties, combined before each change.</summary>
+    [Benchmark(Description = "Two Properties")]
+    public void TwoProperties()
+    {
+        PropertyValues<string, int> last = default;
+        using var sub = _vm.WhenChanging(x => x.Name, x => x.Age)
+            .Subscribe(v => last = v);
+
+        for (var i = 0; i < PropertyChangeCount; i++)
+        {
+            _vm.Name = $"Name_{i}";
+            _vm.Age = i;
+        }
+    }
+
+    /// <summary>Subscribing and reading the first value, with no changes driven.</summary>
+    /// <returns>The observed value.</returns>
+    [Benchmark(Description = "First Observation")]
+    public string FirstObservation()
+    {
+        var result = string.Empty;
+        using var sub = _vm.WhenChanging(x => x.Name)
+            .Subscribe(v => result = v);
+        return result;
+    }
+}

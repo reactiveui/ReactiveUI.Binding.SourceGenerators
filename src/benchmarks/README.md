@@ -23,14 +23,25 @@ apart stops one engine's imports reaching the other's call sites.
 Each case creates one observation or binding and then drives a thousand property changes through it. The
 cost of creating the subscription is measured separately, by the `First...` cases.
 
-| Benchmark | Cases |
-|-----------|-------|
-| `WhenChangedBenchmark` | `SingleProperty`, `DeepChain`, `TwoProperties`, `FirstObservation` |
-| `BindOneWayBenchmark` | `Standard`, `WithScheduler`, `FirstBinding`, `SetupTeardown` |
-| `BindTwoWayBenchmark` | `Standard`, `WithScheduler`, `Bidirectional` |
-| `BindBenchmark` | `Standard`, `Bidirectional`, `WithObservedChanges` |
-| `WhenAnyDynamicBenchmark` | `SingleChain`, `TwoChains`, `DeepChain`, `FirstObservation`, `SingleChainGenerated` |
-| `RxUiDynamicChainBaseline` | `SingleChain`, `TwoChains`, `DeepChain`, `FirstObservation` |
+| Benchmark | Operator | Cases |
+|-----------|----------|-------|
+| `WhenChangedBenchmark` | `WhenChanged` | `SingleProperty`, `DeepChain`, `TwoProperties`, `FirstObservation` |
+| `WhenChangingBenchmark` | `WhenChanging` | `SingleProperty`, `TwoProperties`, `FirstObservation` |
+| `WhenAnyValueBenchmark` | `WhenAnyValue` | `SingleProperty`, `DeepChain`, `TwoProperties`, `FirstObservation` |
+| `WhenAnyBenchmark` | `WhenAny` | `SingleProperty`, `TwoProperties`, `FirstObservation` |
+| `WhenAnyObservableBenchmark` | `WhenAnyObservable` | `SingleStream`, `TwoStreams`, `FirstObservation` |
+| `WhenAnyDynamicBenchmark` | `WhenAnyDynamic` | `SingleChain`, `TwoChains`, `DeepChain`, `FirstObservation`, `SingleChainGenerated` |
+| `BindOneWayBenchmark` | `BindOneWay` | `Standard`, `WithScheduler`, `FirstBinding`, `SetupTeardown` |
+| `BindTwoWayBenchmark` | `BindTwoWay` | `Standard`, `WithScheduler`, `Bidirectional` |
+| `BindBenchmark` | `Bind` | `Standard`, `Bidirectional`, `WithObservedChanges` |
+| `OneWayBindBenchmark` | `OneWayBind` | `Standard`, `FirstBinding` |
+| `BindToBenchmark` | `BindTo` | `Standard`, `FirstBinding` |
+| `InvokeCommandBenchmark` | `InvokeCommand` | `Standard`, `FirstInvocation` |
+| `UnsafeFallbackBenchmark` | the `Unsafe` overloads | `WhenChangedUnsafe`, `WhenChangedUnsafe deep chain`, `WhenAnyValueUnsafe`, `BindOneWayUnsafe`, `BindUnsafe` |
+| `RxUiDynamicChainBaseline` | ReactiveUI's dynamic chain | `SingleChain`, `TwoChains`, `DeepChain`, `FirstObservation` |
+
+`WhenAnyValueBenchmark` and `OneWayBindBenchmark` exist so the two operators the ReactiveUI baseline measures
+have a counterpart here. Read each against `ReactiveUIObservationBenchmark` and `ReactiveUIBindingBenchmark`.
 
 `WhenAnyDynamicBenchmark` carries `SingleChainGenerated` so the two halves of the same scenario sit in one
 table. A chain named at run time is walked by reflection; the same chain written as a lambda is resolved at
@@ -70,15 +81,19 @@ costs far more than the pass under measurement.
 The benchmark runs under `MemoryDiagnoser` and the `GcVerbose` EventPipe profiler. The allocation column is
 the A/B number, and the trace names the frame that allocated.
 
-## What is not measured yet
+## What is not measured
 
-Five operators are benchmarked: `WhenChanged`, `WhenAnyDynamic`, `BindOneWay`, `BindTwoWay` and `Bind`.
-`WhenAnyValue` and `OneWayBind` are measured only on the ReactiveUI side, so those two rows have no
-counterpart. `WhenChanging`, `WhenAny`, `WhenAnyObservable`, `BindTo`, `BindCommand`, `BindInteraction` and
-`InvokeCommand` have no benchmark at all, and neither has any `Unsafe` overload.
+`BindCommand` and `BindInteraction` have no benchmark. Both need something registered before they do any
+work: `BindCommand` needs an `ICreatesCommandBinding` that reaches the control, and `BindInteraction` needs a
+handler. A benchmark would be measuring that fixture rather than the library, so the number would not mean
+what it appeared to.
 
-An `Unsafe` overload resolves its expression by reflection, so it can carry the managed jobs but no NativeAOT
-job, the same way the dynamic-chain classes do.
+Everything else in the observation and binding surface is covered, including the `Unsafe` overloads.
+
+`UnsafeFallbackBenchmark` declares no NativeAOT job. Those overloads carry `RequiresUnreferencedCode` because
+they walk the path at run time, so an ahead-of-time publish cannot be relied on to keep the members they
+reach. That class is the measurement of what the fallback costs against the generated operator of the same
+name.
 
 ## Running them
 
