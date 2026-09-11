@@ -141,6 +141,7 @@ internal static class BindToCodeGenerator
                 first.SourceValueTypeFullName,
                 first.TargetTypeFullName,
                 first.TargetPropertyTypeFullName,
+                first.TargetPropertyIsReferenceType,
                 first.HasConversionHint,
                 first.HasConverterOverride,
                 [.. kvp.Value]));
@@ -444,7 +445,10 @@ internal static class BindToCodeGenerator
         bool supportsNullable,
         bool stubHasExpressionParameters)
     {
-        var targetPropType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].TargetPropertyPath, supportsNullable);
+        var targetPropType = CodeGeneratorHelpers.NullableSelectorType(
+            group.TargetPropertyTypeFullName,
+            group.TargetPropertyIsReferenceType,
+            supportsNullable);
 
         _ = sb.Append("            this ").Append(ObservableOf(group.SourceValueTypeFullName))
             .AppendLine(" source,").Append("            ").Append(group.TargetTypeFullName).AppendLine(" target,")
@@ -490,6 +494,7 @@ internal static class BindToCodeGenerator
     /// <param name="SourceValueTypeFullName">The fully qualified observable value type.</param>
     /// <param name="TargetTypeFullName">The fully qualified target object type.</param>
     /// <param name="TargetPropertyTypeFullName">The fully qualified target property type.</param>
+    /// <param name="TargetPropertyIsReferenceType">Whether that type is a reference type, which annotates the selector parameter.</param>
     /// <param name="HasConversionHint">Whether this group's overload takes a conversion hint.</param>
     /// <param name="HasConverterOverride">Whether this group's overload takes an explicit converter.</param>
     /// <param name="Invocations">All invocations sharing this overload signature.</param>
@@ -497,6 +502,7 @@ internal static class BindToCodeGenerator
         string SourceValueTypeFullName,
         string TargetTypeFullName,
         string TargetPropertyTypeFullName,
+        bool TargetPropertyIsReferenceType,
         bool HasConversionHint,
         bool HasConverterOverride,
         BindToInvocationInfo[] Invocations);

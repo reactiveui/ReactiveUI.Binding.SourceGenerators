@@ -25,6 +25,16 @@ public class BindingDispatchStubTests
     /// <summary>The value written on the target side of a two-way binding.</summary>
     private const string ReverseValue = "reversed";
 
+    /// <summary>The overload a refused BindTo points the caller at.</summary>
+    private const string BindToTwin = "BindToUnsafe";
+
+    /// <summary>The overload a refused command binding points the caller at.</summary>
+    private const string BindCommandTwin = "BindCommandUnsafe";
+
+    /// <summary>The converter a BindTo overload names, so the call reaches the overload taking one.</summary>
+    private static readonly IBindingTypeConverter PassThrough =
+        new StubBindingTypeConverter(typeof(string), typeof(string), static (from, _) => new(true, from));
+
     /// <summary>The source of a binding.</summary>
     private readonly DispatchStubViewModel _viewModel = new();
 
@@ -423,7 +433,7 @@ public class BindingDispatchStubTests
     public Task BindTo_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
         AssertRefusedNaming(
             () => ReactiveUIBindingExtensions.BindTo(_source, _view, x => x.Caption),
-            "BindToUnsafe");
+            BindToTwin);
 
     /// <summary>BindCommand refuses a call no generated dispatch claimed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -432,7 +442,7 @@ public class BindingDispatchStubTests
     public Task BindCommand_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
         AssertRefusedNaming(
             () => ReactiveUIBindingExtensions.BindCommand(_view, _viewModel, x => x.Run, x => x.Control),
-            "BindCommandUnsafe");
+            BindCommandTwin);
 
     /// <summary>BindInteraction refuses a call no generated dispatch claimed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -460,12 +470,15 @@ public class BindingDispatchStubTests
             () => ReactiveUIBindingExtensions.InvokeCommand(_source, _viewModel, x => x.Run),
             "InvokeCommandUnsafe");
 
-    /// <summary>A command binding offers the value its parameter stream produces to the command.</summary>
+    /// <summary>A command binding executes with the value its parameter stream produced.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BindCommandUnsafe_WithAParameterStream_OffersTheValueProduced()
+    public async Task BindCommandUnsafe_WithAParameterStream_ExecutesWithTheValueProduced()
     {
         RuntimeObservationFallbackTests.EnsureInitialized();
+        Locator.CurrentMutable.RegisterConstant<ICreatesCommandBinding>(new ClickCommandBinder());
+        var command = new RecordingStubCommand();
+        _viewModel.Run = command;
 
         using var binding = ReactiveUIBindingExtensions.BindCommandUnsafe(
             _view,
@@ -476,16 +489,21 @@ public class BindingDispatchStubTests
             null);
 
         _source.Observer?.OnNext(BoundValue);
+        _view.Control.PerformClick();
 
-        await Assert.That(binding).IsNotNull();
+        await Assert.That(command.LastParameter).IsEqualTo(BoundValue);
     }
 
-    /// <summary>A command binding offers the value its parameter property holds to the command.</summary>
+    /// <summary>A command binding executes with the value its parameter property holds.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BindCommandUnsafe_WithAParameterProperty_OffersTheValueHeld()
+    public async Task BindCommandUnsafe_WithAParameterProperty_ExecutesWithTheValueHeld()
     {
         RuntimeObservationFallbackTests.EnsureInitialized();
+        Locator.CurrentMutable.RegisterConstant<ICreatesCommandBinding>(new ClickCommandBinder());
+        var command = new RecordingStubCommand();
+        _viewModel.Run = command;
+        _viewModel.Parameter = ReverseValue;
 
         using var binding = ReactiveUIBindingExtensions.BindCommandUnsafe(
             _view,
@@ -495,9 +513,9 @@ public class BindingDispatchStubTests
             x => x.Parameter,
             null);
 
-        _viewModel.Parameter = ReverseValue;
+        _view.Control.PerformClick();
 
-        await Assert.That(binding).IsNotNull();
+        await Assert.That(command.LastParameter).IsEqualTo(ReverseValue);
     }
 
     /// <summary>WhenAny refuses a call no generated dispatch claimed.</summary>
@@ -517,6 +535,136 @@ public class BindingDispatchStubTests
         AssertRefusedNaming(
             () => ReactiveUIBindingExtensions.WhenAnyObservable(_viewModel, x => x.Signal!),
             "WhenAnyObservableUnsafe");
+
+    /// <summary>The converting one-way overload refuses a call no generated dispatch claimed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindOneWayWithConversion_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
+        AssertRefusedNaming(
+            () => ReactiveUIBindingExtensions.BindOneWay(
+                _viewModel,
+                _view,
+                x => x.Caption,
+                x => x.Caption,
+                static value => value + ReverseValue),
+            "BindOneWayUnsafe");
+
+    /// <summary>The converting two-way overload refuses a call no generated dispatch claimed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindTwoWayWithConversions_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
+        AssertRefusedNaming(
+            () => ReactiveUIBindingExtensions.BindTwoWay(
+                _viewModel,
+                _view,
+                x => x.Caption,
+                x => x.Caption,
+                static value => value + ReverseValue,
+                static value => value + BoundValue),
+            "BindTwoWayUnsafe");
+
+    /// <summary>The selecting view binding refuses a call no generated dispatch claimed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task OneWayBindWithSelector_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
+        AssertRefusedNaming(
+            () => ReactiveUIBindingExtensions.OneWayBind(
+                _view,
+                _viewModel,
+                x => x.Caption,
+                x => x.Caption,
+                static value => value + ReverseValue),
+            "OneWayBindUnsafe");
+
+    /// <summary>The converting view binding refuses a call no generated dispatch claimed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindWithConverters_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
+        AssertRefusedNaming(
+            () => ReactiveUIBindingExtensions.Bind(
+                _view,
+                _viewModel,
+                x => x.Caption,
+                x => x.Caption,
+                static value => value + ReverseValue,
+                static value => value + BoundValue),
+            "BindUnsafe");
+
+    /// <summary>BindTo with a conversion hint refuses a call no generated dispatch claimed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    /// <remarks>
+    /// The hint is named rather than positional: it is typed <c>object</c>, so a string passed positionally
+    /// binds to the plain overload's captured expression text instead.
+    /// </remarks>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindToWithConversionHint_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
+        AssertRefusedNaming(
+            () => ReactiveUIBindingExtensions.BindTo(_source, _view, x => x.Caption, conversionHint: BoundValue),
+            BindToTwin);
+
+    /// <summary>BindTo with a converter refuses a call no generated dispatch claimed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindToWithConverterOverride_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
+        AssertRefusedNaming(
+            () => ReactiveUIBindingExtensions.BindTo(_source, _view, x => x.Caption, PassThrough),
+            BindToTwin);
+
+    /// <summary>BindTo with a hint and a converter refuses a call no generated dispatch claimed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindToWithHintAndConverter_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
+        AssertRefusedNaming(
+            () => ReactiveUIBindingExtensions.BindTo(_source, _view, x => x.Caption, BoundValue, PassThrough),
+            BindToTwin);
+
+    /// <summary>A command binding taking a parameter stream refuses a call no dispatch claimed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindCommandWithParameterStream_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
+        AssertRefusedNaming(
+            () => ReactiveUIBindingExtensions.BindCommand(
+                _view,
+                _viewModel,
+                x => x.Run,
+                x => x.Control,
+                _source),
+            BindCommandTwin);
+
+    /// <summary>A command binding taking a parameter property refuses a call no dispatch claimed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindCommandWithParameterProperty_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
+        AssertRefusedNaming(
+            () => ReactiveUIBindingExtensions.BindCommand(
+                _view,
+                _viewModel,
+                x => x.Run,
+                x => x.Control,
+                x => x.Parameter),
+            BindCommandTwin);
+
+    /// <summary>An interaction binding handling with a stream refuses a call no dispatch claimed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Task BindInteractionWithObservableHandler_WithNoGeneratedOverload_NamesTheUnsafeTwin() =>
+        AssertRefusedNaming(
+            () => ReactiveUIBindingExtensions.BindInteraction(
+                _view,
+                _viewModel,
+                x => x.Confirm,
+                context => _source),
+            "BindInteractionUnsafe");
 
     /// <summary>Asserts that a call refuses and points the caller at the overload that resolves it.</summary>
     /// <param name="call">The call expected to refuse.</param>

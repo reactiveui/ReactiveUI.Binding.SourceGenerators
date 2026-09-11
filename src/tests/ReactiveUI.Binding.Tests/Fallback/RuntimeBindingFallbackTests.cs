@@ -425,6 +425,27 @@ public class RuntimeBindingFallbackTests
         await Assert.That(action).ThrowsExactly<ArgumentNullException>();
     }
 
+    /// <summary>Verifies that a null target leaves the source unsubscribed rather than faulting.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindTo_NullTarget_LeavesTheSourceUnsubscribed()
+    {
+        RuntimeObservationFallbackTests.EnsureInitialized();
+
+        var source = new ManualObservable<string>();
+
+        using var binding = RuntimeBindingFallback.BindTo<string, TestViewModel, string>(
+            source,
+            null,
+            x => x.Name,
+            null,
+            null,
+            null,
+            BindingExpression);
+
+        await Assert.That(source.Observer).IsNull();
+    }
+
     /// <summary>A view with one observable property, for the view-first binding tests.</summary>
     private sealed class BindingTestView : IViewFor, INotifyPropertyChanged
     {

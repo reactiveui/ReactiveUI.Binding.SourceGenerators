@@ -13,6 +13,12 @@ public class BindToGeneratorTests
     /// <summary>The <c>BindToDispatch.g.cs</c> name these tests generate against.</summary>
     private const string BindToDispatchgcsName = "BindToDispatch.g.cs";
 
+    /// <summary>The attribute a generated member carries when only the runtime engine can serve it.</summary>
+    private const string RequiresUnreferencedCode = "RequiresUnreferencedCode";
+
+    /// <summary>The runtime engine a call site the compiler could not read is handed to.</summary>
+    private const string RuntimeBindingFallback = "RuntimeBindingFallback.BindTo";
+
     /// <summary>Verifies BindTo with a same-typed string observable and string property (direct assignment).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -292,10 +298,10 @@ public class BindToGeneratorTests
         await result.HasGeneratedSource(BindToDispatchgcsName);
     }
 
-    /// <summary>A BindTo whose target property argument is not an inline lambda is skipped.</summary>
+    /// <summary>A target selector held in a variable names no path to read, so the runtime engine serves it.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BindTo_TargetPropertyNotALambda_GeneratesNoDispatch()
+    public async Task TargetPropertyFromAVariable_GeneratesAnAnnotatedRuntimeDispatch()
     {
         const string source = """
                               using System;
@@ -314,16 +320,96 @@ public class BindToGeneratorTests
 
                                   public static class Scenario
                                   {
-                                      public static void Execute(IObservable<string> source, MyView view)
+                                      public static IDisposable Execute(IObservable<string> source, MyView view)
                                       {
                                           Expression<Func<MyView, string>> property = x => x.Caption;
-                                          source.BindTo(view, property);
+                                          return source.BindTo(view, property);
                                       }
                                   }
                               }
                               """;
 
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+
+        var dispatch = result.GeneratedSources[BindToDispatchgcsName];
+        await Assert.That(dispatch).Contains(RequiresUnreferencedCode);
+        await Assert.That(dispatch).Contains(RuntimeBindingFallback);
+    }
+
+    /// <summary>A target selector whose body is no property path is served by the runtime engine, and says so.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TargetPropertyWithoutAPropertyPath_GeneratesAnAnnotatedRuntimeDispatch()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public class MyView : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                                      public string Caption { get; set; } = "";
+
+                                      public string Resolve() => Caption;
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static IDisposable Execute(IObservable<string> source, MyView view)
+                                      {
+                                          return source.BindTo(view, x => x.Resolve());
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
+
+        var dispatch = result.GeneratedSources[BindToDispatchgcsName];
+        await Assert.That(dispatch).Contains(RequiresUnreferencedCode);
+        await Assert.That(dispatch).Contains(RuntimeBindingFallback);
+    }
+
+    /// <summary>A target selector producing a type no member can declare leaves the call to the stub.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task TargetPropertyProducingAnUndeclarableType_GeneratesNoDispatch()
+    {
+        const string source = """
+                              using System;
+                              using System.ComponentModel;
+                              using ReactiveUI.Binding;
+
+                              namespace TestApp
+                              {
+                                  public class MyView : INotifyPropertyChanged
+                                  {
+                                      public event PropertyChangedEventHandler? PropertyChanged;
+
+                                      public string[] Resolve() => new string[0];
+                                  }
+
+                                  public static class Scenario
+                                  {
+                                      public static IDisposable Execute(IObservable<string[]> source, MyView view)
+                                      {
+                                          return source.BindTo(view, x => x.Resolve());
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
+
+        await result.HasNoGeneratorDiagnostics();
         await result.DoesNotHaveGeneratedSource(BindToDispatchgcsName);
     }
 }

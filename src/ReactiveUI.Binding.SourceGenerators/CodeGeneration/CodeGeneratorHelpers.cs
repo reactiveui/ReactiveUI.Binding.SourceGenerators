@@ -77,10 +77,20 @@ internal static class CodeGeneratorHelpers
     internal static string NullableSelectorLeafType(EquatableArray<PropertyPathSegment> path, bool supportsNullable)
     {
         var leaf = path[path.Length - 1];
-        return supportsNullable && leaf.IsReferenceType
-            ? $"{leaf.PropertyTypeFullName}?"
-            : leaf.PropertyTypeFullName;
+        return NullableSelectorType(leaf.PropertyTypeFullName, leaf.IsReferenceType, supportsNullable);
     }
+
+    /// <summary>Annotates a selector's produced type the way the stub declares it.</summary>
+    /// <param name="typeFullName">The fully qualified produced type.</param>
+    /// <param name="isReferenceType">Whether that type is a reference type.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <returns>The type name, suffixed with <c>?</c> where appropriate.</returns>
+    /// <remarks>
+    /// Taken as the type rather than as a path, because a selector the compiler could not read names no path and
+    /// its produced type comes from the method the call resolved to instead.
+    /// </remarks>
+    internal static string NullableSelectorType(string typeFullName, bool isReferenceType, bool supportsNullable) =>
+        supportsNullable && isReferenceType ? $"{typeFullName}?" : typeFullName;
 
     /// <summary>Builds a dotted property access chain from a root variable and property path segments.</summary>
     /// <param name="root">The root variable name (e.g., "obj", "source").</param>

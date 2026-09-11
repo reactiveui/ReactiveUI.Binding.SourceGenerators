@@ -15,6 +15,10 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="TargetTypeFullName">The fully qualified name of the target object type.</param>
 /// <param name="TargetPropertyPath">The property path chain from the target lambda expression.</param>
 /// <param name="TargetPropertyTypeFullName">The fully qualified type of the target property (leaf of the target path).</param>
+/// <param name="TargetPropertyIsReferenceType">
+/// Whether that type is a reference type, which decides whether the generated selector parameter is annotated
+/// nullable. It has to match the stub's own annotation or the overload is merely applicable rather than better.
+/// </param>
 /// <param name="HasConversionHint">Whether the invocation supplies a <c>conversionHint</c> argument.</param>
 /// <param name="HasConverterOverride">Whether the invocation supplies an explicit <c>IBindingTypeConverter</c> argument.</param>
 /// <param name="TargetExpressionText">The original expression text of the target lambda argument.</param>
@@ -35,6 +39,7 @@ internal sealed record BindToInvocationInfo(
     string TargetTypeFullName,
     EquatableArray<PropertyPathSegment> TargetPropertyPath,
     string TargetPropertyTypeFullName,
+    bool TargetPropertyIsReferenceType,
     bool HasConversionHint,
     bool HasConverterOverride,
     string TargetExpressionText,
