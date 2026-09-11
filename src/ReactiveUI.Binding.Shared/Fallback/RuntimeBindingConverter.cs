@@ -31,7 +31,15 @@ public static class RuntimeBindingConverter
     /// <param name="converterOverride">An optional explicit converter that takes precedence over the registry.</param>
     /// <param name="result">The converted value when conversion succeeds.</param>
     /// <returns><see langword="true"/> if conversion succeeded; otherwise <see langword="false"/>.</returns>
-    public static bool TryConvert<TFrom, TTo>(
+    /// <remarks>
+    /// The converter is resolved from the declared types rather than from the value's runtime type. A runtime
+    /// <see cref="Type"/> cannot satisfy the annotations the converter registry declares, so resolving from one
+    /// would put a trimming requirement on every generated binding that converts. The declared types are what
+    /// the generator bound, so they are what the registry is asked about.
+    /// </remarks>
+    public static bool TryConvert<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TFrom,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TTo>(
         TFrom value,
         object? conversionHint,
         IBindingTypeConverter? converterOverride,
@@ -39,7 +47,7 @@ public static class RuntimeBindingConverter
     {
         var toType = typeof(TTo);
         object? boxed = value;
-        var fromType = boxed?.GetType() ?? typeof(TFrom);
+        var fromType = typeof(TFrom);
 
         object? converted;
 

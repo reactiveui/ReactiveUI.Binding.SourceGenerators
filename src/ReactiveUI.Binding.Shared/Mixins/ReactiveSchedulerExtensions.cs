@@ -13,8 +13,7 @@ namespace ReactiveUI.Binding;
 /// The scheduler type follows the package: ReactiveUI.Binding takes an ISequencer,
 /// ReactiveUI.Binding.Reactive takes a System.Reactive IScheduler.
 /// </summary>
-[ExcludeFromCodeCoverage]
-public static class ReactiveSchedulerExtensions
+public static partial class ReactiveSchedulerExtensions
 {
     /// <summary>
     /// The message displayed when no generated binding is found during certain binding operations.
@@ -23,7 +22,7 @@ public static class ReactiveSchedulerExtensions
     /// avoid this error, ensure that the binding expression is an inline lambda.
     /// </summary>
     private const string NoGeneratedBindingMessage =
-        "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.";
+        "No generated binding dispatch matched this call site. Use the matching Unsafe overload to resolve the expression at run time.";
 
     /// <summary>Provides BindOneWay extension members for <paramref name="source"/>.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
@@ -170,8 +169,10 @@ public static class ReactiveSchedulerExtensions
             ISequencer? scheduler = null,
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
-            where TTarget : class =>
+            where TTarget : class
+        {
             throw new InvalidOperationException(NoGeneratedBindingMessage);
+        }
 
 #if NET8_0_OR_GREATER
         /// <summary>Creates a two-way binding between a source property and a target property with a specified scheduler.</summary>
@@ -318,8 +319,10 @@ public static class ReactiveSchedulerExtensions
             ISequencer? scheduler = null,
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
-            where TTarget : class =>
+            where TTarget : class
+        {
             throw new InvalidOperationException(NoGeneratedBindingMessage);
+        }
 
     }
 
@@ -413,8 +416,10 @@ public static class ReactiveSchedulerExtensions
             ISequencer? scheduler = null,
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
-            where TViewModel : class =>
+            where TViewModel : class
+        {
             throw new InvalidOperationException(NoGeneratedBindingMessage);
+        }
 
 #if NET8_0_OR_GREATER
         /// <summary>
@@ -510,7 +515,9 @@ public static class ReactiveSchedulerExtensions
             ISequencer? scheduler = null,
             [CallerFilePath] string callerFilePath = "",
             [CallerLineNumber] int callerLineNumber = 0)
-            where TViewModel : class =>
+            where TViewModel : class
+        {
             throw new InvalidOperationException(NoGeneratedBindingMessage);
+        }
     }
 }

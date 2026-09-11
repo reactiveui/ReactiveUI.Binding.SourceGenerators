@@ -28,17 +28,27 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenAnyObservable_000031E1E650E394(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenAnyObservable(objectToMonitor, obs1, obs2);
         }
 
         private static global::System.IObservable<string> __WhenAnyObservable_000031E1E650E394(global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ParentViewModel obj)
         {
-            var __obsProperty0_s0 = (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>(
+            var __obsProperty0_s0Mechanism = (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>(
                 obj,
                 "Child",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ParentViewModel)__o).Child,
                 false);
-
+            var __obsProperty0_s0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ParentViewModel), "Child", 5, false);
+            var __obsProperty0_s0 = __obsProperty0_s0Registration == null
+                ? (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>)__obsProperty0_s0Mechanism
+                : (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>(
+                    __obsProperty0_s0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ParentViewModel, global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>>)(__e => __e.Child)).Body,
+                    "Child",
+                    (object __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ParentViewModel)__o).Child,
+                    false,
+                    true);
         var __obsProperty0_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel, global::System.IObservable<string>>(__obsProperty0_s0,
             __obsProperty0_p1 => __obsProperty0_p1 != null
                 ? global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<global::System.IObservable<string>>(
@@ -60,12 +70,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             var __switched0 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty0,
                 __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
 
-            var __obsProperty1_s0 = (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>(
+            var __obsProperty1_s0Mechanism = (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>(
                 obj,
                 "Child",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ParentViewModel)__o).Child,
                 false);
-
+            var __obsProperty1_s0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ParentViewModel), "Child", 5, false);
+            var __obsProperty1_s0 = __obsProperty1_s0Registration == null
+                ? (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>)__obsProperty1_s0Mechanism
+                : (global::System.IObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>(
+                    __obsProperty1_s0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ParentViewModel, global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel>>)(__e => __e.Child)).Body,
+                    "Child",
+                    (object __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ParentViewModel)__o).Child,
+                    false,
+                    true);
         var __obsProperty1_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel, global::System.IObservable<string>>(__obsProperty1_s0,
             __obsProperty1_p1 => __obsProperty1_p1 != null
                 ? global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<global::System.IObservable<string>>(

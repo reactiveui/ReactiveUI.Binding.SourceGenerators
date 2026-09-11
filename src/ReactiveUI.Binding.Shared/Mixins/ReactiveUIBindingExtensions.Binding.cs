@@ -11,6 +11,22 @@ namespace ReactiveUI.Binding;
 /// <summary>Extension methods for property binding (BindOneWay, BindTwoWay, OneWayBind, Bind).</summary>
 public static partial class ReactiveUIBindingExtensions
 {
+    /// <summary>Reported when no generated dispatch claimed a Bind call site.</summary>
+    private const string NoBindDispatchMessage =
+        "No generated Bind dispatch matched this call site. Use BindUnsafe to resolve the expression at run time.";
+
+    /// <summary>Reported when no generated dispatch claimed a BindOneWay call site.</summary>
+    private const string NoBindOneWayDispatchMessage =
+        "No generated BindOneWay dispatch matched this call site. Use BindOneWayUnsafe to resolve the expression at run time.";
+
+    /// <summary>Reported when no generated dispatch claimed a BindTwoWay call site.</summary>
+    private const string NoBindTwoWayDispatchMessage =
+        "No generated BindTwoWay dispatch matched this call site. Use BindTwoWayUnsafe to resolve the expression at run time.";
+
+    /// <summary>Reported when no generated dispatch claimed a OneWayBind call site.</summary>
+    private const string NoOneWayBindDispatchMessage =
+        "No generated OneWayBind dispatch matched this call site. Use OneWayBindUnsafe to resolve the expression at run time.";
+
 #if NET8_0_OR_GREATER
     /// <summary>Creates a one-way binding from a source property to a target property.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
@@ -25,7 +41,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site. Use BindOneWayUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindOneWay<TSource, TTarget, TProperty>(
         this TSource source,
@@ -52,7 +68,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site. Use BindOneWayUnsafe to resolve the expression at run time.</exception>
     public static IDisposable BindOneWay<TSource, TTarget, TProperty>(
         this TSource source,
         TTarget target,
@@ -64,7 +80,7 @@ public static partial class ReactiveUIBindingExtensions
         where TTarget : class
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoBindOneWayDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -83,7 +99,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site. Use BindOneWayUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindOneWay<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
@@ -113,7 +129,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site. Use BindOneWayUnsafe to resolve the expression at run time.</exception>
     public static IDisposable BindOneWay<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
         TTarget target,
@@ -126,7 +142,7 @@ public static partial class ReactiveUIBindingExtensions
         where TTarget : class
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoBindOneWayDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -143,7 +159,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site. Use BindTwoWayUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindTwoWay<TSource, TTarget, TProperty>(
         this TSource source,
@@ -170,7 +186,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site. Use BindTwoWayUnsafe to resolve the expression at run time.</exception>
     public static IDisposable BindTwoWay<TSource, TTarget, TProperty>(
         this TSource source,
         TTarget target,
@@ -182,7 +198,7 @@ public static partial class ReactiveUIBindingExtensions
         where TTarget : class
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoBindTwoWayDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -202,7 +218,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site. Use BindTwoWayUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindTwoWay<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
@@ -234,7 +250,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site. Use BindTwoWayUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IDisposable BindTwoWay<TSource, TSourceProp, TTarget, TTargetProp>(
         this TSource source,
@@ -249,7 +265,7 @@ public static partial class ReactiveUIBindingExtensions
         where TTarget : class
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoBindTwoWayDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -267,7 +283,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated OneWayBind dispatch matched this call site. Use OneWayBindUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, TVProp> OneWayBind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
@@ -295,7 +311,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated OneWayBind dispatch matched this call site. Use OneWayBindUnsafe to resolve the expression at run time.</exception>
     public static IReactiveBinding<TView, TVProp> OneWayBind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
         TViewModel viewModel,
@@ -307,7 +323,7 @@ public static partial class ReactiveUIBindingExtensions
         where TView : class, IViewFor
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoOneWayBindDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -326,7 +342,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated OneWayBind dispatch matched this call site. Use OneWayBindUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TView, TProp, TOut>(
         this TView view,
@@ -356,7 +372,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated OneWayBind dispatch matched this call site. Use OneWayBindUnsafe to resolve the expression at run time.</exception>
     public static IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TView, TProp, TOut>(
         this TView view,
         TViewModel viewModel,
@@ -369,7 +385,7 @@ public static partial class ReactiveUIBindingExtensions
         where TView : class, IViewFor
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoOneWayBindDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -387,7 +403,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated Bind dispatch matched this call site. Use BindUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
@@ -415,7 +431,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated Bind dispatch matched this call site. Use BindUnsafe to resolve the expression at run time.</exception>
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
         TViewModel viewModel,
@@ -427,7 +443,7 @@ public static partial class ReactiveUIBindingExtensions
         where TView : class, IViewFor
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoBindDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -447,7 +463,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated Bind dispatch matched this call site. Use BindUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
@@ -479,7 +495,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated Bind dispatch matched this call site. Use BindUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IReactiveBinding<TView, BindingChange> Bind<TViewModel, TView, TVMProp, TVProp>(
         this TView view,
@@ -494,6 +510,6 @@ public static partial class ReactiveUIBindingExtensions
         where TView : class, IViewFor
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoBindDispatchMessage);
     }
 }

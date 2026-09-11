@@ -47,32 +47,48 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("callerFilePath.EndsWith");
     }
 
-    /// <summary>Verifies GenerateRuntimeFallback throws rather than falling back to runtime reflection.</summary>
+    /// <summary>A call site the overload could not match reaches the stub rather than a throw.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateRuntimeFallback_GeneratesThrowNamingTheMethod()
+    public async Task GenerateRuntimeFallback_CallsTheStubTheOverloadDisplaces()
     {
         var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo();
 
-        ObservationCodeGenerator.GenerateRuntimeFallback(sb, WhenChangedName);
+        ObservationCodeGenerator.GenerateRuntimeFallback(sb, inv, WhenChangedName, inv.PropertyPaths.Length, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ThrowNewGlobalSystemInvalidOperationExceptionFragment);
-        await Assert.That(result).Contains(WhenChangedName);
+        await Assert.That(result).Contains($"{StubFallbackCallFragment}{WhenChangedName}");
+        await Assert.That(result).DoesNotContain(ThrowNewGlobalSystemInvalidOperationExceptionFragment);
+        await Assert.That(result).Contains("(objectToMonitor, property1);");
     }
 
-    /// <summary>Verifies the method prefix is interpolated into the message rather than hard-coded.</summary>
+    /// <summary>The stub the fallback names follows the API being generated.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateRuntimeFallback_WhenChanging_IncludesMethodPrefixInErrorMessage()
+    public async Task GenerateRuntimeFallback_WhenChanging_NamesTheWhenChangingStub()
     {
         var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo();
 
-        ObservationCodeGenerator.GenerateRuntimeFallback(sb, WhenChangingName);
+        ObservationCodeGenerator.GenerateRuntimeFallback(sb, inv, WhenChangingName, inv.PropertyPaths.Length, false);
+
+        await Assert.That(sb.ToString()).Contains($"{StubFallbackCallFragment}{WhenChangingName}");
+    }
+
+    /// <summary>The projected type is stated last, after the observed ones, where the overload takes a selector.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenerateRuntimeFallback_WithSelector_StatesTheProjectedTypeLastAndForwardsIt()
+    {
+        var sb = new StringBuilder();
+        var inv = ModelFactory.CreateInvocationInfo();
+
+        ObservationCodeGenerator.GenerateRuntimeFallback(sb, inv, WhenChangedName, inv.PropertyPaths.Length, true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ThrowNewGlobalSystemInvalidOperationExceptionFragment);
-        await Assert.That(result).Contains(WhenChangingName);
+        await Assert.That(result).Contains($"{inv.ReturnTypeFullName}>(");
+        await Assert.That(result).Contains(", selector);");
     }
 
     /// <summary>Verifies GenerateObservationMethod with a deep chain and selector generates Switch and Select wrapping.</summary>

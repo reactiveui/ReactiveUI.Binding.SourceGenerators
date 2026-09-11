@@ -25,16 +25,26 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenChanging_7FFFF85E7720B498(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanging dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanging<global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel, string>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<string> __WhenChanging_7FFFF85E7720B498(global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel obj)
         {
-            var __obs0 = (global::System.IObservable<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel>(
+            var __obs0Mechanism = (global::System.IObservable<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel>(
                 (global::System.ComponentModel.INotifyPropertyChanging)obj,
                 "Child",
                 (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel)__o).Child);
-
+            var __obs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel), "Child", 5, true);
+            var __obs0 = __obs0Registration == null
+                ? (global::System.IObservable<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel>)__obs0Mechanism
+                : (global::System.IObservable<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel>(
+                    __obs0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel, global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel>>)(__e => __e.Child)).Body,
+                    "Child",
+                    (object __o) => ((global::SharedScenarios.WhenChanging.DeepPropertyChain.ParentViewModel)__o).Child,
+                    true,
+                    true);
         var __obs1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.DeepPropertyChain.ChildModel, string>(__obs0,
             __parent1 => __parent1 != null
                 ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(

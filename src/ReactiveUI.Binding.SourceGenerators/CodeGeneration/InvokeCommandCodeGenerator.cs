@@ -30,6 +30,15 @@ internal static class InvokeCommandCodeGenerator
     /// <summary>The objects a worker takes, in its own parameter order.</summary>
     private const string WorkerArguments = "source, target";
 
+    /// <summary>What a call site the runtime engine serves hands its worker, the selector included.</summary>
+    private const string ReflectionWorkerArguments = "source, target, commandProperty";
+
+    /// <summary>The declaration of the parameter a worker takes its values from.</summary>
+    private const string SourceParameter = " source,";
+
+    /// <summary>The indentation a generated member and its attributes sit at.</summary>
+    private const string MemberIndent = "        ";
+
     /// <summary>The indentation and arrow an interceptor forwards to its worker behind.</summary>
     private const string ForwardingBodyPrefix = "            => ";
 
@@ -111,7 +120,7 @@ internal static class InvokeCommandCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features)
     {
-        var collapsible = features.SupportsCallerArgExpr && !features.SupportsInterceptors;
+        var collapsible = features.CollapsesIndistinguishableCallSites;
         var emitted = collapsible
             ? group with
             {
@@ -198,7 +207,7 @@ internal static class InvokeCommandCodeGenerator
                     CodeGeneratorHelpers.ComputePathSuffix(inv.CallerFilePath));
             }
 
-            CodeGeneratorHelpers.AppendDispatchReturn(sb, WorkerMethodPrefix + WorkerSuffix(inv), WorkerArguments);
+            CodeGeneratorHelpers.AppendDispatchReturn(sb, WorkerMethodPrefix + WorkerSuffix(inv), WorkerArgumentsFor(inv));
         }
 
         CodeGeneratorHelpers.AppendBindingDispatchFallthrough(sb);
@@ -224,13 +233,21 @@ internal static class InvokeCommandCodeGenerator
                 InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, InterceptorEmitter.MemberIndent);
             }
 
+            // An interceptor replaces the consumer's call outright, so this is the member their trimming or
+            // ahead-of-time publish sees. Annotating it is what puts the warning on the call that reflects,
+            // where the same attribute on the worker alone would never leave this file
+            if (entry.Value[0].ReflectionOnly)
+            {
+                _ = sb.Append(MemberIndent).AppendLine(GeneratedTypeNames.RequiresUnreferencedCodeAttribute);
+            }
+
             _ = sb.Append("        internal static ").Append(GeneratedTypeNames.IDisposable).Append(" __Intercept_")
                 .Append(Constants.InvokeCommandMethodName).Append('_').Append(entry.Key).AppendLine("(");
 
             AppendParameterList(sb, group, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
 
             _ = sb.Append(ForwardingBodyPrefix).Append(WorkerMethodPrefix).Append(entry.Key)
-                .Append('(').Append(WorkerArguments).AppendLine(");").AppendLine();
+                .Append('(').Append(WorkerArgumentsFor(entry.Value[0])).AppendLine(");").AppendLine();
         }
     }
 
@@ -255,7 +272,7 @@ internal static class InvokeCommandCodeGenerator
     {
         var commandType = supportsNullable ? $"{ICommand}?" : ICommand;
 
-        _ = sb.Append("            this ").Append(ObservableOf(group.SourceValueTypeFullName)).AppendLine(" source,")
+        _ = sb.Append("            this ").Append(ObservableOf(group.SourceValueTypeFullName)).AppendLine(SourceParameter)
             .Append(CodeGeneratorHelpers.ParameterIndent).Append(group.TargetTypeFullName).AppendLine(" target,")
             .Append(CodeGeneratorHelpers.ParameterIndent)
             .Append(PropertyExpression(group.TargetTypeFullName, commandType)).AppendLine(" commandProperty,");
@@ -288,13 +305,19 @@ internal static class InvokeCommandCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         string suffix)
     {
+        if (inv.ReflectionOnly)
+        {
+            GenerateReflectionWorker(sb, inv, suffix);
+            return;
+        }
+
         var classInfo = CodeGeneratorHelpers.ResolveObservedTypeInfo(
             allClasses,
             inv.TargetTypeFullName,
             inv.CommandPropertyPath);
 
         _ = sb.Append("        private static ").Append(GeneratedTypeNames.IDisposable).Append(' ').Append(WorkerMethodPrefix).Append(suffix).AppendLine("(")
-            .Append(CodeGeneratorHelpers.ParameterIndent).Append(ObservableOf(inv.SourceValueTypeFullName)).AppendLine(" source,")
+            .Append(CodeGeneratorHelpers.ParameterIndent).Append(ObservableOf(inv.SourceValueTypeFullName)).AppendLine(SourceParameter)
             .Append(CodeGeneratorHelpers.ParameterIndent).Append(inv.TargetTypeFullName).AppendLine(" target)")
             .AppendLine(GeneratedSyntax.MemberBodyOpen)
             .Append("            // InvokeCommand: values -> ")
@@ -316,6 +339,37 @@ internal static class InvokeCommandCodeGenerator
         _ = sb.Append("            return ").Append(CommandInvoker).Append(".Invoke(source, ").Append(CommandVariable).AppendLine(");")
             .AppendLine(GeneratedSyntax.MemberBodyClose).AppendLine();
     }
+
+    /// <summary>Emits the worker for a call site whose selector only the runtime engine can resolve.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="inv">The call site being served.</param>
+    /// <param name="suffix">The stable suffix naming this worker.</param>
+    /// <remarks>
+    /// The attribute is what makes this worth generating rather than leaving the call to the stub: a trimming or
+    /// ahead-of-time publish reports this call site and no other, where annotating the shared overload would
+    /// report every call site that merely has the same types.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void GenerateReflectionWorker(StringBuilder sb, InvokeCommandInvocationInfo inv, string suffix) =>
+        sb.Append(MemberIndent).AppendLine(GeneratedTypeNames.RequiresUnreferencedCodeAttribute)
+            .Append("        private static ").Append(GeneratedTypeNames.IDisposable).Append(' ').Append(WorkerMethodPrefix)
+            .Append(suffix).AppendLine("(")
+            .Append(CodeGeneratorHelpers.ParameterIndent).Append(ObservableOf(inv.SourceValueTypeFullName)).AppendLine(SourceParameter)
+            .Append(CodeGeneratorHelpers.ParameterIndent).Append(inv.TargetTypeFullName).AppendLine(" target,")
+            .Append(CodeGeneratorHelpers.ParameterIndent)
+            .Append(PropertyExpression(inv.TargetTypeFullName, ICommand)).AppendLine(" commandProperty)")
+            .AppendLine(GeneratedSyntax.MemberBodyOpen)
+            .AppendLine("            // InvokeCommand: the selector resolves at run time, so the engine reads the path.")
+            .Append("            return ").Append(GeneratedTypeNames.RuntimeCommandFallback)
+            .AppendLine(".InvokeCommand(source, target, commandProperty);")
+            .AppendLine(GeneratedSyntax.MemberBodyClose).AppendLine();
+
+    /// <summary>Names the arguments a call site hands its worker, which the runtime path needs the selector in.</summary>
+    /// <param name="inv">The call site being dispatched.</param>
+    /// <returns>The argument list, as written into the generated call.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string WorkerArgumentsFor(InvokeCommandInvocationInfo inv) =>
+        inv.ReflectionOnly ? ReflectionWorkerArguments : WorkerArguments;
 
     /// <summary>Names the worker a call site reaches.</summary>
     /// <param name="inv">The call site.</param>

@@ -106,6 +106,9 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>The <c>throw new global::System.InvalidOperationException</c> fragment these tests expect in the generated source.</summary>
     private const string ThrowNewGlobalSystemInvalidOperationExceptionFragment = "throw new global::System.InvalidOperationException";
 
+    /// <summary>The opening of the call a generated overload ends on, up to the API name.</summary>
+    private const string StubFallbackCallFragment = "return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.";
+
     /// <summary>Verifies GetSelectorType returns correct Func type for single-property invocation.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

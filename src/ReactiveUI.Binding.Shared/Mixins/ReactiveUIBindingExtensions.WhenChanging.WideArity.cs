@@ -13,6 +13,10 @@ namespace ReactiveUI.Binding;
 /// <summary>Extension methods for observing property changes before they occur (WhenChanging).</summary>
 public static partial class ReactiveUIBindingExtensions
 {
+    /// <summary>Reported when no generated dispatch claimed a WhenChanging call site.</summary>
+    private const string NoWhenChangingDispatchMessage =
+        "No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.";
+
 #if NET8_0_OR_GREATER
     /// <summary>Observes a property on the specified object and emits the value before it changes.</summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
@@ -23,6 +27,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the property value before it changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<T1> WhenChanging<TObj, T1>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -40,6 +45,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the property value before it changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<T1> WhenChanging<TObj, T1>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -48,10 +54,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-
-        return RuntimeObservationFallback.WhenChanging(objectToMonitor, property1);
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -67,6 +70,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2>> WhenChanging<TObj, T1, T2>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -89,6 +93,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2>> WhenChanging<TObj, T1, T2>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -98,14 +103,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            static (v1, v2) => new PropertyValues<T1, T2>(v1, v2));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -124,6 +122,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3>> WhenChanging<TObj, T1, T2, T3>(
         this TObj objectToMonitor,
@@ -152,6 +151,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2, T3>> WhenChanging<TObj, T1, T2, T3>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -162,16 +162,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            static (v1, v2, v3) => new PropertyValues<T1, T2, T3>(v1, v2, v3));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -193,6 +184,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4>> WhenChanging<
@@ -232,6 +224,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2, T3, T4>> WhenChanging<TObj, T1, T2, T3, T4>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -243,18 +236,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            static (v1, v2, v3, v4) => new PropertyValues<T1, T2, T3, T4>(v1, v2, v3, v4));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -279,6 +261,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5>> WhenChanging<
@@ -324,6 +307,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5>> WhenChanging<TObj, T1, T2, T3, T4, T5>(
         this TObj objectToMonitor,
@@ -337,20 +321,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            static (v1, v2, v3, v4, v5) => new PropertyValues<T1, T2, T3, T4, T5>(v1, v2, v3, v4, v5));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -378,6 +349,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6>>
@@ -423,6 +395,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6>(
         this TObj objectToMonitor,
@@ -437,22 +410,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property6),
-            static (v1, v2, v3, v4, v5, v6) => new PropertyValues<T1, T2, T3, T4, T5, T6>(v1, v2, v3, v4, v5, v6));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -483,6 +441,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -534,6 +493,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7>(
         this TObj objectToMonitor,
@@ -549,24 +509,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property6),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property7),
-            static (v1, v2, v3, v4, v5, v6, v7) => new PropertyValues<T1, T2, T3, T4, T5, T6, T7>(v1, v2, v3, v4, v5, v6, v7));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -600,6 +543,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -655,6 +599,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8>(
         this TObj objectToMonitor,
@@ -671,26 +616,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property6),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property7),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property8),
-            static (v1, v2, v3, v4, v5, v6, v7, v8) => new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8>(v1, v2, v3, v4, v5, v6, v7, v8));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -727,6 +653,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -787,6 +714,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
         this TObj objectToMonitor,
@@ -804,29 +732,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property6),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property7),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property8),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property9),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9) =>
-                new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9>(v1, v2, v3, v4, v5, v6, v7, v8, v9));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -866,6 +772,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -931,6 +838,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
         this TObj objectToMonitor,
@@ -949,31 +857,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property6),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property7),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property8),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property9),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property10),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10) =>
-                new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1016,6 +900,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -1098,6 +983,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
         this TObj objectToMonitor,
@@ -1117,33 +1003,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property6),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property7),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property8),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property9),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property10),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property11),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) =>
-                new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1189,6 +1049,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -1277,6 +1138,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
@@ -1298,35 +1160,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-        ArgumentExceptionHelper.ThrowIfNull(property12);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property6),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property7),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property8),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property9),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property10),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property11),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property12),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12) =>
-                new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1375,6 +1209,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -1469,6 +1304,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
@@ -1491,38 +1327,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-        ArgumentExceptionHelper.ThrowIfNull(property12);
-        ArgumentExceptionHelper.ThrowIfNull(property13);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property6),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property7),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property8),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property9),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property10),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property11),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property12),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property13),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13) =>
-
-                    new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1574,6 +1379,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -1660,6 +1466,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
@@ -1683,40 +1490,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-        ArgumentExceptionHelper.ThrowIfNull(property12);
-        ArgumentExceptionHelper.ThrowIfNull(property13);
-        ArgumentExceptionHelper.ThrowIfNull(property14);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property6),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property7),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property8),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property9),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property10),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property11),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property12),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property13),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property14),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14) =>
-
-                    new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1771,6 +1545,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -1861,6 +1636,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
@@ -1885,42 +1661,7 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-        ArgumentExceptionHelper.ThrowIfNull(property12);
-        ArgumentExceptionHelper.ThrowIfNull(property13);
-        ArgumentExceptionHelper.ThrowIfNull(property14);
-        ArgumentExceptionHelper.ThrowIfNull(property15);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property6),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property7),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property8),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property9),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property10),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property11),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property12),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property13),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property14),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property15),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) =>
-
-                    new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1978,6 +1719,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -2090,6 +1832,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values before any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<
@@ -2131,42 +1874,6 @@ public static partial class ReactiveUIBindingExtensions
         where TObj : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(objectToMonitor);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-        ArgumentExceptionHelper.ThrowIfNull(property12);
-        ArgumentExceptionHelper.ThrowIfNull(property13);
-        ArgumentExceptionHelper.ThrowIfNull(property14);
-        ArgumentExceptionHelper.ThrowIfNull(property15);
-        ArgumentExceptionHelper.ThrowIfNull(property16);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property1),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property2),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property3),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property4),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property5),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property6),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property7),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property8),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property9),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property10),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property11),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property12),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property13),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property14),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property15),
-            RuntimeObservationFallback.WhenChanging(objectToMonitor, property16),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) =>
-                new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16));
+        throw new InvalidOperationException(NoWhenChangingDispatchMessage);
     }
 }

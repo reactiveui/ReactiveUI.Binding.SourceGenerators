@@ -31,7 +31,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1)
             .Subscribe(seen.Add);
@@ -56,7 +56,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2)
@@ -82,7 +82,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -109,7 +109,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -137,7 +137,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -166,7 +166,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -196,7 +196,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -227,7 +227,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -259,7 +259,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -292,7 +292,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -326,7 +326,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -361,7 +361,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -397,7 +397,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -424,7 +424,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -452,7 +452,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -481,7 +481,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -511,7 +511,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -542,7 +542,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -574,7 +574,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -607,7 +607,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -641,7 +641,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -676,7 +676,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,
@@ -712,7 +712,7 @@ public class WhenAnyObservableWideArityTests
         var streams = fixture.FillStreams();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservable(
+        using var subscription = ReactiveUIBindingExtensions.WhenAnyObservableUnsafe(
                 fixture,
                 x => x.Stream1,
                 x => x.Stream2,

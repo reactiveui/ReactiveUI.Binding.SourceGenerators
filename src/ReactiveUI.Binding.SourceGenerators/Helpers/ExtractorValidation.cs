@@ -158,6 +158,23 @@ internal static class ExtractorValidation
             : "global::System.EventArgs";
     }
 
+    /// <summary>Takes one of the type arguments the compiler settled on for a resolved call.</summary>
+    /// <param name="methodSymbol">The method the call resolved to.</param>
+    /// <param name="index">Which of its type arguments to take.</param>
+    /// <returns>The type, or <see langword="null"/> when nothing a member could declare is there.</returns>
+    /// <remarks>
+    /// The route to a type when the property path is not one: a selector built at run time still resolves to a
+    /// method whose type arguments the compiler inferred, and those are the types the generated member has to
+    /// declare. An index outside the list answers null rather than throwing, so a caller reading a shape this
+    /// package does not serve declines the call site instead of failing the whole generation pass.
+    /// </remarks>
+    internal static INamedTypeSymbol? DeclarableTypeArgument(IMethodSymbol methodSymbol, int index) =>
+        index >= 0
+        && index < methodSymbol.TypeArguments.Length
+        && methodSymbol.TypeArguments[index] is INamedTypeSymbol { IsStatic: false } named
+            ? named
+            : null;
+
     /// <summary>Checks whether a type is the synthesized grouping type that holds an extension block's members.</summary>
     /// <param name="type">The type to check.</param>
     /// <returns><see langword="true"/> if the type is an extension grouping type; otherwise <see langword="false"/>.</returns>

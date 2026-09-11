@@ -25,17 +25,27 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenChanged_0000130742850C0E(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanged<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level1, string>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<string> __WhenChanged_0000130742850C0E(global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level1 obj)
         {
-            var __obs0 = (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level2>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level2>(
+            var __obs0Mechanism = (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level2>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level2>(
                 obj,
                 "Model",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level1)__o).Model,
                 false);
-
+            var __obs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level1), "Model", 5, false);
+            var __obs0 = __obs0Registration == null
+                ? (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level2>)__obs0Mechanism
+                : (global::System.IObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level2>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level2>(
+                    __obs0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level1, global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level2>>)(__e => __e.Model)).Body,
+                    "Model",
+                    (object __o) => ((global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level1)__o).Model,
+                    false,
+                    true);
         var __obs1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level2, global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3>(__obs0,
             __parent1 => __parent1 != null
                 ? global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<global::SharedScenarios.WhenChanged.FourLevelDeepChain.Level3>(

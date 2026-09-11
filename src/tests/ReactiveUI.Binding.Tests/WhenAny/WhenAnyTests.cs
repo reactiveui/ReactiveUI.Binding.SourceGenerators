@@ -23,7 +23,7 @@ public class WhenAnyTests
         var fixture = new TestFixture { IsNotNullString = "Initial" };
         var values = new List<string>();
 
-        using var sub = fixture.WhenAny(
+        using var sub = fixture.WhenAnyUnsafe(
                 x => x.IsNotNullString,
                 static change => change.Value)
             .Subscribe(values.Add);
@@ -47,7 +47,7 @@ public class WhenAnyTests
         var fixture = new TestFixture { IsNotNullString = "Hello", IsOnlyOneWord = "World" };
         var values = new List<string>();
 
-        using var sub = fixture.WhenAny(
+        using var sub = fixture.WhenAnyUnsafe(
                 x => x.IsNotNullString,
                 x => x.IsOnlyOneWord,
                 static (c1, c2) => $"{c1.Value} {c2.Value}")
@@ -67,7 +67,7 @@ public class WhenAnyTests
         var fixture = new TestFixture { IsNotNullString = "PreExisting" };
         var values = new List<string>();
 
-        using var sub = fixture.WhenAny(
+        using var sub = fixture.WhenAnyUnsafe(
                 x => x.IsNotNullString,
                 static change => change.Value)
             .Subscribe(values.Add);
@@ -86,7 +86,7 @@ public class WhenAnyTests
         var obj = new NonReactiveINotifyPropertyChangedObject { InpcProperty = "Start" };
         var values = new List<string>();
 
-        using var sub = obj.WhenAny(
+        using var sub = obj.WhenAnyUnsafe(
                 x => x.InpcProperty,
                 static change => change.Value)
             .Subscribe(values.Add);
@@ -109,7 +109,7 @@ public class WhenAnyTests
         var fixture = new TestFixture { IsNotNullString = "Test" };
         IObservedChange<TestFixture, string>? captured = null;
 
-        using var sub = fixture.WhenAny(
+        using var sub = fixture.WhenAnyUnsafe(
                 x => x.IsNotNullString,
                 static change => change)
             .Subscribe(c => captured = c);

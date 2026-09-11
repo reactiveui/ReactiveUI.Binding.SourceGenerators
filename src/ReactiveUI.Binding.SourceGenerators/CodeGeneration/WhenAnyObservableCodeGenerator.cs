@@ -33,6 +33,9 @@ internal static class WhenAnyObservableCodeGenerator
     /// <summary>The base name used to build emitted local variable identifiers for the raw observable property.</summary>
     private const string ObsPropertyVarName = "__obsProperty";
 
+    /// <summary>The selector forwarded after the observed properties, where the overload takes one.</summary>
+    private const string SelectorArgument = ", selector";
+
     /// <summary>Generates concrete typed overloads and observation methods for WhenAnyObservable invocations.</summary>
     /// <param name="invocations">All detected WhenAnyObservable invocations.</param>
     /// <param name="allClasses">All detected class binding info for type mechanism lookup.</param>
@@ -77,10 +80,9 @@ internal static class WhenAnyObservableCodeGenerator
         CodeGeneratorHelpers.AppendIndexedStaticPrefixNormalization(sb, supportsCallerArgExpr, "obs", propCount);
         EmitDispatchTable(sb, group, supportsCallerArgExpr, propCount, hasSelector);
 
-        // Runtime fallback: throw for now (WhenAnyObservable doesn't have a simple fallback path)
-        _ = sb.AppendLine(
-                "            throw new global::System.InvalidOperationException(\"No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.\");")
-            .AppendLine("        }");
+        GenerateRuntimeFallback(sb, propCount, hasSelector);
+
+        _ = sb.AppendLine("        }");
     }
 
     /// <summary>Generates an observation method for a single WhenAnyObservable invocation.</summary>
@@ -307,15 +309,24 @@ internal static class WhenAnyObservableCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features)
     {
+        var emitted = features.CollapsesIndistinguishableCallSites
+            ? group with
+            {
+                Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
+                    group.Invocations,
+                    static x => string.Join("|", x.ExpressionTexts)),
+            }
+            : group;
+
         if (features.SupportsInterceptors)
         {
-            GenerateInterceptors(sb, group, in features);
+            GenerateInterceptors(sb, emitted, in features);
         }
         else
         {
             GenerateConcreteOverload(
                 sb,
-                group,
+                emitted,
                 features.SupportsCallerArgExpr,
                 features.SupportsNullable,
                 features.StubHasExpressionParameters);
@@ -323,9 +334,9 @@ internal static class WhenAnyObservableCodeGenerator
 
         _ = sb.AppendLine();
 
-        for (var i = 0; i < group.Invocations.Length; i++)
+        for (var i = 0; i < emitted.Invocations.Length; i++)
         {
-            var inv = group.Invocations[i];
+            var inv = emitted.Invocations[i];
             GenerateObservationMethod(
                 sb,
                 inv,
@@ -362,7 +373,7 @@ internal static class WhenAnyObservableCodeGenerator
             AppendParameterList(sb, first, supportsCallerArgExpr, supportsNullable, stubHasExpressionParameters);
 
             _ = sb.Append("            => __WhenAnyObservable_").Append(entry.Key).Append("(objectToMonitor")
-                .Append(first.HasSelector ? ", selector" : string.Empty).AppendLine(");").AppendLine();
+                .Append(first.HasSelector ? SelectorArgument : string.Empty).AppendLine(");").AppendLine();
         }
     }
 
@@ -416,6 +427,37 @@ internal static class WhenAnyObservableCodeGenerator
         _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
     }
 
+    /// <summary>Ends the overload where the stub it displaces would have ended: at the runtime engine.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="propCount">The number of observed observable properties.</param>
+    /// <param name="hasSelector">Whether the overload takes a selector.</param>
+    /// <remarks>
+    /// The type arguments are left to inference here. WhenAnyObservable states the element type carried by each
+    /// observed <c>IObservable&lt;T&gt;</c> rather than the property's own type, and the generated parameters
+    /// already spell that out, so inference reaches it without the generator taking the type name apart.
+    /// </remarks>
+    private static void GenerateRuntimeFallback(StringBuilder sb, int propCount, bool hasSelector)
+    {
+        var arguments = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+        _ = arguments.Append("objectToMonitor");
+
+        for (var i = 0; i < propCount; i++)
+        {
+            _ = arguments.Append(", obs").Append(i + 1);
+        }
+
+        if (hasSelector)
+        {
+            _ = arguments.Append(SelectorArgument);
+        }
+
+        CodeGeneratorHelpers.AppendStubFallbackCall(
+            sb,
+            Constants.WhenAnyObservableMethodName,
+            string.Empty,
+            arguments.ToStringAndReturn());
+    }
+
     /// <summary>Emits the if/else-if dispatch table that routes each matched invocation to its generated method.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The type group containing invocations that share a signature.</param>
@@ -453,7 +495,7 @@ internal static class WhenAnyObservableCodeGenerator
             }
 
             _ = sb.AppendLine("            {");
-            var selectorArg = hasSelector ? ", selector" : string.Empty;
+            var selectorArg = hasSelector ? SelectorArgument : string.Empty;
             var methodSuffix = CodeGeneratorHelpers.ComputeStableMethodSuffix(
                 inv.SourceTypeFullName,
                 inv.CallerFilePath,

@@ -30,7 +30,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenAny_00002A522B790276(objectToMonitor, selector);
             }
-            throw new global::System.InvalidOperationException("No generated WhenAny dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenAny<global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel, string, string>(objectToMonitor, property1, selector);
         }
 
         private static global::System.IObservable<string> __WhenAny_00002A5206691BE8(global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel obj, global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.MultipleInvocationsSameType.MyViewModel, string>, string> selector)

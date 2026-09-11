@@ -25,12 +25,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenChanged_7FFFDFDB348EEE2E(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanged<global::TestApp.MyWpfControl, string>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<string> __WhenChanged_7FFFDFDB348EEE2E(global::TestApp.MyWpfControl obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Text", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyWpfControl)__o).Text, true);
+            return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<string>(
+                obj,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyWpfControl, string>>)(__e => __e.Text)).Body,
+                "Text",
+                false,
+                5,
+                (object __o) => ((global::TestApp.MyWpfControl)__o).Text,
+                new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Text", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyWpfControl)__o).Text, true));
         }
 
     }

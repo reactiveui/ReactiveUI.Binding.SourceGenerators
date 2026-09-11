@@ -166,6 +166,7 @@ public sealed class DefaultViewLocator : IViewLocator
     }
 
     /// <inheritdoc/>
+    [RequiresDynamicCode("Resolving a view from an object closes IViewFor<> over its runtime type. Use the generic overload, or register the view, to stay ahead-of-time safe.")]
     public IViewFor? ResolveView(object? viewModel, string? contract)
     {
         if (viewModel is null)
@@ -195,7 +196,7 @@ public sealed class DefaultViewLocator : IViewLocator
             return view;
         }
 
-        // 3. MakeGenericType fallback (non-AOT, for compatibility)
+        // 3. Closing IViewFor<> over the runtime type, which needs an instantiation the compiler never saw
         return TryResolveViaReflection(viewModel, normalizedContract);
     }
 
@@ -216,7 +217,13 @@ public sealed class DefaultViewLocator : IViewLocator
     /// <param name="viewModel">The view model instance.</param>
     /// <param name="contract">The normalized contract string.</param>
     /// <returns>The resolved view, or <see langword="null"/>.</returns>
+    /// <remarks>
+    /// Closing <c>IViewFor&lt;&gt;</c> over a runtime type needs the runtime to build an instantiation the
+    /// compiler never saw, which an ahead-of-time build cannot do. Asking the runtime whether it can rather
+    /// than attempting it and catching keeps this tier off the AOT analyser's books and off the exception path.
+    /// </remarks>
     [ExcludeFromCodeCoverage]
+    [RequiresDynamicCode("Closes IViewFor<> over the view model's runtime type, which needs an instantiation the compiler never saw.")]
     private static IViewFor? TryResolveViaReflection(object viewModel, string contract)
     {
         try
@@ -232,8 +239,8 @@ public sealed class DefaultViewLocator : IViewLocator
         }
         catch (Exception ex) when (ex is InvalidOperationException or NotSupportedException or TypeLoadException or ArgumentException)
         {
-            // MakeGenericType cannot build the closed IViewFor<> on AOT platforms where the
-            // instantiation was trimmed; the caller falls back to the other resolution tiers.
+            // A closed IViewFor<> the compiler never saw cannot be built where its instantiation was trimmed,
+            // so the caller falls back to the other resolution tiers
         }
 
         return null;

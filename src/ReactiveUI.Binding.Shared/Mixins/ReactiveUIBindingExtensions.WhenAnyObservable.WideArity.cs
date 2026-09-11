@@ -16,6 +16,9 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public static partial class ReactiveUIBindingExtensions
 {
+    /// <summary>Reported when no generated dispatch claimed a WhenAnyObservable call site.</summary>
+    private const string NoWhenAnyObservableDispatchMessage =
+        "No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.";
 #if NET8_0_OR_GREATER
     /// <summary>Observes 1 observable property on the specified sender and switches to the latest observable.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
@@ -26,7 +29,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the latest observed observable.</returns>
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -43,7 +46,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the latest observed observable.</returns>
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -52,10 +55,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-
-        return ObservableChainHelpers.SwitchLatest(sender, obs1);
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -70,7 +70,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -90,7 +90,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -100,13 +100,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-
-        return Signal.Merge(
-            sender.WhenAnyObservable(obs1),
-            sender.WhenAnyObservable(obs2));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -123,8 +117,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -147,7 +141,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -158,15 +152,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-
-        return Signal.Merge(
-            sender.WhenAnyObservable(obs1),
-            sender.WhenAnyObservable(obs2),
-            sender.WhenAnyObservable(obs3));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -185,8 +171,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -212,7 +198,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -224,17 +210,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-
-        return Signal.Merge(
-            sender.WhenAnyObservable(obs1),
-            sender.WhenAnyObservable(obs2),
-            sender.WhenAnyObservable(obs3),
-            sender.WhenAnyObservable(obs4));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -255,8 +231,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -285,8 +261,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -299,19 +275,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-
-        return Signal.Merge(
-            sender.WhenAnyObservable(obs1),
-            sender.WhenAnyObservable(obs2),
-            sender.WhenAnyObservable(obs3),
-            sender.WhenAnyObservable(obs4),
-            sender.WhenAnyObservable(obs5));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -334,9 +298,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -368,8 +332,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -383,21 +347,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-
-        return Signal.Merge(
-            sender.WhenAnyObservable(obs1),
-            sender.WhenAnyObservable(obs2),
-            sender.WhenAnyObservable(obs3),
-            sender.WhenAnyObservable(obs4),
-            sender.WhenAnyObservable(obs5),
-            sender.WhenAnyObservable(obs6));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -422,9 +372,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -459,8 +409,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -475,23 +425,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-
-        return Signal.Merge(
-            sender.WhenAnyObservable(obs1),
-            sender.WhenAnyObservable(obs2),
-            sender.WhenAnyObservable(obs3),
-            sender.WhenAnyObservable(obs4),
-            sender.WhenAnyObservable(obs5),
-            sender.WhenAnyObservable(obs6),
-            sender.WhenAnyObservable(obs7));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -518,9 +452,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -558,8 +492,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -575,25 +509,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-        ArgumentExceptionHelper.ThrowIfNull(obs8);
-
-        return Signal.Merge(
-            sender.WhenAnyObservable(obs1),
-            sender.WhenAnyObservable(obs2),
-            sender.WhenAnyObservable(obs3),
-            sender.WhenAnyObservable(obs4),
-            sender.WhenAnyObservable(obs5),
-            sender.WhenAnyObservable(obs6),
-            sender.WhenAnyObservable(obs7),
-            sender.WhenAnyObservable(obs8));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -622,9 +538,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -665,8 +581,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -683,27 +599,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-        ArgumentExceptionHelper.ThrowIfNull(obs8);
-        ArgumentExceptionHelper.ThrowIfNull(obs9);
-
-        return Signal.Merge(
-            sender.WhenAnyObservable(obs1),
-            sender.WhenAnyObservable(obs2),
-            sender.WhenAnyObservable(obs3),
-            sender.WhenAnyObservable(obs4),
-            sender.WhenAnyObservable(obs5),
-            sender.WhenAnyObservable(obs6),
-            sender.WhenAnyObservable(obs7),
-            sender.WhenAnyObservable(obs8),
-            sender.WhenAnyObservable(obs9));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -734,9 +630,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -780,8 +676,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -799,29 +695,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-        ArgumentExceptionHelper.ThrowIfNull(obs8);
-        ArgumentExceptionHelper.ThrowIfNull(obs9);
-        ArgumentExceptionHelper.ThrowIfNull(obs10);
-
-        return Signal.Merge(
-            sender.WhenAnyObservable(obs1),
-            sender.WhenAnyObservable(obs2),
-            sender.WhenAnyObservable(obs3),
-            sender.WhenAnyObservable(obs4),
-            sender.WhenAnyObservable(obs5),
-            sender.WhenAnyObservable(obs6),
-            sender.WhenAnyObservable(obs7),
-            sender.WhenAnyObservable(obs8),
-            sender.WhenAnyObservable(obs9),
-            sender.WhenAnyObservable(obs10));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -854,9 +728,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -903,8 +777,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -923,31 +797,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-        ArgumentExceptionHelper.ThrowIfNull(obs8);
-        ArgumentExceptionHelper.ThrowIfNull(obs9);
-        ArgumentExceptionHelper.ThrowIfNull(obs10);
-        ArgumentExceptionHelper.ThrowIfNull(obs11);
-
-        return Signal.Merge(
-            sender.WhenAnyObservable(obs1),
-            sender.WhenAnyObservable(obs2),
-            sender.WhenAnyObservable(obs3),
-            sender.WhenAnyObservable(obs4),
-            sender.WhenAnyObservable(obs5),
-            sender.WhenAnyObservable(obs6),
-            sender.WhenAnyObservable(obs7),
-            sender.WhenAnyObservable(obs8),
-            sender.WhenAnyObservable(obs9),
-            sender.WhenAnyObservable(obs10),
-            sender.WhenAnyObservable(obs11));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -982,9 +832,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -1034,8 +884,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits values from the merged observed observables.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet>(
         this TSender sender,
         Expression<Func<TSender, IObservable<TRet>?>> obs1,
@@ -1055,33 +905,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-        ArgumentExceptionHelper.ThrowIfNull(obs8);
-        ArgumentExceptionHelper.ThrowIfNull(obs9);
-        ArgumentExceptionHelper.ThrowIfNull(obs10);
-        ArgumentExceptionHelper.ThrowIfNull(obs11);
-        ArgumentExceptionHelper.ThrowIfNull(obs12);
-
-        return Signal.Merge(
-            sender.WhenAnyObservable(obs1),
-            sender.WhenAnyObservable(obs2),
-            sender.WhenAnyObservable(obs3),
-            sender.WhenAnyObservable(obs4),
-            sender.WhenAnyObservable(obs5),
-            sender.WhenAnyObservable(obs6),
-            sender.WhenAnyObservable(obs7),
-            sender.WhenAnyObservable(obs8),
-            sender.WhenAnyObservable(obs9),
-            sender.WhenAnyObservable(obs10),
-            sender.WhenAnyObservable(obs11),
-            sender.WhenAnyObservable(obs12));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1101,8 +925,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -1128,7 +952,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -1139,16 +963,6 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
-        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
-        return CombineLatestObservable.Create(
-            o1,
-            o2,
-            (v1, v2) => selector(v1, v2));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 }

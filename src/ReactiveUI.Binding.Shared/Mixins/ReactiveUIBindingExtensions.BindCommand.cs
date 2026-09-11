@@ -14,6 +14,10 @@ namespace ReactiveUI.Binding;
 /// <summary>Extension methods for binding commands from a view model to controls on a view.</summary>
 public static partial class ReactiveUIBindingExtensions
 {
+    /// <summary>Reported when no generated dispatch claimed a BindCommand call site.</summary>
+    private const string NoBindCommandDispatchMessage =
+        "No generated BindCommand dispatch matched this call site. Use BindCommandUnsafe to resolve the expression at run time.";
+
 #if NET8_0_OR_GREATER
     /// <summary>Binds a command from a view model to a control on a view.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
@@ -30,7 +34,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site. Use BindCommandUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl>(
@@ -61,7 +65,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site. Use BindCommandUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo defaults must stay optional; overloads would shadow the generated overloads")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl>(
@@ -78,7 +82,7 @@ public static partial class ReactiveUIBindingExtensions
         where TControl : class
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoBindCommandDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -99,7 +103,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site. Use BindCommandUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl, TParam>(
@@ -133,7 +137,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site. Use BindCommandUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo defaults must stay optional; overloads would shadow the generated overloads")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
@@ -152,7 +156,7 @@ public static partial class ReactiveUIBindingExtensions
         where TControl : class
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoBindCommandDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -174,7 +178,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site. Use BindCommandUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
     public static IDisposable BindCommand<TView, TViewModel, TProp, TControl, TParam>(
@@ -209,7 +213,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindCommand dispatch matched this call site. Use BindCommandUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo defaults must stay optional; overloads would shadow the generated overloads")]
     [SuppressMessage("Design", "SST2309", Justification = "the CallerInfo and toEvent defaults must stay optional; overloads would shadow the generated overloads")]
@@ -228,6 +232,6 @@ public static partial class ReactiveUIBindingExtensions
         where TControl : class
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoBindCommandDispatchMessage);
     }
 }

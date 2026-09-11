@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -18,6 +19,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 /// </summary>
 public static class TestHelper
 {
+    /// <summary>The transitive reference set each runtime flavour compiles against, keyed by flavour.</summary>
+    private static readonly ConcurrentDictionary<bool, ImmutableArray<MetadataReference>> FlavourReferences = new();
+
     /// <summary>
     /// Returns the C# language version used to exercise the <c>CallerFilePath</c> + <c>CallerLineNumber</c>
     /// dispatch fallback. The version is deliberately kept below C# 10 (where
@@ -110,33 +114,15 @@ public static class TestHelper
         IEnumerable<MetadataReference> references = Basic.Reference.Assemblies.Net80.References.All;
 #endif
 
-        // Add ReactiveUI and transitive assembly references.
-        // ReactiveUI is seeded by ReactiveObject rather than IReactiveObject: the two live in
-        // different assemblies, and the walk only follows references outward, so seeding from the
-        // interface would leave the assembly that declares ReactiveObject out of the compilation.
-        var runtimeSeeds = useReactiveRuntime
-            ? new[] { typeof(ReactiveUI.Binding.Reactive.ReactiveUIBindingExtensions).Assembly }
-            : new[]
-            {
-                typeof(ReactiveUIBindingExtensions).Assembly,
-                typeof(ReactiveUI.Primitives.Concurrency.ISequencer).Assembly,
-            };
-
-        var seedAssemblies = new[]
-        {
-            typeof(ReactiveObject).Assembly, typeof(IReactiveObject).Assembly,
-            typeof(System.Reactive.Linq.Observable).Assembly,
-        }.Concat(runtimeSeeds).ToArray();
-
         var allReferences = references
-            .Concat(GetTransitiveReferences(seedAssemblies))
+            .Concat(RuntimeReferences(useReactiveRuntime))
             .Concat(additionalReferences);
 
         return CSharpCompilation.Create(
             assemblyName,
             [syntaxTree],
             allReferences,
-            new(OutputKind.DynamicallyLinkedLibrary));
+            new(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextFor(parseOptions)));
     }
 
     /// <summary>The parse options a build produces from a language version, which is what the tests usually name.</summary>
@@ -529,6 +515,53 @@ public static class TestHelper
         .Replace("CombineLatest", "CL", StringComparison.Ordinal)
         .Replace("GeneratesElseIf", "GEI", StringComparison.Ordinal)
         .Replace("SameTypeSignature", "STS", StringComparison.Ordinal);
+
+    /// <summary>Names the runtime and transitive references a flavour compiles against, building the set once.</summary>
+    /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>
+    /// <returns>The shared reference set.</returns>
+    /// <remarks>
+    /// A <see cref="MetadataReference"/> carries its own copy of the assembly's metadata, and a compilation keeps
+    /// every reference it was given alive. Building the set per compilation therefore holds one metadata heap per
+    /// referenced assembly per test, which is what takes the suite past a CI runner's memory. The set is fixed for
+    /// a flavour, so it is built once and shared - the framework set is shared for the same reason.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ImmutableArray<MetadataReference> RuntimeReferences(bool useReactiveRuntime) =>
+        FlavourReferences.GetOrAdd(useReactiveRuntime, static flavour =>
+        {
+            // ReactiveUI is seeded by ReactiveObject rather than IReactiveObject: the two live in
+            // different assemblies, and the walk only follows references outward, so seeding from the
+            // interface would leave the assembly that declares ReactiveObject out of the compilation.
+            var runtimeSeeds = flavour
+                ? new[] { typeof(ReactiveUI.Binding.Reactive.ReactiveUIBindingExtensions).Assembly }
+                : new[]
+                {
+                    typeof(ReactiveUIBindingExtensions).Assembly,
+                    typeof(ReactiveUI.Primitives.Concurrency.ISequencer).Assembly,
+                };
+
+            var seedAssemblies = new[]
+            {
+                typeof(ReactiveObject).Assembly, typeof(IReactiveObject).Assembly,
+                typeof(System.Reactive.Linq.Observable).Assembly,
+            }.Concat(runtimeSeeds).ToArray();
+
+            return [.. GetTransitiveReferences(seedAssemblies)];
+        });
+
+    /// <summary>Chooses the nullable context a consumer's language version would give its own source.</summary>
+    /// <param name="parseOptions">The options the consumer's source is parsed with.</param>
+    /// <returns>The nullable context options for the compilation.</returns>
+    /// <remarks>
+    /// Annotations rather than warnings: a scenario written with <c>T?</c> needs an annotation context or every
+    /// annotation is reported, and turning the warnings on as well would report the scenario's own null-flow
+    /// instead of what the test is about. A version below C# 8 has no context to establish.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static NullableContextOptions NullableContextFor(CSharpParseOptions parseOptions) =>
+        parseOptions.LanguageVersion.MapSpecifiedToEffectiveVersion() >= LanguageVersion.CSharp8
+            ? NullableContextOptions.Annotations
+            : NullableContextOptions.Disable;
 
     /// <summary>
     /// Recursively walks assembly references from the seed assemblies to collect

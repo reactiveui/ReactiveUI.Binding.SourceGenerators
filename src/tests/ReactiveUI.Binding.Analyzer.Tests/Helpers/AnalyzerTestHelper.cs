@@ -179,7 +179,7 @@ public static class AnalyzerTestHelper
         private const string RootNamespaceKey = "build_property.RootNamespace";
 
         /// <summary>The shared empty option map.</summary>
-        private static readonly Dictionary<string, string> EmptyOptions = new(StringComparer.Ordinal);
+        private static readonly Dictionary<string, string> EmptyOptions = [with(StringComparer.Ordinal)];
 
         /// <summary>The per-file options, which nothing under test reads.</summary>
         private static readonly FixedOptions NoOptions = new(EmptyOptions);

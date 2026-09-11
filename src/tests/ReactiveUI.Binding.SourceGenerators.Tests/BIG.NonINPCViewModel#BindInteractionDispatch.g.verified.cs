@@ -44,8 +44,18 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return serial;
         }
-
-        var interactionObs = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>(viewModel.Confirm);
+        var interactionObsMechanism = new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>(viewModel.Confirm);
+        var interactionObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel), "Confirm", 0, false);
+        var interactionObs = interactionObsRegistration == null
+            ? (global::System.IObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>)interactionObsMechanism
+            : (global::System.IObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>(
+                interactionObsRegistration,
+                viewModel,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel, global::ReactiveUI.Binding.IInteraction<string, bool>>>)(__e => __e.Confirm)).Body,
+                "Confirm",
+                (object __o) => ((global::SharedScenarios.BindInteraction.NonINPCViewModel.MyViewModel)__o).Confirm,
+                false,
+                true);
 
             var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(interactionObs, interaction =>
             {

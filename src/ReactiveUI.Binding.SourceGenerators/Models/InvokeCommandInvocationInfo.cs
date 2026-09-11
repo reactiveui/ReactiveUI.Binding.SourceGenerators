@@ -18,6 +18,12 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="Interceptor">
 /// Where this call site is, for a build that claims call sites outright rather than competing for them.
 /// </param>
+/// <param name="ReflectionOnly">
+/// Whether the selector named a path the compiler could read. A selector built at run time, or held in a
+/// variable, resolves to nothing at compile time, so the call site is served by the runtime engine instead of a
+/// generated observation - and the member claiming it says so with <c>[RequiresUnreferencedCode]</c>, which is
+/// what puts the warning on the call that actually reflects rather than on every call sharing its types.
+/// </param>
 internal sealed record InvokeCommandInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -25,4 +31,5 @@ internal sealed record InvokeCommandInvocationInfo(
     string TargetTypeFullName,
     EquatableArray<PropertyPathSegment> CommandPropertyPath,
     string CommandExpressionText,
-    InterceptorLocation Interceptor = default);
+    InterceptorLocation Interceptor = default,
+    bool ReflectionOnly = false);

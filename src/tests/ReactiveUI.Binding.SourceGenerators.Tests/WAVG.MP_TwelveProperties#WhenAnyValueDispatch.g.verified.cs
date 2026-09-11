@@ -58,7 +58,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenAnyValue_7FFFC43E653A6144(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenAnyValue dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenAnyValue<global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture, string, string, string, string, string, string, string, string, string, string, string, string>(objectToMonitor, property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, property11, property12);
         }
 
         private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, string, string, string, string, string, string, string, string, string, string, string>> __WhenAnyValue_7FFFC43E653A6144(global::SharedScenarios.WhenAnyValue.MultiPropertyTwelveProperties.WhenAnyFixture obj)

@@ -25,6 +25,7 @@ generation. Zero reflection, fully AOT/trimming safe, 3-7x faster than the legac
 - [What does it do?](#what-does-it-do)
 - [How does it work?](#how-does-it-work)
 - [How a call site reaches its generated code](#how-a-call-site-reaches-its-generated-code)
+- [When nothing claims the call](#when-nothing-claims-the-call)
 - [How do I install?](#how-do-i-install)
 - [Supported APIs](#supported-apis)
 - [Usage Examples](#usage-examples)
@@ -118,6 +119,48 @@ will not.
 
 Either way the same generated method runs, so bindings behave identically.
 
+## When nothing claims the call
+
+A generated overload wins overload resolution for every call site of its types, including the ones whose lambdas it
+could not read - an expression held in a variable, one assembled at run time, or a receiver typed as a type parameter.
+Those calls reach the runtime stub, which throws and names the overload that does resolve them:
+
+```csharp
+Expression<Func<MyViewModel, string>> selector = x => x.Name;
+
+vm.WhenChanged(selector);        // throws: no generated WhenChanged dispatch matched this call site
+vm.WhenChangedUnsafe(selector);  // walks the chain by reflection
+```
+
+Every API has an `Unsafe` twin:
+
+| Compile-time      | Reflection                                                     |
+|-------------------|----------------------------------------------------------------|
+| `WhenChanged`     | `WhenChangedUnsafe`                                            |
+| `WhenChanging`    | `WhenChangingUnsafe`                                           |
+| `WhenAnyValue`    | `WhenAnyValueUnsafe`                                           |
+| `BindOneWay`      | `BindOneWayUnsafe`                                             |
+| `BindTwoWay`      | `BindTwoWayUnsafe`                                             |
+| `Bind`            | `BindUnsafe`                                                   |
+| `OneWayBind`      | `OneWayBindUnsafe`                                             |
+| `BindTo`          | `BindToUnsafe`                                                 |
+| `BindCommand`     | `BindCommandUnsafe`                                            |
+| `BindInteraction` | `BindInteractionUnsafe`                                        |
+| `InvokeCommand`   | `InvokeCommandUnsafe`                                          |
+| `WhenAny`         | `WhenAnyUnsafe`                                                |
+| `WhenAnyObservable` | `WhenAnyObservableUnsafe`                                    |
+
+Every `Unsafe` overload carries `[RequiresUnreferencedCode]` and the unsuffixed names carry none, so a `PublishTrimmed`
+or `PublishAot` build reports the reflection at the call sites that asked for it and says nothing about the rest. That
+is what keeps a fully generated application free of IL2026 while leaving the runtime engine available to the call sites
+that need it. `RXUIBIND001`, `RXUIBIND006` and `RXUIBIND009` name those call sites while you build, before the throw.
+
+The scheduler overloads follow the same split, in `ReactiveSchedulerUnsafeExtensions`.
+
+`WhenAnyDynamic` is the one API with no twin. It takes the chain as an `Expression` the caller built, so there is
+never a lambda for the generator to read and no compile-time half to offer - the unsuffixed overloads carry the
+annotation themselves.
+
 ### What the package ships
 
 The generator and its analyzer are packed once per compiler generation:
@@ -190,6 +233,9 @@ Platform-specific packages provide DependencyProperty observation and other plat
 
 All APIs support single properties, deep property chains (e.g. `x => x.Address.City`), and multi-property observation (
 up to 12 properties for `WhenAnyValue`/`WhenChanged`).
+
+Each of them also has an `Unsafe` twin that resolves the expression by reflection, for the call sites the generator
+cannot read - see [When nothing claims the call](#when-nothing-claims-the-call).
 
 ## Usage Examples
 
@@ -519,15 +565,15 @@ The separate analyzer package reports the following diagnostics:
 
 | ID          | Severity | Description                                                                                                                                                              |
 |-------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| RXUIBIND001 | Info     | Expression must be an inline lambda for compile-time optimisation. Variable or method references fall back to runtime.                                                   |
+| RXUIBIND001 | Info     | Expression must be an inline lambda for compile-time optimisation. A variable or method reference needs the `Unsafe` overload.                                           |
 | RXUIBIND002 | Warning  | Type has no observable properties and does not implement any observable notification mechanism.                                                                          |
 | RXUIBIND003 | Warning  | Expression accesses a private or protected member which cannot be observed by a generated extension method.                                                              |
 | RXUIBIND004 | Warning  | Type does not support before-change notifications (WhenChanging). WPF DependencyObjects, WinForms Components, and Android Views only support after-change notifications. |
 | RXUIBIND005 | Info     | Source type implements INotifyDataErrorInfo; validation state propagation is not generated and requires runtime engine or manual ErrorsChanged subscription.             |
-| RXUIBIND006 | Warning  | Expression contains an unsupported path segment (indexer, field, or method call). Only simple property access chains can be observed by the source generator.            |
+| RXUIBIND006 | Warning  | Expression contains an unsupported path segment (indexer, field, or method call). Only simple property access chains are generated; the rest need the `Unsafe` overload.  |
 | RXUIBIND007 | Warning  | BindCommand control has no bindable event. Specify the `toEvent` parameter explicitly.                                                                                   |
 | RXUIBIND008 | Warning  | The property selected in a BindInteraction expression does not implement `IInteraction<TInput, TOutput>`.                                                                |
-| RXUIBIND009 | Warning  | The generated binding dispatch is out of reach from this file, so the call falls back to the runtime stub. Not reported where the call site is claimed by an interceptor. |
+| RXUIBIND009 | Warning  | The generated binding dispatch is out of reach from this file, so the call reaches the throwing stub. Not reported where the call site is claimed by an interceptor.      |
 | RXUIBIND010 | Warning  | The observed path passes through a type that raises no notification, so it is read once and the observation stops following the path there.                              |
 | RXUIBIND011 | Warning  | The call resolved to ReactiveUI's own mixin, so nothing is generated for it and it takes the runtime expression engine. Import `ReactiveUI.Binding` in the file.          |
 
@@ -561,7 +607,8 @@ first, and the view's own first value is then weighed against what was just writ
 A generated overload has to name the bound types, and a call made through a type parameter names none - the
 type is only known once something closes it. Those call sites are left to the runtime stub, so a generic
 binding helper compiles and throws when it runs rather than emitting an overload naming a type parameter,
-which would fail the consumer's build outright.
+which would fail the consumer's build outright. Calling the `Unsafe` twin from the helper binds it by
+reflection instead, and marks the helper as the reflection boundary it is.
 
 ### A silent link in a path is reported at compile time, not at run time
 

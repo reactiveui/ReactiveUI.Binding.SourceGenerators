@@ -29,7 +29,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenAny_7FFFD022211E67B0(objectToMonitor, selector);
             }
-            throw new global::System.InvalidOperationException("No generated WhenAny dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenAny<global::SharedScenarios.WhenAny.MultiPropertyTwoProperties.MyViewModel, string, string, string>(objectToMonitor, property1, property2, selector);
         }
 
         private static global::System.IObservable<string> __WhenAny_7FFFD022211E67B0(global::SharedScenarios.WhenAny.MultiPropertyTwoProperties.MyViewModel obj, global::System.Func<global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.MultiPropertyTwoProperties.MyViewModel, string>, global::ReactiveUI.Binding.IObservedChange<global::SharedScenarios.WhenAny.MultiPropertyTwoProperties.MyViewModel, string>, string> selector)

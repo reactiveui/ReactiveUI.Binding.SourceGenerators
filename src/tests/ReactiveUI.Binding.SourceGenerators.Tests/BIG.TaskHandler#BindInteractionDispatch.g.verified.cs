@@ -44,12 +44,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return serial;
         }
-
-        var interactionObs = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>(
+        var interactionObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(
             viewModel,
             "Confirm",
             (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.TaskHandler.MyViewModel)__o).Confirm,
             true);
+        var interactionObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindInteraction.TaskHandler.MyViewModel), "Confirm", 5, false);
+        var interactionObs = interactionObsRegistration == null
+            ? (global::System.IObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>)interactionObsMechanism
+            : (global::System.IObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::ReactiveUI.Binding.IInteraction<string, bool>>(
+                interactionObsRegistration,
+                viewModel,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.TaskHandler.MyViewModel, global::ReactiveUI.Binding.IInteraction<string, bool>>>)(__e => __e.Confirm)).Body,
+                "Confirm",
+                (object __o) => ((global::SharedScenarios.BindInteraction.TaskHandler.MyViewModel)__o).Confirm,
+                false,
+                true);
 
             var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(interactionObs, interaction =>
             {

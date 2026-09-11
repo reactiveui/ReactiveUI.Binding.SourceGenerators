@@ -36,8 +36,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -67,7 +67,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -79,20 +79,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
-        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
-        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
-        return CombineLatestObservable.Create(
-            o1,
-            o2,
-            o3,
-            (v1, v2, v3) => selector(v1, v2, v3));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -118,9 +105,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -154,8 +141,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -168,23 +155,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
-        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
-        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
-        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
-        return CombineLatestObservable.Create(
-            o1,
-            o2,
-            o3,
-            o4,
-            (v1, v2, v3, v4) => selector(v1, v2, v3, v4));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -213,9 +184,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -253,8 +224,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -268,26 +239,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
-        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
-        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
-        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
-        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
-        return CombineLatestObservable.Create(
-            o1,
-            o2,
-            o3,
-            o4,
-            o5,
-            (v1, v2, v3, v4, v5) => selector(v1, v2, v3, v4, v5));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -319,9 +271,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -363,8 +315,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -379,29 +331,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
-        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
-        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
-        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
-        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
-        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
-        return CombineLatestObservable.Create(
-            o1,
-            o2,
-            o3,
-            o4,
-            o5,
-            o6,
-            (v1, v2, v3, v4, v5, v6) => selector(v1, v2, v3, v4, v5, v6));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -436,9 +366,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -484,8 +414,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -501,32 +431,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
-        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
-        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
-        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
-        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
-        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
-        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
-        return CombineLatestObservable.Create(
-            o1,
-            o2,
-            o3,
-            o4,
-            o5,
-            o6,
-            o7,
-            (v1, v2, v3, v4, v5, v6, v7) => selector(v1, v2, v3, v4, v5, v6, v7));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -564,9 +469,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -616,8 +521,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -634,35 +539,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-        ArgumentExceptionHelper.ThrowIfNull(obs8);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
-        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
-        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
-        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
-        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
-        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
-        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
-        var o8 = ObservableChainHelpers.SwitchLatest(sender, obs8);
-        return CombineLatestObservable.Create(
-            o1,
-            o2,
-            o3,
-            o4,
-            o5,
-            o6,
-            o7,
-            o8,
-            (v1, v2, v3, v4, v5, v6, v7, v8) => selector(v1, v2, v3, v4, v5, v6, v7, v8));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -703,9 +580,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -759,8 +636,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -778,38 +655,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-        ArgumentExceptionHelper.ThrowIfNull(obs8);
-        ArgumentExceptionHelper.ThrowIfNull(obs9);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
-        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
-        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
-        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
-        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
-        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
-        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
-        var o8 = ObservableChainHelpers.SwitchLatest(sender, obs8);
-        var o9 = ObservableChainHelpers.SwitchLatest(sender, obs9);
-        return CombineLatestObservable.Create(
-            o1,
-            o2,
-            o3,
-            o4,
-            o5,
-            o6,
-            o7,
-            o8,
-            o9,
-            (v1, v2, v3, v4, v5, v6, v7, v8, v9) => selector(v1, v2, v3, v4, v5, v6, v7, v8, v9));
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -853,9 +699,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -913,8 +759,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -933,41 +779,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-        ArgumentExceptionHelper.ThrowIfNull(obs8);
-        ArgumentExceptionHelper.ThrowIfNull(obs9);
-        ArgumentExceptionHelper.ThrowIfNull(obs10);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
-        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
-        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
-        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
-        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
-        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
-        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
-        var o8 = ObservableChainHelpers.SwitchLatest(sender, obs8);
-        var o9 = ObservableChainHelpers.SwitchLatest(sender, obs9);
-        var o10 = ObservableChainHelpers.SwitchLatest(sender, obs10);
-        return CombineLatestObservable.Create(
-            o1,
-            o2,
-            o3,
-            o4,
-            o5,
-            o6,
-            o7,
-            o8,
-            o9,
-            o10,
-            selector);
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1014,9 +826,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -1078,8 +890,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -1099,44 +911,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-        ArgumentExceptionHelper.ThrowIfNull(obs8);
-        ArgumentExceptionHelper.ThrowIfNull(obs9);
-        ArgumentExceptionHelper.ThrowIfNull(obs10);
-        ArgumentExceptionHelper.ThrowIfNull(obs11);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
-        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
-        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
-        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
-        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
-        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
-        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
-        var o8 = ObservableChainHelpers.SwitchLatest(sender, obs8);
-        var o9 = ObservableChainHelpers.SwitchLatest(sender, obs9);
-        var o10 = ObservableChainHelpers.SwitchLatest(sender, obs10);
-        var o11 = ObservableChainHelpers.SwitchLatest(sender, obs11);
-        return CombineLatestObservable.Create(
-            o1,
-            o2,
-            o3,
-            o4,
-            o5,
-            o6,
-            o7,
-            o8,
-            o9,
-            o10,
-            o11,
-            selector);
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1186,9 +961,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -1254,9 +1029,9 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence of selector results.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyObservable dispatch matched this call site. Use WhenAnyObservableUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
-    [RequiresUnreferencedCode("Runtime observation fallback uses reflection-based expression analysis.")]
     public static IObservable<TRet> WhenAnyObservable<TSender, TRet, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
         this TSender sender,
         Expression<Func<TSender, IObservable<T1>?>> obs1,
@@ -1277,46 +1052,6 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(obs1);
-        ArgumentExceptionHelper.ThrowIfNull(obs2);
-        ArgumentExceptionHelper.ThrowIfNull(obs3);
-        ArgumentExceptionHelper.ThrowIfNull(obs4);
-        ArgumentExceptionHelper.ThrowIfNull(obs5);
-        ArgumentExceptionHelper.ThrowIfNull(obs6);
-        ArgumentExceptionHelper.ThrowIfNull(obs7);
-        ArgumentExceptionHelper.ThrowIfNull(obs8);
-        ArgumentExceptionHelper.ThrowIfNull(obs9);
-        ArgumentExceptionHelper.ThrowIfNull(obs10);
-        ArgumentExceptionHelper.ThrowIfNull(obs11);
-        ArgumentExceptionHelper.ThrowIfNull(obs12);
-        ArgumentExceptionHelper.ThrowIfNull(selector);
-
-        var o1 = ObservableChainHelpers.SwitchLatest(sender, obs1);
-        var o2 = ObservableChainHelpers.SwitchLatest(sender, obs2);
-        var o3 = ObservableChainHelpers.SwitchLatest(sender, obs3);
-        var o4 = ObservableChainHelpers.SwitchLatest(sender, obs4);
-        var o5 = ObservableChainHelpers.SwitchLatest(sender, obs5);
-        var o6 = ObservableChainHelpers.SwitchLatest(sender, obs6);
-        var o7 = ObservableChainHelpers.SwitchLatest(sender, obs7);
-        var o8 = ObservableChainHelpers.SwitchLatest(sender, obs8);
-        var o9 = ObservableChainHelpers.SwitchLatest(sender, obs9);
-        var o10 = ObservableChainHelpers.SwitchLatest(sender, obs10);
-        var o11 = ObservableChainHelpers.SwitchLatest(sender, obs11);
-        var o12 = ObservableChainHelpers.SwitchLatest(sender, obs12);
-        return CombineLatestObservable.Create(
-            o1,
-            o2,
-            o3,
-            o4,
-            o5,
-            o6,
-            o7,
-            o8,
-            o9,
-            o10,
-            o11,
-            o12,
-            selector);
+        throw new InvalidOperationException(NoWhenAnyObservableDispatchMessage);
     }
 }

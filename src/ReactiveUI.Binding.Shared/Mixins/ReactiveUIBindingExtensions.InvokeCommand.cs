@@ -18,6 +18,10 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public static partial class ReactiveUIBindingExtensions
 {
+    /// <summary>Reported when no generated dispatch claimed an InvokeCommand call site.</summary>
+    private const string NoInvokeCommandDispatchMessage =
+        "No generated InvokeCommand dispatch matched this call site. Use InvokeCommandUnsafe to resolve the expression at run time.";
+
     /// <summary>Executes a command with each value the sequence produces.</summary>
     /// <typeparam name="T">The type of the value offered as the command parameter.</typeparam>
     /// <param name="source">The sequence driving the executions.</param>
@@ -43,8 +47,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, stops executing the command and stops observing the property.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="commandProperty"/> is null.</exception>
-    [RequiresUnreferencedCode("Runtime command fallback resolves the property chain by reflection.")]
+    /// <exception cref="InvalidOperationException">No generated InvokeCommand dispatch matched this call site. Use InvokeCommandUnsafe to resolve the expression at run time.</exception>
     public static IDisposable InvokeCommand<T, TTarget>(
         this IObservable<T> source,
         TTarget? target,
@@ -63,8 +66,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, stops executing the command and stops observing the property.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="commandProperty"/> is null.</exception>
-    [RequiresUnreferencedCode("Runtime command fallback resolves the property chain by reflection.")]
+    /// <exception cref="InvalidOperationException">No generated InvokeCommand dispatch matched this call site. Use InvokeCommandUnsafe to resolve the expression at run time.</exception>
     public static IDisposable InvokeCommand<T, TTarget>(
         this IObservable<T> source,
         TTarget? target,
@@ -73,5 +75,5 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TTarget : class
 #endif
-        => RuntimeCommandFallback.InvokeCommand(source, target, commandProperty);
+        => throw new InvalidOperationException(NoInvokeCommandDispatchMessage);
 }

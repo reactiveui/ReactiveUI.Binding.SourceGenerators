@@ -29,7 +29,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenChanging_00001B25E45F4801(objectToMonitor, selector);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanging dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanging<global::SharedScenarios.WhenChanging.MultiPropertyWithSelector.MyViewModel, string, string, string>(objectToMonitor, property1, property2, selector);
         }
 
         private static global::System.IObservable<string> __WhenChanging_00001B25E45F4801(global::SharedScenarios.WhenChanging.MultiPropertyWithSelector.MyViewModel obj, global::System.Func<string, string, string> selector)

@@ -18,6 +18,9 @@ public class DispatchStubView : IViewFor, INotifyPropertyChanged
     /// <summary>Gets the control a command binding names.</summary>
     public DispatchStubControl Control { get; } = new();
 
+    /// <summary>Gets the control that no registered command binder reaches.</summary>
+    public UnclaimedStubControl Surface { get; } = new();
+
     /// <summary>Gets or sets the bound text.</summary>
     public string Caption
     {

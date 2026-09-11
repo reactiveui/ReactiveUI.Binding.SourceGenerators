@@ -303,6 +303,58 @@ public static class RuntimeBindingFallback
             bindingExpression);
     }
 
+    /// <summary>Writes every value a sequence produces into a property, converting it on the way.</summary>
+    /// <typeparam name="TValue">The type the sequence produces.</typeparam>
+    /// <typeparam name="TTarget">The type declaring the written property.</typeparam>
+    /// <typeparam name="TTargetValue">The type of the written property.</typeparam>
+    /// <param name="source">The sequence driving the writes.</param>
+    /// <param name="target">The object declaring the written property.</param>
+    /// <param name="targetProperty">The property to write.</param>
+    /// <param name="conversionHint">An optional hint handed to the converter.</param>
+    /// <param name="converterOverride">A converter that takes precedence over the registered ones.</param>
+    /// <param name="scheduler">The scheduler the writes are delivered on, or null for the main thread.</param>
+    /// <param name="bindingExpression">The bound expression, named when a write faults.</param>
+    /// <returns>A disposable that, when disposed, stops writing.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="targetProperty"/> is null.</exception>
+    /// <remarks>
+    /// A value the converter refuses is written as the target type's default, which is what the generated path
+    /// does with the same converter, so a call site behaves the same whether or not it was claimed.
+    /// A null target holds no property to write, so the values are dropped rather than faulting the sequence.
+    /// </remarks>
+    [RequiresUnreferencedCode("Runtime binding fallback resolves the property chain by reflection.")]
+    public static IDisposable BindTo<TValue, TTarget, TTargetValue>(
+        IObservable<TValue> source,
+        TTarget? target,
+        Expression<Func<TTarget, TTargetValue>> targetProperty,
+        object? conversionHint,
+        IBindingTypeConverter? converterOverride,
+        ISequencer? scheduler,
+        string bindingExpression)
+        where TTarget : class
+    {
+        ArgumentExceptionHelper.ThrowIfNull(source);
+        ArgumentExceptionHelper.ThrowIfNull(targetProperty);
+
+        if (target is null)
+        {
+            return EmptyDisposable.Instance;
+        }
+
+        var converted = new MapSignal<TValue, TTargetValue>(
+            source,
+            value =>
+            {
+                _ = RuntimeBindingConverter.TryConvert<TValue, TTargetValue>(
+                    value,
+                    conversionHint,
+                    converterOverride,
+                    out var result);
+                return result;
+            });
+
+        return Write(Schedule(converted, scheduler), target, targetProperty, bindingExpression);
+    }
+
     /// <summary>Wraps a two-way pair of writes as the binding value the view-first APIs hand back.</summary>
     /// <typeparam name="TViewModel">The type declaring the view-model property.</typeparam>
     /// <typeparam name="TView">The type declaring the view property.</typeparam>

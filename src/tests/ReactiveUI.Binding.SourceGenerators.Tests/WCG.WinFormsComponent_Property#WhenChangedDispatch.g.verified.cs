@@ -25,12 +25,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenChanged_0000245FAC302C0E(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanged<global::TestApp.MyWinFormsControl, string>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<string> __WhenChanged_0000245FAC302C0E(global::TestApp.MyWinFormsControl obj)
         {
-            return new global::ReactiveUI.Binding.Observables.EventObservable<string>(__h => ((global::TestApp.MyWinFormsControl)obj).TextChanged += __h, __h => ((global::TestApp.MyWinFormsControl)obj).TextChanged -= __h, () => ((global::TestApp.MyWinFormsControl)obj).Text, true);
+            return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<string>(
+                obj,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyWinFormsControl, string>>)(__e => __e.Text)).Body,
+                "Text",
+                false,
+                8,
+                (object __o) => ((global::TestApp.MyWinFormsControl)__o).Text,
+                new global::ReactiveUI.Binding.Observables.EventObservable<string>(__h => ((global::TestApp.MyWinFormsControl)obj).TextChanged += __h, __h => ((global::TestApp.MyWinFormsControl)obj).TextChanged -= __h, () => ((global::TestApp.MyWinFormsControl)obj).Text, true));
         }
 
     }

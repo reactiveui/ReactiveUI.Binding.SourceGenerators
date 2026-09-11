@@ -25,7 +25,7 @@ jobs:
             # CombineLatest observables are one class per arity; each repetition is what makes the call site
             # allocation-free and reflection-free, so collapsing them is not an option. The platform packages
             # implement the same small abstractions against different UI frameworks.
-            sonarCpdExclusions: '**/tests/**,**/benchmarks/**,**/*.WideArity.cs,**/Observables/CombineLatest*Observable.cs,**/ReactiveUI.Binding.Maui.Shared/**,**/ReactiveUI.Binding.Wpf.Shared/**,**/ReactiveUI.Binding.WinForms.Shared/**,**/ReactiveUI.Binding.Platform.Shared/**'
+            sonarCpdExclusions: '**/tests/**,**/benchmarks/**,**/*.WideArity.cs,**/*.WideArity.Unsafe.cs,**/Observables/CombineLatest*Observable.cs,**/ReactiveUI.Binding.Maui.Shared/**,**/ReactiveUI.Binding.Wpf.Shared/**,**/ReactiveUI.Binding.WinForms.Shared/**,**/ReactiveUI.Binding.Platform.Shared/**'
             sonarTestExclusions: '**/tests/**,**/benchmarks/**'
             # Matches ci-build.yml: the MTP/TUnit suite is far slower on Windows net10
             # than on net8/9, so allow generous headroom for the coverage run.

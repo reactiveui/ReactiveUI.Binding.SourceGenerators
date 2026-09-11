@@ -5,6 +5,14 @@
     <PackageTags>reactiveui;binding;observableforproperty</PackageTags>
   </PropertyGroup>
 
+  <!-- The .editorconfig sets every IL20xx/IL30xx rule to error; the analysers that raise them only run when
+       these are set, so without this the policy never reaches the source that ships. Only the frameworks that
+       have a linker - net4x has neither a trimmer nor an AOT compiler. -->
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
   <!-- The seam source, compiled here with the lean identity: ISequencer resolves to
        ReactiveUI.Primitives.Concurrency and the namespaces stay unshifted. ReactiveUI.Binding.Reactive
        links these same files under REACTIVE_SHIM. -->
