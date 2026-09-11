@@ -49,22 +49,8 @@ jobs:
             - name: Report the installed runtimes
               run: dotnet --info
 
-            # BenchmarkDotNet generates a project per job under the benchmark's own output folder, and the
-            # NativeAOT build writes below that again. From the runner's checkout path the linker's module
-            # definition file lands past 260 characters, so link.exe cannot open it and every NativeAOT job
-            # reports NA while the run still exits zero. Working from the drive root keeps it inside the limit.
-            - name: Clone the tree to a short path
-              run: |
-                  git clone --quiet "$env:GITHUB_WORKSPACE" C:\b
-                  git -C C:\b checkout --quiet --detach $env:GITHUB_SHA
-
-                  # Cloning leaves origin pointing at the checkout's own directory, which the git tasks
-                  # behind source linking reject as a URL. The packages the benchmarks reference do ship,
-                  # so they keep source linking and need a remote that names the repository.
-                  git -C C:\b remote set-url origin "https://github.com/$env:GITHUB_REPOSITORY"
-
             - name: Run the benchmarks
-              working-directory: C:\b\src
+              working-directory: src
               env:
                   # Taken through the environment rather than interpolated into the command, so the
                   # input cannot extend it.
@@ -84,7 +70,12 @@ jobs:
 
                       # The host TFM only launches the switcher; each benchmark's SimpleJob attributes
                       # decide which runtimes are actually measured.
-                      dotnet run --project $project -c Release -f net10.0 -- `
+                      #
+                      # BenchmarkDotNet generates a project per job beside the built assembly, and the
+                      # NativeAOT build writes below that again. Left in the default output folder the
+                      # linker's module definition file lands past 260 characters, link.exe cannot open it,
+                      # and every NativeAOT job reports NA while the run still exits zero.
+                      dotnet run --project $project -c Release -f net10.0 --artifacts-path C:\a -- `
                           --filter $env:FILTER `
                           --artifacts "$env:GITHUB_WORKSPACE/benchmark-artifacts/$name" `
                           --exporters github json html csv

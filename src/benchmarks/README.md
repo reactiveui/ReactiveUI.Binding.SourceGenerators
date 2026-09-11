@@ -112,10 +112,10 @@ dotnet run -c Release -f net10.0 -- --filter '*'
 
 Release configuration is required. A Debug build measures the absence of the optimiser.
 
-On Windows, run them from a short path such as `C:\b`. BenchmarkDotNet generates a project per job inside the
-benchmark's own output folder, and the NativeAOT build writes below that again; from a deep checkout the
-linker's module definition file lands past 260 characters, and every NativeAOT job then reports `NA` instead
-of a measurement.
+On Windows, add `--artifacts-path C:\a`. BenchmarkDotNet generates a project per job beside the built
+assembly, and the NativeAOT build writes below that again; from a deep checkout the linker's module
+definition file lands past 260 characters, and every NativeAOT job then reports `NA` instead of a
+measurement.
 
 Results land in `BenchmarkDotNet.Artifacts/results`, which is ignored by git.
 
