@@ -65,35 +65,33 @@ ahead-of-time published application keeps working.
 
 ## What it does
 
-ReactiveUI's binding engine reads a lambda at run time. It compiles the expression tree, then finds each
-property by name. That costs time on every binding, and it defeats a trimmer, which cannot see which members
-the reflection will ask for.
+A property raises an event when it changes. Which event depends on the type that declares it.
 
-This generator does the same work while you compile. It reads the lambda from the syntax tree and emits a
-method that reads the property directly. The emitted code names every type and every member, so a trimmer can
-see all of it.
+The generator looks at that type while you compile, works out which event to listen to, and writes the code
+that subscribes. Your call site then just subscribes to the chain.
 
-Three things disappear as a result.
+ReactiveUI does the same job at run time instead. It compiles the expression tree, then finds each property by
+name. That costs time on every binding, and a trimmer cannot see which members the reflection will ask for.
 
-- No expression tree is compiled at run time.
-- No member is found by name. Every property read is a direct call.
-- The base package does not depend on System.Reactive. Generated code returns `IObservable<T>` from the BCL.
+Doing it at compile time removes both problems. The emitted code names every type and every member, so
+trimming and ahead-of-time publishing keep working. The base package also has no System.Reactive dependency,
+because generated code returns `IObservable<T>` from the BCL.
 
 ## How it works
 
-The generator runs three pipelines while your project compiles.
+The generator needs two things from your code.
 
-**Types.** It scans your classes for a notification mechanism. A class might raise `PropertyChanged`, or
-derive from a WPF `DependencyObject`, or inherit `NSObject`. Each mechanism is observed differently, so the
-generator records which one reaches each property.
+First, which event each type raises. A class raising `PropertyChanged` is listened to one way, a WPF
+`DependencyObject` another, an `NSObject` another again. The generator records which mechanism reaches each
+property.
 
-**Call sites.** It scans your binding calls and reads the property path out of each lambda. Every call site
-gets its own method.
+Second, which properties each call site names. It reads the path out of the lambda and emits one method per
+call site, subscribing to the events those properties raise. A chain such as `x => x.Address.City` subscribes
+to each link, and re-subscribes further down when an intermediate object is replaced.
 
-**Views.** It scans for `IViewFor<T>` implementations and writes a type switch that resolves a view without
-reflection.
+It also scans for `IViewFor<T>` and writes a type switch that resolves a view without reflection.
 
-Here is a real emitted method for `vm.WhenChanged(x => x.Name)` on a class that raises `PropertyChanged`:
+Here is what it emits for `vm.WhenChanged(x => x.Name)` on a class that raises `PropertyChanged`:
 
 ```csharp
 private static global::System.IObservable<string> __WhenChanged_7FFFD2E8D6FC818E(MyViewModel obj)
@@ -110,30 +108,23 @@ private static global::System.IObservable<string> __WhenChanged_7FFFD2E8D6FC818E
 }
 ```
 
-The last argument is the generated observation. The `5` is the affinity the generator chose it with.
-`Choose` offers the link to any `ICreatesObservableForProperty` you registered at run time, and takes yours
-only when it scores higher. That is how a platform plugin still wins, without any of it costing reflection:
-the property name, the declaring type and the getter are all fixed at compile time.
+The last argument is the subscription the generator wrote. Everything it needs is fixed at compile time: the
+declaring type, the property name and the getter.
+
+`Choose` offers the link to any `ICreatesObservableForProperty` you registered, and takes yours when it scores
+higher than the mechanism the generator picked. That is how a platform plugin still wins without costing any
+reflection.
 
 ## How a call site reaches its generated code
 
-There are two mechanisms. Your compiler decides which one you get.
+Your compiler decides this, and it matters only when something goes wrong.
 
-**Roslyn 4.13 and newer intercept the call.** The generator tells the compiler to run its method in place of
-yours. Nothing goes through name lookup, so this works from any file and any language version, including
+Roslyn 4.13 and newer intercept the call, which means the compiler runs the generated method in place of
+yours. Nothing goes through name lookup, so it works from any file and any language version, including
 `<LangVersion>7.3</LangVersion>` on .NET Framework 4.6.2.
 
-```csharp
-[InterceptsLocation(1, "j8MnGMWiKja+66BWQ5M81agPAABQcm9ncmFtLmNz")]  // vm.WhenChanged(x => x.Name), line 12
-internal static IObservable<string> __Intercept_WhenChanged_7FFF(
-    this MyViewModel objectToMonitor,
-    Expression<Func<MyViewModel, string>> property1, /* caller-info parameters */)
-    => __WhenChanged_7FFF(objectToMonitor);
-```
-
-**Roslyn 4.8 to 4.12 emit an overload that competes for the call.** A non-generic method beats the generic
-runtime stub, so the generated overload wins, but only where extension-method lookup finds it. RXUIBIND009
-tells you when it will not.
+Roslyn 4.8 to 4.12 emit an overload that competes for the call instead. It wins wherever
+extension-method lookup finds it, and RXUIBIND009 tells you where it will not.
 
 Both routes run the same method, so a binding behaves the same either way.
 
@@ -154,10 +145,15 @@ dispatch file twice and fail your build.
 
 ## When nothing claims the call
 
-A generated overload wins overload resolution for every call site of its types. That includes the ones whose
-lambda it could not read: an expression held in a variable, one assembled at run time, or a receiver typed as
-a type parameter. Those calls reach the runtime stub, which throws and names the overload that does resolve
-them.
+Some call sites cannot be read while you compile. An expression held in a variable, one assembled at run
+time, or a receiver typed as a type parameter all name no path the generator can see.
+
+Those call sites get the `Unsafe` overload, which is ReactiveUI's reflection pipeline. It walks the chain at
+run time and finds each property by name, so it is not guaranteed to survive trimming or ahead-of-time
+publishing. Every other overload is.
+
+Asking for the plain name where nothing was generated throws, and the message names the overload that
+resolves it:
 
 ```csharp
 Expression<Func<MyViewModel, string>> selector = x => x.Name;
