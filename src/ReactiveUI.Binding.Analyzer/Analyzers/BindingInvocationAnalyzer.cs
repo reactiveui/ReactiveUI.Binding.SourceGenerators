@@ -529,7 +529,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            if (TypeAnalyzer.HasObservableMechanism(linkType, context.Compilation))
+            if (AnalyzerHelpers.HasObservableMechanism(linkType, context.Compilation))
             {
                 continue;
             }
