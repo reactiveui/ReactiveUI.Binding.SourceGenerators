@@ -13,6 +13,12 @@ public class InvokeCommandGeneratorTests
     /// <summary>The <c>InvokeCommandDispatch.g.cs</c> name these tests generate against.</summary>
     private const string InvokeCommandDispatchgcsName = "InvokeCommandDispatch.g.cs";
 
+    /// <summary>The attribute a generated member carries when only the runtime engine can serve it.</summary>
+    private const string RequiresUnreferencedCode = "RequiresUnreferencedCode";
+
+    /// <summary>The runtime engine a call site the compiler could not read is handed to.</summary>
+    private const string RuntimeCommandFallback = "RuntimeCommandFallback.InvokeCommand";
+
     /// <summary>Verifies InvokeCommand observing a command property on the target.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -177,10 +183,10 @@ public class InvokeCommandGeneratorTests
         await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchgcsName);
     }
 
-    /// <summary>A selector whose body is no property path leaves nothing to observe.</summary>
+    /// <summary>A selector whose body is no property path is served by the runtime engine, and says so.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task SelectorWithoutAPropertyPath_GeneratesNoDispatch()
+    public async Task SelectorWithoutAPropertyPath_GeneratesAnAnnotatedRuntimeDispatch()
     {
         const string source = """
                               using System;
@@ -213,7 +219,10 @@ public class InvokeCommandGeneratorTests
 
         await result.HasNoGeneratorDiagnostics();
         await result.CompilationSucceeds();
-        await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchgcsName);
+
+        var dispatch = result.GeneratedSources[InvokeCommandDispatchgcsName];
+        await Assert.That(dispatch).Contains(RequiresUnreferencedCode);
+        await Assert.That(dispatch).Contains(RuntimeCommandFallback);
     }
 
     /// <summary>A receiver that is no stream of values has nothing to drive an execution.</summary>
@@ -255,10 +264,10 @@ public class InvokeCommandGeneratorTests
         await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchgcsName);
     }
 
-    /// <summary>A selector held in a variable names no path to read, so nothing is generated for it.</summary>
+    /// <summary>A selector held in a variable names no path to read, so the runtime engine serves it.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task SelectorFromAVariable_GeneratesNoDispatch()
+    public async Task SelectorFromAVariable_GeneratesAnAnnotatedRuntimeDispatch()
     {
         const string source = """
                               using System;
@@ -290,7 +299,10 @@ public class InvokeCommandGeneratorTests
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.HasNoGeneratorDiagnostics();
-        await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchgcsName);
+
+        var dispatch = result.GeneratedSources[InvokeCommandDispatchgcsName];
+        await Assert.That(dispatch).Contains(RequiresUnreferencedCode);
+        await Assert.That(dispatch).Contains(RuntimeCommandFallback);
     }
 
     /// <summary>Two call sites spelling the same selector share one generated worker.</summary>

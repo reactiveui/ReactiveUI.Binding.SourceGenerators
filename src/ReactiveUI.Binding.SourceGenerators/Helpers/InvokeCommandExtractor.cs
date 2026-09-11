@@ -64,16 +64,25 @@ internal static class InvokeCommandExtractor
         var targetTypeName =
             ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
 
-        // One guard for both: a target the model could not name is as unusable as a path it could not read.
-        return commandPropertyPath is null || commandPropertyPath.Length == 0 || targetTypeName is null
-            ? null
-            : new InvokeCommandInvocationInfo(
-                invocation.SyntaxTree.FilePath,
-                invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
-                sourceValueType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                targetTypeName,
-                new(commandPropertyPath),
-                CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(commandArg.ToString()),
-                InterceptableLocationReader.Read(semanticModel, invocation, ct));
+        // A target the model cannot name leaves nothing to declare a member against, generated or otherwise.
+        if (targetTypeName is null)
+        {
+            return null;
+        }
+
+        // A path the compiler could not read is still a call this package answers - through the runtime engine
+        // rather than a generated observation - so it is carried on instead of dropped, marked for the emitter.
+        var reflectionOnly = commandPropertyPath is null || commandPropertyPath.Length == 0;
+        EquatableArray<PropertyPathSegment> path = reflectionOnly ? default : new(commandPropertyPath!);
+
+        return new(
+            invocation.SyntaxTree.FilePath,
+            invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+            sourceValueType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            targetTypeName,
+            path,
+            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(commandArg.ToString()),
+            InterceptableLocationReader.Read(semanticModel, invocation, ct),
+            reflectionOnly);
     }
 }

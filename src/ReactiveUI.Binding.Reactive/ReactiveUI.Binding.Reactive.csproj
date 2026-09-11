@@ -9,6 +9,13 @@
     <PackageTags>reactiveui;binding;system.reactive;scheduler</PackageTags>
   </PropertyGroup>
 
+  <!-- The same link and ahead-of-time gate the lean leaf carries, over the same source. Only the frameworks
+       that have a linker - net4x has neither a trimmer nor an AOT compiler. -->
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\ReactiveUI.Binding.Shared\**\*.cs" Link="ReactiveUI.Binding.Shared\%(RecursiveDir)%(Filename)%(Extension)"/>
   </ItemGroup>

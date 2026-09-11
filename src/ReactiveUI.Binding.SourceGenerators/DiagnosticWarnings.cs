@@ -22,7 +22,8 @@ internal static class DiagnosticWarnings
     internal static readonly DiagnosticDescriptor NonInlineLambda = new(
         "RXUIBIND001",
         "Expression must be inline lambda",
-        "Expression argument must be an inline lambda expression for compile-time optimization. Variable or method references fall back to runtime.",
+        "Expression argument must be an inline lambda expression for compile-time optimization. A variable or "
+        + "method reference is not generated, so the call throws unless it names the Unsafe overload.",
         UsageCategory,
         DiagnosticSeverity.Info,
         true,
@@ -72,7 +73,7 @@ internal static class DiagnosticWarnings
     internal static readonly DiagnosticDescriptor NoBeforeChangeSupport = new(
         "RXUIBIND004",
         "Type does not support before-change notifications",
-        "Type '{0}' does not support before-change notifications via {1}; WhenChanging will fall back to runtime",
+        "Type '{0}' does not support before-change notifications via {1}; WhenChanging reads the value once and then stays silent",
         UsageCategory,
         DiagnosticSeverity.Warning,
         true,
@@ -92,10 +93,10 @@ internal static class DiagnosticWarnings
     internal static readonly DiagnosticDescriptor DispatchOutOfReach = new(
         "RXUIBIND009",
         "Generated binding dispatch is out of reach here",
-        "This binding falls back to runtime observation. The assembly exposes its internals, so on C# 9 and "
-        + "below the generated dispatch has to live in the root namespace '{0}' to stay unambiguous, and this "
-        + "file's namespace '{1}' is not under it. Move the file under the root namespace, or raise the "
-        + "language version to 10 or later.",
+        "This binding throws rather than reaching its generated code. The assembly exposes its internals, so on "
+        + "C# 9 and below the generated dispatch has to live in the root namespace '{0}' to stay unambiguous, and "
+        + "this file's namespace '{1}' is not under it. Move the file under the root namespace, raise the language "
+        + "version to 10 or later, or name the Unsafe overload to resolve the expression at run time.",
         UsageCategory,
         DiagnosticSeverity.Warning,
         true,
@@ -105,7 +106,7 @@ internal static class DiagnosticWarnings
     internal static readonly DiagnosticDescriptor UnsupportedPathSegment = new(
         "RXUIBIND006",
         "Expression contains unsupported path segment",
-        "Expression contains '{0}' which is not a simple property access. Indexers, fields, and method calls cannot be observed by the source generator and will fall back to runtime.",
+        "Expression contains '{0}' which is not a simple property access. Indexers, fields, and method calls are not generated, so the call throws unless it names the Unsafe overload.",
         UsageCategory,
         DiagnosticSeverity.Warning,
         true,
@@ -136,13 +137,16 @@ internal static class DiagnosticWarnings
         "Compile-time dispatch is chosen by extension-method lookup, which only reaches an overload declared "
         + "in a namespace enclosing the call site. Before C# 10 there is no global using to widen that, and an "
         + "assembly that exposes its internals cannot leave the overloads in the shared namespace without "
-        + "risking an ambiguous call against the assembly it exposes them to. Files outside the root namespace "
-        + "therefore bind to the runtime stub instead.";
+        + "risking an ambiguous call against the assembly it exposes them to. A file outside the root namespace "
+        + "therefore binds to the stub, which throws and names the Unsafe overload that resolves the expression "
+        + "by reflection.";
 
     /// <summary>The string description of the none inline lambda.</summary>
     private const string NoneInlineLambdaDescription =
         "The source generator can only optimize inline lambda expressions (e.g., x => x.Property). "
-        + "Variable references, method calls, or other non-inline expressions will fall back to runtime expression-tree analysis.";
+        + "A variable reference, a method call, or any other non-inline expression produces no generated dispatch, "
+        + "so the call throws. Name the Unsafe overload - WhenChangedUnsafe, BindOneWayUnsafe and so on - to walk "
+        + "the chain by reflection instead, which reports the requirement at the call site under trimming.";
 
     /// <summary>The string description of the no observable properties warning.</summary>
     private const string NoObservablePropertiesDescription =
@@ -152,12 +156,13 @@ internal static class DiagnosticWarnings
     /// <summary>The string description of the private member warning.</summary>
     private const string PrivateMemberDescription =
         "The source generator generates extension methods which cannot access private or protected members. "
-        + "The binding will fall back to runtime reflection.";
+        + "No dispatch is emitted for the call, so it throws unless it names the Unsafe overload.";
 
     /// <summary>The string description of the no before-change support warning.</summary>
     private const string NoBeforeChangeSupportDescription =
         "The notification mechanism for this type does not provide before-change events. "
-        + "WPF DependencyObjects, WinForms Components, and Android Views only support after-change notifications.";
+        + "WPF DependencyObjects, WinForms Components, and Android Views only support after-change notifications, "
+        + "so the observation reports the value as it stands, once, and then nothing further.";
 
     /// <summary>The string description of the validation not generated warning.</summary>
     private const string ValidationNotGeneratedDescription =

@@ -25,12 +25,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenChanged_000018C06482B4BD(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanged<global::TestApp.MyAppleView, string>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<string> __WhenChanged_000018C06482B4BD(global::TestApp.MyAppleView obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Text", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyAppleView)__o).Text, true);
+            return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<string>(
+                obj,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyAppleView, string>>)(__e => __e.Text)).Body,
+                "Text",
+                false,
+                5,
+                (object __o) => ((global::TestApp.MyAppleView)__o).Text,
+                new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Text", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyAppleView)__o).Text, true));
         }
 
     }

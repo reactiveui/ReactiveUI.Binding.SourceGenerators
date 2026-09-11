@@ -43,12 +43,22 @@ namespace ReactiveUI.Binding
         {
             return serial;
         }
-            var __interactionObs_s0 = (global::System.IObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>(
+            var __interactionObs_s0Mechanism = (global::System.IObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>(
                 viewModel,
                 "Child",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel)__o).Child,
                 false);
-
+            var __interactionObs_s0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel), "Child", 5, false);
+            var __interactionObs_s0 = __interactionObs_s0Registration == null
+                ? (global::System.IObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>)__interactionObs_s0Mechanism
+                : (global::System.IObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>(
+                    __interactionObs_s0Registration,
+                    viewModel,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel, global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel>>)(__e => __e.Child)).Body,
+                    "Child",
+                    (object __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel)__o).Child,
+                    false,
+                    true);
         var __interactionObs_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>(__interactionObs_s0,
             __p1 => __p1 != null
                 ? global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<global::ReactiveUI.Binding.Interaction<string, bool>>(

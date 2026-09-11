@@ -29,7 +29,7 @@ public class WhenAnyValueMultiPropertyTests
         var fixture = new WhenAnyTestFixture { Value1 = "A" };
         var values = new List<string>();
 
-        using var sub = fixture.WhenAnyValue(x => x.Value1)
+        using var sub = fixture.WhenAnyValueUnsafe(x => x.Value1)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -46,7 +46,7 @@ public class WhenAnyValueMultiPropertyTests
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B" };
         var values = new List<PropertyValues<string, string>>();
 
-        using var sub = fixture.WhenAnyValue(x => x.Value1, x => x.Value2)
+        using var sub = fixture.WhenAnyValueUnsafe(x => x.Value1, x => x.Value2)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -64,7 +64,7 @@ public class WhenAnyValueMultiPropertyTests
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C" };
         var values = new List<PropertyValues<string, string, string>>();
 
-        using var sub = fixture.WhenAnyValue(x => x.Value1, x => x.Value2, x => x.Value3)
+        using var sub = fixture.WhenAnyValueUnsafe(x => x.Value1, x => x.Value2, x => x.Value3)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);
@@ -83,7 +83,7 @@ public class WhenAnyValueMultiPropertyTests
         var fixture = new WhenAnyTestFixture { Value1 = "A", Value2 = "B", Value3 = "C", Value4 = "D" };
         var values = new List<PropertyValues<string, string, string, string>>();
 
-        using var sub = fixture.WhenAnyValue(
+        using var sub = fixture.WhenAnyValueUnsafe(
                 x => x.Value1,
                 x => x.Value2,
                 x => x.Value3,
@@ -106,7 +106,7 @@ public class WhenAnyValueMultiPropertyTests
         var values =
             new List<PropertyValues<string, string, string, string, string>>();
 
-        using var sub = fixture.WhenAnyValue(
+        using var sub = fixture.WhenAnyValueUnsafe(
                 x => x.Value1,
                 x => x.Value2,
                 x => x.Value3,
@@ -130,7 +130,7 @@ public class WhenAnyValueMultiPropertyTests
         var values =
             new List<PropertyValues<string, string, string, string, string, string>>();
 
-        using var sub = fixture.WhenAnyValue(
+        using var sub = fixture.WhenAnyValueUnsafe(
                 x => x.Value1,
                 x => x.Value2,
                 x => x.Value3,
@@ -155,7 +155,7 @@ public class WhenAnyValueMultiPropertyTests
         var values =
             new List<PropertyValues<string, string, string, string, string, string, string>>();
 
-        using var sub = fixture.WhenAnyValue(
+        using var sub = fixture.WhenAnyValueUnsafe(
                 x => x.Value1,
                 x => x.Value2,
                 x => x.Value3,
@@ -180,7 +180,7 @@ public class WhenAnyValueMultiPropertyTests
 
         string? lastItem8 = null;
 
-        using var sub = fixture.WhenAnyValue(
+        using var sub = fixture.WhenAnyValueUnsafe(
                 x => x.Value1,
                 x => x.Value2,
                 x => x.Value3,
@@ -205,7 +205,7 @@ public class WhenAnyValueMultiPropertyTests
 
         string? lastItem9 = null;
 
-        using var sub = fixture.WhenAnyValue(
+        using var sub = fixture.WhenAnyValueUnsafe(
                 x => x.Value1,
                 x => x.Value2,
                 x => x.Value3,
@@ -231,7 +231,7 @@ public class WhenAnyValueMultiPropertyTests
 
         string? lastItem10 = null;
 
-        using var sub = fixture.WhenAnyValue(
+        using var sub = fixture.WhenAnyValueUnsafe(
                 x => x.Value1,
                 x => x.Value2,
                 x => x.Value3,
@@ -271,7 +271,7 @@ public class WhenAnyValueMultiPropertyTests
 
         string? lastItem11 = null;
 
-        using var sub = fixture.WhenAnyValue(
+        using var sub = fixture.WhenAnyValueUnsafe(
                 x => x.Value1,
                 x => x.Value2,
                 x => x.Value3,
@@ -313,7 +313,7 @@ public class WhenAnyValueMultiPropertyTests
 
         string? lastItem12 = null;
 
-        using var sub = fixture.WhenAnyValue(
+        using var sub = fixture.WhenAnyValueUnsafe(
                 x => x.Value1,
                 x => x.Value2,
                 x => x.Value3,
@@ -341,7 +341,7 @@ public class WhenAnyValueMultiPropertyTests
         var fixture = new WhenAnyTestFixture { Value1 = "A" };
         var values = new List<string>();
 
-        using var sub = fixture.WhenAnyValue(x => x.Value1)
+        using var sub = fixture.WhenAnyValueUnsafe(x => x.Value1)
             .Subscribe(values.Add);
 
         fixture.Value1 = "B";
@@ -363,7 +363,7 @@ public class WhenAnyValueMultiPropertyTests
         var fixture = new WhenAnyTestFixture { Value1 = "Hello", Value2 = "World" };
         var values = new List<string>();
 
-        using var sub = fixture.WhenAnyValue(
+        using var sub = fixture.WhenAnyValueUnsafe(
                 x => x.Value1,
                 x => x.Value2,
                 static (v1, v2) => $"{v1} {v2}")
@@ -383,7 +383,7 @@ public class WhenAnyValueMultiPropertyTests
         var fixture = new HostTestFixture { Child = new() { IsNotNullString = "Deep" } };
         var values = new List<string>();
 
-        using var sub = fixture.WhenAnyValue(x => x.Child!.IsNotNullString)
+        using var sub = fixture.WhenAnyValueUnsafe(x => x.Child!.IsNotNullString)
             .Subscribe(values.Add);
 
         await Assert.That(values.Count).IsGreaterThanOrEqualTo(1);

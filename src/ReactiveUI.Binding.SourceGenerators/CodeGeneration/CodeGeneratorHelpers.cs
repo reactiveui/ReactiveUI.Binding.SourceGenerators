@@ -549,6 +549,37 @@ internal static class CodeGeneratorHelpers
         return kept.Count == invocations.Length ? invocations : [.. kept];
     }
 
+    /// <summary>Emits the tail of a generated overload as a call to the stub the overload displaces.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="methodName">The API being generated, which names the stub method to call.</param>
+    /// <param name="typeArguments">The stub's type arguments, or empty to let them be inferred.</param>
+    /// <param name="arguments">The arguments to forward, in the stub's parameter order.</param>
+    /// <remarks>
+    /// A generated overload wins overload resolution for every call site of its types, including the ones whose
+    /// lambdas it could not read - an expression held in a variable, or built at run time. Generating an overload
+    /// therefore takes the stub out of reach, so the overload has to end where the stub would have: at the runtime
+    /// engine, for the APIs whose stub offers one. Naming the class makes it a static call rather than an
+    /// extension call, so it binds to the stub instead of recursing into the overload emitting it.
+    /// The type arguments are stated wherever a generated parameter carries the leaf type's nullable annotation
+    /// while the selector alongside it does not, which is enough to defeat inference.
+    /// </remarks>
+    internal static void AppendStubFallbackCall(
+        StringBuilder sb,
+        string methodName,
+        string typeArguments,
+        string arguments)
+    {
+        _ = sb.Append("            return global::").Append(Constants.SharedGeneratedNamespace).Append('.')
+            .Append(Constants.StubExtensionClassName).Append('.').Append(methodName);
+
+        if (typeArguments.Length > 0)
+        {
+            _ = sb.Append('<').Append(typeArguments).Append('>');
+        }
+
+        _ = sb.Append('(').Append(arguments).AppendLine(");");
+    }
+
     /// <summary>Emits a whole dispatch file: the extension class, and one overload per group of call sites.</summary>
     /// <typeparam name="TInvocation">The call-site model this API extracts.</typeparam>
     /// <typeparam name="TGroup">The group of call sites that share one overload.</typeparam>

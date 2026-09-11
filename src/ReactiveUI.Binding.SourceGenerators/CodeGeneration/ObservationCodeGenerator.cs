@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
+using ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
 using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
@@ -37,11 +38,17 @@ internal static class ObservationCodeGenerator
     /// <summary>Passes the observed object as the first argument of a generated call.</summary>
     private const string MonitoredObjectArgument = "(objectToMonitor";
 
+    /// <summary>The name the generated overloads give the observed object.</summary>
+    private const string MonitoredObjectName = "objectToMonitor";
+
     /// <summary>Opens the observation a property that never notifies is read through.</summary>
     private const string UnchangingObservableOpen = ")new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<";
 
     /// <summary>Opens a before-change observation cast to the interface the chain stage expects.</summary>
     private const string ChangingObservableOpen = ">)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<";
+
+    /// <summary>The indent an argument takes when the choice is written in an expression position.</summary>
+    private const string ExpressionChoiceArgumentIndent = "                ";
 
     /// <summary>Names the local holding the observation the generator's own mechanism builds.</summary>
     private const string MechanismVariableSuffix = "Mechanism";
@@ -260,6 +267,17 @@ internal static class ObservationCodeGenerator
         var segment = path[0];
         var plugin = ResolveRootPlugin(classInfo, segment);
 
+        ChainRegistrationEmitter.AppendChoiceOpen(
+            sb,
+            "obj",
+            segment,
+            plugin?.Affinity ?? 0,
+            isBeforeChange,
+            string.Empty,
+            ExpressionChoiceArgumentIndent);
+
+        _ = sb.Append(ExpressionChoiceArgumentIndent);
+
         if (plugin is not null)
         {
             plugin.EmitShallowObservation(sb, "obj", segment, GetTypeCastName(classInfo), isBeforeChange, true);
@@ -277,6 +295,8 @@ internal static class ObservationCodeGenerator
             _ = sb.Append("new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<").Append(segment.PropertyTypeFullName)
                 .Append(">(").Append(propertyAccess).Append(')');
         }
+
+        _ = sb.Append(')');
     }
 
     /// <summary>
@@ -357,24 +377,7 @@ internal static class ObservationCodeGenerator
         var obs0Var = $"{varName}_s0";
         var rootPlugin = ResolveRootPlugin(classInfo, seg0);
 
-        if (rootPlugin is not null)
-        {
-            rootPlugin.EmitDeepChainRootSegment(sb, "obj", seg0, GetTypeCastName(classInfo), isBeforeChange, obs0Var);
-        }
-        else if (IsINPChanging(classInfo) && isBeforeChange)
-        {
-            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(obs0Var).Append(" = (global::System.IObservable<").Append(seg0.PropertyTypeFullName)
-                .Append(ChangingObservableOpen).Append(seg0.PropertyTypeFullName).AppendLine(">(")
-                .AppendLine(ChangingSourceArgument).Append(GeneratedSyntax.QuotedArgumentOpen)
-                .Append(seg0.PropertyName).AppendLine("\",").Append(ChangingReaderLambdaOpen)
-                .Append(GetTypeCastName(classInfo)).Append(GeneratedSyntax.ObserverCastClose).Append(seg0.PropertyName).AppendLine(");");
-        }
-        else
-        {
-            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(obs0Var).Append(" = (global::System.IObservable<").Append(seg0.PropertyTypeFullName).Append('>')
-                .Append(UnchangingObservableOpen).Append(seg0.PropertyTypeFullName).Append(">(obj.")
-                .Append(seg0.PropertyName).AppendLine(");");
-        }
+        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, isBeforeChange, obs0Var);
 
         EmitDeepChainInnerSegments(sb, path, isBeforeChange, varName);
 
@@ -458,22 +461,49 @@ internal static class ObservationCodeGenerator
         // one property at a time, so the dispatch itself has nothing to decide.
         EmitDispatchTable(sb, group, supportsCallerArgExpr, methodPrefix, propCount, hasSelector);
 
-        GenerateRuntimeFallback(sb, methodPrefix);
+        GenerateRuntimeFallback(sb, first, methodPrefix, propCount, hasSelector);
 
         _ = sb.AppendLine("        }");
     }
 
-    /// <summary>
-    /// Generates the throw path for when no generated dispatch match is found.
-    /// Since the source generator matched all invocations at compile time, an unmatched
-    /// dispatch indicates a caching issue — never falls back to runtime reflection.
-    /// </summary>
+    /// <summary>Ends the overload where the stub it displaces would have ended: at the runtime engine.</summary>
     /// <param name="sb">The string builder to append to.</param>
+    /// <param name="first">The invocation whose types the whole group shares.</param>
     /// <param name="methodPrefix">The method name prefix.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateRuntimeFallback(StringBuilder sb, string methodPrefix) =>
-    sb.Append("            throw new global::System.InvalidOperationException(\"No generated ").Append(methodPrefix)
-        .AppendLine(" dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.\");");
+    /// <param name="propCount">The number of observed properties.</param>
+    /// <param name="hasSelector">Whether the overload takes a selector.</param>
+    internal static void GenerateRuntimeFallback(
+        StringBuilder sb,
+        InvocationInfo first,
+        string methodPrefix,
+        int propCount,
+        bool hasSelector)
+    {
+        var typeArguments = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+        var arguments = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+
+        _ = typeArguments.Append(first.SourceTypeFullName);
+        _ = arguments.Append(MonitoredObjectName);
+
+        for (var i = 0; i < propCount; i++)
+        {
+            var path = first.PropertyPaths[i];
+            _ = typeArguments.Append(", ").Append(path[path.Length - 1].PropertyTypeFullName);
+            _ = arguments.Append(", property").Append(i + 1);
+        }
+
+        if (hasSelector)
+        {
+            _ = typeArguments.Append(", ").Append(first.ReturnTypeFullName);
+            _ = arguments.Append(", selector");
+        }
+
+        CodeGeneratorHelpers.AppendStubFallbackCall(
+            sb,
+            methodPrefix,
+            typeArguments.ToStringAndReturn(),
+            arguments.ToStringAndReturn());
+    }
 
     /// <summary>Generates a single-property observation method body using plugin dispatch.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -493,28 +523,39 @@ internal static class ObservationCodeGenerator
         var plugin = classInfo is not null
             ? ObservationPluginRegistry.GetBestPlugin(classInfo, propertyName)
             : null;
+        var segment = inv.PropertyPaths[0][0];
+
+        ChainRegistrationEmitter.AppendChoiceOpen(
+            sb,
+            "obj",
+            segment,
+            plugin?.Affinity ?? 0,
+            isBeforeChange,
+            "            return ",
+            ExpressionChoiceArgumentIndent);
+
+        _ = sb.Append(ExpressionChoiceArgumentIndent);
 
         if (plugin is not null)
         {
-            var segment = inv.PropertyPaths[0][0];
-            _ = sb.Append("            return ");
             plugin.EmitShallowObservation(sb, "obj", segment, GetTypeCastName(classInfo), isBeforeChange, true);
-            _ = sb.Append(';');
         }
         else if (IsINPChanging(classInfo) && isBeforeChange)
         {
             // INPChanging-only type (no INPC, no IReactiveObject) — can observe before-change
-            _ = sb.Append("            return new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<")
+            _ = sb.Append("new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<")
                 .Append(inv.ReturnTypeFullName).AppendLine(">(").AppendLine(ChangingSourceArgument)
                 .Append(GeneratedSyntax.QuotedArgumentOpen).Append(propertyName).AppendLine("\",")
                 .Append(ChangingReaderLambdaOpen).Append(inv.SourceTypeFullName)
-                .Append(GeneratedSyntax.ObserverCastClose).Append(propertyName).Append(");");
+                .Append(GeneratedSyntax.ObserverCastClose).Append(propertyName).Append(')');
         }
         else
         {
-            _ = sb.Append("            return new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<")
-                .Append(inv.ReturnTypeFullName).Append(">(").Append(propertyAccess).Append(");");
+            _ = sb.Append("new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<")
+                .Append(inv.ReturnTypeFullName).Append(">(").Append(propertyAccess).Append(')');
         }
+
+        _ = sb.Append(");");
     }
 
     /// <summary>Generates a deep chain observation method body using plugin dispatch for the root segment and inner segments.</summary>
@@ -533,24 +574,7 @@ internal static class ObservationCodeGenerator
         var rootPlugin = ResolveRootPlugin(classInfo, seg0);
 
         // First segment: observe root object for first property
-        if (rootPlugin is not null)
-        {
-            rootPlugin.EmitDeepChainRootSegment(sb, "obj", seg0, GetTypeCastName(classInfo), isBeforeChange, "__obs0");
-        }
-        else if (IsINPChanging(classInfo) && isBeforeChange)
-        {
-            _ = sb.Append("            var __obs0 = (global::System.IObservable<").Append(seg0.PropertyTypeFullName)
-                .Append(ChangingObservableOpen).Append(seg0.PropertyTypeFullName).AppendLine(">(")
-                .AppendLine(ChangingSourceArgument).Append(GeneratedSyntax.QuotedArgumentOpen)
-                .Append(seg0.PropertyName).AppendLine("\",").Append(ChangingReaderLambdaOpen)
-                .Append(GetTypeCastName(classInfo)).Append(GeneratedSyntax.ObserverCastClose).Append(seg0.PropertyName).AppendLine(");");
-        }
-        else
-        {
-            _ = sb.Append("            var __obs0 = (global::System.IObservable<").Append(seg0.PropertyTypeFullName).Append('>')
-                .Append(UnchangingObservableOpen).Append(seg0.PropertyTypeFullName).Append(">(obj.")
-                .Append(seg0.PropertyName).AppendLine(");");
-        }
+        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, isBeforeChange, "__obs0");
 
         EmitObservationChainInnerSegments(sb, path, isBeforeChange);
 
@@ -603,7 +627,8 @@ internal static class ObservationCodeGenerator
                 segment,
                 plugin?.Affinity ?? 0,
                 false,
-                new(GeneratedSyntax.InlineLocalDeclaration, "            ", mechanismVariable, variableName));
+                new(GeneratedSyntax.InlineLocalDeclaration, "            ", mechanismVariable, variableName),
+                propertyTypeFullName);
             _ = sb.AppendLine();
         }
         else
@@ -625,12 +650,20 @@ internal static class ObservationCodeGenerator
     /// <param name="generatedAffinity">The affinity of the mechanism the generator picked.</param>
     /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
     /// <param name="layout">Where the choice is written and what it names the locals it declares.</param>
+    /// <param name="valueTypeOverride">
+    /// The element type the surrounding code expects, where it is not the property's own declared type.
+    /// </param>
     /// <remarks>
     /// The registration is resolved where the observation is built rather than at the call site's dispatch, so a
     /// binding keeps its generated write and only its reading changes. The property is named as a literal and
     /// read through an emitted accessor, and the expression handed to the registration is a lambda the compiler
     /// built, so nothing on this path is resolved by name and an ahead-of-time consumer carries no expression
     /// engine for it.
+    /// <para>
+    /// The element type is overridable because a caller can want the property's interface rather than its
+    /// declared type - an interaction property declared as <c>Interaction</c> is observed as
+    /// <c>IInteraction</c> - and the choice has to be typed the same way as the mechanism it wraps.
+    /// </para>
     /// </remarks>
     private static void EmitInlinePluginChoice(
         StringBuilder sb,
@@ -638,10 +671,11 @@ internal static class ObservationCodeGenerator
         PropertyPathSegment segment,
         int generatedAffinity,
         bool isBeforeChange,
-        in PluginChoiceLayout layout)
+        in PluginChoiceLayout layout,
+        string? valueTypeOverride = null)
     {
         var declaringType = segment.DeclaringTypeFullName;
-        var valueType = segment.PropertyTypeFullName;
+        var valueType = valueTypeOverride ?? segment.PropertyTypeFullName;
         var pluginVariable = layout.VariableName + RegistrationVariableSuffix;
         var argumentIndent = $"{layout.ContinuationIndent}    ";
         const string observableOpen = "? (global::System.IObservable<";
@@ -662,6 +696,68 @@ internal static class ObservationCodeGenerator
             .Append(argumentIndent).Append(BooleanLiteral(isBeforeChange)).AppendLine(",")
             .Append(argumentIndent).Append("true);");
     }
+
+    /// <summary>Emits the first link of a chain into a local, and the choice a registration can win for it.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="rootVar">The variable holding the chain root.</param>
+    /// <param name="seg0">The first segment of the path.</param>
+    /// <param name="classInfo">The root type's binding info, when known.</param>
+    /// <param name="rootPlugin">The plugin for the root type, when one matched.</param>
+    /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
+    /// <param name="obsVar">The local the link's observation is assigned to.</param>
+    /// <remarks>
+    /// The first link is offered to a registration on the same terms as every later one. Without this the root
+    /// of a chain was the one link a registered plugin could not take, which made the honouring depend on where
+    /// in a path the property sat.
+    /// </remarks>
+    private static void EmitChainRootWithChoice(
+        StringBuilder sb,
+        string rootVar,
+        PropertyPathSegment seg0,
+        ClassBindingInfo? classInfo,
+        IObservationPlugin? rootPlugin,
+        bool isBeforeChange,
+        string obsVar)
+    {
+        var mechanismVariable = obsVar + MechanismVariableSuffix;
+
+        if (rootPlugin is not null)
+        {
+            rootPlugin.EmitDeepChainRootSegment(sb, rootVar, seg0, GetTypeCastName(classInfo), isBeforeChange, mechanismVariable);
+        }
+        else if (IsINPChanging(classInfo) && isBeforeChange)
+        {
+            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(mechanismVariable)
+                .Append(" = (global::System.IObservable<").Append(seg0.PropertyTypeFullName)
+                .Append(ChangingObservableOpen).Append(seg0.PropertyTypeFullName).AppendLine(">(")
+                .Append(ChangingSourceArgumentFor(rootVar)).Append(GeneratedSyntax.QuotedArgumentOpen)
+                .Append(seg0.PropertyName).AppendLine("\",").Append(ChangingReaderLambdaOpen)
+                .Append(GetTypeCastName(classInfo)).Append(GeneratedSyntax.ObserverCastClose)
+                .Append(seg0.PropertyName).AppendLine(");");
+        }
+        else
+        {
+            _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(mechanismVariable)
+                .Append(" = (global::System.IObservable<").Append(seg0.PropertyTypeFullName).Append('>')
+                .Append(UnchangingObservableOpen).Append(seg0.PropertyTypeFullName).Append(">(").Append(rootVar).Append('.')
+                .Append(seg0.PropertyName).AppendLine(");");
+        }
+
+        EmitInlinePluginChoice(
+            sb,
+            rootVar,
+            seg0,
+            rootPlugin?.Affinity ?? 0,
+            isBeforeChange,
+            new(GeneratedSyntax.BodyLocalDeclaration, "                ", mechanismVariable, obsVar));
+    }
+
+    /// <summary>Renders the before-change observable's source argument for a given root.</summary>
+    /// <param name="rootVar">The variable holding the observed object.</param>
+    /// <returns>The argument line the before-change observable takes.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string ChangingSourceArgumentFor(string rootVar) =>
+        $"                (global::System.ComponentModel.INotifyPropertyChanging){rootVar},\n";
 
     /// <summary>Picks the observation plugin for the type that declares a chain segment's property.</summary>
     /// <param name="segment">The chain segment, which carries how its declaring type notifies.</param>
@@ -863,16 +959,7 @@ internal static class ObservationCodeGenerator
     {
         var seg0 = propertyPath[0];
 
-        if (plugin is not null)
-        {
-            plugin.EmitDeepChainRootSegment(sb, rootVar, seg0, GetTypeCastName(classInfo), false, $"__{variableName}_s0");
-        }
-        else
-        {
-            _ = sb.Append("            var __").Append(variableName).Append("_s0 = (global::System.IObservable<").Append(seg0.PropertyTypeFullName)
-                .Append('>').Append(UnchangingObservableOpen).Append(seg0.PropertyTypeFullName)
-                .Append(">(").Append(rootVar).Append('.').Append(seg0.PropertyName).AppendLine(");");
-        }
+        EmitChainRootWithChoice(sb, rootVar, seg0, classInfo, plugin, false, $"__{variableName}_s0");
 
         for (var s = 1; s < propertyPath.Length; s++)
         {

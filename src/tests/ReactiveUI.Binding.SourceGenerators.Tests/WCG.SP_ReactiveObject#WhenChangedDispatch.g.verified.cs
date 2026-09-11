@@ -25,12 +25,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenChanged_0000039705C7F4BC(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanged<global::SharedScenarios.WhenChanged.SinglePropertyReactiveObject.MyViewModel, string>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<string> __WhenChanged_0000039705C7F4BC(global::SharedScenarios.WhenChanged.SinglePropertyReactiveObject.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.SinglePropertyReactiveObject.MyViewModel)__o).Name, true);
+            return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<string>(
+                obj,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.SinglePropertyReactiveObject.MyViewModel, string>>)(__e => __e.Name)).Body,
+                "Name",
+                false,
+                10,
+                (object __o) => ((global::SharedScenarios.WhenChanged.SinglePropertyReactiveObject.MyViewModel)__o).Name,
+                new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.SinglePropertyReactiveObject.MyViewModel)__o).Name, true));
         }
 
     }

@@ -158,6 +158,45 @@ internal static class ExtractorValidation
             : "global::System.EventArgs";
     }
 
+    /// <summary>Names one of the type arguments the compiler settled on for a resolved call.</summary>
+    /// <param name="methodSymbol">The method the call resolved to.</param>
+    /// <param name="index">Which of its type arguments to name.</param>
+    /// <returns>The fully qualified name, or <see langword="null"/> when nothing declarable is there.</returns>
+    /// <remarks>
+    /// The route to a type when the property path is not one: a selector built at run time still resolves to a
+    /// method whose type arguments the compiler inferred, and those are the types the generated member has to
+    /// declare. An index outside the list answers null rather than throwing, so a caller reading a shape this
+    /// package does not serve declines the call site instead of failing the whole generation pass.
+    /// </remarks>
+    internal static string? TypeArgumentDisplayName(IMethodSymbol methodSymbol, int index) =>
+        index < 0 || index >= methodSymbol.TypeArguments.Length
+            ? null
+            : GetDeclarableTypeDisplayName(methodSymbol.TypeArguments[index]);
+
+    /// <summary>Names the type a selector produces, read from the selector rather than from its body.</summary>
+    /// <param name="semanticModel">The semantic model for the call site.</param>
+    /// <param name="selector">The argument the selector was passed as.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The fully qualified produced type, or <see langword="null"/> when nothing declarable is there.</returns>
+    /// <remarks>
+    /// A selector held in a variable, or built at run time, has no body a path can be read from - but it still
+    /// has a type, and that type is <c>Expression&lt;Func&lt;TInput, TProduced&gt;&gt;</c>. Taking the produced
+    /// type from there is what lets a call site the compiler could not read still be served, because the
+    /// generated member has to declare exactly the types the call already has.
+    /// </remarks>
+    internal static string? SelectorProducedTypeDisplayName(
+        SemanticModel semanticModel,
+        Microsoft.CodeAnalysis.CSharp.Syntax.ExpressionSyntax selector,
+        CancellationToken ct)
+    {
+        // Expression<Func<TInput, TProduced>>: unwrap the expression, then take what the delegate returns.
+        return semanticModel.GetTypeInfo(selector, ct).ConvertedType
+                is INamedTypeSymbol { TypeArguments.Length: 1 } expression
+            && expression.TypeArguments[0] is INamedTypeSymbol { TypeArguments.Length: > 1 } func
+            ? GetTypeDisplayName(func.TypeArguments[func.TypeArguments.Length - 1])
+            : null;
+    }
+
     /// <summary>Checks whether a type is the synthesized grouping type that holds an extension block's members.</summary>
     /// <param name="type">The type to check.</param>
     /// <returns><see langword="true"/> if the type is an extension grouping type; otherwise <see langword="false"/>.</returns>

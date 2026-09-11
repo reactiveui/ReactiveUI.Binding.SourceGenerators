@@ -67,6 +67,23 @@ public class AotViewModel : INotifyPropertyChanged, INotifyPropertyChanging
         }
     } = new();
 
+    /// <summary>Gets or sets the stream a WhenAnyObservable call switches to.</summary>
+    public IObservable<string>? Signal
+    {
+        get => field;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+
+            PropertyChanging?.Invoke(this, new(nameof(Signal)));
+            field = value;
+            PropertyChanged?.Invoke(this, new(nameof(Signal)));
+        }
+    }
+
     /// <summary>Gets or sets the command a stream of values is invoked against.</summary>
     public ICommand? Save
     {

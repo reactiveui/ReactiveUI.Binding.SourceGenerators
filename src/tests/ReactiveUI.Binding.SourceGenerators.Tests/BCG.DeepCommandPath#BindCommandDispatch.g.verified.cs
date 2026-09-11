@@ -50,12 +50,22 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
             }
 
-            var __commandObs_s0 = (global::System.IObservable<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>(
+            var __commandObs_s0Mechanism = (global::System.IObservable<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>)new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>(
                 viewModel,
                 "Child",
                 (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.MyViewModel)__o).Child,
                 false);
-
+            var __commandObs_s0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindCommand.DeepCommandPath.MyViewModel), "Child", 5, false);
+            var __commandObs_s0 = __commandObs_s0Registration == null
+                ? (global::System.IObservable<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>)__commandObs_s0Mechanism
+                : (global::System.IObservable<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>(
+                    __commandObs_s0Registration,
+                    viewModel,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.DeepCommandPath.MyViewModel, global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel>>)(__e => __e.Child)).Body,
+                    "Child",
+                    (object __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.MyViewModel)__o).Child,
+                    false,
+                    true);
         var __commandObs_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel, global::System.Windows.Input.ICommand>(__commandObs_s0,
             __p1 => __p1 != null
                 ? global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<global::System.Windows.Input.ICommand>(

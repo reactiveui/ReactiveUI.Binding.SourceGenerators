@@ -44,4 +44,7 @@ public class DispatchStubViewModel : INotifyPropertyChanged
 
     /// <summary>Gets or sets the interaction an interaction binding names.</summary>
     public IInteraction<string, bool> Confirm { get; set; } = null!;
+
+    /// <summary>Gets or sets the stream a WhenAnyObservable call names.</summary>
+    public IObservable<string>? Signal { get; set; }
 }

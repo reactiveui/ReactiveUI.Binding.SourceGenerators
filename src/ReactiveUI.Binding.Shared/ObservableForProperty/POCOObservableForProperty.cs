@@ -20,7 +20,6 @@ public sealed class POCOObservableForProperty : ICreatesObservableForProperty
     private static readonly ConcurrentDictionary<ObservedPropertyKey, byte> HasWarned = new();
 
     /// <inheritdoc/>
-    [RequiresUnreferencedCode("Uses reflection over runtime types which is not trim- or AOT-safe.")]
     public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
     {
         ArgumentExceptionHelper.ThrowIfNull(type);
@@ -30,7 +29,6 @@ public sealed class POCOObservableForProperty : ICreatesObservableForProperty
     }
 
     /// <inheritdoc/>
-    [RequiresUnreferencedCode("Uses reflection over runtime types which is not trim- or AOT-safe.")]
     public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(
         object sender,
         Expression expression,

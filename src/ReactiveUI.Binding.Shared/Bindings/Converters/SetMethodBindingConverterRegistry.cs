@@ -54,7 +54,7 @@ public sealed class SetMethodBindingConverterRegistry
 
         lock (_gate)
         {
-            var snap = _snapshot ?? new Snapshot(new(InitialRegistryCapacity));
+            var snap = _snapshot ?? new Snapshot([with(InitialRegistryCapacity)]);
 
             // Copy-on-write update: clone the list
             var newList = new List<ISetMethodBindingConverter>(snap.Converters) { converter };

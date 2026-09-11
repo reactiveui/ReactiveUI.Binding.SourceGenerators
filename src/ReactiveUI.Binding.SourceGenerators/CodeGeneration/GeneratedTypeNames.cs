@@ -137,6 +137,20 @@ internal static class GeneratedTypeNames
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.RuntimeBindingConverter</c>.</summary>
     internal const string RuntimeBindingConverter = "global::ReactiveUI.Binding.Fallback.RuntimeBindingConverter";
 
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.RuntimeCommandFallback</c>.</summary>
+    internal const string RuntimeCommandFallback = "global::ReactiveUI.Binding.Fallback.RuntimeCommandFallback";
+
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.RuntimeBindingFallback</c>.</summary>
+    internal const string RuntimeBindingFallback = "global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback";
+
+    /// <summary>
+    /// The attribute a generated member carries when it reaches the runtime expression engine, so a trimming or
+    /// ahead-of-time publish reports the call sites that reflect rather than the ones beside them that do not.
+    /// </summary>
+    internal const string RequiresUnreferencedCodeAttribute =
+        "[global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("
+        + "\"This call site names a property path the compiler could not read, so it is resolved by reflection.\")]";
+
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.ObservationAffinityChecker</c>.</summary>
     internal const string ObservationAffinityChecker = "global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker";
 

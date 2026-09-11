@@ -30,10 +30,6 @@ internal static class BindInteractionCodeGenerator
     /// <summary>Closes the view model parameter of a generated binding worker.</summary>
     private const string ViewModelParameterSuffix = " viewModel,";
 
-    /// <summary>Declares the local the interaction property is observed into, up to the observation type.</summary>
-    private const string InteractionObservationOpen =
-        "        var interactionObs = new global::ReactiveUI.Binding.Observables.";
-
     /// <summary>Generates concrete typed overloads and binding methods for BindInteraction invocations.</summary>
     /// <param name="invocations">All detected BindInteraction invocations.</param>
     /// <param name="allClasses">All detected class binding info.</param>
@@ -333,15 +329,16 @@ internal static class BindInteractionCodeGenerator
         }
     }
 
-    /// <summary>
-    /// Emits the null guard and the observation of the interaction property. A single-segment path
-    /// observes the property directly; a deeper path delegates to the shared chain emitter.
-    /// </summary>
+    /// <summary>Emits the null guard and the observation of the interaction property.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The BindInteraction invocation info.</param>
     /// <param name="viewModelClassInfo">The view model type's binding info, when known.</param>
     /// <param name="viewClassInfo">The view type's binding info, which says whether it exposes a view model.</param>
     /// <param name="interactionType">The fully qualified interaction type being observed.</param>
+    /// <remarks>
+    /// The shared chain emitter answers every path length, so a single-segment interaction property is offered
+    /// to a registered plugin on the same terms as a deeper one and as every other binding API.
+    /// </remarks>
     private static void EmitInteractionObservation(
         StringBuilder sb,
         BindInteractionInvocationInfo inv,
@@ -358,33 +355,13 @@ internal static class BindInteractionCodeGenerator
             viewModelClassInfo,
             viewClassInfo);
 
-        if (observation.Path.Length != 1)
-        {
-            ObservationCodeGenerator.EmitInlineObservation(
-                sb,
-                observation.RootVariable,
-                observation.Path,
-                interactionType,
-                observation.RootClassInfo,
-                "interactionObs");
-            return;
-        }
-
-        var propertyName = inv.InteractionPropertyPath[0].PropertyName;
-        _ = sb.AppendLine();
-
-        if (ObservationCodeGenerator.IsINPC(viewModelClassInfo))
-        {
-            _ = sb.Append(InteractionObservationOpen)
-                .Append("PropertyObservable<").Append(interactionType).AppendLine(">(").AppendLine("            viewModel,")
-                .Append("            \"").Append(propertyName).AppendLine("\",")
-                .Append("            (global::System.ComponentModel.INotifyPropertyChanged __o) => ((").Append(inv.ViewModelTypeFullName)
-                .Append(GeneratedSyntax.ObserverCastClose).Append(propertyName).AppendLine(",").AppendLine("            true);");
-            return;
-        }
-
-        _ = sb.Append(InteractionObservationOpen)
-            .Append("UnchangingPropertyObservable<").Append(interactionType).Append(">(viewModel.").Append(propertyName).AppendLine(");");
+        ObservationCodeGenerator.EmitInlineObservation(
+            sb,
+            observation.RootVariable,
+            observation.Path,
+            interactionType,
+            observation.RootClassInfo,
+            "interactionObs");
     }
 
     /// <summary>Appends the guard that leaves the binding inert until the view is given a view model.</summary>

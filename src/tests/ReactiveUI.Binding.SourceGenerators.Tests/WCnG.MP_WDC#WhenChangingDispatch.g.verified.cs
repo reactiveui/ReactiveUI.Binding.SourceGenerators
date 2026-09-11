@@ -29,16 +29,26 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenChanging_7FFFFF97E6DC4D84(objectToMonitor, selector);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanging dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanging<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel, string, string, string>(objectToMonitor, property1, property2, selector);
         }
 
         private static global::System.IObservable<string> __WhenChanging_7FFFFF97E6DC4D84(global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel obj, global::System.Func<string, string, string> selector)
         {
-            var __propObs0_s0 = (global::System.IObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>(
+            var __propObs0_s0Mechanism = (global::System.IObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>(
                 (global::System.ComponentModel.INotifyPropertyChanging)obj,
                 "Address",
                 (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel)__o).Address);
-
+            var __propObs0_s0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel), "Address", 5, true);
+            var __propObs0_s0 = __propObs0_s0Registration == null
+                ? (global::System.IObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>)__propObs0_s0Mechanism
+                : (global::System.IObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>(
+                    __propObs0_s0Registration,
+                    obj,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel, global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>>)(__e => __e.Address)).Body,
+                    "Address",
+                    (object __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel)__o).Address,
+                    true,
+                    true);
         var __propObs0_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel, string>(__propObs0_s0,
             __propObs0_p1 => __propObs0_p1 != null
                 ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(

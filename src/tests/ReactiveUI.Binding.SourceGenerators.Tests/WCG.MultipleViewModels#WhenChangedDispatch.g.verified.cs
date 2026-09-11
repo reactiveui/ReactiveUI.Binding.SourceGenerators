@@ -25,12 +25,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenChanged_000013C2FFE01BC5(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanged<global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1, string>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<string> __WhenChanged_000013C2FFE01BC5(global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1 obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1)__o).Name, true);
+            return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<string>(
+                obj,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1, string>>)(__e => __e.Name)).Body,
+                "Name",
+                false,
+                5,
+                (object __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1)__o).Name,
+                new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel1)__o).Name, true));
         }
 
         /// <summary>
@@ -49,12 +56,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenChanged_00001520715BEC78(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanged<global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2, int>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<int> __WhenChanged_00001520715BEC78(global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2 obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(obj, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2)__o).Count, true);
+            return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<int>(
+                obj,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2, int>>)(__e => __e.Count)).Body,
+                "Count",
+                false,
+                5,
+                (object __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2)__o).Count,
+                new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(obj, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultipleViewModels.ViewModel2)__o).Count, true));
         }
 
     }

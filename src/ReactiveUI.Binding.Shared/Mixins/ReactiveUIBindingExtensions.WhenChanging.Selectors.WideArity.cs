@@ -32,6 +32,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, TReturn>(
         this TObj objectToMonitor,
@@ -60,6 +61,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, TReturn>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -69,11 +71,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.Property1, t.Property2));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -95,6 +93,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, TReturn>(
         this TObj objectToMonitor,
@@ -128,6 +127,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, TReturn>(
         this TObj objectToMonitor,
         Expression<Func<TObj, T1>> property1,
@@ -138,12 +138,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -168,6 +163,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, TReturn>(
         this TObj objectToMonitor,
@@ -206,6 +202,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, TReturn>(
         this TObj objectToMonitor,
@@ -218,13 +215,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -252,6 +243,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, TReturn>(
@@ -296,6 +288,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, TReturn>(
         this TObj objectToMonitor,
@@ -309,14 +302,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -347,6 +333,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, TReturn>(
@@ -396,6 +383,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, TReturn>(
         this TObj objectToMonitor,
@@ -410,15 +398,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            property6,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5, t.Property6));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -452,6 +432,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, TReturn>(
@@ -506,6 +487,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, TReturn>(
         this TObj objectToMonitor,
@@ -521,23 +503,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            property6,
-            property7,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.Property1,
-                t.Property2,
-                t.Property3,
-                t.Property4,
-                t.Property5,
-                t.Property6,
-                t.Property7));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -574,6 +540,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, TReturn>(
@@ -633,6 +600,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, TReturn>(
         this TObj objectToMonitor,
@@ -649,25 +617,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            property6,
-            property7,
-            property8,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.Property1,
-                t.Property2,
-                t.Property3,
-                t.Property4,
-                t.Property5,
-                t.Property6,
-                t.Property7,
-                t.Property8));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -707,6 +657,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, TReturn>(
@@ -771,6 +722,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, TReturn>(
         this TObj objectToMonitor,
@@ -788,27 +740,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            property6,
-            property7,
-            property8,
-            property9,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.Property1,
-                t.Property2,
-                t.Property3,
-                t.Property4,
-                t.Property5,
-                t.Property6,
-                t.Property7,
-                t.Property8,
-                t.Property9));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -851,6 +783,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TReturn>(
@@ -920,6 +853,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TReturn>(
         this TObj objectToMonitor,
@@ -938,29 +872,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            property6,
-            property7,
-            property8,
-            property9,
-            property10,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.Property1,
-                t.Property2,
-                t.Property3,
-                t.Property4,
-                t.Property5,
-                t.Property6,
-                t.Property7,
-                t.Property8,
-                t.Property9,
-                t.Property10));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1006,6 +918,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TReturn>(
@@ -1080,6 +993,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TReturn>(
         this TObj objectToMonitor,
@@ -1099,31 +1013,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            property6,
-            property7,
-            property8,
-            property9,
-            property10,
-            property11,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.Property1,
-                t.Property2,
-                t.Property3,
-                t.Property4,
-                t.Property5,
-                t.Property6,
-                t.Property7,
-                t.Property8,
-                t.Property9,
-                t.Property10,
-                t.Property11));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1172,6 +1062,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TReturn>(
@@ -1251,6 +1142,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TReturn>(
         this TObj objectToMonitor,
@@ -1271,33 +1163,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            property6,
-            property7,
-            property8,
-            property9,
-            property10,
-            property11,
-            property12,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.Property1,
-                t.Property2,
-                t.Property3,
-                t.Property4,
-                t.Property5,
-                t.Property6,
-                t.Property7,
-                t.Property8,
-                t.Property9,
-                t.Property10,
-                t.Property11,
-                t.Property12));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1349,6 +1215,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<
@@ -1448,6 +1315,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TReturn>(
         this TObj objectToMonitor,
@@ -1469,35 +1337,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            property6,
-            property7,
-            property8,
-            property9,
-            property10,
-            property11,
-            property12,
-            property13,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.Property1,
-                t.Property2,
-                t.Property3,
-                t.Property4,
-                t.Property5,
-                t.Property6,
-                t.Property7,
-                t.Property8,
-                t.Property9,
-                t.Property10,
-                t.Property11,
-                t.Property12,
-                t.Property13));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1552,6 +1392,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<
@@ -1657,6 +1498,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TReturn>(
         this TObj objectToMonitor,
@@ -1679,37 +1521,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            property6,
-            property7,
-            property8,
-            property9,
-            property10,
-            property11,
-            property12,
-            property13,
-            property14,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.Property1,
-                t.Property2,
-                t.Property3,
-                t.Property4,
-                t.Property5,
-                t.Property6,
-                t.Property7,
-                t.Property8,
-                t.Property9,
-                t.Property10,
-                t.Property11,
-                t.Property12,
-                t.Property13,
-                t.Property14));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1767,6 +1579,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<
@@ -1878,6 +1691,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TReturn>(
         this TObj objectToMonitor,
@@ -1901,39 +1715,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            property6,
-            property7,
-            property8,
-            property9,
-            property10,
-            property11,
-            property12,
-            property13,
-            property14,
-            property15,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.Property1,
-                t.Property2,
-                t.Property3,
-                t.Property4,
-                t.Property5,
-                t.Property6,
-                t.Property7,
-                t.Property8,
-                t.Property9,
-                t.Property10,
-                t.Property11,
-                t.Property12,
-                t.Property13,
-                t.Property14,
-                t.Property15));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 
 #if NET8_0_OR_GREATER
     /// <summary>
@@ -1994,6 +1776,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<TReturn> WhenChanging<
@@ -2111,6 +1894,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the converted result before any of the observed properties changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenChanging dispatch matched this call site. Use WhenChangingUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TReturn> WhenChanging<TObj, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TReturn>(
         this TObj objectToMonitor,
@@ -2135,39 +1919,5 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TObj : class
 #endif
-        => objectToMonitor.WhenChanging(
-            property1,
-            property2,
-            property3,
-            property4,
-            property5,
-            property6,
-            property7,
-            property8,
-            property9,
-            property10,
-            property11,
-            property12,
-            property13,
-            property14,
-            property15,
-            property16,
-            callerFilePath: callerFilePath,
-            callerLineNumber: callerLineNumber).Select(t => conversionFunc(
-                t.Property1,
-                t.Property2,
-                t.Property3,
-                t.Property4,
-                t.Property5,
-                t.Property6,
-                t.Property7,
-                t.Property8,
-                t.Property9,
-                t.Property10,
-                t.Property11,
-                t.Property12,
-                t.Property13,
-                t.Property14,
-                t.Property15,
-                t.Property16));
+        => throw new InvalidOperationException(NoWhenChangingDispatchMessage);
 }

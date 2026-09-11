@@ -30,7 +30,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1)
             .Subscribe(seen.Add);
@@ -50,7 +50,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2)
@@ -71,7 +71,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -93,7 +93,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -116,7 +116,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -140,7 +140,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -165,7 +165,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -191,7 +191,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -218,7 +218,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -246,7 +246,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -275,7 +275,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -305,7 +305,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -336,7 +336,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -368,7 +368,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -401,7 +401,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -435,7 +435,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -470,7 +470,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -492,7 +492,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -515,7 +515,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -539,7 +539,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -564,7 +564,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -590,7 +590,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -617,7 +617,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -645,7 +645,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -674,7 +674,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -704,7 +704,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -735,7 +735,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -767,7 +767,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -800,7 +800,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -834,7 +834,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,
@@ -869,7 +869,7 @@ public class WhenChangingWideArityTests
         var fixture = new WideArityFixture();
         var seen = new List<string>();
 
-        using var subscription = ReactiveUIBindingExtensions.WhenChanging(
+        using var subscription = ReactiveUIBindingExtensions.WhenChangingUnsafe(
                 fixture,
                 x => x.Value1,
                 x => x.Value2,

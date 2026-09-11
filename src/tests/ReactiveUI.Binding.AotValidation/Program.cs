@@ -61,6 +61,8 @@ internal static class Program
         ValidateOneWayBind();
         ValidateBind();
         ValidateInvokeCommand();
+        ValidateWhenAny();
+        ValidateWhenAnyObservable();
 
         Report(string.Empty);
         Report($"AOT Validation: {_passed} passed, {_failed} failed");
@@ -187,6 +189,30 @@ internal static class Program
         viewModel.Name = ReplacementName;
         AssertEqual("InvokeCommand after set", ExpectedTwoExecutions, command.ExecuteCount);
         AssertEqual("InvokeCommand parameter after set", ReplacementName, command.LastParameter as string);
+    }
+
+    /// <summary>WhenAny reports the observed change, and its selector projects it.</summary>
+    private static void ValidateWhenAny()
+    {
+        var vm = new AotViewModel { Name = InitialName };
+        string? last = null;
+        using var sub = vm.WhenAny(x => x.Name, static c => c.Value).Subscribe(v => last = v);
+        AssertEqual("WhenAny initial", InitialName, last);
+        vm.Name = ReplacementName;
+        AssertEqual("WhenAny after set", ReplacementName, last);
+    }
+
+    /// <summary>WhenAnyObservable switches to the stream the observed property holds.</summary>
+    private static void ValidateWhenAnyObservable()
+    {
+        var stream = new System.Reactive.Subjects.Subject<string>();
+        var vm = new AotViewModel { Signal = stream };
+        string? last = null;
+        using var sub = vm.WhenAnyObservable(x => x.Signal!).Subscribe(v => last = v);
+        stream.OnNext(InitialName);
+        AssertEqual("WhenAnyObservable first value", InitialName, last);
+        stream.OnNext(ReplacementName);
+        AssertEqual("WhenAnyObservable second value", ReplacementName, last);
     }
 
     /// <summary>Compares an expected and actual value, recording a pass or failure to the console.</summary>

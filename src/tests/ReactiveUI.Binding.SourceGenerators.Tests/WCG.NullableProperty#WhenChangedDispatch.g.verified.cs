@@ -25,12 +25,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenChanged_7FFFF613BD504637(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanged dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanged<global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel, string>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<string> __WhenChanged_7FFFF613BD504637(global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "NullableName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel)__o).NullableName, true);
+            return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<string>(
+                obj,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel, string>>)(__e => __e.NullableName)).Body,
+                "NullableName",
+                false,
+                5,
+                (object __o) => ((global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel)__o).NullableName,
+                new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "NullableName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.NullableProperty.MyViewModel)__o).NullableName, true));
         }
 
     }

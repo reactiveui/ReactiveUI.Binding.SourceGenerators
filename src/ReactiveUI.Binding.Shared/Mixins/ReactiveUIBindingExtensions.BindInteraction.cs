@@ -11,6 +11,10 @@ namespace ReactiveUI.Binding;
 /// <summary>Extension methods for binding interactions between a view and a view model.</summary>
 public static partial class ReactiveUIBindingExtensions
 {
+    /// <summary>Reported when no generated dispatch claimed a BindInteraction call site.</summary>
+    private const string NoBindInteractionDispatchMessage =
+        "No generated BindInteraction dispatch matched this call site. Use BindInteractionUnsafe to resolve the expression at run time.";
+
 #if NET8_0_OR_GREATER
     /// <summary>Binds a task-based handler to an interaction exposed by the view model.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
@@ -25,7 +29,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site. Use BindInteractionUnsafe to resolve the expression at run time.</exception>
     public static IDisposable BindInteraction<TViewModel, TView, TInput, TOutput>(
         this TView view,
         TViewModel? viewModel,
@@ -50,7 +54,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site. Use BindInteractionUnsafe to resolve the expression at run time.</exception>
     public static IDisposable BindInteraction<TViewModel, TView, TInput, TOutput>(
         this TView view,
         TViewModel? viewModel,
@@ -62,7 +66,7 @@ public static partial class ReactiveUIBindingExtensions
         where TView : class, IViewFor
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoBindInteractionDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -80,7 +84,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site. Use BindInteractionUnsafe to resolve the expression at run time.</exception>
     public static IDisposable BindInteraction<TViewModel, TView, TInput, TOutput, TDontCare>(
         this TView view,
         TViewModel? viewModel,
@@ -106,7 +110,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site.</exception>
+    /// <exception cref="InvalidOperationException">No generated BindInteraction dispatch matched this call site. Use BindInteractionUnsafe to resolve the expression at run time.</exception>
     public static IDisposable BindInteraction<TViewModel, TView, TInput, TOutput, TDontCare>(
         this TView view,
         TViewModel? viewModel,
@@ -118,6 +122,6 @@ public static partial class ReactiveUIBindingExtensions
         where TView : class, IViewFor
 #endif
     {
-        throw new InvalidOperationException(NoGeneratedBindingMessage);
+        throw new InvalidOperationException(NoBindInteractionDispatchMessage);
     }
 }

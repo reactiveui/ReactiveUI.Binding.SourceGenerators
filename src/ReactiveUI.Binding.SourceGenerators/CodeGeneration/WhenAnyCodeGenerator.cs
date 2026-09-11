@@ -65,21 +65,42 @@ internal static class WhenAnyCodeGenerator
         CodeGeneratorHelpers.AppendIndexedStaticPrefixNormalization(sb, supportsCallerArgExpr, "property", propCount);
         EmitDispatchTable(sb, group, supportsCallerArgExpr, propCount);
 
-        // Runtime fallback
-        GenerateRuntimeFallback(sb);
+        GenerateRuntimeFallback(sb, first, propCount);
 
         _ = sb.AppendLine("        }");
     }
 
-    /// <summary>
-    /// Generates the throw path for when no generated WhenAny dispatch match is found.
-    /// Since the source generator matched all invocations at compile time, an unmatched
-    /// dispatch indicates a caching issue — never falls back to runtime reflection.
-    /// </summary>
+    /// <summary>Ends the overload where the stub it displaces would have ended: at the runtime engine.</summary>
     /// <param name="sb">The string builder to append to.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateRuntimeFallback(StringBuilder sb) => sb.AppendLine(
-        "            throw new global::System.InvalidOperationException(\"No generated WhenAny dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.\");");
+    /// <param name="first">The invocation whose types the whole group shares.</param>
+    /// <param name="propCount">The number of observed properties.</param>
+    /// <remarks>
+    /// WhenAny states its projected type before the observed ones - <c>WhenAny&lt;TSender, TRet, T1...&gt;</c> -
+    /// unlike the observation APIs, which put the projection last.
+    /// </remarks>
+    internal static void GenerateRuntimeFallback(StringBuilder sb, InvocationInfo first, int propCount)
+    {
+        var typeArguments = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+        var arguments = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+
+        _ = typeArguments.Append(first.SourceTypeFullName).Append(", ").Append(first.ReturnTypeFullName);
+        _ = arguments.Append("objectToMonitor");
+
+        for (var i = 0; i < propCount; i++)
+        {
+            var path = first.PropertyPaths[i];
+            _ = typeArguments.Append(", ").Append(path[path.Length - 1].PropertyTypeFullName);
+            _ = arguments.Append(", property").Append(i + 1);
+        }
+
+        _ = arguments.Append(", selector");
+
+        CodeGeneratorHelpers.AppendStubFallbackCall(
+            sb,
+            Constants.WhenAnyMethodName,
+            typeArguments.ToStringAndReturn(),
+            arguments.ToStringAndReturn());
+    }
 
     /// <summary>
     /// Generates an observation method for a single WhenAny invocation.
@@ -246,11 +267,20 @@ internal static class WhenAnyCodeGenerator
         ImmutableArray<ClassBindingInfo> allClasses,
         in LanguageFeatures features)
     {
+        var emitted = features.CollapsesIndistinguishableCallSites
+            ? group with
+            {
+                Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
+                    group.Invocations,
+                    static x => string.Join("|", x.ExpressionTexts)),
+            }
+            : group;
+
         if (features.SupportsInterceptors)
         {
             InterceptorEmitter.GenerateInterceptors(
                 sb,
-                group,
+                emitted,
                 Constants.WhenAnyMethodName,
                 ObservationMethodSuffix,
                 in features,
@@ -265,7 +295,7 @@ internal static class WhenAnyCodeGenerator
         {
             GenerateConcreteOverload(
                 sb,
-                group,
+                emitted,
                 features.SupportsCallerArgExpr,
                 features.SupportsNullable,
                 features.StubHasExpressionParameters);
@@ -273,9 +303,9 @@ internal static class WhenAnyCodeGenerator
 
         _ = sb.AppendLine();
 
-        for (var i = 0; i < group.Invocations.Length; i++)
+        for (var i = 0; i < emitted.Invocations.Length; i++)
         {
-            var inv = group.Invocations[i];
+            var inv = emitted.Invocations[i];
             GenerateObservationMethod(
                 sb,
                 inv,

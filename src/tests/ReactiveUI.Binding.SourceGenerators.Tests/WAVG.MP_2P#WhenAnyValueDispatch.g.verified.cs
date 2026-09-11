@@ -28,7 +28,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenAnyValue_0000038CCDEFA447(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenAnyValue dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenAnyValue<global::SharedScenarios.WhenAnyValue.MultiPropertyTwoProperties.MyViewModel, string, int>(objectToMonitor, property1, property2);
         }
 
         private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int>> __WhenAnyValue_0000038CCDEFA447(global::SharedScenarios.WhenAnyValue.MultiPropertyTwoProperties.MyViewModel obj)

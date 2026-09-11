@@ -30,5 +30,6 @@ public interface IViewLocator : IEnableLogger
     /// <param name="viewModel">The view model instance to resolve a view for.</param>
     /// <param name="contract">An optional contract string for named registrations.</param>
     /// <returns>The resolved view, or <see langword="null"/> if no view is found.</returns>
+    [RequiresDynamicCode("Resolving a view from an object closes IViewFor<> over its runtime type. Use the generic overload, or register the view, to stay ahead-of-time safe.")]
     IViewFor? ResolveView(object? viewModel, string? contract);
 }

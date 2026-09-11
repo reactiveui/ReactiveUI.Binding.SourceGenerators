@@ -23,12 +23,19 @@ namespace ReactiveUI.Binding
             {
                 return __WhenChanging_7FFFD2B6A9CCF5C7(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenChanging dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenChanging<global::SharedScenarios.WhenChanging.SinglePropertyINPC.MyViewModel, string>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<string> __WhenChanging_7FFFD2B6A9CCF5C7(global::SharedScenarios.WhenChanging.SinglePropertyINPC.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>((global::System.ComponentModel.INotifyPropertyChanging)obj, "Name", (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.SinglePropertyINPC.MyViewModel)__o).Name);
+            return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<string>(
+                obj,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.SinglePropertyINPC.MyViewModel, string>>)(__e => __e.Name)).Body,
+                "Name",
+                true,
+                5,
+                (object __o) => ((global::SharedScenarios.WhenChanging.SinglePropertyINPC.MyViewModel)__o).Name,
+                new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>((global::System.ComponentModel.INotifyPropertyChanging)obj, "Name", (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.SinglePropertyINPC.MyViewModel)__o).Name));
         }
 
     }

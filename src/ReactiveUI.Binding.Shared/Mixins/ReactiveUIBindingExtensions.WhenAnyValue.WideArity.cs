@@ -13,6 +13,10 @@ namespace ReactiveUI.Binding;
 /// <summary>Extension methods for observing property changes using ReactiveUI conventions (WhenAnyValue).</summary>
 public static partial class ReactiveUIBindingExtensions
 {
+    /// <summary>Reported when no generated dispatch claimed a WhenAnyValue call site.</summary>
+    private const string NoWhenAnyValueDispatchMessage =
+        "No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.";
+
 #if NET8_0_OR_GREATER
     /// <summary>
     /// Observes a property on the specified sender and emits its value after it changes. This is a ReactiveUI compatibility shim.
@@ -25,6 +29,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the property value when it changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     public static IObservable<T1> WhenAnyValue<TSender, T1>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
@@ -44,6 +49,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits the property value when it changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     public static IObservable<T1> WhenAnyValue<TSender, T1>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
@@ -52,10 +58,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-
-        return RuntimeObservationFallback.WhenAnyValue(sender, property1);
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -73,6 +76,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2>> WhenAnyValue<TSender, T1, T2>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
@@ -97,6 +101,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2>> WhenAnyValue<TSender, T1, T2>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
@@ -106,14 +111,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            static (v1, v2) => new PropertyValues<T1, T2>(v1, v2));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -134,6 +132,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3>> WhenAnyValue<TSender, T1, T2, T3>(
         this TSender sender,
@@ -164,6 +163,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2, T3>> WhenAnyValue<TSender, T1, T2, T3>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
@@ -174,16 +174,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            static (v1, v2, v3) => new PropertyValues<T1, T2, T3>(v1, v2, v3));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -207,6 +198,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4>> WhenAnyValue<
@@ -248,6 +240,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     public static IObservable<PropertyValues<T1, T2, T3, T4>> WhenAnyValue<TSender, T1, T2, T3, T4>(
         this TSender sender,
         Expression<Func<TSender, T1>> property1,
@@ -259,18 +252,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            static (v1, v2, v3, v4) => new PropertyValues<T1, T2, T3, T4>(v1, v2, v3, v4));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -297,6 +279,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5>> WhenAnyValue<
@@ -344,6 +327,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5>> WhenAnyValue<TSender, T1, T2, T3, T4, T5>(
         this TSender sender,
@@ -357,20 +341,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            static (v1, v2, v3, v4, v5) => new PropertyValues<T1, T2, T3, T4, T5>(v1, v2, v3, v4, v5));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -400,6 +371,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6>>
@@ -447,6 +419,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6>> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6>(
         this TSender sender,
@@ -461,22 +434,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            RuntimeObservationFallback.WhenAnyValue(sender, property6),
-            static (v1, v2, v3, v4, v5, v6) => new PropertyValues<T1, T2, T3, T4, T5, T6>(v1, v2, v3, v4, v5, v6));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -509,6 +467,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -562,6 +521,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7>> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7>(
         this TSender sender,
@@ -577,24 +537,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            RuntimeObservationFallback.WhenAnyValue(sender, property6),
-            RuntimeObservationFallback.WhenAnyValue(sender, property7),
-            static (v1, v2, v3, v4, v5, v6, v7) => new PropertyValues<T1, T2, T3, T4, T5, T6, T7>(v1, v2, v3, v4, v5, v6, v7));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -630,6 +573,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -687,6 +631,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8>> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8>(
         this TSender sender,
@@ -703,26 +648,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            RuntimeObservationFallback.WhenAnyValue(sender, property6),
-            RuntimeObservationFallback.WhenAnyValue(sender, property7),
-            RuntimeObservationFallback.WhenAnyValue(sender, property8),
-            static (v1, v2, v3, v4, v5, v6, v7, v8) => new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8>(v1, v2, v3, v4, v5, v6, v7, v8));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -761,6 +687,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -823,6 +750,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9>> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
         this TSender sender,
@@ -840,29 +768,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            RuntimeObservationFallback.WhenAnyValue(sender, property6),
-            RuntimeObservationFallback.WhenAnyValue(sender, property7),
-            RuntimeObservationFallback.WhenAnyValue(sender, property8),
-            RuntimeObservationFallback.WhenAnyValue(sender, property9),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9) =>
-                new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9>(v1, v2, v3, v4, v5, v6, v7, v8, v9));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -904,6 +810,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -971,6 +878,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
         this TSender sender,
@@ -989,31 +897,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            RuntimeObservationFallback.WhenAnyValue(sender, property6),
-            RuntimeObservationFallback.WhenAnyValue(sender, property7),
-            RuntimeObservationFallback.WhenAnyValue(sender, property8),
-            RuntimeObservationFallback.WhenAnyValue(sender, property9),
-            RuntimeObservationFallback.WhenAnyValue(sender, property10),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10) =>
-                new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1058,6 +942,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -1142,6 +1027,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
         this TSender sender,
@@ -1161,33 +1047,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            RuntimeObservationFallback.WhenAnyValue(sender, property6),
-            RuntimeObservationFallback.WhenAnyValue(sender, property7),
-            RuntimeObservationFallback.WhenAnyValue(sender, property8),
-            RuntimeObservationFallback.WhenAnyValue(sender, property9),
-            RuntimeObservationFallback.WhenAnyValue(sender, property10),
-            RuntimeObservationFallback.WhenAnyValue(sender, property11),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) =>
-                new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1235,6 +1095,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -1325,6 +1186,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
@@ -1346,35 +1208,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-        ArgumentExceptionHelper.ThrowIfNull(property12);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            RuntimeObservationFallback.WhenAnyValue(sender, property6),
-            RuntimeObservationFallback.WhenAnyValue(sender, property7),
-            RuntimeObservationFallback.WhenAnyValue(sender, property8),
-            RuntimeObservationFallback.WhenAnyValue(sender, property9),
-            RuntimeObservationFallback.WhenAnyValue(sender, property10),
-            RuntimeObservationFallback.WhenAnyValue(sender, property11),
-            RuntimeObservationFallback.WhenAnyValue(sender, property12),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12) =>
-                new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1425,6 +1259,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -1521,6 +1356,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
@@ -1543,38 +1379,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-        ArgumentExceptionHelper.ThrowIfNull(property12);
-        ArgumentExceptionHelper.ThrowIfNull(property13);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            RuntimeObservationFallback.WhenAnyValue(sender, property6),
-            RuntimeObservationFallback.WhenAnyValue(sender, property7),
-            RuntimeObservationFallback.WhenAnyValue(sender, property8),
-            RuntimeObservationFallback.WhenAnyValue(sender, property9),
-            RuntimeObservationFallback.WhenAnyValue(sender, property10),
-            RuntimeObservationFallback.WhenAnyValue(sender, property11),
-            RuntimeObservationFallback.WhenAnyValue(sender, property12),
-            RuntimeObservationFallback.WhenAnyValue(sender, property13),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13) =>
-
-                    new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1628,6 +1433,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -1716,6 +1522,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
@@ -1739,40 +1546,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-        ArgumentExceptionHelper.ThrowIfNull(property12);
-        ArgumentExceptionHelper.ThrowIfNull(property13);
-        ArgumentExceptionHelper.ThrowIfNull(property14);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            RuntimeObservationFallback.WhenAnyValue(sender, property6),
-            RuntimeObservationFallback.WhenAnyValue(sender, property7),
-            RuntimeObservationFallback.WhenAnyValue(sender, property8),
-            RuntimeObservationFallback.WhenAnyValue(sender, property9),
-            RuntimeObservationFallback.WhenAnyValue(sender, property10),
-            RuntimeObservationFallback.WhenAnyValue(sender, property11),
-            RuntimeObservationFallback.WhenAnyValue(sender, property12),
-            RuntimeObservationFallback.WhenAnyValue(sender, property13),
-            RuntimeObservationFallback.WhenAnyValue(sender, property14),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14) =>
-
-                    new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -1829,6 +1603,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -1921,6 +1696,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
@@ -1945,42 +1721,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-        ArgumentExceptionHelper.ThrowIfNull(property12);
-        ArgumentExceptionHelper.ThrowIfNull(property13);
-        ArgumentExceptionHelper.ThrowIfNull(property14);
-        ArgumentExceptionHelper.ThrowIfNull(property15);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            RuntimeObservationFallback.WhenAnyValue(sender, property6),
-            RuntimeObservationFallback.WhenAnyValue(sender, property7),
-            RuntimeObservationFallback.WhenAnyValue(sender, property8),
-            RuntimeObservationFallback.WhenAnyValue(sender, property9),
-            RuntimeObservationFallback.WhenAnyValue(sender, property10),
-            RuntimeObservationFallback.WhenAnyValue(sender, property11),
-            RuntimeObservationFallback.WhenAnyValue(sender, property12),
-            RuntimeObservationFallback.WhenAnyValue(sender, property13),
-            RuntimeObservationFallback.WhenAnyValue(sender, property14),
-            RuntimeObservationFallback.WhenAnyValue(sender, property15),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) =>
-
-                    new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 
 #if NET8_0_OR_GREATER
@@ -2040,6 +1781,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     public static
@@ -2154,6 +1896,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
     /// <returns>An observable sequence that emits a tuple of all observed property values when any of them changes.</returns>
+    /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<PropertyValues<
@@ -2195,42 +1938,6 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #endif
     {
-        ArgumentExceptionHelper.ThrowIfNull(sender);
-        ArgumentExceptionHelper.ThrowIfNull(property1);
-        ArgumentExceptionHelper.ThrowIfNull(property2);
-        ArgumentExceptionHelper.ThrowIfNull(property3);
-        ArgumentExceptionHelper.ThrowIfNull(property4);
-        ArgumentExceptionHelper.ThrowIfNull(property5);
-        ArgumentExceptionHelper.ThrowIfNull(property6);
-        ArgumentExceptionHelper.ThrowIfNull(property7);
-        ArgumentExceptionHelper.ThrowIfNull(property8);
-        ArgumentExceptionHelper.ThrowIfNull(property9);
-        ArgumentExceptionHelper.ThrowIfNull(property10);
-        ArgumentExceptionHelper.ThrowIfNull(property11);
-        ArgumentExceptionHelper.ThrowIfNull(property12);
-        ArgumentExceptionHelper.ThrowIfNull(property13);
-        ArgumentExceptionHelper.ThrowIfNull(property14);
-        ArgumentExceptionHelper.ThrowIfNull(property15);
-        ArgumentExceptionHelper.ThrowIfNull(property16);
-
-        return CombineLatestObservable.Create(
-            RuntimeObservationFallback.WhenAnyValue(sender, property1),
-            RuntimeObservationFallback.WhenAnyValue(sender, property2),
-            RuntimeObservationFallback.WhenAnyValue(sender, property3),
-            RuntimeObservationFallback.WhenAnyValue(sender, property4),
-            RuntimeObservationFallback.WhenAnyValue(sender, property5),
-            RuntimeObservationFallback.WhenAnyValue(sender, property6),
-            RuntimeObservationFallback.WhenAnyValue(sender, property7),
-            RuntimeObservationFallback.WhenAnyValue(sender, property8),
-            RuntimeObservationFallback.WhenAnyValue(sender, property9),
-            RuntimeObservationFallback.WhenAnyValue(sender, property10),
-            RuntimeObservationFallback.WhenAnyValue(sender, property11),
-            RuntimeObservationFallback.WhenAnyValue(sender, property12),
-            RuntimeObservationFallback.WhenAnyValue(sender, property13),
-            RuntimeObservationFallback.WhenAnyValue(sender, property14),
-            RuntimeObservationFallback.WhenAnyValue(sender, property15),
-            RuntimeObservationFallback.WhenAnyValue(sender, property16),
-            static (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) =>
-                new PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16));
+        throw new InvalidOperationException(NoWhenAnyValueDispatchMessage);
     }
 }

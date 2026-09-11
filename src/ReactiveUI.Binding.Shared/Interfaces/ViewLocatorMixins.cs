@@ -32,6 +32,7 @@ public static class ViewLocatorMixins
         /// <summary>Resolves a view for the specified view model instance using the default contract.</summary>
         /// <param name="viewModel">The view model instance to resolve a view for.</param>
         /// <returns>The resolved view, or <see langword="null"/> if no view is found.</returns>
+        [RequiresDynamicCode("Resolving a view from an object closes IViewFor<> over its runtime type. Use the generic overload, or register the view, to stay ahead-of-time safe.")]
         public IViewFor? ResolveView(object? viewModel)
         {
             ArgumentExceptionHelper.ThrowIfNull(locator);

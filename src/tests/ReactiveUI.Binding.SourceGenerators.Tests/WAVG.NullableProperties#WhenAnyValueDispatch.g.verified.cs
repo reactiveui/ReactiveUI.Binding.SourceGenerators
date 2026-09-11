@@ -25,12 +25,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenAnyValue_00001B08EE215D76(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenAnyValue dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenAnyValue<global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel, string>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<string> __WhenAnyValue_00001B08EE215D76(global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "NullableName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableName, true);
+            return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<string>(
+                obj,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel, string>>)(__e => __e.NullableName)).Body,
+                "NullableName",
+                false,
+                5,
+                (object __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableName,
+                new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "NullableName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableName, true));
         }
 
         /// <summary>
@@ -49,12 +56,19 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenAnyValue_00001B08D596E358(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenAnyValue dispatch matched. Ensure the expression is an inline lambda for compile-time optimization.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenAnyValue<global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel, int?>(objectToMonitor, property1);
         }
 
         private static global::System.IObservable<int?> __WhenAnyValue_00001B08D596E358(global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel obj)
         {
-            return new global::ReactiveUI.Binding.Observables.PropertyObservable<int?>(obj, "NullableAge", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableAge, true);
+            return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<int?>(
+                obj,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel, int?>>)(__e => __e.NullableAge)).Body,
+                "NullableAge",
+                false,
+                5,
+                (object __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableAge,
+                new global::ReactiveUI.Binding.Observables.PropertyObservable<int?>(obj, "NullableAge", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel)__o).NullableAge, true));
         }
 
     }

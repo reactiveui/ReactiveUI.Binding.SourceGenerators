@@ -66,14 +66,14 @@ public sealed class BindingTypeConverterRegistry
 
         lock (_gate)
         {
-            var snap = _snapshot ?? new Snapshot(new(InitialRegistryCapacity));
+            var snap = _snapshot ?? new Snapshot([with(InitialRegistryCapacity)]);
 
             // Copy-on-write update: clone the dictionary shallowly
             var newDict = CloneRegistryShallow(snap.ConvertersByTypePair);
 
             List<IBindingTypeConverter>? list =
                 !newDict.TryGetValue(key, out list)
-                    ? new(InitialConverterListCapacity)
+                    ? [with(InitialConverterListCapacity)]
                     : [.. list];
 
             list.Add(converter);

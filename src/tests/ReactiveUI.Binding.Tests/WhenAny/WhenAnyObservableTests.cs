@@ -46,7 +46,7 @@ public class WhenAnyObservableTests
         var values = new List<int>();
 
         // Command1 is null, should not throw
-        using var sub = vm.WhenAnyObservable(x => x.Command1)
+        using var sub = vm.WhenAnyObservableUnsafe(x => x.Command1)
             .Subscribe(values.Add);
 
         // Set it to a real observable
@@ -71,7 +71,7 @@ public class WhenAnyObservableTests
         var vm = new TestWhenAnyObsViewModel { Command1 = subject1, Command2 = subject2 };
         var values = new List<int>();
 
-        using var sub = vm.WhenAnyObservable(x => x.Command1, x => x.Command2)
+        using var sub = vm.WhenAnyObservableUnsafe(x => x.Command1, x => x.Command2)
             .Subscribe(values.Add);
 
         subject1.OnNext(1);
@@ -95,7 +95,7 @@ public class WhenAnyObservableTests
         var vm = new TestWhenAnyObsViewModel { Command1 = subject1, Command2 = subject2, Command3 = subject3 };
         var values = new List<int>();
 
-        using var sub = vm.WhenAnyObservable(x => x.Command1, x => x.Command2, x => x.Command3)
+        using var sub = vm.WhenAnyObservableUnsafe(x => x.Command1, x => x.Command2, x => x.Command3)
             .Subscribe(values.Add);
 
         subject1.OnNext(FirstCombineValue);
@@ -115,7 +115,7 @@ public class WhenAnyObservableTests
         var vm = new TestWhenAnyObsViewModel();
         var values = new List<int>();
 
-        using var sub = vm.WhenAnyObservable(x => x.Changes)
+        using var sub = vm.WhenAnyObservableUnsafe(x => x.Changes)
             .Subscribe(values.Add);
 
         // Initially null, should not emit

@@ -25,7 +25,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             {
                 return __WhenAnyObservable_7FFFCD9779338746(objectToMonitor);
             }
-            throw new global::System.InvalidOperationException("No generated WhenAnyObservable dispatch matched. This indicates a source generator caching issue.");
+            return global::ReactiveUI.Binding.ReactiveUIBindingExtensions.WhenAnyObservable(objectToMonitor, obs1);
         }
 
         private static global::System.IObservable<string> __WhenAnyObservable_7FFFCD9779338746(global::SharedScenarios.WhenAnyObservable.SingleObservable.MyViewModel obj)

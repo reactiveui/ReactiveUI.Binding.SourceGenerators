@@ -18,14 +18,12 @@ public class INPCObservableForProperty : ICreatesObservableForProperty
     private static readonly int SupportedAffinity = BindingAffinity.Explicit;
 
     /// <inheritdoc/>
-    [RequiresUnreferencedCode("Uses reflection over runtime types which is not trim- or AOT-safe.")]
     public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged) =>
         (beforeChanged ? typeof(INotifyPropertyChanging) : typeof(INotifyPropertyChanged)).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo())
             ? SupportedAffinity
             : 0;
 
     /// <inheritdoc/>
-    [RequiresUnreferencedCode("Uses reflection over runtime types which is not trim- or AOT-safe.")]
     public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(
         object sender,
         Expression expression,

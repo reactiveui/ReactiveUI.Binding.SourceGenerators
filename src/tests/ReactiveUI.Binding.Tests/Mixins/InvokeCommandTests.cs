@@ -60,7 +60,7 @@ public class InvokeCommandTests
         var viewModel = new DispatchStubViewModel { Run = command };
         var values = new Subject<string>();
 
-        using var invocation = values.InvokeCommand(viewModel, x => x.Run);
+        using var invocation = values.InvokeCommandUnsafe(viewModel, x => x.Run);
 
         values.OnNext(FirstValue);
 
@@ -77,7 +77,7 @@ public class InvokeCommandTests
 
         var values = new Subject<string>();
 
-        using var invocation = values.InvokeCommand((DispatchStubViewModel?)null, x => x.Run);
+        using var invocation = values.InvokeCommandUnsafe((DispatchStubViewModel?)null, x => x.Run);
 
         values.OnNext(FirstValue);
 
@@ -89,7 +89,7 @@ public class InvokeCommandTests
     [Test]
     public async Task InvokeCommand_NullSelector_Throws() =>
         await Assert.That(static () =>
-                new Subject<string>().InvokeCommand(new DispatchStubViewModel(), null!))
+                new Subject<string>().InvokeCommandUnsafe(new DispatchStubViewModel(), null!))
             .Throws<ArgumentNullException>();
 
     /// <summary>A null sequence is rejected rather than deferred to the first value.</summary>
@@ -97,6 +97,6 @@ public class InvokeCommandTests
     [Test]
     public async Task InvokeCommand_NullSource_Throws() =>
         await Assert.That(static () =>
-                ((IObservable<string>)null!).InvokeCommand(new DispatchStubViewModel(), x => x.Run))
+                ((IObservable<string>)null!).InvokeCommandUnsafe(new DispatchStubViewModel(), x => x.Run))
             .Throws<ArgumentNullException>();
 }
