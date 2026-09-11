@@ -76,7 +76,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 false,
                 true);
         var bindObs = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, conversionFunc);
-            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(bindObs);
+            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(bindObs, target);
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {

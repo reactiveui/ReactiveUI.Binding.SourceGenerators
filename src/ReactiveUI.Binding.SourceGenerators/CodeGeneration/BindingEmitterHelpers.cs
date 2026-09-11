@@ -30,6 +30,31 @@ internal static class BindingEmitterHelpers
     /// <summary>Opens a delegate parameter, ready for the two type arguments and the parameter name.</summary>
     private const string FuncParameterPrefix = ", global::System.Func<";
 
+    /// <summary>Emits a whole binding dispatch file, claiming its call sites through one API's dispatch.</summary>
+    /// <param name="invocations">The detected call sites for this API.</param>
+    /// <param name="allClasses">All detected class binding info.</param>
+    /// <param name="features">The consumer compilation's language-feature snapshot.</param>
+    /// <param name="api">The API whose overload or interceptors claim the call sites.</param>
+    /// <param name="emitMethod">Emits the binding method for one call site.</param>
+    /// <returns>The generated source, or null when there are no call sites.</returns>
+    /// <remarks>
+    /// Every binding API claims a group the same way, so how the claim is emitted follows from the API rather
+    /// than being written out again at each registration.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static string? Generate(
+        ImmutableArray<BindingInvocationInfo> invocations,
+        ImmutableArray<ClassBindingInfo> allClasses,
+        in LanguageFeatures features,
+        BindingDispatchApi api,
+        Action<StringBuilder, BindEmitContext> emitMethod) =>
+        Generate(
+            invocations,
+            allClasses,
+            in features,
+            (sb, group, f) => EmitOverloadOrInterceptors(sb, group, api, in f),
+            emitMethod);
+
     /// <summary>
     /// Emits a whole binding dispatch file: the extension class, one concrete overload per group of
     /// call sites, and one binding method per call site.
@@ -385,26 +410,34 @@ internal static class BindingEmitterHelpers
     /// <param name="inv">The binding invocation info.</param>
     /// <param name="sourceVar">The variable holding the values being written to the view.</param>
     /// <param name="resultVar">The name to give the routed observable.</param>
+    /// <param name="targetVar">The worker parameter naming the object the write lands on.</param>
     /// <returns>The variable to subscribe the write to.</returns>
     /// <remarks>
+    /// <para>
     /// A view model raises its notifications from whatever thread did the work, and the UI frameworks only allow
     /// a view to be touched from the thread that owns it. Where a call site named its own scheduler the caller
     /// has already said where the write lands, so this stays out of the way; otherwise the routing is decided at
     /// runtime by whichever platform package is present, which is the only place that can know.
+    /// </para>
+    /// <para>
+    /// The object being written is named rather than assumed, because thread affinity belongs to it: WPF allows
+    /// several UI threads, so a two-way binding routes each direction to whichever side that direction writes.
+    /// </para>
     /// </remarks>
     internal static string EmitViewThreadStage(
         StringBuilder sb,
         BindingInvocationInfo inv,
         string sourceVar,
-        string resultVar)
+        string resultVar,
+        string targetVar)
     {
         if (inv.HasScheduler)
         {
             return sourceVar;
         }
 
-        _ = sb.Append("            var ").Append(resultVar).Append(" = ").Append(GeneratedTypeNames.BindingSchedulers).Append(".ObserveOnMainThread(")
-            .Append(sourceVar).AppendLine(");");
+        _ = sb.Append("            var ").Append(resultVar).Append(" = ").Append(GeneratedTypeNames.BindingSchedulers).Append(".ObserveOnViewThread(")
+            .Append(sourceVar).Append(", ").Append(targetVar).AppendLine(");");
 
         return resultVar;
     }

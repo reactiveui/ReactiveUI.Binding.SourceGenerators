@@ -95,8 +95,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView)__o).FirstNameText,
                 false,
                 true);
-            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
-            var sourceThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(targetObs);
+            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(sourceObs, target);
+            var sourceThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(targetObs, source);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
@@ -172,8 +172,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::SharedScenarios.BindTwoWay.MultipleSameTypeBindings.MyView)__o).LastNameText,
                 false,
                 true);
-            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(sourceObs);
-            var sourceThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(targetObs);
+            var targetThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(sourceObs, target);
+            var sourceThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(targetObs, source);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {

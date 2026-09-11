@@ -80,7 +80,7 @@ internal static class BindOneWayCodeGenerator
 
         var subscribeVar = BindingEmitterHelpers.EmitSingleStreamStages(sb, DispatchApi, inv);
 
-        subscribeVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, subscribeVar, "targetThreadObs");
+        subscribeVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, subscribeVar, "targetThreadObs", "target");
 
         _ = sb.AppendLine().Append("            return ").Append(BindingErrors).Append(".Subscribe(").Append(subscribeVar).AppendLine(", value =>")
             .AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(targetAssignment).AppendLine().Append("            }, \"")

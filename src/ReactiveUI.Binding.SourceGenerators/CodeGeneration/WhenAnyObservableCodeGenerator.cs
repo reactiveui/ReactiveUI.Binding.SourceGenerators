@@ -128,18 +128,14 @@ internal static class WhenAnyObservableCodeGenerator
         WhenAnyObservableInvocationInfo inv,
         ClassBindingInfo? classInfo)
     {
-        var path = inv.PropertyPaths[0];
         var innerType = inv.InnerObservableTypeFullNames[0];
 
-        // Generate property observation for the observable property itself
-        if (path.Length > 1)
-        {
-            ObservationCodeGenerator.GenerateDeepChainVariable(sb, path, classInfo, false, ObsPropertyVarName);
-        }
-        else
-        {
-            ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, ObsPropertyVarName);
-        }
+        ObservationCodeGenerator.GenerateObservedPropertyVariable(
+            sb,
+            inv.PropertyPaths[0],
+            classInfo,
+            false,
+            ObsPropertyVarName);
 
         _ = sb.AppendLine()
             .AppendLine();
@@ -159,28 +155,7 @@ internal static class WhenAnyObservableCodeGenerator
         WhenAnyObservableInvocationInfo inv,
         ClassBindingInfo? classInfo)
     {
-        // Generate switched observable for each property
-        for (var i = 0; i < inv.PropertyPaths.Length; i++)
-        {
-            var path = inv.PropertyPaths[i];
-            var innerType = inv.InnerObservableTypeFullNames[i];
-            var rawVar = ObsPropertyVarName + i;
-            var switchedVar = $"__switched{i}";
-
-            if (path.Length > 1)
-            {
-                ObservationCodeGenerator.GenerateDeepChainVariable(sb, path, classInfo, false, rawVar);
-            }
-            else
-            {
-                ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, rawVar);
-            }
-
-            _ = sb.AppendLine().AppendLine().Append("            var ").Append(switchedVar).Append(" = new ").Append(SwitchMapSignal).Append('<')
-                .Append(ObservableOf(innerType)).Append(", ").Append(innerType).Append(">(").Append(rawVar).AppendLine(",")
-                .Append(ObservableFallbackOpen).Append(innerType)
-                .Append(EmptySignalOpen).Append(innerType).AppendLine(SingletonInstanceClose).AppendLine();
-        }
+        EmitSwitchedObservables(sb, inv, classInfo);
 
         _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.Merge(");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
@@ -207,28 +182,7 @@ internal static class WhenAnyObservableCodeGenerator
         WhenAnyObservableInvocationInfo inv,
         ClassBindingInfo? classInfo)
     {
-        // Generate switched observable for each property
-        for (var i = 0; i < inv.PropertyPaths.Length; i++)
-        {
-            var path = inv.PropertyPaths[i];
-            var innerType = inv.InnerObservableTypeFullNames[i];
-            var rawVar = ObsPropertyVarName + i;
-            var switchedVar = $"__switched{i}";
-
-            if (path.Length > 1)
-            {
-                ObservationCodeGenerator.GenerateDeepChainVariable(sb, path, classInfo, false, rawVar);
-            }
-            else
-            {
-                ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, classInfo, false, rawVar);
-            }
-
-            _ = sb.AppendLine().AppendLine().Append("            var ").Append(switchedVar).Append(" = new ").Append(SwitchMapSignal).Append('<')
-                .Append(ObservableOf(innerType)).Append(", ").Append(innerType).Append(">(").Append(rawVar).AppendLine(",")
-                .Append(ObservableFallbackOpen).Append(innerType)
-                .Append(EmptySignalOpen).Append(innerType).AppendLine(SingletonInstanceClose).AppendLine();
-        }
+        EmitSwitchedObservables(sb, inv, classInfo);
 
         _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
@@ -296,6 +250,33 @@ internal static class WhenAnyObservableCodeGenerator
         }
 
         return result;
+    }
+
+    /// <summary>Emits one variable per observed property, each switched to the latest value its property holds.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="inv">The invocation info.</param>
+    /// <param name="classInfo">The class binding info for the source type, or null.</param>
+    /// <remarks>
+    /// What the switched variables are then fed to is the difference between the shapes: merging them hands the
+    /// caller whichever produced a value, combining them hands the caller a selector's view of all of them.
+    /// </remarks>
+    private static void EmitSwitchedObservables(
+        StringBuilder sb,
+        WhenAnyObservableInvocationInfo inv,
+        ClassBindingInfo? classInfo)
+    {
+        for (var i = 0; i < inv.PropertyPaths.Length; i++)
+        {
+            var innerType = inv.InnerObservableTypeFullNames[i];
+            var rawVar = ObsPropertyVarName + i;
+
+            ObservationCodeGenerator.GenerateObservedPropertyVariable(sb, inv.PropertyPaths[i], classInfo, false, rawVar);
+
+            _ = sb.AppendLine().AppendLine().Append("            var __switched").Append(i).Append(" = new ").Append(SwitchMapSignal).Append('<')
+                .Append(ObservableOf(innerType)).Append(", ").Append(innerType).Append(">(").Append(rawVar).AppendLine(",")
+                .Append(ObservableFallbackOpen).Append(innerType)
+                .Append(EmptySignalOpen).Append(innerType).AppendLine(SingletonInstanceClose).AppendLine();
+        }
     }
 
     /// <summary>Emits the overload and the observation methods for one group of call sites.</summary>

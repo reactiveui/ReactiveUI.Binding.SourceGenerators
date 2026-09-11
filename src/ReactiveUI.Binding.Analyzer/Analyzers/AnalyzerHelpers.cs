@@ -148,7 +148,7 @@ internal static class AnalyzerHelpers
         out INamedTypeSymbol? sourceType)
     {
         sourceType = ExtractTypeArgument(methodSymbol, typeArgumentIndex);
-        return sourceType is not null && !TypeAnalyzer.HasObservableMechanism(sourceType, compilation);
+        return sourceType is not null && !HasObservableMechanism(sourceType, compilation);
     }
 
     /// <summary>
@@ -195,6 +195,50 @@ internal static class AnalyzerHelpers
         var dataErrorInfo =
             compilation.GetTypeByMetadataName(SourceGenerators.Constants.INotifyDataErrorInfoMetadataName);
         return dataErrorInfo is not null && ImplementsInterface(sourceType, dataErrorInfo);
+    }
+
+    /// <summary>
+    /// Determines whether a type notifies about property changes at all, through any of the mechanisms this
+    /// library observes: INotifyPropertyChanged, IReactiveObject, a WPF or WinUI dependency object, an Apple
+    /// NSObject, a WinForms component, or an Android view.
+    /// </summary>
+    /// <param name="typeSymbol">The type symbol to check.</param>
+    /// <param name="compilation">The current compilation for type resolution.</param>
+    /// <returns><c>true</c> if the type supports property observation; otherwise, <c>false</c>.</returns>
+    internal static bool HasObservableMechanism(INamedTypeSymbol typeSymbol, Compilation compilation)
+    {
+        INamedTypeSymbol?[] interfaces =
+        [
+            compilation.GetTypeByMetadataName(SourceGenerators.Constants.INotifyPropertyChangedMetadataName),
+            compilation.GetTypeByMetadataName(SourceGenerators.Constants.IReactiveObjectMetadataName),
+        ];
+
+        for (var i = 0; i < interfaces.Length; i++)
+        {
+            if (interfaces[i] is { } observable && ImplementsInterface(typeSymbol, observable))
+            {
+                return true;
+            }
+        }
+
+        INamedTypeSymbol?[] baseTypes =
+        [
+            compilation.GetTypeByMetadataName(SourceGenerators.Constants.WpfDependencyObjectMetadataName),
+            compilation.GetTypeByMetadataName(SourceGenerators.Constants.WinUIDependencyObjectMetadataName),
+            compilation.GetTypeByMetadataName(SourceGenerators.Constants.NSObjectMetadataName),
+            compilation.GetTypeByMetadataName(SourceGenerators.Constants.WinFormsComponentMetadataName),
+            compilation.GetTypeByMetadataName(SourceGenerators.Constants.AndroidViewMetadataName),
+        ];
+
+        for (var i = 0; i < baseTypes.Length; i++)
+        {
+            if (baseTypes[i] is { } observable && InheritsFrom(typeSymbol, observable))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>Determines whether a type implements a specific interface.</summary>

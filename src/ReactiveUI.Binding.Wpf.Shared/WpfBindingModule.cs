@@ -23,5 +23,9 @@ public sealed class WpfBindingModule : IModule
 
         resolver.RegisterLazySingleton<ICreatesObservableForProperty>(static () =>
             new DependencyObjectObservableForProperty());
+
+        // A view may only be touched from the thread that owns it, and which thread that is belongs to the
+        // object rather than the process, so the binding asks the target.
+        resolver.RegisterLazySingleton<IViewThreadResolver>(static () => new DispatcherViewThreadResolver());
     }
 }

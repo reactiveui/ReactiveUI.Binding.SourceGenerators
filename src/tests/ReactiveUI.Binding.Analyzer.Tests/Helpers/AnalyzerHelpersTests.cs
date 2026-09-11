@@ -621,7 +621,7 @@ public class AnalyzerHelpersTests
         var compilation = CreateCompilation(Source);
         var typeSymbol = GetNamedTypeSymbol(compilation, "MyVm");
 
-        var result = TypeAnalyzer.HasObservableMechanism(typeSymbol, compilation);
+        var result = AnalyzerHelpers.HasObservableMechanism(typeSymbol, compilation);
 
         await Assert.That(result).IsTrue();
     }
@@ -663,7 +663,7 @@ public class AnalyzerHelpersTests
 
         var typeSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
 
-        var result = TypeAnalyzer.HasObservableMechanism(typeSymbol, compilation);
+        var result = AnalyzerHelpers.HasObservableMechanism(typeSymbol, compilation);
 
         await Assert.That(result).IsFalse();
     }

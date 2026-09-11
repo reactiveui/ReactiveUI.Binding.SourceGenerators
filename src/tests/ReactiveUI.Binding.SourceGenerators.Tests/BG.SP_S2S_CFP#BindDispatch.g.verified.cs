@@ -87,7 +87,7 @@ namespace ReactiveUI.Binding
             var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(vmObs, v => new global::ReactiveUI.Binding.BindingChange(v, true));
             var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(viewObs, v => new global::ReactiveUI.Binding.BindingChange(v, false));
             var __sides = new global::ReactiveUI.Primitives.Advanced.MergeSignal<global::ReactiveUI.Binding.BindingChange>(__vmTagged, __viewTagged);
-            var __routed = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnMainThread(__sides);
+            var __routed = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__sides, view);
             var changed = new global::ReactiveUI.Binding.Observables.AppliedChangeObservable();
 
             var disposable = global::ReactiveUI.Binding.BindingErrors.Subscribe(__routed, __change =>

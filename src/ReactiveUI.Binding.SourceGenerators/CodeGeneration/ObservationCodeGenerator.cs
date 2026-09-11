@@ -214,14 +214,7 @@ internal static class ObservationCodeGenerator
             var path = inv.PropertyPaths[i];
             var varName = $"__propObs{i}";
 
-            if (path.Length > 1)
-            {
-                GenerateDeepChainVariable(sb, path, classInfo, isBeforeChange, varName);
-            }
-            else
-            {
-                GenerateShallowObservableVariable(sb, path, classInfo, isBeforeChange, varName);
-            }
+            GenerateObservedPropertyVariable(sb, path, classInfo, isBeforeChange, varName);
 
             // Blank line between variable declarations for readability
             _ = sb.AppendLine()
@@ -297,6 +290,33 @@ internal static class ObservationCodeGenerator
         }
 
         _ = sb.Append(')');
+    }
+
+    /// <summary>Emits the variable holding one observed property.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="path">The property path being observed.</param>
+    /// <param name="classInfo">The class binding info for the declaring type, or null.</param>
+    /// <param name="isBeforeChange">True for WhenChanging (before-change), false for WhenChanged (after-change).</param>
+    /// <param name="varName">The name to give the variable.</param>
+    /// <remarks>
+    /// A chain re-subscribes when an intermediate object is replaced, so it is emitted differently from a single
+    /// property. Which of the two applies follows from the path's length alone, so every emitter asks here
+    /// rather than testing the length itself.
+    /// </remarks>
+    internal static void GenerateObservedPropertyVariable(
+        StringBuilder sb,
+        EquatableArray<PropertyPathSegment> path,
+        ClassBindingInfo? classInfo,
+        bool isBeforeChange,
+        string varName)
+    {
+        if (path.Length > 1)
+        {
+            GenerateDeepChainVariable(sb, path, classInfo, isBeforeChange, varName);
+            return;
+        }
+
+        GenerateShallowObservableVariable(sb, path, classInfo, isBeforeChange, varName);
     }
 
     /// <summary>

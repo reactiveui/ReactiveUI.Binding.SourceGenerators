@@ -23,5 +23,9 @@ public sealed class MauiBindingModule : IModule
 #endif
         resolver.RegisterLazySingleton<IBindingTypeConverter>(static () => new BooleanToVisibilityTypeConverter());
         resolver.RegisterLazySingleton<IBindingTypeConverter>(static () => new VisibilityToBooleanTypeConverter());
+
+        // A view may only be touched from the thread that owns it, and which thread that is belongs to the
+        // object rather than the process, so the binding asks the target.
+        resolver.RegisterLazySingleton<IViewThreadResolver>(static () => new DispatcherViewThreadResolver());
     }
 }
