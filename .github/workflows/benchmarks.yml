@@ -75,11 +75,21 @@ jobs:
                       # NativeAOT build writes below that again. Left in the default output folder the
                       # linker's module definition file lands past 260 characters, link.exe cannot open it,
                       # and every NativeAOT job reports NA while the run still exits zero.
-                      dotnet run --project $project -c Release -f net10.0 --artifacts-path C:\a -- `
-                          --filter $env:FILTER `
-                          --artifacts "$env:GITHUB_WORKSPACE/benchmark-artifacts/$name" `
-                          --exporters github json html csv
-                      if ($LASTEXITCODE -ne 0) { throw "$name exited with $LASTEXITCODE" }
+                      #
+                      # Started detached so the host's priority can be raised; BenchmarkDotNet passes it
+                      # on to the processes it spawns per job. The runner is a shared VM, so this removes
+                      # the noise that is ours to remove — read the results for trend, not as absolutes.
+                      $arguments = @(
+                          'run', '--project', $project, '-c', 'Release', '-f', 'net10.0', '--artifacts-path', 'C:\a', '--',
+                          '--filter', $env:FILTER,
+                          '--artifacts', "$env:GITHUB_WORKSPACE/benchmark-artifacts/$name",
+                          '--exporters', 'github', 'json', 'html', 'csv'
+                      )
+                      $run = Start-Process -FilePath 'dotnet' -ArgumentList $arguments -NoNewWindow -PassThru
+                      try { $run.PriorityClass = [System.Diagnostics.ProcessPriorityClass]::High }
+                      catch { Write-Host "::warning::Could not raise the benchmark priority: $($_.Exception.Message)" }
+                      $run.WaitForExit()
+                      if ($run.ExitCode -ne 0) { throw "$name exited with $($run.ExitCode)" }
 
                       Write-Host '::endgroup::'
                   }
