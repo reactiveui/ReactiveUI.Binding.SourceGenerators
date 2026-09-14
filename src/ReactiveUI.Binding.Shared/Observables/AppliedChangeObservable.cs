@@ -42,47 +42,14 @@ public sealed class AppliedChangeObservable : IObservable<BindingChange>
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);
 
-        IObserver<BindingChange>[] updated;
-        IObserver<BindingChange>[] current;
-
-        do
-        {
-            current = Volatile.Read(ref _observers);
-            updated = new IObserver<BindingChange>[current.Length + 1];
-            Array.Copy(current, updated, current.Length);
-            updated[current.Length] = observer;
-        }
-        while (!ReferenceEquals(Interlocked.CompareExchange(ref _observers, updated, current), current));
-
+        CopyOnWriteArray.Add(ref _observers, observer);
         return new Subscription(this, observer);
     }
 
     /// <summary>Drops one observer without disturbing a change already being delivered.</summary>
-    /// <param name="observer">The observer to drop.</param>
-    /// <remarks>
-    /// An observer that is not there is left alone. A subscription drops its own place once and no other path
-    /// reaches here, so that is a guard against a future caller rather than something the current ones do.
-    /// </remarks>
-    internal void Remove(IObserver<BindingChange> observer)
-    {
-        IObserver<BindingChange>[] current;
-        IObserver<BindingChange>[] updated;
-
-        do
-        {
-            current = Volatile.Read(ref _observers);
-            var index = Array.IndexOf(current, observer);
-            if (index < 0)
-            {
-                return;
-            }
-
-            updated = new IObserver<BindingChange>[current.Length - 1];
-            Array.Copy(current, updated, index);
-            Array.Copy(current, index + 1, updated, index, current.Length - index - 1);
-        }
-        while (!ReferenceEquals(Interlocked.CompareExchange(ref _observers, updated, current), current));
-    }
+    /// <param name="observer">The observer to drop. An observer that is not there is left alone.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void Remove(IObserver<BindingChange> observer) => CopyOnWriteArray.Remove(ref _observers, observer);
 
     /// <summary>Releases one observer's place in the change stream.</summary>
     /// <param name="parent">The stream subscribed to.</param>

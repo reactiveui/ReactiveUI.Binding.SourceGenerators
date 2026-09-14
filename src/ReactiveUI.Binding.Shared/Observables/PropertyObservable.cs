@@ -70,11 +70,10 @@ public sealed class PropertyObservable<T> : IObservable<T>
         private readonly EqualityComparer<T> _comparer;
 
         /// <summary>
-        /// Serializes the initial emit in the constructor with concurrent <see cref="OnPropertyChanged"/>
-        /// invocations on other threads, so the handler always sees a consistent
-        /// <see cref="_hasValue"/> / <see cref="_lastValue"/> snapshot regardless of timing.
+        /// Counts the emits asked for and not yet served. The thread that raises it from zero serves every
+        /// emit asked for while it runs, so emits never overlap and no thread waits for another.
         /// </summary>
-        private readonly Lock _gate = new();
+        private int _pendingEmits;
 
         /// <summary>The downstream observer. Set to <see langword="null"/> on disposal.</summary>
         private IObserver<T>? _observer;
@@ -145,33 +144,48 @@ public sealed class PropertyObservable<T> : IObservable<T>
             EmitCurrent();
         }
 
-        /// <summary>
-        /// Reads the current property value under <see cref="_gate"/> and forwards it to the downstream
-        /// observer when the distinct-until-changed gate allows. Holding <see cref="_gate"/> across the
-        /// read-decision-emit sequence ensures the constructor's initial emit and any concurrent
-        /// <see cref="OnPropertyChanged"/> invocation cannot interleave on the downstream observer or
-        /// publish a duplicate when both see the same current value.
-        /// </summary>
+        /// <summary>Reads the current property value and forwards it downstream when the distinct gate allows.</summary>
+        /// <remarks>
+        /// A call made while another emit runs returns at once. The running emit reads the property again
+        /// before it stops, so the value is never lost and never stale. A call from inside the downstream
+        /// observer is delivered after that observer returns. A throw clears the count, so the next change
+        /// still emits.
+        /// </remarks>
         private void EmitCurrent()
         {
-            lock (_gate)
+            if (Interlocked.Increment(ref _pendingEmits) != 1)
             {
-                var observer = Volatile.Read(ref _observer);
-                if (observer is null)
+                return;
+            }
+
+            var unserved = 1;
+            try
+            {
+                do
                 {
-                    return;
+                    var observer = Volatile.Read(ref _observer);
+                    if (observer is null)
+                    {
+                        return;
+                    }
+
+                    var value = _parent._getter(_parent._source);
+
+                    if (!_parent._distinctUntilChanged || !_hasValue || !_comparer.Equals(value!, _lastValue!))
+                    {
+                        _lastValue = value;
+                        _hasValue = true;
+                        observer.OnNext(value!);
+                    }
+
+                    unserved = Interlocked.Add(ref _pendingEmits, -unserved);
                 }
-
-                var value = _parent._getter(_parent._source);
-
-                if (_parent._distinctUntilChanged && _hasValue && _comparer.Equals(value!, _lastValue!))
-                {
-                    return;
-                }
-
-                _lastValue = value;
-                _hasValue = true;
-                observer.OnNext(value!);
+                while (unserved != 0);
+            }
+            catch
+            {
+                Volatile.Write(ref _pendingEmits, 0);
+                throw;
             }
         }
     }

@@ -98,6 +98,8 @@ public sealed class PluginPropertyObservable<T> : IObservable<T>
         /// <summary>
         /// Serializes the initial emit with notifications arriving on other threads, so the handler always
         /// sees a consistent <see cref="_hasValue"/> and <see cref="_lastValue"/> pair whatever the timing.
+        /// It is a lock rather than a hand-off to the thread already emitting, because a before-change
+        /// notification must read the value on the raising thread before that thread writes.
         /// </summary>
         private readonly Lock _gate = new();
 
