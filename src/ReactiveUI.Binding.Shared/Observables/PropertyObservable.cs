@@ -91,6 +91,7 @@ public sealed class PropertyObservable<T> : IObservable<T>
         /// <summary>Initializes a new instance of the <see cref="Subscription"/> class, subscribing and emitting the initial value.</summary>
         /// <param name="parent">The parent observable.</param>
         /// <param name="observer">The downstream observer.</param>
+        /// <remarks>A throw from the initial emit detaches the handler before propagating, as the caller never receives a disposable.</remarks>
         public Subscription(PropertyObservable<T> parent, IObserver<T> observer)
         {
             _parent = parent;
@@ -98,7 +99,16 @@ public sealed class PropertyObservable<T> : IObservable<T>
             _comparer = EqualityComparer<T>.Default;
 
             parent._source.PropertyChanged += OnPropertyChanged;
-            EmitCurrent();
+
+            try
+            {
+                EmitCurrent();
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
         }
 
         /// <inheritdoc/>

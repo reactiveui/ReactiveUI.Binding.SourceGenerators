@@ -74,13 +74,23 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
         /// <summary>Initializes a new instance of the <see cref="Subscription"/> class, subscribing and emitting the initial value.</summary>
         /// <param name="parent">The parent observable.</param>
         /// <param name="observer">The downstream observer.</param>
+        /// <remarks>A throw from the initial emit detaches the handler before propagating, as the caller never receives a disposable.</remarks>
         public Subscription(PropertyChangingObservable<T> parent, IObserver<T> observer)
         {
             _parent = parent;
             _observer = observer;
 
             parent._source.PropertyChanging += OnPropertyChanging;
-            EmitCurrent();
+
+            try
+            {
+                EmitCurrent();
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
         }
 
         /// <inheritdoc/>

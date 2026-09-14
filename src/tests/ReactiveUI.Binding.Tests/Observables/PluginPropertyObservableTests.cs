@@ -99,6 +99,62 @@ public class PluginPropertyObservableTests
         await Assert.That(notifications.SubscriberCount).IsEqualTo(0);
     }
 
+    /// <summary>A getter that throws on subscribe propagates and drops the registration's own subscription.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Subscribe_GetterThrows_ReleasesTheRegistration()
+    {
+        var fixture = new ObservedFixture { Name = InitialName };
+        var notifications = new PluginNotifications();
+        var observed = new List<string>();
+        var fail = true;
+        var observable = new PluginPropertyObservable<string>(
+            notifications,
+            fixture,
+            NameExpression(),
+            ObservedPropertyName,
+            source => fail ? throw new InvalidOperationException("getter") : ((ObservedFixture)source).Name,
+            false,
+            true);
+
+        var action = () => observable.Subscribe(new RecordingObserver<string>(observed, []));
+        await Assert.That(action).ThrowsExactly<InvalidOperationException>();
+
+        fail = false;
+        notifications.Raise(fixture);
+
+        await Assert.That(notifications.SubscriberCount).IsEqualTo(0);
+        await Assert.That(observed).IsEmpty();
+    }
+
+    /// <summary>A registration that notifies from inside its own subscribe is still released when the getter throws.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Subscribe_RegistrationNotifiesDuringSubscribeAndGetterThrows_ReleasesTheRegistration()
+    {
+        var fixture = new ObservedFixture { Name = InitialName };
+        var notifications = new PluginNotifications { NotifyDuringSubscribe = fixture };
+        var observed = new List<string>();
+        var fail = true;
+        var observable = new PluginPropertyObservable<string>(
+            notifications,
+            fixture,
+            NameExpression(),
+            ObservedPropertyName,
+            source => fail ? throw new InvalidOperationException("getter") : ((ObservedFixture)source).Name,
+            false,
+            true);
+
+        var action = () => observable.Subscribe(new RecordingObserver<string>(observed, []));
+        await Assert.That(action).ThrowsExactly<InvalidOperationException>();
+
+        fail = false;
+        notifications.Raise(fixture);
+
+        await Assert.That(notifications.SubscriberCount).IsEqualTo(0);
+        await Assert.That(observed).IsEmpty();
+    }
+
     /// <summary>Every argument the observation cannot work without is rejected outright.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -311,6 +367,9 @@ public class PluginPropertyObservableTests
         /// <summary>Gets how many observers are still subscribed.</summary>
         public int SubscriberCount => _observers.Count;
 
+        /// <summary>Gets or sets the object to notify about from inside <see cref="Subscribe"/>, or <see langword="null"/> to stay silent.</summary>
+        public object? NotifyDuringSubscribe { get; set; }
+
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged) => int.MaxValue;
@@ -330,6 +389,11 @@ public class PluginPropertyObservableTests
         {
             _observers.Add(observer);
             _lastObserver = observer;
+            if (NotifyDuringSubscribe is { } sender)
+            {
+                observer.OnNext(new ObservedChange<object, object?>(sender, null, null));
+            }
+
             return new Unsubscriber(_observers, observer);
         }
 

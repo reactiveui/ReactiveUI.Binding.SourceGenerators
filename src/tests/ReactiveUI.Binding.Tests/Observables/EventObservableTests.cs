@@ -94,6 +94,31 @@ public class EventObservableTests
         await Assert.That(results[0]).IsEqualTo(InitialValue);
     }
 
+    /// <summary>Verifies that a getter throwing on subscribe propagates and removes the handler through the remove delegate.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Subscribe_GetterThrows_RemovesHandler()
+    {
+        EventHandler? handler = null;
+        var fail = true;
+        var results = new List<string>();
+
+        var observable = new EventObservable<string>(
+            h => handler += h,
+            h => handler -= h,
+            () => fail ? throw new InvalidOperationException("getter") : InitialValue,
+            false);
+
+        var action = () => observable.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
+        await Assert.That(action).ThrowsExactly<InvalidOperationException>();
+
+        fail = false;
+        handler?.Invoke(this, EventArgs.Empty);
+
+        await Assert.That(handler).IsNull();
+        await Assert.That(results).IsEmpty();
+    }
+
     /// <summary>Verifies that event handler invocation emits updated values.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]

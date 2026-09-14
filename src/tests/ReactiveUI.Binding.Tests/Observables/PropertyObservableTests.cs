@@ -90,6 +90,25 @@ public class PropertyObservableTests
         await Assert.That(results[0]).IsEqualTo(InitialName);
     }
 
+    /// <summary>Verifies that a getter throwing on subscribe propagates and leaves no handler attached.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task Subscribe_GetterThrows_DetachesHandler()
+    {
+        var vm = new ThrowingGetterViewModel();
+        var results = new List<string>();
+        var observable = new PropertyObservable<string>(vm, "Name", static x => ((ThrowingGetterViewModel)x).Name, false);
+
+        var action = () => observable.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
+        await Assert.That(action).ThrowsExactly<InvalidOperationException>();
+
+        vm.Fail = false;
+        vm.RaisePropertyChanged("Name");
+
+        await Assert.That(vm.HandlerCount).IsEqualTo(0);
+        await Assert.That(results).IsEmpty();
+    }
+
     /// <summary>Verifies that PropertyChanged event triggers a new value emission.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
@@ -325,6 +344,35 @@ public class PropertyObservableTests
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RaisePropertyChanged(string? propertyName) =>
             PropertyChanged?.Invoke(this, new(propertyName));
+    }
+
+    /// <summary>A view model whose getter throws on demand and which counts its attached handlers.</summary>
+    private sealed class ThrowingGetterViewModel : INotifyPropertyChanged
+    {
+        /// <summary>The attached handlers.</summary>
+        private PropertyChangedEventHandler? _propertyChanged;
+
+        /// <inheritdoc/>
+        public event PropertyChangedEventHandler? PropertyChanged
+        {
+            add => _propertyChanged += value;
+            remove => _propertyChanged -= value;
+        }
+
+        /// <summary>Gets or sets a value indicating whether reading <see cref="Name"/> throws.</summary>
+        public bool Fail { get; set; } = true;
+
+        /// <summary>Gets the name, throwing while <see cref="Fail"/> is set.</summary>
+        public string Name => Fail ? throw new InvalidOperationException("getter") : InitialName;
+
+        /// <summary>Gets the number of attached handlers.</summary>
+        public int HandlerCount => _propertyChanged?.GetInvocationList().Length ?? 0;
+
+        /// <summary>Raises the <see cref="PropertyChanged"/> event for the specified property.</summary>
+        /// <param name="propertyName">The name of the property that changed.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RaisePropertyChanged(string? propertyName) =>
+            _propertyChanged?.Invoke(this, new(propertyName));
     }
 
     /// <summary>A simple observer that delegates to provided actions.</summary>
