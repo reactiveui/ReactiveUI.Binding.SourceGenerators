@@ -1,21 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net10.0;net11.0;net462</TargetFrameworks>
-    <!--
-      net462 compiles anywhere but only launches on Windows, so the job that measures it is declared
-      there alone. Declaring it also drops the EventPipe profiler, which refuses any job below
-      .NET Core 3.0 and whose validator stops the whole run rather than the single job.
-    -->
-    <DefineConstants Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(DefineConstants);BENCH_NETFX</DefineConstants>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet"/>
     <PackageReference Include="ReactiveUI"/>
     <PackageReference Include="System.Reactive"/>
   </ItemGroup>

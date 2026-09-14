@@ -5,7 +5,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 
-namespace ReactiveUI.Binding.Benchmarks;
+namespace ReactiveUI.Binding.Benchmarks.Mocks;
 
 /// <summary>A child view model for deep chain benchmarks.</summary>
 [DebuggerDisplay("Value = {Value}")]

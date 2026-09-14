@@ -3,29 +3,23 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Diagnosers;
 using Microsoft.CodeAnalysis;
+using ReactiveUI.Binding.Benchmarks.Configs;
+using ReactiveUI.Binding.Generator.Benchmarks.Support;
 
 namespace ReactiveUI.Binding.Generator.Benchmarks;
 
-/// <summary>Measures a full generation pass over a corpus of consumer code.</summary>
+/// <summary>Measures a full generation pass over the mock consumer source.</summary>
 /// <remarks>
 /// The driver is rebuilt per iteration so each measurement is a cold generation, which is what a consumer's
 /// build actually pays. Reusing a primed driver would measure the incremental cache instead, and hoisting the
 /// driver into setup would let one iteration's caches serve the next.
 /// </remarks>
-[MemoryDiagnoser]
-#if !BENCH_NETFX
-[EventPipeProfiler(EventPipeProfile.GcVerbose)]
-#endif
+[Config(typeof(ProfilerConfig))]
 public class GenerationBenchmarks
 {
-    /// <summary>The corpus compilation, built once per parameter set.</summary>
+    /// <summary>The mock consumer compilation, built once per parameter set.</summary>
     private Compilation _compilation = null!;
-
-    /// <summary>Gets or sets how many view-model and view pairs the corpus holds.</summary>
-    [Params(1, 16, 64)]
-    public int Pairs { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the build lists the generated namespace, which is what decides
@@ -35,16 +29,16 @@ public class GenerationBenchmarks
     public bool Intercept { get; set; }
 
     /// <summary>
-    /// Builds the corpus compilation once per parameter set. Loading a framework's worth of metadata
+    /// Builds the mock consumer compilation once per parameter set. Loading a framework's worth of metadata
     /// references costs far more than a generation pass and is work the host build does once, so measuring it
     /// per iteration would bury what this benchmark is for.
     /// </summary>
     [GlobalSetup]
-    public void Setup() => _compilation = GeneratorHarness.BuildCompilation(GeneratorCorpus.Build(Pairs), Intercept);
+    public void Setup() => _compilation = GeneratorHarness.BuildCompilation(Intercept);
 
     /// <summary>Runs a whole cold generation: syntax scan, extraction, and emission.</summary>
     /// <returns>The number of generated characters, returned so the work cannot be optimized away.</returns>
-    /// <exception cref="InvalidOperationException">The corpus generated nothing, so there is no result to report.</exception>
+    /// <exception cref="InvalidOperationException">The mock consumer source generated nothing, so there is no result to report.</exception>
     [Benchmark]
     public int Generate()
     {
@@ -59,10 +53,10 @@ public class GenerationBenchmarks
             characters += generated.SourceText.Length;
         }
 
-        // A corpus that stopped matching the APIs would generate nothing and quietly turn this into a
+        // Mock source that stopped matching the APIs would generate nothing and quietly turn this into a
         // measurement of driver overhead, so refuse to report a number for it.
         return characters == 0
-            ? throw new InvalidOperationException("The corpus generated no source; the benchmark is measuring nothing.")
+            ? throw new InvalidOperationException("The mock consumer source generated nothing; the benchmark is measuring nothing.")
             : characters;
     }
 }

@@ -2,20 +2,6 @@ name: Benchmarks
 
 on:
     workflow_dispatch:
-        inputs:
-            suite:
-                description: 'Which benchmark suite to run'
-                type: choice
-                default: runtime
-                options:
-                    - runtime
-                    - baseline
-                    - generator
-                    - all
-            filter:
-                description: 'BenchmarkDotNet filter, e.g. *WhenChanged* or *'
-                type: string
-                default: '*'
 
 permissions:
     contents: read
@@ -24,12 +10,9 @@ jobs:
     benchmark:
         uses: reactiveui/actions-common/.github/workflows/workflow-common-benchmarks.yml@main
         with:
-            # One line per suite the choice covers. An unselected suite leaves a blank line behind,
-            # which the list skips.
             projects: |
-                ${{ (inputs.suite == 'runtime'   || inputs.suite == 'all') && 'benchmarks/ReactiveUI.Binding.Benchmarks/ReactiveUI.Binding.Benchmarks.csproj' || '' }}
-                ${{ (inputs.suite == 'baseline'  || inputs.suite == 'all') && 'benchmarks/ReactiveUI.Binding.Benchmarks.ReactiveUI/ReactiveUI.Binding.Benchmarks.ReactiveUI.csproj' || '' }}
-                ${{ (inputs.suite == 'generator' || inputs.suite == 'all') && 'benchmarks/ReactiveUI.Binding.Generator.Benchmarks/ReactiveUI.Binding.Generator.Benchmarks.csproj' || '' }}
-            filter: ${{ inputs.filter }}
+                benchmarks/ReactiveUI.Binding.Benchmarks/ReactiveUI.Binding.Benchmarks.csproj
+                benchmarks/ReactiveUI.Binding.Benchmarks.ReactiveUI/ReactiveUI.Binding.Benchmarks.ReactiveUI.csproj
+                benchmarks/ReactiveUI.Binding.Generator.Benchmarks/ReactiveUI.Binding.Generator.Benchmarks.csproj
             solutionFile: ReactiveUI.Binding.SourceGenerators.slnx
             installWorkloads: true

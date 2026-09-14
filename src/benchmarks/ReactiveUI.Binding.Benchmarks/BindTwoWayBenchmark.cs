@@ -4,26 +4,14 @@
 
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Jobs;
+using ReactiveUI.Binding.Benchmarks.Configs;
+using ReactiveUI.Binding.Benchmarks.Mocks;
 using ReactiveUI.Primitives.Concurrency;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Source-generated BindTwoWay benchmarks with and without scheduler.</summary>
-#if BENCH_NETFX
-[SimpleJob(RuntimeMoniker.Net462)]
-#endif
-[SimpleJob(RuntimeMoniker.Net80)]
-[SimpleJob(RuntimeMoniker.Net10_0)]
-[SimpleJob(RuntimeMoniker.Net11_0)]
-[SimpleJob(RuntimeMoniker.NativeAot10_0, id: nameof(RuntimeMoniker.NativeAot10_0))]
-[SimpleJob(RuntimeMoniker.NativeAot11_0, id: nameof(RuntimeMoniker.NativeAot11_0))]
-[MemoryDiagnoser]
-#if !BENCH_NETFX
-[EventPipeProfiler(EventPipeProfile.GcVerbose)]
-#endif
-[MarkdownExporterAttribute.GitHub]
+[Config(typeof(NativeAotBenchmarkConfig))]
 public class BindTwoWayBenchmark
 {
     /// <summary>Represents the number of property change events to be triggered during the benchmark tests.</summary>
