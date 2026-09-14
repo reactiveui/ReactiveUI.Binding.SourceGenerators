@@ -354,7 +354,7 @@ namespace ReactiveUI.Binding.Reactive
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(int from, object? conversionHint, out string? result) { }
     }
-    [System.Diagnostics.DebuggerDisplay("Handlers = {_handlers.Count}")]
+    [System.Diagnostics.DebuggerDisplay("Handlers = {_handlers.Length}")]
     public class Interaction<TInput, TOutput> : ReactiveUI.Binding.Reactive.IInteraction<TInput, TOutput>
     {
         public Interaction() { }

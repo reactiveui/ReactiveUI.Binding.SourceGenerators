@@ -20,11 +20,8 @@ namespace ReactiveUI.Binding.Builder;
 /// </example>
 public static class RxBindingBuilder
 {
-    /// <summary>Synchronization gate for initialization and reset operations.</summary>
-    private static readonly Lock _resetLock = new();
-
-    /// <summary>Tracks whether ReactiveUI.Binding has been initialized (0 = not initialized, 1 = initialized).</summary>
-    private static int _hasBeenInitialized; // 0 = false, 1 = true
+    /// <summary>Whether ReactiveUI.Binding has been initialized: 0 until <see cref="MarkAsInitialized"/> runs, 1 after.</summary>
+    private static int _hasBeenInitialized;
 
     /// <summary>Creates a new <see cref="ReactiveUIBindingBuilder"/> using the current Splat locator.</summary>
     /// <returns>A new builder instance.</returns>
@@ -35,18 +32,17 @@ public static class RxBindingBuilder
     /// <exception cref="InvalidOperationException">Thrown if <c>BuildApp()</c> has not been called.</exception>
     public static void EnsureInitialized()
     {
-        lock (_resetLock)
+        if (Volatile.Read(ref _hasBeenInitialized) != 0)
         {
-            if (_hasBeenInitialized == 0)
-            {
-                throw new InvalidOperationException(
-                    "ReactiveUI.Binding has not been initialized. You must initialize using the builder pattern.\n\n"
-                    + "Example:\n"
-                    + "RxBindingBuilder.CreateReactiveUIBindingBuilder()\n"
-                    + "    .WithCoreServices()\n"
-                    + "    .BuildApp();");
-            }
+            return;
         }
+
+        throw new InvalidOperationException(
+            "ReactiveUI.Binding has not been initialized. You must initialize using the builder pattern.\n\n"
+            + "Example:\n"
+            + "RxBindingBuilder.CreateReactiveUIBindingBuilder()\n"
+            + "    .WithCoreServices()\n"
+            + "    .BuildApp();");
     }
 
     /// <summary>Resets the initialization state for testing purposes only.</summary>
@@ -55,20 +51,12 @@ public static class RxBindingBuilder
     /// </remarks>
     internal static void ResetForTesting()
     {
-        lock (_resetLock)
-        {
-            AppBuilder.ResetBuilderStateForTests();
-            AppLocator.SetLocator(new ModernDependencyResolver());
-            _hasBeenInitialized = 0;
-        }
+        AppBuilder.ResetBuilderStateForTests();
+        AppLocator.SetLocator(new ModernDependencyResolver());
+        Volatile.Write(ref _hasBeenInitialized, 0);
     }
 
     /// <summary>Marks ReactiveUI.Binding as initialized. Called by <see cref="ReactiveUIBindingBuilder.BuildApp"/>.</summary>
-    internal static void MarkAsInitialized()
-    {
-        lock (_resetLock)
-        {
-            _hasBeenInitialized = 1;
-        }
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void MarkAsInitialized() => Volatile.Write(ref _hasBeenInitialized, 1);
 }

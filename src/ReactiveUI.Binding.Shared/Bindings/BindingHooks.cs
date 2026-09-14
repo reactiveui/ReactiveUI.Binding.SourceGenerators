@@ -29,6 +29,10 @@ namespace ReactiveUI.Binding;
 public static class BindingHooks
 {
     /// <summary>Guards <see cref="_hooks"/> while it is (re)resolved.</summary>
+    /// <remarks>
+    /// Only the first resolve after a refresh takes it. Holding it while the locator is read stops a resolve
+    /// that races <see cref="Refresh"/> from publishing the set that refresh dropped.
+    /// </remarks>
     private static readonly Lock Gate = new();
 
     /// <summary>The resolved hooks, or null while none has been resolved yet.</summary>
@@ -87,7 +91,7 @@ public static class BindingHooks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IPropertyBindingHook[] Resolve()
     {
-        var resolved = _hooks;
+        var resolved = Volatile.Read(ref _hooks);
         if (resolved is not null)
         {
             return resolved;
