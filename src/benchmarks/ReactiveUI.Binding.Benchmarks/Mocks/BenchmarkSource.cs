@@ -4,7 +4,7 @@
 
 using System.Runtime.CompilerServices;
 
-namespace ReactiveUI.Binding.Benchmarks;
+namespace ReactiveUI.Binding.Benchmarks.Mocks;
 
 /// <summary>A stream the benchmark drives by hand, so the value count is the measurement.</summary>
 /// <typeparam name="T">The value type.</typeparam>

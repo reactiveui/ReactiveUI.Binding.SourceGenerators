@@ -3,16 +3,12 @@
   <PropertyGroup>
     <!-- The same measurements, taken against the generator built for Roslyn 4.13. That build is the one that
          claims a call site outright, so it is the only one where the interceptor tier can be measured. -->
-    <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
     <AssemblyName>ReactiveUI.Binding.Generator.Benchmarks.Roslyn413</AssemblyName>
     <RootNamespace>ReactiveUI.Binding.Generator.Benchmarks</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net80"/>
   </ItemGroup>
@@ -27,6 +23,9 @@
     <Compile Include="..\ReactiveUI.Binding.Generator.Benchmarks\**\*.cs"
              Exclude="..\ReactiveUI.Binding.Generator.Benchmarks\obj\**\*.cs;..\ReactiveUI.Binding.Generator.Benchmarks\bin\**\*.cs"
              Link="%(RecursiveDir)%(Filename)%(Extension)"/>
+    <Content Include="..\ReactiveUI.Binding.Generator.Benchmarks\Mocks\*.cs"
+             Link="Mocks\%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
 
 </Project>

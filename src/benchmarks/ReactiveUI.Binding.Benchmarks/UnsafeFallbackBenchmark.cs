@@ -6,8 +6,9 @@
 using System.Diagnostics.CodeAnalysis;
 #endif
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Jobs;
+using ReactiveUI.Binding.Benchmarks.Configs;
+using ReactiveUI.Binding.Benchmarks.Mocks;
+using ReactiveUI.Binding.Builder;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
@@ -17,17 +18,7 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// walk the path at run time, so an ahead-of-time publish cannot be relied on to keep the members they reach.
 /// Read these against the generated benchmark of the same operator to see what the fallback costs.
 /// </remarks>
-#if BENCH_NETFX
-[SimpleJob(RuntimeMoniker.Net462)]
-#endif
-[SimpleJob(RuntimeMoniker.Net80)]
-[SimpleJob(RuntimeMoniker.Net10_0)]
-[SimpleJob(RuntimeMoniker.Net11_0)]
-[MemoryDiagnoser]
-#if !BENCH_NETFX
-[EventPipeProfiler(EventPipeProfile.GcVerbose)]
-#endif
-[MarkdownExporterAttribute.GitHub]
+[Config(typeof(BenchmarkConfig))]
 #if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
 #endif
@@ -42,8 +33,14 @@ public class UnsafeFallbackBenchmark
     /// <summary>The binding's target.</summary>
     private BenchmarkView _view = null!;
 
-    /// <summary>Builds the runtime services the reflection path resolves through, once for the process.</summary>
-    static UnsafeFallbackBenchmark() => BindingInitializer.EnsureInitialized();
+    /// <summary>Registers the runtime services the reflection path resolves through.</summary>
+    [GlobalSetup]
+    public static void Register()
+    {
+        var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
+        _ = builder.WithCoreServices();
+        _ = builder.BuildApp();
+    }
 
     /// <summary>Builds a fresh source and target before each iteration.</summary>
     [IterationSetup]

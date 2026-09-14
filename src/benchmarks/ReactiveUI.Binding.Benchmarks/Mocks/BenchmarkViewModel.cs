@@ -6,7 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
 
-namespace ReactiveUI.Binding.Benchmarks;
+namespace ReactiveUI.Binding.Benchmarks.Mocks;
 
 /// <summary>A view model used for benchmarking source-generated property observation and binding.</summary>
 [DebuggerDisplay("Name = {Name}, Age = {Age}")]

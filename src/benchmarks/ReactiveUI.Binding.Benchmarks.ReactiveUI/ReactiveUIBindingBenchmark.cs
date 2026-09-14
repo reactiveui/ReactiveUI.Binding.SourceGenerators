@@ -4,23 +4,15 @@
 
 using System.Diagnostics;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Jobs;
+using ReactiveUI.Binding.Benchmarks.Configs;
+using ReactiveUI.Binding.Benchmarks.Mocks;
+using ReactiveUI.Builder;
+using Splat;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>ReactiveUI expression-tree binding benchmarks for comparison.</summary>
-#if BENCH_NETFX
-[SimpleJob(RuntimeMoniker.Net462)]
-#endif
-[SimpleJob(RuntimeMoniker.Net80)]
-[SimpleJob(RuntimeMoniker.Net10_0)]
-[SimpleJob(RuntimeMoniker.Net11_0)]
-[MemoryDiagnoser]
-#if !BENCH_NETFX
-[EventPipeProfiler(EventPipeProfile.GcVerbose)]
-#endif
-[MarkdownExporterAttribute.GitHub]
+[Config(typeof(BenchmarkConfig))]
 [DebuggerDisplay("Expression-tree binding over {PropertyChangeCount} changes")]
 public class ReactiveUIBindingBenchmark
 {
@@ -33,8 +25,15 @@ public class ReactiveUIBindingBenchmark
     /// <summary>The target view instance used for binding benchmarks.</summary>
     private BenchmarkView _target = null!;
 
-    /// <summary>Initializes static members of the <see cref="ReactiveUIBindingBenchmark"/> class. Ensures ReactiveUI is configured before any benchmarks run.</summary>
-    static ReactiveUIBindingBenchmark() => ModuleInitializer.EnsureInitialized();
+    /// <summary>Configures ReactiveUI for the benchmark process.</summary>
+    [GlobalSetup]
+    public static void Register()
+    {
+        ModeDetector.OverrideModeDetector(new BenchmarkModeDetector());
+        _ = RxAppBuilder.CreateReactiveUIBuilder()
+            .WithCoreServices()
+            .BuildApp();
+    }
 
     /// <summary>Sets up fresh source and target objects before each benchmark iteration.</summary>
     [IterationSetup]
