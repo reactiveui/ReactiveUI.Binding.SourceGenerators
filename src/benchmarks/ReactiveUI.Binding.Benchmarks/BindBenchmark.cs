@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Jobs;
+using ReactiveUI.Binding.Benchmarks.Configs;
+using ReactiveUI.Binding.Benchmarks.Mocks;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
@@ -13,19 +13,7 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// and applied once, and the changes it wrote are published to whoever subscribes to the binding - so the cost
 /// of making one, of driving it from either side, and of watching what it did are all measured here.
 /// </summary>
-#if BENCH_NETFX
-[SimpleJob(RuntimeMoniker.Net462)]
-#endif
-[SimpleJob(RuntimeMoniker.Net80)]
-[SimpleJob(RuntimeMoniker.Net10_0)]
-[SimpleJob(RuntimeMoniker.Net11_0)]
-[SimpleJob(RuntimeMoniker.NativeAot10_0, id: nameof(RuntimeMoniker.NativeAot10_0))]
-[SimpleJob(RuntimeMoniker.NativeAot11_0, id: nameof(RuntimeMoniker.NativeAot11_0))]
-[MemoryDiagnoser]
-#if !BENCH_NETFX
-[EventPipeProfiler(EventPipeProfile.GcVerbose)]
-#endif
-[MarkdownExporterAttribute.GitHub]
+[Config(typeof(NativeAotBenchmarkConfig))]
 public class BindBenchmark
 {
     /// <summary>Represents the number of property change events to be triggered during the benchmark tests.</summary>
@@ -92,26 +80,6 @@ public class BindBenchmark
         for (var i = 0; i < PropertyChangeCount; i++)
         {
             _viewModel.Name = $"Name_{i}";
-        }
-    }
-
-    /// <summary>Counts what a binding reported without allocating per change.</summary>
-    private sealed class CountingObserver : IObserver<BindingChange>
-    {
-        /// <summary>Gets how many changes were reported.</summary>
-        public int Count { get; private set; }
-
-        /// <inheritdoc/>
-        public void OnNext(BindingChange value) => Count++;
-
-        /// <inheritdoc/>
-        public void OnError(Exception error)
-        {
-        }
-
-        /// <inheritdoc/>
-        public void OnCompleted()
-        {
         }
     }
 }

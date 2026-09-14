@@ -8,28 +8,17 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Jobs;
 using ReactiveUI;
+using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Builder;
-using BenchmarkVm = ReactiveUI.Binding.Benchmarks.BenchmarkViewModel;
+using BenchmarkVm = ReactiveUI.Binding.Benchmarks.Mocks.BenchmarkViewModel;
 
 // Outside ReactiveUI.Binding so extension lookup reaches ReactiveUI's overloads; the view model comes in by alias,
 // since importing its namespace would make every call ambiguous.
 namespace RxUiDynamicChain;
 
 /// <summary>The dynamic-chain scenarios of <c>WhenAnyDynamicBenchmark</c>, run against ReactiveUI's own engine.</summary>
-#if BENCH_NETFX
-[SimpleJob(RuntimeMoniker.Net462)]
-#endif
-[SimpleJob(RuntimeMoniker.Net80)]
-[SimpleJob(RuntimeMoniker.Net10_0)]
-[SimpleJob(RuntimeMoniker.Net11_0)]
-[MemoryDiagnoser]
-#if !BENCH_NETFX
-[EventPipeProfiler(EventPipeProfile.GcVerbose)]
-#endif
-[MarkdownExporterAttribute.GitHub]
+[Config(typeof(BenchmarkConfig))]
 #if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
 #endif

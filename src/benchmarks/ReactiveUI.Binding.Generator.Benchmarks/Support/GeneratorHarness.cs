@@ -7,13 +7,19 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using ReactiveUI.Binding.SourceGenerators;
 
-namespace ReactiveUI.Binding.Generator.Benchmarks;
+namespace ReactiveUI.Binding.Generator.Benchmarks.Support;
 
-/// <summary>Shared setup for the generator benchmarks: compilations and drivers over a corpus.</summary>
+/// <summary>Builds the compilation and the generator driver the generation benchmarks run.</summary>
 internal static class GeneratorHarness
 {
-    /// <summary>The assembly name given to the throwaway compilation the generator runs against.</summary>
-    private const string CompilationAssemblyName = "Corpus";
+    /// <summary>The assembly name given to the compilation the generator runs against.</summary>
+    private const string CompilationAssemblyName = "Mocks";
+
+    /// <summary>The folder beside the benchmark assembly that holds the mock consumer source.</summary>
+    private const string MocksFolder = "Mocks";
+
+    /// <summary>Matches the C# source files in the mocks folder.</summary>
+    private const string SourceFilePattern = "*.cs";
 
     /// <summary>The feature a build lists interceptable namespaces under.</summary>
     private const string InterceptorsNamespacesFeature = "InterceptorsNamespaces";
@@ -29,20 +35,28 @@ internal static class GeneratorHarness
     /// <returns>The parse options.</returns>
     internal static CSharpParseOptions ParseOptions(bool intercept)
     {
-        var parseOptions = new CSharpParseOptions(LanguageVersion.CSharp10);
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Latest);
 
         return intercept
             ? parseOptions.WithFeatures([new KeyValuePair<string, string>(InterceptorsNamespacesFeature, InterceptorNamespace)])
             : parseOptions;
     }
 
-    /// <summary>Builds a compilation over the corpus source.</summary>
-    /// <param name="sourceText">The corpus source text.</param>
+    /// <summary>Builds a compilation over the mock consumer source copied beside the benchmark assembly.</summary>
     /// <param name="intercept">Whether the build lists the generated namespace for interception.</param>
     /// <returns>The compilation.</returns>
-    internal static CSharpCompilation BuildCompilation(string sourceText, bool intercept)
+    internal static CSharpCompilation BuildCompilation(bool intercept)
     {
-        var syntaxTree = CSharpSyntaxTree.ParseText(sourceText, ParseOptions(intercept));
+        var parseOptions = ParseOptions(intercept);
+        var paths = Directory.GetFiles(Path.Combine(AppContext.BaseDirectory, MocksFolder), SourceFilePattern);
+        Array.Sort(paths, StringComparer.Ordinal);
+
+        var syntaxTrees = new SyntaxTree[paths.Length];
+        for (var i = 0; i < paths.Length; i++)
+        {
+            using var reader = File.OpenText(paths[i]);
+            syntaxTrees[i] = CSharpSyntaxTree.ParseText(reader.ReadToEnd(), parseOptions, paths[i]);
+        }
 
         var references = new List<MetadataReference>(Basic.Reference.Assemblies.Net80.References.All)
         {
@@ -53,7 +67,7 @@ internal static class GeneratorHarness
 
         return CSharpCompilation.Create(
             CompilationAssemblyName,
-            [syntaxTree],
+            syntaxTrees,
             references,
             new(OutputKind.DynamicallyLinkedLibrary));
     }

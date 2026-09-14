@@ -5,7 +5,7 @@
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
-namespace ReactiveUI.Binding.Benchmarks;
+namespace ReactiveUI.Binding.Benchmarks.Mocks;
 
 /// <summary>A command that counts what reached it, so an invocation benchmark measures the wiring and not the body.</summary>
 public sealed class BenchmarkCommand : ICommand

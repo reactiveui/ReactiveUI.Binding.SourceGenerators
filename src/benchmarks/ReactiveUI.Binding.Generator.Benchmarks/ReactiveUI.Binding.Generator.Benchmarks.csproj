@@ -1,15 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet"/>
-    <PackageReference Include="BenchmarkDotNet.Diagnostics.dotTrace" Condition="false"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net80"/>
   </ItemGroup>
@@ -21,6 +16,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\ReactiveUI.Binding.SourceGenerators\ReactiveUI.Binding.SourceGenerators.csproj"/>
     <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Mocks\*.cs" CopyToOutputDirectory="PreserveNewest"/>
   </ItemGroup>
 
 </Project>
