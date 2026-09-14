@@ -9,27 +9,13 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
-/// <summary>
-/// Observation plugin for WinUI <c>DependencyObject</c> types.
-/// Affinity: 6 (matches ReactiveUI's WinUI DependencyObjectObservableForProperty).
-/// Does NOT support before-change notifications.
-/// Generates inline <c>__WinUIDPObservable</c> using <c>RegisterPropertyChangedCallback</c> /
-/// <c>UnregisterPropertyChangedCallback</c> — direct static field access, no reflection.
-/// </summary>
-/// <remarks>
-/// WinUI uses token-based callback registration instead of <c>EventHandler</c>,
-/// so this plugin generates an inline observable class rather than using <c>EventObservable</c>.
-/// The inline class is emitted once per generated output file.
-/// </remarks>
+/// <summary>Observes WinUI dependency properties through <c>RegisterPropertyChangedCallback</c>.</summary>
 internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin
 {
     /// <summary>Completes the name of the dependency property field a plain property is registered under.</summary>
     private const string DependencyPropertyFieldSuffix = "Property,";
 
-    /// <summary>
-    /// The affinity score for the WinUI DependencyObject observation plugin
-    /// (matches ReactiveUI's WinUI DependencyObjectObservableForProperty).
-    /// </summary>
+    /// <summary>The affinity this plugin bids with.</summary>
     private static readonly int WinUIAffinity = BindingAffinity.WinUiDependencyObject;
 
     /// <inheritdoc/>
@@ -154,10 +140,7 @@ internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin
                               }
                       """);
 
-    /// <summary>
-    /// Emits the <c>Subscribe</c> method and the nested <c>Subscription</c> class
-    /// for the <c>__WinUIDPObservable&lt;T&gt;</c> observable, closing the outer class.
-    /// </summary>
+    /// <summary>Emits the observable's <c>Subscribe</c> method and subscription class, closing the observable.</summary>
     /// <param name="sb">The string builder.</param>
     private static void EmitSubscriptionClass(StringBuilder sb)
     {

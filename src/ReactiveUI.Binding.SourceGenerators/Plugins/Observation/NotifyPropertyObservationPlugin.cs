@@ -8,15 +8,7 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
-/// <summary>
-/// Base for the observation plugins that watch a type through
-/// <see cref="System.ComponentModel.INotifyPropertyChanged"/> and
-/// <see cref="System.ComponentModel.INotifyPropertyChanging"/>.
-/// </summary>
-/// <remarks>
-/// A derived plugin says only which types it claims and how strongly. Everything it emits is the same,
-/// so the interface is implemented once here rather than repeated per plugin.
-/// </remarks>
+/// <summary>The base for observation plugins that watch a type through its property change notifications.</summary>
 internal closed class NotifyPropertyObservationPlugin : IObservationPlugin
 {
     /// <inheritdoc/>
@@ -35,10 +27,6 @@ internal closed class NotifyPropertyObservationPlugin : IObservationPlugin
     public abstract bool IsAMatch(ClassBindingInfo classInfo);
 
     /// <inheritdoc/>
-    /// <remarks>
-    /// The notification interfaces carry the property name in the event they raise rather than declaring
-    /// anything per property, so every property of a type that implements one is reachable.
-    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) => true;
 

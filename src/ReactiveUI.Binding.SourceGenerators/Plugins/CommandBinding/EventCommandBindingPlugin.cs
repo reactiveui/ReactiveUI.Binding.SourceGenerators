@@ -9,12 +9,7 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 
-/// <summary>Base for the command binding plugins that drive a command from a control's event.</summary>
-/// <remarks>
-/// A derived plugin says which controls it claims and writes the three parameter-kind bodies. Resolving the
-/// event-args type and choosing between those three is the same wherever the command comes from an event, so
-/// the interface is implemented once here rather than repeated per plugin.
-/// </remarks>
+/// <summary>The base for command binding plugins that execute a command from a control's event.</summary>
 internal closed class EventCommandBindingPlugin : ICommandBindingPlugin
 {
     /// <inheritdoc/>
@@ -43,11 +38,6 @@ internal closed class EventCommandBindingPlugin : ICommandBindingPlugin
 
     /// <summary>Appends the subscription that rebinds the control whenever the command property changes.</summary>
     /// <param name="sb">The string builder to append to.</param>
-    /// <remarks>
-    /// The command is observed rather than read, so a view model that hands one over later - or swaps one out -
-    /// rebinds the control. Everything the previous command attached is dropped first, and a binding with no
-    /// command yet stays inert.
-    /// </remarks>
     protected static void AppendCommandSubscription(StringBuilder sb) =>
         _ = sb.AppendLine(CommandBindingSyntax.SerialDisposableDeclaration)
             .AppendLine(CommandBindingSyntax.CommandSubscriptionOpen)
@@ -60,15 +50,12 @@ internal closed class EventCommandBindingPlugin : ICommandBindingPlugin
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types.</param>
-    /// <remarks>
-    /// A parameter stream and a command stream emit independently, so the parameter is held in a local the
-    /// event handler reads at the moment it runs rather than captured when the command arrived.
-    /// </remarks>
     protected static void AppendLatestParameterCapture(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         bool supportsNullable)
     {
+        // The parameter and command streams emit independently, so the handler reads the latest parameter when it runs.
         _ = sb.AppendLine().Append("            ").Append(inv.ParameterTypeFullName)
             .Append(supportsNullable && inv.ParameterIsReferenceType ? "?" : string.Empty).AppendLine(" __latestParam = default;")
             .AppendLine("            var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(")
@@ -106,7 +93,7 @@ internal closed class EventCommandBindingPlugin : ICommandBindingPlugin
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The control access chain.</param>
     /// <param name="eventArgsType">The event args type.</param>
-    /// <param name="supportsNullable">There can be a null type.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types.</param>
     protected abstract void EmitWithObservableParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
@@ -120,7 +107,7 @@ internal closed class EventCommandBindingPlugin : ICommandBindingPlugin
     /// <param name="controlAccess">The control access chain.</param>
     /// <param name="eventArgsType">The event args type.</param>
     /// <param name="paramAccess">The parameter access chain.</param>
-    /// <param name="supportsNullable">There can be a null type.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types.</param>
     protected abstract void EmitWithExpressionParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
@@ -134,7 +121,7 @@ internal closed class EventCommandBindingPlugin : ICommandBindingPlugin
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The control access chain.</param>
     /// <param name="eventArgsType">The event args type.</param>
-    /// <param name="supportsNullable">There can be a null type.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types.</param>
     protected abstract void EmitWithNoParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,

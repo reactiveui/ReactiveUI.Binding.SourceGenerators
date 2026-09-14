@@ -138,10 +138,7 @@ public class InvokeCommandGeneratorTests
         await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchgcsName);
     }
 
-    /// <summary>
-    /// A target held in a type parameter is named by nothing a generated member could declare, so the call site
-    /// is declined rather than emitted with the parameter's own name in it.
-    /// </summary>
+    /// <summary>A target typed as a type parameter generates no dispatch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task GenericTargetParameter_GeneratesNoDispatch()
@@ -339,10 +336,7 @@ public class InvokeCommandGeneratorTests
         await Assert.That(workers).IsEqualTo(1);
     }
 
-    /// <summary>
-    /// The overload taking the command itself has no property to observe, so it is served by the runtime library
-    /// and no dispatch is generated for it.
-    /// </summary>
+    /// <summary>The overload taking the command itself generates no dispatch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task CommandArgument_GeneratesNoDispatch()

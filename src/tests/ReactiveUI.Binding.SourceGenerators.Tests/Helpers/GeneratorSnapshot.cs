@@ -8,19 +8,7 @@ using Microsoft.CodeAnalysis;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
-/// <summary>Compares every file a generator run produced against the snapshots stored in the test project.</summary>
-/// <remarks>
-/// <para>
-/// A snapshot is named <c>{type}.{method}#{hint name}.verified.cs</c> and starts with a <c>//HintName:</c> line. A file
-/// that differs, or has no snapshot yet, is written next to it as <c>.received.cs</c> and fails the test, as does a
-/// snapshot the run no longer produces. With the <c>ACCEPT_SNAPSHOTS</c> environment variable set, the run's output
-/// replaces the snapshots instead.
-/// </para>
-/// <para>
-/// The snapshot directory is recorded as assembly metadata when the test project builds. A caller file path cannot
-/// stand in for it: a continuous-integration build maps source paths to <c>/_/</c>, which exists nowhere on disk.
-/// </para>
-/// </remarks>
+/// <summary>Compares a generator run's output with the snapshots stored in the test project.</summary>
 internal static class GeneratorSnapshot
 {
     /// <summary>The environment variable that makes a run write its output over the snapshots.</summary>
@@ -93,15 +81,12 @@ internal static class GeneratorSnapshot
     /// <param name="output">The generated output, in snapshot form.</param>
     /// <param name="accept">Whether the output replaces the snapshot.</param>
     /// <returns><see langword="true"/> when the output equals the snapshot or was accepted as it.</returns>
-    /// <remarks>
-    /// A snapshot whose content already matches is left untouched when accepting, so regenerating rewrites only the
-    /// files whose output changed rather than every file's encoding and line endings.
-    /// </remarks>
     private static async Task<bool> StoreAsync(string basePath, string output, bool accept)
     {
         var verifiedPath = basePath + VerifiedSuffix;
         var receivedPath = basePath + ReceivedSuffix;
 
+        // Compared before accepting, so a matching snapshot keeps its bytes rather than being rewritten.
         if (File.Exists(verifiedPath) && Normalize(await File.ReadAllTextAsync(verifiedPath)) == output)
         {
             File.Delete(receivedPath);
@@ -124,6 +109,7 @@ internal static class GeneratorSnapshot
     /// <exception cref="InvalidOperationException">The test assembly records no snapshot directory.</exception>
     private static string ReadSnapshotDirectory()
     {
+        // Recorded at build time: a CI build maps caller file paths to /_/, which does not exist on disk.
         foreach (var attribute in typeof(GeneratorSnapshot).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>())
         {
             if (attribute.Key == DirectoryMetadataKey && !string.IsNullOrEmpty(attribute.Value))

@@ -229,10 +229,7 @@ public class ReflectionTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that Rewrite strips Convert (boxing) expressions and returns the underlying member access.
-    /// Covers ExpressionRewriter line 47: ExpressionType.Convert case.
-    /// </summary>
+    /// <summary>Verifies that Rewrite strips a boxing conversion and returns the underlying member access.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Rewrite_ConvertExpression_StripsConvertAndReturnsMemberAccess()
@@ -248,10 +245,7 @@ public class ReflectionTests
         await Assert.That(((MemberExpression)rewritten).Member.Name).IsEqualTo("Age");
     }
 
-    /// <summary>
-    /// Verifies that ExpressionToPropertyNames joins every hop of a deep (4-level) chain into a single
-    /// dotted path, exercising the join across multiple intermediate members rather than just one.
-    /// </summary>
+    /// <summary>Verifies that ExpressionToPropertyNames joins every hop of a four-level chain into one dotted path.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExpressionToPropertyNames_DeeperChain_ReturnsDottedPath()
@@ -447,13 +441,7 @@ public class ReflectionTests
         await Assert.That(result.Length).IsGreaterThan(0);
     }
 
-    /// <summary>
-    /// Verifies that TrySetValueToPropertyChain with shouldThrow=true returns false (rather than throwing)
-    /// when the final property's immediate parent is null. The chain is short enough that the null target
-    /// is reached only after the traversal loop, so this exercises the throwing getter-resolution path
-    /// (GetValueFetcherOrThrow) reaching a valid member yet still returning false — distinct from both the
-    /// shouldThrow=false null-intermediate case and the deeper chain that throws mid-loop.
-    /// </summary>
+    /// <summary>Verifies that TrySetValueToPropertyChain with shouldThrow=true returns false when the final property's parent is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TrySetValueToPropertyChain_ShouldThrowTrue_NullFinalParent_ReturnsFalse()
@@ -462,7 +450,8 @@ public class ReflectionTests
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
-        var vm = new TestViewModel(); // Address is null
+        // A two-hop chain reaches the null parent after the traversal loop, so this returns rather than throws.
+        var vm = new TestViewModel();
         var result = Reflection.TrySetValueToPropertyChain(vm, chain, "New", true);
 
         await Assert.That(result).IsFalse();
@@ -523,7 +512,6 @@ public class ReflectionTests
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
-        // For a single-property chain, null root hits the "if (current is null)" check at line 186
         var result = Reflection.TryGetValueForPropertyChain<string>(out _, null, chain);
 
         await Assert.That(result).IsFalse();
@@ -538,7 +526,6 @@ public class ReflectionTests
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
-        // Null root with single-property chain hits the null check before last property
         var result = Reflection.TryGetAllValuesForPropertyChain(out _, null, chain);
 
         await Assert.That(result).IsFalse();
@@ -558,90 +545,58 @@ public class ReflectionTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that TryGetValueForPropertyChain returns false when an intermediate becomes null
-    /// during loop traversal in a 4-level chain. Uses Chain2.Chain3.Host.SomeOtherParam where Chain3
-    /// is null, so the third loop iteration (i=2) encounters null current.
-    /// Covers Reflection.cs line 176 (current is null in loop body).
-    /// </summary>
+    /// <summary>Verifies that TryGetValueForPropertyChain returns false when an intermediate of a four-level chain is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetValueForPropertyChain_NullIntermediate_In4LevelChain_ReturnsFalse()
     {
-        // 4-element chain: [Chain2, Chain3, Host, SomeOtherParam]
-        // Loop runs for i=0,1,2 (count-1=3).
-        // i=0: fetches Chain2 (non-null). i=1: fetches Chain3 (null). current = null.
-        // i=2: current is null → line 176 fires.
         Expression<Func<ObjChain1, int>> expr = x => x.Chain2!.Chain3!.Host!.SomeOtherParam;
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
-        // Chain2 exists but Chain3 is null
+        // Chain3 is null, so the walk meets a null inside the loop rather than at the last hop.
         var obj = new ObjChain1 { Chain2 = new() };
         var result = Reflection.TryGetValueForPropertyChain<int>(out _, obj, chain);
 
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that TryGetAllValuesForPropertyChain returns false when an intermediate becomes null
-    /// during loop traversal in a 4-level chain. Uses Chain2.Chain3.Host.SomeOtherParam where Chain3
-    /// is null, so the third loop iteration (i=2) encounters null current.
-    /// Covers Reflection.cs line 221 (current is null in loop body).
-    /// </summary>
+    /// <summary>Verifies that TryGetAllValuesForPropertyChain returns false and stops recording when an intermediate is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TryGetAllValuesForPropertyChain_NullIntermediate_In4LevelChain_ReturnsFalse()
     {
-        // 4-element chain: [Chain2, Chain3, Host, SomeOtherParam]
-        // Loop runs for i=0,1,2 (count-1=3).
-        // i=0: fetches Chain2 (non-null). i=1: fetches Chain3 (null). current = null.
-        // i=2: current is null → line 221 fires.
         Expression<Func<ObjChain1, int>> expr = x => x.Chain2!.Chain3!.Host!.SomeOtherParam;
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
-        // Chain2 exists but Chain3 is null
+        // Chain3 is null, so the walk meets a null inside the loop rather than at the last hop.
         var obj = new ObjChain1 { Chain2 = new() };
         var result = Reflection.TryGetAllValuesForPropertyChain(out var changeValues, obj, chain);
 
         await Assert.That(result).IsFalse();
-
-        // First two values should be set, third should be null
         await Assert.That(changeValues[0]).IsNotNull();
         await Assert.That(changeValues[1]).IsNotNull();
         await Assert.That(changeValues[ThirdValueIndex]).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that TrySetValueToPropertyChain with shouldThrow=true throws ArgumentNullException
-    /// when an intermediate target becomes null during chain traversal.
-    /// Uses a 4-level chain where Chain3 is null, causing the third loop iteration to hit
-    /// the null target throw at getter(target ?? throw).
-    /// Covers Reflection.cs line 278 (target ?? throw).
-    /// </summary>
+    /// <summary>Verifies that TrySetValueToPropertyChain with shouldThrow=true throws when an intermediate target is null.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TrySetValueToPropertyChain_ShouldThrowTrue_NullIntermediate_ThrowsArgumentNullException()
     {
-        // 4-element chain: [Chain2, Chain3, Host, SomeOtherParam]
-        // Loop runs i=0,1,2. At i=1, getter returns null (Chain3 is null).
-        // At i=2, target is null and shouldThrow=true, so getter(null ?? throw) fires.
         Expression<Func<ObjChain1, int>> expr = x => x.Chain2!.Chain3!.Host!.SomeOtherParam;
         var body = Reflection.Rewrite(expr.Body);
         var chain = body.GetExpressionChain();
 
-        var obj = new ObjChain1 { Chain2 = new() }; // Chain3 is null
+        // Chain3 is null, so the walk meets a null inside the loop rather than at the last hop.
+        var obj = new ObjChain1 { Chain2 = new() };
         var action = () => Reflection.TrySetValueToPropertyChain(obj, chain, SampleValue);
 
         await Assert.That(action).ThrowsException();
     }
 
-    /// <summary>
-    /// Verifies that TrySetValueToPropertyChain with shouldThrow=false resolves the getter/setter via the
-    /// non-throwing path (GetValueFetcherForProperty / GetValueSetterForProperty) and successfully sets the
-    /// final property when every member in the chain is populated.
-    /// </summary>
+    /// <summary>Verifies that TrySetValueToPropertyChain with shouldThrow=false sets the final property of a populated chain.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TrySetValueToPropertyChain_ShouldThrowFalse_PopulatedChain_SetsValue()
@@ -658,39 +613,28 @@ public class ReflectionTests
         await Assert.That(address.City).IsEqualTo("New");
     }
 
-    /// <summary>
-    /// Verifies that ExpressionToPropertyNames correctly formats multi-argument indexer expressions
-    /// with comma separators between arguments.
-    /// Covers Reflection.cs line 58 (i != 0 TRUE branch in indexer argument loop).
-    /// </summary>
+    /// <summary>Verifies that ExpressionToPropertyNames formats an indexer on a member as its name and argument.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExpressionToPropertyNames_MultiArgIndexer_ReturnsPathWithCommaSeparatedArgs()
     {
-        // Create an IndexExpression with two constant arguments
         var parameter = System.Linq.Expressions.Expression.Parameter(typeof(MultiArgIndexedModel), "x");
         var itemsProperty = System.Linq.Expressions.Expression.Property(parameter, "Items");
         var indexer = typeof(Dictionary<string, int>).GetProperty("Item")!;
         var arg = System.Linq.Expressions.Expression.Constant("key1");
         var indexExpr = System.Linq.Expressions.Expression.MakeIndex(itemsProperty, indexer, [arg]);
 
-        // Build a full expression: parameter -> Items (MemberAccess) -> Item["key1"] (Index)
         var rewritten = Reflection.Rewrite(indexExpr);
         var name = Reflection.ExpressionToPropertyNames(rewritten);
 
         await Assert.That(name).Contains("Item[key1]");
     }
 
-    /// <summary>
-    /// Verifies that ExpressionToPropertyNames correctly formats a true multi-parameter indexer expression
-    /// with comma separators between arguments.
-    /// Covers Reflection.cs line 58 (i != 0 TRUE branch in multi-arg indexer argument loop).
-    /// </summary>
+    /// <summary>Verifies that ExpressionToPropertyNames separates a multi-parameter indexer's arguments with commas.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExpressionToPropertyNames_TrueMultiArgIndexer_ReturnsCommaSeparatedArgs()
     {
-        // Create an IndexExpression with TWO constant arguments to exercise the i != 0 branch
         var parameter = System.Linq.Expressions.Expression.Parameter(typeof(TrueMultiArgIndexedModel), "x");
         var indexer = typeof(TrueMultiArgIndexedModel).GetProperty("Item")!;
         var arg0 = System.Linq.Expressions.Expression.Constant(FirstIndexArgument);
@@ -703,14 +647,10 @@ public class ReflectionTests
         var rewritten = Reflection.Rewrite(indexExpr);
         var name = Reflection.ExpressionToPropertyNames(rewritten);
 
-        // Should contain "Item[3,5]" with the comma between args
         await Assert.That(name).Contains("Item[3,5]");
     }
 
-    /// <summary>
-    /// Verifies that TrySetValueToPropertyChain throws when attempting to set a read-only property
-    /// with shouldThrow=true (default). PropertyInfo.SetValue throws when the property has no setter.
-    /// </summary>
+    /// <summary>Verifies that TrySetValueToPropertyChain with shouldThrow=true throws for a read-only property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TrySetValueToPropertyChain_ReadOnlyProperty_ShouldThrowTrue_Throws()
@@ -725,12 +665,7 @@ public class ReflectionTests
         await Assert.That(act).ThrowsException();
     }
 
-    /// <summary>
-    /// Verifies that TrySetValueToPropertyChain with shouldThrow=false on a read-only property
-    /// throws at the PropertyInfo.SetValue level (the setter delegate is non-null but the property
-    /// has no set accessor). Covers Reflection.cs line 293 where shouldThrow=false selects
-    /// GetValueSetterForProperty, and line 295 where the returned setter is invoked.
-    /// </summary>
+    /// <summary>Verifies that TrySetValueToPropertyChain with shouldThrow=false still throws for a read-only property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task TrySetValueToPropertyChain_ReadOnlyProperty_ShouldThrowFalse_Throws()
@@ -742,8 +677,7 @@ public class ReflectionTests
         var model = new ReadOnlyModel();
         var act = () => Reflection.TrySetValueToPropertyChain(model, chain, NewFieldValue, false);
 
-        // GetValueSetterForProperty returns property.SetValue (non-null) for any PropertyInfo,
-        // but calling SetValue on a getter-only property throws ArgumentException.
+        // The non-throwing lookup still hands back a setter for any property; invoking it on a getter-only one throws.
         await Assert.That(act).ThrowsException();
     }
 
@@ -805,8 +739,7 @@ public class ReflectionTests
         public Dictionary<string, int> Items { get; } = new() { ["key1"] = SeededValue };
     }
 
-    /// <summary>A test model with a true multi-parameter indexer (two int parameters).</summary>
-    /// <summary>A test model with a read-only property (getter only, no setter).</summary>
+    /// <summary>A test model with a read-only property.</summary>
     private sealed class ReadOnlyModel
     {
         /// <summary>Gets the read-only value. This property has no setter.</summary>

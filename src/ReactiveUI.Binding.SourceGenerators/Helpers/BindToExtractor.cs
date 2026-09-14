@@ -8,10 +8,7 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
-/// <summary>
-/// Extracts <see cref="BindToInvocationInfo"/> from <c>BindTo</c> invocations. The source is an
-/// observable stream (the receiver), so only the target property path is extracted.
-/// </summary>
+/// <summary>Extracts <see cref="BindToInvocationInfo"/> from <c>BindTo</c> invocations.</summary>
 internal static class BindToExtractor
 {
     /// <summary>The minimum number of arguments a BindTo invocation must have (target, property).</summary>
@@ -108,8 +105,7 @@ internal static class BindToExtractor
             return direct.TypeArguments[0];
         }
 
-        // A null receiver simply has no interfaces to walk, so it falls through to the same result as one
-        // that implements nothing; a separate guard for it could never be taken from the only caller.
+        // A null receiver has no interfaces, so it returns null like one that implements none.
         foreach (var iface in receiver?.AllInterfaces ?? System.Collections.Immutable.ImmutableArray<INamedTypeSymbol>.Empty)
         {
             if (IsFrameworkObservable(iface))
@@ -124,13 +120,6 @@ internal static class BindToExtractor
     /// <summary>Determines whether a type is the framework's own <c>System.IObservable&lt;T&gt;</c>.</summary>
     /// <param name="type">The type to judge.</param>
     /// <returns><see langword="true"/> when it is that interface rather than one of the same name.</returns>
-    /// <remarks>
-    /// Asked of the receiver and of each interface it implements, so the shape and the namespace are described
-    /// once. Both a lookalike declared elsewhere and one of the same name taking a different number of type
-    /// arguments answer no. A named type always belongs to a namespace, the global one at worst, so there is
-    /// none to account for; the shapes that belong to no namespace - an array, a pointer, a function pointer -
-    /// are not named types and never arrive here.
-    /// </remarks>
     private static bool IsFrameworkObservable(INamedTypeSymbol type) =>
         type is { Name: "IObservable", TypeArguments.Length: 1 }
         && type.ContainingNamespace.ToDisplayString() == "System";

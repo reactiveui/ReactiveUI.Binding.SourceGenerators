@@ -11,16 +11,7 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Tests the tier that claims a binding call site outright instead of offering an overload that has to win
-/// extension-method lookup.
-/// </summary>
-/// <remarks>
-/// Which tier a build gets is settled by the compiler hosting the generator and by whether the project lists
-/// the generated namespace, so every test here states the outcome for both and the suite runs against both
-/// generator builds. That is what keeps the assertions honest on a compiler that cannot describe a call site
-/// at all, where the overloads are still the only thing that can be emitted.
-/// </remarks>
+/// <summary>Tests the tier that claims binding call sites with interceptors rather than overloads.</summary>
 public class InterceptedCallSiteTests
 {
     /// <summary>The attribute text an interceptor carries.</summary>
@@ -247,11 +238,7 @@ public class InterceptedCallSiteTests
                                                    }
                                                    """;
 
-    /// <summary>The dispatch file each generated binding API emits.</summary>
-    /// <remarks>
-    /// Named rather than matched on a suffix, because the view locator emits one too and it claims no call
-    /// site. An API that stopped emitting its file would drop silently out of a pattern.
-    /// </remarks>
+    /// <summary>The dispatch file each generated binding API emits, excluding the view locator's, which claims no call site.</summary>
     private static readonly string[] ApiDispatchFiles =
     [
         "WhenChangedDispatch.g.cs",
@@ -324,10 +311,7 @@ public class InterceptedCallSiteTests
         await Assert.That(dispatch).Contains(OverloadDeclaration);
     }
 
-    /// <summary>
-    /// A project below C# 10 is served the same way. Interception is refused on a language version, not chosen
-    /// by one, which is what puts a compile-time binding in reach of a consumer the overloads cannot serve.
-    /// </summary>
+    /// <summary>A project below C# 10 is claimed the same way.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OptedInBuild_BelowCSharp10_StillClaimsTheCallSite()
@@ -340,10 +324,7 @@ public class InterceptedCallSiteTests
             .IsEqualTo(!InterceptableLocationReader.IsSupported);
     }
 
-    /// <summary>
-    /// A file declared outside the root namespace is out of the overloads' reach, and is claimed anyway. This is
-    /// the case the tier exists for: nothing about an interceptor goes through extension-method lookup.
-    /// </summary>
+    /// <summary>A file declared outside the root namespace is claimed although the overloads cannot reach it.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OptedInBuild_ClaimsACallSiteOutsideTheRootNamespace()
@@ -354,10 +335,7 @@ public class InterceptedCallSiteTests
             .IsEqualTo(InterceptableLocationReader.IsSupported);
     }
 
-    /// <summary>
-    /// The emitted assembly runs the binding. Emission is where the compiler checks an interceptor against the
-    /// call it replaces, so a signature that does not match fails here rather than being noticed downstream.
-    /// </summary>
+    /// <summary>The emitted assembly runs the binding an interceptor claimed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OptedInBuild_RunsTheBindingItClaimed()
@@ -397,10 +375,7 @@ public class InterceptedCallSiteTests
         context.Unload();
     }
 
-    /// <summary>
-    /// A call site whose selector the compiler cannot read is not claimed, even by a build that could claim it. It
-    /// reaches the stub, which throws and names the Unsafe overload, the same as on a build given the overloads.
-    /// </summary>
+    /// <summary>A call site whose selector cannot be read is left to the stub, even in a build that claims call sites.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task OptedInBuild_LeavesACallSiteItCannotReadToTheStub()

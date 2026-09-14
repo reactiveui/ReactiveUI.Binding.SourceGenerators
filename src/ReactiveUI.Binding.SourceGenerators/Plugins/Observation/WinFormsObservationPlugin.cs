@@ -9,25 +9,7 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
-/// <summary>
-/// Observation plugin for WinForms <c>Component</c> types.
-/// Affinity: 8 (matches ReactiveUI's WinformsCreatesObservableForProperty).
-/// Does NOT support before-change notifications.
-/// Generates <c>EventObservable</c> with direct <c>{PropertyName}Changed</c> event subscription —
-/// no reflection needed.
-/// </summary>
-/// <remarks>
-/// <para>
-/// WinForms uses the convention that observable properties have a corresponding
-/// <c>{PropertyName}Changed</c> event with <see cref="EventHandler"/> signature.
-/// Generated code subscribes directly to these events (e.g., <c>obj.TextChanged += handler</c>).
-/// </para>
-/// <para>
-/// If a WinForms component does not have the expected <c>{PropertyName}Changed</c> event,
-/// the generated code will produce a compile error in the user's project, clearly indicating
-/// that the property cannot be observed via the WinForms event convention.
-/// </para>
-/// </remarks>
+/// <summary>Observes WinForms components through their <c>{PropertyName}Changed</c> events.</summary>
 internal sealed class WinFormsObservationPlugin : AfterChangeObservationPlugin
 {
     /// <summary>Opens the lambda that adds or removes the generated event handler.</summary>
@@ -39,10 +21,7 @@ internal sealed class WinFormsObservationPlugin : AfterChangeObservationPlugin
     /// <summary>Completes the event name and unsubscribes the generated handler.</summary>
     private const string ChangedEventRemove = "Changed -= __h,";
 
-    /// <summary>
-    /// The affinity score for the WinForms Component observation plugin
-    /// (matches ReactiveUI's WinformsCreatesObservableForProperty).
-    /// </summary>
+    /// <summary>The affinity this plugin bids with.</summary>
     private static readonly int WinFormsAffinity = BindingAffinity.WinFormsEvent;
 
     /// <inheritdoc/>

@@ -6,11 +6,7 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
 
-/// <summary>
-/// Snapshot tests for the ViewLocatorDispatchGenerator.
-/// Verifies that the generator correctly detects IViewFor&lt;T&gt; implementations
-/// and generates AOT-safe view dispatch code.
-/// </summary>
+/// <summary>Snapshot tests for the view locator dispatch generator.</summary>
 public class ViewLocatorDispatchGeneratorTests
 {
     /// <summary>Verifies that a single IViewFor&lt;T&gt; implementation generates correct dispatch code.</summary>
@@ -356,10 +352,7 @@ public class ViewLocatorDispatchGeneratorTests
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
 
-    /// <summary>
-    /// Verifies that when a ViewModel has both a default view and a contract view,
-    /// the contract-specific check is emitted first so it is not shadowed by the default branch.
-    /// </summary>
+    /// <summary>Verifies a contract view's check is emitted before the default view's.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task DefaultAndContractViewsDispatchCorrectly()
@@ -401,10 +394,7 @@ public class ViewLocatorDispatchGeneratorTests
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
 
-    /// <summary>
-    /// Verifies that when a ViewModel has multiple contract views but no default view,
-    /// the dispatch block contains only contract checks with no default fallback return.
-    /// </summary>
+    /// <summary>Verifies a view model with only contract views emits no default return.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task MultipleContractViewsWithoutDefault()
@@ -447,10 +437,7 @@ public class ViewLocatorDispatchGeneratorTests
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
     }
 
-    /// <summary>
-    /// Verifies that [SingleInstanceView] on a view without parameterless constructor
-    /// generates service-locator-only dispatch (no singleton cache field).
-    /// </summary>
+    /// <summary>Verifies [SingleInstanceView] on a view without a parameterless constructor generates no singleton cache.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public Task SingleInstanceViewWithoutParameterlessCtor()

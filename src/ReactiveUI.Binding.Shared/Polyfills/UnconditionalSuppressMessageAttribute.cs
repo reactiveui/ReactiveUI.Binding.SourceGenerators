@@ -18,7 +18,7 @@ namespace System.Diagnostics.CodeAnalysis;
     AllowMultiple = true)]
 internal sealed class UnconditionalSuppressMessageAttribute : Attribute
 {
-    /// <summary>Initializes a new instance of the <see cref="UnconditionalSuppressMessageAttribute"/> class, specifying the category of the tool and the identifier for an analysis rule.</summary>
+    /// <summary>Initializes a new instance of the <see cref="UnconditionalSuppressMessageAttribute"/> class.</summary>
     /// <param name="category">The category identifying the classification of the attribute.</param>
     /// <param name="checkId">The identifier of the analysis tool rule to be suppressed.</param>
     public UnconditionalSuppressMessageAttribute(string category, string checkId)

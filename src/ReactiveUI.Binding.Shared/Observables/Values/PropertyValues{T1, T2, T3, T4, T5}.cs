@@ -19,11 +19,6 @@ namespace ReactiveUI.Binding;
 /// <param name="Property3">The value of the third observed property.</param>
 /// <param name="Property4">The value of the fourth observed property.</param>
 /// <param name="Property5">The value of the fifth observed property.</param>
-/// <remarks>
-/// Multi-property observation emits every property's current value together, so the emission is one value
-/// rather than a group of them. Being positional, it still deconstructs, so a subscriber can name the
-/// properties it cares about without naming the type.
-/// </remarks>
 [DebuggerDisplay("PropertyValues: {Property1}, {Property2}, +3 more")]
 [SuppressMessage(
     "Design",

@@ -11,12 +11,6 @@ namespace ReactiveUI.Binding.WinForms;
 #endif
 
 /// <summary>Names the thread that owns a WinForms control, so a binding writes to it on its own thread.</summary>
-/// <remarks>
-/// WinForms exposes no context per control, so the posting goes through the control itself, and the control is
-/// asked on every write rather than once. A control whose handle has not been created yet owns no thread, so its
-/// writes stay inline; once the handle exists, later writes go to the thread that created it. Creating the handle
-/// here instead would tie the control to whichever thread made the binding.
-/// </remarks>
 public sealed class ControlViewThreadResolver : IViewThreadResolver
 {
     /// <inheritdoc/>
@@ -25,16 +19,12 @@ public sealed class ControlViewThreadResolver : IViewThreadResolver
 
     /// <summary>Runs a callback on the thread that owns one control.</summary>
     /// <param name="control">The control whose thread the callbacks run on.</param>
-    /// <remarks>
-    /// <see cref="Control.InvokeRequired"/> answers false while neither the control nor a parent has a handle, and
-    /// for a caller already on the owning thread, so both run inline and pay nothing. Only a write from elsewhere
-    /// is queued.
-    /// </remarks>
     private sealed class ControlContext(Control control) : SynchronizationContext
     {
         /// <inheritdoc/>
         public override void Post(SendOrPostCallback d, object? state)
         {
+            // InvokeRequired is false until the control or a parent has a handle, so those writes run inline.
             if (!control.InvokeRequired)
             {
                 d(state);

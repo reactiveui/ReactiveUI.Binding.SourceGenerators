@@ -19,10 +19,7 @@ public class EventHelpersTests
     /// <summary>The <c>MyButton</c> name these tests generate against.</summary>
     private const string MyButtonName = "MyButton";
 
-    /// <summary>
-    /// Verifies FindEventArgsType returns "global::System.EventArgs" when the event's delegate
-    /// type has a non-standard number of parameters (e.g. Action with 0 params).
-    /// </summary>
+    /// <summary>Verifies FindEventArgsType returns EventArgs when the event's delegate has a non-standard parameter count.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindEventArgsType_ActionDelegate_ReturnsEventArgs()
@@ -128,11 +125,7 @@ public class EventHelpersTests
         await Assert.That(argsType).IsNull();
     }
 
-    /// <summary>
-    /// Verifies FindEventArgsType returns null when the type has a member named "Click"
-    /// that is a property, not an event. This exercises the <c>members[i] is IEventSymbol</c>
-    /// false branch in FindEventArgsType.
-    /// </summary>
+    /// <summary>Verifies FindEventArgsType returns null when the member named Click is a property.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindEventArgsType_PropertyNamedClick_ReturnsNull()
@@ -155,10 +148,7 @@ public class EventHelpersTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies FindEventArgsType returns null when the type has a method named "Click"
-    /// rather than an event. This also exercises the non-event member branch.
-    /// </summary>
+    /// <summary>Verifies FindEventArgsType returns null when the member named Click is a method.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindEventArgsType_MethodNamedClick_ReturnsNull()

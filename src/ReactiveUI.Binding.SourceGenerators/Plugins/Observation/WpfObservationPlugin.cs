@@ -8,25 +8,7 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
-/// <summary>
-/// Observation plugin for WPF <c>DependencyObject</c> types.
-/// Affinity: 4 (matches ReactiveUI's DependencyObjectObservableForProperty).
-/// Does NOT support before-change notifications (DependencyProperties have no before-change event).
-/// Generates <c>EventObservable</c> with <c>DependencyPropertyDescriptor.AddValueChanged</c> —
-/// direct static field access, no reflection.
-/// </summary>
-/// <remarks>
-/// <para>
-/// WPF DependencyProperties use the naming convention <c>{PropertyName}Property</c> for the
-/// static <c>DependencyProperty</c> field. Generated code accesses this field directly
-/// (e.g., <c>global::MyApp.MyControl.TextProperty</c>) instead of using reflection.
-/// </para>
-/// <para>
-/// <c>DependencyPropertyDescriptor.FromProperty(dp, type).AddValueChanged(obj, handler)</c>
-/// uses <see cref="EventHandler"/>, which is compatible with <c>EventObservable</c>
-/// from the runtime library.
-/// </para>
-/// </remarks>
+/// <summary>Observes WPF dependency properties through <c>DependencyPropertyDescriptor.AddValueChanged</c>.</summary>
 internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin
 {
     /// <summary>Opens the descriptor lookup the handler is added to or removed from.</summary>
@@ -44,10 +26,7 @@ internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin
     /// <summary>Completes the dependency property field name and opens its owner type.</summary>
     private const string DependencyPropertyOwnerOpen = "Property, typeof(";
 
-    /// <summary>
-    /// The affinity score for the WPF DependencyObject observation plugin
-    /// (matches ReactiveUI's DependencyObjectObservableForProperty).
-    /// </summary>
+    /// <summary>The affinity this plugin bids with.</summary>
     private static readonly int WpfAffinity = BindingAffinity.WpfDependencyObject;
 
     /// <inheritdoc/>
@@ -60,12 +39,6 @@ internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin
     public override bool RequiresHelperClasses => false;
 
     /// <inheritdoc/>
-    /// <remarks>
-    /// A dependency property has one change stream and hands it over whatever the caller asked for, so a
-    /// before-change observation keeps tracking the property and receives each value once it has settled. It
-    /// does not withdraw the mechanism the way a component's change event does, and reading the property once
-    /// instead would leave the observation silent for every change after the first.
-    /// </remarks>
     protected override bool AnswersBeforeChangeWithLiveStream => true;
 
     /// <inheritdoc/>

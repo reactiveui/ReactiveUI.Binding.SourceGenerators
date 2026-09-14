@@ -8,11 +8,7 @@ using System.Windows.Threading;
 
 namespace ReactiveUI.Binding.Wpf.Tests;
 
-/// <summary>
-/// Tests for the WPF view-thread resolver. Compiled twice: once against ReactiveUI.Binding.Wpf and once,
-/// under REACTIVE_SHIM, against ReactiveUI.Binding.Reactive.Wpf, so both leaves are exercised by the same
-/// assertions.
-/// </summary>
+/// <summary>Tests for the WPF view-thread resolver.</summary>
 public class DispatcherViewThreadResolverTests
 {
     /// <summary>How long a callback posted to another UI thread is given to arrive.</summary>
@@ -33,11 +29,7 @@ public class DispatcherViewThreadResolverTests
     public async Task ContextFor_WithSomethingElse_ClaimsNothing() =>
         await Assert.That(new DispatcherViewThreadResolver().ContextFor(UnclaimedTarget)).IsNull();
 
-    /// <summary>
-    /// An object owned by a second UI thread is written on that thread, not on the one the write came from.
-    /// This is the case a process-wide thread gets wrong: it would marshal the write into the first UI thread,
-    /// where touching this object throws exactly as an unmarshalled write does.
-    /// </summary>
+    /// <summary>An object owned by a second UI thread is written on that thread, not on the one the write came from.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ContextFor_WithAnObjectOwnedByASecondUiThread_PostsToThatThread()
@@ -64,10 +56,7 @@ public class DispatcherViewThreadResolverTests
         await Assert.That(ranOnThreadId).IsNotEqualTo(writingThreadId);
     }
 
-    /// <summary>
-    /// A write already on the thread that owns the object is applied inline, so an update raised on the UI
-    /// thread keeps the write synchronous and a caller reading the view back sees the new value.
-    /// </summary>
+    /// <summary>A write already on the thread that owns the object is applied inline.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Post_ToAnObjectOwnedByTheWritingThread_RunsInline()

@@ -16,17 +16,11 @@ namespace System.Diagnostics.CodeAnalysis;
 internal sealed class NotNullWhenAttribute : Attribute
 {
     /// <summary>Initializes a new instance of the <see cref="NotNullWhenAttribute"/> class.</summary>
-    /// <param name="returnValue">
-    /// The return value condition. If the method returns this value,
-    /// the associated parameter will not be <see langword="null"/>.
-    /// </param>
+    /// <param name="returnValue">The return value after which the parameter is not null.</param>
     public NotNullWhenAttribute(bool returnValue) =>
         ReturnValue = returnValue;
 
-    /// <summary>
-    /// Gets a value indicating whether the return condition has been satisfied.
-    /// If the method returns this value, the associated parameter will not be <see langword="null"/>.
-    /// </summary>
+    /// <summary>Gets the return value after which the parameter is not null.</summary>
     public bool ReturnValue { get; }
 }
 

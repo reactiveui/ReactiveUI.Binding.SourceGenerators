@@ -11,11 +11,7 @@ using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNam
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
-/// <summary>
-/// Generates concrete typed extension method overloads and binding methods for <c>BindTo</c> invocations.
-/// The source is an observable stream applied to a target property; differing source/target types are
-/// coerced at runtime via <c>RuntimeBindingConverter</c> (matching ReactiveUI's converter registry behavior).
-/// </summary>
+/// <summary>Generates the typed overloads, interceptors and binding methods for <c>BindTo</c> invocations.</summary>
 internal static class BindToCodeGenerator
 {
     /// <summary>The indentation the direct-assignment subscription body sits at.</summary>
@@ -247,17 +243,10 @@ internal static class BindToCodeGenerator
             .Append(NoBindingFoundMessage).AppendLine("\");").AppendLine(GeneratedSyntax.MemberBodyClose);
     }
 
-    /// <summary>
-    /// Generates the private worker method that subscribes to the source observable and assigns each
-    /// value to the target property, coercing types when required.
-    /// </summary>
+    /// <summary>Generates the binding method that writes each source value to the target property on the target's thread.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="suffix">The stable method-name suffix.</param>
-    /// <remarks>
-    /// Each value is delivered on the thread that owns the target, which is where <c>BindToUnsafe</c> delivers it
-    /// too, so a call site writes on the same thread whichever way it was resolved.
-    /// </remarks>
     internal static void GenerateBindToMethod(StringBuilder sb, BindToInvocationInfo inv, string suffix)
     {
         var directAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
@@ -384,17 +373,12 @@ internal static class BindToCodeGenerator
         }
     }
 
-    /// <summary>Writes the parameters a <c>BindTo</c> member declares, closing the list.</summary>
+    /// <summary>Writes the stub's parameter list, which the overload and the interceptor both have to match exactly.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group whose types the parameters are written from.</param>
     /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameter.</param>
-    /// <remarks>
-    /// One list serves the overload and the interceptor, because both have to be the stub's signature: the
-    /// overload only wins resolution against a candidate it is otherwise indistinguishable from, and an
-    /// interceptor is refused outright unless its signature is the intercepted method's.
-    /// </remarks>
     private static void AppendParameterList(
         StringBuilder sb,
         BindToTypeGroup group,

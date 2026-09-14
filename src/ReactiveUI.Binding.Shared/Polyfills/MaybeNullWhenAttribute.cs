@@ -16,16 +16,10 @@ namespace System.Diagnostics.CodeAnalysis;
 internal sealed class MaybeNullWhenAttribute : Attribute
 {
     /// <summary>Initializes a new instance of the <see cref="MaybeNullWhenAttribute"/> class.</summary>
-    /// <param name="returnValue">
-    /// The return value condition. If the method returns this value,
-    /// the associated parameter may be <see langword="null"/>.
-    /// </param>
+    /// <param name="returnValue">The return value after which the parameter may be null.</param>
     public MaybeNullWhenAttribute(bool returnValue) => ReturnValue = returnValue;
 
-    /// <summary>
-    /// Gets a value indicating whether the return condition has been satisfied.
-    /// If the method returns this value, the associated parameter may be <see langword="null"/>.
-    /// </summary>
+    /// <summary>Gets the return value after which the parameter may be null.</summary>
     public bool ReturnValue { get; }
 }
 

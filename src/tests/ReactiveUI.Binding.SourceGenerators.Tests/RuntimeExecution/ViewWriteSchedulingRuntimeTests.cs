@@ -8,11 +8,7 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.RuntimeExecution;
 
-/// <summary>
-/// Covers where a binding delivers its write to the view. A view model raises its notifications from whatever
-/// thread did the work, and the UI frameworks only allow a view to be touched from the thread that owns it, so
-/// the binding has to move the write rather than leaving each consumer to do it.
-/// </summary>
+/// <summary>Covers which thread a binding delivers its write to the view on.</summary>
 public class ViewWriteSchedulingRuntimeTests
 {
     /// <summary>What the scenario returns when the write went through the established sequencer.</summary>
@@ -154,20 +150,13 @@ public class ViewWriteSchedulingRuntimeTests
                                             }
                                             """;
 
-    /// <summary>
-    /// A write to the view goes through the established sequencer. Delivering it on the notifying thread is
-    /// what throws on the UI frameworks, and an application that had this done for it will not have added the
-    /// marshalling itself.
-    /// </summary>
+    /// <summary>A BindOneWay write to the view goes through the established sequencer.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindOneWay_WhenAViewThreadIsEstablished_DeliversTheWriteThroughIt() =>
         await Assert.That(await RunScenarioAsync("Run")).IsEqualTo(Scheduled);
 
-    /// <summary>
-    /// A generated <c>BindTo</c> delivers its write through the same sequencer, which is where the call resolved
-    /// by <c>BindToUnsafe</c> delivers it too.
-    /// </summary>
+    /// <summary>A generated BindTo write to the view goes through the established sequencer.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindTo_WhenAViewThreadIsEstablished_DeliversTheWriteThroughIt() =>

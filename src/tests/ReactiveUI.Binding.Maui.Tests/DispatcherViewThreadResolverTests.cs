@@ -7,15 +7,7 @@ using Microsoft.Maui.Dispatching;
 
 namespace ReactiveUI.Binding.Maui.Tests;
 
-/// <summary>
-/// Tests for the MAUI view-thread resolver. Compiled twice: once against ReactiveUI.Binding.Maui and once,
-/// under REACTIVE_SHIM, against ReactiveUI.Binding.Reactive.Maui, so both leaves are exercised by the same
-/// assertions.
-/// </summary>
-/// <remarks>
-/// Serialized: the dispatcher a bindable object picks up comes from a process-wide provider, which these
-/// swap for one that records what it was handed.
-/// </remarks>
+/// <summary>Tests for the MAUI view-thread resolver.</summary>
 [NotInParallel]
 public class DispatcherViewThreadResolverTests
 {
@@ -43,10 +35,7 @@ public class DispatcherViewThreadResolverTests
         }
     }
 
-    /// <summary>
-    /// A write already on the thread that owns the object runs inline rather than queueing a turn, so an update
-    /// raised on the UI thread stays synchronous.
-    /// </summary>
+    /// <summary>A write from the thread that owns the object runs inline rather than queueing a turn.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Post_FromTheOwningThread_RunsInline()
@@ -103,10 +92,7 @@ public class DispatcherViewThreadResolverTests
         }
     }
 
-    /// <summary>
-    /// An object that picks a dispatcher up after the binding was made is written through it from then on, because
-    /// the context asks the object on every write.
-    /// </summary>
+    /// <summary>An object that picks a dispatcher up after the binding was made is written through it from then on.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Post_AfterTheObjectPicksUpADispatcher_GoesThroughIt()

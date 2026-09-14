@@ -14,19 +14,11 @@ using ReactiveUI;
 using ReactiveUI.Builder;
 using BenchmarkVm = ReactiveUI.Binding.Benchmarks.BenchmarkViewModel;
 
+// Outside ReactiveUI.Binding so extension lookup reaches ReactiveUI's overloads; the view model comes in by alias,
+// since importing its namespace would make every call ambiguous.
 namespace RxUiDynamicChain;
 
-/// <summary>
-/// The same dynamic-chain scenarios as <c>WhenAnyDynamicBenchmark</c>, run against ReactiveUI's own engine so
-/// the two are read side by side.
-/// </summary>
-/// <remarks>
-/// Declared outside the <c>ReactiveUI.Binding</c> namespace on purpose. Extension lookup walks the enclosing
-/// namespaces from the inside out and stops at the first level offering a candidate, so a class nested under
-/// <c>ReactiveUI.Binding</c> reaches this library's overloads and never consults ReactiveUI's. The view model
-/// arrives through a type alias rather than an import for the same reason: importing its namespace would put
-/// both libraries' overloads at the outermost level and make every call ambiguous.
-/// </remarks>
+/// <summary>The dynamic-chain scenarios of <c>WhenAnyDynamicBenchmark</c>, run against ReactiveUI's own engine.</summary>
 #if BENCH_NETFX
 [SimpleJob(RuntimeMoniker.Net462)]
 #endif
@@ -55,12 +47,7 @@ public class RxUiDynamicChainBaseline
     /// <summary>Names the chain reaching through an intermediate.</summary>
     private static readonly Expression ChildValueChain = Chain(x => x.Child.Value);
 
-    /// <summary>Reads one observed change.</summary>
-    /// <remarks>
-    /// Typed rather than inferred so the binding is pinned: the parameter names ReactiveUI's
-    /// <see cref="IObservedChange{TSender, TValue}"/>, so a call that resolved to this library's overload of
-    /// the same name would not compile rather than quietly benchmarking the wrong engine.
-    /// </remarks>
+    /// <summary>Reads one observed change as ReactiveUI's type, so a call resolving to this library's overload does not compile.</summary>
     private static readonly Func<IObservedChange<BenchmarkVm?, object?>, object?> ReadOne =
         static c1 => c1.Value;
 
