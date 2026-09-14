@@ -73,7 +73,7 @@ public class RxUiDynamicChainBaseline
 
     /// <summary>Registers the observation plugins ReactiveUI resolves each link through.</summary>
     [GlobalSetup]
-    public void Register()
+    public static void Register()
     {
         var builder = RxAppBuilder.CreateReactiveUIBuilder();
         _ = builder.WithCoreServices();

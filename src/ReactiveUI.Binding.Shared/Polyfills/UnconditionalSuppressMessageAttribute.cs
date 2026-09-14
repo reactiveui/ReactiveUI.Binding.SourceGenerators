@@ -28,10 +28,10 @@ internal sealed class UnconditionalSuppressMessageAttribute : Attribute
     }
 
     /// <summary>Gets the category identifying the classification of the attribute.</summary>
-    internal string Category { get; }
+    public string Category { get; }
 
     /// <summary>Gets the identifier of the analysis tool rule to be suppressed.</summary>
-    internal string CheckId { get; }
+    public string CheckId { get; }
 
     /// <summary>Gets or sets the scope of the code that is relevant for the attribute.</summary>
     internal string? Scope { get; set; }

@@ -148,14 +148,14 @@ public class WinFormsCreatesObservableForPropertyTests
 
         /// <summary>Gets a value with no corresponding Changed event.</summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string Untracked => string.Empty;
+        public string Untracked { get; } = string.Empty;
     }
 
     /// <summary>A type that is not a component, so WinForms observation should decline it.</summary>
     public sealed class PlainModel
     {
         /// <summary>Gets a value that no WinForms event announces.</summary>
-        public string Name => string.Empty;
+        public string Name { get; } = string.Empty;
     }
 
     /// <summary>An observer that counts the notifications it receives.</summary>

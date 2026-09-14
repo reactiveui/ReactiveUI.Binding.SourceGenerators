@@ -747,14 +747,6 @@ public class ReflectionTests
         await Assert.That(act).ThrowsException();
     }
 
-    /// <summary>A test model with a public field for testing field-based reflection.</summary>
-    public class FieldTestModel
-    {
-        /// <summary>A public field for testing field-based reflection.</summary>
-        [SuppressMessage("Design", "SST1401:Fields should be private", Justification = "A public field is what the field-reflection path under test resolves.")]
-        public string PublicField = string.Empty;
-    }
-
     /// <summary>A test model with an indexed property for testing index expressions.</summary>
     public sealed class TrueMultiArgIndexedModel
     {
@@ -776,6 +768,14 @@ public class ReflectionTests
         /// <param name="Row">The row index.</param>
         /// <param name="Col">The column index.</param>
         internal readonly record struct GridCell(int Row, int Col);
+    }
+
+    /// <summary>A test model with a public field for testing field-based reflection.</summary>
+    internal sealed class FieldTestModel
+    {
+        /// <summary>A public field for testing field-based reflection.</summary>
+        [SuppressMessage("Design", "SST1401:Fields should be private", Justification = "A public field is what the field-reflection path under test resolves.")]
+        public string PublicField = string.Empty;
     }
 
     /// <summary>A test model with an indexed property for testing index expressions.</summary>

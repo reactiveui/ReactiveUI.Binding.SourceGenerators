@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 /// event-args type and choosing between those three is the same wherever the command comes from an event, so
 /// the interface is implemented once here rather than repeated per plugin.
 /// </remarks>
-internal abstract class EventCommandBindingPlugin : ICommandBindingPlugin
+internal closed class EventCommandBindingPlugin : ICommandBindingPlugin
 {
     /// <inheritdoc/>
     public abstract int Affinity { get; }

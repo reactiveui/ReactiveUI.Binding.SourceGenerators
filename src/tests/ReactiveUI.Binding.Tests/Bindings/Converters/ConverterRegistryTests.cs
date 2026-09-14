@@ -15,9 +15,6 @@ public class ConverterRegistryTests
     /// <summary>A negative affinity, which means the converter does not apply.</summary>
     private const int NegativeAffinity = -5;
 
-    /// <summary>The UTC offset, in hours, of the sample timestamp under test.</summary>
-    private const int OffsetHours = -5;
-
     /// <summary>The affinity a plain test converter reports unless a test needs a ranking.</summary>
     private const int DefaultAffinity = 5;
 
@@ -26,9 +23,6 @@ public class ConverterRegistryTests
 
     /// <summary>Affinity ranking that outranks every other converter registered in a test.</summary>
     private const int HighAffinity = 10;
-
-    /// <summary>The highest affinity used, for the converter a test expects to win outright.</summary>
-    private const int HighestAffinity = 100;
 
     /// <summary>The number of concurrent read iterations in the thread-safety test.</summary>
     private const int ConcurrentReadIterations = 100;

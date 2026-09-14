@@ -295,7 +295,7 @@ public class SymbolHelpersTests
         var semanticModel = compilation.GetSemanticModel(tree);
         var classDecl = (await tree.GetRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
             .First(static c => c.Identifier.Text == "Ext");
-        var classSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl)!;
+        var classSymbol = semanticModel.GetDeclaredSymbol(classDecl)!;
         var methodSymbol = classSymbol.GetMembers("Bind").OfType<IMethodSymbol>().First();
         var converterParam = methodSymbol.Parameters[0];
 
@@ -325,7 +325,7 @@ public class SymbolHelpersTests
         var semanticModel = compilation.GetSemanticModel(tree);
         var classDecl = (await tree.GetRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
             .First(static c => c.Identifier.Text == "Ext");
-        var classSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl)!;
+        var classSymbol = semanticModel.GetDeclaredSymbol(classDecl)!;
         var methodSymbol = classSymbol.GetMembers("Bind").OfType<IMethodSymbol>().First();
         var converterParam = methodSymbol.Parameters[0];
 
@@ -415,6 +415,6 @@ public class SymbolHelpersTests
         var semanticModel = compilation.GetSemanticModel(tree);
         var classDecl = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
             .First(c => c.Identifier.Text == typeName);
-        return (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl)!;
+        return semanticModel.GetDeclaredSymbol(classDecl)!;
     }
 }

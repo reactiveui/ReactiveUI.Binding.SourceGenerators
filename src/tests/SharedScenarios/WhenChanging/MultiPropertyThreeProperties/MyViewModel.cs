@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System;
 using System.ComponentModel;
 
 namespace SharedScenarios.WhenChanging.MultiPropertyThreeProperties;
@@ -64,7 +65,7 @@ public class MyViewModel : INotifyPropertyChanged, INotifyPropertyChanging
         get => _score;
         set
         {
-            if (_score.Equals(value))
+            if (Math.Abs(_score - value) < double.Epsilon)
             {
                 return;
             }

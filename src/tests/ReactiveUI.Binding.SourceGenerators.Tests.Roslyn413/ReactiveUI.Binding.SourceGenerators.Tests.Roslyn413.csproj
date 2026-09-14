@@ -11,8 +11,6 @@
   <ItemGroup>
     <PackageReference Include="TUnit"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
-    <PackageReference Include="Verify.SourceGenerators"/>
-    <PackageReference Include="Verify.TUnit"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net110"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net100"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net90"/>

@@ -256,7 +256,7 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First();
 
-        var classSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
+        var classSymbol = model.GetDeclaredSymbol(classDecl)!;
         var inpc = compilation.GetTypeByMetadataName("System.ComponentModel.INotifyPropertyChanged")!;
 
         var result = AnalyzerHelpers.ImplementsInterface(classSymbol, inpc);
@@ -289,7 +289,7 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First();
 
-        var classSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
+        var classSymbol = model.GetDeclaredSymbol(classDecl)!;
         var inpc = compilation.GetTypeByMetadataName("System.ComponentModel.INotifyPropertyChanged")!;
 
         var result = AnalyzerHelpers.ImplementsInterface(classSymbol, inpc);
@@ -319,8 +319,8 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .ToArray();
 
-        var baseSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecls[0])!;
-        var unrelatedSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecls[1])!;
+        var baseSymbol = model.GetDeclaredSymbol(classDecls[0])!;
+        var unrelatedSymbol = model.GetDeclaredSymbol(classDecls[1])!;
 
         var result = AnalyzerHelpers.InheritsFrom(unrelatedSymbol, baseSymbol);
 
@@ -349,8 +349,8 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .ToArray();
 
-        var baseSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecls[0])!;
-        var derivedSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecls[1])!;
+        var baseSymbol = model.GetDeclaredSymbol(classDecls[0])!;
+        var derivedSymbol = model.GetDeclaredSymbol(classDecls[1])!;
 
         var result = AnalyzerHelpers.InheritsFrom(derivedSymbol, baseSymbol);
 
@@ -661,7 +661,7 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First(static c => c.Identifier.Text == "MyVm");
 
-        var typeSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
+        var typeSymbol = model.GetDeclaredSymbol(classDecl)!;
 
         var result = AnalyzerHelpers.HasObservableMechanism(typeSymbol, compilation);
 
@@ -682,7 +682,7 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First(c => c.Identifier.Text == className);
 
-        return (INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
+        return model.GetDeclaredSymbol(classDecl)!;
     }
 
     /// <summary>Creates a compilation from the specified source code.</summary>

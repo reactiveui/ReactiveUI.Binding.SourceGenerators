@@ -15,9 +15,6 @@ public class BindingEmitterHelpersTests
     /// <summary>The fully qualified name of a source property type.</summary>
     private const string IntTypeName = "global::System.Int32";
 
-    /// <summary>The fully qualified name of a target property type.</summary>
-    private const string StringTypeName = "global::System.String";
-
     /// <summary>The fully qualified name of the view model a call site binds from.</summary>
     private const string ViewModelTypeName = "global::TestApp.MyViewModel";
 

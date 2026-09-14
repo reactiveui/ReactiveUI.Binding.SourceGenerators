@@ -57,7 +57,7 @@ public class WhenAnyDynamicBenchmark
 
     /// <summary>Registers the observation plugins the reflection walk resolves each link through.</summary>
     [GlobalSetup]
-    public void Register()
+    public static void Register()
     {
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         _ = builder.WithCoreServices();

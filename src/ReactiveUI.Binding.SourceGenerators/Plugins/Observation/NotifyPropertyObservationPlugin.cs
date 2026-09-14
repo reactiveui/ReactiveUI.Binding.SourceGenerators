@@ -17,7 +17,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// A derived plugin says only which types it claims and how strongly. Everything it emits is the same,
 /// so the interface is implemented once here rather than repeated per plugin.
 /// </remarks>
-internal abstract class NotifyPropertyObservationPlugin : IObservationPlugin
+internal closed class NotifyPropertyObservationPlugin : IObservationPlugin
 {
     /// <inheritdoc/>
     public abstract int Affinity { get; }

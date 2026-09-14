@@ -28,7 +28,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// that the property cannot be observed via the WinForms event convention.
 /// </para>
 /// </remarks>
-internal sealed class WinFormsObservationPlugin : AfterChangeObservationPlugin, IObservationPlugin
+internal sealed class WinFormsObservationPlugin : AfterChangeObservationPlugin
 {
     /// <summary>Opens the lambda that adds or removes the generated event handler.</summary>
     private const string HandlerLambdaOpen = "                __h => ((";
@@ -49,30 +49,30 @@ internal sealed class WinFormsObservationPlugin : AfterChangeObservationPlugin, 
     public override int Affinity => WinFormsAffinity;
 
     /// <inheritdoc/>
-    public string ObservationKind => "WinForms";
+    public override string ObservationKind => "WinForms";
 
     /// <inheritdoc/>
-    public bool RequiresHelperClasses => false;
+    public override bool RequiresHelperClasses => false;
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsAMatch(ClassBindingInfo classInfo) =>
+    public override bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.InheritsWinFormsComponent;
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
+    public override bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
         ObservedProperties.HasChangeEvent(classInfo, propertyName);
 
     /// <inheritdoc/>
-    public void EmitHelperClasses(StringBuilder sb)
+    public override void EmitHelperClasses(StringBuilder sb)
     {
         // No helper classes needed — uses EventObservable<T> from runtime library.
     }
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitInlineObservationVariable(
+    public override void EmitInlineObservationVariable(
         StringBuilder sb,
         string rootVar,
         PropertyPathSegment segment,

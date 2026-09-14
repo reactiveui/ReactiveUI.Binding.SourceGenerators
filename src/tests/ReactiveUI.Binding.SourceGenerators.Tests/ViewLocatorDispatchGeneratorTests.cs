@@ -159,9 +159,7 @@ public class ViewLocatorDispatchGeneratorTests
 
         // Abstract views should not produce ViewDispatch.g.cs
         var result = TestHelper.RunGenerator(source);
-        return Verify(result.Driver)
-            .UseTypeName("VDG")
-            .UseMethodName("AbstractExcl");
+        return GeneratorSnapshot.VerifyAsync(result.Driver, "VDG", "AbstractExcl");
     }
 
     /// <summary>Verifies that a view with a private constructor generates service-locator-only dispatch (no direct construction).</summary>
@@ -216,9 +214,7 @@ public class ViewLocatorDispatchGeneratorTests
                               """;
 
         var result = TestHelper.RunGenerator(source);
-        return Verify(result.Driver)
-            .UseTypeName("VDG")
-            .UseMethodName("NoViewFor");
+        return GeneratorSnapshot.VerifyAsync(result.Driver, "VDG", "NoViewFor");
     }
 
     /// <summary>Verifies that duplicate IViewFor&lt;T&gt; implementations for the same view model are deduplicated.</summary>
@@ -293,9 +289,7 @@ public class ViewLocatorDispatchGeneratorTests
 
         // Excluded views should not produce ViewDispatch.g.cs
         var result = TestHelper.RunGenerator(source);
-        return Verify(result.Driver)
-            .UseTypeName("VDG")
-            .UseMethodName("ExclAttr");
+        return GeneratorSnapshot.VerifyAsync(result.Driver, "VDG", "ExclAttr");
     }
 
     /// <summary>Verifies that a view marked with [SingleInstanceView] generates singleton dispatch code.</summary>

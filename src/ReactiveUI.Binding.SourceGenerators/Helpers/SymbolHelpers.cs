@@ -180,7 +180,7 @@ internal static class SymbolHelpers
         }
 
         var memberSymbol = semanticModel.GetSymbolInfo(memberAccess, ct).Symbol;
-        return !(memberSymbol is IPropertySymbol { Type: INamedTypeSymbol namedType }) ? null : namedType;
+        return memberSymbol is IPropertySymbol { Type: INamedTypeSymbol namedType } ? namedType : null;
     }
 
     /// <summary>

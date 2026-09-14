@@ -44,6 +44,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IDisposable BindOneWay<TTarget, TProperty>(
             TTarget target,
             Expression<Func<TSource, TProperty>> sourceProperty,
@@ -68,6 +72,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IDisposable BindOneWay<TTarget, TProperty>(
             TTarget target,
             Expression<Func<TSource, TProperty>> sourceProperty,
@@ -99,6 +107,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IDisposable BindOneWay<TSourceProp, TTarget, TTargetProp>(
             TTarget target,
             Expression<Func<TSource, TSourceProp>> sourceProperty,
@@ -128,6 +140,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IDisposable BindOneWay<TSourceProp, TTarget, TTargetProp>(
             TTarget target,
             Expression<Func<TSource, TSourceProp>> sourceProperty,
@@ -160,6 +176,10 @@ public static partial class ReactiveSchedulerExtensions
             "Design",
             "SST2309:Optional parameters should be overloads",
             Justification = "Part of the CallerInfo dispatch contract; overloads would exceed the parameter limit.")]
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IDisposable BindOneWay<TSourceProp, TTarget, TTargetProp>(
             TTarget target,
             Expression<Func<TSource, TSourceProp>> sourceProperty,
@@ -188,6 +208,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IDisposable BindTwoWay<TTarget, TProperty>(
             TTarget target,
             Expression<Func<TSource, TProperty>> sourceProperty,
@@ -212,6 +236,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IDisposable BindTwoWay<TTarget, TProperty>(
             TTarget target,
             Expression<Func<TSource, TProperty>> sourceProperty,
@@ -244,6 +272,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IDisposable BindTwoWay<TSourceProp, TTarget, TTargetProp>(
             TTarget target,
             Expression<Func<TSource, TSourceProp>> sourceProperty,
@@ -275,6 +307,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IDisposable BindTwoWay<TSourceProp, TTarget, TTargetProp>(
             TTarget target,
             Expression<Func<TSource, TSourceProp>> sourceProperty,
@@ -309,6 +345,10 @@ public static partial class ReactiveSchedulerExtensions
             "Design",
             "SST2309:Optional parameters should be overloads",
             Justification = "Part of the CallerInfo dispatch contract; overloads would exceed the parameter limit.")]
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IDisposable BindTwoWay<TSourceProp, TTarget, TTargetProp>(
             TTarget target,
             Expression<Func<TSource, TSourceProp>> sourceProperty,
@@ -348,6 +388,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TProp, TOut>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TProp>> viewModelProperty,
@@ -375,6 +419,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IReactiveBinding<TView, TOut> OneWayBind<TViewModel, TProp, TOut>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TProp>> viewModelProperty,
@@ -407,6 +455,10 @@ public static partial class ReactiveSchedulerExtensions
             "Design",
             "SST2309:Optional parameters should be overloads",
             Justification = "Part of the CallerInfo dispatch contract; overloads would exceed the parameter limit.")]
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IReactiveBinding<TView, TVProp> OneWayBind<TViewModel, TVMProp, TVProp>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,
@@ -440,6 +492,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IReactiveBinding<TView, BindingChange> Bind<TViewModel, TVMProp, TVProp>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,
@@ -471,6 +527,10 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
         /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IReactiveBinding<TView, BindingChange> Bind<TViewModel, TVMProp, TVProp>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,
@@ -505,6 +565,10 @@ public static partial class ReactiveSchedulerExtensions
             "Design",
             "SST2309:Optional parameters should be overloads",
             Justification = "Part of the CallerInfo dispatch contract; overloads would exceed the parameter limit.")]
+        [SuppressMessage(
+            "Extensions",
+            "SST1711:Extension block members should use the block's receiver",
+            Justification = "Part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws.")]
         public IReactiveBinding<TView, BindingChange> Bind<TViewModel, TVMProp, TVProp>(
             TViewModel viewModel,
             Expression<Func<TViewModel, TVMProp>> viewModelProperty,

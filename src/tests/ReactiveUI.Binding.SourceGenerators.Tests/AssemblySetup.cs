@@ -3,21 +3,3 @@
 // See the LICENSE file in the project root for full license information.
 
 [assembly: NotInParallel]
-
-namespace ReactiveUI.Binding.SourceGenerators.Tests;
-
-/// <summary>Assembly-level setup for source generator tests.</summary>
-public static class AssemblySetup
-{
-    /// <summary>Initializes the source generators.</summary>
-    [Before(Assembly)]
-    public static void Init()
-    {
-        VerifySourceGenerators.Initialize();
-        VerifierSettings.UseSplitModeForUniqueDirectory();
-
-        // To accept new or changed snapshots, uncomment the AutoVerify call below, run the suite,
-        // then comment it out again and re-run to confirm the snapshots pass on their own.
-        ////VerifierSettings.AutoVerify()
-    }
-}

@@ -27,7 +27,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// from the runtime library.
 /// </para>
 /// </remarks>
-internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin, IObservationPlugin
+internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin
 {
     /// <summary>Opens the descriptor lookup the handler is added to or removed from.</summary>
     private const string DescriptorLookupOpen = "                __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(";
@@ -54,10 +54,10 @@ internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin, IObse
     public override int Affinity => WpfAffinity;
 
     /// <inheritdoc/>
-    public string ObservationKind => "WpfDP";
+    public override string ObservationKind => "WpfDP";
 
     /// <inheritdoc/>
-    public bool RequiresHelperClasses => false;
+    public override bool RequiresHelperClasses => false;
 
     /// <inheritdoc/>
     /// <remarks>
@@ -70,23 +70,23 @@ internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin, IObse
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsAMatch(ClassBindingInfo classInfo) =>
+    public override bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.InheritsWpfDependencyObject;
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
+    public override bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
         ObservedProperties.IsDependencyProperty(classInfo, propertyName);
 
     /// <inheritdoc/>
-    public void EmitHelperClasses(StringBuilder sb)
+    public override void EmitHelperClasses(StringBuilder sb)
     {
         // No helper classes needed — uses EventObservable<T> from runtime library.
     }
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitInlineObservationVariable(
+    public override void EmitInlineObservationVariable(
         StringBuilder sb,
         string rootVar,
         PropertyPathSegment segment,

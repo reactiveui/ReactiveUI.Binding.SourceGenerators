@@ -88,15 +88,11 @@ The `--treenode-filter` follows the pattern: `/{AssemblyName}/{Namespace}/{Class
 - `src/Directory.Packages.props` - Central package management
 - `src/Directory.Build.targets` - Build targets
 
-### Snapshot Testing with Verify
+### Snapshot Testing
 
-- Generator tests use **Verify.SourceGenerators** for snapshot testing
-- Snapshots stored as `*.verified.cs` files alongside test classes
-- To accept new/changed snapshots:
-  1. Enable `VerifierSettings.AutoVerify()` in `AssemblySetup.cs`
-  2. Run tests to accept all snapshots
-  3. Disable `VerifierSettings.AutoVerify()` after accepting
-  4. Re-run tests to confirm they pass without AutoVerify
+- Generator tests compare every generated file with a `*.verified.cs` snapshot beside the test class, through `Helpers/GeneratorSnapshot.cs`
+- A snapshot is named `{type}.{method}#{hint name}.verified.cs`; an output that differs or has no snapshot is written beside it as `*.received.cs` and fails the test, as does a snapshot the run no longer produces
+- To accept new or changed snapshots, run the tests with the `ACCEPT_SNAPSHOTS=1` environment variable, then run them again without it
 
 ### Generator Test Language Versions (Critical)
 
@@ -527,10 +523,11 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 
 ### Style Enforcement
 
-- EditorConfig rules (`.editorconfig`)
-- StyleCop Analyzers - builds fail on violations
-- Roslynator Analyzers - additional code quality rules
+- EditorConfig rules (`.editorconfig`), kept in step with the RoslynCommonAnalyzers repository's own `.editorconfig`
+- StyleSharp, PerformanceSharp and SecuritySharp analyzers - builds fail on violations
+- The Sonar rules are set to `none`, so the SonarCloud scan does not report what these analyzers already cover
 - **All public APIs require XML documentation comments**
+- **Public API baselines**: every shipping library checks in `PublicAPI/<tfm>/PublicAPI.txt` through PublicApiSharp.Analyzers (PAS0001-PAS0005 are errors); generators, analyzers, tests and benchmarks are not tracked. To regenerate one, empty the file and run `dotnet format analyzers <project> -f <tfm> --diagnostics PAS0001 PAS0003 --severity info`
 - **RS2008**: Analyzer release tracking enabled (`AnalyzerReleases.Shipped.md` / `AnalyzerReleases.Unshipped.md`)
 
 ### C# Style Rules
@@ -553,13 +550,15 @@ If a rule genuinely cannot be fixed without changing behavior or public API, **S
 
 | Rule | Where it may be suppressed | Justification text |
 |------|----------------------------|--------------------|
-| **S107** (too many parameters) | The **offending method only** (never class-level) where the parameter count is inherent — e.g. CombineLatest selector lambdas, CallerInfo dispatch stubs. | parameter count is inherent to the API/overload under test |
-| **S4018** (generic type param not inferable) | **Public / interface-dictated** generic methods whose signature cannot change. Must be **fixed** (refactored) when the method is private/internal and refactorable. | type parameter is dictated by the interface / specified explicitly by the caller |
-| **S100 / S101** (PascalCase naming) | Only for established domain acronyms: **INPC** (INotifyPropertyChanged), **KVO** (Key-Value Observing), **POCO**. | established acronym matching ReactiveUI domain terminology |
-| **S2360** (optional parameters) | Only the CallerInfo dispatch stubs (e.g. `ReactiveSchedulerExtensions`) where converting to overloads would exceed the parameter-count limit (S107). | part of the CallerInfo dispatch contract; overloads would exceed the parameter limit |
+| **SST1472** (too many parameters) | The **offending method only** (never class-level) where the parameter count is inherent — e.g. CombineLatest selector lambdas, CallerInfo dispatch stubs. | parameter count is inherent to the API/overload under test |
+| **SST2307** (generic type param not inferable) | **Public / interface-dictated** generic methods whose signature cannot change. Must be **fixed** (refactored) when the method is private/internal and refactorable. | type parameter is dictated by the interface / specified explicitly by the caller |
+| **SST1300** (PascalCase naming) | Only for established domain acronyms: **INPC** (INotifyPropertyChanged), **KVO** (Key-Value Observing), **POCO**. | established acronym matching ReactiveUI domain terminology |
+| **SST2309** (optional parameters) | Only the CallerInfo dispatch stubs (e.g. `ReactiveSchedulerExtensions`) where converting to overloads would exceed the parameter-count limit (SST1472). | part of the CallerInfo dispatch contract; overloads would exceed the parameter limit |
 | **CA1040** (empty interfaces) | Only interfaces that are intentional **marker interfaces** (e.g. `IActivatableView`). | intentional marker interface |
+| **SST1711** (extension block member never reads its receiver) | Only the CallerInfo dispatch stubs declared in extension blocks (e.g. `ReactiveSchedulerExtensions`). A genuine member that ignores its receiver moves to a static helper class instead. | part of the CallerInfo dispatch contract; the generated overload reads the receiver and this stub only throws |
+| **CA1005** (too many generic type parameters) | Only arity-expanded public types whose type parameters are the values they carry (e.g. `PropertyValues<T1..T16>`). | one arity-expanded emission per observed-property count; the type parameters are the observed properties |
 
-Anything **not** in this table — including (non-exhaustively) S103, S2342, S4070, RCS1157, CA1019, CA1508, S6566, S6562 — must be **fixed**, or **discussed and approved before any suppression is added**.
+Anything **not** in this table — including (non-exhaustively) CA1019, CA1508, SST1175, SST1473, SST2337 — must be **fixed**, or **discussed and approved before any suppression is added**.
 
 ## Key Architectural Patterns
 
@@ -714,7 +713,7 @@ build keeps working right up until Wine starts. Each copy chains to the reposito
 5. Wire into `BindingGenerator.cs` `Initialize()`
 6. Add code generation to `CodeGeneration/CodeGenerator.cs`
 7. Add snapshot test in generator test project
-8. Accept snapshots using `VerifierSettings.AutoVerify()` trick
+8. Accept snapshots by running the tests with `ACCEPT_SNAPSHOTS=1`
 
 ### Adding a New Analyzer Diagnostic
 
@@ -726,10 +725,8 @@ build keeps working right up until Wine starts. Each copy chains to the reposito
 
 ### Accepting Snapshot Changes
 
-1. Enable `VerifierSettings.AutoVerify()` in `AssemblySetup.cs`
-2. Run tests: `dotnet test --project tests/ReactiveUI.Binding.SourceGenerators.Tests/... -c Release`
-3. Disable `VerifierSettings.AutoVerify()` in `AssemblySetup.cs`
-4. Re-run tests to confirm they pass without AutoVerify
+1. Run tests with the variable set: `ACCEPT_SNAPSHOTS=1 dotnet test --project tests/ReactiveUI.Binding.SourceGenerators.Tests/... -c Release`
+2. Re-run tests without it to confirm the snapshots pass on their own
 
 ## What to Avoid
 

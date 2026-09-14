@@ -15,7 +15,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// asked anyway is the one thing that differs, so the shape is decided here and the answer is left to
 /// <see cref="AnswersBeforeChangeWithLiveStream"/>.
 /// </remarks>
-internal abstract class AfterChangeObservationPlugin
+internal closed class AfterChangeObservationPlugin : IObservationPlugin
 {
     /// <summary>Gets the affinity this mechanism bids with.</summary>
     /// <remarks>
@@ -24,8 +24,14 @@ internal abstract class AfterChangeObservationPlugin
     /// </remarks>
     public abstract int Affinity { get; }
 
-    /// <summary>Gets a value indicating whether this mechanism can report a change before it happens.</summary>
+    /// <inheritdoc/>
+    public abstract string ObservationKind { get; }
+
+    /// <inheritdoc/>
     public bool SupportsBeforeChanged => false;
+
+    /// <inheritdoc/>
+    public abstract bool RequiresHelperClasses { get; }
 
     /// <summary>Gets a value indicating whether a before-change request is answered with the live change stream.</summary>
     /// <remarks>
@@ -37,6 +43,15 @@ internal abstract class AfterChangeObservationPlugin
     /// behaving the same here as it does through the runtime engine.
     /// </remarks>
     protected virtual bool AnswersBeforeChangeWithLiveStream => false;
+
+    /// <inheritdoc/>
+    public abstract bool IsAMatch(ClassBindingInfo classInfo);
+
+    /// <inheritdoc/>
+    public abstract bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName);
+
+    /// <inheritdoc/>
+    public abstract void EmitHelperClasses(StringBuilder sb);
 
     /// <summary>Emits the observation of a property read directly off the object a call site named.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -157,6 +172,14 @@ internal abstract class AfterChangeObservationPlugin
         _ = sb.Append("                : (global::System.IObservable<").Append(segType).Append(">)")
             .Append(nullParentObservable).AppendLine(");");
     }
+
+    /// <inheritdoc/>
+    public abstract void EmitInlineObservationVariable(
+        StringBuilder sb,
+        string rootVar,
+        PropertyPathSegment segment,
+        string castTypeName,
+        string varName);
 
     /// <summary>Appends the after-change observation as a bare expression.</summary>
     /// <param name="sb">The string builder to append to.</param>

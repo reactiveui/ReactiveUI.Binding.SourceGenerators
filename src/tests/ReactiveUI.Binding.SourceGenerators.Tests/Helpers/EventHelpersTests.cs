@@ -191,6 +191,6 @@ public class EventHelpersTests
         var semanticModel = compilation.GetSemanticModel(tree);
         var classDecl = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
             .First(c => c.Identifier.Text == typeName);
-        return (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl)!;
+        return semanticModel.GetDeclaredSymbol(classDecl)!;
     }
 }

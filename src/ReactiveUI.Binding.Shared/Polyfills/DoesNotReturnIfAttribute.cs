@@ -27,7 +27,7 @@ internal sealed class DoesNotReturnIfAttribute : Attribute
     /// Gets a value indicating whether code after the method is considered unreachable
     /// by diagnostics if the argument to the associated parameter matches this value.
     /// </summary>
-    internal bool ParameterValue { get; }
+    public bool ParameterValue { get; }
 }
 #else
 [assembly: TypeForwardedTo(typeof(DoesNotReturnIfAttribute))]

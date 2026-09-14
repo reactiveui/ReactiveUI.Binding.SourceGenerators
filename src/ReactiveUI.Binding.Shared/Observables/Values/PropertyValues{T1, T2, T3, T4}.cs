@@ -23,6 +23,10 @@ namespace ReactiveUI.Binding;
 /// properties it cares about without naming the type.
 /// </remarks>
 [DebuggerDisplay("PropertyValues: {Property1}, {Property2}, +2 more")]
+[SuppressMessage(
+    "Design",
+    "CA1005:Avoid excessive parameters on generic types",
+    Justification = "One arity-expanded emission per observed-property count; the type parameters are the observed properties.")]
 public readonly record struct PropertyValues<T1, T2, T3, T4>(
     T1 Property1,
     T2 Property2,

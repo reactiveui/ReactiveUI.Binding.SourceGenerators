@@ -27,16 +27,16 @@ internal sealed class RequiresDynamicCodeAttribute : Attribute
         Message = message;
 
     /// <summary>Gets or sets a value indicating whether the annotation should not apply to static members.</summary>
-    internal bool ExcludeStatics { get; set; }
+    public bool ExcludeStatics { get; set; }
 
     /// <summary>Gets a message that contains information about the usage of dynamic code.</summary>
-    internal string Message { get; }
+    public string Message { get; }
 
     /// <summary>
     /// Gets or sets an optional URL that contains more information about the method,
     /// why it requires dynamic code, and what options a consumer has to deal with it.
     /// </summary>
-    internal string? Url { get; set; }
+    public string? Url { get; set; }
 }
 #else
 [assembly: TypeForwardedTo(typeof(RequiresDynamicCodeAttribute))]

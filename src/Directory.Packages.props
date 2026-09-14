@@ -13,14 +13,12 @@
   <PropertyGroup>
     <!-- StyleSharp.Analyzers, PerformanceSharp.Analyzers and SecuritySharp.Analyzers ship from the
          same release pipeline and always share a version. -->
-    <RoslynCommonAnalyzersVersion>4.0.4</RoslynCommonAnalyzersVersion>
+    <RoslynCommonAnalyzersVersion>4.2.2</RoslynCommonAnalyzersVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Testing Framework -->
-    <PackageVersion Include="TUnit" Version="1.66.27"/>
-    <PackageVersion Include="Verify.TUnit" Version="32.0.0"/>
-    <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0"/>
+    <PackageVersion Include="TUnit" Version="1.67.0"/>
 
     <!--
       Roslyn / Code Analysis.
@@ -65,10 +63,8 @@
     <PackageVersion Include="StyleSharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
     <PackageVersion Include="PerformanceSharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
     <PackageVersion Include="SecuritySharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
-    <PackageVersion Include="Roslynator.Analyzers" Version="5.0.0"/>
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.401"/>
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.34.0.3385"/>
-    <PackageVersion Include="Blazor.Common.Analyzers" Version="2.1.0"/>
+    <PackageVersion Include="PublicApiSharp.Analyzers" Version="2.0.0"/>
 
     <!-- MAUI -->
     <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>

@@ -197,35 +197,14 @@ public static class TestHelper
     /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>A task representing the asynchronous verification operation.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Task TestPass(
         string source,
         Type callerType,
         LanguageVersion? languageVersion,
         [CallerFilePath] string file = "",
-        [CallerMemberName] string memberName = "")
-    {
-        ArgumentNullException.ThrowIfNull(callerType);
-        ArgumentNullException.ThrowIfNull(memberName);
-
-        var result = RunGenerator(source, languageVersion);
-
-        // Log any diagnostics for debugging
-        var allDiagnostics = result.OutputCompilation.GetDiagnostics()
-            .Concat(result.GeneratorDiagnostics)
-            .Where(static d => d.Severity >= DiagnosticSeverity.Warning)
-            .ToImmutableArray();
-
-        foreach (var diagnostic in allDiagnostics)
-        {
-            TestContext.Current?.OutputWriter.WriteLine($"{diagnostic.Severity}: {diagnostic.GetMessage()}");
-        }
-
-        VerifySettings settings = new();
-        settings.DisableRequireUniquePrefix();
-        settings.UseTypeName(AbbreviateTypeName(callerType.Name));
-        settings.UseMethodName(AbbreviateMethodName(memberName));
-        return Verify(result.Driver, settings, file);
-    }
+        [CallerMemberName] string memberName = "") =>
+        TestPassWithResult(source, callerType, languageVersion, file, memberName);
 
     /// <summary>
     /// Tests a source generator scenario that is expected to succeed.
@@ -281,11 +260,11 @@ public static class TestHelper
             }
         }
 
-        VerifySettings settings = new();
-        settings.DisableRequireUniquePrefix();
-        settings.UseTypeName(AbbreviateTypeName(callerType.Name));
-        settings.UseMethodName(AbbreviateMethodName(memberName));
-        await Verify(result.Driver, settings, file);
+        await GeneratorSnapshot.VerifyAsync(
+            result.Driver,
+            AbbreviateTypeName(callerType.Name),
+            AbbreviateMethodName(memberName),
+            file);
 
         return result;
     }

@@ -695,6 +695,6 @@ public class CommandExtractorHelperTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First();
 
-        return (Microsoft.CodeAnalysis.INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
+        return model.GetDeclaredSymbol(classDecl)!;
     }
 }
