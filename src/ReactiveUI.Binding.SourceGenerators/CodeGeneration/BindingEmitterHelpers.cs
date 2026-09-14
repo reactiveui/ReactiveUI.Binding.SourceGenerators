@@ -405,41 +405,46 @@ internal static class BindingEmitterHelpers
             .AppendLine(">(__value, null, null, out __converted);").AppendLine("                        return __converted;")
             .AppendLine("                    });");
 
-    /// <summary>Emits the stage that delivers a write to the view on the thread the view belongs to.</summary>
+    /// <summary>Emits the stage that delivers a write on the owning thread of the object it lands on.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The binding invocation info.</param>
-    /// <param name="sourceVar">The variable holding the values being written to the view.</param>
+    /// <param name="sourceVar">The variable holding the values being written.</param>
     /// <param name="resultVar">The name to give the routed observable.</param>
     /// <param name="targetVar">The worker parameter naming the object the write lands on.</param>
+    /// <param name="invoker">The invoker class that object's type carries, or null for none.</param>
     /// <returns>The variable to subscribe the write to.</returns>
-    /// <remarks>
-    /// <para>
-    /// A view model raises its notifications from whatever thread did the work, and the UI frameworks only allow
-    /// a view to be touched from the thread that owns it. Where a call site named its own scheduler the caller
-    /// has already said where the write lands, so this stays out of the way; otherwise the routing is decided at
-    /// runtime by whichever platform package is present, which is the only place that can know.
-    /// </para>
-    /// <para>
-    /// The object being written is named rather than assumed, because thread affinity belongs to it: WPF allows
-    /// several UI threads, so a two-way binding routes each direction to whichever side that direction writes.
-    /// </para>
-    /// </remarks>
     internal static string EmitViewThreadStage(
         StringBuilder sb,
         BindingInvocationInfo inv,
         string sourceVar,
         string resultVar,
-        string targetVar)
+        string targetVar,
+        string? invoker)
     {
+        // A scheduler named at the call site already decides where the write lands.
         if (inv.HasScheduler)
         {
             return sourceVar;
         }
 
-        _ = sb.Append("            var ").Append(resultVar).Append(" = ").Append(GeneratedTypeNames.BindingSchedulers).Append(".ObserveOnViewThread(")
-            .Append(sourceVar).Append(", ").Append(targetVar).AppendLine(");");
+        _ = AppendViewThreadCall(sb.Append("            var ").Append(resultVar).Append(" = "), sourceVar, targetVar, invoker).AppendLine(";");
 
         return resultVar;
+    }
+
+    /// <summary>Appends the call that routes an observable onto the owning thread of the object it writes to.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="sourceVar">The variable holding the values being written.</param>
+    /// <param name="targetVar">The variable naming the object the write lands on.</param>
+    /// <param name="invoker">The invoker class that object's type carries, or null for none.</param>
+    /// <returns>The string builder.</returns>
+    internal static StringBuilder AppendViewThreadCall(StringBuilder sb, string sourceVar, string targetVar, string? invoker)
+    {
+        _ = sb.Append(GeneratedTypeNames.BindingSchedulers).Append(".ObserveOnViewThread(").Append(sourceVar).Append(", ").Append(targetVar);
+
+        return invoker is null
+            ? sb.Append(')')
+            : sb.Append(", ").Append(invoker).Append(".Instance)");
     }
 
     /// <summary>Decides what a view-first binding observes: the view model it was handed, or the view's own.</summary>

@@ -23,8 +23,6 @@ public sealed class WinFormsBindingModule : IModule
 
         resolver.RegisterLazySingleton<ICreatesObservableForProperty>(static () => new WinFormsCreatesObservableForProperty());
 
-        // A view may only be touched from the thread that owns it, and which thread that is belongs to the
-        // object rather than the process, so the binding asks the target.
-        resolver.RegisterLazySingleton<IViewThreadResolver>(static () => new ControlViewThreadResolver());
+        resolver.RegisterLazySingleton<IViewThreadInvoker>(static () => new ControlViewThreadInvoker());
     }
 }

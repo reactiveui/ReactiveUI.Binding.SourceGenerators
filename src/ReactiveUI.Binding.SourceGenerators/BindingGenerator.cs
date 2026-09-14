@@ -12,6 +12,7 @@ using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Invocations;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
+using ReactiveUI.Binding.SourceGenerators.Plugins.ViewThread;
 
 namespace ReactiveUI.Binding.SourceGenerators;
 
@@ -64,6 +65,7 @@ public class BindingGenerator : IIncrementalGenerator
             static (ctx, data) => RegistrationGenerator.Generate(ctx, data.Left, data.Right));
 
         RegisterObservationHelperOutput(in context, allObservableTypes, languageFeatures);
+        RegisterViewThreadInvokerOutput(in context, languageFeatures);
 
         // Pipeline C: View locator dispatch (IViewFor<T> scanning)
         ViewLocatorDispatchGenerator.Register(context, languageFeatures);
@@ -179,6 +181,19 @@ public class BindingGenerator : IIncrementalGenerator
                 .Select(static (kinds, _) => ObservationHelperGenerator.SelectHelperKinds(kinds))
                 .Combine(languageFeatures),
             static (ctx, data) => ObservationHelperGenerator.Generate(ctx, data.Left, data.Right));
+
+    /// <summary>Declares the invoker classes generated bindings carry, for each UI platform the compilation references.</summary>
+    /// <param name="context">The generator initialization context.</param>
+    /// <param name="languageFeatures">The consumer's language-feature snapshot, which names the namespace.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void RegisterViewThreadInvokerOutput(
+        in IncrementalGeneratorInitializationContext context,
+        IncrementalValueProvider<LanguageFeatures> languageFeatures) =>
+        context.RegisterSourceOutput(
+            context.CompilationProvider
+                .Select(static (compilation, _) => ViewThreadPluginRegistry.InvokersIn(compilation))
+                .Combine(languageFeatures),
+            static (ctx, data) => ViewThreadInvokerGenerator.Generate(ctx, data.Left, data.Right));
 
     /// <summary>Runs one syntax scan and keeps the call sites it could extract.</summary>
     /// <typeparam name="T">The extracted call-site model.</typeparam>

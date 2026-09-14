@@ -112,6 +112,9 @@ internal static class GeneratedTypeNames
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingSchedulers</c>.</summary>
     internal const string BindingSchedulers = "global::ReactiveUI.Binding.BindingSchedulers";
 
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.IViewThreadInvoker</c>.</summary>
+    internal const string IViewThreadInvoker = "global::ReactiveUI.Binding.IViewThreadInvoker";
+
     /// <summary>The message a generated overload throws when no binding matches the call site.</summary>
     internal const string NoBindingFoundMessage =
         "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.";

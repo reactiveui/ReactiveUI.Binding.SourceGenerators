@@ -27,18 +27,18 @@ public class WinFormsBindingModuleTests
         await Assert.That(factories.Exists(static f => f is WinFormsCreatesObservableForProperty)).IsTrue();
     }
 
-    /// <summary>Verifies that Configure registers the resolver naming the thread a control belongs to.</summary>
+    /// <summary>Verifies that Configure registers the invoker that writes on a control's own thread.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task Configure_RegistersTheViewThreadResolver()
+    public async Task Configure_RegistersTheViewThreadInvoker()
     {
         var resolver = new ModernDependencyResolver();
 
         new WinFormsBindingModule().Configure(resolver);
 
-        var resolvers = resolver.GetServices<IViewThreadResolver>().ToList();
+        var invokers = resolver.GetServices<IViewThreadInvoker>().ToList();
 
-        await Assert.That(resolvers.Exists(static r => r is ControlViewThreadResolver)).IsTrue();
+        await Assert.That(invokers.Exists(static i => i is ControlViewThreadInvoker)).IsTrue();
     }
 
     /// <summary>Verifies that Configure rejects a null resolver rather than failing later.</summary>

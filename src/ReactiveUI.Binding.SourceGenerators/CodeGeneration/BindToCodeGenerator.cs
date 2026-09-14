@@ -32,6 +32,9 @@ internal static class BindToCodeGenerator
     /// <summary>The opening of a worker's return statement.</summary>
     private const string ReturnPrefix = "            return ";
 
+    /// <summary>The worker parameter naming the object a write lands on.</summary>
+    private const string TargetParameterName = "target";
+
     /// <summary>Generates concrete typed overloads and binding methods for <c>BindTo</c> invocations.</summary>
     /// <param name="invocations">All detected <c>BindTo</c> invocations.</param>
     /// <param name="features">The consumer compilation's C# language-feature snapshot (dispatch strategy and nullable support).</param>
@@ -250,12 +253,12 @@ internal static class BindToCodeGenerator
     internal static void GenerateBindToMethod(StringBuilder sb, BindToInvocationInfo inv, string suffix)
     {
         var directAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
-            "target",
+            TargetParameterName,
             inv.TargetPropertyPath,
             "value",
             DirectSubscriptionBodyIndent);
         var convertedAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
-            "target",
+            TargetParameterName,
             inv.TargetPropertyPath,
             "__converted",
             ConvertedSubscriptionBodyIndent);
@@ -272,15 +275,15 @@ internal static class BindToCodeGenerator
 
         if (directAssign)
         {
-            _ = sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe(").Append(BindingSchedulers)
-                .AppendLine(".ObserveOnViewThread(source, target), value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
+            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe("), "source", TargetParameterName, inv.TargetViewThreadInvoker)
+                .AppendLine(", value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
                 .Append("                ").Append(directAssignment).AppendLine().Append("            }, \"")
                 .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");").AppendLine(GeneratedSyntax.MemberBodyClose).AppendLine();
         }
         else
         {
-            _ = sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe(").Append(BindingSchedulers)
-                .AppendLine(".ObserveOnViewThread(source, target), value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
+            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe("), "source", TargetParameterName, inv.TargetViewThreadInvoker)
+                .AppendLine(", value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
                 .Append("                if (").Append(RuntimeBindingConverter).Append(".TryConvert<").Append(inv.SourceValueTypeFullName).Append(", ")
                 .Append(inv.TargetPropertyTypeFullName).Append(">(value, ").Append(FormatConversionArguments(inv)).AppendLine(", out var __converted))")
                 .AppendLine("                {").Append("                    ").Append(convertedAssignment).AppendLine().AppendLine("                }")

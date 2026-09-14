@@ -9,5 +9,11 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <summary>The two types a binding call site joins.</summary>
 /// <param name="SourceTypeFullName">The fully qualified source type.</param>
 /// <param name="TargetTypeFullName">The fully qualified target type.</param>
+/// <param name="SourceViewThreadInvoker">The invoker class a write to the source carries, or null for none.</param>
+/// <param name="TargetViewThreadInvoker">The invoker class a write to the target carries, or null for none.</param>
 [DebuggerDisplay("BindingSides: {SourceTypeFullName,nq} -> {TargetTypeFullName,nq}")]
-internal readonly record struct BindingSides(string SourceTypeFullName, string TargetTypeFullName);
+internal readonly record struct BindingSides(
+    string SourceTypeFullName,
+    string TargetTypeFullName,
+    string? SourceViewThreadInvoker = null,
+    string? TargetViewThreadInvoker = null);

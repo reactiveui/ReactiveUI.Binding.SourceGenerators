@@ -27,18 +27,18 @@ public class WpfBindingModuleTests
         await Assert.That(factories.Exists(static f => f is DependencyObjectObservableForProperty)).IsTrue();
     }
 
-    /// <summary>Verifies that Configure registers the resolver naming the thread a view belongs to.</summary>
+    /// <summary>Verifies that Configure registers the invoker that writes on a view's own thread.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task Configure_RegistersTheViewThreadResolver()
+    public async Task Configure_RegistersTheViewThreadInvoker()
     {
         var resolver = new ModernDependencyResolver();
 
         new WpfBindingModule().Configure(resolver);
 
-        var resolvers = resolver.GetServices<IViewThreadResolver>().ToList();
+        var invokers = resolver.GetServices<IViewThreadInvoker>().ToList();
 
-        await Assert.That(resolvers.Exists(static r => r is DispatcherViewThreadResolver)).IsTrue();
+        await Assert.That(invokers.Exists(static i => i is DispatcherViewThreadInvoker)).IsTrue();
     }
 
     /// <summary>Verifies that Configure rejects a null resolver rather than failing later.</summary>

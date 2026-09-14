@@ -9,5 +9,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <summary>The two types a BindCommand call site joins.</summary>
 /// <param name="ViewTypeFullName">The fully qualified view type.</param>
 /// <param name="ViewModelTypeFullName">The fully qualified view model type.</param>
+/// <param name="ViewThreadInvoker">The invoker class a write to the view carries, or null for none.</param>
 [DebuggerDisplay("BindCommandSides: {ViewTypeFullName,nq} <- {ViewModelTypeFullName,nq}")]
-internal readonly record struct BindCommandSides(string ViewTypeFullName, string ViewModelTypeFullName);
+internal readonly record struct BindCommandSides(
+    string ViewTypeFullName,
+    string ViewModelTypeFullName,
+    string? ViewThreadInvoker = null);

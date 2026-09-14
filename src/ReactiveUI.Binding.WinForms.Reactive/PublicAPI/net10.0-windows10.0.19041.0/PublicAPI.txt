@@ -2,10 +2,12 @@
 [assembly: System.Runtime.Versioning.SupportedOSPlatform("Windows10.0.19041.0")]
 namespace ReactiveUI.Binding.Reactive.WinForms
 {
-    public sealed class ControlViewThreadResolver : ReactiveUI.Binding.Reactive.IViewThreadResolver
+    public sealed class ControlViewThreadInvoker : ReactiveUI.Binding.Reactive.IViewThreadInvoker
     {
-        public ControlViewThreadResolver() { }
-        public System.Threading.SynchronizationContext? ContextFor(object target) { }
+        public ControlViewThreadInvoker() { }
+        public bool CheckAccess(object target) { }
+        public bool Claims(object target) { }
+        public void Post(object target, System.Action<object?> callback, object? state) { }
     }
     public sealed class WinFormsBindingModule : Splat.Builder.IModule
     {

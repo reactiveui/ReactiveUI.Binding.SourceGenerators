@@ -14,213 +14,259 @@ public class BindingSchedulerTests
     /// <summary>The value driven through a routed binding.</summary>
     private const string Written = "written";
 
-    /// <summary>A target nothing claims, so the fallback decides where its write lands.</summary>
+    /// <summary>A target no invoker claims.</summary>
     private static readonly object UnclaimedTarget = new();
 
-    /// <summary>A target a resolver claims is written on the thread that resolver named.</summary>
+    /// <summary>A write from the thread that owns the target is applied inline, even when the host set a main thread.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task ObserveOnViewThread_WhenAResolverClaimsTheTarget_PostsToItsContext()
+    public async Task ObserveOnViewThread_OnTheOwningThread_WritesInline()
     {
-        var context = new RecordingSynchronizationContext();
         var target = new object();
+        var invoker = new StubViewThreadInvoker(target) { HasAccess = true };
+        var host = new RecordingSynchronizationContext();
+        var observer = new RecordingObserver<string>();
 
-        using (RegisterResolver(new StubViewThreadResolver(target, context)))
+        using (RegisterInvoker(invoker))
+        using (UseMainThread(host))
         {
             var source = new ManualObservable<string>();
-            var seen = string.Empty;
-
-            using var subscription = BindingSchedulers.ObserveOnViewThread(source, target)
-                .Subscribe(new CapturingObserver(value => seen = value));
+            using var subscription = BindingSchedulers.ObserveOnViewThread(source, target).Subscribe(observer);
 
             source.Observer?.OnNext(Written);
 
-            await Assert.That(context.PostCount).IsGreaterThan(0);
-            await Assert.That(seen).IsEqualTo(Written);
+            await Assert.That(string.Join(",", observer.Values)).IsEqualTo(Written);
+            await Assert.That(invoker.PostCount).IsEqualTo(0);
+            await Assert.That(host.PostCount).IsEqualTo(0);
         }
     }
 
-    /// <summary>Two targets owned by different threads are each written on their own.</summary>
+    /// <summary>A write from another thread is posted through the invoker that claims the target.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task ObserveOnViewThread_WithTwoTargetsOnDifferentThreads_PostsEachToItsOwn()
+    public async Task ObserveOnViewThread_FromAnotherThread_PostsThroughTheInvoker()
     {
-        var firstContext = new RecordingSynchronizationContext();
-        var secondContext = new RecordingSynchronizationContext();
+        var target = new object();
+        var invoker = new StubViewThreadInvoker(target);
+        var observer = new RecordingObserver<string>();
+
+        using (RegisterInvoker(invoker))
+        {
+            var source = new ManualObservable<string>();
+            using var subscription = BindingSchedulers.ObserveOnViewThread(source, target).Subscribe(observer);
+
+            source.Observer?.OnNext(Written);
+
+            await Assert.That(observer.Values.Count).IsEqualTo(0);
+            await Assert.That(invoker.PostCount).IsEqualTo(1);
+
+            invoker.RunPosted();
+
+            await Assert.That(string.Join(",", observer.Values)).IsEqualTo(Written);
+        }
+    }
+
+    /// <summary>A write from another thread goes through the main thread the host set, not the invoker.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObserveOnViewThread_FromAnotherThreadWhenTheHostSetsAMainThread_DeliversThroughIt()
+    {
+        var target = new object();
+        var invoker = new StubViewThreadInvoker(target);
+        var host = new RecordingSynchronizationContext();
+        var observer = new RecordingObserver<string>();
+
+        using (RegisterInvoker(invoker))
+        using (UseMainThread(host))
+        {
+            var source = new ManualObservable<string>();
+            using var subscription = BindingSchedulers.ObserveOnViewThread(source, target).Subscribe(observer);
+
+            source.Observer?.OnNext(Written);
+
+            await Assert.That(host.PostCount).IsEqualTo(1);
+            await Assert.That(invoker.PostCount).IsEqualTo(0);
+            await Assert.That(string.Join(",", observer.Values)).IsEqualTo(Written);
+        }
+    }
+
+    /// <summary>A target nothing claims is written where the notification was raised, even when the host set a main thread.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObserveOnViewThread_WhenNothingClaimsTheTarget_HandsBackTheSource()
+    {
+        using (RegisterInvoker(new StubViewThreadInvoker()))
+        using (UseMainThread(new RecordingSynchronizationContext()))
+        {
+            var source = new ManualObservable<string>();
+
+            await Assert.That(BindingSchedulers.ObserveOnViewThread(source, UnclaimedTarget)).IsSameReferenceAs(source);
+        }
+    }
+
+    /// <summary>With no target there is nothing to route, so the source is handed back.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObserveOnViewThread_WithNoTarget_HandsBackTheSource()
+    {
+        var source = new ManualObservable<string>();
+
+        await Assert.That(BindingSchedulers.ObserveOnViewThread(source, target: null)).IsSameReferenceAs(source);
+    }
+
+    /// <summary>Two targets claimed by different invokers are each posted through their own.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObserveOnViewThread_WithTwoTargets_PostsEachThroughItsOwnInvoker()
+    {
         var firstTarget = new object();
         var secondTarget = new object();
+        var firstInvoker = new StubViewThreadInvoker(firstTarget);
+        var secondInvoker = new StubViewThreadInvoker(secondTarget);
 
-        var resolver = new StubViewThreadResolver(firstTarget, firstContext);
-        resolver.Add(secondTarget, secondContext);
-
-        using (RegisterResolver(resolver))
+        using (RegisterInvoker(firstInvoker))
+        using (RegisterInvoker(secondInvoker))
         {
             var first = new ManualObservable<string>();
             var second = new ManualObservable<string>();
 
-            using var firstSub = BindingSchedulers.ObserveOnViewThread(first, firstTarget)
-                .Subscribe(new CapturingObserver(static _ => { }));
-            using var secondSub = BindingSchedulers.ObserveOnViewThread(second, secondTarget)
-                .Subscribe(new CapturingObserver(static _ => { }));
+            using var firstSub = BindingSchedulers.ObserveOnViewThread(first, firstTarget).Subscribe(new RecordingObserver<string>());
+            using var secondSub = BindingSchedulers.ObserveOnViewThread(second, secondTarget).Subscribe(new RecordingObserver<string>());
 
             first.Observer?.OnNext(Written);
 
-            await Assert.That(firstContext.PostCount).IsGreaterThan(0);
-            await Assert.That(secondContext.PostCount).IsEqualTo(0);
+            await Assert.That(firstInvoker.PostCount).IsEqualTo(1);
+            await Assert.That(secondInvoker.PostCount).IsEqualTo(0);
         }
     }
 
-    /// <summary>A main thread the host sets takes the write even when a resolver claims the target.</summary>
+    /// <summary>The fallback a generated binding passes is used when no registered invoker claims the target.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task ObserveOnViewThread_WhenTheHostSetsAMainThread_DeliversThroughItAheadOfAnyResolver()
+    public async Task ObserveOnViewThread_WithAFallback_UsesItWhenNothingRegisteredClaimsTheTarget()
     {
-        var hostContext = new RecordingSynchronizationContext();
-        var resolverContext = new RecordingSynchronizationContext();
-        var target = new object();
+        var fallback = new StubViewThreadInvoker();
+        var observer = new RecordingObserver<string>();
 
-        using (RegisterResolver(new StubViewThreadResolver(target, resolverContext)))
+        using (RegisterInvoker(new StubViewThreadInvoker()))
         {
-            try
-            {
-                BindingSchedulers.UseSynchronizationContext(hostContext);
-
-                var source = new ManualObservable<string>();
-
-                using var subscription = BindingSchedulers.ObserveOnViewThread(source, target)
-                    .Subscribe(new CapturingObserver(static _ => { }));
-
-                source.Observer?.OnNext(Written);
-
-                await Assert.That(hostContext.PostCount).IsGreaterThan(0);
-                await Assert.That(resolverContext.PostCount).IsEqualTo(0);
-            }
-            finally
-            {
-                BindingSchedulers.UseSynchronizationContext(null);
-            }
-        }
-    }
-
-    /// <summary>A target no resolver claims is delivered through the main thread a host set.</summary>
-    /// <returns>A task representing the asynchronous test operation.</returns>
-    [Test]
-    public async Task ObserveOnViewThread_WhenNoResolverClaimsTheTarget_DeliversThroughTheHostsMainThread()
-    {
-        var context = new RecordingSynchronizationContext();
-
-        try
-        {
-            BindingSchedulers.UseSynchronizationContext(context);
-
             var source = new ManualObservable<string>();
+            using var subscription = BindingSchedulers.ObserveOnViewThread(source, UnclaimedTarget, fallback).Subscribe(observer);
 
-            using var subscription = BindingSchedulers.ObserveOnViewThread(source, UnclaimedTarget)
-                .Subscribe(new CapturingObserver(static _ => { }));
+            source.Observer?.OnNext(Written);
+            fallback.RunPosted();
+
+            await Assert.That(fallback.PostCount).IsEqualTo(1);
+            await Assert.That(string.Join(",", observer.Values)).IsEqualTo(Written);
+        }
+    }
+
+    /// <summary>A registered invoker that claims the target takes precedence over the fallback.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObserveOnViewThread_WithAFallback_PrefersARegisteredInvoker()
+    {
+        var target = new object();
+        var registered = new StubViewThreadInvoker(target);
+        var fallback = new StubViewThreadInvoker();
+
+        using (RegisterInvoker(registered))
+        {
+            var source = new ManualObservable<string>();
+            using var subscription = BindingSchedulers.ObserveOnViewThread(source, target, fallback).Subscribe(new RecordingObserver<string>());
 
             source.Observer?.OnNext(Written);
 
-            await Assert.That(context.PostCount).IsGreaterThan(0);
-        }
-        finally
-        {
-            BindingSchedulers.UseSynchronizationContext(null);
+            await Assert.That(registered.PostCount).IsEqualTo(1);
+            await Assert.That(fallback.PostCount).IsEqualTo(0);
         }
     }
 
-    /// <summary>With nothing established the source is handed back untouched, so writes stay inline.</summary>
+    /// <summary>With a fallback but no target there is nothing to route, so the source is handed back.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task ObserveOnViewThread_WithNothingEstablished_HandsBackTheSource()
+    public async Task ObserveOnViewThread_WithAFallbackAndNoTarget_HandsBackTheSource()
     {
-        BindingSchedulers.UseSynchronizationContext(null);
-        ViewThreadResolvers.Refresh();
-
         var source = new ManualObservable<string>();
 
-        await Assert.That(BindingSchedulers.ObserveOnViewThread(source, UnclaimedTarget)).IsSameReferenceAs(source);
+        await Assert.That(BindingSchedulers.ObserveOnViewThread(source, null, new StubViewThreadInvoker())).IsSameReferenceAs(source);
     }
 
-    /// <summary>A null target claims nothing, which is what the unsuffixed entry point hands in.</summary>
+    /// <summary>A missing source is rejected.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObserveOnViewThread_WithNoSource_Throws() =>
+        await Assert.That(static () => BindingSchedulers.ObserveOnViewThread<string>(null!, UnclaimedTarget)).ThrowsExactly<ArgumentNullException>();
+
+    /// <summary>A missing source is rejected when a fallback is passed.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObserveOnViewThread_WithAFallbackButNoSource_Throws() =>
+        await Assert.That(static () => BindingSchedulers.ObserveOnViewThread<string>(null!, UnclaimedTarget, new StubViewThreadInvoker()))
+            .ThrowsExactly<ArgumentNullException>();
+
+    /// <summary>A missing fallback is rejected.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObserveOnViewThread_WithNoFallback_Throws() =>
+        await Assert.That(static () => BindingSchedulers.ObserveOnViewThread(new ManualObservable<string>(), UnclaimedTarget, null!))
+            .ThrowsExactly<ArgumentNullException>();
+
+    /// <summary>A null target claims nothing.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ForTarget_WithNoTarget_ClaimsNothing()
     {
-        ViewThreadResolvers.Refresh();
+        ViewThreadInvokers.Refresh();
 
-        await Assert.That(ViewThreadResolvers.ForTarget(target: null)).IsNull();
+        await Assert.That(ViewThreadInvokers.ForTarget(target: null)).IsNull();
     }
 
-    /// <summary>Registers a resolver and drops the resolved set again on dispose.</summary>
-    /// <param name="resolver">The resolver to register.</param>
-    /// <returns>A scope that drops the resolved set on dispose.</returns>
-    private static ResolverScope RegisterResolver(IViewThreadResolver resolver)
+    /// <summary>Clearing the synchronization context clears the main thread.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task UseSynchronizationContext_WithNoContext_ClearsTheMainThread()
     {
-        Locator.CurrentMutable.RegisterConstant(resolver);
-        ViewThreadResolvers.Refresh();
+        BindingSchedulers.UseSynchronizationContext(new RecordingSynchronizationContext());
+        BindingSchedulers.UseSynchronizationContext(null);
+
+        await Assert.That(BindingSchedulers.MainThread).IsNull();
+    }
+
+    /// <summary>Registers an invoker and drops the resolved set again on dispose.</summary>
+    /// <param name="invoker">The invoker to register.</param>
+    /// <returns>A scope that drops the resolved set on dispose.</returns>
+    private static InvokerScope RegisterInvoker(IViewThreadInvoker invoker)
+    {
+        Locator.CurrentMutable.RegisterConstant(invoker);
+        ViewThreadInvokers.Refresh();
 
         return new();
     }
 
-    /// <summary>Drops the resolved set so a later test does not inherit this one's resolver.</summary>
-    private sealed class ResolverScope : IDisposable
+    /// <summary>Delivers writes from another thread through a context until the scope is disposed.</summary>
+    /// <param name="context">The context standing in for the host's main thread.</param>
+    /// <returns>A scope that clears the main thread on dispose.</returns>
+    private static MainThreadScope UseMainThread(SynchronizationContext context)
+    {
+        BindingSchedulers.UseSynchronizationContext(context);
+
+        return new();
+    }
+
+    /// <summary>Drops the resolved set so a later test does not inherit this one's invoker.</summary>
+    private sealed class InvokerScope : IDisposable
     {
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Dispose() => ViewThreadResolvers.Refresh();
+        public void Dispose() => ViewThreadInvokers.Refresh();
     }
 
-    /// <summary>Claims only the targets it was told about, as a platform resolver claims only its own.</summary>
-    /// <param name="target">The target this resolver claims.</param>
-    /// <param name="context">The context owning it.</param>
-    private sealed class StubViewThreadResolver(object target, SynchronizationContext context) : IViewThreadResolver
+    /// <summary>Clears the main thread so a later test does not inherit it.</summary>
+    private sealed class MainThreadScope : IDisposable
     {
-        /// <summary>The targets this resolver claims, against the thread that owns each.</summary>
-        private readonly Dictionary<object, SynchronizationContext> _owners = new() { [target] = context };
-
-        /// <summary>Claims one more target.</summary>
-        /// <param name="other">The target to claim.</param>
-        /// <param name="owner">The context owning it.</param>
-        public void Add(object other, SynchronizationContext owner) => _owners[other] = owner;
-
-        /// <inheritdoc/>
-        public SynchronizationContext? ContextFor(object target) =>
-            _owners.TryGetValue(target, out var owner) ? owner : null;
-    }
-
-    /// <summary>A context that records what was posted to it, standing in for a UI framework's.</summary>
-    private sealed class RecordingSynchronizationContext : SynchronizationContext
-    {
-        /// <summary>Gets how many callbacks were posted.</summary>
-        public int PostCount { get; private set; }
-
-        /// <inheritdoc/>
-        public override void Post(SendOrPostCallback d, object? state)
-        {
-            PostCount++;
-            d(state);
-        }
-
-        /// <inheritdoc/>
-        public override void Send(SendOrPostCallback d, object? state) => Post(d, state);
-    }
-
-    /// <summary>Hands each value to a callback, so a test can see what arrived.</summary>
-    /// <param name="onValue">Receives each value.</param>
-    private sealed class CapturingObserver(Action<string> onValue) : IObserver<string>
-    {
-        /// <inheritdoc/>
-        public void OnCompleted()
-        {
-        }
-
-        /// <inheritdoc/>
-        public void OnError(Exception error)
-        {
-        }
-
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void OnNext(string value) => onValue(value);
+        public void Dispose() => BindingSchedulers.UseSynchronizationContext(null);
     }
 }

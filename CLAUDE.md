@@ -18,7 +18,7 @@ See: https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test?tabs=dotnet
 ### Prerequisites
 
 ```powershell
-# Check .NET installation (.NET 8.0, 9.0, and 10.0 required)
+# Check .NET installation (.NET 8.0, 9.0, 10.0 and 11.0 required)
 dotnet --info
 
 # Restore NuGet packages
@@ -36,7 +36,7 @@ dotnet restore ReactiveUI.Binding.SourceGenerators.slnx
 # Build the solution
 dotnet build ReactiveUI.Binding.SourceGenerators.slnx -c Release
 
-# Build with warnings as errors (includes StyleCop violations)
+# Build with warnings as errors (includes StyleSharp violations)
 dotnet build ReactiveUI.Binding.SourceGenerators.slnx -c Release -warnaserror
 
 # Clean the solution
@@ -163,7 +163,7 @@ src/
 │   ├── Observables/                             # Hand-rolled observables and disposables
 │   └── View/                                    # ViewLocator, DefaultViewLocator, IViewFor<T>, attributes
 │
-├── ReactiveUI.Binding/                          # Lean leaf (net8.0;net9.0;net10.0;net462-net481)
+├── ReactiveUI.Binding/                          # Lean leaf (net8.0-net11.0;net462-net481)
 ├── ReactiveUI.Binding.Reactive/                 # System.Reactive leaf: same source, REACTIVE_SHIM
 │
 ├── build/                                       # SkipMakePriOnNonWindows.targets (see below)
@@ -200,9 +200,13 @@ src/
 │   │       ├── WpfObservationPlugin.cs          # WPF DependencyObject (WpfDependencyObject, 4)
 │   │       ├── NotifyPropertyObservationPlugin.cs # Base for the INPC-watching plugins above
 │   │       └── NotifyPropertyEmitter.cs         # The observation those plugins all emit
+│   │   └── ViewThread/                          # The invoker a generated binding carries for its target
+│   │       ├── ViewThreadPluginRegistry.cs      # Matches a target's type to its platform's invoker
+│   │       └── Wpf/WinForms/MauiViewThreadPlugin.cs # One plugin per platform
 │   ├── Generators/                              # Whole-compilation outputs
 │   │   ├── RegistrationGenerator.cs             # Consolidates all → [ModuleInitializer]
 │   │   ├── ObservationHelperGenerator.cs        # Declares the KVO/WinUI helper classes, once per compilation
+│   │   ├── ViewThreadInvokerGenerator.cs        # Declares the WPF/WinForms/MAUI invoker classes, once per compilation
 │   │   └── ViewLocatorDispatchGenerator.cs      # IViewFor<T> → AOT view dispatch (Pipeline C)
 │   ├── Invocations/                             # Per-invocation generators (Pipeline B)
 │   │   ├── WhenChangedInvocationGenerator.cs    # After-change observation
@@ -260,32 +264,70 @@ generic type inference dominate the `GcVerbose` trace), so a second semantic pas
 not affordable. It also means a type from a *referenced* assembly is observed correctly even though the
 declaration scan never sees it.
 
-**Pipeline B (Invocation Detection)**: Scans method invocations (`WhenChanged`, `WhenChanging`, `BindOneWay`, `BindTwoWay`, `WhenAnyValue`, `InvokeCommand`) → extracts lambda property paths → generates optimized per-call-site observation/binding code. Uses **CallerFilePath + CallerLineNumber dispatch**: API stubs capture caller info, generated dispatch table routes to compile-time generated methods.
+**Pipeline B (Invocation Detection)** scans calls to 13 APIs: `WhenChanged`, `WhenChanging`, `WhenAnyValue`,
+`WhenAny`, `WhenAnyObservable`, `BindOneWay`, `BindTwoWay`, `OneWayBind`, `Bind`, `BindTo`, `BindCommand`,
+`BindInteraction` and `InvokeCommand`. It reads the property paths from each call's lambdas. It writes one method
+per call site. [API Pattern](#api-pattern) shows how a call site reaches that method.
 
-**Pipeline C (View Dispatch)**: Scans classes implementing `IViewFor<T>` → extracts `ViewRegistrationInfo` POCOs (VM FQN, View FQN, constructor availability, `[ViewContract]` contract, `[SingleInstanceView]` flag) → generates `ViewDispatch.g.cs` with a type-switch dispatch function. Supports contract-based multi-view resolution (contract checks emitted before default), singleton caching via `Interlocked.CompareExchange`, and 3-tier resolution (service locator → direct construction → null). Views can be excluded with `[ExcludeFromViewRegistration]`.
+**Pipeline C (View Dispatch)** scans classes that implement `IViewFor<T>`. For each view it records:
+
+- the view model type and the view type
+- whether the view has a parameterless constructor
+- its `[ViewContract]` contract and its `[SingleInstanceView]` flag
+
+It writes `ViewDispatch.g.cs`, a type switch from view model to view. A view with the requested contract comes
+before the default view. Each view's resolver tries the service locator first. It then uses the cached instance
+for a `[SingleInstanceView]` view, or calls the parameterless constructor. A view with no parameterless
+constructor resolves to null. `[ExcludeFromViewRegistration]` leaves a view out.
+
+`DefaultViewLocator.ResolveView` tries the generated lookup first. It then tries mappings added with `Map`, and
+then the service locator.
 
 ### API Pattern
+
+The runtime library declares every API as a stub. The stubs live in `ReactiveUIBindingExtensions` and
+`ReactiveSchedulerExtensions`. A stub throws `InvalidOperationException` when it runs. Its message names the
+`Unsafe` overload.
+
+For each call site, the generator writes a method that does the work. The call site reaches that method in one of
+two ways.
+
+- **An interceptor.** On Roslyn 4.13 and newer, the generator emits an `[InterceptsLocation]` method. The compiler
+  replaces the call with it. Setting `ReactiveUIBindingUseInterceptors` to `false` turns this off.
+- **A concrete overload.** Otherwise the generator emits an overload that beats the generic stub in method lookup.
+  From C# 10 it matches the call site by the lambda's text, captured with `[CallerArgumentExpression]`. Below
+  C# 10 it matches by `[CallerFilePath]` and `[CallerLineNumber]`.
+
+A call site the generator cannot read has to use the `Unsafe` overload. That overload finds properties by
+reflection.
 
 ```csharp
 // User writes:
 var obs = vm.WhenChanged(x => x.Name);
 
-// Generator emits API stub (PostInitializationOutput) with CallerInfo dispatch:
-public static IObservable<TReturn> WhenChanged<TObj, TReturn>(
-    this TObj obj, Expression<Func<TObj, TReturn>> property,
-    [CallerFilePath] string callerFilePath = "",
-    [CallerLineNumber] int callerLineNumber = 0) where TObj : class
+// The runtime stub, which throws when nothing replaces the call:
+public static IObservable<TReturn> WhenChanged<TObj, TReturn>(this TObj obj, Expression<Func<TObj, TReturn>> property, ...)
+
+// The generator writes one method per call site:
+private static IObservable<string> __WhenChanged_7FFFD2E8D6FC818E(MyViewModel obj)
 {
-    if (__GeneratedBindingDispatcher.TryGetWhenChanged(callerFilePath, callerLineNumber, obj, out var result))
-        return (IObservable<TReturn>)result!;
-    throw new InvalidOperationException("...");  // Runtime fallback TBD
+    // Attaches to PropertyChanged and emits the current value first.
 }
 
-// Generator emits per-invocation optimized method:
-private static IObservable<string> __WhenChanged_0(MyViewModel obj)
+// Roslyn 4.13 and newer: an interceptor claims the call site.
+[InterceptsLocation(1, "...")]
+internal static IObservable<string> __Intercept_WhenChanged_7FFFD2E8D6FC818E(this MyViewModel obj, Expression<Func<MyViewModel, string>> property, ...)
+    => __WhenChanged_7FFFD2E8D6FC818E(obj);
+
+// Roslyn 4.8 to 4.12: a concrete overload wins lookup and matches the call site.
+public static IObservable<string> WhenChanged(this MyViewModel obj, Expression<Func<MyViewModel, string>> property, [CallerArgumentExpression("property")] string propertyExpression = "", ...)
 {
-    return Observable.Create<string>(observer => { ... PropertyChanged subscription ... })
-        .StartWith(obj.Name);
+    if (propertyExpression == "x => x.Name")
+    {
+        return __WhenChanged_7FFFD2E8D6FC818E(obj);
+    }
+
+    throw new InvalidOperationException("No generated binding found. ...");
 }
 ```
 
@@ -397,6 +439,66 @@ and silently not to a binding of the same property. The check has to be on the p
 registered set is resolved once and kept rather than re-read from the locator per call - re-reading cost
 ~141 B and ~1.2 us per binding created, which a view full of bindings pays for repeatedly. `Refresh()`
 drops the cache for a host that registers a plugin after its first binding.
+
+**Every binding writes on the view's owning thread.** ReactiveUI moves a write only on WPF. It does so for a
+two-way `Bind` and for swapping a control's `Command`. Here every binding API moves it, on WPF, WinForms and MAUI.
+The order matches ReactiveUI's WPF binder, which checks `CheckAccess()` before it uses
+`RxSchedulers.MainThreadScheduler`. A ReactiveUI adapter sets `BindingSchedulers.MainThread` to that scheduler to
+get the same result.
+
+### Which Thread a Binding Writes On
+
+A UI framework lets only one thread touch a view. That is the view's owning thread. Every binding API sends its
+view writes through `BindingSchedulers.ObserveOnViewThread`. Generated and `Unsafe` calls both do. The observation
+APIs (`WhenChanged`, `WhenAny`, `WhenAnyValue` and the rest) do not. The caller decides where to observe.
+
+**`IViewThreadInvoker` is the contract.** It has three members.
+
+- `Claims(target)` says whether the object belongs to this platform.
+- `CheckAccess(target)` says whether the calling thread may write to the object now.
+- `Post(target, callback, state)` queues the callback on the owning thread.
+
+Each platform module registers one invoker. Each invoker uses its platform's own API.
+
+| Invoker | `CheckAccess` | `Post` |
+|---------|---------------|--------|
+| WPF `DispatcherViewThreadInvoker` | `DispatcherObject.CheckAccess()` | `Dispatcher.BeginInvoke`; inline with no dispatcher, as for a frozen `Freezable` |
+| WinForms `ControlViewThreadInvoker` | `!Control.InvokeRequired` | `Control.BeginInvoke`; inline while the control has no handle |
+| MAUI `DispatcherViewThreadInvoker` | `!IDispatcher.IsDispatchRequired` | `IDispatcher.Dispatch`; inline with no dispatcher |
+
+MAUI's `BindableObject.Dispatcher` throws `InvalidOperationException` when it finds no dispatcher. That is normal in
+a view's unit test. The MAUI invoker catches it. It treats the object as having no owning thread.
+
+**`ViewThreadObservable` decides every route.** Invokers only answer its questions.
+
+1. It uses the first registered invoker that claims the target. A generated binding also passes a fallback: an
+   invoker to use when no registered one claims the target. With no invoker at all, the source comes back
+   unchanged.
+2. A notification runs inline when nothing is queued and `CheckAccess` passes.
+3. Any other notification is queued. One callback empties the queue. It runs on `BindingSchedulers.MainThread`
+   when that is set, and through `Post` otherwise.
+
+A notification that arrives behind queued ones waits its turn, even on the owning thread. The view sees values in
+the order the source produced them.
+
+`MainThread` only carries writes from another thread to a claimed object. It never sees an on-thread write. It
+never sees a write to an unclaimed object.
+
+**Generated bindings carry their fallback.** They route writes without the platform module.
+
+- `ViewThreadPluginRegistry` checks the target's type during extraction. It matches
+  `System.Windows.Threading.DispatcherObject`, `System.Windows.Forms.Control` and
+  `Microsoft.Maui.Controls.BindableObject`.
+- The invocation model stores the matching invoker's class name. `BindTo`, `BindOneWay`, `OneWayBind` and `Bind`
+  store it for the target. `BindTwoWay` stores it for both sides. `BindCommand` stores it for the view.
+- The emitter passes `__WpfViewThreadInvoker.Instance`, or the WinForms or MAUI class, as the fallback.
+- `ViewThreadInvokerGenerator` declares those classes in `ViewThreadInvokers.g.cs`, once per compilation.
+
+The generator declares a class when its platform type resolves in the compilation. It does not look at call
+sites. A call site can only name an invoker for a type that resolves. So every reference has a declaration.
+
+There is no WinUI invoker. No runtime package registers one. A generated one would route writes that the `Unsafe`
+twin does not.
 
 ### Operators Come From Primitives
 
@@ -540,6 +642,43 @@ Not all platforms support before-change notifications (WPF DP, WinUI DP, WinForm
 - **Modern C#:** Nullable reference types, pattern matching, records, init setters
 - **netstandard2.0 targets:** Use `IsExternalInit.cs` polyfill for records; avoid APIs not available in netstandard2.0 (e.g., use `if (x is null) throw new System.ArgumentNullException(...)` instead of `ArgumentNullException.ThrowIfNull()`)
 
+## Writing Docs
+
+These rules cover README.md, CLAUDE.md and every other doc in the repository. They do not cover XML doc comments.
+
+### Who you write for
+
+Write for a reader at a grade 8 level who knows basic C#. They know what a class, a property and an event are. They do not know this library.
+
+### Sentences
+
+- Put the main point first.
+- Give each sentence one subject. Use two only when they are tightly coupled.
+- Keep sentences short. Split a sentence that needs a dash, a semicolon or a "which" to hold together.
+- Use the active voice. Say who does what: "the binding writes the value", not "the value is written".
+- Use verbs, not nouns made from verbs. Write "decide", not "make a decision".
+- Say what is true. Avoid double negatives.
+- Cut words that add nothing. Do not restate a point in the next sentence.
+
+### Words
+
+- Use everyday words. When you need a technical term, define it the first time you use it.
+- Define each term once. After that, use it without explaining it again.
+- Use the same word for the same thing every time. Do not swap in a synonym for variety.
+- Use "you" for the reader.
+
+### Structure
+
+- Use headings so a reader can find a topic.
+- Use a list for steps or for separate items. Use a table to compare items across the same columns.
+- Show a short code example when it explains faster than words.
+
+### Scope
+
+- Each section says what this library does, on its own terms.
+- Anything that differs from ReactiveUI goes only under the differences header: "Where this differs from ReactiveUI" in README.md, and "Where This Engine Parts Company With ReactiveUI's" here. Do not compare with ReactiveUI anywhere else.
+- Describe the code as it is. Do not describe what it used to do.
+
 ## Analyzer Suppression Policy
 
 **NO analyzer suppressions are allowed unless discussed and approved first.** This applies to every form of suppression: `[SuppressMessage]` attributes, `#pragma warning disable`, `.editorconfig` severity downgrades, and `<NoWarn>` in project files. **Fix the underlying issue instead.**
@@ -593,7 +732,7 @@ references to types nobody declared.
 There are **two distinct C# language contexts** in this project:
 
 **Generator source code** (the `.cs` files in `ReactiveUI.Binding.SourceGenerators/`):
-- Compiled with the **latest** C# language version (currently C# 12)
+- Compiled with `LangVersion` set to `latest`
 - Can freely use raw string literals (`$$"""`), file-scoped namespaces, pattern matching (`is not`), records, switch expressions, etc.
 - Must target **netstandard2.0** (Roslyn requirement), but the SDK/language version is latest
 
@@ -740,9 +879,9 @@ build keeps working right up until Wine starts. Each copy chains to the reposito
 
 ## Important Notes
 
-- **Required .NET SDKs:** .NET 8.0, 9.0, and 10.0
+- **Required .NET SDKs:** .NET 8.0, 9.0, 10.0 and 11.0
 - **Generator + Analyzer targets:** netstandard2.0 (Roslyn requirement)
-- **Runtime library targets:** net8.0;net9.0;net10.0;net462;net472;net481
+- **Runtime library targets:** net8.0;net9.0;net10.0;net11.0;net462;net47;net471;net472;net48;net481
 - **No shallow clones:** Repository requires full clone for Nerdbank.GitVersioning
 - **Where the analyzers ship:** `ReactiveUI.Binding` and `ReactiveUI.Binding.Reactive` each pack the generator
   and analyzer DLLs into `analyzers/dotnet/roslyn4.8/cs` and `analyzers/dotnet/roslyn4.13/cs`, so referencing a

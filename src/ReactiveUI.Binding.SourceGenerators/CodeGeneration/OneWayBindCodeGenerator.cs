@@ -88,7 +88,7 @@ internal static class OneWayBindCodeGenerator
             currentVar = EmitRegistryConversionStage(sb, inv, currentVar);
         }
 
-        currentVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, currentVar, "viewThreadObs", "view");
+        currentVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, currentVar, "viewThreadObs", "view", inv.TargetViewThreadInvoker);
 
         _ = sb.AppendLine().Append("            var sub = ").Append(BindingErrors).Append(".Subscribe(").Append(currentVar).AppendLine(", value =>")
             .AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(viewAssignment).AppendLine().Append("            }, \"")

@@ -5,6 +5,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins.ViewThread;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
@@ -59,8 +60,7 @@ internal static class BindingExtractor
             return null;
         }
 
-        if (ResolveBindingSides(memberAccess, args, methodName, semanticModel, ct)
-            is not var (sourceTypeFullName, targetTypeFullName))
+        if (ResolveBindingSides(memberAccess, args, methodName, semanticModel, ct) is not { } sides)
         {
             return null;
         }
@@ -74,9 +74,9 @@ internal static class BindingExtractor
         return new(
             invocation.SyntaxTree.FilePath,
             invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
-            sourceTypeFullName,
+            sides.SourceTypeFullName,
             new(sourcePropertyPath),
-            targetTypeFullName,
+            sides.TargetTypeFullName,
             new(targetPropertyPath),
             sourcePropertyPath[^1].PropertyTypeFullName,
             targetPropertyPath[^1].PropertyTypeFullName,
@@ -87,7 +87,9 @@ internal static class BindingExtractor
             CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(sourcePropertyArg.ToString()),
             CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString()),
             hasConverterOverride,
-            InterceptableLocationReader.Read(semanticModel, invocation, ct));
+            InterceptableLocationReader.Read(semanticModel, invocation, ct),
+            sides.SourceViewThreadInvoker,
+            sides.TargetViewThreadInvoker);
     }
 
     /// <summary>
@@ -110,20 +112,23 @@ internal static class BindingExtractor
         SemanticModel semanticModel,
         CancellationToken ct)
     {
-        var receiverTypeName =
-            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type);
-        var firstArgTypeName =
-            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
+        var receiverType = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type;
+        var firstArgType = semanticModel.GetTypeInfo(args[0].Expression, ct).Type;
+        var receiverTypeName = ExtractorValidation.GetDeclarableTypeDisplayName(receiverType);
+        var firstArgTypeName = ExtractorValidation.GetDeclarableTypeDisplayName(firstArgType);
 
         if (receiverTypeName is null || firstArgTypeName is null)
         {
             return null;
         }
 
+        var receiverInvoker = ViewThreadPluginRegistry.InvokerFor(receiverType, semanticModel.Compilation);
+        var firstArgInvoker = ViewThreadPluginRegistry.InvokerFor(firstArgType, semanticModel.Compilation);
+
         var isViewFirst = methodName is Constants.OneWayBindMethodName or Constants.BindMethodName;
         return isViewFirst
-            ? new BindingSides(firstArgTypeName, receiverTypeName)
-            : new BindingSides(receiverTypeName, firstArgTypeName);
+            ? new BindingSides(firstArgTypeName, receiverTypeName, firstArgInvoker, receiverInvoker)
+            : new BindingSides(receiverTypeName, firstArgTypeName, receiverInvoker, firstArgInvoker);
     }
 
     /// <summary>
