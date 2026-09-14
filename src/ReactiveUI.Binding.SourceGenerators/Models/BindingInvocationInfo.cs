@@ -27,6 +27,8 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="Interceptor">
 /// Where this call site is, for a build that claims call sites outright rather than competing for them.
 /// </param>
+/// <param name="SourceViewThreadInvoker">The invoker class a write to the source carries, or null for none.</param>
+/// <param name="TargetViewThreadInvoker">The invoker class a write to the target carries, or null for none.</param>
 internal sealed record BindingInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -43,4 +45,6 @@ internal sealed record BindingInvocationInfo(
     string SourceExpressionText,
     string TargetExpressionText,
     bool HasConverterOverride,
-    InterceptorLocation Interceptor = default);
+    InterceptorLocation Interceptor = default,
+    string? SourceViewThreadInvoker = null,
+    string? TargetViewThreadInvoker = null);

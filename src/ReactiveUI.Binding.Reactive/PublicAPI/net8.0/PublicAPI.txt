@@ -72,6 +72,8 @@ namespace ReactiveUI.Binding.Reactive
         public static System.Reactive.Concurrency.IScheduler? MainThread { get; set; }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public static System.IObservable<T> ObserveOnViewThread<T>(System.IObservable<T> source, object? target) { }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public static System.IObservable<T> ObserveOnViewThread<T>(System.IObservable<T> source, object? target, ReactiveUI.Binding.Reactive.IViewThreadInvoker fallback) { }
         public static void UseSynchronizationContext(System.Threading.SynchronizationContext? context) { }
     }
     [System.Diagnostics.DebuggerDisplay("{FromType.Name,nq} -> {ToType.Name,nq} converter")]
@@ -351,9 +353,11 @@ namespace ReactiveUI.Binding.Reactive
         ReactiveUI.Binding.Reactive.IViewFor? ResolveView(object? viewModel, string? contract) { }
         ReactiveUI.Binding.Reactive.IViewFor? ResolveView<TViewModel>(TViewModel viewModel, string? contract) where TViewModel : class { }
     }
-    public interface IViewThreadResolver
+    public interface IViewThreadInvoker
     {
-        System.Threading.SynchronizationContext? ContextFor(object target) { }
+        bool CheckAccess(object target) { }
+        bool Claims(object target) { }
+        void Post(object target, System.Action<object?> callback, object? state) { }
     }
     [System.Diagnostics.DebuggerDisplay("int -> int? (affinity {Affinity})")]
     public sealed class IntegerToNullableIntegerTypeConverter : ReactiveUI.Binding.Reactive.IBindingTypeConverter<int, int?>
@@ -1686,9 +1690,9 @@ namespace ReactiveUI.Binding.Reactive
         public ReactiveUI.Binding.Reactive.ViewMappingBuilder Map<TViewModel, TView>(string? contract) where TViewModel : class where TView : ReactiveUI.Binding.Reactive.IViewFor, new() { }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static class ViewThreadResolvers
+    public static class ViewThreadInvokers
     {
-        public static System.Threading.SynchronizationContext? ForTarget(object? target) { }
+        public static ReactiveUI.Binding.Reactive.IViewThreadInvoker? ForTarget(object? target) { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Refresh() { }
     }

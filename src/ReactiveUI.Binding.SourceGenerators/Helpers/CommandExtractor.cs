@@ -5,6 +5,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins.ViewThread;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
@@ -60,8 +61,7 @@ internal static class CommandExtractor
             return null;
         }
 
-        if (ResolveBindCommandSides(memberAccess, args, semanticModel, ct)
-            is not var (viewTypeFullName, viewModelTypeFullName))
+        if (ResolveBindCommandSides(memberAccess, args, semanticModel, ct) is not { } sides)
         {
             return null;
         }
@@ -75,8 +75,8 @@ internal static class CommandExtractor
         return new(
             invocation.SyntaxTree.FilePath,
             invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
-            viewTypeFullName,
-            viewModelTypeFullName,
+            sides.ViewTypeFullName,
+            sides.ViewModelTypeFullName,
             new(commandPropertyPath),
             new(controlPropertyPath),
             commandPropertyPath[^1].PropertyTypeFullName,
@@ -95,7 +95,8 @@ internal static class CommandExtractor
             capabilities.HasCommand,
             capabilities.HasCommandParameter,
             capabilities.HasEnabled,
-            InterceptableLocationReader.Read(semanticModel, invocation, ct));
+            InterceptableLocationReader.Read(semanticModel, invocation, ct),
+            sides.ViewThreadInvoker);
     }
 
     /// <summary>Searches invocation arguments for a valid <c>withParameter</c> lambda expression.</summary>
@@ -278,14 +279,17 @@ internal static class CommandExtractor
         SemanticModel semanticModel,
         CancellationToken ct)
     {
-        var viewTypeFullName =
-            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type);
+        var viewType = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type;
+        var viewTypeFullName = ExtractorValidation.GetDeclarableTypeDisplayName(viewType);
         var viewModelTypeFullName =
             ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
 
         return viewTypeFullName is null || viewModelTypeFullName is null
             ? null
-            : new BindCommandSides(viewTypeFullName, viewModelTypeFullName);
+            : new BindCommandSides(
+                viewTypeFullName,
+                viewModelTypeFullName,
+                ViewThreadPluginRegistry.InvokerFor(viewType, semanticModel.Compilation));
     }
 
     /// <summary>

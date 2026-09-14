@@ -296,8 +296,8 @@ internal static class BindCommandCodeGenerator
             "__commandChanges");
 
         // Each rebind touches the control, so the command arrives on the view's thread.
-        _ = sb.Append("            var commandObs = ").Append(GeneratedTypeNames.BindingSchedulers)
-            .AppendLine(".ObserveOnViewThread(__commandChanges, view);");
+        _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append("            var commandObs = "), "__commandChanges", "view", inv.ViewThreadInvoker)
+            .AppendLine(";");
 
         if (inv is not { HasObservableParameter: false, HasExpressionParameter: true, ParameterPropertyPath: not null })
         {

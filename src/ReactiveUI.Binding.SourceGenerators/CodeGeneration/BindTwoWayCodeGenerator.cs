@@ -110,8 +110,8 @@ internal static class BindTwoWayCodeGenerator
 
         // Both directions are routed, and the source direction first, so its initial value is queued ahead of
         // the target's. That ordering is what seeds the target before the target's own first value is weighed.
-        sourceVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, sourceVar, "targetThreadObs", TargetParameterName);
-        targetVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, targetVar, "sourceThreadObs", SourceParameterName);
+        sourceVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, sourceVar, "targetThreadObs", TargetParameterName, inv.TargetViewThreadInvoker);
+        targetVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, targetVar, "sourceThreadObs", SourceParameterName, inv.SourceViewThreadInvoker);
 
         EmitTwoWaySubscription(sb, inv, sourceVar, targetVar, targetAccess, sourceSetAccess);
     }

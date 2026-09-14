@@ -20,10 +20,13 @@ namespace ReactiveUI.Binding.Reactive.Wpf
         public int GetAffinityForObject(System.Type type, string propertyName, bool beforeChanged) { }
         public System.IObservable<ReactiveUI.Binding.Reactive.IObservedChange<object, object?>> GetNotificationForProperty(object sender, System.Linq.Expressions.Expression expression, string propertyName, bool beforeChanged, bool suppressWarnings) { }
     }
-    public sealed class DispatcherViewThreadResolver : ReactiveUI.Binding.Reactive.IViewThreadResolver
+    public sealed class DispatcherViewThreadInvoker : ReactiveUI.Binding.Reactive.IViewThreadInvoker
     {
-        public DispatcherViewThreadResolver() { }
-        public System.Threading.SynchronizationContext? ContextFor(object target) { }
+        public DispatcherViewThreadInvoker() { }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public bool CheckAccess(object target) { }
+        public bool Claims(object target) { }
+        public void Post(object target, System.Action<object?> callback, object? state) { }
     }
     public sealed class VisibilityToBooleanTypeConverter : ReactiveUI.Binding.Reactive.BindingTypeConverter<System.Windows.Visibility, bool>
     {

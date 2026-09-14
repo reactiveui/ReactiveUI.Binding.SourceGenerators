@@ -400,6 +400,7 @@ public static class TestHelper
         "BindToGeneratorTests" => "BToG",
         "InvokeCommandGeneratorTests" => "ICG",
         "ViewLocatorDispatchGeneratorTests" => "VDG",
+        "ViewThreadInvokerGeneratorTests" => "VTIG",
         _ => typeName
     };
 

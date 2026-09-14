@@ -31,6 +31,20 @@ public class MauiBindingModuleTests
         await Assert.That(converters.Exists(static c => c is VisibilityToBooleanTypeConverter)).IsTrue();
     }
 
+    /// <summary>Verifies that Configure registers the invoker that writes on a view's own thread.</summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task Configure_RegistersTheViewThreadInvoker()
+    {
+        var resolver = new ModernDependencyResolver();
+
+        new MauiBindingModule().Configure(resolver);
+
+        var invokers = resolver.GetServices<IViewThreadInvoker>().ToList();
+
+        await Assert.That(invokers.Exists(static i => i is DispatcherViewThreadInvoker)).IsTrue();
+    }
+
     /// <summary>Verifies that Configure rejects a null resolver rather than failing later.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]

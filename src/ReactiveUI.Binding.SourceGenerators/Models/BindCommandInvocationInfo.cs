@@ -34,6 +34,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// <param name="Interceptor">
 /// Where this call site is, for a build that claims call sites outright rather than competing for them.
 /// </param>
+/// <param name="ViewThreadInvoker">The invoker class a write to the view carries, or null for none.</param>
 internal sealed record BindCommandInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -57,4 +58,5 @@ internal sealed record BindCommandInvocationInfo(
     bool HasCommandProperty,
     bool HasCommandParameterProperty,
     bool HasEnabledProperty,
-    InterceptorLocation Interceptor = default);
+    InterceptorLocation Interceptor = default,
+    string? ViewThreadInvoker = null);

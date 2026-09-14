@@ -5,6 +5,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins.ViewThread;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
@@ -52,8 +53,8 @@ internal static class BindToExtractor
 
         var targetPropertyArg = args[1].Expression;
         var targetPropertyPath = SyntaxHelpers.ExtractPropertyPathFromLambda(targetPropertyArg, semanticModel, ct);
-        var targetTypeName =
-            ExtractorValidation.GetDeclarableTypeDisplayName(semanticModel.GetTypeInfo(args[0].Expression, ct).Type);
+        var targetType = semanticModel.GetTypeInfo(args[0].Expression, ct).Type;
+        var targetTypeName = ExtractorValidation.GetDeclarableTypeDisplayName(targetType);
 
         // A target the model cannot name leaves nothing to declare a member against, generated or otherwise.
         if (targetTypeName is null)
@@ -89,7 +90,8 @@ internal static class BindToExtractor
             hasConversionHint,
             hasConverterOverride,
             targetExpressionText,
-            InterceptableLocationReader.Read(semanticModel, invocation, ct));
+            InterceptableLocationReader.Read(semanticModel, invocation, ct),
+            ViewThreadPluginRegistry.InvokerFor(targetType, semanticModel.Compilation));
     }
 
     /// <summary>

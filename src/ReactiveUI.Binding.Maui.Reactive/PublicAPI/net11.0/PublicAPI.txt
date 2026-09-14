@@ -21,10 +21,12 @@ namespace ReactiveUI.Binding.Reactive.Maui
         public override int GetAffinityForObjects() { }
         public override bool TryConvert(bool from, object? conversionHint, out Microsoft.Maui.Visibility result) { }
     }
-    public sealed class DispatcherViewThreadResolver : ReactiveUI.Binding.Reactive.IViewThreadResolver
+    public sealed class DispatcherViewThreadInvoker : ReactiveUI.Binding.Reactive.IViewThreadInvoker
     {
-        public DispatcherViewThreadResolver() { }
-        public System.Threading.SynchronizationContext? ContextFor(object target) { }
+        public DispatcherViewThreadInvoker() { }
+        public bool CheckAccess(object target) { }
+        public bool Claims(object target) { }
+        public void Post(object target, System.Action<object?> callback, object? state) { }
     }
     public sealed class MauiBindingModule : Splat.Builder.IModule
     {

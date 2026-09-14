@@ -7,126 +7,126 @@ using Microsoft.Maui.Dispatching;
 
 namespace ReactiveUI.Binding.Maui.Tests;
 
-/// <summary>Tests for the MAUI view-thread resolver.</summary>
+/// <summary>Tests for the MAUI view-thread invoker.</summary>
 [NotInParallel]
-public class DispatcherViewThreadResolverTests
+public class DispatcherViewThreadInvokerTests
 {
-    /// <summary>A target the resolver does not recognise, so it is left to another resolver.</summary>
+    /// <summary>A target the invoker does not recognise.</summary>
     private static readonly object UnclaimedTarget = new();
 
-    /// <summary>A write from another thread is claimed and goes through the dispatcher the object carries.</summary>
+    /// <summary>A bindable object is claimed.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
-    public async Task Post_FromAnotherThread_GoesThroughTheDispatcher()
+    public async Task Claims_WithABindableObject_ClaimsIt() =>
+        await Assert.That(new DispatcherViewThreadInvoker().Claims(new Label())).IsTrue();
+
+    /// <summary>Anything that is not a bindable object is left to another invoker.</summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task Claims_WithSomethingElse_ClaimsNothing() =>
+        await Assert.That(new DispatcherViewThreadInvoker().Claims(UnclaimedTarget)).IsFalse();
+
+    /// <summary>A caller the dispatcher says must dispatch may not write directly.</summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task CheckAccess_WhenTheDispatcherRequiresDispatch_IsFalse()
+    {
+        using (new DispatcherProviderScope(new RecordingDispatcher()))
+        {
+            await Assert.That(new DispatcherViewThreadInvoker().CheckAccess(new Label())).IsFalse();
+        }
+    }
+
+    /// <summary>A caller already on the dispatcher's thread may write directly.</summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task CheckAccess_WhenTheDispatcherDoesNotRequireDispatch_IsTrue()
+    {
+        using (new DispatcherProviderScope(new RecordingDispatcher { IsDispatchRequired = false }))
+        {
+            await Assert.That(new DispatcherViewThreadInvoker().CheckAccess(new Label())).IsTrue();
+        }
+    }
+
+    /// <summary>An object with no dispatcher to find, as in a view's unit test, may be written from any thread.</summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task CheckAccess_WithNoDispatcher_IsTrue()
+    {
+        using (new DispatcherProviderScope(null))
+        {
+            await Assert.That(new DispatcherViewThreadInvoker().CheckAccess(new Label())).IsTrue();
+        }
+    }
+
+    /// <summary>A posted callback goes through the dispatcher the object carries.</summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task Post_GoesThroughTheDispatcher()
     {
         var dispatcher = new RecordingDispatcher();
+        var state = new object();
+        object? received = null;
 
         using (new DispatcherProviderScope(dispatcher))
         {
-            var context = new DispatcherViewThreadResolver().ContextFor(new Label());
-
-            await Assert.That(context).IsNotNull();
-
-            var posted = false;
-            context!.Post(_ => posted = true, null);
+            new DispatcherViewThreadInvoker().Post(new Label(), s => received = s, state);
 
             await Assert.That(dispatcher.DispatchCount).IsEqualTo(1);
-            await Assert.That(posted).IsTrue();
+            await Assert.That(received).IsSameReferenceAs(state);
         }
     }
 
-    /// <summary>A write from the thread that owns the object runs inline rather than queueing a turn.</summary>
+    /// <summary>A callback posted to an object with no dispatcher to find runs inline rather than throwing.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
-    public async Task Post_FromTheOwningThread_RunsInline()
+    public async Task Post_WithNoDispatcher_RunsInline()
     {
-        var dispatcher = new RecordingDispatcher { IsDispatchRequired = false };
+        var posted = false;
 
-        using (new DispatcherProviderScope(dispatcher))
+        using (new DispatcherProviderScope(null))
         {
-            var context = new DispatcherViewThreadResolver().ContextFor(new Label());
-            var posted = false;
-
-            context!.Post(_ => posted = true, null);
-
-            await Assert.That(posted).IsTrue();
-            await Assert.That(dispatcher.DispatchCount).IsEqualTo(0);
+            new DispatcherViewThreadInvoker().Post(new Label(), _ => posted = true, null);
         }
+
+        await Assert.That(posted).IsTrue();
     }
 
-    /// <summary>A send from the thread that owns the object runs inline rather than queueing a turn.</summary>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    [Test]
-    public async Task Send_FromTheOwningThread_RunsInline()
-    {
-        var dispatcher = new RecordingDispatcher { IsDispatchRequired = false };
-
-        using (new DispatcherProviderScope(dispatcher))
-        {
-            var context = new DispatcherViewThreadResolver().ContextFor(new Label());
-            var sent = false;
-
-            context!.Send(_ => sent = true, null);
-
-            await Assert.That(sent).IsTrue();
-            await Assert.That(dispatcher.DispatchCount).IsEqualTo(0);
-        }
-    }
-
-    /// <summary>A send from another thread goes through the dispatcher.</summary>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    [Test]
-    public async Task Send_FromAnotherThread_GoesThroughTheDispatcher()
-    {
-        var dispatcher = new RecordingDispatcher();
-
-        using (new DispatcherProviderScope(dispatcher))
-        {
-            var context = new DispatcherViewThreadResolver().ContextFor(new Label());
-            var sent = false;
-
-            context!.Send(_ => sent = true, null);
-
-            await Assert.That(dispatcher.DispatchCount).IsEqualTo(1);
-            await Assert.That(sent).IsTrue();
-        }
-    }
-
-    /// <summary>An object that picks a dispatcher up after the binding was made is written through it from then on.</summary>
+    /// <summary>An object that picks a dispatcher up after it was created is written through it from then on.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task Post_AfterTheObjectPicksUpADispatcher_GoesThroughIt()
     {
         var dispatcher = new RecordingDispatcher();
-        SynchronizationContext? context;
+        Label target;
 
         using (new DispatcherProviderScope(null))
         {
-            context = new DispatcherViewThreadResolver().ContextFor(new Label());
+            target = new();
         }
 
         using (new DispatcherProviderScope(dispatcher))
         {
             var posted = false;
 
-            context!.Post(_ => posted = true, null);
+            new DispatcherViewThreadInvoker().Post(target, _ => posted = true, null);
 
             await Assert.That(dispatcher.DispatchCount).IsEqualTo(1);
             await Assert.That(posted).IsTrue();
         }
     }
 
-    /// <summary>Anything that is not a bindable object is left to another resolver.</summary>
+    /// <summary>A missing callback is rejected.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
-    public async Task ContextFor_WithSomethingElse_ClaimsNothing() =>
-        await Assert.That(new DispatcherViewThreadResolver().ContextFor(UnclaimedTarget)).IsNull();
+    public async Task Post_WithNoCallback_Throws() =>
+        await Assert.That(static () => new DispatcherViewThreadInvoker().Post(new Label(), null!, null)).ThrowsExactly<ArgumentNullException>();
 
     /// <summary>Hands out one dispatcher for the duration of a test, then puts the provider back.</summary>
     private sealed class DispatcherProviderScope : IDisposable
     {
         /// <summary>Initializes a new instance of the <see cref="DispatcherProviderScope"/> class.</summary>
-        /// <param name="dispatcher">The dispatcher every bindable object created inside the scope picks up, or null for none.</param>
+        /// <param name="dispatcher">The dispatcher every thread is handed inside the scope, or null for none.</param>
         public DispatcherProviderScope(IDispatcher? dispatcher) =>
             _ = DispatcherProvider.SetCurrent(new StubProvider(dispatcher));
 
