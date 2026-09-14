@@ -14,8 +14,8 @@ internal sealed class MauiViewThreadPlugin : IViewThreadPlugin
     /// <summary>The fully qualified MAUI type the invoker claims.</summary>
     private const string OwnerTypeFullName = "global::Microsoft.Maui.Controls.BindableObject";
 
-    /// <summary>The call that reads the dispatcher an object carries.</summary>
-    private const string FindDispatcherCall = "                var dispatcher = FindDispatcher((global::Microsoft.Maui.Controls.BindableObject)target);";
+    /// <summary>The statement that reads the dispatcher an object carries.</summary>
+    private const string FindDispatcherStatement = "var dispatcher = FindDispatcher((global::Microsoft.Maui.Controls.BindableObject)target);";
 
     /// <inheritdoc/>
     public string OwnerMetadataName => "Microsoft.Maui.Controls.BindableObject";
@@ -26,24 +26,9 @@ internal sealed class MauiViewThreadPlugin : IViewThreadPlugin
     /// <inheritdoc/>
     public void EmitInvoker(StringBuilder sb, string nullableSuffix)
     {
-        _ = AppendOpen(sb, InvokerTypeName, OwnerTypeFullName)
-            .AppendLine("            public bool CheckAccess(object target)")
-            .AppendLine(MemberOpen)
-            .AppendLine(FindDispatcherCall)
-            .AppendLine("                return dispatcher == null || !dispatcher.IsDispatchRequired;")
-            .AppendLine(MemberClose)
-            .AppendLine();
-
-        _ = AppendPostOpen(sb, nullableSuffix)
-            .AppendLine(FindDispatcherCall)
-            .AppendLine("                if (dispatcher == null)")
-            .AppendLine(BodyBlockOpen)
-            .AppendLine("                    callback(state);")
-            .AppendLine("                    return;")
-            .AppendLine(BodyBlockClose)
-            .AppendLine()
-            .AppendLine("                dispatcher.Dispatch(() => callback(state));")
-            .AppendLine(MemberClose)
+        _ = AppendOpen(sb, InvokerTypeName, OwnerTypeFullName);
+        _ = AppendCheckAccess(sb, FindDispatcherStatement, "dispatcher == null || !dispatcher.IsDispatchRequired");
+        _ = AppendPost(sb, nullableSuffix, FindDispatcherStatement, "dispatcher == null", "dispatcher.Dispatch(() => callback(state));")
             .AppendLine()
             .Append("            private static global::Microsoft.Maui.Dispatching.IDispatcher").Append(nullableSuffix)
             .Append(" FindDispatcher(").Append(OwnerTypeFullName).AppendLine(" owner)")
@@ -56,7 +41,7 @@ internal sealed class MauiViewThreadPlugin : IViewThreadPlugin
             .AppendLine(BodyBlockOpen)
             .AppendLine("                    return null;")
             .AppendLine(BodyBlockClose)
-            .AppendLine(MemberClose)
-            .AppendLine("        }");
+            .AppendLine(MemberClose);
+        _ = AppendClose(sb);
     }
 }

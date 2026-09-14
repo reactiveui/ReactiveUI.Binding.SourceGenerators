@@ -4,6 +4,8 @@
 
 using System.Text;
 
+using static ReactiveUI.Binding.SourceGenerators.Plugins.ViewThread.ViewThreadInvokerSyntax;
+
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.ViewThread;
 
 /// <summary>Writes to a WinForms control on the thread that created its handle.</summary>
@@ -21,23 +23,14 @@ internal sealed class WinFormsViewThreadPlugin : IViewThreadPlugin
     /// <inheritdoc/>
     public void EmitInvoker(StringBuilder sb, string nullableSuffix)
     {
-        _ = ViewThreadInvokerSyntax.AppendOpen(sb, InvokerTypeName, OwnerTypeFullName)
-            .AppendLine("            public bool CheckAccess(object target)")
-            .AppendLine("            {")
-            .Append("                return !((").Append(OwnerTypeFullName).AppendLine(")target).InvokeRequired;")
-            .AppendLine("            }")
-            .AppendLine();
-
-        _ = ViewThreadInvokerSyntax.AppendPostOpen(sb, nullableSuffix)
-            .Append("                var control = (").Append(OwnerTypeFullName).AppendLine(")target;")
-            .AppendLine("                if (!control.InvokeRequired)")
-            .AppendLine("                {")
-            .AppendLine("                    callback(state);")
-            .AppendLine("                    return;")
-            .AppendLine("                }")
-            .AppendLine()
-            .AppendLine("                control.BeginInvoke(callback, new[] { state });")
-            .AppendLine("            }")
-            .AppendLine("        }");
+        _ = AppendOpen(sb, InvokerTypeName, OwnerTypeFullName);
+        _ = AppendCheckAccess(sb, null, $"!(({OwnerTypeFullName})target).InvokeRequired");
+        _ = AppendPost(
+            sb,
+            nullableSuffix,
+            $"var control = ({OwnerTypeFullName})target;",
+            "!control.InvokeRequired",
+            "control.BeginInvoke(callback, new[] { state });");
+        _ = AppendClose(sb);
     }
 }
