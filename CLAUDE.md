@@ -474,12 +474,16 @@ a view's unit test. The MAUI invoker catches it. It treats the object as having 
 1. It uses the first registered invoker that claims the target. A generated binding also passes a fallback: an
    invoker to use when no registered one claims the target. With no invoker at all, the source comes back
    unchanged.
-2. A notification runs inline when nothing is queued and `CheckAccess` passes.
-3. Any other notification is queued. One callback empties the queue. It runs on `BindingSchedulers.MainThread`
-   when that is set, and through `Post` otherwise.
+2. A notification runs inline when nothing is waiting and `CheckAccess` passes.
+3. Any other notification waits. One drain delivers what waits. It runs on `BindingSchedulers.MainThread` when that
+   is set, and through `Post` otherwise.
 
-A notification that arrives behind queued ones waits its turn, even on the owning thread. The view sees values in
-the order the source produced them.
+Only the latest value waits. A newer value replaces it, even one raised on the owning thread while a drain runs.
+Completion and errors wait beside the value and are delivered after it.
+
+Keeping every value breaks two-way bindings. Writing a view raises the view's own change at once. If a newer value
+is still waiting, that echo writes the older value back to the view model. The write raises another change, and
+the two sides bounce forever. `ViewWriteSchedulingRuntimeTests` covers this for `Bind` and `BindTwoWay`.
 
 `MainThread` only carries writes from another thread to a claimed object. It never sees an on-thread write. It
 never sees a write to an unclaimed object.
@@ -496,6 +500,8 @@ never sees a write to an unclaimed object.
 
 The generator declares a class when its platform type resolves in the compilation. It does not look at call
 sites. A call site can only name an invoker for a type that resolves. So every reference has a declaration.
+
+An `Unsafe` binding only has the registered invokers. It routes writes only when the platform module is registered.
 
 There is no WinUI invoker. No runtime package registers one. A generated one would route writes that the `Unsafe`
 twin does not.
