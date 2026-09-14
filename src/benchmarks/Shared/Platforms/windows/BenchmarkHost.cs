@@ -7,7 +7,7 @@ using BenchmarkDotNet.Running;
 
 namespace ReactiveUI.Binding.Benchmarks.Configs;
 
-/// <summary>Runs the benchmarks on .NET with EventPipe, then on .NET Framework with ETW.</summary>
+/// <summary>Runs the benchmarks on .NET with EventPipe, on .NET Framework with ETW, and on NativeAOT with the memory diagnoser.</summary>
 public static class BenchmarkHost
 {
     /// <summary>Runs the benchmarks the command line selects.</summary>
@@ -18,5 +18,6 @@ public static class BenchmarkHost
         var switcher = BenchmarkSwitcher.FromAssembly(assembly);
         _ = switcher.Run(args, new BenchmarkConfig());
         _ = switcher.Run(args, new NetFrameworkConfig());
+        _ = switcher.Run(args, new NativeAotMemoryConfig());
     }
 }

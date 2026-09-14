@@ -27,6 +27,11 @@ public class ProfilerConfig : ManualConfig
     /// <summary>Initializes a new instance of the <see cref="ProfilerConfig"/> class.</summary>
     public ProfilerConfig()
     {
+        if (!BenchmarkProfiling.Enabled)
+        {
+            return;
+        }
+
         EventPipeProvider[] providers =
         [
             new(SampleProfilerProviderName, EventLevel.Informational),
