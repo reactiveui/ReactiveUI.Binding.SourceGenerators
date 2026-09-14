@@ -7,12 +7,16 @@ using BenchmarkDotNet.Running;
 
 namespace ReactiveUI.Binding.Benchmarks.Configs;
 
-/// <summary>Runs the benchmarks on .NET with EventPipe.</summary>
+/// <summary>Runs the benchmarks on .NET with EventPipe, and on NativeAOT with the memory diagnoser.</summary>
 public static class BenchmarkHost
 {
     /// <summary>Runs the benchmarks the command line selects.</summary>
     /// <param name="assembly">The assembly holding the benchmarks.</param>
     /// <param name="args">The command line arguments passed to the benchmark switcher.</param>
-    public static void Run(Assembly assembly, string[] args) =>
-        _ = BenchmarkSwitcher.FromAssembly(assembly).Run(args, new BenchmarkConfig());
+    public static void Run(Assembly assembly, string[] args)
+    {
+        var switcher = BenchmarkSwitcher.FromAssembly(assembly);
+        _ = switcher.Run(args, new BenchmarkConfig());
+        _ = switcher.Run(args, new NativeAotMemoryConfig());
+    }
 }
