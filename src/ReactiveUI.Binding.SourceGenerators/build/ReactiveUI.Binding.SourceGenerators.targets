@@ -62,14 +62,15 @@
 
     <!--
       Interception is refused outright for a namespace the project did not list, so the opt-in travels with
-      the generator that emits into it. Appended to whatever the project already listed, and written straight
-      into $(Features) because the friendly property was folded into it before this target runs.
+      the generator that emits into it. Appended to whatever the project already listed. The compiler task reads
+      the property when CoreCompile runs and merges it with the SDK's own namespaces; a second
+      InterceptorsNamespaces entry in $(Features) would replace that merged list instead.
     -->
     <PropertyGroup Condition="'$(_ReactiveUIBindingInterceptsCallSites)' == 'true' and '$(ReactiveUIBindingUseInterceptors)' == 'true'">
       <_ReactiveUIBindingInterceptorsNamespaces>$(InterceptorsNamespaces)</_ReactiveUIBindingInterceptorsNamespaces>
       <_ReactiveUIBindingInterceptorsNamespaces Condition="'$(_ReactiveUIBindingInterceptorsNamespaces)' != ''">$(_ReactiveUIBindingInterceptorsNamespaces);</_ReactiveUIBindingInterceptorsNamespaces>
       <_ReactiveUIBindingInterceptorsNamespaces>$(_ReactiveUIBindingInterceptorsNamespaces)$(_ReactiveUIBindingInterceptorNamespace)</_ReactiveUIBindingInterceptorsNamespaces>
-      <Features>$(Features);InterceptorsNamespaces=$(_ReactiveUIBindingInterceptorsNamespaces)</Features>
+      <InterceptorsNamespaces>$(_ReactiveUIBindingInterceptorsNamespaces)</InterceptorsNamespaces>
     </PropertyGroup>
 
     <!--
