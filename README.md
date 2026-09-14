@@ -242,17 +242,54 @@ scores higher. See [Which mechanism wins](#which-mechanism-wins).
 
 ## How a call site reaches its generated code
 
-A call site is a line where you call a method such as `WhenChanged`. Your compiler version decides how a call
-site reaches its generated code. You only need this section when something goes wrong.
+A call site is a line where you call a method such as `WhenChanged`. How a call site reaches its generated code
+depends on the C# compiler that builds your project.
 
-Roslyn 4.13 and newer intercept the call. The compiler replaces your call with a call to the generated method.
-This works from any file and any language version, including `<LangVersion>7.3</LangVersion>` on .NET Framework
-4.6.2.
+### Which compiler you have
 
-Roslyn 4.8 to 4.12 get a generated overload instead. That overload has to win C#'s normal method lookup.
-RXUIBIND009 tells you where it cannot.
+You do not choose the compiler directly. It comes with your build tools.
 
-Both routes run the same generated method. A binding behaves the same either way.
+- Building in Visual Studio, or with Visual Studio's `msbuild`, uses the compiler that ships with that Visual
+  Studio version.
+- Building with `dotnet build` uses the compiler that ships with that .NET SDK version.
+
+| Your build tools | How a call reaches the generated code |
+|------------------|---------------------------------------|
+| Visual Studio 2022 17.13 or later, Visual Studio 2026, or .NET SDK 9.0.200 or later | Interception |
+| Visual Studio 2022 17.8 to 17.12, or .NET SDK 8.0.100 to 9.0.1xx | A generated overload |
+| Anything older | Not supported. The build fails with RXUIBIND100. |
+
+Microsoft's [Roslyn version table](https://learn.microsoft.com/en-us/visualstudio/extensibility/roslyn-version-support)
+lists the compiler in each Visual Studio version.
+
+**Interception.** The compiler replaces your call with a call to the generated method. This works from any file
+and any C# language version.
+
+**A generated overload.** The generator adds an overload that has to win C#'s normal method lookup. RXUIBIND009
+tells you where it cannot.
+
+Both ways run the same generated method. A binding behaves the same either way.
+
+### .NET Framework projects
+
+A .NET Framework project gets the same features as a .NET project. It needs the SDK-style project format and new
+enough build tools. An SDK-style project file names the SDK on its first line and sets a target framework:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+</Project>
+```
+
+Build that project with Visual Studio 2022 17.13 or later, or with `dotnet build` on .NET SDK 9.0.200 or later.
+It then uses interception, even at the C# 7.3 language version .NET Framework projects default to.
+
+An old-style project file has no `Sdk` attribute and lists its source files one by one. It still works. It uses the
+compiler from the Visual Studio that builds it.
+
+### Build properties
 
 Two build properties change this.
 
