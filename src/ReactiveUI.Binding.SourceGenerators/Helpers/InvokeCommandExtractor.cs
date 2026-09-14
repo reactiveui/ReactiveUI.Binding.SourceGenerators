@@ -8,10 +8,7 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
-/// <summary>
-/// Extracts <see cref="InvokeCommandInvocationInfo"/> from <c>InvokeCommand</c> invocations. The values come
-/// from the receiver, so the only path extracted is the one reaching the command.
-/// </summary>
+/// <summary>Extracts <see cref="InvokeCommandInvocationInfo"/> from <c>InvokeCommand</c> invocations.</summary>
 internal static class InvokeCommandExtractor
 {
     /// <summary>The minimum number of arguments this overload carries (target, command property).</summary>
@@ -21,11 +18,6 @@ internal static class InvokeCommandExtractor
     /// <param name="context">The generator syntax context.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>An <see cref="InvokeCommandInvocationInfo"/> POCO, or null if the invocation is not analyzable.</returns>
-    /// <remarks>
-    /// The overload taking the command itself has nothing to resolve and nothing to observe, so it carries no
-    /// selector and is declined here: it falls short of the argument count, and its only argument is not a
-    /// lambda a path could be read from.
-    /// </remarks>
     internal static InvokeCommandInvocationInfo? ExtractInvokeCommandInvocation(
         GeneratorSyntaxContext context,
         CancellationToken ct)
@@ -45,6 +37,7 @@ internal static class InvokeCommandExtractor
             return null;
         }
 
+        // The overload taking the command itself has one argument and no selector to observe.
         var args = invocation.ArgumentList.Arguments;
         if (!ExtractorValidation.HasMinimumArguments(args.Count, MinimumInvokeCommandArgumentCount))
         {
@@ -70,19 +63,17 @@ internal static class InvokeCommandExtractor
             return null;
         }
 
-        // A path the compiler could not read is still a call this package answers - through the runtime engine
-        // rather than a generated observation - so it is carried on instead of dropped, marked for the emitter.
-        var reflectionOnly = commandPropertyPath is null || commandPropertyPath.Length == 0;
-        EquatableArray<PropertyPathSegment> path = reflectionOnly ? default : new(commandPropertyPath!);
-
-        return new(
-            invocation.SyntaxTree.FilePath,
-            invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
-            sourceValueType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            targetTypeName,
-            path,
-            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(commandArg.ToString()),
-            InterceptableLocationReader.Read(semanticModel, invocation, ct),
-            reflectionOnly);
+        // A selector the compiler cannot read names no path, so nothing is generated and the stub throws,
+        // naming the Unsafe overload that resolves it.
+        return commandPropertyPath is not { Length: > 0 }
+            ? null
+            : new(
+                invocation.SyntaxTree.FilePath,
+                invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                sourceValueType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                targetTypeName,
+                new(commandPropertyPath),
+                CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(commandArg.ToString()),
+                InterceptableLocationReader.Read(semanticModel, invocation, ct));
     }
 }

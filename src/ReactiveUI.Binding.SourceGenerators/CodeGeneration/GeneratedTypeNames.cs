@@ -4,15 +4,7 @@
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
-/// <summary>
-/// Fully-qualified type-name fragments and small builders emitted into generated source, centralized
-/// so emission strings stay short, consistent, and have a single source of truth. Each constant is the
-/// exact text written into the generated code (interpolating a member produces byte-identical output to
-/// spelling the type out inline). Generic-type constants omit the trailing <c>&lt;</c>; use the
-/// <c>…Of</c> helper methods to build the closed generic form.
-/// <para>Import with <c>using static</c> so call sites read as <c>{ObservableOf(t)}</c> rather than the
-/// long qualified form.</para>
-/// </summary>
+/// <summary>The fully qualified type names, and builders for their closed generic forms, written into generated source.</summary>
 internal static class GeneratedTypeNames
 {
     /// <summary><c>System.IObservable</c> (open generic; use <see cref="ObservableOf"/>).</summary>
@@ -21,11 +13,7 @@ internal static class GeneratedTypeNames
     /// <summary>The projection sink, which maps each value of a source sequence (open generic).</summary>
     internal const string MapSignal = "global::ReactiveUI.Primitives.Signals.MapSignal";
 
-    /// <summary>
-    /// The projecting flattening sink, which maps each value onto an inner sequence and follows only the most
-    /// recent one (open generic). Fuses the projection into the switch, so a chain stage costs one sink rather
-    /// than a map feeding a separate switch.
-    /// </summary>
+    /// <summary>The projecting switch sink, which maps each value onto an inner sequence and follows only the latest (open generic).</summary>
     internal const string SwitchMapSignal = "global::ReactiveUI.Primitives.Advanced.SwitchMapSignal";
 
     /// <summary>The interleaving sink, which relays every source sequence at once (open generic).</summary>
@@ -79,37 +67,19 @@ internal static class GeneratedTypeNames
     /// <summary>The <c>ReactiveUI.Binding.Observables</c> namespace prefix (no trailing dot).</summary>
     internal const string Observables = "global::ReactiveUI.Binding.Observables";
 
-    /// <summary>
-    /// The observation of a property with no mechanism behind it, opened with its type argument. Emits the
-    /// current value and then stays open, because a source that completes ends the subscription that reads
-    /// it - which for a binding means the binding stops, and for a chain stage means a live subtree is torn
-    /// down. Only whole observations use this; a missing parent inside a chain is a different question.
-    /// </summary>
+    /// <summary>Opens the observation of a property with no change mechanism, which emits the current value and never completes.</summary>
     internal const string OpenUnchangingProperty = "new global::ReactiveUI.Binding.Observables.UnchangingPropertyObservable<";
 
-    /// <summary>
-    /// The scheduler abstraction the generated scheduler-taking overloads declare. ReactiveUI.Binding
-    /// binds its shared source to this type; the System.Reactive leaf binds the same source to IScheduler.
-    /// </summary>
+    /// <summary>The scheduler type the generated scheduler-taking overloads declare.</summary>
     internal const string ISequencer = "global::ReactiveUI.Primitives.Concurrency.ISequencer";
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Primitives.LinqExtensions</c>.</summary>
-    /// <remarks>
-    /// Primitives owns this rather than the binding runtime because it does the job better: an immediate
-    /// sequencer is handed straight back as the source, so nothing is scheduled and nothing is allocated,
-    /// and a real scheduler queues notifications and schedules one drain per burst rather than one
-    /// scheduled action per notification. Called as a static method, so generated code needs no import.
-    /// </remarks>
     internal const string LinqExtensions = "global::ReactiveUI.Primitives.LinqExtensions";
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Primitives.SubscribeExtensions</c>.</summary>
     internal const string RxBindingExtensions = "global::ReactiveUI.Primitives.SubscribeExtensions";
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingHooks</c>.</summary>
-    /// <remarks>
-    /// Guarded by <c>Any</c> at every call site so the closures the veto needs are only built once a hook is
-    /// actually registered, which almost no application does.
-    /// </remarks>
     internal const string BindingHooks = "global::ReactiveUI.Binding.BindingHooks";
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.ObservedChange</c> (open generic).</summary>
@@ -127,29 +97,11 @@ internal static class GeneratedTypeNames
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.PropertyValues</c>, the multi-property emission.</summary>
     internal const string PropertyValues = "global::ReactiveUI.Binding.PropertyValues";
 
-    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingErrors</c>.</summary>
-    /// <remarks>
-    /// A binding's write subscribes through this rather than plainly, so a faulting source is recorded and a
-    /// setter that threw is rethrown instead of being lost on whichever thread raised the notification.
-    /// </remarks>
+    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingErrors</c>, which every binding write subscribes through.</summary>
     internal const string BindingErrors = "global::ReactiveUI.Binding.BindingErrors";
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.RuntimeBindingConverter</c>.</summary>
     internal const string RuntimeBindingConverter = "global::ReactiveUI.Binding.Fallback.RuntimeBindingConverter";
-
-    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.RuntimeCommandFallback</c>.</summary>
-    internal const string RuntimeCommandFallback = "global::ReactiveUI.Binding.Fallback.RuntimeCommandFallback";
-
-    /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.RuntimeBindingFallback</c>.</summary>
-    internal const string RuntimeBindingFallback = "global::ReactiveUI.Binding.Fallback.RuntimeBindingFallback";
-
-    /// <summary>
-    /// The attribute a generated member carries when it reaches the runtime expression engine, so a trimming or
-    /// ahead-of-time publish reports the call sites that reflect rather than the ones beside them that do not.
-    /// </summary>
-    internal const string RequiresUnreferencedCodeAttribute =
-        "[global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("
-        + "\"This call site names a property path the compiler could not read, so it is resolved by reflection.\")]";
 
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.Fallback.ObservationAffinityChecker</c>.</summary>
     internal const string ObservationAffinityChecker = "global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker";
@@ -160,10 +112,7 @@ internal static class GeneratedTypeNames
     /// <summary>The fully qualified name of <c>ReactiveUI.Binding.BindingSchedulers</c>.</summary>
     internal const string BindingSchedulers = "global::ReactiveUI.Binding.BindingSchedulers";
 
-    /// <summary>
-    /// The dispatch-failure message thrown by a generated overload when no compile-time binding matches the
-    /// call site. Centralized so every overload emits identical text.
-    /// </summary>
+    /// <summary>The message a generated overload throws when no binding matches the call site.</summary>
     internal const string NoBindingFoundMessage =
         "No generated binding found. Ensure the expression is an inline lambda for compile-time optimization.";
 
@@ -193,15 +142,11 @@ internal static class GeneratedTypeNames
     /// <param name="segmentTypeName">The fully-qualified type of the segment's property.</param>
     /// <param name="parentVariable">The variable holding the parent stage's observable.</param>
     /// <returns>The opening text of the stage construction.</returns>
-    /// <remarks>
-    /// The parent stage is typed as the segment's declaring type. <see cref="IObservable"/> is covariant, so a
-    /// parent observable of a more derived type still converts, and the projection lambda's parameter arrives
-    /// typed rather than inferred.
-    /// </remarks>
     internal static string OpenChainSwitchMap(
         Models.PropertyPathSegment segment,
         string segmentTypeName,
         string parentVariable) =>
+        // Typed as the declaring type: IObservable is covariant, so a parent of a more derived type still converts.
         $"new {SwitchMapSignal}<{segment.DeclaringTypeFullName}, {segmentTypeName}>({parentVariable},";
 
     /// <summary>Renders the read of a segment's property from an object that has to be cast to reach it.</summary>
@@ -209,11 +154,6 @@ internal static class GeneratedTypeNames
     /// <param name="castTypeName">The type the object is cast to before the read.</param>
     /// <param name="objectExpression">The expression producing the object.</param>
     /// <returns>The rendered read.</returns>
-    /// <remarks>
-    /// A segment may also have to narrow what it read. A view exposing its view model as a base or an
-    /// interface still holds the view model the call site named, and the stage below is typed as that view
-    /// model - observables being covariant, only the read itself can bridge the two.
-    /// </remarks>
     internal static string ReadProperty(
         Models.PropertyPathSegment segment,
         string castTypeName,
@@ -221,6 +161,7 @@ internal static class GeneratedTypeNames
     {
         var read = $"(({castTypeName}){objectExpression}).{segment.PropertyName}";
 
+        // A view exposing its view model as a base or an interface narrows the read to the view model the call site named.
         return segment.ReadCastTypeFullName is null
             ? read
             : $"(({segment.ReadCastTypeFullName})(object){read})";

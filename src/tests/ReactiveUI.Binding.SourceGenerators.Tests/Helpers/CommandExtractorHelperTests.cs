@@ -249,10 +249,7 @@ public class CommandExtractorHelperTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies that FindParameterLambda returns null when there are only 3 arguments
-    /// (loop starts at index 3, so never enters).
-    /// </summary>
+    /// <summary>Verifies that FindParameterLambda returns null when there are only 3 arguments.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task FindParameterLambda_ThreeArgsOnly_ReturnsNull()
@@ -695,6 +692,6 @@ public class CommandExtractorHelperTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First();
 
-        return (Microsoft.CodeAnalysis.INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
+        return model.GetDeclaredSymbol(classDecl)!;
     }
 }

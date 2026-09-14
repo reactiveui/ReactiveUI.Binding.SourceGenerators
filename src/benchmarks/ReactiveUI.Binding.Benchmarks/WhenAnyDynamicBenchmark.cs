@@ -14,16 +14,7 @@ using ReactiveUI.Binding.Builder;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
-/// <summary>
-/// Reflection-walked observation benchmarks, and what the generated observation of the same chain costs.
-/// The pair is the choice a caller actually makes: a chain named by an expression built at run time cannot
-/// be resolved at compile time, and this says what that buys and what it costs.
-/// </summary>
-/// <remarks>
-/// No NativeAOT job: these overloads walk members by reflection and say so with
-/// <c>RequiresUnreferencedCode</c>, so an ahead-of-time published run is not a
-/// configuration they support.
-/// </remarks>
+/// <summary>Benchmarks reflection-walked observation against the generated observation of the same chain.</summary>
 #if BENCH_NETFX
 [SimpleJob(RuntimeMoniker.Net462)]
 #endif
@@ -57,7 +48,7 @@ public class WhenAnyDynamicBenchmark
 
     /// <summary>Registers the observation plugins the reflection walk resolves each link through.</summary>
     [GlobalSetup]
-    public void Register()
+    public static void Register()
     {
         var builder = RxBindingBuilder.CreateReactiveUIBindingBuilder();
         _ = builder.WithCoreServices();

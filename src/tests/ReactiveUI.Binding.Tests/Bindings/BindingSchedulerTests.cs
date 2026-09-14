@@ -8,11 +8,6 @@ using ReactiveUI.Binding.Tests.TestModels;
 namespace ReactiveUI.Binding.Tests.Bindings;
 
 /// <summary>Covers which thread a binding delivers its write on.</summary>
-/// <remarks>
-/// A view may only be touched from the thread that owns it, and which thread that is belongs to the object
-/// rather than the process. These tests run serially because the resolved set and the fallback are both
-/// process-wide state.
-/// </remarks>
 [NotInParallel]
 public class BindingSchedulerTests
 {
@@ -45,10 +40,7 @@ public class BindingSchedulerTests
         }
     }
 
-    /// <summary>
-    /// Two targets owned by different threads are written on their own. This is the case a process-wide
-    /// thread gets wrong, and the reason the target is asked rather than the process.
-    /// </summary>
+    /// <summary>Two targets owned by different threads are each written on their own.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ObserveOnViewThread_WithTwoTargetsOnDifferentThreads_PostsEachToItsOwn()
@@ -78,10 +70,42 @@ public class BindingSchedulerTests
         }
     }
 
-    /// <summary>A target no resolver claims falls back to the blanket thread a host established.</summary>
+    /// <summary>A main thread the host sets takes the write even when a resolver claims the target.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task ObserveOnViewThread_WhenNoResolverClaimsTheTarget_FallsBackToTheBlanketThread()
+    public async Task ObserveOnViewThread_WhenTheHostSetsAMainThread_DeliversThroughItAheadOfAnyResolver()
+    {
+        var hostContext = new RecordingSynchronizationContext();
+        var resolverContext = new RecordingSynchronizationContext();
+        var target = new object();
+
+        using (RegisterResolver(new StubViewThreadResolver(target, resolverContext)))
+        {
+            try
+            {
+                BindingSchedulers.UseSynchronizationContext(hostContext);
+
+                var source = new ManualObservable<string>();
+
+                using var subscription = BindingSchedulers.ObserveOnViewThread(source, target)
+                    .Subscribe(new CapturingObserver(static _ => { }));
+
+                source.Observer?.OnNext(Written);
+
+                await Assert.That(hostContext.PostCount).IsGreaterThan(0);
+                await Assert.That(resolverContext.PostCount).IsEqualTo(0);
+            }
+            finally
+            {
+                BindingSchedulers.UseSynchronizationContext(null);
+            }
+        }
+    }
+
+    /// <summary>A target no resolver claims is delivered through the main thread a host set.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObserveOnViewThread_WhenNoResolverClaimsTheTarget_DeliversThroughTheHostsMainThread()
     {
         var context = new RecordingSynchronizationContext();
 

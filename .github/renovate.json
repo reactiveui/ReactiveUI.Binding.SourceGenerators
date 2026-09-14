@@ -22,10 +22,7 @@
             ],
             "groupName": "analyzers",
             "matchPackageNames": [
-                "/^Roslynator\\./",
-                "/^SonarAnalyzer\\./",
-                "/^stylecop\\.analyzers$/i",
-                "/^Blazor\\.Common\\.Analyzers$/"
+                "/^(Style|Performance|Security|PublicApi)Sharp\\.Analyzers$/"
             ]
         },
         {
@@ -37,17 +34,6 @@
             "matchPackageNames": [
                 "/^MinVer$/",
                 "/^Microsoft\\.SourceLink\\./"
-            ]
-        },
-        {
-            "description": "Verify.TUnit is built against a specific TUnit version. The shared preset groups TUnit separately from Verify.*, which can split a matched pair across two PRs and red the build; keep them together here.",
-            "matchManagers": [
-                "nuget"
-            ],
-            "groupName": "TUnit",
-            "matchPackageNames": [
-                "/^TUnit(\\.|$)/",
-                "/^Verify\\./"
             ]
         },
         {

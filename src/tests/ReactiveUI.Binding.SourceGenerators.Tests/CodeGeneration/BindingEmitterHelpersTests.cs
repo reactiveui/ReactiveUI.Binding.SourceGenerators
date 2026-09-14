@@ -15,9 +15,6 @@ public class BindingEmitterHelpersTests
     /// <summary>The fully qualified name of a source property type.</summary>
     private const string IntTypeName = "global::System.Int32";
 
-    /// <summary>The fully qualified name of a target property type.</summary>
-    private const string StringTypeName = "global::System.String";
-
     /// <summary>The fully qualified name of the view model a call site binds from.</summary>
     private const string ViewModelTypeName = "global::TestApp.MyViewModel";
 
@@ -41,10 +38,7 @@ public class BindingEmitterHelpersTests
         await Assert.That(observation.Path[0].ReadCastTypeFullName).IsNull();
     }
 
-    /// <summary>
-    /// A view exposing its view model as a base is still holding the view model the call site named, so the
-    /// binding follows that property and the read narrows to the named type.
-    /// </summary>
+    /// <summary>A view exposing its view model as a base type is observed through that property, narrowed to the named type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveViewModelObservation_ViewModelTypedAsABase_ObservesTheViewAndNarrowsTheRead()
@@ -55,10 +49,7 @@ public class BindingEmitterHelpersTests
         await Assert.That(observation.Path[0].ReadCastTypeFullName).IsEqualTo(ViewModelTypeName);
     }
 
-    /// <summary>
-    /// The weakly typed declaration the non-generic view interface requires names no view model, so it is not
-    /// followed - the call site handed the view model over directly, and the view may never have been given one.
-    /// </summary>
+    /// <summary>The weakly typed view model the non-generic view interface declares is not followed.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ResolveViewModelObservation_ViewModelTypedAsObject_ObservesTheViewModelItWasHanded()
@@ -114,10 +105,7 @@ public class BindingEmitterHelpersTests
         await Assert.That(BindingEmitterHelpers.RequiresRegistryConversion(invocation)).IsTrue();
     }
 
-    /// <summary>
-    /// A binding API that takes neither a converter nor a scheduler describes itself by leaving those members
-    /// unset, so the descriptor's own defaults have to emit nothing rather than require every API to say so.
-    /// </summary>
+    /// <summary>A descriptor that sets neither a converter nor a scheduler emits nothing for them.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindingDispatchApi_WithNoConversionOrSchedulerDeclared_EmitsNothingExtra()

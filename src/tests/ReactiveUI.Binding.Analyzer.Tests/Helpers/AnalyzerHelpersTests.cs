@@ -105,10 +105,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that IsBindingExtensionMethod returns false for a method whose containing type
-    /// is not the generated extension class.
-    /// </summary>
+    /// <summary>Verifies that IsBindingExtensionMethod returns false for a method outside the generated extension class.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsBindingExtensionMethod_UnrelatedMethod_ReturnsFalse()
@@ -256,7 +253,7 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First();
 
-        var classSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
+        var classSymbol = model.GetDeclaredSymbol(classDecl)!;
         var inpc = compilation.GetTypeByMetadataName("System.ComponentModel.INotifyPropertyChanged")!;
 
         var result = AnalyzerHelpers.ImplementsInterface(classSymbol, inpc);
@@ -289,7 +286,7 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First();
 
-        var classSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
+        var classSymbol = model.GetDeclaredSymbol(classDecl)!;
         var inpc = compilation.GetTypeByMetadataName("System.ComponentModel.INotifyPropertyChanged")!;
 
         var result = AnalyzerHelpers.ImplementsInterface(classSymbol, inpc);
@@ -319,8 +316,8 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .ToArray();
 
-        var baseSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecls[0])!;
-        var unrelatedSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecls[1])!;
+        var baseSymbol = model.GetDeclaredSymbol(classDecls[0])!;
+        var unrelatedSymbol = model.GetDeclaredSymbol(classDecls[1])!;
 
         var result = AnalyzerHelpers.InheritsFrom(unrelatedSymbol, baseSymbol);
 
@@ -349,8 +346,8 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .ToArray();
 
-        var baseSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecls[0])!;
-        var derivedSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecls[1])!;
+        var baseSymbol = model.GetDeclaredSymbol(classDecls[0])!;
+        var derivedSymbol = model.GetDeclaredSymbol(classDecls[1])!;
 
         var result = AnalyzerHelpers.InheritsFrom(derivedSymbol, baseSymbol);
 
@@ -400,10 +397,7 @@ public class AnalyzerHelpersTests
         await Assert.That(sourceType).IsNotNull();
     }
 
-    /// <summary>
-    /// Verifies that LacksObservableMechanism returns true for a generic method
-    /// whose first type argument has no observable mechanism.
-    /// </summary>
+    /// <summary>Verifies that LacksObservableMechanism returns true when the first type argument has no observable mechanism.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task LacksObservableMechanism_GenericWithPlainClass_ReturnsTrue()
@@ -448,10 +442,7 @@ public class AnalyzerHelpersTests
         await Assert.That(mechanism).IsEqualTo(string.Empty);
     }
 
-    /// <summary>
-    /// Verifies that LacksBeforeChangeSupport returns true for a generic method
-    /// whose first type argument implements only INPC (no INotifyPropertyChanging).
-    /// </summary>
+    /// <summary>Verifies that LacksBeforeChangeSupport returns true when the first type argument implements only INPC.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task LacksBeforeChangeSupport_GenericINPCOnly_ReturnsTrue()
@@ -500,10 +491,7 @@ public class AnalyzerHelpersTests
         await Assert.That(sourceType).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that ImplementsDataErrorInfo returns true for a generic method
-    /// whose first type argument implements INotifyDataErrorInfo.
-    /// </summary>
+    /// <summary>Verifies that ImplementsDataErrorInfo returns true when the first type argument implements INotifyDataErrorInfo.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ImplementsDataErrorInfo_GenericWithDataErrorInfo_ReturnsTrue()
@@ -537,10 +525,7 @@ public class AnalyzerHelpersTests
         await Assert.That(sourceType!.Name).IsEqualTo("MyVm");
     }
 
-    /// <summary>
-    /// Verifies that ImplementsDataErrorInfo returns false for a generic method
-    /// whose first type argument does not implement INotifyDataErrorInfo.
-    /// </summary>
+    /// <summary>Verifies that ImplementsDataErrorInfo returns false when the first type argument does not implement INotifyDataErrorInfo.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ImplementsDataErrorInfo_GenericWithoutDataErrorInfo_ReturnsFalse()
@@ -570,10 +555,7 @@ public class AnalyzerHelpersTests
         await Assert.That(sourceType!.Name).IsEqualTo("MyVm");
     }
 
-    /// <summary>
-    /// Verifies that ImplementsDataErrorInfo returns false when the compilation
-    /// does not contain the INotifyDataErrorInfo type.
-    /// </summary>
+    /// <summary>Verifies that ImplementsDataErrorInfo returns false when the compilation has no INotifyDataErrorInfo type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ImplementsDataErrorInfo_TypeNotInCompilation_ReturnsFalse()
@@ -626,10 +608,7 @@ public class AnalyzerHelpersTests
         await Assert.That(result).IsTrue();
     }
 
-    /// <summary>
-    /// Verifies that HasObservableMechanism handles the case where IReactiveObject
-    /// is not in the compilation (iro == null short-circuit).
-    /// </summary>
+    /// <summary>Verifies that HasObservableMechanism handles a compilation with no IReactiveObject type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasObservableMechanism_IReactiveObjectNotInCompilation_ReturnsFalseForInterfacedType()
@@ -661,7 +640,7 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First(static c => c.Identifier.Text == "MyVm");
 
-        var typeSymbol = (INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
+        var typeSymbol = model.GetDeclaredSymbol(classDecl)!;
 
         var result = AnalyzerHelpers.HasObservableMechanism(typeSymbol, compilation);
 
@@ -682,7 +661,7 @@ public class AnalyzerHelpersTests
             .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
             .First(c => c.Identifier.Text == className);
 
-        return (INamedTypeSymbol)model.GetDeclaredSymbol(classDecl)!;
+        return model.GetDeclaredSymbol(classDecl)!;
     }
 
     /// <summary>Creates a compilation from the specified source code.</summary>
@@ -735,10 +714,7 @@ public class AnalyzerHelpersTests
         return new((IMethodSymbol)model.GetSymbolInfo(invocation).Symbol!, compilation);
     }
 
-    /// <summary>
-    /// Gets the resolved method symbol from the first invocation using a minimal compilation
-    /// that only includes core references (no INotifyDataErrorInfo).
-    /// </summary>
+    /// <summary>Gets the resolved method symbol from the first invocation in a compilation with only core references.</summary>
     /// <param name="source">The source code containing an invocation.</param>
     /// <returns>The method symbol and compilation.</returns>
     private static MethodSymbolContext GetInvocationMethodSymbolMinimal(string source)

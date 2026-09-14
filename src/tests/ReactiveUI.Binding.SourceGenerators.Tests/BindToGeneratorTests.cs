@@ -13,12 +13,6 @@ public class BindToGeneratorTests
     /// <summary>The <c>BindToDispatch.g.cs</c> name these tests generate against.</summary>
     private const string BindToDispatchgcsName = "BindToDispatch.g.cs";
 
-    /// <summary>The attribute a generated member carries when only the runtime engine can serve it.</summary>
-    private const string RequiresUnreferencedCode = "RequiresUnreferencedCode";
-
-    /// <summary>The runtime engine a call site the compiler could not read is handed to.</summary>
-    private const string RuntimeBindingFallback = "RuntimeBindingFallback.BindTo";
-
     /// <summary>Verifies BindTo with a same-typed string observable and string property (direct assignment).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -67,11 +61,7 @@ public class BindToGeneratorTests
         await result.HasNoGeneratorDiagnostics();
     }
 
-    /// <summary>
-    /// Verifies that BindTo generates CallerFilePath dispatch when targeting pre-C# 10.
-    /// CompilationSucceeds is omitted because the CallerFilePath stub signature is ambiguous
-    /// with the runtime extension method in this test harness (both assemblies are referenced).
-    /// </summary>
+    /// <summary>Verifies that BindTo generates file-and-line dispatch below C# 10.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task SameTypeString_CallerFilePath()
@@ -81,6 +71,8 @@ public class BindToGeneratorTests
             source,
             typeof(BindToGeneratorTests),
             TestHelper.FallbackLanguageVersion(nullableEnabled: true));
+
+        // No CompilationSucceeds: the harness references both the stub and the runtime method, which are ambiguous here.
         await result.HasNoGeneratorDiagnostics();
     }
 
@@ -151,10 +143,7 @@ public class BindToGeneratorTests
         await result.DoesNotHaveGeneratedSource(BindToDispatchgcsName);
     }
 
-    /// <summary>
-    /// A BindTo declared on a class sharing the stub's name but taking too few arguments is skipped
-    /// rather than read past the end of its argument list.
-    /// </summary>
+    /// <summary>A BindTo on a class sharing the stub's name but taking too few arguments is skipped.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindTo_TooFewArguments_GeneratesNoDispatch()
@@ -183,10 +172,7 @@ public class BindToGeneratorTests
         await result.DoesNotHaveGeneratedSource(BindToDispatchgcsName);
     }
 
-    /// <summary>
-    /// A BindTo whose receiver is a type name rather than a value has no receiver type at all, and is
-    /// skipped rather than dereferenced.
-    /// </summary>
+    /// <summary>A BindTo whose receiver is a type name rather than a value is skipped.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindTo_ReceiverWithoutAType_GeneratesNoDispatch()
@@ -257,10 +243,7 @@ public class BindToGeneratorTests
         await result.DoesNotHaveGeneratedSource(BindToDispatchgcsName);
     }
 
-    /// <summary>
-    /// A receiver that reaches IObservable through an implemented interface rather than being one is
-    /// still observed, and binds against that interface's value type.
-    /// </summary>
+    /// <summary>A receiver implementing IObservable through an interface binds against that interface's value type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task BindTo_ObservableThroughAnInterface_GeneratesDispatch()
@@ -298,10 +281,10 @@ public class BindToGeneratorTests
         await result.HasGeneratedSource(BindToDispatchgcsName);
     }
 
-    /// <summary>A target selector held in a variable names no path to read, so the runtime engine serves it.</summary>
+    /// <summary>A target selector held in a variable names no path to read, so the call is left to the stub, which throws.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task TargetPropertyFromAVariable_GeneratesAnAnnotatedRuntimeDispatch()
+    public async Task TargetPropertyFromAVariable_GeneratesNoDispatch()
     {
         const string source = """
                               using System;
@@ -332,16 +315,13 @@ public class BindToGeneratorTests
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.HasNoGeneratorDiagnostics();
-
-        var dispatch = result.GeneratedSources[BindToDispatchgcsName];
-        await Assert.That(dispatch).Contains(RequiresUnreferencedCode);
-        await Assert.That(dispatch).Contains(RuntimeBindingFallback);
+        await result.DoesNotHaveGeneratedSource(BindToDispatchgcsName);
     }
 
-    /// <summary>A target selector whose body is no property path is served by the runtime engine, and says so.</summary>
+    /// <summary>A target selector whose body is no property path is left to the stub, which throws.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task TargetPropertyWithoutAPropertyPath_GeneratesAnAnnotatedRuntimeDispatch()
+    public async Task TargetPropertyWithoutAPropertyPath_GeneratesNoDispatch()
     {
         const string source = """
                               using System;
@@ -372,10 +352,7 @@ public class BindToGeneratorTests
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.HasNoGeneratorDiagnostics();
-
-        var dispatch = result.GeneratedSources[BindToDispatchgcsName];
-        await Assert.That(dispatch).Contains(RequiresUnreferencedCode);
-        await Assert.That(dispatch).Contains(RuntimeBindingFallback);
+        await result.DoesNotHaveGeneratedSource(BindToDispatchgcsName);
     }
 
     /// <summary>A target selector producing a type no member can declare leaves the call to the stub.</summary>

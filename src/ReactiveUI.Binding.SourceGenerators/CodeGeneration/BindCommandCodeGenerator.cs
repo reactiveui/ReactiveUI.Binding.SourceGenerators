@@ -175,7 +175,7 @@ internal static class BindCommandCodeGenerator
     /// <param name="viewModelClassInfo">The view model type class binding info.</param>
     /// <param name="viewClassInfo">The view type class binding info, which says whether it exposes a view model.</param>
     /// <param name="suffix">The stable method name suffix.</param>
-    /// <param name="supportsNullable">There can be a null type.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void GenerateBindCommandMethod(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
@@ -187,9 +187,7 @@ internal static class BindCommandCodeGenerator
         var cmdPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.CommandPropertyPath);
         var ctrlPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.ControlPropertyPath);
 
-        // Only the observable-parameter worker actually consumes 'withParameter' (see
-        // BuildParameterObservableExpression). The expression-parameter case reads the value via the
-        // compile-time-extracted ParameterPropertyPath, so the worker takes no extra parameter there.
+        // Only a caller-supplied stream is passed in; a parameter named as a property is observed inside the worker.
         var extraParams = inv.HasObservableParameter
             ? $", global::System.IObservable<{inv.ParameterTypeFullName}> withParameter"
             : string.Empty;
@@ -202,18 +200,14 @@ internal static class BindCommandCodeGenerator
             .AppendLine("                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;").AppendLine(GeneratedSyntax.StatementBlockClose)
             .AppendLine();
 
-        // Get the control access chain
         var controlAccess = CodeGeneratorHelpers.BuildPropertyAccessChain("view", inv.ControlPropertyPath);
 
         EmitViewModelObservations(sb, inv, viewModelClassInfo, viewClassInfo);
 
-        // Try plugins in affinity order (highest first) via registry
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
         var generatedAffinity = plugin is not null ? plugin.Affinity : -1;
         var hasEvent = inv.ResolvedEventName is not null;
 
-        // Emit affinity check: let user-registered ICreatesCommandBinding plugins override
-        // if they have higher affinity than the source-generated binding
         EmitCommandAffinityCheck(sb, inv, controlAccess, generatedAffinity, hasEvent);
 
         if (plugin is not null)
@@ -233,12 +227,7 @@ internal static class BindCommandCodeGenerator
         _ = sb.AppendLine();
     }
 
-    /// <summary>
-    /// Emits the command binding affinity check that allows user-registered
-    /// <c>ICreatesCommandBinding</c> implementations to override the generated binding
-    /// when they have higher affinity. If no user plugin has higher affinity, falls through
-    /// to the generated event subscription code.
-    /// </summary>
+    /// <summary>Emits the check that hands the binding to a registered <c>ICreatesCommandBinding</c> with a higher affinity.</summary>
     /// <param name="sb">The string builder.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="controlAccess">The control access chain (e.g., "view.MyButton").</param>
@@ -251,7 +240,6 @@ internal static class BindCommandCodeGenerator
         int generatedAffinity,
         bool hasEvent)
     {
-        // Build the parameter observable expression for the custom binder
         var paramObsExpr = BuildParameterObservableExpression(inv);
 
         _ = sb.AppendLine().AppendLine("            if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker")
@@ -276,30 +264,16 @@ internal static class BindCommandCodeGenerator
     /// <summary>Builds the parameter observable expression string for custom binder fallback code.</summary>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <returns>The parameter observable expression to embed in generated code.</returns>
-    /// <remarks>
-    /// Both parameter forms reach the binder as a stream: <c>withParameter</c> is either the caller's own
-    /// observable or the observation of the named property, so a registered binder sees each value the
-    /// parameter takes rather than the one it happened to hold when the command arrived.
-    /// </remarks>
     internal static string BuildParameterObservableExpression(BindCommandInvocationInfo inv) =>
         inv.HasObservableParameter || inv is { HasExpressionParameter: true, ParameterPropertyPath: not null }
             ? $"new global::ReactiveUI.Primitives.Signals.MapSignal<{inv.ParameterTypeFullName}, object>(withParameter, __p => __p)"
             : "global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<object>.Instance";
 
-    /// <summary>Emits the observations of the command, and of a parameter named as a property.</summary>
+    /// <summary>Emits the observations of the command, and of a parameter named as a property, through the view's current view model.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The BindCommand invocation info.</param>
     /// <param name="viewModelClassInfo">The view model type class binding info.</param>
     /// <param name="viewClassInfo">The view type class binding info, which says whether it exposes a view model.</param>
-    /// <remarks>
-    /// Both are observed through whichever view model the view currently holds, so replacing it rebinds the
-    /// command and keeps the parameter flowing from the view model now on display.
-    /// <para>
-    /// A parameter named as a property is observed rather than read once. The control has to see each value the
-    /// property takes, the same as it would from a caller-supplied stream; reading it when the command arrives
-    /// leaves the control holding whatever it happened to be at that moment.
-    /// </para>
-    /// </remarks>
     private static void EmitViewModelObservations(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
@@ -319,13 +293,18 @@ internal static class BindCommandCodeGenerator
             commandObservation.Path,
             inv.CommandTypeFullName,
             commandObservation.RootClassInfo,
-            "commandObs");
+            "__commandChanges");
+
+        // Each rebind touches the control, so the command arrives on the view's thread.
+        _ = sb.Append("            var commandObs = ").Append(GeneratedTypeNames.BindingSchedulers)
+            .AppendLine(".ObserveOnViewThread(__commandChanges, view);");
 
         if (inv is not { HasObservableParameter: false, HasExpressionParameter: true, ParameterPropertyPath: not null })
         {
             return;
         }
 
+        // Observed rather than read once, so the control sees every value the parameter takes.
         var parameterObservation = BindingEmitterHelpers.ResolveViewModelObservation(
             inv.ViewModelTypeFullName,
             inv.ViewTypeFullName,
@@ -346,13 +325,6 @@ internal static class BindCommandCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindCommand type group.</param>
     /// <param name="dispatchSummaryLine">The documentation line naming what the overload matches a call site on.</param>
-    /// <remarks>
-    /// The command selector is nullable - a command property may be null - matching the runtime stub's
-    /// <c>Expression&lt;Func&lt;TViewModel, TProp?&gt;&gt;</c>. The control selector stays non-nullable to match
-    /// the stub's <c>Expression&lt;Func&lt;TView, TControl&gt;&gt;</c>, so overload resolution selects the
-    /// generated overload rather than falling through to the runtime fallback. The expression-form parameter
-    /// selector is nullable for a reference-type parameter, for the same reason: the lambda may return null.
-    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void AppendOverloadSummary(
         StringBuilder sb,
@@ -362,17 +334,12 @@ internal static class BindCommandCodeGenerator
             .AppendLine(".").AppendLine(dispatchSummaryLine).AppendLine("        /// </summary>")
             .AppendLine("        public static global::System.IDisposable BindCommand(");
 
-    /// <summary>Writes the parameters a BindCommand member declares, closing the list.</summary>
+    /// <summary>Writes the stub's parameter list, which the overload and the interceptor both have to match exactly.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindCommand type group whose types the parameters are written from.</param>
     /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters.</param>
-    /// <remarks>
-    /// One list serves the overload and the interceptor, because both have to be the stub's signature: the
-    /// overload only wins resolution against a candidate it is otherwise indistinguishable from, and an
-    /// interceptor is refused outright unless its signature is the intercepted method's.
-    /// </remarks>
     private static void AppendParameterList(
         StringBuilder sb,
         BindCommandTypeGroup group,
@@ -380,6 +347,7 @@ internal static class BindCommandCodeGenerator
         bool supportsNullable,
         bool stubHasExpressionParameters)
     {
+        // The command and parameter selectors are nullable and the control selector is not, as the stub declares them.
         var commandType = CodeGeneratorHelpers.NullableSelectorLeafType(group.Invocations[0].CommandPropertyPath, supportsNullable);
 
         _ = sb.Append("            this ").Append(group.ViewTypeFullName)

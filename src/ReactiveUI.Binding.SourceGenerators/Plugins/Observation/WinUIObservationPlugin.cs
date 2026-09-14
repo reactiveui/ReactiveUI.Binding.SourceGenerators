@@ -9,50 +9,36 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
-/// <summary>
-/// Observation plugin for WinUI <c>DependencyObject</c> types.
-/// Affinity: 6 (matches ReactiveUI's WinUI DependencyObjectObservableForProperty).
-/// Does NOT support before-change notifications.
-/// Generates inline <c>__WinUIDPObservable</c> using <c>RegisterPropertyChangedCallback</c> /
-/// <c>UnregisterPropertyChangedCallback</c> — direct static field access, no reflection.
-/// </summary>
-/// <remarks>
-/// WinUI uses token-based callback registration instead of <c>EventHandler</c>,
-/// so this plugin generates an inline observable class rather than using <c>EventObservable</c>.
-/// The inline class is emitted once per generated output file.
-/// </remarks>
-internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin, IObservationPlugin
+/// <summary>Observes WinUI dependency properties through <c>RegisterPropertyChangedCallback</c>.</summary>
+internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin
 {
     /// <summary>Completes the name of the dependency property field a plain property is registered under.</summary>
     private const string DependencyPropertyFieldSuffix = "Property,";
 
-    /// <summary>
-    /// The affinity score for the WinUI DependencyObject observation plugin
-    /// (matches ReactiveUI's WinUI DependencyObjectObservableForProperty).
-    /// </summary>
+    /// <summary>The affinity this plugin bids with.</summary>
     private static readonly int WinUIAffinity = BindingAffinity.WinUiDependencyObject;
 
     /// <inheritdoc/>
     public override int Affinity => WinUIAffinity;
 
     /// <inheritdoc/>
-    public string ObservationKind => "WinUIDP";
+    public override string ObservationKind => "WinUIDP";
 
     /// <inheritdoc/>
-    public bool RequiresHelperClasses => true;
+    public override bool RequiresHelperClasses => true;
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsAMatch(ClassBindingInfo classInfo) =>
+    public override bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.InheritsWinUIDependencyObject;
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
+    public override bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
         ObservedProperties.IsDependencyProperty(classInfo, propertyName);
 
     /// <inheritdoc/>
-    public void EmitHelperClasses(StringBuilder sb)
+    public override void EmitHelperClasses(StringBuilder sb)
     {
         EmitObservableHeader(sb);
         EmitSubscriptionClass(sb);
@@ -60,7 +46,7 @@ internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin, IOb
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void EmitInlineObservationVariable(
+    public override void EmitInlineObservationVariable(
         StringBuilder sb,
         string rootVar,
         PropertyPathSegment segment,
@@ -154,10 +140,7 @@ internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin, IOb
                               }
                       """);
 
-    /// <summary>
-    /// Emits the <c>Subscribe</c> method and the nested <c>Subscription</c> class
-    /// for the <c>__WinUIDPObservable&lt;T&gt;</c> observable, closing the outer class.
-    /// </summary>
+    /// <summary>Emits the observable's <c>Subscribe</c> method and subscription class, closing the observable.</summary>
     /// <param name="sb">The string builder.</param>
     private static void EmitSubscriptionClass(StringBuilder sb)
     {

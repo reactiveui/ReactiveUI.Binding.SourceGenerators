@@ -51,7 +51,7 @@ public sealed class GeneratorTestResult
         GeneratedSources = generatedSources;
     }
 
-    /// <summary>Gets the generator driver after execution (for Verify snapshot testing).</summary>
+    /// <summary>Gets the generator driver after execution, for snapshot comparison.</summary>
     public GeneratorDriver Driver { get; }
 
     /// <summary>Gets the compilation after generator execution.</summary>

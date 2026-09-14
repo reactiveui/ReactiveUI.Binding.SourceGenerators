@@ -9,10 +9,7 @@ using System.Diagnostics;
 
 namespace System.Diagnostics.CodeAnalysis;
 
-/// <summary>
-/// Indicates that the specified method requires dynamic access to code that is not referenced
-/// statically, for example through <see cref="System.Reflection"/>.
-/// </summary>
+/// <summary>Indicates that the method requires access to code that is not statically referenced.</summary>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
 [AttributeUsage(
@@ -28,12 +25,9 @@ internal sealed class RequiresUnreferencedCodeAttribute : Attribute
         Message = message;
 
     /// <summary>Gets a message that contains information about the usage of unreferenced code.</summary>
-    internal string Message { get; }
+    public string Message { get; }
 
-    /// <summary>
-    /// Gets or sets an optional URL that contains more information about the method,
-    /// why it requires unreferenced code, and what options a consumer has to deal with it.
-    /// </summary>
+    /// <summary>Gets or sets an optional URL with more information about the requirement.</summary>
     internal string? Url { get; set; }
 }
 

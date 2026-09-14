@@ -16,18 +16,12 @@ namespace System.Diagnostics.CodeAnalysis;
 internal sealed class DoesNotReturnIfAttribute : Attribute
 {
     /// <summary>Initializes a new instance of the <see cref="DoesNotReturnIfAttribute"/> class with the specified parameter value.</summary>
-    /// <param name="parameterValue">
-    /// The condition parameter value. Code after the method is considered unreachable
-    /// by diagnostics if the argument to the associated parameter matches this value.
-    /// </param>
+    /// <param name="parameterValue">The argument value for which the method does not return.</param>
     public DoesNotReturnIfAttribute(bool parameterValue) =>
         ParameterValue = parameterValue;
 
-    /// <summary>
-    /// Gets a value indicating whether code after the method is considered unreachable
-    /// by diagnostics if the argument to the associated parameter matches this value.
-    /// </summary>
-    internal bool ParameterValue { get; }
+    /// <summary>Gets the argument value for which the method does not return.</summary>
+    public bool ParameterValue { get; }
 }
 #else
 [assembly: TypeForwardedTo(typeof(DoesNotReturnIfAttribute))]

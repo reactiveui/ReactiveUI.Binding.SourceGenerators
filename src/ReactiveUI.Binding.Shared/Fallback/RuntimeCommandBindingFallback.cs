@@ -13,12 +13,6 @@ namespace ReactiveUI.Binding.Fallback;
 #endif
 
 /// <summary>Binds a command to a control through the runtime expression engine.</summary>
-/// <remarks>
-/// Reached where the generator could not serve the call site - a view or view model it cannot name, or a selector
-/// that is not an inline lambda. Which control mechanism carries the execution is the generated path's decision
-/// too: both ask <c>CommandBinderService</c> for the binder with the highest affinity for the control, and
-/// only how the command and the control are found differs.
-/// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class RuntimeCommandBindingFallback
 {
@@ -36,11 +30,6 @@ public static class RuntimeCommandBindingFallback
     /// <param name="bindingExpression">The bound expression, named when the observation faults.</param>
     /// <returns>A disposable that, when disposed, unbinds the command and stops observing.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="commandProperty"/> or <paramref name="controlProperty"/> is null.</exception>
-    /// <remarks>
-    /// Both sides are followed, so replacing either the command or the control rebinds and drops the binding it
-    /// held before. A null view model holds no command property to observe, so nothing is bound rather than the
-    /// call faulting - which is the ordinary state before a view model is assigned.
-    /// </remarks>
     [RequiresUnreferencedCode("Runtime command binding resolves the property chain by reflection.")]
     public static IDisposable BindCommand<
         TView,
@@ -66,6 +55,7 @@ public static class RuntimeCommandBindingFallback
         ArgumentExceptionHelper.ThrowIfNull(commandProperty);
         ArgumentExceptionHelper.ThrowIfNull(controlProperty);
 
+        // No view model is the ordinary state before one is assigned, so nothing is bound.
         if (viewModel is null)
         {
             return EmptyDisposable.Instance;
@@ -75,8 +65,11 @@ public static class RuntimeCommandBindingFallback
         var commands = RuntimeObservationFallback.WhenAnyValue(viewModel, commandProperty);
         var controls = RuntimeObservationFallback.WhenAnyValue(view, controlProperty);
 
+        // Each rebind touches the control, so it is delivered on the view's thread.
         var observation = BindingErrors.Subscribe(
-            LinqExtensions.CombineLatest(commands, controls, static (command, control) => (command, control)),
+            BindingSchedulers.ObserveOnViewThread(
+                LinqExtensions.CombineLatest(commands, controls, static (command, control) => (command, control)),
+                view),
             pair => binding.Disposable = Bind(pair.command, pair.control, commandParameter, toEvent),
             bindingExpression);
 

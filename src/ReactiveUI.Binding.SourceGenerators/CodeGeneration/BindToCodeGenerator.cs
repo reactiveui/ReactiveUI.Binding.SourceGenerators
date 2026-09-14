@@ -11,11 +11,7 @@ using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNam
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
-/// <summary>
-/// Generates concrete typed extension method overloads and binding methods for <c>BindTo</c> invocations.
-/// The source is an observable stream applied to a target property; differing source/target types are
-/// coerced at runtime via <c>RuntimeBindingConverter</c> (matching ReactiveUI's converter registry behavior).
-/// </summary>
+/// <summary>Generates the typed overloads, interceptors and binding methods for <c>BindTo</c> invocations.</summary>
 internal static class BindToCodeGenerator
 {
     /// <summary>The indentation the direct-assignment subscription body sits at.</summary>
@@ -29,9 +25,6 @@ internal static class BindToCodeGenerator
 
     /// <summary>The indentation and arrow an interceptor forwards to its binding behind.</summary>
     private const string ForwardingBodyPrefix = "            => ";
-
-    /// <summary>The selector a call site the runtime engine serves hands its worker, ahead of the conversion arguments.</summary>
-    private const string ReflectionPropertyArgument = ", property";
 
     /// <summary>The indentation a forwarded argument sits at.</summary>
     private const string ArgumentIndent = "                ";
@@ -203,7 +196,7 @@ internal static class BindToCodeGenerator
 
             _ = sb.Append("            ").Append(condition).Append(" (propertyExpression == \"").Append(escapedTargetExpr).AppendLine("\")")
                 .AppendLine(GeneratedSyntax.StatementBlockOpen);
-            AppendWorkerInvocation(sb, ReturnStatementPrefix, BindToMethodSuffix(inv), WorkerArgumentsFor(inv, extraArguments));
+            AppendWorkerInvocation(sb, ReturnStatementPrefix, BindToMethodSuffix(inv), extraArguments);
             _ = sb.AppendLine("            }");
         }
 
@@ -242,7 +235,7 @@ internal static class BindToCodeGenerator
             _ = sb.Append("            ").Append(condition).Append(" (callerLineNumber == ").Append(inv.CallerLineNumber).AppendLine()
                 .Append("                && callerFilePath.EndsWith(\"").Append(CodeGeneratorHelpers.EscapeString(pathSuffix)).Append("\", ")
                 .Append(OrdinalIgnoreCase).AppendLine("))").AppendLine(GeneratedSyntax.StatementBlockOpen);
-            AppendWorkerInvocation(sb, ReturnStatementPrefix, BindToMethodSuffix(inv), WorkerArgumentsFor(inv, extraArguments));
+            AppendWorkerInvocation(sb, ReturnStatementPrefix, BindToMethodSuffix(inv), extraArguments);
             _ = sb.AppendLine("            }");
         }
 
@@ -250,21 +243,12 @@ internal static class BindToCodeGenerator
             .Append(NoBindingFoundMessage).AppendLine("\");").AppendLine(GeneratedSyntax.MemberBodyClose);
     }
 
-    /// <summary>
-    /// Generates the private worker method that subscribes to the source observable and assigns each
-    /// value to the target property, coercing types when required.
-    /// </summary>
+    /// <summary>Generates the binding method that writes each source value to the target property on the target's thread.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="suffix">The stable method-name suffix.</param>
     internal static void GenerateBindToMethod(StringBuilder sb, BindToInvocationInfo inv, string suffix)
     {
-        if (inv.ReflectionOnly)
-        {
-            GenerateReflectionBindToMethod(sb, inv, suffix);
-            return;
-        }
-
         var directAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
             "target",
             inv.TargetPropertyPath,
@@ -288,13 +272,15 @@ internal static class BindToCodeGenerator
 
         if (directAssign)
         {
-            _ = sb.Append(ReturnPrefix).Append(BindingErrors).AppendLine(".Subscribe(source, value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
+            _ = sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe(").Append(BindingSchedulers)
+                .AppendLine(".ObserveOnViewThread(source, target), value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
                 .Append("                ").Append(directAssignment).AppendLine().Append("            }, \"")
                 .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");").AppendLine(GeneratedSyntax.MemberBodyClose).AppendLine();
         }
         else
         {
-            _ = sb.Append(ReturnPrefix).Append(BindingErrors).AppendLine(".Subscribe(source, value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
+            _ = sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe(").Append(BindingSchedulers)
+                .AppendLine(".ObserveOnViewThread(source, target), value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
                 .Append("                if (").Append(RuntimeBindingConverter).Append(".TryConvert<").Append(inv.SourceValueTypeFullName).Append(", ")
                 .Append(inv.TargetPropertyTypeFullName).Append(">(value, ").Append(FormatConversionArguments(inv)).AppendLine(", out var __converted))")
                 .AppendLine("                {").Append("                    ").Append(convertedAssignment).AppendLine().AppendLine("                }")
@@ -302,41 +288,6 @@ internal static class BindToCodeGenerator
                 .AppendLine(GeneratedSyntax.MemberBodyClose).AppendLine();
         }
     }
-
-    /// <summary>Emits the worker for a call site whose selector only the runtime engine can resolve.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="inv">The call site being served.</param>
-    /// <param name="suffix">The stable suffix naming this worker.</param>
-    /// <remarks>
-    /// The attribute is what makes this worth generating rather than leaving the call to the stub: a trimming or
-    /// ahead-of-time publish reports this call site and no other, where annotating the shared overload would
-    /// report every call site that merely has the same types.
-    /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateReflectionBindToMethod(StringBuilder sb, BindToInvocationInfo inv, string suffix) =>
-        sb.Append(InterceptorEmitter.MemberIndent).AppendLine(GeneratedTypeNames.RequiresUnreferencedCodeAttribute)
-            .Append("        private static ").Append(GeneratedTypeNames.IDisposable).Append(" __BindTo_").Append(suffix).Append('(')
-            .Append(ObservableOf(inv.SourceValueTypeFullName)).Append(" source, ").Append(inv.TargetTypeFullName).Append(" target, ")
-            .Append(PropertyExpression(inv.TargetTypeFullName, inv.TargetPropertyTypeFullName)).Append(" property")
-            .Append(FormatExtraMethodParams(inv)).AppendLine(")")
-            .AppendLine(GeneratedSyntax.MemberBodyOpen)
-            .AppendLine("            // BindTo: the selector resolves at run time, so the engine reads the path.")
-            .Append(ReturnPrefix).Append(GeneratedTypeNames.RuntimeBindingFallback).AppendLine(".BindTo(")
-            .AppendLine("                source,")
-            .AppendLine("                target,")
-            .AppendLine("                property,")
-            .Append(ArgumentIndent).Append(FormatConversionArguments(inv)).AppendLine(",")
-            .AppendLine("                null,")
-            .Append(ArgumentIndent).Append('"').Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");")
-            .AppendLine(GeneratedSyntax.MemberBodyClose).AppendLine();
-
-    /// <summary>Names the arguments a call site hands its worker, which the runtime path needs the selector in.</summary>
-    /// <param name="inv">The call site being dispatched.</param>
-    /// <param name="extraArguments">The conversion arguments this group's overload forwards.</param>
-    /// <returns>The argument list, as written into the generated call.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static string WorkerArgumentsFor(BindToInvocationInfo inv, string extraArguments) =>
-        inv.ReflectionOnly ? ReflectionPropertyArgument + extraArguments : extraArguments;
 
     /// <summary>Appends the conversion-hint and converter-override parameters to the concrete overload signature.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -412,32 +363,22 @@ internal static class BindToCodeGenerator
                 InterceptorEmitter.AppendAttribute(sb, callSite.Interceptor, InterceptorEmitter.MemberIndent);
             }
 
-            if (entry.Value[0].ReflectionOnly)
-            {
-                _ = sb.Append(InterceptorEmitter.MemberIndent).AppendLine(GeneratedTypeNames.RequiresUnreferencedCodeAttribute);
-            }
-
             _ = sb.Append("        internal static ").Append(GeneratedTypeNames.IDisposable).Append(" __Intercept_BindTo_")
                 .Append(entry.Key).AppendLine("(");
 
             AppendParameterList(sb, group, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
 
-            AppendWorkerInvocation(sb, ForwardingBodyPrefix, entry.Key, WorkerArgumentsFor(entry.Value[0], extraArguments));
+            AppendWorkerInvocation(sb, ForwardingBodyPrefix, entry.Key, extraArguments);
             _ = sb.AppendLine();
         }
     }
 
-    /// <summary>Writes the parameters a <c>BindTo</c> member declares, closing the list.</summary>
+    /// <summary>Writes the stub's parameter list, which the overload and the interceptor both have to match exactly.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The group whose types the parameters are written from.</param>
     /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameter.</param>
-    /// <remarks>
-    /// One list serves the overload and the interceptor, because both have to be the stub's signature: the
-    /// overload only wins resolution against a candidate it is otherwise indistinguishable from, and an
-    /// interceptor is refused outright unless its signature is the intercepted method's.
-    /// </remarks>
     private static void AppendParameterList(
         StringBuilder sb,
         BindToTypeGroup group,

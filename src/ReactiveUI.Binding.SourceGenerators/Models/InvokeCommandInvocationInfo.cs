@@ -4,26 +4,14 @@
 
 namespace ReactiveUI.Binding.SourceGenerators.Models;
 
-/// <summary>
-/// Per-call-site value-equatable POCO for <c>InvokeCommand</c> invocations. The values come from an observable
-/// stream, so the only path captured is the one reaching the command. Contains no ISymbol, SyntaxNode, or
-/// Location references.
-/// </summary>
+/// <summary>The per-call-site model of an <c>InvokeCommand</c> invocation.</summary>
 /// <param name="CallerFilePath">The source file path of the call site, captured via <c>[CallerFilePath]</c>.</param>
 /// <param name="CallerLineNumber">The line number of the call site, captured via <c>[CallerLineNumber]</c>.</param>
 /// <param name="SourceValueTypeFullName">The fully qualified type produced by the source observable (the <c>T</c> in <c>IObservable&lt;T&gt;</c>).</param>
 /// <param name="TargetTypeFullName">The fully qualified name of the type declaring the command property.</param>
 /// <param name="CommandPropertyPath">The property path chain reaching the command.</param>
 /// <param name="CommandExpressionText">The original expression text of the command lambda argument.</param>
-/// <param name="Interceptor">
-/// Where this call site is, for a build that claims call sites outright rather than competing for them.
-/// </param>
-/// <param name="ReflectionOnly">
-/// Whether the selector named a path the compiler could read. A selector built at run time, or held in a
-/// variable, resolves to nothing at compile time, so the call site is served by the runtime engine instead of a
-/// generated observation - and the member claiming it says so with <c>[RequiresUnreferencedCode]</c>, which is
-/// what puts the warning on the call that actually reflects rather than on every call sharing its types.
-/// </param>
+/// <param name="Interceptor">The call site's location, for a build that intercepts call sites.</param>
 internal sealed record InvokeCommandInvocationInfo(
     string CallerFilePath,
     int CallerLineNumber,
@@ -31,5 +19,4 @@ internal sealed record InvokeCommandInvocationInfo(
     string TargetTypeFullName,
     EquatableArray<PropertyPathSegment> CommandPropertyPath,
     string CommandExpressionText,
-    InterceptorLocation Interceptor = default,
-    bool ReflectionOnly = false);
+    InterceptorLocation Interceptor = default);

@@ -8,7 +8,7 @@
 
 namespace System.Diagnostics.CodeAnalysis;
 
-/// <summary>Indicates that certain members on a specified <see cref="Type"/> are accessed dynamically, for example through <see cref="System.Reflection"/>.</summary>
+/// <summary>Indicates which members of a type are accessed dynamically.</summary>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
 [AttributeUsage(
@@ -24,13 +24,13 @@ namespace System.Diagnostics.CodeAnalysis;
     Inherited = false)]
 internal sealed class DynamicallyAccessedMembersAttribute : Attribute
 {
-    /// <summary>Initializes a new instance of the <see cref="DynamicallyAccessedMembersAttribute"/> class with the specified member types.</summary>
-    /// <param name="memberTypes">The types of members dynamically accessed.</param>
+    /// <summary>Initializes a new instance of the <see cref="DynamicallyAccessedMembersAttribute"/> class.</summary>
+    /// <param name="memberTypes">The kinds of members accessed dynamically.</param>
     public DynamicallyAccessedMembersAttribute(DynamicallyAccessedMemberTypes memberTypes) =>
         MemberTypes = memberTypes;
 
-    /// <summary>Gets the <see cref="DynamicallyAccessedMemberTypes"/> which specifies the type of members dynamically accessed.</summary>
-    internal DynamicallyAccessedMemberTypes MemberTypes { get; }
+    /// <summary>Gets the kinds of members accessed dynamically.</summary>
+    public DynamicallyAccessedMemberTypes MemberTypes { get; }
 }
 
 #else

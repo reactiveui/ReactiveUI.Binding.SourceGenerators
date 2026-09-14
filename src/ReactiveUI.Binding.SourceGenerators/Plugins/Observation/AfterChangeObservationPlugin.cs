@@ -8,35 +8,32 @@ using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
-/// <summary>The base for a mechanism that reports a property change only once it has happened.</summary>
-/// <remarks>
-/// A dependency property, a component's change event and an Android widget's event all raise after the value
-/// has already moved, so none of them can say what a property is about to become. What they do about being
-/// asked anyway is the one thing that differs, so the shape is decided here and the answer is left to
-/// <see cref="AnswersBeforeChangeWithLiveStream"/>.
-/// </remarks>
-internal abstract class AfterChangeObservationPlugin
+/// <summary>The base for an observation mechanism that raises only after a property has changed.</summary>
+internal closed class AfterChangeObservationPlugin : IObservationPlugin
 {
     /// <summary>Gets the affinity this mechanism bids with.</summary>
-    /// <remarks>
-    /// A chain link offers its observation to any registration scoring higher than this, so the number the
-    /// plugin bids to the registry is the same one the emitted comparison carries.
-    /// </remarks>
     public abstract int Affinity { get; }
 
-    /// <summary>Gets a value indicating whether this mechanism can report a change before it happens.</summary>
+    /// <inheritdoc/>
+    public abstract string ObservationKind { get; }
+
+    /// <inheritdoc/>
     public bool SupportsBeforeChanged => false;
 
-    /// <summary>Gets a value indicating whether a before-change request is answered with the live change stream.</summary>
-    /// <remarks>
-    /// None of these mechanisms can say what a property is about to become, but they do not all decline the
-    /// question the same way. A dependency property hands back the stream it always has, so the caller keeps
-    /// tracking and merely receives the value after each change rather than before it. A component's change
-    /// event scores nothing for a before-change request instead, which withdraws the mechanism and leaves the
-    /// property read once. Following whichever the platform does is what keeps a before-change observation
-    /// behaving the same here as it does through the runtime engine.
-    /// </remarks>
+    /// <inheritdoc/>
+    public abstract bool RequiresHelperClasses { get; }
+
+    /// <summary>Gets a value indicating whether a before-change request observes the after-change stream instead of reading the value once.</summary>
     protected virtual bool AnswersBeforeChangeWithLiveStream => false;
+
+    /// <inheritdoc/>
+    public abstract bool IsAMatch(ClassBindingInfo classInfo);
+
+    /// <inheritdoc/>
+    public abstract bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName);
+
+    /// <inheritdoc/>
+    public abstract void EmitHelperClasses(StringBuilder sb);
 
     /// <summary>Emits the observation of a property read directly off the object a call site named.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -119,11 +116,6 @@ internal abstract class AfterChangeObservationPlugin
     /// <param name="segment">The property path segment being observed.</param>
     /// <param name="isBeforeChange">Whether before-change notifications are being observed.</param>
     /// <param name="nullParentBehavior">What the link observes while its parent is null.</param>
-    /// <remarks>
-    /// The link switches onto whichever parent the previous one last produced, so the whole shape - the switch,
-    /// the null-parent test and the substitute observation - is the same whatever the mechanism. Only the
-    /// observation of a present parent differs, which is what each plugin supplies.
-    /// </remarks>
     public void EmitDeepChainInnerSegment(
         StringBuilder sb,
         string prevVar,
@@ -157,6 +149,14 @@ internal abstract class AfterChangeObservationPlugin
         _ = sb.Append("                : (global::System.IObservable<").Append(segType).Append(">)")
             .Append(nullParentObservable).AppendLine(");");
     }
+
+    /// <inheritdoc/>
+    public abstract void EmitInlineObservationVariable(
+        StringBuilder sb,
+        string rootVar,
+        PropertyPathSegment segment,
+        string castTypeName,
+        string varName);
 
     /// <summary>Appends the after-change observation as a bare expression.</summary>
     /// <param name="sb">The string builder to append to.</param>

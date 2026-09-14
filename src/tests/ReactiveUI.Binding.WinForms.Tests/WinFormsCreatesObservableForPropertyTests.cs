@@ -8,11 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.WinForms.Tests;
 
-/// <summary>
-/// Tests for the WinForms property observer. Compiled twice: once against ReactiveUI.Binding.WinForms
-/// and once, under REACTIVE_SHIM, against ReactiveUI.Binding.Reactive.WinForms, so both leaves are
-/// exercised by the same assertions.
-/// </summary>
+/// <summary>Tests for the WinForms property observer.</summary>
 public class WinFormsCreatesObservableForPropertyTests
 {
     /// <summary>The number of notifications expected when two changes are raised.</summary>
@@ -125,10 +121,7 @@ public class WinFormsCreatesObservableForPropertyTests
             () => observer.GetNotificationForProperty(component, NameExpression, "Untracked", false, false));
     }
 
-    /// <summary>
-    /// A component that raises the <c>{PropertyName}Changed</c> event WinForms observation looks for.
-    /// Public because the observer finds the event by reflection over public members only.
-    /// </summary>
+    /// <summary>A public component raising the <c>{PropertyName}Changed</c> event, which the observer looks up among public members only.</summary>
     public sealed class ComponentWithChangedEvent : Component
     {
         /// <summary>Raised after <see cref="Name"/> changes.</summary>
@@ -148,14 +141,14 @@ public class WinFormsCreatesObservableForPropertyTests
 
         /// <summary>Gets a value with no corresponding Changed event.</summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string Untracked => string.Empty;
+        public string Untracked { get; } = string.Empty;
     }
 
     /// <summary>A type that is not a component, so WinForms observation should decline it.</summary>
     public sealed class PlainModel
     {
         /// <summary>Gets a value that no WinForms event announces.</summary>
-        public string Name => string.Empty;
+        public string Name { get; } = string.Empty;
     }
 
     /// <summary>An observer that counts the notifications it receives.</summary>

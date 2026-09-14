@@ -12,28 +12,21 @@ namespace ReactiveUI.Binding.Maui;
 #endif
 
 /// <summary>Names the dispatcher that owns a MAUI object, so a binding writes to it on its own thread.</summary>
-/// <remarks>
-/// Every <see cref="BindableObject"/> carries the dispatcher of the window it belongs to, which is what a
-/// multi-window application needs: the write follows the object rather than whichever window happened to be
-/// built first.
-/// </remarks>
 public sealed class DispatcherViewThreadResolver : IViewThreadResolver
 {
     /// <inheritdoc/>
     public SynchronizationContext? ContextFor(object target) =>
-        target is BindableObject { Dispatcher: { } dispatcher } ? new DispatcherContext(dispatcher) : null;
+        target is BindableObject bindable ? new DispatcherContext(bindable) : null;
 
-    /// <summary>Runs a callback on the thread one dispatcher owns.</summary>
-    /// <param name="dispatcher">The dispatcher whose thread the callbacks run on.</param>
-    /// <remarks>
-    /// A caller already on that thread runs inline, so a view model raising on the UI thread keeps its write
-    /// synchronous and pays nothing. Only a write from elsewhere is queued.
-    /// </remarks>
-    private sealed class DispatcherContext(IDispatcher dispatcher) : SynchronizationContext
+    /// <summary>Runs a callback on the thread one object's dispatcher owns.</summary>
+    /// <param name="owner">The object whose dispatcher the callbacks run on.</param>
+    private sealed class DispatcherContext(BindableObject owner) : SynchronizationContext
     {
         /// <inheritdoc/>
         public override void Post(SendOrPostCallback d, object? state)
         {
+            // Only MAUI's own Binding dispatches; a property set directly reaches the handler on the calling thread.
+            var dispatcher = owner.Dispatcher;
             if (!dispatcher.IsDispatchRequired)
             {
                 d(state);

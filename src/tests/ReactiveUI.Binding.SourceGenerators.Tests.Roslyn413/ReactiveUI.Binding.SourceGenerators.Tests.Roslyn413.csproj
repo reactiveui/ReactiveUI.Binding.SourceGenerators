@@ -11,8 +11,6 @@
   <ItemGroup>
     <PackageReference Include="TUnit"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
-    <PackageReference Include="Verify.SourceGenerators"/>
-    <PackageReference Include="Verify.TUnit"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net110"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net100"/>
     <PackageReference Include="Basic.Reference.Assemblies.Net90"/>
@@ -33,6 +31,10 @@
              Link="%(RecursiveDir)%(Filename)%(Extension)"/>
     <Compile Include="..\Shared\TransitiveAssemblyResolver.cs" Link="Shared\TransitiveAssemblyResolver.cs"/>
     <Compile Include="..\Shared\RoslynSymbolProbe.cs" Link="Shared\RoslynSymbolProbe.cs"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="GeneratorSnapshotDirectory" Value="$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../ReactiveUI.Binding.SourceGenerators.Tests'))"/>
   </ItemGroup>
 
   <PropertyGroup>

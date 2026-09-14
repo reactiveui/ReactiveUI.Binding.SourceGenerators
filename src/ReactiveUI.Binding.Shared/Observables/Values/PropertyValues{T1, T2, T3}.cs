@@ -15,12 +15,11 @@ namespace ReactiveUI.Binding;
 /// <param name="Property1">The value of the first observed property.</param>
 /// <param name="Property2">The value of the second observed property.</param>
 /// <param name="Property3">The value of the third observed property.</param>
-/// <remarks>
-/// Multi-property observation emits every property's current value together, so the emission is one value
-/// rather than a group of them. Being positional, it still deconstructs, so a subscriber can name the
-/// properties it cares about without naming the type.
-/// </remarks>
 [DebuggerDisplay("PropertyValues: {Property1}, {Property2}, +1 more")]
+[SuppressMessage(
+    "Design",
+    "CA1005:Avoid excessive parameters on generic types",
+    Justification = "One arity-expanded emission per observed-property count; the type parameters are the observed properties.")]
 public readonly record struct PropertyValues<T1, T2, T3>(
     T1 Property1,
     T2 Property2,

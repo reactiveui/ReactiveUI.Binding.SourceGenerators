@@ -12,30 +12,22 @@ namespace ReactiveUI.Binding.Wpf;
 #endif
 
 /// <summary>Names the dispatcher that owns a WPF object, so a binding writes to it on its own thread.</summary>
-/// <remarks>
-/// WPF allows several UI threads, and every <see cref="DependencyObject"/> records the dispatcher that created
-/// it. Asking the object rather than the process is what makes a second window on a second UI thread work: a
-/// process-wide thread would marshal that window's writes into the first thread and throw exactly as an
-/// unmarshalled write does.
-/// </remarks>
 public sealed class DispatcherViewThreadResolver : IViewThreadResolver
 {
     /// <inheritdoc/>
     public SynchronizationContext? ContextFor(object target) =>
-        target is DependencyObject dependencyObject ? new DispatcherContext(dependencyObject.Dispatcher) : null;
+        target is DependencyObject dependencyObject ? new DispatcherContext(dependencyObject) : null;
 
-    /// <summary>Runs a callback on the thread one dispatcher owns.</summary>
-    /// <param name="dispatcher">The dispatcher whose thread the callbacks run on.</param>
-    /// <remarks>
-    /// A caller already on that thread runs inline, so a view model raising on the UI thread keeps its write
-    /// synchronous and pays nothing. Only a write from elsewhere is queued.
-    /// </remarks>
-    private sealed class DispatcherContext(Dispatcher dispatcher) : SynchronizationContext
+    /// <summary>Runs a callback on the thread one object's dispatcher owns.</summary>
+    /// <param name="owner">The object whose dispatcher the callbacks run on.</param>
+    private sealed class DispatcherContext(DependencyObject owner) : SynchronizationContext
     {
         /// <inheritdoc/>
         public override void Post(SendOrPostCallback d, object? state)
         {
-            if (dispatcher.CheckAccess())
+            // A frozen Freezable has no dispatcher and belongs to no thread.
+            var dispatcher = owner.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
             {
                 d(state);
                 return;
@@ -47,7 +39,8 @@ public sealed class DispatcherViewThreadResolver : IViewThreadResolver
         /// <inheritdoc/>
         public override void Send(SendOrPostCallback d, object? state)
         {
-            if (dispatcher.CheckAccess())
+            var dispatcher = owner.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
             {
                 d(state);
                 return;

@@ -13,24 +13,13 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
-/// <summary>
-/// Test helper for running the incremental generator against test source code.
-/// Follows the pattern from the Roslyn Source Generators Cookbook.
-/// </summary>
+/// <summary>Runs the binding generator over test source and builds the compilations it needs.</summary>
 public static class TestHelper
 {
     /// <summary>The transitive reference set each runtime flavour compiles against, keyed by flavour.</summary>
     private static readonly ConcurrentDictionary<bool, ImmutableArray<MetadataReference>> FlavourReferences = new();
 
-    /// <summary>
-    /// Returns the C# language version used to exercise the <c>CallerFilePath</c> + <c>CallerLineNumber</c>
-    /// dispatch fallback. The version is deliberately kept below C# 10 (where
-    /// <c>CallerArgumentExpression</c> would take over) so the file/line dispatch path is exercised, while
-    /// still being high enough to compile the scenario source. Scenario view models use nullable reference
-    /// type annotations (a C# 8 feature); compiling them under C# 7.3 would raise
-    /// "nullable reference types is not available". When the scenario has no nullable annotations, C# 7.3 is
-    /// used so the generated output is also asserted valid on the minimum supported language version.
-    /// </summary>
+    /// <summary>Returns the language version below C# 10 that exercises file-and-line dispatch for a scenario.</summary>
     /// <param name="nullableEnabled">Whether the scenario source uses nullable reference type annotations.</param>
     /// <returns>C# 8 when the scenario uses nullable annotations; otherwise C# 7.3.</returns>
     public static LanguageVersion FallbackLanguageVersion(bool nullableEnabled) =>
@@ -50,11 +39,7 @@ public static class TestHelper
     public static Compilation CreateCompilation(string source, LanguageVersion? languageVersion) =>
         CreateCompilation(source, languageVersion, false);
 
-    /// <summary>
-    /// Creates a compilation from source code, referencing one of the two runtime packages. The packages share
-    /// no type names, so a compilation references one or the other and never both - which is also what lets the
-    /// generator tell which flavour it is generating for.
-    /// </summary>
+    /// <summary>Creates a compilation that references one of the two runtime packages.</summary>
     /// <param name="source">The source code to compile.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>
@@ -66,10 +51,7 @@ public static class TestHelper
         bool useReactiveRuntime) =>
         CreateCompilation(source, languageVersion, useReactiveRuntime, "TestAssembly", []);
 
-    /// <summary>
-    /// Creates a compilation that also references separately built assemblies, so a scenario can put a type
-    /// somewhere the generator cannot see a declaration for.
-    /// </summary>
+    /// <summary>Creates a compilation that also references separately built assemblies.</summary>
     /// <param name="source">The source code to compile.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>
@@ -85,10 +67,7 @@ public static class TestHelper
         ImmutableArray<MetadataReference> additionalReferences) =>
         CreateCompilation(source, ParseOptionsFor(languageVersion), useReactiveRuntime, assemblyName, additionalReferences);
 
-    /// <summary>
-    /// Creates a compilation from source code parsed exactly as the caller asks, which is how a scenario reaches
-    /// the options a language version alone cannot express.
-    /// </summary>
+    /// <summary>Creates a compilation from source parsed with the given options.</summary>
     /// <param name="source">The source code to compile.</param>
     /// <param name="parseOptions">The options the consumer's source is parsed with.</param>
     /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>
@@ -132,10 +111,7 @@ public static class TestHelper
     public static CSharpParseOptions ParseOptionsFor(LanguageVersion? languageVersion) =>
         new(languageVersion ?? LanguageVersion.CSharp7_3);
 
-    /// <summary>
-    /// The parse options of a build that has the package's targets on it, which list the generated namespace so
-    /// the compiler honours an interceptor emitted into it.
-    /// </summary>
+    /// <summary>Returns parse options that opt the generated namespace into interception.</summary>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <returns>The parse options, carrying the opt-in.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -143,10 +119,7 @@ public static class TestHelper
         ParseOptionsFor(languageVersion)
             .WithFeatures([new KeyValuePair<string, string>("InterceptorsNamespaces", "ReactiveUI.Binding.Generated.Interceptors")]);
 
-    /// <summary>
-    /// Compiles source into a metadata reference, standing in for a type the consumer references rather than
-    /// declares. A referenced type reaches the generator only as a symbol, never as a declaration.
-    /// </summary>
+    /// <summary>Compiles source into a metadata reference, for a type a scenario references rather than declares.</summary>
     /// <param name="source">The source code of the referenced assembly.</param>
     /// <param name="assemblyName">The name to give the referenced assembly.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
@@ -176,89 +149,51 @@ public static class TestHelper
     /// <summary>Tests a source generator scenario that is expected to succeed. Verifies the generated output against a snapshot.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
-    /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>A task representing the asynchronous verification operation.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Task TestPass(
         string source,
         Type callerType,
-        [CallerFilePath] string file = "",
         [CallerMemberName] string memberName = "") =>
-        TestPass(source, callerType, null, file, memberName);
+        TestPass(source, callerType, null, memberName);
 
-    /// <summary>
-    /// Tests a source generator scenario that is expected to succeed, targeting a specific language version.
-    /// Verifies the generated output against a snapshot.
-    /// </summary>
+    /// <summary>Runs a scenario at the given language version and compares the output with its snapshots.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
-    /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>A task representing the asynchronous verification operation.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Task TestPass(
         string source,
         Type callerType,
         LanguageVersion? languageVersion,
-        [CallerFilePath] string file = "",
-        [CallerMemberName] string memberName = "")
-    {
-        ArgumentNullException.ThrowIfNull(callerType);
-        ArgumentNullException.ThrowIfNull(memberName);
+        [CallerMemberName] string memberName = "") =>
+        TestPassWithResult(source, callerType, languageVersion, memberName);
 
-        var result = RunGenerator(source, languageVersion);
-
-        // Log any diagnostics for debugging
-        var allDiagnostics = result.OutputCompilation.GetDiagnostics()
-            .Concat(result.GeneratorDiagnostics)
-            .Where(static d => d.Severity >= DiagnosticSeverity.Warning)
-            .ToImmutableArray();
-
-        foreach (var diagnostic in allDiagnostics)
-        {
-            TestContext.Current?.OutputWriter.WriteLine($"{diagnostic.Severity}: {diagnostic.GetMessage()}");
-        }
-
-        VerifySettings settings = new();
-        settings.DisableRequireUniquePrefix();
-        settings.UseTypeName(AbbreviateTypeName(callerType.Name));
-        settings.UseMethodName(AbbreviateMethodName(memberName));
-        return Verify(result.Driver, settings, file);
-    }
-
-    /// <summary>
-    /// Tests a source generator scenario that is expected to succeed.
-    /// Verifies the generated output against a snapshot and returns the result for further assertions.
-    /// </summary>
+    /// <summary>Runs a scenario, compares the output with its snapshots, and returns the result.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
-    /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>The generator test result for additional assertions.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Task<GeneratorTestResult> TestPassWithResult(
         string source,
         Type callerType,
-        [CallerFilePath] string file = "",
         [CallerMemberName] string memberName = "") =>
-        TestPassWithResult(source, callerType, null, file, memberName);
+        TestPassWithResult(source, callerType, null, memberName);
 
-    /// <summary>
-    /// Tests a source generator scenario that is expected to succeed, targeting a specific language version.
-    /// Verifies the generated output against a snapshot and returns the result for further assertions.
-    /// </summary>
+    /// <summary>Runs a scenario at the given language version, compares the output with its snapshots, and returns the result.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
-    /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>The generator test result for additional assertions.</returns>
     public static async Task<GeneratorTestResult> TestPassWithResult(
         string source,
         Type callerType,
         LanguageVersion? languageVersion,
-        [CallerFilePath] string file = "",
         [CallerMemberName] string memberName = "")
     {
         ArgumentNullException.ThrowIfNull(callerType);
@@ -281,11 +216,10 @@ public static class TestHelper
             }
         }
 
-        VerifySettings settings = new();
-        settings.DisableRequireUniquePrefix();
-        settings.UseTypeName(AbbreviateTypeName(callerType.Name));
-        settings.UseMethodName(AbbreviateMethodName(memberName));
-        await Verify(result.Driver, settings, file);
+        await GeneratorSnapshot.VerifyAsync(
+            result.Driver,
+            AbbreviateTypeName(callerType.Name),
+            AbbreviateMethodName(memberName));
 
         return result;
     }
@@ -304,16 +238,10 @@ public static class TestHelper
     public static GeneratorTestResult RunGenerator(string source, LanguageVersion? languageVersion) =>
         RunGenerator(source, languageVersion, null);
 
-    /// <summary>
-    /// Runs the source generator on the provided source code, targeting a specific language version and
-    /// reporting the given root namespace to it the way a real build would.
-    /// </summary>
+    /// <summary>Runs the generator with the given root namespace reported as a build would.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
-    /// <param name="rootNamespace">
-    /// The root namespace the build exposes, or <see langword="null"/> to run with none - which is what every
-    /// other overload does, because an in-memory compilation carries no MSBuild properties.
-    /// </param>
+    /// <param name="rootNamespace">The root namespace the build exposes, or <see langword="null"/> for none.</param>
     /// <returns>A <see cref="GeneratorTestResult"/> containing driver, compilation, and diagnostics.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static GeneratorTestResult RunGenerator(
@@ -322,10 +250,7 @@ public static class TestHelper
         string? rootNamespace) =>
         RunGenerator(source, languageVersion, rootNamespace, false);
 
-    /// <summary>
-    /// Runs the source generator against one of the two runtime packages, reporting the given root namespace to
-    /// it the way a real build would.
-    /// </summary>
+    /// <summary>Runs the generator against one of the two runtime packages with the given root namespace.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <param name="rootNamespace">The root namespace the build exposes, or <see langword="null"/> for none.</param>
@@ -339,10 +264,7 @@ public static class TestHelper
         bool useReactiveRuntime) =>
         RunGenerator(source, languageVersion, rootNamespace, useReactiveRuntime, []);
 
-    /// <summary>
-    /// Runs the source generator against a compilation that also references separately built assemblies, so a
-    /// scenario can observe a type the consumer references rather than declares.
-    /// </summary>
+    /// <summary>Runs the generator against a compilation that also references separately built assemblies.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
     /// <param name="rootNamespace">The root namespace the build exposes, or <see langword="null"/> for none.</param>
@@ -458,10 +380,7 @@ public static class TestHelper
         return new(assembly, context);
     }
 
-    /// <summary>
-    /// Abbreviates a test class type name to a short prefix for snapshot file names.
-    /// Keeps snapshot file paths under the Windows MAX_PATH limit (260 chars).
-    /// </summary>
+    /// <summary>Abbreviates a test class name for snapshot file names, keeping paths under the Windows path limit.</summary>
     /// <param name="typeName">The test class type name.</param>
     /// <returns>An abbreviated prefix string.</returns>
     internal static string AbbreviateTypeName(string typeName) => typeName switch
@@ -484,10 +403,7 @@ public static class TestHelper
         _ => typeName
     };
 
-    /// <summary>
-    /// Abbreviates a test method name by replacing common patterns with short tokens.
-    /// Keeps snapshot file paths under the Windows MAX_PATH limit (260 chars).
-    /// </summary>
+    /// <summary>Abbreviates a test method name for snapshot file names, keeping paths under the Windows path limit.</summary>
     /// <param name="methodName">The test method name.</param>
     /// <returns>An abbreviated method name string.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -516,19 +432,15 @@ public static class TestHelper
         .Replace("GeneratesElseIf", "GEI", StringComparison.Ordinal)
         .Replace("SameTypeSignature", "STS", StringComparison.Ordinal);
 
-    /// <summary>Names the runtime and transitive references a flavour compiles against, building the set once.</summary>
+    /// <summary>Returns the runtime and transitive references a flavour compiles against.</summary>
     /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>
     /// <returns>The shared reference set.</returns>
-    /// <remarks>
-    /// A <see cref="MetadataReference"/> carries its own copy of the assembly's metadata, and a compilation keeps
-    /// every reference it was given alive. Building the set per compilation therefore holds one metadata heap per
-    /// referenced assembly per test, which is what takes the suite past a CI runner's memory. The set is fixed for
-    /// a flavour, so it is built once and shared - the framework set is shared for the same reason.
-    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ImmutableArray<MetadataReference> RuntimeReferences(bool useReactiveRuntime) =>
         FlavourReferences.GetOrAdd(useReactiveRuntime, static flavour =>
         {
+            // Built once per flavour and shared: each MetadataReference holds its own metadata copy, and a set
+            // per compilation exhausts a CI runner's memory.
             // ReactiveUI is seeded by ReactiveObject rather than IReactiveObject: the two live in
             // different assemblies, and the walk only follows references outward, so seeding from the
             // interface would leave the assembly that declares ReactiveObject out of the compilation.
@@ -549,24 +461,16 @@ public static class TestHelper
             return [.. GetTransitiveReferences(seedAssemblies)];
         });
 
-    /// <summary>Chooses the nullable context a consumer's language version would give its own source.</summary>
+    /// <summary>Returns an annotation-only nullable context from C# 8, so a scenario's own null flow is not reported.</summary>
     /// <param name="parseOptions">The options the consumer's source is parsed with.</param>
     /// <returns>The nullable context options for the compilation.</returns>
-    /// <remarks>
-    /// Annotations rather than warnings: a scenario written with <c>T?</c> needs an annotation context or every
-    /// annotation is reported, and turning the warnings on as well would report the scenario's own null-flow
-    /// instead of what the test is about. A version below C# 8 has no context to establish.
-    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static NullableContextOptions NullableContextFor(CSharpParseOptions parseOptions) =>
         parseOptions.LanguageVersion.MapSpecifiedToEffectiveVersion() >= LanguageVersion.CSharp8
             ? NullableContextOptions.Annotations
             : NullableContextOptions.Disable;
 
-    /// <summary>
-    /// Recursively walks assembly references from the seed assemblies to collect
-    /// all transitive dependencies as metadata references.
-    /// </summary>
+    /// <summary>Collects metadata references for the seed assemblies and everything they reference.</summary>
     /// <param name="seedAssemblies">The root assemblies to start from.</param>
     /// <returns>Metadata references for all reachable assemblies.</returns>
     private static IEnumerable<MetadataReference> GetTransitiveReferences(params Assembly[] seedAssemblies)
@@ -608,10 +512,7 @@ public static class TestHelper
         }
     }
 
-    /// <summary>
-    /// Supplies the generator the MSBuild properties a real build would, which an in-memory compilation
-    /// otherwise has no way to carry.
-    /// </summary>
+    /// <summary>Supplies the MSBuild properties a real build passes to the generator.</summary>
     private sealed class BuildPropertyOptionsProvider : AnalyzerConfigOptionsProvider
     {
         /// <summary>The analyzer config key a build exposes the root namespace under.</summary>
@@ -656,12 +557,6 @@ public static class TestHelper
 
     /// <summary>A fixed set of analyzer config options.</summary>
     /// <param name="options">The options to expose.</param>
-    /// <remarks>
-    /// The out parameter is non-nullable where the base declares it nullable-with-a-postcondition, because the
-    /// attribute that states the postcondition cannot be named in this assembly: the generator compiles its own
-    /// netstandard2.0 copy of it and makes it visible here, so the name resolves to two types. Always assigning
-    /// a value keeps the stronger promise, so nothing downstream can observe the difference.
-    /// </remarks>
     private sealed class BuildPropertyOptions(IReadOnlyDictionary<string, string> options) : AnalyzerConfigOptions
     {
         /// <inheritdoc/>
@@ -676,6 +571,8 @@ public static class TestHelper
                 return true;
             }
 
+            // Always assigned, so the out parameter needs no MaybeNullWhen: that name resolves to two types here,
+            // the framework's and the generator's polyfill.
             value = string.Empty;
             return false;
         }

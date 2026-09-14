@@ -6,17 +6,11 @@ using System.Runtime.CompilerServices;
 
 namespace ReactiveUI.Binding.Tests.Bindings.Converters;
 
-/// <summary>
-///     Tests for the lock-free converter registries.
-///     Verifies thread-safety, affinity-based selection, and snapshot pattern behavior.
-/// </summary>
+/// <summary>Tests for the converter registries.</summary>
 public class ConverterRegistryTests
 {
     /// <summary>A negative affinity, which means the converter does not apply.</summary>
     private const int NegativeAffinity = -5;
-
-    /// <summary>The UTC offset, in hours, of the sample timestamp under test.</summary>
-    private const int OffsetHours = -5;
 
     /// <summary>The affinity a plain test converter reports unless a test needs a ranking.</summary>
     private const int DefaultAffinity = 5;
@@ -26,9 +20,6 @@ public class ConverterRegistryTests
 
     /// <summary>Affinity ranking that outranks every other converter registered in a test.</summary>
     private const int HighAffinity = 10;
-
-    /// <summary>The highest affinity used, for the converter a test expects to win outright.</summary>
-    private const int HighestAffinity = 100;
 
     /// <summary>The number of concurrent read iterations in the thread-safety test.</summary>
     private const int ConcurrentReadIterations = 100;
@@ -42,7 +33,7 @@ public class ConverterRegistryTests
     /// <summary>The expected number of converters after registering two.</summary>
     private const int ExpectedTwoConverters = 2;
 
-    /// <summary>Verifies that the registry supports concurrent reads during registration. This tests the lock-free snapshot pattern.</summary>
+    /// <summary>Verifies that the registry supports concurrent reads during registration.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task ConcurrentReads_DuringRegistration_ShouldBeThreadSafe()
@@ -186,10 +177,7 @@ public class ConverterRegistryTests
         await Assert.That(allConverters).Contains(converter3);
     }
 
-    /// <summary>
-    ///     Verifies that when multiple converters are registered for the same type pair,
-    ///     the one with the highest affinity is selected.
-    /// </summary>
+    /// <summary>Verifies that the highest-affinity converter is selected among several for the same type pair.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task MultipleConverters_ShouldSelectHighestAffinity()
@@ -266,10 +254,7 @@ public class ConverterRegistryTests
         await Assert.That(selected).IsEqualTo(highAffinity);
     }
 
-    /// <summary>
-    /// Verifies that SetMethodBindingConverterRegistry.TryGetConverter returns null when no converters are registered.
-    /// Covers the null snapshot path at lines 88-92.
-    /// </summary>
+    /// <summary>Verifies that SetMethodBindingConverterRegistry.TryGetConverter returns null when no converters are registered.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task SetMethodRegistry_Empty_TryGetConverter_ReturnsNull()
@@ -281,10 +266,7 @@ public class ConverterRegistryTests
         await Assert.That(result).IsNull();
     }
 
-    /// <summary>
-    /// Verifies that SetMethodBindingConverterRegistry.GetAllConverters returns empty when no converters are registered.
-    /// Covers the null snapshot path at lines 122-126.
-    /// </summary>
+    /// <summary>Verifies that SetMethodBindingConverterRegistry.GetAllConverters returns empty when no converters are registered.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task SetMethodRegistry_Empty_GetAllConverters_ReturnsEmpty()
@@ -326,10 +308,7 @@ public class ConverterRegistryTests
         await Assert.That(all).Contains(converter2);
     }
 
-    /// <summary>
-    /// Verifies that GetAllConverters returns empty on a fresh (never-registered) BindingTypeConverterRegistry.
-    /// Covers the if (snap is null) TRUE branch in BindingTypeConverterRegistry.GetAllConverters().
-    /// </summary>
+    /// <summary>Verifies that GetAllConverters returns empty on a BindingTypeConverterRegistry nothing was registered with.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task TypeConverterRegistry_Fresh_GetAllConverters_ReturnsEmpty()
@@ -341,10 +320,7 @@ public class ConverterRegistryTests
         await Assert.That(result.Count()).IsEqualTo(0);
     }
 
-    /// <summary>
-    /// Verifies that GetAllConverters returns empty on a fresh (never-registered) BindingFallbackConverterRegistry.
-    /// Covers the if (snap is null) TRUE branch in BindingFallbackConverterRegistry.GetAllConverters().
-    /// </summary>
+    /// <summary>Verifies that GetAllConverters returns empty on a BindingFallbackConverterRegistry nothing was registered with.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
     public async Task FallbackRegistry_Fresh_GetAllConverters_ReturnsEmpty()

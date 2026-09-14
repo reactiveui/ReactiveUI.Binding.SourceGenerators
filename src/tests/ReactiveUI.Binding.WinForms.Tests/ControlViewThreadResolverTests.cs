@@ -6,11 +6,7 @@ using System.Windows.Forms;
 
 namespace ReactiveUI.Binding.WinForms.Tests;
 
-/// <summary>
-/// Tests for the WinForms view-thread resolver. Compiled twice: once against ReactiveUI.Binding.WinForms and
-/// once, under REACTIVE_SHIM, against ReactiveUI.Binding.Reactive.WinForms, so both leaves are exercised by
-/// the same assertions.
-/// </summary>
+/// <summary>Tests for the WinForms view-thread resolver.</summary>
 public class ControlViewThreadResolverTests
 {
     /// <summary>How long a callback posted to a control's thread is given to arrive.</summary>
@@ -29,17 +25,59 @@ public class ControlViewThreadResolverTests
         await Assert.That(new ControlViewThreadResolver().ContextFor(owner.Control)).IsNotNull();
     }
 
-    /// <summary>
-    /// A control with no handle owns no thread yet. Creating one here would bind the control to whichever
-    /// thread made the binding, so the write is left where the caller put it.
-    /// </summary>
+    /// <summary>A write to a control with no handle runs inline and does not create the handle.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task ContextFor_WithAControlThatHasNoHandle_ClaimsNothing()
+    public async Task Post_ToAControlThatHasNoHandle_RunsInline()
     {
+        var writingThreadId = Environment.CurrentManagedThreadId;
         using var control = new Control();
 
-        await Assert.That(new ControlViewThreadResolver().ContextFor(control)).IsNull();
+        var context = new ControlViewThreadResolver().ContextFor(control);
+        var ranOnThreadId = 0;
+
+        await Assert.That(context).IsNotNull();
+
+        context!.Post(_ => ranOnThreadId = Environment.CurrentManagedThreadId, null);
+
+        await Assert.That(ranOnThreadId).IsEqualTo(writingThreadId);
+        await Assert.That(control.IsHandleCreated).IsFalse();
+    }
+
+    /// <summary>A binding made before the control's handle exists writes on the thread that later creates the handle.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Post_AfterTheHandleIsCreatedOnAnotherThread_RunsOnThatThread()
+    {
+        using var owner = new ControlThread();
+        var control = new Control();
+        var context = new ControlViewThreadResolver().ContextFor(control);
+        using var created = new ManualResetEventSlim();
+
+        // Reading the handle on the owning thread creates it there, which is what gives the control its owner.
+        _ = owner.Control.BeginInvoke(() =>
+        {
+            _ = control.Handle;
+            created.Set();
+        });
+
+        await Assert.That(created.Wait(Patience)).IsTrue();
+
+        using var arrived = new ManualResetEventSlim();
+        var ranOnThreadId = 0;
+
+        context!.Post(
+            _ =>
+            {
+                ranOnThreadId = Environment.CurrentManagedThreadId;
+                arrived.Set();
+            },
+            null);
+
+        await Assert.That(arrived.Wait(Patience)).IsTrue();
+        await Assert.That(ranOnThreadId).IsEqualTo(owner.ThreadId);
+
+        _ = owner.Control.BeginInvoke(control.Dispose);
     }
 
     /// <summary>Anything that is not a control is left to another resolver.</summary>
@@ -87,10 +125,7 @@ public class ControlViewThreadResolverTests
         await Assert.That(ranOnThreadId).IsEqualTo(owner.ThreadId);
     }
 
-    /// <summary>
-    /// A write already on the thread that owns the control is applied inline, so an update raised on the UI
-    /// thread keeps the write synchronous and a caller reading the control back sees the new value.
-    /// </summary>
+    /// <summary>A write already on the thread that owns the control is applied inline.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task Post_ToAControlOwnedByTheWritingThread_RunsInline()
@@ -128,11 +163,6 @@ public class ControlViewThreadResolverTests
     }
 
     /// <summary>A control owned by a thread that pumps messages, as a WinForms application's controls are.</summary>
-    /// <remarks>
-    /// The thread is handed back only once its message loop has gone idle, because a control posts and sends
-    /// through that loop: handing it back at handle creation would leave a send waiting on a loop that had not
-    /// started.
-    /// </remarks>
     private sealed class ControlThread : IDisposable
     {
         /// <summary>Keeps the message loop running until the thread is told to stop.</summary>
@@ -151,6 +181,8 @@ public class ControlViewThreadResolverTests
 
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
+
+            // Posts and sends go through the message loop, so wait for it to run, not just for the handle.
             _ = _pumping.Wait(Patience);
 
             ThreadId = thread.ManagedThreadId;

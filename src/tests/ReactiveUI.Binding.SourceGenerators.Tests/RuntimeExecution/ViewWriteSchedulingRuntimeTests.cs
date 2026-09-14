@@ -8,11 +8,7 @@ using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.RuntimeExecution;
 
-/// <summary>
-/// Covers where a binding delivers its write to the view. A view model raises its notifications from whatever
-/// thread did the work, and the UI frameworks only allow a view to be touched from the thread that owns it, so
-/// the binding has to move the write rather than leaving each consumer to do it.
-/// </summary>
+/// <summary>Covers which thread a binding delivers its write to the view on.</summary>
 public class ViewWriteSchedulingRuntimeTests
 {
     /// <summary>What the scenario returns when the write went through the established sequencer.</summary>
@@ -82,6 +78,29 @@ public class ViewWriteSchedulingRuntimeTests
                                                     public string DisplayName { get; set; } = "";
                                                 }
 
+                                                public class ManualStream : IObservable<string>
+                                                {
+                                                    private IObserver<string> _observer;
+
+                                                    public void Push(string value)
+                                                    {
+                                                        _observer.OnNext(value);
+                                                    }
+
+                                                    public IDisposable Subscribe(IObserver<string> observer)
+                                                    {
+                                                        _observer = observer;
+                                                        return new Subscription();
+                                                    }
+
+                                                    private sealed class Subscription : IDisposable
+                                                    {
+                                                        public void Dispose()
+                                                        {
+                                                        }
+                                                    }
+                                                }
+
                                                 public static class Usage
                                                 {
                                                     public static string Run()
@@ -105,29 +124,59 @@ public class ViewWriteSchedulingRuntimeTests
                                                             BindingSchedulers.MainThread = null;
                                                         }
                                                     }
+
+                                                    public static string RunBindTo()
+                                                    {
+                                                        var sequencer = new RecordingSequencer();
+                                                        BindingSchedulers.MainThread = sequencer;
+
+                                                        try
+                                                        {
+                                                            var stream = new ManualStream();
+                                                            var view = new MyView();
+
+                                                            var binding = stream.BindTo(view, x => x.DisplayName);
+
+                                                            stream.Push("changed");
+
+                                                            return sequencer.Used && view.DisplayName == "changed" ? "scheduled" : "inline";
+                                                        }
+                                                        finally
+                                                        {
+                                                            BindingSchedulers.MainThread = null;
+                                                        }
+                                                    }
                                                 }
                                             }
                                             """;
 
-    /// <summary>
-    /// A write to the view goes through the established sequencer. Delivering it on the notifying thread is
-    /// what throws on the UI frameworks, and an application that had this done for it will not have added the
-    /// marshalling itself.
-    /// </summary>
+    /// <summary>A BindOneWay write to the view goes through the established sequencer.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BindOneWay_WhenAViewThreadIsEstablished_DeliversTheWriteThroughIt()
+    public async Task BindOneWay_WhenAViewThreadIsEstablished_DeliversTheWriteThroughIt() =>
+        await Assert.That(await RunScenarioAsync("Run")).IsEqualTo(Scheduled);
+
+    /// <summary>A generated BindTo write to the view goes through the established sequencer.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindTo_WhenAViewThreadIsEstablished_DeliversTheWriteThroughIt() =>
+        await Assert.That(await RunScenarioAsync("RunBindTo")).IsEqualTo(Scheduled);
+
+    /// <summary>Compiles the scenario, runs one of its entry points, and reports where the write was delivered.</summary>
+    /// <param name="entryPoint">The static method on the scenario's <c>Usage</c> class to run.</param>
+    /// <returns>What the entry point reported.</returns>
+    private static async Task<string?> RunScenarioAsync(string entryPoint)
     {
         var result = TestHelper.RunGenerator(SchedulingSource, LanguageVersion.CSharp10);
         await result.CompilationSucceeds();
 
         var (assembly, context) = TestHelper.EmitAndLoad(result);
-        var run = assembly.GetType("TestApp.Usage")!.GetMethod("Run", BindingFlags.Public | BindingFlags.Static)!;
+        var run = assembly.GetType("TestApp.Usage")!.GetMethod(entryPoint, BindingFlags.Public | BindingFlags.Static)!;
 
         var outcome = (string?)run.Invoke(null, null);
 
         context.Unload();
 
-        await Assert.That(outcome).IsEqualTo(Scheduled);
+        return outcome;
     }
 }

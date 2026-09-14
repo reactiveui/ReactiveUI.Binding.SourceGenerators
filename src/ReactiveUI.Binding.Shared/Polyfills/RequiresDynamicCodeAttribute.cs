@@ -11,7 +11,7 @@ using Targets = System.AttributeTargets;
 
 namespace System.Diagnostics.CodeAnalysis;
 
-/// <summary>Indicates that the specified method requires the ability to generate new code at runtime, for example through <see cref="System.Reflection"/>.</summary>
+/// <summary>Indicates that the method requires generating code at run time.</summary>
 [ExcludeFromCodeCoverage]
 [DebuggerNonUserCode]
 [AttributeUsage(
@@ -27,16 +27,13 @@ internal sealed class RequiresDynamicCodeAttribute : Attribute
         Message = message;
 
     /// <summary>Gets or sets a value indicating whether the annotation should not apply to static members.</summary>
-    internal bool ExcludeStatics { get; set; }
+    public bool ExcludeStatics { get; set; }
 
     /// <summary>Gets a message that contains information about the usage of dynamic code.</summary>
-    internal string Message { get; }
+    public string Message { get; }
 
-    /// <summary>
-    /// Gets or sets an optional URL that contains more information about the method,
-    /// why it requires dynamic code, and what options a consumer has to deal with it.
-    /// </summary>
-    internal string? Url { get; set; }
+    /// <summary>Gets or sets an optional URL with more information about the requirement.</summary>
+    public string? Url { get; set; }
 }
 #else
 [assembly: TypeForwardedTo(typeof(RequiresDynamicCodeAttribute))]

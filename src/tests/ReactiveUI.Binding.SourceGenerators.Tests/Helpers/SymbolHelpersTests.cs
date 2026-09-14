@@ -132,10 +132,7 @@ public class SymbolHelpersTests
         await Assert.That(result).IsFalse();
     }
 
-    /// <summary>
-    /// Verifies ExtractInteractionTypeArguments returns true and extracts types when the property
-    /// type is <c>IInteraction&lt;TInput, TOutput&gt;</c> directly.
-    /// </summary>
+    /// <summary>Verifies ExtractInteractionTypeArguments extracts the types of a property typed as <c>IInteraction&lt;TInput, TOutput&gt;</c>.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractInteractionTypeArguments_DirectIInteractionProperty_ReturnsTrueWithTypes()
@@ -188,10 +185,7 @@ public class SymbolHelpersTests
         await Assert.That(outputType).IsEqualTo(string.Empty);
     }
 
-    /// <summary>
-    /// Verifies ExtractInnerObservableType correctly extracts the inner type when the property's
-    /// type implements IObservable&lt;T&gt; via an interface (not directly IObservable&lt;T&gt;).
-    /// </summary>
+    /// <summary>Verifies ExtractInnerObservableType extracts the inner type from a property implementing IObservable&lt;T&gt; through an interface.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractInnerObservableType_ViaInterfaceImplementation_ReturnsInnerType()
@@ -228,10 +222,7 @@ public class SymbolHelpersTests
         await Assert.That(innerType).IsEqualTo("int");
     }
 
-    /// <summary>
-    /// Verifies ExtractInnerObservableType falls back to the leaf segment type when the
-    /// expression is not a simple member-access lambda.
-    /// </summary>
+    /// <summary>Verifies ExtractInnerObservableType falls back to the leaf segment type for a non-member-access lambda.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task ExtractInnerObservableType_NonLambdaArg_ReturnsFallbackType()
@@ -295,7 +286,7 @@ public class SymbolHelpersTests
         var semanticModel = compilation.GetSemanticModel(tree);
         var classDecl = (await tree.GetRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
             .First(static c => c.Identifier.Text == "Ext");
-        var classSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl)!;
+        var classSymbol = semanticModel.GetDeclaredSymbol(classDecl)!;
         var methodSymbol = classSymbol.GetMembers("Bind").OfType<IMethodSymbol>().First();
         var converterParam = methodSymbol.Parameters[0];
 
@@ -325,7 +316,7 @@ public class SymbolHelpersTests
         var semanticModel = compilation.GetSemanticModel(tree);
         var classDecl = (await tree.GetRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
             .First(static c => c.Identifier.Text == "Ext");
-        var classSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl)!;
+        var classSymbol = semanticModel.GetDeclaredSymbol(classDecl)!;
         var methodSymbol = classSymbol.GetMembers("Bind").OfType<IMethodSymbol>().First();
         var converterParam = methodSymbol.Parameters[0];
 
@@ -415,6 +406,6 @@ public class SymbolHelpersTests
         var semanticModel = compilation.GetSemanticModel(tree);
         var classDecl = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
             .First(c => c.Identifier.Text == typeName);
-        return (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl)!;
+        return semanticModel.GetDeclaredSymbol(classDecl)!;
     }
 }
