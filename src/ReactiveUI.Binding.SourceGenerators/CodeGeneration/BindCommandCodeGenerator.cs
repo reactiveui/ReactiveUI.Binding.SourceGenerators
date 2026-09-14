@@ -293,7 +293,9 @@ internal static class BindCommandCodeGenerator
     /// <param name="viewClassInfo">The view type class binding info, which says whether it exposes a view model.</param>
     /// <remarks>
     /// Both are observed through whichever view model the view currently holds, so replacing it rebinds the
-    /// command and keeps the parameter flowing from the view model now on display.
+    /// command and keeps the parameter flowing from the view model now on display. The command is delivered on the
+    /// thread that owns the view, so each rebind touches the control there, which is where the runtime command
+    /// binding delivers it too.
     /// <para>
     /// A parameter named as a property is observed rather than read once. The control has to see each value the
     /// property takes, the same as it would from a caller-supplied stream; reading it when the command arrives
@@ -319,7 +321,10 @@ internal static class BindCommandCodeGenerator
             commandObservation.Path,
             inv.CommandTypeFullName,
             commandObservation.RootClassInfo,
-            "commandObs");
+            "__commandChanges");
+
+        _ = sb.Append("            var commandObs = ").Append(GeneratedTypeNames.BindingSchedulers)
+            .AppendLine(".ObserveOnViewThread(__commandChanges, view);");
 
         if (inv is not { HasObservableParameter: false, HasExpressionParameter: true, ParameterPropertyPath: not null })
         {

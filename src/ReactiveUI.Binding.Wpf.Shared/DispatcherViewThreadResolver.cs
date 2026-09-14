@@ -22,20 +22,22 @@ public sealed class DispatcherViewThreadResolver : IViewThreadResolver
 {
     /// <inheritdoc/>
     public SynchronizationContext? ContextFor(object target) =>
-        target is DependencyObject dependencyObject ? new DispatcherContext(dependencyObject.Dispatcher) : null;
+        target is DependencyObject dependencyObject ? new DispatcherContext(dependencyObject) : null;
 
-    /// <summary>Runs a callback on the thread one dispatcher owns.</summary>
-    /// <param name="dispatcher">The dispatcher whose thread the callbacks run on.</param>
+    /// <summary>Runs a callback on the thread one object's dispatcher owns.</summary>
+    /// <param name="owner">The object whose dispatcher the callbacks run on.</param>
     /// <remarks>
-    /// A caller already on that thread runs inline, so a view model raising on the UI thread keeps its write
-    /// synchronous and pays nothing. Only a write from elsewhere is queued.
+    /// The object is asked for its dispatcher on every write. A frozen <see cref="Freezable"/> has none and belongs
+    /// to no thread, and a caller already on the owning thread needs no turn, so both run inline and pay nothing.
+    /// Only a write from elsewhere is queued.
     /// </remarks>
-    private sealed class DispatcherContext(Dispatcher dispatcher) : SynchronizationContext
+    private sealed class DispatcherContext(DependencyObject owner) : SynchronizationContext
     {
         /// <inheritdoc/>
         public override void Post(SendOrPostCallback d, object? state)
         {
-            if (dispatcher.CheckAccess())
+            var dispatcher = owner.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
             {
                 d(state);
                 return;
@@ -47,7 +49,8 @@ public sealed class DispatcherViewThreadResolver : IViewThreadResolver
         /// <inheritdoc/>
         public override void Send(SendOrPostCallback d, object? state)
         {
-            if (dispatcher.CheckAccess())
+            var dispatcher = owner.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
             {
                 d(state);
                 return;

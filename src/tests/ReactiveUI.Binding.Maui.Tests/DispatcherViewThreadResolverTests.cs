@@ -103,6 +103,33 @@ public class DispatcherViewThreadResolverTests
         }
     }
 
+    /// <summary>
+    /// An object that picks a dispatcher up after the binding was made is written through it from then on, because
+    /// the context asks the object on every write.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [Test]
+    public async Task Post_AfterTheObjectPicksUpADispatcher_GoesThroughIt()
+    {
+        var dispatcher = new RecordingDispatcher();
+        SynchronizationContext? context;
+
+        using (new DispatcherProviderScope(null))
+        {
+            context = new DispatcherViewThreadResolver().ContextFor(new Label());
+        }
+
+        using (new DispatcherProviderScope(dispatcher))
+        {
+            var posted = false;
+
+            context!.Post(_ => posted = true, null);
+
+            await Assert.That(dispatcher.DispatchCount).IsEqualTo(1);
+            await Assert.That(posted).IsTrue();
+        }
+    }
+
     /// <summary>Anything that is not a bindable object is left to another resolver.</summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Test]
@@ -113,8 +140,8 @@ public class DispatcherViewThreadResolverTests
     private sealed class DispatcherProviderScope : IDisposable
     {
         /// <summary>Initializes a new instance of the <see cref="DispatcherProviderScope"/> class.</summary>
-        /// <param name="dispatcher">The dispatcher every bindable object created inside the scope picks up.</param>
-        public DispatcherProviderScope(IDispatcher dispatcher) =>
+        /// <param name="dispatcher">The dispatcher every bindable object created inside the scope picks up, or null for none.</param>
+        public DispatcherProviderScope(IDispatcher? dispatcher) =>
             _ = DispatcherProvider.SetCurrent(new StubProvider(dispatcher));
 
         /// <inheritdoc/>
@@ -122,8 +149,8 @@ public class DispatcherViewThreadResolverTests
         public void Dispose() => _ = DispatcherProvider.SetCurrent(null);
 
         /// <summary>Hands the same dispatcher to every thread that asks.</summary>
-        /// <param name="dispatcher">The dispatcher to hand out.</param>
-        private sealed class StubProvider(IDispatcher dispatcher) : IDispatcherProvider
+        /// <param name="dispatcher">The dispatcher to hand out, or null for none.</param>
+        private sealed class StubProvider(IDispatcher? dispatcher) : IDispatcherProvider
         {
             /// <inheritdoc/>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -30,16 +30,65 @@ public class ControlViewThreadResolverTests
     }
 
     /// <summary>
-    /// A control with no handle owns no thread yet. Creating one here would bind the control to whichever
-    /// thread made the binding, so the write is left where the caller put it.
+    /// A control with no handle is claimed, but owns no thread yet, so a write to it runs where the caller put it
+    /// and the handle is not created on the caller's behalf.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task ContextFor_WithAControlThatHasNoHandle_ClaimsNothing()
+    public async Task Post_ToAControlThatHasNoHandle_RunsInline()
     {
+        var writingThreadId = Environment.CurrentManagedThreadId;
         using var control = new Control();
 
-        await Assert.That(new ControlViewThreadResolver().ContextFor(control)).IsNull();
+        var context = new ControlViewThreadResolver().ContextFor(control);
+        var ranOnThreadId = 0;
+
+        await Assert.That(context).IsNotNull();
+
+        context!.Post(_ => ranOnThreadId = Environment.CurrentManagedThreadId, null);
+
+        await Assert.That(ranOnThreadId).IsEqualTo(writingThreadId);
+        await Assert.That(control.IsHandleCreated).IsFalse();
+    }
+
+    /// <summary>
+    /// A binding made before the control's handle exists writes on the thread that later creates the handle. The
+    /// context asks the control on every write, so a binding made in a form's constructor is not left behind on
+    /// the thread that made it.
+    /// </summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Post_AfterTheHandleIsCreatedOnAnotherThread_RunsOnThatThread()
+    {
+        using var owner = new ControlThread();
+        var control = new Control();
+        var context = new ControlViewThreadResolver().ContextFor(control);
+        using var created = new ManualResetEventSlim();
+
+        // Reading the handle on the owning thread creates it there, which is what gives the control its owner.
+        _ = owner.Control.BeginInvoke(() =>
+        {
+            _ = control.Handle;
+            created.Set();
+        });
+
+        await Assert.That(created.Wait(Patience)).IsTrue();
+
+        using var arrived = new ManualResetEventSlim();
+        var ranOnThreadId = 0;
+
+        context!.Post(
+            _ =>
+            {
+                ranOnThreadId = Environment.CurrentManagedThreadId;
+                arrived.Set();
+            },
+            null);
+
+        await Assert.That(arrived.Wait(Patience)).IsTrue();
+        await Assert.That(ranOnThreadId).IsEqualTo(owner.ThreadId);
+
+        _ = owner.Control.BeginInvoke(control.Dispose);
     }
 
     /// <summary>Anything that is not a control is left to another resolver.</summary>

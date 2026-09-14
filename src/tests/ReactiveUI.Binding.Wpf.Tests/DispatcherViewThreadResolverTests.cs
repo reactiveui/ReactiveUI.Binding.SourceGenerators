@@ -81,6 +81,40 @@ public class DispatcherViewThreadResolverTests
         await Assert.That(ranOnThreadId).IsEqualTo(writingThreadId);
     }
 
+    /// <summary>A frozen object belongs to no dispatcher, so a write to it runs where the caller put it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Post_ToAFrozenObject_RunsInline()
+    {
+        var writingThreadId = Environment.CurrentManagedThreadId;
+        var frozen = new FreezableFixture();
+        frozen.Freeze();
+
+        var context = new DispatcherViewThreadResolver().ContextFor(frozen);
+        var ranOnThreadId = 0;
+
+        context!.Post(_ => ranOnThreadId = Environment.CurrentManagedThreadId, null);
+
+        await Assert.That(ranOnThreadId).IsEqualTo(writingThreadId);
+    }
+
+    /// <summary>A send to a frozen object runs inline as well.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Send_ToAFrozenObject_RunsInline()
+    {
+        var sendingThreadId = Environment.CurrentManagedThreadId;
+        var frozen = new FreezableFixture();
+        frozen.Freeze();
+
+        var context = new DispatcherViewThreadResolver().ContextFor(frozen);
+        var ranOnThreadId = 0;
+
+        context!.Send(_ => ranOnThreadId = Environment.CurrentManagedThreadId, null);
+
+        await Assert.That(ranOnThreadId).IsEqualTo(sendingThreadId);
+    }
+
     /// <summary>A send from the owning thread runs inline as well.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -159,4 +193,11 @@ public class DispatcherViewThreadResolverTests
 
     /// <summary>A dependency object with no properties, standing in for a view.</summary>
     private sealed class Fixture : DependencyObject;
+
+    /// <summary>A freezable with no properties, which gives up its dispatcher once frozen.</summary>
+    private sealed class FreezableFixture : Freezable
+    {
+        /// <inheritdoc/>
+        protected override Freezable CreateInstanceCore() => new FreezableFixture();
+    }
 }

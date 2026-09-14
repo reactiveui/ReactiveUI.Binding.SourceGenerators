@@ -254,6 +254,10 @@ internal static class BindToCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="inv">The invocation info.</param>
     /// <param name="suffix">The stable method-name suffix.</param>
+    /// <remarks>
+    /// Each value is delivered on the thread that owns the target, which is where <c>BindToUnsafe</c> delivers it
+    /// too, so a call site writes on the same thread whichever way it was resolved.
+    /// </remarks>
     internal static void GenerateBindToMethod(StringBuilder sb, BindToInvocationInfo inv, string suffix)
     {
         var directAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
@@ -279,13 +283,15 @@ internal static class BindToCodeGenerator
 
         if (directAssign)
         {
-            _ = sb.Append(ReturnPrefix).Append(BindingErrors).AppendLine(".Subscribe(source, value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
+            _ = sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe(").Append(BindingSchedulers)
+                .AppendLine(".ObserveOnViewThread(source, target), value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
                 .Append("                ").Append(directAssignment).AppendLine().Append("            }, \"")
                 .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");").AppendLine(GeneratedSyntax.MemberBodyClose).AppendLine();
         }
         else
         {
-            _ = sb.Append(ReturnPrefix).Append(BindingErrors).AppendLine(".Subscribe(source, value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
+            _ = sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe(").Append(BindingSchedulers)
+                .AppendLine(".ObserveOnViewThread(source, target), value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
                 .Append("                if (").Append(RuntimeBindingConverter).Append(".TryConvert<").Append(inv.SourceValueTypeFullName).Append(", ")
                 .Append(inv.TargetPropertyTypeFullName).Append(">(value, ").Append(FormatConversionArguments(inv)).AppendLine(", out var __converted))")
                 .AppendLine("                {").Append("                    ").Append(convertedAssignment).AppendLine().AppendLine("                }")

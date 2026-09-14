@@ -577,18 +577,26 @@ object.
 That distinction matters as soon as an application has more than one UI thread. WPF allows several, each owning
 its own windows, and a write sent to the wrong one throws exactly as an unmarshalled write does.
 
+The object is asked on every write, not once when the binding is made. A WinForms control bound before its
+window handle exists - in a form's constructor, say - is written inline until the handle is created, and on the
+thread that created it from then on.
+
 A write that is already on the owning thread is applied inline, so setting a property on the UI thread and
 reading the control back on the next line behaves as it reads. Only a write from another thread waits for a
 turn of the message loop.
+
+Every binding API routes its writes this way - `BindOneWay`, `BindTwoWay`, `OneWayBind`, `Bind`, `BindTo` and
+the rebinding a `BindCommand` does - and a call resolved by its `Unsafe` twin routes them identically.
 
 > [!TIP]
 > Naming a scheduler on the binding wins outright - `vm.BindOneWay(view, x => x.Name, x => x.NameLabel,
 > scheduler: someScheduler)`. Use it when you want the write somewhere specific.
 
-An application can name one thread for everything else with
-`BindingSchedulers.UseSynchronizationContext(context)`. It is consulted only for targets no platform package
-claims. Where neither answers - a console host, a test, a platform with no thread affinity - writes are
-delivered inline and cost nothing.
+A host can take the choice over for every binding by setting `BindingSchedulers.MainThread`, or with
+`BindingSchedulers.UseSynchronizationContext(context)`. When it is set, writes go through it ahead of any platform
+package, which is how an adapter delivers through its own scheduler and how a test substitutes one. Where nothing
+answers - a console host, a test, a platform with no thread affinity - writes are delivered inline and cost
+nothing.
 
 ## Rx library compatibility
 
@@ -670,6 +678,16 @@ breaks a `PublishAot` build for everyone who calls it.
 
 The first write follows ReactiveUI's default. The view model side is applied first. The view's own first value
 is then weighed against what was just written, and dropped when the two are equal.
+
+### Every binding writes on the thread that owns the view
+
+ReactiveUI moves a write onto the UI thread only for a two-way `Bind` on WPF. Its `OneWayBind` and `BindTo`
+write wherever the notification was raised, and so does every WinForms and MAUI binding.
+
+Here every binding API moves the write, on WPF, WinForms and MAUI alike, as described in
+[Which thread a binding writes on](#which-thread-a-binding-writes-on). A background update that throws under
+ReactiveUI works here. One that ReactiveUI applied synchronously without throwing arrives a turn of the message
+loop later. A host that wants ReactiveUI's scheduler to decide sets `BindingSchedulers.MainThread` to it.
 
 ### A binding made through a type parameter is not generated
 

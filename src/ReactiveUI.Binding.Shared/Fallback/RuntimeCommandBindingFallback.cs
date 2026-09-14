@@ -38,8 +38,9 @@ public static class RuntimeCommandBindingFallback
     /// <exception cref="ArgumentNullException"><paramref name="commandProperty"/> or <paramref name="controlProperty"/> is null.</exception>
     /// <remarks>
     /// Both sides are followed, so replacing either the command or the control rebinds and drops the binding it
-    /// held before. A null view model holds no command property to observe, so nothing is bound rather than the
-    /// call faulting - which is the ordinary state before a view model is assigned.
+    /// held before. Each rebind touches the control, so it is delivered on the thread that owns the view, as the
+    /// generated binding delivers it. A null view model holds no command property to observe, so nothing is bound
+    /// rather than the call faulting - which is the ordinary state before a view model is assigned.
     /// </remarks>
     [RequiresUnreferencedCode("Runtime command binding resolves the property chain by reflection.")]
     public static IDisposable BindCommand<
@@ -76,7 +77,9 @@ public static class RuntimeCommandBindingFallback
         var controls = RuntimeObservationFallback.WhenAnyValue(view, controlProperty);
 
         var observation = BindingErrors.Subscribe(
-            LinqExtensions.CombineLatest(commands, controls, static (command, control) => (command, control)),
+            BindingSchedulers.ObserveOnViewThread(
+                LinqExtensions.CombineLatest(commands, controls, static (command, control) => (command, control)),
+                view),
             pair => binding.Disposable = Bind(pair.command, pair.control, commandParameter, toEvent),
             bindingExpression);
 

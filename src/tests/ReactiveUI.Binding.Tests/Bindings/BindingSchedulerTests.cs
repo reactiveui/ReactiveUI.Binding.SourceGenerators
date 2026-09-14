@@ -78,10 +78,45 @@ public class BindingSchedulerTests
         }
     }
 
-    /// <summary>A target no resolver claims falls back to the blanket thread a host established.</summary>
+    /// <summary>
+    /// A main thread the host sets takes the write even when a resolver claims the target. That is how an adapter
+    /// hands the choice to a scheduler of its own, and how a test substitutes one.
+    /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task ObserveOnViewThread_WhenNoResolverClaimsTheTarget_FallsBackToTheBlanketThread()
+    public async Task ObserveOnViewThread_WhenTheHostSetsAMainThread_DeliversThroughItAheadOfAnyResolver()
+    {
+        var hostContext = new RecordingSynchronizationContext();
+        var resolverContext = new RecordingSynchronizationContext();
+        var target = new object();
+
+        using (RegisterResolver(new StubViewThreadResolver(target, resolverContext)))
+        {
+            try
+            {
+                BindingSchedulers.UseSynchronizationContext(hostContext);
+
+                var source = new ManualObservable<string>();
+
+                using var subscription = BindingSchedulers.ObserveOnViewThread(source, target)
+                    .Subscribe(new CapturingObserver(static _ => { }));
+
+                source.Observer?.OnNext(Written);
+
+                await Assert.That(hostContext.PostCount).IsGreaterThan(0);
+                await Assert.That(resolverContext.PostCount).IsEqualTo(0);
+            }
+            finally
+            {
+                BindingSchedulers.UseSynchronizationContext(null);
+            }
+        }
+    }
+
+    /// <summary>A target no resolver claims is delivered through the main thread a host set.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task ObserveOnViewThread_WhenNoResolverClaimsTheTarget_DeliversThroughTheHostsMainThread()
     {
         var context = new RecordingSynchronizationContext();
 
