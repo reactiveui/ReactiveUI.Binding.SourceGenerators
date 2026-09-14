@@ -21,6 +21,9 @@ public class ViewWriteSchedulingRuntimeTests
     /// <summary>What a scenario returns when the write went through the platform's own dispatcher.</summary>
     private const string Dispatched = "dispatched";
 
+    /// <summary>What a burst scenario returns when both sides end on the latest value.</summary>
+    private const string Settled = "settled";
+
     /// <summary>Bindings onto stand-ins for WPF, WinForms and MAUI views, and onto a plain object.</summary>
     private const string SchedulingSource = """
                                             using System;
@@ -86,6 +89,40 @@ public class ViewWriteSchedulingRuntimeTests
                                                 public class WpfView : System.Windows.Threading.DispatcherObject
                                                 {
                                                     public string DisplayName { get; set; } = "";
+                                                }
+
+                                                public class TwoWayWpfView : System.Windows.Threading.DispatcherObject, INotifyPropertyChanged
+                                                {
+                                                    private string _displayName = "";
+
+                                                    public event PropertyChangedEventHandler PropertyChanged;
+
+                                                    public int Writes { get; private set; }
+
+                                                    public string DisplayName
+                                                    {
+                                                        get { return _displayName; }
+                                                        set
+                                                        {
+                                                            Writes++;
+                                                            if (Writes > 1000)
+                                                            {
+                                                                throw new InvalidOperationException("The binding kept writing.");
+                                                            }
+
+                                                            _displayName = value;
+                                                            var handler = PropertyChanged;
+                                                            if (handler != null)
+                                                            {
+                                                                handler(this, new PropertyChangedEventArgs("DisplayName"));
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                public class BoundWpfView : TwoWayWpfView, IViewFor
+                                                {
+                                                    public object ViewModel { get; set; }
                                                 }
 
                                                 public class WinFormsView : System.Windows.Forms.Control
@@ -262,6 +299,45 @@ public class ViewWriteSchedulingRuntimeTests
                                                         return Describe(view.DisplayName, false, 0);
                                                     }
 
+                                                    public static string TwoWayBurstFromAnotherThread()
+                                                    {
+                                                        var viewModel = new MyViewModel();
+                                                        var view = new TwoWayWpfView();
+                                                        view.Dispatcher.Holds = true;
+                                                        var binding = viewModel.BindTwoWay(view, x => x.Name, x => x.DisplayName);
+
+                                                        return RunBurst(viewModel, view);
+                                                    }
+
+                                                    public static string ViewFirstBindBurstFromAnotherThread()
+                                                    {
+                                                        var viewModel = new MyViewModel();
+                                                        var view = new BoundWpfView();
+                                                        view.Dispatcher.Holds = true;
+                                                        var binding = view.Bind(viewModel, x => x.Name, x => x.DisplayName);
+
+                                                        return RunBurst(viewModel, view);
+                                                    }
+
+                                                    private static string RunBurst(MyViewModel viewModel, TwoWayWpfView view)
+                                                    {
+                                                        try
+                                                        {
+                                                            view.Dispatcher.Pump(view);
+                                                            viewModel.Name = "A";
+                                                            viewModel.Name = "B";
+                                                            view.Dispatcher.Pump(view);
+                                                        }
+                                                        catch (Exception)
+                                                        {
+                                                            return "kept writing";
+                                                        }
+
+                                                        return viewModel.Name == "B" && view.DisplayName == "B"
+                                                            ? "settled"
+                                                            : "stale: " + viewModel.Name + " / " + view.DisplayName;
+                                                    }
+
                                                     private static string Describe(string written, bool scheduled, int dispatched)
                                                     {
                                                         if (written != "changed")
@@ -288,13 +364,39 @@ public class ViewWriteSchedulingRuntimeTests
 
                                                 public class Dispatcher
                                                 {
+                                                    private readonly System.Collections.Generic.Queue<Action> _held = new System.Collections.Generic.Queue<Action>();
+
                                                     public int Posts { get; private set; }
+
+                                                    public bool Holds { get; set; }
 
                                                     public object BeginInvoke(DispatcherPriority priority, Delegate method, object arg)
                                                     {
                                                         Posts++;
+                                                        if (Holds)
+                                                        {
+                                                            _held.Enqueue(() => method.DynamicInvoke(arg));
+                                                            return null;
+                                                        }
+
                                                         method.DynamicInvoke(arg);
                                                         return null;
+                                                    }
+
+                                                    public void Pump(DispatcherObject owner)
+                                                    {
+                                                        owner.HasAccess = true;
+                                                        try
+                                                        {
+                                                            while (_held.Count > 0)
+                                                            {
+                                                                _held.Dequeue()();
+                                                            }
+                                                        }
+                                                        finally
+                                                        {
+                                                            owner.HasAccess = false;
+                                                        }
                                                     }
                                                 }
 
@@ -417,6 +519,18 @@ public class ViewWriteSchedulingRuntimeTests
     [Test]
     public async Task BindOneWay_ToAMauiObjectWithNoDispatcher_WritesInline() =>
         await Assert.That(await RunScenarioAsync("OneWayToAMauiViewWithNoDispatcher")).IsEqualTo(Inline);
+
+    /// <summary>Two changes from another thread before the view's thread runs leave a two-way binding on the latest value.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task BindTwoWay_ABurstFromAnotherThread_SettlesOnTheLatestValue() =>
+        await Assert.That(await RunScenarioAsync("TwoWayBurstFromAnotherThread")).IsEqualTo(Settled);
+
+    /// <summary>Two changes from another thread before the view's thread runs leave a view-first binding on the latest value.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task Bind_ABurstFromAnotherThread_SettlesOnTheLatestValue() =>
+        await Assert.That(await RunScenarioAsync("ViewFirstBindBurstFromAnotherThread")).IsEqualTo(Settled);
 
     /// <summary>Compiles the scenario, runs one of its entry points, and reports where the write was delivered.</summary>
     /// <param name="entryPoint">The static method on the scenario's <c>Usage</c> class to run.</param>

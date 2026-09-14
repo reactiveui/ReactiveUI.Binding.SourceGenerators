@@ -2,8 +2,6 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
-using System.Collections.Concurrent;
-
 #if REACTIVE_SHIM
 namespace ReactiveUI.Binding.Reactive.Observables;
 #else
@@ -27,36 +25,32 @@ internal sealed class ViewThreadObservable<T>(IObservable<T> source, object targ
         return sink;
     }
 
-    /// <summary>One notification waiting for the owning thread.</summary>
-    /// <param name="kind">Which of the three notifications this is.</param>
-    /// <param name="value">The value, for a next notification.</param>
-    /// <param name="error">The error, for an error notification.</param>
-    private readonly struct Notification(NotificationKind kind, T? value, Exception? error)
-    {
-        /// <summary>Gets which of the three notifications this is.</summary>
-        public NotificationKind Kind { get; } = kind;
-
-        /// <summary>Gets the value, for a next notification.</summary>
-        public T? Value { get; } = value;
-
-        /// <summary>Gets the error, for an error notification.</summary>
-        public Exception? Error { get; } = error;
-    }
-
-    /// <summary>The subscription that writes inline on the owning thread and queues everything else.</summary>
+    /// <summary>The subscription that writes inline on the owning thread and holds the latest value for it otherwise.</summary>
     /// <param name="observer">The observer applying the write.</param>
     /// <param name="target">The object the write lands on.</param>
     /// <param name="invoker">The invoker for the thread that owns <paramref name="target"/>.</param>
     private sealed class Sink(IObserver<T> observer, object target, IViewThreadInvoker invoker) : IObserver<T>, IDisposable
     {
-        /// <summary>The notifications waiting for the owning thread, created on the first write that has to wait.</summary>
-        private ConcurrentQueue<Notification>? _queue;
+        /// <summary>Guards the waiting notifications and the scheduled flag.</summary>
+        private readonly Lock _gate = new();
 
         /// <summary>The upstream subscription, or null once disposed.</summary>
         private IDisposable? _upstream;
 
-        /// <summary>How many notifications are queued and not yet delivered.</summary>
-        private int _pending;
+        /// <summary>The latest value waiting for the owning thread.</summary>
+        private T? _value;
+
+        /// <summary>Whether <see cref="_value"/> holds a value.</summary>
+        private bool _hasValue;
+
+        /// <summary>The error waiting for the owning thread, or null.</summary>
+        private Exception? _error;
+
+        /// <summary>Whether completion is waiting for the owning thread.</summary>
+        private bool _completed;
+
+        /// <summary>Whether a drain is scheduled or running.</summary>
+        private bool _scheduled;
 
         /// <summary>Non-zero once the subscription is disposed.</summary>
         private int _disposed;
@@ -69,37 +63,28 @@ internal sealed class ViewThreadObservable<T>(IObservable<T> source, object targ
         /// <inheritdoc/>
         public void OnNext(T value)
         {
-            if (TryDeliverInline())
+            if (Admit(NotificationKind.Next, value, null))
             {
                 observer.OnNext(value);
-                return;
             }
-
-            Enqueue(new(NotificationKind.Next, value, null));
         }
 
         /// <inheritdoc/>
         public void OnError(Exception error)
         {
-            if (TryDeliverInline())
+            if (Admit(NotificationKind.Error, default, error))
             {
                 observer.OnError(error);
-                return;
             }
-
-            Enqueue(new(NotificationKind.Error, default, error));
         }
 
         /// <inheritdoc/>
         public void OnCompleted()
         {
-            if (TryDeliverInline())
+            if (Admit(NotificationKind.Completed, default, null))
             {
                 observer.OnCompleted();
-                return;
             }
-
-            Enqueue(new(NotificationKind.Completed, default, null));
         }
 
         /// <inheritdoc/>
@@ -114,55 +99,72 @@ internal sealed class ViewThreadObservable<T>(IObservable<T> source, object targ
             Interlocked.Exchange(ref _upstream, null)!.Dispose();
         }
 
-        /// <summary>Delivers the queued notifications in order, on whichever thread the invoker or main thread runs this.</summary>
-        private void Drain()
-        {
-            var queue = Volatile.Read(ref _queue)!;
-
-            do
-            {
-                // The pending count is only raised after an enqueue, so there is always a notification to take.
-                _ = queue.TryDequeue(out var notification);
-
-                if (Volatile.Read(ref _disposed) == 0)
-                {
-                    Deliver(notification);
-                }
-            }
-            while (Interlocked.Decrement(ref _pending) != 0);
-        }
-
-        /// <summary>Determines whether a notification can be delivered on the calling thread now.</summary>
-        /// <returns><see langword="false"/> when disposed, when earlier notifications are still queued, or when the caller is not on the owning thread.</returns>
-        private bool TryDeliverInline() =>
-            Volatile.Read(ref _disposed) == 0
-            && Volatile.Read(ref _pending) == 0
-            && invoker.CheckAccess(target);
-
-        /// <summary>Queues a notification and, when nothing is draining, schedules a drain.</summary>
-        /// <param name="notification">The notification to queue.</param>
-        private void Enqueue(in Notification notification)
+        /// <summary>Decides whether a notification runs on the calling thread, and holds it for the owning thread otherwise.</summary>
+        /// <param name="kind">Which notification arrived.</param>
+        /// <param name="value">The value, for a next notification.</param>
+        /// <param name="error">The error, for an error notification.</param>
+        /// <returns><see langword="true"/> when the caller should deliver the notification now.</returns>
+        private bool Admit(NotificationKind kind, T? value, Exception? error)
         {
             if (Volatile.Read(ref _disposed) != 0)
             {
-                return;
+                return false;
             }
 
-            var queue = Volatile.Read(ref _queue);
-            if (queue is null)
+            bool startDrain;
+            lock (_gate)
             {
-                // The source delivers one notification at a time, so only this thread ever creates the queue.
-                queue = new();
-                Volatile.Write(ref _queue, queue);
+                if (!_scheduled && invoker.CheckAccess(target))
+                {
+                    return true;
+                }
+
+                Hold(kind, value, error);
+                startDrain = !_scheduled;
+                _scheduled = true;
             }
 
-            queue.Enqueue(notification);
-
-            if (Interlocked.Increment(ref _pending) != 1)
+            if (startDrain)
             {
-                return;
+                ScheduleDrain();
             }
 
+            return false;
+        }
+
+        /// <summary>Holds a notification until the drain runs.</summary>
+        /// <param name="kind">Which notification arrived.</param>
+        /// <param name="value">The value, for a next notification.</param>
+        /// <param name="error">The error, for an error notification.</param>
+        private void Hold(NotificationKind kind, T? value, Exception? error)
+        {
+            switch (kind)
+            {
+                case NotificationKind.Next:
+                {
+                    // A newer value replaces a waiting one, so an echo of an earlier write never writes an old value back.
+                    _value = value;
+                    _hasValue = true;
+                    break;
+                }
+
+                case NotificationKind.Error:
+                {
+                    _error = error;
+                    break;
+                }
+
+                default:
+                {
+                    _completed = true;
+                    break;
+                }
+            }
+        }
+
+        /// <summary>Schedules the drain on the host's main thread when one is set, and through the invoker otherwise.</summary>
+        private void ScheduleDrain()
+        {
             var mainThread = BindingSchedulers.MainThread;
             if (mainThread is null)
             {
@@ -179,29 +181,62 @@ internal sealed class ViewThreadObservable<T>(IObservable<T> source, object targ
                 });
         }
 
-        /// <summary>Hands one notification to the observer.</summary>
-        /// <param name="notification">The notification to deliver.</param>
-        private void Deliver(in Notification notification)
+        /// <summary>Delivers what is waiting until nothing is left, including anything held while a write runs.</summary>
+        private void Drain()
         {
-            switch (notification.Kind)
+            while (true)
             {
-                case NotificationKind.Next:
+                T? value;
+                bool hasValue;
+                Exception? error;
+                bool completed;
+
+                lock (_gate)
                 {
-                    observer.OnNext(notification.Value!);
-                    break;
+                    if (!_hasValue && _error is null && !_completed)
+                    {
+                        _scheduled = false;
+                        return;
+                    }
+
+                    value = _value;
+                    hasValue = _hasValue;
+                    error = _error;
+                    completed = _completed;
+                    _value = default;
+                    _hasValue = false;
+                    _error = null;
+                    _completed = false;
                 }
 
-                case NotificationKind.Error:
+                if (Volatile.Read(ref _disposed) != 0)
                 {
-                    observer.OnError(notification.Error!);
-                    break;
+                    continue;
                 }
 
-                default:
-                {
-                    observer.OnCompleted();
-                    break;
-                }
+                Deliver(value, hasValue, error, completed);
+            }
+        }
+
+        /// <summary>Hands the waiting value, then any terminal notification, to the observer.</summary>
+        /// <param name="value">The waiting value.</param>
+        /// <param name="hasValue">Whether a value was waiting.</param>
+        /// <param name="error">The waiting error, or null.</param>
+        /// <param name="completed">Whether completion was waiting.</param>
+        private void Deliver(T? value, bool hasValue, Exception? error, bool completed)
+        {
+            if (hasValue)
+            {
+                observer.OnNext(value!);
+            }
+
+            if (error is not null)
+            {
+                observer.OnError(error);
+            }
+            else if (completed)
+            {
+                observer.OnCompleted();
             }
         }
     }

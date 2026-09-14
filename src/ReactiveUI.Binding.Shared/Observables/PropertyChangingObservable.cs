@@ -64,7 +64,8 @@ public sealed class PropertyChangingObservable<T> : IObservable<T>
         /// <summary>
         /// Serializes the initial emit in the constructor with concurrent <see cref="OnPropertyChanging"/>
         /// invocations on other threads, so a racing handler emit and the constructor's initial emit do
-        /// not interleave on the downstream observer.
+        /// not interleave on the downstream observer. It is a lock rather than a hand-off to the thread
+        /// already emitting, because the value must be read on the raising thread before that thread writes.
         /// </summary>
         private readonly Lock _gate = new();
 

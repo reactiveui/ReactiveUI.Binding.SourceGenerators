@@ -616,10 +616,11 @@ right one.
 
 The binding asks on every write.
 
-- A write on the owning thread runs straight away. Set a property on the UI thread, and the control has the new
-  value on the next line.
-- A write from another thread waits for the owning thread.
-- Writes keep their order.
+- A write on the owning thread runs straight away when no earlier write is waiting. Set a property on the UI
+  thread, and the control has the new value on the next line.
+- A write from another thread waits for the owning thread. A write on the owning thread also waits while an
+  earlier write is waiting.
+- Only the latest value waits. A newer change replaces the waiting one, so a burst of changes becomes one write.
 
 Some objects have no owning thread. The binding writes to them straight away.
 
@@ -629,7 +630,7 @@ Some objects have no owning thread. The binding writes to them straight away.
 - Any object that is not a WPF, WinForms or MAUI object, such as a plain view model.
 
 Every binding API does this: `BindOneWay`, `BindTwoWay`, `OneWayBind`, `Bind`, `BindTo`, and `BindCommand` when
-it binds a new command to the control. Each `Unsafe` twin does the same.
+it binds a new command to the control. Each `Unsafe` twin does the same through the registered invokers.
 
 ### Invokers
 
@@ -639,6 +640,9 @@ An invoker you register is asked first.
 
 A generated binding knows its target's type when it compiles. For a WPF, WinForms or MAUI target, it carries that
 platform's invoker. So it routes writes even when the platform module is not registered.
+
+An `Unsafe` binding only finds its target's type while the app runs. It uses the registered invokers alone. Register
+the platform module when you use `Unsafe` bindings.
 
 ### Choosing the thread yourself
 
@@ -751,7 +755,12 @@ message loop later.
 
 Where ReactiveUI does move a write, the order is the same. A write on the owning thread runs straight away. A
 write from another thread goes through the main-thread scheduler. Set `BindingSchedulers.MainThread` to
-ReactiveUI's main-thread scheduler to match it exactly.
+ReactiveUI's main-thread scheduler to use the same scheduler.
+
+A burst of changes from another thread is handled differently. ReactiveUI's one-way bindings and `BindTo` write
+every value, on the thread that raised it. Its two-way `Bind` queues one signal per change and reads the current
+value when each signal runs. Here every binding writes only the latest value, once. A binding's change stream
+skips the values in between.
 
 ### A binding made through a type parameter is not generated
 

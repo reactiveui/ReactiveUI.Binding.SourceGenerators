@@ -29,14 +29,14 @@ namespace ReactiveUI.Binding;
 /// <see cref="UnhandledInteractionException{TInput, TOutput}"/> if no handler handles the interaction.
 /// </para>
 /// </remarks>
-[DebuggerDisplay("Handlers = {_handlers.Count}")]
+[DebuggerDisplay("Handlers = {_handlers.Length}")]
 public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
 {
-    /// <summary>The list of registered interaction handlers, invoked in reverse order during <see cref="Handle"/>.</summary>
-    private readonly List<Func<IInteractionContext<TInput, TOutput>, Task>> _handlers = [];
-
-    /// <summary>Synchronization gate for thread-safe handler registration and removal.</summary>
-    private readonly Lock _sync = new();
+    /// <summary>
+    /// The registered handlers, invoked in reverse order during <see cref="Handle"/>. The array is replaced
+    /// rather than changed, so a question already being handled walks the set it started with.
+    /// </summary>
+    private Func<IInteractionContext<TInput, TOutput>, Task>[] _handlers = [];
 
     /// <inheritdoc/>
     public IDisposable RegisterHandler(Action<IInteractionContext<TInput, TOutput>> handler)
@@ -80,7 +80,7 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
     public virtual async Task<TOutput> Handle(TInput input)
     {
         var context = GenerateContext(input);
-        var handlers = GetHandlers();
+        var handlers = Volatile.Read(ref _handlers);
 
         for (var i = handlers.Length - 1; i >= 0; i--)
         {
@@ -96,13 +96,7 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
 
     /// <summary>Gets all registered handlers by order of registration.</summary>
     /// <returns>All registered handlers.</returns>
-    protected Func<IInteractionContext<TInput, TOutput>, Task>[] GetHandlers()
-    {
-        lock (_sync)
-        {
-            return [.. _handlers];
-        }
-    }
+    protected Func<IInteractionContext<TInput, TOutput>, Task>[] GetHandlers() => [.. Volatile.Read(ref _handlers)];
 
     /// <summary>Gets an interaction context which is used to provide information about the interaction.</summary>
     /// <param name="input">The input that is being passed in.</param>
@@ -110,25 +104,17 @@ public class Interaction<TInput, TOutput> : IInteraction<TInput, TOutput>
     protected virtual IOutputContext<TInput, TOutput> GenerateContext(TInput input) =>
         new InteractionContext<TInput, TOutput>(input);
 
-    /// <summary>Adds a handler to the internal handler list under the synchronization gate.</summary>
+    /// <summary>Adds a handler to the registered set.</summary>
     /// <param name="handler">The handler to add.</param>
-    private void AddHandler(Func<IInteractionContext<TInput, TOutput>, Task> handler)
-    {
-        lock (_sync)
-        {
-            _handlers.Add(handler);
-        }
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void AddHandler(Func<IInteractionContext<TInput, TOutput>, Task> handler) =>
+        CopyOnWriteArray.Add(ref _handlers, handler);
 
-    /// <summary>Removes a handler from the internal handler list under the synchronization gate.</summary>
+    /// <summary>Removes the first registration of a handler from the registered set.</summary>
     /// <param name="handler">The handler to remove.</param>
-    private void RemoveHandler(Func<IInteractionContext<TInput, TOutput>, Task> handler)
-    {
-        lock (_sync)
-        {
-            _ = _handlers.Remove(handler);
-        }
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void RemoveHandler(Func<IInteractionContext<TInput, TOutput>, Task> handler) =>
+        CopyOnWriteArray.Remove(ref _handlers, handler);
 
     /// <summary>An observer that bridges an observable sequence to a <see cref="TaskCompletionSource{TResult}"/>, completing the task when the observable completes or faults.</summary>
     /// <typeparam name="T">The element type of the observable sequence.</typeparam>

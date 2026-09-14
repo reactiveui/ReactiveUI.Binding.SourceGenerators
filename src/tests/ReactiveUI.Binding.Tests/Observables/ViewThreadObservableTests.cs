@@ -71,10 +71,10 @@ public class ViewThreadObservableTests
         }
     }
 
-    /// <summary>A burst from another thread posts one drain and keeps its order.</summary>
+    /// <summary>A burst from another thread posts one write, and that write carries only the latest value.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task OnNext_ABurstFromAnotherThread_PostsOnceAndKeepsTheOrder()
+    public async Task OnNext_ABurstFromAnotherThread_WritesOnlyTheLatestValue()
     {
         var invoker = new StubViewThreadInvoker();
         var (source, observer, subscription) = Subscribe(invoker);
@@ -88,14 +88,14 @@ public class ViewThreadObservableTests
             invoker.RunPosted();
 
             await Assert.That(invoker.PostCount).IsEqualTo(1);
-            await Assert.That(string.Join(",", observer.Values)).IsEqualTo("first,second,third");
+            await Assert.That(string.Join(",", observer.Values)).IsEqualTo(Third);
         }
     }
 
-    /// <summary>A value on the owning thread waits behind values still queued from another thread.</summary>
+    /// <summary>A value on the owning thread replaces a value still waiting from another thread.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task OnNext_OnTheOwningThreadBehindQueuedValues_WaitsItsTurn()
+    public async Task OnNext_OnTheOwningThreadWhileAWriteWaits_ReplacesTheWaitingValue()
     {
         var invoker = new StubViewThreadInvoker();
         var (source, observer, subscription) = Subscribe(invoker);
@@ -111,7 +111,27 @@ public class ViewThreadObservableTests
             invoker.RunPosted();
 
             await Assert.That(invoker.PostCount).IsEqualTo(1);
-            await Assert.That(string.Join(",", observer.Values)).IsEqualTo("first,second");
+            await Assert.That(string.Join(",", observer.Values)).IsEqualTo(Second);
+        }
+    }
+
+    /// <summary>A value that waits is written before the completion that follows it.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task OnCompleted_AfterAWaitingValue_WritesTheValueFirst()
+    {
+        var invoker = new StubViewThreadInvoker();
+        var completedAfter = string.Empty;
+        var source = new ManualObservable<string>();
+        var observer = new RecordingObserver<string>();
+
+        using (new ViewThreadObservable<string>(source, Target, invoker).Subscribe(new CompletionOrderObserver(observer, () => completedAfter = string.Join(",", observer.Values))))
+        {
+            source.Observer?.OnNext(First);
+            source.Observer?.OnCompleted();
+            invoker.RunPosted();
+
+            await Assert.That(completedAfter).IsEqualTo(First);
         }
     }
 
@@ -300,6 +320,24 @@ public class ViewThreadObservableTests
         var observer = new RecordingObserver<string>();
 
         return (source, observer, new ViewThreadObservable<string>(source, Target, invoker).Subscribe(observer));
+    }
+
+    /// <summary>Forwards values to a recorder and reports what it held when completion arrived.</summary>
+    /// <param name="inner">The recorder that receives each value.</param>
+    /// <param name="onCompleted">Runs when completion arrives.</param>
+    private sealed class CompletionOrderObserver(RecordingObserver<string> inner, Action onCompleted) : IObserver<string>
+    {
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void OnCompleted() => onCompleted();
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void OnError(Exception error) => inner.OnError(error);
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void OnNext(string value) => inner.OnNext(value);
     }
 
     /// <summary>A source that counts how often its subscription is disposed.</summary>
