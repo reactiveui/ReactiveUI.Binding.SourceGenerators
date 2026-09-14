@@ -2,6 +2,8 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+
 namespace ReactiveUI.Binding.Tests.Interactions;
 
 /// <summary>Tests for <see cref="Interaction{TInput, TOutput}"/>.</summary>
@@ -9,6 +11,9 @@ public class InteractionTests
 {
     /// <summary>The result the first registered handler produces.</summary>
     private const string FirstHandlerResult = "first";
+
+    /// <summary>The result the second registered handler produces.</summary>
+    private const string SecondHandlerResult = "second";
 
     /// <summary>The expected output of the synchronous handler (the length of "hello").</summary>
     private const int HelloLength = 5;
@@ -70,10 +75,27 @@ public class InteractionTests
     {
         var interaction = new Interaction<string, string>();
         using var first = interaction.RegisterHandler(static ctx => ctx.SetOutput(FirstHandlerResult));
-        using var second = interaction.RegisterHandler(static ctx => ctx.SetOutput("second"));
+        using var second = interaction.RegisterHandler(static ctx => ctx.SetOutput(SecondHandlerResult));
 
         var result = await interaction.Handle("input");
-        await Assert.That(result).IsEqualTo("second");
+        await Assert.That(result).IsEqualTo(SecondHandlerResult);
+    }
+
+    /// <summary>Verifies that GetHandlers hands back a copy, so changing it leaves the registered handlers alone.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Test]
+    public async Task GetHandlers_ReturnsACopyOfTheRegisteredHandlers()
+    {
+        var interaction = new HandlerListingInteraction();
+        using var first = interaction.RegisterHandler(static ctx => ctx.SetOutput(FirstHandlerResult));
+        using var second = interaction.RegisterHandler(static ctx => ctx.SetOutput(SecondHandlerResult));
+
+        var handlers = interaction.ListHandlers();
+        Array.Clear(handlers);
+
+        await Assert.That(interaction.ListHandlers().Length).IsEqualTo(2);
+        await Assert.That(interaction.ListHandlers()[1]).IsNotNull();
+        await Assert.That(await interaction.Handle("input")).IsEqualTo(SecondHandlerResult);
     }
 
     /// <summary>Verifies that Handle throws UnhandledInteractionException when no handler calls SetOutput.</summary>
@@ -189,5 +211,14 @@ public class InteractionTests
             observer.OnError(error);
             return EmptyDisposable.Instance;
         }
+    }
+
+    /// <summary>An interaction that exposes its protected handler list to the tests.</summary>
+    private sealed class HandlerListingInteraction : Interaction<string, string>
+    {
+        /// <summary>Lists the registered handlers.</summary>
+        /// <returns>The registered handlers, in registration order.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Func<IInteractionContext<string, string>, Task>[] ListHandlers() => GetHandlers();
     }
 }
