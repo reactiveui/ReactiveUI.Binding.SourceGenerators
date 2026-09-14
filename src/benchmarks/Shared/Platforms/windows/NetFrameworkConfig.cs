@@ -27,9 +27,13 @@ public class NetFrameworkConfig : ManualConfig
     {
         Add(DefaultConfig.Instance);
         _ = AddJob(new Job(NetFrameworkJobId).WithRuntime(ClrRuntime.Net462));
-        _ = AddDiagnoser(new EtwProfiler(new EtwProfilerConfig()));
         _ = AddExporter(MarkdownExporter.GitHub);
         _ = AddFilter(new SimpleFilter(static benchmark => benchmark.Job.Id == NetFrameworkJobId));
         _ = WithOption(ConfigOptions.DontOverwriteResults, true);
+
+        if (BenchmarkProfiling.Enabled)
+        {
+            _ = AddDiagnoser(new EtwProfiler(new EtwProfilerConfig()));
+        }
     }
 }
