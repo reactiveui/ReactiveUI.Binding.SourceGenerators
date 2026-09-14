@@ -70,19 +70,17 @@ internal static class InvokeCommandExtractor
             return null;
         }
 
-        // A path the compiler could not read is still a call this package answers - through the runtime engine
-        // rather than a generated observation - so it is carried on instead of dropped, marked for the emitter.
-        var reflectionOnly = commandPropertyPath is null || commandPropertyPath.Length == 0;
-        EquatableArray<PropertyPathSegment> path = reflectionOnly ? default : new(commandPropertyPath!);
-
-        return new(
-            invocation.SyntaxTree.FilePath,
-            invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
-            sourceValueType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            targetTypeName,
-            path,
-            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(commandArg.ToString()),
-            InterceptableLocationReader.Read(semanticModel, invocation, ct),
-            reflectionOnly);
+        // A selector the compiler cannot read names no path, so nothing is generated and the stub throws,
+        // naming the Unsafe overload that resolves it.
+        return commandPropertyPath is not { Length: > 0 }
+            ? null
+            : new(
+                invocation.SyntaxTree.FilePath,
+                invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                sourceValueType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                targetTypeName,
+                new(commandPropertyPath),
+                CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(commandArg.ToString()),
+                InterceptableLocationReader.Read(semanticModel, invocation, ct));
     }
 }

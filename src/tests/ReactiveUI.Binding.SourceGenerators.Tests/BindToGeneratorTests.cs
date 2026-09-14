@@ -13,12 +13,6 @@ public class BindToGeneratorTests
     /// <summary>The <c>BindToDispatch.g.cs</c> name these tests generate against.</summary>
     private const string BindToDispatchgcsName = "BindToDispatch.g.cs";
 
-    /// <summary>The attribute a generated member carries when only the runtime engine can serve it.</summary>
-    private const string RequiresUnreferencedCode = "RequiresUnreferencedCode";
-
-    /// <summary>The runtime engine a call site the compiler could not read is handed to.</summary>
-    private const string RuntimeBindingFallback = "RuntimeBindingFallback.BindTo";
-
     /// <summary>Verifies BindTo with a same-typed string observable and string property (direct assignment).</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -298,10 +292,10 @@ public class BindToGeneratorTests
         await result.HasGeneratedSource(BindToDispatchgcsName);
     }
 
-    /// <summary>A target selector held in a variable names no path to read, so the runtime engine serves it.</summary>
+    /// <summary>A target selector held in a variable names no path to read, so the call is left to the stub, which throws.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task TargetPropertyFromAVariable_GeneratesAnAnnotatedRuntimeDispatch()
+    public async Task TargetPropertyFromAVariable_GeneratesNoDispatch()
     {
         const string source = """
                               using System;
@@ -332,16 +326,13 @@ public class BindToGeneratorTests
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.HasNoGeneratorDiagnostics();
-
-        var dispatch = result.GeneratedSources[BindToDispatchgcsName];
-        await Assert.That(dispatch).Contains(RequiresUnreferencedCode);
-        await Assert.That(dispatch).Contains(RuntimeBindingFallback);
+        await result.DoesNotHaveGeneratedSource(BindToDispatchgcsName);
     }
 
-    /// <summary>A target selector whose body is no property path is served by the runtime engine, and says so.</summary>
+    /// <summary>A target selector whose body is no property path is left to the stub, which throws.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task TargetPropertyWithoutAPropertyPath_GeneratesAnAnnotatedRuntimeDispatch()
+    public async Task TargetPropertyWithoutAPropertyPath_GeneratesNoDispatch()
     {
         const string source = """
                               using System;
@@ -372,10 +363,7 @@ public class BindToGeneratorTests
         var result = TestHelper.RunGenerator(source, LanguageVersion.CSharp10);
 
         await result.HasNoGeneratorDiagnostics();
-
-        var dispatch = result.GeneratedSources[BindToDispatchgcsName];
-        await Assert.That(dispatch).Contains(RequiresUnreferencedCode);
-        await Assert.That(dispatch).Contains(RuntimeBindingFallback);
+        await result.DoesNotHaveGeneratedSource(BindToDispatchgcsName);
     }
 
     /// <summary>A target selector producing a type no member can declare leaves the call to the stub.</summary>

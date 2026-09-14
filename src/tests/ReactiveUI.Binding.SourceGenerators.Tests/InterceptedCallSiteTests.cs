@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
@@ -41,12 +40,6 @@ public class InterceptedCallSiteTests
 
     /// <summary>The dispatch file an InvokeCommand call site is claimed in.</summary>
     private const string InvokeCommandDispatchFileName = "InvokeCommandDispatch.g.cs";
-
-    /// <summary>How many members carry the requirement when the claim carries it too: the claim and the worker.</summary>
-    private const int ClaimAndWorker = 2;
-
-    /// <summary>How many carry it when the overloads are what the build got: the worker alone.</summary>
-    private const int WorkerAlone = 1;
 
     /// <summary>The type the scenario exposes its binding through.</summary>
     private const string UsageTypeName = $"{RootNamespace}.Usage";
@@ -210,7 +203,7 @@ public class InterceptedCallSiteTests
                                             }
                                             """;
 
-    /// <summary>Call sites whose selectors name no property path, so only the runtime engine can serve them.</summary>
+    /// <summary>Call sites whose selectors name no property path, so nothing is generated and they reach the stub.</summary>
     private const string RuntimeResolvedScenario = """
                                                    using System;
                                                    using System.ComponentModel;
@@ -405,28 +398,18 @@ public class InterceptedCallSiteTests
     }
 
     /// <summary>
-    /// A claim that reaches the runtime engine carries the requirement on the claim itself, not only on the worker
-    /// behind it. The claim is what replaces the consumer's call, so it is the member their publish reports.
+    /// A call site whose selector the compiler cannot read is not claimed, even by a build that could claim it. It
+    /// reaches the stub, which throws and names the Unsafe overload, the same as on a build given the overloads.
     /// </summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task OptedInBuild_AnnotatesAClaimThatReachesTheRuntimeEngine()
+    public async Task OptedInBuild_LeavesACallSiteItCannotReadToTheStub()
     {
         var result = Generate(RuntimeResolvedScenario, LanguageVersion.CSharp10, optIn: true, RootNamespace);
 
         await Assert.That(result.CompilationErrors).IsEmpty();
-
-        // The worker always carries it; a build that can claim the call site carries it there as well.
-        var expected = InterceptableLocationReader.IsSupported ? ClaimAndWorker : WorkerAlone;
-
-        await result.GeneratedSourceContainsCount(
-            BindToDispatchFileName,
-            GeneratedTypeNames.RequiresUnreferencedCodeAttribute,
-            expected);
-        await result.GeneratedSourceContainsCount(
-            InvokeCommandDispatchFileName,
-            GeneratedTypeNames.RequiresUnreferencedCodeAttribute,
-            expected);
+        await result.DoesNotHaveGeneratedSource(BindToDispatchFileName);
+        await result.DoesNotHaveGeneratedSource(InvokeCommandDispatchFileName);
     }
 
     /// <summary>The generated namespace is what the opt-in has to name.</summary>

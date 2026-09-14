@@ -64,15 +64,15 @@ internal static class BindToExtractor
             return null;
         }
 
-        var reflectionOnly = targetPropertyPath is null || targetPropertyPath.Length == 0;
-        var written = WrittenProperty(methodSymbol, targetPropertyPath, reflectionOnly);
-        if (written is null)
+        // A selector the compiler cannot read names no path, so nothing is generated and the stub throws,
+        // naming the Unsafe overload that resolves it.
+        if (targetPropertyPath is not { Length: > 0 })
         {
             return null;
         }
 
+        var leaf = targetPropertyPath[^1];
         var sourceValueTypeFullName = sourceValueType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        EquatableArray<PropertyPathSegment> targetPath = reflectionOnly ? default : new(targetPropertyPath!);
 
         DetectConversionParameters(methodSymbol, out var hasConversionHint, out var hasConverterOverride);
 
@@ -86,14 +86,13 @@ internal static class BindToExtractor
             lineNumber,
             sourceValueTypeFullName,
             targetTypeName,
-            targetPath,
-            written.Value.TypeFullName,
-            written.Value.IsReferenceType,
+            new(targetPropertyPath),
+            leaf.PropertyTypeFullName,
+            leaf.IsReferenceType,
             hasConversionHint,
             hasConverterOverride,
             targetExpressionText,
-            InterceptableLocationReader.Read(semanticModel, invocation, ct),
-            reflectionOnly);
+            InterceptableLocationReader.Read(semanticModel, invocation, ct));
     }
 
     /// <summary>
@@ -120,35 +119,6 @@ internal static class BindToExtractor
         }
 
         return null;
-    }
-
-    /// <summary>Names the type of the property a call writes, however the call names it.</summary>
-    /// <param name="methodSymbol">The method the call resolved to.</param>
-    /// <param name="targetPropertyPath">The path read from the selector, where one could be read.</param>
-    /// <param name="reflectionOnly">Whether the selector resolved to no path at compile time.</param>
-    /// <returns>The written type, or <see langword="null"/> when nothing declarable is there.</returns>
-    /// <remarks>
-    /// A selector the compiler could read names the type at the end of the path. One it could not still resolved
-    /// to a method, whose last type argument is that same property's type, so the call is served rather than
-    /// dropped for want of a name the path would have supplied.
-    /// </remarks>
-    private static WrittenPropertyType? WrittenProperty(
-        IMethodSymbol methodSymbol,
-        PropertyPathSegment[]? targetPropertyPath,
-        bool reflectionOnly)
-    {
-        if (!reflectionOnly)
-        {
-            var leaf = targetPropertyPath![targetPropertyPath.Length - 1];
-            return new(leaf.PropertyTypeFullName, leaf.IsReferenceType);
-        }
-
-        var written = ExtractorValidation.DeclarableTypeArgument(methodSymbol, methodSymbol.TypeArguments.Length - 1);
-        return written is null
-            ? null
-            : new WrittenPropertyType(
-                written.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                written.IsReferenceType);
     }
 
     /// <summary>Determines whether a type is the framework's own <c>System.IObservable&lt;T&gt;</c>.</summary>
@@ -194,9 +164,4 @@ internal static class BindToExtractor
             }
         }
     }
-
-    /// <summary>The type a <c>BindTo</c> call writes to.</summary>
-    /// <param name="TypeFullName">The fully qualified property type.</param>
-    /// <param name="IsReferenceType">Whether that type is a reference type.</param>
-    private readonly record struct WrittenPropertyType(string TypeFullName, bool IsReferenceType);
 }
