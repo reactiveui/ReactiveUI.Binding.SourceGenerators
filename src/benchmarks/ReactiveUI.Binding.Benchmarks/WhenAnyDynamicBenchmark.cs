@@ -8,14 +8,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 using ReactiveUI.Binding.Builder;
 
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>Benchmarks reflection-walked observation against the generated observation of the same chain.</summary>
-[Config(typeof(BenchmarkConfig))]
 #if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
 #endif

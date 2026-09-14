@@ -2,13 +2,14 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Jobs;
 
 namespace ReactiveUI.Binding.Benchmarks.Configs;
 
-/// <summary>Adds the NativeAOT runtimes to <see cref="BenchmarkConfig"/>, for benchmarks whose code publishes ahead of time.</summary>
-public class NativeAotBenchmarkConfig : BenchmarkConfig
+/// <summary>Adds the NativeAOT runtimes, for benchmarks whose code publishes ahead of time.</summary>
+public class NativeAotBenchmarkConfig : ManualConfig
 {
     /// <summary>Initializes a new instance of the <see cref="NativeAotBenchmarkConfig"/> class.</summary>
     public NativeAotBenchmarkConfig()

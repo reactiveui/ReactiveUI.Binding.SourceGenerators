@@ -9,7 +9,6 @@ using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
 using ReactiveUI;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Builder;
 using BenchmarkVm = ReactiveUI.Binding.Benchmarks.Mocks.BenchmarkViewModel;
 
@@ -18,7 +17,6 @@ using BenchmarkVm = ReactiveUI.Binding.Benchmarks.Mocks.BenchmarkViewModel;
 namespace RxUiDynamicChain;
 
 /// <summary>The dynamic-chain scenarios of <c>WhenAnyDynamicBenchmark</c>, run against ReactiveUI's own engine.</summary>
-[Config(typeof(BenchmarkConfig))]
 #if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
 #endif

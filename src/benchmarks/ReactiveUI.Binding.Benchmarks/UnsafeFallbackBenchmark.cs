@@ -6,7 +6,6 @@
 using System.Diagnostics.CodeAnalysis;
 #endif
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 using ReactiveUI.Binding.Builder;
 
@@ -18,7 +17,6 @@ namespace ReactiveUI.Binding.Benchmarks;
 /// walk the path at run time, so an ahead-of-time publish cannot be relied on to keep the members they reach.
 /// Read these against the generated benchmark of the same operator to see what the fallback costs.
 /// </remarks>
-[Config(typeof(BenchmarkConfig))]
 #if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
 #endif
