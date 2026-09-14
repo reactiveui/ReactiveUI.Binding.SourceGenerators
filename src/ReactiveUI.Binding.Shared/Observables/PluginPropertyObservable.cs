@@ -113,9 +113,13 @@ public sealed class PluginPropertyObservable<T> : IObservable<T>
         /// <summary>Whether at least one value has been emitted.</summary>
         private bool _hasValue;
 
+        /// <summary>Whether <see cref="_inner"/> is in place; notifications before then are covered by the initial emit.</summary>
+        private bool _subscribed;
+
         /// <summary>Initializes a new instance of the <see cref="Subscription"/> class, subscribing and emitting the initial value.</summary>
         /// <param name="parent">The parent observable.</param>
         /// <param name="observer">The downstream observer.</param>
+        /// <remarks>A throw from the initial emit drops the registration's subscription before propagating, as the caller never receives a disposable.</remarks>
         public Subscription(PluginPropertyObservable<T> parent, IObserver<T> observer)
         {
             _parent = parent;
@@ -128,13 +132,29 @@ public sealed class PluginPropertyObservable<T> : IObservable<T>
                 parent._propertyName,
                 parent._beforeChange,
                 false).Subscribe(this);
+            Volatile.Write(ref _subscribed, true);
 
-            EmitCurrent();
+            try
+            {
+                EmitCurrent();
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
         }
 
         /// <inheritdoc/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void OnNext(IObservedChange<object, object?> value) => EmitCurrent();
+        public void OnNext(IObservedChange<object, object?> value)
+        {
+            if (!Volatile.Read(ref _subscribed))
+            {
+                return;
+            }
+
+            EmitCurrent();
+        }
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
