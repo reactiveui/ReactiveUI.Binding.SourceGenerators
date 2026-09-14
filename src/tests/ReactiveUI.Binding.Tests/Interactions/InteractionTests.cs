@@ -24,6 +24,12 @@ public class InteractionTests
     /// <summary>An alternative output value used by the Action-overload test.</summary>
     private const int ActionOutput = 99;
 
+    /// <summary>The input handed to an interaction whose handlers ignore it.</summary>
+    private const string HandleInput = "input";
+
+    /// <summary>The number of handlers the handler-list test registers.</summary>
+    private const int RegisteredHandlerCount = 2;
+
     /// <summary>Verifies that Handle returns the output set by a synchronous handler.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
@@ -77,7 +83,7 @@ public class InteractionTests
         using var first = interaction.RegisterHandler(static ctx => ctx.SetOutput(FirstHandlerResult));
         using var second = interaction.RegisterHandler(static ctx => ctx.SetOutput(SecondHandlerResult));
 
-        var result = await interaction.Handle("input");
+        var result = await interaction.Handle(HandleInput);
         await Assert.That(result).IsEqualTo(SecondHandlerResult);
     }
 
@@ -93,9 +99,9 @@ public class InteractionTests
         var handlers = interaction.ListHandlers();
         Array.Clear(handlers);
 
-        await Assert.That(interaction.ListHandlers().Length).IsEqualTo(2);
+        await Assert.That(interaction.ListHandlers().Length).IsEqualTo(RegisteredHandlerCount);
         await Assert.That(interaction.ListHandlers()[1]).IsNotNull();
-        await Assert.That(await interaction.Handle("input")).IsEqualTo(SecondHandlerResult);
+        await Assert.That(await interaction.Handle(HandleInput)).IsEqualTo(SecondHandlerResult);
     }
 
     /// <summary>Verifies that Handle throws UnhandledInteractionException when no handler calls SetOutput.</summary>
@@ -133,7 +139,7 @@ public class InteractionTests
             // Intentionally don't call SetOutput — skip
         });
 
-        var result = await interaction.Handle("input");
+        var result = await interaction.Handle(HandleInput);
         await Assert.That(result).IsEqualTo(FirstHandlerResult);
     }
 
