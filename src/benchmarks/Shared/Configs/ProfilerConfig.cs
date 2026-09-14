@@ -10,7 +10,7 @@ using Microsoft.Diagnostics.Tracing.Parsers;
 
 namespace ReactiveUI.Binding.Benchmarks.Configs;
 
-/// <summary>Traces every benchmark with EventPipe, recording CPU samples and verbose GC events in one trace.</summary>
+/// <summary>Traces a benchmark with EventPipe, recording CPU samples and verbose GC events in one trace.</summary>
 /// <remarks>
 /// A config keeps one EventPipe profiler, and the CPU and GC profiles both enable the runtime provider. So the
 /// sample profiler is added beside the GC profile, and the runtime provider carries the keywords of both.

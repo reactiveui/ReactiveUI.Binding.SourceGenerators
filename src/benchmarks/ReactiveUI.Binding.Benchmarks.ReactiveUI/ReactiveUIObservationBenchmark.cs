@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using BenchmarkDotNet.Attributes;
-using ReactiveUI.Binding.Benchmarks.Configs;
 using ReactiveUI.Binding.Benchmarks.Mocks;
 using ReactiveUI.Builder;
 using Splat;
@@ -12,7 +11,6 @@ using Splat;
 namespace ReactiveUI.Binding.Benchmarks;
 
 /// <summary>ReactiveUI expression-tree WhenAnyValue benchmarks for comparison.</summary>
-[Config(typeof(BenchmarkConfig))]
 [DebuggerDisplay("Expression-tree observation over {PropertyChangeCount} changes")]
 public class ReactiveUIObservationBenchmark
 {
