@@ -2,6 +2,7 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Benchmarks.Configs;
 
 namespace ReactiveUI.Binding.Benchmarks;
@@ -12,5 +13,6 @@ internal static class Program
     /// <summary>Runs the benchmarks selected by the command line.</summary>
     /// <param name="args">The command-line arguments passed to the switcher.</param>
     [STAThread]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void Main(string[] args) => BenchmarkHost.Run(typeof(Program).Assembly, args);
 }
