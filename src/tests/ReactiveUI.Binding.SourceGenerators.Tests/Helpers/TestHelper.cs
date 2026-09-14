@@ -176,16 +176,14 @@ public static class TestHelper
     /// <summary>Tests a source generator scenario that is expected to succeed. Verifies the generated output against a snapshot.</summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
-    /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>A task representing the asynchronous verification operation.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Task TestPass(
         string source,
         Type callerType,
-        [CallerFilePath] string file = "",
         [CallerMemberName] string memberName = "") =>
-        TestPass(source, callerType, null, file, memberName);
+        TestPass(source, callerType, null, memberName);
 
     /// <summary>
     /// Tests a source generator scenario that is expected to succeed, targeting a specific language version.
@@ -194,7 +192,6 @@ public static class TestHelper
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
-    /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>A task representing the asynchronous verification operation.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -202,9 +199,8 @@ public static class TestHelper
         string source,
         Type callerType,
         LanguageVersion? languageVersion,
-        [CallerFilePath] string file = "",
         [CallerMemberName] string memberName = "") =>
-        TestPassWithResult(source, callerType, languageVersion, file, memberName);
+        TestPassWithResult(source, callerType, languageVersion, memberName);
 
     /// <summary>
     /// Tests a source generator scenario that is expected to succeed.
@@ -212,16 +208,14 @@ public static class TestHelper
     /// </summary>
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
-    /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>The generator test result for additional assertions.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Task<GeneratorTestResult> TestPassWithResult(
         string source,
         Type callerType,
-        [CallerFilePath] string file = "",
         [CallerMemberName] string memberName = "") =>
-        TestPassWithResult(source, callerType, null, file, memberName);
+        TestPassWithResult(source, callerType, null, memberName);
 
     /// <summary>
     /// Tests a source generator scenario that is expected to succeed, targeting a specific language version.
@@ -230,14 +224,12 @@ public static class TestHelper
     /// <param name="source">The source code to compile and generate.</param>
     /// <param name="callerType">The type of the calling test class for snapshot organization.</param>
     /// <param name="languageVersion">The C# language version to target, or <see langword="null"/> for C# 7.3.</param>
-    /// <param name="file">The source file path of the caller (automatically populated).</param>
     /// <param name="memberName">The member name of the caller (automatically populated).</param>
     /// <returns>The generator test result for additional assertions.</returns>
     public static async Task<GeneratorTestResult> TestPassWithResult(
         string source,
         Type callerType,
         LanguageVersion? languageVersion,
-        [CallerFilePath] string file = "",
         [CallerMemberName] string memberName = "")
     {
         ArgumentNullException.ThrowIfNull(callerType);
@@ -263,8 +255,7 @@ public static class TestHelper
         await GeneratorSnapshot.VerifyAsync(
             result.Driver,
             AbbreviateTypeName(callerType.Name),
-            AbbreviateMethodName(memberName),
-            file);
+            AbbreviateMethodName(memberName));
 
         return result;
     }

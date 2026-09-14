@@ -33,6 +33,10 @@
     <Compile Include="..\Shared\RoslynSymbolProbe.cs" Link="Shared\RoslynSymbolProbe.cs"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyMetadata Include="GeneratorSnapshotDirectory" Value="$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../ReactiveUI.Binding.SourceGenerators.Tests'))"/>
+  </ItemGroup>
+
   <PropertyGroup>
     <SharedScenariosPath>$(MSBuildProjectDirectory)\..\SharedScenarios\</SharedScenariosPath>
   </PropertyGroup>

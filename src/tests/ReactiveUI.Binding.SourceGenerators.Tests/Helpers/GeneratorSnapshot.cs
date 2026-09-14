@@ -2,22 +2,32 @@
 // ReactiveUI Association Incorporated licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
-/// <summary>Compares every file a generator run produced against the snapshots stored beside the calling test.</summary>
+/// <summary>Compares every file a generator run produced against the snapshots stored in the test project.</summary>
 /// <remarks>
+/// <para>
 /// A snapshot is named <c>{type}.{method}#{hint name}.verified.cs</c> and starts with a <c>//HintName:</c> line. A file
 /// that differs, or has no snapshot yet, is written next to it as <c>.received.cs</c> and fails the test, as does a
 /// snapshot the run no longer produces. With the <c>ACCEPT_SNAPSHOTS</c> environment variable set, the run's output
 /// replaces the snapshots instead.
+/// </para>
+/// <para>
+/// The snapshot directory is recorded as assembly metadata when the test project builds. A caller file path cannot
+/// stand in for it: a continuous-integration build maps source paths to <c>/_/</c>, which exists nowhere on disk.
+/// </para>
 /// </remarks>
 internal static class GeneratorSnapshot
 {
     /// <summary>The environment variable that makes a run write its output over the snapshots.</summary>
     private const string AcceptVariable = "ACCEPT_SNAPSHOTS";
+
+    /// <summary>The assembly metadata key the test project records its snapshot directory under.</summary>
+    private const string DirectoryMetadataKey = "GeneratorSnapshotDirectory";
 
     /// <summary>The suffix of a stored snapshot.</summary>
     private const string VerifiedSuffix = ".verified.cs";
@@ -25,21 +35,18 @@ internal static class GeneratorSnapshot
     /// <summary>The suffix of the output written beside a snapshot it does not match.</summary>
     private const string ReceivedSuffix = ".received.cs";
 
+    /// <summary>The directory holding the snapshots.</summary>
+    private static readonly string SnapshotDirectory = ReadSnapshotDirectory();
+
     /// <summary>Asserts that the generated files match the stored snapshots.</summary>
     /// <param name="driver">The driver after the generator has run.</param>
     /// <param name="typeName">The snapshot name's type segment.</param>
     /// <param name="methodName">The snapshot name's method segment.</param>
-    /// <param name="sourceFilePath">The calling test's source file; its directory holds the snapshots.</param>
     /// <returns>A task that completes once every file has been compared.</returns>
-    internal static async Task VerifyAsync(
-        GeneratorDriver driver,
-        string typeName,
-        string methodName,
-        [CallerFilePath] string sourceFilePath = "")
+    internal static async Task VerifyAsync(GeneratorDriver driver, string typeName, string methodName)
     {
         ArgumentNullException.ThrowIfNull(driver);
 
-        var directory = Path.GetDirectoryName(sourceFilePath) ?? string.Empty;
         var prefix = $"{typeName}.{methodName}#";
         var accept = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(AcceptVariable));
         var produced = new HashSet<string>(StringComparer.Ordinal);
@@ -53,14 +60,14 @@ internal static class GeneratorSnapshot
                 _ = produced.Add(name);
 
                 var output = $"//HintName: {source.HintName}\n{Normalize(source.SourceText.ToString())}";
-                if (!await StoreAsync(Path.Combine(directory, name), output, accept))
+                if (!await StoreAsync(Path.Combine(SnapshotDirectory, name), output, accept))
                 {
                     failures.Add($"{name}{VerifiedSuffix} does not match the generated output; see {name}{ReceivedSuffix}");
                 }
             }
         }
 
-        foreach (var snapshot in Directory.EnumerateFiles(directory, $"{prefix}*{VerifiedSuffix}"))
+        foreach (var snapshot in Directory.EnumerateFiles(SnapshotDirectory, $"{prefix}*{VerifiedSuffix}"))
         {
             var fileName = Path.GetFileName(snapshot);
             if (produced.Contains(fileName[..^VerifiedSuffix.Length]))
@@ -86,10 +93,20 @@ internal static class GeneratorSnapshot
     /// <param name="output">The generated output, in snapshot form.</param>
     /// <param name="accept">Whether the output replaces the snapshot.</param>
     /// <returns><see langword="true"/> when the output equals the snapshot or was accepted as it.</returns>
+    /// <remarks>
+    /// A snapshot whose content already matches is left untouched when accepting, so regenerating rewrites only the
+    /// files whose output changed rather than every file's encoding and line endings.
+    /// </remarks>
     private static async Task<bool> StoreAsync(string basePath, string output, bool accept)
     {
         var verifiedPath = basePath + VerifiedSuffix;
         var receivedPath = basePath + ReceivedSuffix;
+
+        if (File.Exists(verifiedPath) && Normalize(await File.ReadAllTextAsync(verifiedPath)) == output)
+        {
+            File.Delete(receivedPath);
+            return true;
+        }
 
         if (accept)
         {
@@ -98,14 +115,24 @@ internal static class GeneratorSnapshot
             return true;
         }
 
-        if (File.Exists(verifiedPath) && Normalize(await File.ReadAllTextAsync(verifiedPath)) == output)
-        {
-            File.Delete(receivedPath);
-            return true;
-        }
-
         await File.WriteAllTextAsync(receivedPath, output);
         return false;
+    }
+
+    /// <summary>Reads the snapshot directory the test project recorded when it was built.</summary>
+    /// <returns>The absolute path of the snapshot directory.</returns>
+    /// <exception cref="InvalidOperationException">The test assembly records no snapshot directory.</exception>
+    private static string ReadSnapshotDirectory()
+    {
+        foreach (var attribute in typeof(GeneratorSnapshot).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>())
+        {
+            if (attribute.Key == DirectoryMetadataKey && !string.IsNullOrEmpty(attribute.Value))
+            {
+                return attribute.Value;
+            }
+        }
+
+        throw new InvalidOperationException($"The test assembly records no '{DirectoryMetadataKey}' assembly metadata.");
     }
 
     /// <summary>Normalises line endings so a snapshot compares the same on every checkout.</summary>
