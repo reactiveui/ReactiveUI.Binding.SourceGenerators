@@ -15,7 +15,7 @@ jobs:
     benchmark:
         uses: reactiveui/actions-common/.github/workflows/workflow-common-benchmarks.yml@main
         with:
-            ref: ${{ inputs.sha }}
+            revision: ${{ inputs.sha }}
             projects: |
                 benchmarks/ReactiveUI.Binding.Benchmarks/ReactiveUI.Binding.Benchmarks.csproj
                 benchmarks/ReactiveUI.Binding.Benchmarks.ReactiveUI/ReactiveUI.Binding.Benchmarks.ReactiveUI.csproj
