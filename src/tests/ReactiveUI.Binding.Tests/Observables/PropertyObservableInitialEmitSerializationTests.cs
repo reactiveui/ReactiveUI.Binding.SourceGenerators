@@ -32,11 +32,16 @@ public class PropertyObservableInitialEmitSerializationTests
     private const string ThirdName = "Carol";
 
     /// <summary>
-    /// How long the initial emit waits for a competing thread to finish its write. The subscription never
-    /// makes that thread wait, so the join ends as soon as the write does; the bound only turns a deadlock
-    /// into a failure.
+    /// How long the initial emit gives a competing thread to finish its write. The competing thread waits
+    /// for the initial emit, so the join always expires; one that did not wait finishes in microseconds.
     /// </summary>
-    private const int CompetitorTimeoutMilliseconds = 10_000;
+    private const int InterleaveWindowMilliseconds = 500;
+
+    /// <summary>
+    /// How long a competing emit waits for the subscribing thread to return from subscribe. The bound only
+    /// turns a subscribing thread held by that emit into a failure rather than a hang.
+    /// </summary>
+    private const int SubscribeReturnTimeoutMilliseconds = 10_000;
 
     /// <summary>
     /// Subscriptions the unforced sweep builds. Sized from measurement: against unserialized code this
@@ -79,7 +84,7 @@ public class PropertyObservableInitialEmitSerializationTests
     /// constructor performs for its initial emit itself raises
     /// <see cref="INotifyPropertyChanged.PropertyChanged"/>, so the handler runs part-way through
     /// construction on the subscribing thread. This also pins that a notification raised on the emitting
-    /// thread is handed to the running emit, since waiting for that emit would deadlock here rather than fail.
+    /// thread is handed to the running emit rather than nested inside it.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
@@ -114,18 +119,33 @@ public class PropertyObservableInitialEmitSerializationTests
     }
 
     /// <summary>
-    /// A competing handler never runs inside the initial emit and never waits for it. A thread that
-    /// writes while the initial emit is on the stack finishes at once, and the running emit delivers its
-    /// value after the initial one. Waiting on the observer for such a thread is therefore not a deadlock.
+    /// A thread that writes while the initial emit is on the stack waits for that emit, then delivers its
+    /// value itself. The subscribing thread returns from subscribe without delivering the other thread's
+    /// value, so a subscriber runs on the thread that raised the change.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
-    public async Task Subscribe_PropertyChangedRaisedOnAnotherThreadDuringInitialEmit_NeitherOverlapsNorBlocksThatThread()
+    public async Task Subscribe_PropertyChangedRaisedOnAnotherThreadDuringInitialEmit_WaitsThenEmitsOnThatThread()
     {
         var source = new HookedViewModel { Name = InitialName };
         using var competitorStarted = new ManualResetEventSlim(false);
+        using var subscribeReturned = new ManualResetEventSlim(false);
         Thread? competitor = null;
-        var competitorFinished = false;
+        var competitorFinishedDuringInitialEmit = true;
+        var replacementReadThreadId = 0;
+        var subscribeReturnedBeforeReplacementRead = false;
+
+        string? ReadAndRecordThread(INotifyPropertyChanged instance)
+        {
+            var name = ((HookedViewModel)instance).Name;
+            if (name == ReplacementName)
+            {
+                replacementReadThreadId = Environment.CurrentManagedThreadId;
+                subscribeReturnedBeforeReplacementRead = subscribeReturned.Wait(SubscribeReturnTimeoutMilliseconds);
+            }
+
+            return name;
+        }
 
         // Runs from inside the downstream call of the initial emit, which is the window no other emit may enter.
         var recorder = new EmissionRecorder<string?>
@@ -140,22 +160,25 @@ public class PropertyObservableInitialEmitSerializationTests
 
                 competitor.Start();
                 competitorStarted.Wait();
-                competitorFinished = competitor.Join(CompetitorTimeoutMilliseconds);
+                competitorFinishedDuringInitialEmit = competitor.Join(InterleaveWindowMilliseconds);
             },
         };
 
         var observable = new PropertyObservable<string?>(
             source,
             nameof(HookedViewModel.Name),
-            static x => ((HookedViewModel)x).Name,
+            ReadAndRecordThread,
             distinctUntilChanged: true);
 
         using (observable.Subscribe(recorder))
         {
+            subscribeReturned.Set();
             competitor!.Join();
 
             await AssertNoErrors(recorder);
-            await Assert.That(competitorFinished).IsTrue();
+            await Assert.That(competitorFinishedDuringInitialEmit).IsFalse();
+            await Assert.That(subscribeReturnedBeforeReplacementRead).IsTrue();
+            await Assert.That(replacementReadThreadId).IsEqualTo(competitor.ManagedThreadId);
             await Assert.That(recorder.MaxConcurrentEmissions).IsEqualTo(1);
             await AssertSequence(recorder.Snapshot(), InitialName, ReplacementName);
         }

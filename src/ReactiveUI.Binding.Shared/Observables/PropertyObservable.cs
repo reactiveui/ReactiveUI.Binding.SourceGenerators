@@ -70,10 +70,16 @@ public sealed class PropertyObservable<T> : IObservable<T>
         private readonly EqualityComparer<T> _comparer;
 
         /// <summary>
-        /// Counts the emits asked for and not yet served. The thread that raises it from zero serves every
-        /// emit asked for while it runs, so emits never overlap and no thread waits for another.
+        /// Serializes emits across threads. A change raised on another thread waits for the running emit and is
+        /// then delivered on the thread that raised it.
         /// </summary>
-        private int _pendingEmits;
+        private readonly Lock _gate = new();
+
+        /// <summary>Whether an emit is running. Read and written only under <see cref="_gate"/>.</summary>
+        private bool _emitting;
+
+        /// <summary>Whether the emitting thread raised another change from inside its own emit.</summary>
+        private bool _changedDuringEmit;
 
         /// <summary>The downstream observer. Set to <see langword="null"/> on disposal.</summary>
         private IObserver<T>? _observer;
@@ -146,46 +152,49 @@ public sealed class PropertyObservable<T> : IObservable<T>
 
         /// <summary>Reads the current property value and forwards it downstream when the distinct gate allows.</summary>
         /// <remarks>
-        /// A call made while another emit runs returns at once. The running emit reads the property again
-        /// before it stops, so the value is never lost and never stale. A call from inside the downstream
-        /// observer is delivered after that observer returns. A throw clears the count, so the next change
-        /// still emits.
+        /// A call from another thread waits for the running emit, then emits on its own thread. A call the
+        /// emitting thread makes from inside its own emit, from the getter or the downstream observer, returns
+        /// at once; the running emit reads the property again after the observer returns.
         /// </remarks>
         private void EmitCurrent()
         {
-            if (Interlocked.Increment(ref _pendingEmits) != 1)
+            lock (_gate)
             {
-                return;
-            }
-
-            var unserved = 1;
-            try
-            {
-                do
+                if (_emitting)
                 {
-                    var observer = Volatile.Read(ref _observer);
-                    if (observer is null)
-                    {
-                        return;
-                    }
-
-                    var value = _parent._getter(_parent._source);
-
-                    if (!_parent._distinctUntilChanged || !_hasValue || !_comparer.Equals(value!, _lastValue!))
-                    {
-                        _lastValue = value;
-                        _hasValue = true;
-                        observer.OnNext(value!);
-                    }
-
-                    unserved = Interlocked.Add(ref _pendingEmits, -unserved);
+                    _changedDuringEmit = true;
+                    return;
                 }
-                while (unserved != 0);
-            }
-            catch
-            {
-                Volatile.Write(ref _pendingEmits, 0);
-                throw;
+
+                _emitting = true;
+                try
+                {
+                    do
+                    {
+                        _changedDuringEmit = false;
+
+                        var observer = Volatile.Read(ref _observer);
+                        if (observer is null)
+                        {
+                            return;
+                        }
+
+                        var value = _parent._getter(_parent._source);
+
+                        if (!_parent._distinctUntilChanged || !_hasValue || !_comparer.Equals(value!, _lastValue!))
+                        {
+                            _lastValue = value;
+                            _hasValue = true;
+                            observer.OnNext(value!);
+                        }
+                    }
+                    while (_changedDuringEmit);
+                }
+                finally
+                {
+                    _emitting = false;
+                    _changedDuringEmit = false;
+                }
             }
         }
     }
