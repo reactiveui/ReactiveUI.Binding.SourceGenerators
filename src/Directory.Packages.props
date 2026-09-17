@@ -30,8 +30,8 @@
 
     <!-- Dependencies -->
     <PackageVersion Include="Splat" Version="21.0.0"/>
-    <PackageVersion Include="ReactiveUI.Primitives" Version="7.5.0"/>
-    <PackageVersion Include="ReactiveUI.Primitives.Reactive" Version="7.5.0"/>
+    <PackageVersion Include="ReactiveUI.Primitives" Version="8.0.0"/>
+    <PackageVersion Include="ReactiveUI.Primitives.Reactive" Version="8.0.0"/>
     <PackageVersion Include="System.Reactive" Version="7.0.0"/>
 
     <!-- Build Tools -->
