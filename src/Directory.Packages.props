@@ -4,53 +4,29 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
 
-  <!-- MAUI version varies by target framework -->
   <PropertyGroup>
     <MauiVersion Condition="$(TargetFramework.StartsWith('net10'))">10.0.101</MauiVersion>
     <MauiVersion Condition="$(TargetFramework.StartsWith('net11'))">11.0.0-rc.1.26451.6</MauiVersion>
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- StyleSharp.Analyzers, PerformanceSharp.Analyzers and SecuritySharp.Analyzers ship from the
-         same release pipeline and always share a version. -->
-    <RoslynCommonAnalyzersVersion>4.2.2</RoslynCommonAnalyzersVersion>
+    <RoslynCommonAnalyzersVersion>5.0.4</RoslynCommonAnalyzersVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Testing Framework -->
-    <PackageVersion Include="TUnit" Version="1.67.0"/>
+    <PackageVersion Include="TUnit" Version="1.68.4"/>
 
-    <!--
-      Roslyn / Code Analysis.
-
-      The shipping generator and analyzer projects compile against Roslyn 4.8.0
-      (VersionOverride in their own .csproj), the version that ships with the
-      .NET 8 SDK (8.0.1xx) and Visual Studio 2022 17.8. A compiler refuses to
-      load an analyzer built against a NEWER Roslyn than the one running, so
-      4.8.0 is the floor for which consumers can use the package at all — do NOT
-      raise it without deciding to drop those consumers.
-
-      The version below is the one the test and benchmark projects compile and
-      run against; it must stay at or above what their own tooling requires
-      (Basic.Reference.Assemblies needs >= 4.11, BenchmarkDotNet needs >= 4.14).
-      Running the generator on a newer Roslyn than it was built against is the
-      normal, supported direction, and it is also what lets the suite name a
-      language version by its constant rather than as whatever preview happens
-      to be current.
-
-      Microsoft.CodeAnalysis.Analyzers is a build-time-only analyzer package
-      (the RS#### authoring rules) with no impact on the end-user-facing Roslyn
-      version, so it tracks the latest stable release independently.
-    -->
+    <!-- Roslyn Framework -->
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.9.0"/>
 
     <!-- Test Infrastructure -->
-    <PackageVersion Include="Basic.Reference.Assemblies.Net110" Version="1.8.11"/>
-    <PackageVersion Include="Basic.Reference.Assemblies.Net100" Version="1.8.11"/>
-    <PackageVersion Include="Basic.Reference.Assemblies.Net90" Version="1.8.11"/>
-    <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.8.11"/>
+    <PackageVersion Include="Basic.Reference.Assemblies.Net110" Version="1.8.12"/>
+    <PackageVersion Include="Basic.Reference.Assemblies.Net100" Version="1.8.12"/>
+    <PackageVersion Include="Basic.Reference.Assemblies.Net90" Version="1.8.12"/>
+    <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.8.12"/>
 
     <!-- Dependencies -->
     <PackageVersion Include="Splat" Version="21.0.0"/>
@@ -64,7 +40,7 @@
     <PackageVersion Include="PerformanceSharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
     <PackageVersion Include="SecuritySharp.Analyzers" Version="$(RoslynCommonAnalyzersVersion)"/>
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.401"/>
-    <PackageVersion Include="PublicApiSharp.Analyzers" Version="2.0.0"/>
+    <PackageVersion Include="PublicApiSharp.Analyzers" Version="2.0.1"/>
 
     <!-- MAUI -->
     <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
@@ -72,7 +48,6 @@
     <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" Condition="$(TargetFramework.StartsWith('net10'))"/>
 
     <!-- Benchmarking -->
-    <!-- The net11 and NativeAOT-11 runtime monikers arrive in 0.16; 0.15 tops out at 10. -->
     <PackageVersion Include="BenchmarkDotNet" Version="0.16.0-preview.1"/>
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.16.0-preview.1"/>
 
