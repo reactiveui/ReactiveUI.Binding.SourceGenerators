@@ -819,7 +819,7 @@ dotnet_diagnostic.IDE0302.severity = none # Use collection expression for stacka
 dotnet_diagnostic.IDE0303.severity = none # Use collection expression for Create
 dotnet_diagnostic.IDE0304.severity = none # Use collection expression for builder
 dotnet_diagnostic.IDE0305.severity = none # Use collection expression for fluent
-dotnet_diagnostic.IDE0306.severity = none # Use collection expression for new 
+dotnet_diagnostic.IDE0306.severity = none # Use collection expression for new
 dotnet_diagnostic.IDE0320.severity = none # Make anonymous function static — eliminates the closure-capture display class allocation
 dotnet_diagnostic.IDE0050.severity = none # Convert anonymous type to tuple
 dotnet_diagnostic.IDE0230.severity = none # Use UTF-8 string literal — better hot-path encoding for byte-array constants
@@ -842,7 +842,7 @@ dotnet_diagnostic.IDE3000.severity = none # Disabled per project convention — 
 ###################
 # StyleSharp Analyzers (SST)
 ###################
-file_header_template = Copyright (c) 2019-2026 ReactiveUI Association Incorporated. All rights reserved.\nReactiveUI Association Incorporated licenses this file to you under the MIT license.\nSee the LICENSE file in the project root for full license information.
+file_header_template = Copyright (c) 2019-2026 ReactiveUI and Contributors. All rights reserved.\nReactiveUI and Contributors licenses this file to you under the MIT license.\nSee the LICENSE file in the project root for full license information.
 stylesharp.summary_single_line_max_length = 120
 
 stylesharp.SST2313.allowed_enum_storage = int, uint, long, ulong # deliberately widened enums stay legal
@@ -2558,7 +2558,7 @@ indent_size = 2
 [*.builds]
 indent_size = 2
 
-[*.{xml,resx,ruleset}]
+[*.{xml,stylecop,resx,ruleset}]
 indent_size = 2
 
 [*.{props,targets,config,nuspec}]
