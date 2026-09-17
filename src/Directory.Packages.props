@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <RoslynCommonAnalyzersVersion>5.0.4</RoslynCommonAnalyzersVersion>
+    <RoslynCommonAnalyzersVersion>5.0.5</RoslynCommonAnalyzersVersion>
   </PropertyGroup>
 
   <ItemGroup>
