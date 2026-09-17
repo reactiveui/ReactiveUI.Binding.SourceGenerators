@@ -15,12 +15,15 @@ namespace ReactiveUI.Binding.Analyzer.Analyzers;
 /// <summary>
 /// Analyzes binding and observation invocations (WhenChanged, WhenChanging, BindOneWay, BindTwoWay,
 /// OneWayBind, Bind, BindTo, BindCommand, BindInteraction) for common issues. The generic lambda checks
-/// (RXUIBIND001/003/006/010) apply to every recognized extension method; the remaining checks are
+/// (RXUIBIND001/003/006/010) apply to generated binding entry points; the remaining checks are
 /// method-specific (RXUIBIND004, RXUIBIND005, RXUIBIND007, RXUIBIND008).
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class BindingInvocationAnalyzer : DiagnosticAnalyzer
 {
+    /// <summary>Runtime entry points accept expressions that the generator cannot inspect.</summary>
+    private const string UnsafeMethodSuffix = "Unsafe";
+
     /// <summary>The parameter type a property path arrives as, which marks it out from the other arguments.</summary>
     private const string ExpressionParameterTypePrefix = "System.Linq.Expressions.Expression<";
 
@@ -57,7 +60,8 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         var invocationOp = (IInvocationOperation)context.Operation;
 
         var methodSymbol = invocationOp.TargetMethod;
-        if (!AnalyzerHelpers.IsBindingExtensionMethod(methodSymbol))
+        if (!AnalyzerHelpers.IsBindingExtensionMethod(methodSymbol)
+            || methodSymbol.Name.EndsWith(UnsafeMethodSuffix, StringComparison.Ordinal))
         {
             return;
         }

@@ -13,6 +13,15 @@ internal static class GeneratedTypeNames
     /// <summary>The projection sink, which maps each value of a source sequence (open generic).</summary>
     internal const string MapSignal = "global::ReactiveUI.Primitives.Signals.MapSignal";
 
+    /// <summary>The typed two-source combination operator.</summary>
+    internal const string CombineLatestSignal = "global::ReactiveUI.Primitives.Advanced.CombineLatestSignal";
+
+    /// <summary>The typed distinct-value operator.</summary>
+    internal const string UniqueSignal = "global::ReactiveUI.Primitives.Advanced.UniqueSignal";
+
+    /// <summary>The typed scheduled-delivery operator.</summary>
+    internal const string WitnessOnSignal = "global::ReactiveUI.Primitives.Advanced.WitnessOnSignal";
+
     /// <summary>The projecting switch sink, which maps each value onto an inner sequence and follows only the latest (open generic).</summary>
     internal const string SwitchMapSignal = "global::ReactiveUI.Primitives.Advanced.SwitchMapSignal";
 

@@ -57,9 +57,13 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs1);
         ArgumentExceptionHelper.ThrowIfNull(obs2);
 
-        return Signal.Merge(
+        IObservable<TRet>[] sources =
+        [
             sender.WhenAnyObservableUnsafe(obs1),
-            sender.WhenAnyObservableUnsafe(obs2));
+            sender.WhenAnyObservableUnsafe(obs2),
+        ];
+
+        return new EnumerableBlendSignal<TRet>(sources);
     }
 
     /// <summary>Observes 3 observable properties on the specified sender and merges the switched observables.</summary>
@@ -85,10 +89,14 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs2);
         ArgumentExceptionHelper.ThrowIfNull(obs3);
 
-        return Signal.Merge(
+        IObservable<TRet>[] sources =
+        [
             sender.WhenAnyObservableUnsafe(obs1),
             sender.WhenAnyObservableUnsafe(obs2),
-            sender.WhenAnyObservableUnsafe(obs3));
+            sender.WhenAnyObservableUnsafe(obs3),
+        ];
+
+        return new EnumerableBlendSignal<TRet>(sources);
     }
 
     /// <summary>Observes 4 observable properties on the specified sender and merges the switched observables.</summary>
@@ -117,11 +125,15 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs3);
         ArgumentExceptionHelper.ThrowIfNull(obs4);
 
-        return Signal.Merge(
+        IObservable<TRet>[] sources =
+        [
             sender.WhenAnyObservableUnsafe(obs1),
             sender.WhenAnyObservableUnsafe(obs2),
             sender.WhenAnyObservableUnsafe(obs3),
-            sender.WhenAnyObservableUnsafe(obs4));
+            sender.WhenAnyObservableUnsafe(obs4),
+        ];
+
+        return new EnumerableBlendSignal<TRet>(sources);
     }
 
     /// <summary>Observes 5 observable properties on the specified sender and merges the switched observables.</summary>
@@ -153,12 +165,16 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs4);
         ArgumentExceptionHelper.ThrowIfNull(obs5);
 
-        return Signal.Merge(
+        IObservable<TRet>[] sources =
+        [
             sender.WhenAnyObservableUnsafe(obs1),
             sender.WhenAnyObservableUnsafe(obs2),
             sender.WhenAnyObservableUnsafe(obs3),
             sender.WhenAnyObservableUnsafe(obs4),
-            sender.WhenAnyObservableUnsafe(obs5));
+            sender.WhenAnyObservableUnsafe(obs5),
+        ];
+
+        return new EnumerableBlendSignal<TRet>(sources);
     }
 
     /// <summary>Observes 6 observable properties on the specified sender and merges the switched observables.</summary>
@@ -194,13 +210,17 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs5);
         ArgumentExceptionHelper.ThrowIfNull(obs6);
 
-        return Signal.Merge(
+        IObservable<TRet>[] sources =
+        [
             sender.WhenAnyObservableUnsafe(obs1),
             sender.WhenAnyObservableUnsafe(obs2),
             sender.WhenAnyObservableUnsafe(obs3),
             sender.WhenAnyObservableUnsafe(obs4),
             sender.WhenAnyObservableUnsafe(obs5),
-            sender.WhenAnyObservableUnsafe(obs6));
+            sender.WhenAnyObservableUnsafe(obs6),
+        ];
+
+        return new EnumerableBlendSignal<TRet>(sources);
     }
 
     /// <summary>Observes 7 observable properties on the specified sender and merges the switched observables.</summary>
@@ -239,14 +259,18 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs6);
         ArgumentExceptionHelper.ThrowIfNull(obs7);
 
-        return Signal.Merge(
+        IObservable<TRet>[] sources =
+        [
             sender.WhenAnyObservableUnsafe(obs1),
             sender.WhenAnyObservableUnsafe(obs2),
             sender.WhenAnyObservableUnsafe(obs3),
             sender.WhenAnyObservableUnsafe(obs4),
             sender.WhenAnyObservableUnsafe(obs5),
             sender.WhenAnyObservableUnsafe(obs6),
-            sender.WhenAnyObservableUnsafe(obs7));
+            sender.WhenAnyObservableUnsafe(obs7),
+        ];
+
+        return new EnumerableBlendSignal<TRet>(sources);
     }
 
     /// <summary>Observes 8 observable properties on the specified sender and merges the switched observables.</summary>
@@ -288,7 +312,8 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs7);
         ArgumentExceptionHelper.ThrowIfNull(obs8);
 
-        return Signal.Merge(
+        IObservable<TRet>[] sources =
+        [
             sender.WhenAnyObservableUnsafe(obs1),
             sender.WhenAnyObservableUnsafe(obs2),
             sender.WhenAnyObservableUnsafe(obs3),
@@ -296,7 +321,10 @@ public static partial class ReactiveUIBindingExtensions
             sender.WhenAnyObservableUnsafe(obs5),
             sender.WhenAnyObservableUnsafe(obs6),
             sender.WhenAnyObservableUnsafe(obs7),
-            sender.WhenAnyObservableUnsafe(obs8));
+            sender.WhenAnyObservableUnsafe(obs8),
+        ];
+
+        return new EnumerableBlendSignal<TRet>(sources);
     }
 
     /// <summary>Observes 9 observable properties on the specified sender and merges the switched observables.</summary>
@@ -341,7 +369,8 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs8);
         ArgumentExceptionHelper.ThrowIfNull(obs9);
 
-        return Signal.Merge(
+        IObservable<TRet>[] sources =
+        [
             sender.WhenAnyObservableUnsafe(obs1),
             sender.WhenAnyObservableUnsafe(obs2),
             sender.WhenAnyObservableUnsafe(obs3),
@@ -350,7 +379,10 @@ public static partial class ReactiveUIBindingExtensions
             sender.WhenAnyObservableUnsafe(obs6),
             sender.WhenAnyObservableUnsafe(obs7),
             sender.WhenAnyObservableUnsafe(obs8),
-            sender.WhenAnyObservableUnsafe(obs9));
+            sender.WhenAnyObservableUnsafe(obs9),
+        ];
+
+        return new EnumerableBlendSignal<TRet>(sources);
     }
 
     /// <summary>Observes 10 observable properties on the specified sender and merges the switched observables.</summary>
@@ -398,7 +430,8 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs9);
         ArgumentExceptionHelper.ThrowIfNull(obs10);
 
-        return Signal.Merge(
+        IObservable<TRet>[] sources =
+        [
             sender.WhenAnyObservableUnsafe(obs1),
             sender.WhenAnyObservableUnsafe(obs2),
             sender.WhenAnyObservableUnsafe(obs3),
@@ -408,7 +441,10 @@ public static partial class ReactiveUIBindingExtensions
             sender.WhenAnyObservableUnsafe(obs7),
             sender.WhenAnyObservableUnsafe(obs8),
             sender.WhenAnyObservableUnsafe(obs9),
-            sender.WhenAnyObservableUnsafe(obs10));
+            sender.WhenAnyObservableUnsafe(obs10),
+        ];
+
+        return new EnumerableBlendSignal<TRet>(sources);
     }
 
     /// <summary>Observes 11 observable properties on the specified sender and merges the switched observables.</summary>
@@ -459,7 +495,8 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs10);
         ArgumentExceptionHelper.ThrowIfNull(obs11);
 
-        return Signal.Merge(
+        IObservable<TRet>[] sources =
+        [
             sender.WhenAnyObservableUnsafe(obs1),
             sender.WhenAnyObservableUnsafe(obs2),
             sender.WhenAnyObservableUnsafe(obs3),
@@ -470,7 +507,10 @@ public static partial class ReactiveUIBindingExtensions
             sender.WhenAnyObservableUnsafe(obs8),
             sender.WhenAnyObservableUnsafe(obs9),
             sender.WhenAnyObservableUnsafe(obs10),
-            sender.WhenAnyObservableUnsafe(obs11));
+            sender.WhenAnyObservableUnsafe(obs11),
+        ];
+
+        return new EnumerableBlendSignal<TRet>(sources);
     }
 
     /// <summary>Observes 12 observable properties on the specified sender and merges the switched observables.</summary>
@@ -524,7 +564,8 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(obs11);
         ArgumentExceptionHelper.ThrowIfNull(obs12);
 
-        return Signal.Merge(
+        IObservable<TRet>[] sources =
+        [
             sender.WhenAnyObservableUnsafe(obs1),
             sender.WhenAnyObservableUnsafe(obs2),
             sender.WhenAnyObservableUnsafe(obs3),
@@ -536,7 +577,10 @@ public static partial class ReactiveUIBindingExtensions
             sender.WhenAnyObservableUnsafe(obs9),
             sender.WhenAnyObservableUnsafe(obs10),
             sender.WhenAnyObservableUnsafe(obs11),
-            sender.WhenAnyObservableUnsafe(obs12));
+            sender.WhenAnyObservableUnsafe(obs12),
+        ];
+
+        return new EnumerableBlendSignal<TRet>(sources);
     }
 
     /// <summary>

@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using ReactiveUI.Binding.Observables;
+using ReactiveUI.Binding.Tests.TestModels;
 
 namespace ReactiveUI.Binding.Tests.Observables;
 
@@ -21,11 +22,209 @@ public class PluginPropertyObservableTests
     /// <summary>The value the fixture is moved to.</summary>
     private const string UpdatedName = "updated";
 
+    /// <summary>The completion marker recorded after all delivered values.</summary>
+    private const string CompletionMarker = "complete";
+
+    /// <summary>The error marker recorded after all delivered values.</summary>
+    private const string ErrorMarker = "error";
+
     /// <summary>The single emission an observation makes when nothing has moved.</summary>
     private static readonly string[] InitialOnly = [InitialName];
 
     /// <summary>The pair an observation makes when the property is moved once.</summary>
     private static readonly string[] InitialThenUpdated = [InitialName, UpdatedName];
+
+    /// <summary>A subscriber can wait for a provider notification from another thread without deadlocking.</summary>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Test]
+    public async Task OnNext_WaitsForCompetingWriter_DeliversLatestValueWithoutOverlap()
+    {
+        const int joinTimeoutSeconds = 5;
+        var fixture = new ObservedFixture { Name = InitialName };
+        var notifications = new PluginNotifications();
+        var writerFinished = false;
+        Thread? writer = null;
+        var recorder = new EmissionRecorder<string>
+        {
+            OnFirstValue = () =>
+            {
+                writer = new(() =>
+                {
+                    fixture.Name = UpdatedName;
+                    notifications.Raise(fixture);
+                }) { IsBackground = true };
+                writer.Start();
+                writerFinished = writer.Join(TimeSpan.FromSeconds(joinTimeoutSeconds));
+            },
+        };
+        using var subscription = Build(fixture, notifications).Subscribe(recorder);
+
+        var joined = writer!.Join(TimeSpan.FromSeconds(joinTimeoutSeconds));
+        await Assert.That(joined).IsTrue();
+        await Assert.That(writerFinished).IsTrue();
+        await Assert.That(recorder.MaxConcurrentEmissions).IsEqualTo(1);
+        await Assert.That(recorder.Snapshot()).IsEquivalentTo(InitialThenUpdated);
+    }
+
+    /// <summary>A terminal raised during attachment follows the initial value, and only the first terminal is delivered.</summary>
+    /// <param name="fault">Whether the provider's first terminal is an error.</param>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Subscribe_TerminalDuringAttachment_DeliversInitialValueBeforeTerminal(bool fault)
+    {
+        const int expectedNotifications = 2;
+        var fixture = new ObservedFixture { Name = InitialName };
+        var notifications = new PluginNotifications();
+        var sequence = new List<string>();
+        var error = new InvalidOperationException("provider error");
+        notifications.AfterSubscribe = () =>
+        {
+            if (fault)
+            {
+                notifications.Fault(error);
+            }
+
+            notifications.Complete();
+            notifications.Fault(error);
+        };
+
+        using var subscription = Build(fixture, notifications).Subscribe(
+            sequence.Add,
+            _ => sequence.Add(ErrorMarker),
+            () => sequence.Add(CompletionMarker));
+        fixture.Name = UpdatedName;
+        notifications.Raise(fixture);
+
+        await Assert.That(sequence).Count().IsEqualTo(expectedNotifications);
+        await Assert.That(sequence[0]).IsEqualTo(InitialName);
+        await Assert.That(sequence[1]).IsEqualTo(fault ? ErrorMarker : CompletionMarker);
+    }
+
+    /// <summary>A provider terminal waits for the current observer and the pending property read.</summary>
+    /// <param name="fault">Whether the terminal is an error.</param>
+    /// <param name="sameValue">Whether the pending notification leaves the value unchanged.</param>
+    /// <param name="distinct">Whether equal consecutive values are suppressed.</param>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Test]
+    [MatrixDataSource]
+    public async Task OnNext_ReentrantChangeAndTerminal_DeliversPendingValueBeforeTerminal(
+        [Matrix(false, true)] bool fault,
+        [Matrix(false, true)] bool sameValue,
+        [Matrix(false, true)] bool distinct)
+    {
+        const int valueAndTerminalCount = 2;
+        var fixture = new ObservedFixture { Name = InitialName };
+        var notifications = new PluginNotifications();
+        var sequence = new List<string>();
+        var insideObserver = false;
+        var completionOverlapped = false;
+        using var subscription = Build(fixture, notifications, distinct).Subscribe(
+            value =>
+            {
+                insideObserver = true;
+                sequence.Add(value);
+                if (sequence.Count == 1)
+                {
+                    fixture.Name = sameValue ? InitialName : UpdatedName;
+                    notifications.Raise(fixture);
+                    if (fault)
+                    {
+                        notifications.Fault(new InvalidOperationException(ErrorMarker));
+                    }
+                    else
+                    {
+                        notifications.Complete();
+                    }
+                }
+
+                insideObserver = false;
+            },
+            _ =>
+            {
+                completionOverlapped = insideObserver;
+                sequence.Add(ErrorMarker);
+            },
+            () =>
+            {
+                completionOverlapped = insideObserver;
+                sequence.Add(CompletionMarker);
+            });
+
+        var emitsPending = !sameValue || !distinct;
+        await Assert.That(sequence).Count().IsEqualTo(valueAndTerminalCount + (emitsPending ? 1 : 0));
+        await Assert.That(sequence[0]).IsEqualTo(InitialName);
+        if (emitsPending)
+        {
+            await Assert.That(sequence[1]).IsEqualTo(sameValue ? InitialName : UpdatedName);
+        }
+
+        await Assert.That(sequence[^1]).IsEqualTo(fault ? ErrorMarker : CompletionMarker);
+        await Assert.That(completionOverlapped).IsFalse();
+    }
+
+    /// <summary>Disposing inside the final getter prevents its value and terminal from reaching the observer.</summary>
+    /// <param name="fault">Whether the pending terminal is an error.</param>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task OnNext_FinalGetterDisposes_StopsFinalValueAndTerminal(bool fault)
+    {
+        var fixture = new ObservedFixture { Name = InitialName };
+        var notifications = new PluginNotifications();
+        var values = new List<string>();
+        var terminated = false;
+        var disposeOnRead = false;
+        IDisposable? subscription = null;
+        var observable = new PluginPropertyObservable<string>(
+            notifications,
+            fixture,
+            NameExpression(),
+            ObservedPropertyName,
+            _ =>
+            {
+                if (disposeOnRead)
+                {
+                    subscription!.Dispose();
+                }
+
+                return fixture.Name;
+            },
+            false,
+            true);
+        subscription = observable.Subscribe(
+            value =>
+            {
+                values.Add(value);
+                if (value == UpdatedName)
+                {
+                    fixture.Name = "final";
+                    notifications.Raise(fixture);
+                    disposeOnRead = true;
+                    if (fault)
+                    {
+                        notifications.Fault(new InvalidOperationException(ErrorMarker));
+                    }
+                    else
+                    {
+                        notifications.Complete();
+                    }
+                }
+            },
+            _ => terminated = true,
+            () => terminated = true);
+        using (subscription)
+        {
+            fixture.Name = UpdatedName;
+            notifications.Raise(fixture);
+
+            await Assert.That(values).IsEquivalentTo(InitialThenUpdated);
+            await Assert.That(terminated).IsFalse();
+            await Assert.That(notifications.SubscriberCount).IsEqualTo(0);
+        }
+    }
 
     /// <summary>Subscribing reports the property's current value without waiting for a notification.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
@@ -324,8 +523,9 @@ public class PluginPropertyObservableTests
     /// <summary>Builds the observation under test over a fixture and a registration.</summary>
     /// <param name="fixture">The object being observed.</param>
     /// <param name="notifications">The registration driving the observation.</param>
+    /// <param name="distinct">Whether equal consecutive values are suppressed.</param>
     /// <returns>The observation.</returns>
-    private static PluginPropertyObservable<string> Build(ObservedFixture fixture, PluginNotifications notifications) =>
+    private static PluginPropertyObservable<string> Build(ObservedFixture fixture, PluginNotifications notifications, bool distinct = true) =>
         new(
             notifications,
             fixture,
@@ -333,7 +533,7 @@ public class PluginPropertyObservableTests
             ObservedPropertyName,
             static observed => ((ObservedFixture)observed).Name,
             false,
-            true);
+            distinct);
 
     /// <summary>An object with a property to observe.</summary>
     private sealed class ObservedFixture : INotifyPropertyChanged
@@ -370,6 +570,9 @@ public class PluginPropertyObservableTests
         /// <summary>Gets or sets the object to notify about from inside <see cref="Subscribe"/>, or <see langword="null"/> to stay silent.</summary>
         public object? NotifyDuringSubscribe { get; set; }
 
+        /// <summary>Gets or sets an action raised after attaching the observer.</summary>
+        public Action? AfterSubscribe { get; set; }
+
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged) => int.MaxValue;
@@ -394,6 +597,7 @@ public class PluginPropertyObservableTests
                 observer.OnNext(new ObservedChange<object, object?>(sender, null, null));
             }
 
+            AfterSubscribe?.Invoke();
             return new Unsubscriber(_observers, observer);
         }
 

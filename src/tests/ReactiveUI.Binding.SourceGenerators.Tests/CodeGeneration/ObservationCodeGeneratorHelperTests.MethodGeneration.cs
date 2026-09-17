@@ -117,10 +117,10 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("__WhenChanged_DEADBEEF");
     }
 
-    /// <summary>Verifies GenerateObservationMethod with a single property and selector generates Select wrapping.</summary>
+    /// <summary>A single-property selector constructs a map with the observed and projected types.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateObservationMethod_SinglePropertyWithSelector_GeneratesSelectWrap()
+    public async Task GenerateObservationMethod_SinglePropertyWithSelector_GeneratesMapSignal()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateInvocationInfo(
@@ -131,7 +131,7 @@ public partial class ObservationCodeGeneratorHelperTests
         ObservationCodeGenerator.GenerateObservationMethod(sb, inv, classInfo, "CAFEBABE", false, WhenChangedName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("LinqExtensions.Select(");
+        await Assert.That(result).Contains("new global::ReactiveUI.Primitives.Signals.MapSignal<global::System.String, global::System.Int32>(");
         await Assert.That(result).Contains("selector");
     }
 

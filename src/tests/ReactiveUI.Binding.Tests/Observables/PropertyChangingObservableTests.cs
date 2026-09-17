@@ -27,6 +27,66 @@ public class PropertyChangingObservableTests
     /// <summary>The number of rapid property-changing iterations in the concurrency test.</summary>
     private const int ConcurrencyIterations = 100;
 
+    /// <summary>A subscriber can wait for another writer while preserving its captured before-change value.</summary>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Test]
+    public async Task OnNext_WaitsForCompetingWriter_DeliversCapturedValueWithoutOverlap()
+    {
+        const int joinTimeoutSeconds = 5;
+        var source = new TestViewModel { Name = InitialName };
+        var writerFinished = false;
+        Thread? writer = null;
+        var recorder = new EmissionRecorder<string?>
+        {
+            OnFirstValue = () =>
+            {
+                writer = new(() => source.Name = "Bob") { IsBackground = true };
+                writer.Start();
+                writerFinished = writer.Join(TimeSpan.FromSeconds(joinTimeoutSeconds));
+            },
+        };
+        var observable = new PropertyChangingObservable<string?>(source, nameof(source.Name), static x => ((TestViewModel)x).Name);
+        using var subscription = observable.Subscribe(recorder);
+
+        var joined = writer!.Join(TimeSpan.FromSeconds(joinTimeoutSeconds));
+        var values = recorder.Snapshot();
+        await Assert.That(joined).IsTrue();
+        await Assert.That(writerFinished).IsTrue();
+        await Assert.That(recorder.MaxConcurrentEmissions).IsEqualTo(1);
+        await Assert.That(values).Count().IsEqualTo(ExpectedTwoEmissions);
+        await Assert.That(values[0]).IsEqualTo(InitialName);
+        await Assert.That(values[1]).IsEqualTo(InitialName);
+        await Assert.That(source.Name).IsEqualTo("Bob");
+    }
+
+    /// <summary>A nested before-change notification reaches the observer before the nested setter writes.</summary>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Test]
+    public async Task OnNext_ReentrantWrite_DeliversBeforeNestedWrite()
+    {
+        var source = new TestViewModel { Name = InitialName };
+        var values = new List<string?>();
+        var valueSeenDuringNestedNotification = string.Empty;
+        var observable = new PropertyChangingObservable<string?>(source, nameof(source.Name), static x => ((TestViewModel)x).Name);
+        using var subscription = observable.Subscribe(value =>
+        {
+            values.Add(value);
+            if (values.Count == 1)
+            {
+                source.Name = "Bob";
+            }
+            else
+            {
+                valueSeenDuringNestedNotification = source.Name;
+            }
+        });
+
+        await Assert.That(values).Count().IsEqualTo(ExpectedTwoEmissions);
+        await Assert.That(values[1]).IsEqualTo(InitialName);
+        await Assert.That(valueSeenDuringNestedNotification).IsEqualTo(InitialName);
+        await Assert.That(source.Name).IsEqualTo("Bob");
+    }
+
     /// <summary>Verifies that Subscribe throws ArgumentNullException when observer is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
@@ -104,6 +164,20 @@ public class PropertyChangingObservableTests
 
         await Assert.That(vm.HandlerCount).IsEqualTo(0);
         await Assert.That(results).IsEmpty();
+    }
+
+    /// <summary>A getter failure during event attachment releases the handler before propagating.</summary>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Test]
+    public async Task Subscribe_GetterThrowsDuringAttachment_DetachesHandler()
+    {
+        var source = new ThrowingGetterViewModel { NotifyDuringAttachment = true };
+        var observable = new PropertyChangingObservable<string>(source, nameof(source.Name), static value => ((ThrowingGetterViewModel)value).Name);
+        var observer = new EmissionRecorder<string>();
+
+        await Assert.That(() => observable.Subscribe(observer)).ThrowsExactly<InvalidOperationException>();
+        await Assert.That(source.HandlerCount).IsEqualTo(0);
+        await Assert.That(observer.Snapshot()).IsEmpty();
     }
 
     /// <summary>Verifies that PropertyChanging event triggers a value emission (old value).</summary>
@@ -209,15 +283,10 @@ public class PropertyChangingObservableTests
         await Assert.That(results).Count().IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that the <c>if (observer is null) { return; }</c> guard in OnPropertyChanging
-    /// is exercised by nulling the observer via <see cref="PropertyChangingObservable{T}.Subscription.TrySetDisposed"/>
-    /// without calling Dispose (which would unregister the handler). This deterministically covers the
-    /// race-condition guard path.
-    /// </summary>
+    /// <summary>A notification captured before disposal cannot deliver after disposal.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
-    public async Task OnPropertyChanging_ObserverNulledWithoutUnregistering_DoesNotThrow()
+    public async Task OnPropertyChanging_HandlerCapturedBeforeDisposal_DoesNotDeliver()
     {
         var vm = new ManualTestViewModel { Name = InitialName };
         var results = new List<string>();
@@ -225,19 +294,9 @@ public class PropertyChangingObservableTests
 
         var subscription = observable.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
 
-        // Null the observer WITHOUT calling Dispose so the PropertyChanging event handler remains
-        // registered — when the event fires, OnPropertyChanging runs with a null observer,
-        // deterministically hitting the null-guard branch. TrySetDisposed performs exactly the
-        // atomic null-out that Dispose's first step does, minus the handler unregistration.
-        _ = ((PropertyChangingObservable<string>.Subscription)subscription).TrySetDisposed();
-
-        var action = () => vm.RaisePropertyChanging("Name");
+        var action = () => vm.RaisePropertyChanging("Name", subscription.Dispose);
         await Assert.That(action).ThrowsNothing();
-
-        // Only the initial value should have been emitted; no second value after null-observer.
         await Assert.That(results).Count().IsEqualTo(1);
-
-        // Cleanup: Dispose will see _observer already null and skip unregistration.
         subscription.Dispose();
     }
 
@@ -309,9 +368,14 @@ public class PropertyChangingObservableTests
 
         /// <summary>Raises the <see cref="PropertyChanging"/> event for the specified property.</summary>
         /// <param name="propertyName">The name of the property that is changing.</param>
+        /// <param name="beforeRaise">An action to run after capturing the event handlers.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RaisePropertyChanging(string? propertyName) =>
-            PropertyChanging?.Invoke(this, new(propertyName));
+        public void RaisePropertyChanging(string? propertyName, Action? beforeRaise = null)
+        {
+            var handlers = PropertyChanging;
+            beforeRaise?.Invoke();
+            handlers?.Invoke(this, new(propertyName));
+        }
     }
 
     /// <summary>A view model whose getter throws on demand and which counts its attached handlers.</summary>
@@ -323,9 +387,20 @@ public class PropertyChangingObservableTests
         /// <inheritdoc/>
         public event PropertyChangingEventHandler? PropertyChanging
         {
-            add => _propertyChanging += value;
+            add
+            {
+                _propertyChanging += value;
+                if (NotifyDuringAttachment)
+                {
+                    value?.Invoke(this, new(nameof(Name)));
+                }
+            }
+
             remove => _propertyChanging -= value;
         }
+
+        /// <summary>Gets or sets a value indicating whether adding a handler raises a notification.</summary>
+        public bool NotifyDuringAttachment { get; set; }
 
         /// <summary>Gets or sets a value indicating whether reading <see cref="Name"/> throws.</summary>
         public bool Fail { get; set; } = true;

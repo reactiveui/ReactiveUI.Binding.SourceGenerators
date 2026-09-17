@@ -28,8 +28,8 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>The fully qualified name of the <c>Country</c> type used by these tests.</summary>
     private const string CountryTypeName = "global::TestApp.Country";
 
-    /// <summary>The <c>DistinctUntilChanged</c> name these tests generate against.</summary>
-    private const string DistinctUntilChangedName = "DistinctUntilChanged";
+    /// <summary>The concrete distinct-value operator these tests generate against.</summary>
+    private const string UniqueSignalName = "new global::ReactiveUI.Primitives.Advanced.UniqueSignal<";
 
     /// <summary>The <c>CombineLatest</c> name these tests generate against.</summary>
     private const string CombineLatestName = "CombineLatest";
@@ -97,8 +97,8 @@ public partial class ObservationCodeGeneratorHelperTests
     /// <summary>The <c>x =&gt; x.Address.City</c> property selector these tests bind against.</summary>
     private const string CitySelector = "x => x.Address.City";
 
-    /// <summary>The <c>DistinctUntilChanged(</c> fragment these tests expect in the generated source.</summary>
-    private const string DistinctUntilChangedFragment = "LinqExtensions.DistinctUntilChanged(";
+    /// <summary>The typed distinct-value constructor these tests expect in the generated source.</summary>
+    private const string UniqueSignalFragment = "new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::System.String>(";
 
     /// <summary>The projecting flattening sink these tests expect in the generated source.</summary>
     private const string SwitchSinkFragment = "SwitchMapSignal<";

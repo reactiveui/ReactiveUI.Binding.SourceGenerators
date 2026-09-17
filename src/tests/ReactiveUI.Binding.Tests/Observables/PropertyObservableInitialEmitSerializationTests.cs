@@ -31,17 +31,8 @@ public class PropertyObservableInitialEmitSerializationTests
     /// <summary>The property value written after a read has failed.</summary>
     private const string ThirdName = "Carol";
 
-    /// <summary>
-    /// How long the initial emit gives a competing thread to finish its write. The competing thread waits
-    /// for the initial emit, so the join always expires; one that did not wait finishes in microseconds.
-    /// </summary>
+    /// <summary>How long the initial emit gives a competing thread to hand off its notification.</summary>
     private const int InterleaveWindowMilliseconds = 500;
-
-    /// <summary>
-    /// How long a competing emit waits for the subscribing thread to return from subscribe. The bound only
-    /// turns a subscribing thread held by that emit into a failure rather than a hang.
-    /// </summary>
-    private const int SubscribeReturnTimeoutMilliseconds = 10_000;
 
     /// <summary>
     /// Subscriptions the unforced sweep builds. Sized from measurement: against unserialized code this
@@ -119,33 +110,17 @@ public class PropertyObservableInitialEmitSerializationTests
     }
 
     /// <summary>
-    /// A thread that writes while the initial emit is on the stack waits for that emit, then delivers its
-    /// value itself. The subscribing thread returns from subscribe without delivering the other thread's
-    /// value, so a subscriber runs on the thread that raised the change.
+    /// A competing writer hands off its notification while the initial observer waits for that writer.
+    /// The delivery gate emits the latest value after the initial observer returns.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
-    public async Task Subscribe_PropertyChangedRaisedOnAnotherThreadDuringInitialEmit_WaitsThenEmitsOnThatThread()
+    public async Task Subscribe_PropertyChangedRaisedOnAnotherThreadDuringInitialEmit_HandsOffWithoutOverlap()
     {
         var source = new HookedViewModel { Name = InitialName };
         using var competitorStarted = new ManualResetEventSlim(false);
-        using var subscribeReturned = new ManualResetEventSlim(false);
         Thread? competitor = null;
-        var competitorFinishedDuringInitialEmit = true;
-        var replacementReadThreadId = 0;
-        var subscribeReturnedBeforeReplacementRead = false;
-
-        string? ReadAndRecordThread(INotifyPropertyChanged instance)
-        {
-            var name = ((HookedViewModel)instance).Name;
-            if (name == ReplacementName)
-            {
-                replacementReadThreadId = Environment.CurrentManagedThreadId;
-                subscribeReturnedBeforeReplacementRead = subscribeReturned.Wait(SubscribeReturnTimeoutMilliseconds);
-            }
-
-            return name;
-        }
+        var competitorFinishedDuringInitialEmit = false;
 
         // Runs from inside the downstream call of the initial emit, which is the window no other emit may enter.
         var recorder = new EmissionRecorder<string?>
@@ -167,18 +142,15 @@ public class PropertyObservableInitialEmitSerializationTests
         var observable = new PropertyObservable<string?>(
             source,
             nameof(HookedViewModel.Name),
-            ReadAndRecordThread,
+            static instance => ((HookedViewModel)instance).Name,
             distinctUntilChanged: true);
 
         using (observable.Subscribe(recorder))
         {
-            subscribeReturned.Set();
             competitor!.Join();
 
             await AssertNoErrors(recorder);
-            await Assert.That(competitorFinishedDuringInitialEmit).IsFalse();
-            await Assert.That(subscribeReturnedBeforeReplacementRead).IsTrue();
-            await Assert.That(replacementReadThreadId).IsEqualTo(competitor.ManagedThreadId);
+            await Assert.That(competitorFinishedDuringInitialEmit).IsTrue();
             await Assert.That(recorder.MaxConcurrentEmissions).IsEqualTo(1);
             await AssertSequence(recorder.Snapshot(), InitialName, ReplacementName);
         }

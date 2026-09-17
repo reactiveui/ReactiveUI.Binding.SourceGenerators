@@ -73,6 +73,11 @@ cost of creating the subscription is measured separately, by the `First...` case
 | `OneWayBindBenchmark` | `OneWayBind` | `Standard`, `FirstBinding` |
 | `BindToBenchmark` | `BindTo` | `Standard`, `FirstBinding` |
 | `InvokeCommandBenchmark` | `InvokeCommand` | `Standard`, `FirstInvocation` |
+| `BindCommandBenchmark` | `BindCommand` | Subscription and command replacement through an established binding |
+| `BindInteractionBenchmark` | `BindInteraction` | Subscription and handler migration between existing interactions |
+| `ObservationDeliveryBenchmark` | After-change, before-change and plugin observations | Subscription and steady delivery of integer values |
+| `ObservationContentionBenchmark` | The three observation delivery contracts | Competing producer latency and slow-subscriber delivery-thread occupancy |
+| `CombineLatestArityBenchmark` | 2–16-source `CombineLatest` | Public concrete constructor versus extension, including subscription and disposal |
 | `UnsafeFallbackBenchmark` | the `Unsafe` overloads | `WhenChangedUnsafe`, `WhenChangedUnsafe deep chain`, `WhenAnyValueUnsafe`, `BindOneWayUnsafe`, `BindUnsafe` |
 | `RxUiDynamicChainBaseline` | ReactiveUI's dynamic chain | `SingleChain`, `TwoChains`, `DeepChain`, `FirstObservation` |
 
@@ -117,14 +122,44 @@ costs far more than the pass under measurement.
 The benchmark runs under `MemoryDiagnoser` and the `GcVerbose` EventPipe profiler. The allocation column is
 the A/B number, and the trace names the frame that allocated.
 
-## What is not measured
+## Delivery and operator adoption
 
-`BindCommand` and `BindInteraction` have no benchmark. Both need something registered before they do any
-work: `BindCommand` needs an `ICreatesCommandBinding` that reaches the control, and `BindInteraction` needs a
-handler. A benchmark would be measuring that fixture rather than the library, so the number would not mean
-what it appeared to.
+`ObservationDeliveryBenchmark.Subscribe` includes observable construction, initial delivery and disposal.
+`Deliver` uses an established subscription and reports cost per property change. Its integer source caches
+event arguments. The plugin fixture forwards a cached notification token and leaves value reads to the binding.
 
-Everything else in the observation and binding surface is covered, including the `Unsafe` overloads.
+`ObservationContentionBenchmark.ProducerLatency` times one setter while another thread holds the subscriber.
+Setup waits until the subscriber has entered; cleanup releases it after the setter returns.
+`DeliveryThread` times the raising thread through one 40 ms subscriber call while another producer makes
+16 changes. It includes the subscriber's fixed workload and any pending delivery that the raising thread
+drains. Read it as delivery-thread occupancy, including work a UI thread would perform when it raises the
+change. These cases do not measure a platform dispatcher. Thread creation, subscription and joining are
+outside both measurements. Before-change delivery preserves captured values; after-change delivery can
+collapse pending changes, so compare producer latency and delivery occupancy together.
+
+`CombineLatestArityBenchmark` has two comparison groups. `ConstructAndSubscribe` includes construction;
+`Subscribe` subscribes to existing pipelines to isolate subscription allocations. Both groups create fresh
+subscription state and dispose it inside each measurement. The public constructor captures typed slots for
+each arity. Setup verifies that both routes combine every input. Compare the allocation columns before
+replacing a wide-arity extension with a constructor.
+
+`BindCommandBenchmark` uses a control with `Command` and `CommandParameter` properties. `BindInteractionBenchmark`
+uses a synchronous handler. Each measures setup separately from replacing the source property through a live
+binding. The replacement cases report cost per replacement and reuse commands or interactions.
+
+Run these families separately from `src/` after builds and tests finish:
+
+```sh
+dotnet run -c Release -f net10.0 --project benchmarks/ReactiveUI.Binding.Benchmarks -- --filter '*CombineLatestArityBenchmark*' --warmupCount 5 --iterationCount 15
+dotnet run -c Release -f net10.0 --project benchmarks/ReactiveUI.Binding.Benchmarks -- --filter '*ObservationDeliveryBenchmark*' '*ObservationContentionBenchmark*' --warmupCount 5 --iterationCount 15
+dotnet run -c Release -f net10.0 --project benchmarks/ReactiveUI.Binding.Benchmarks -- --filter '*BindCommandBenchmark*' '*BindInteractionBenchmark*' --warmupCount 5 --iterationCount 15
+```
+
+Each command retains the shared managed tracing and NativeAOT jobs. On Linux, pin the process to separate
+physical cores and raise priority where permitted. Compare error ranges as well as means, and inspect the
+allocation trace when a route allocates more. Keep benchmark runs separate from builds and tests.
+
+## Unsafe paths
 
 `UnsafeFallbackBenchmark` declares no NativeAOT job. Those overloads carry `RequiresUnreferencedCode` because
 they walk the path at run time, so an ahead-of-time publish cannot be relied on to keep the members they

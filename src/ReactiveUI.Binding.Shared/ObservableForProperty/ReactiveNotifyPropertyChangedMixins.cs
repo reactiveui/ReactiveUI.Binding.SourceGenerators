@@ -316,10 +316,11 @@ public static class ReactiveNotifyPropertyChangedMixins
 
         return sourceChange.Value is null
             ? new ImmediateReturnSignal<IObservedChange<object?, object?>>(kicker)
-            : new LeadSignal<IObservedChange<object?, object?>>(
+            : new MapSignal<IObservedChange<object?, object?>, IObservedChange<object?, object?>>(
+                new LeadSignal<IObservedChange<object?, object?>>(
                     NotifyForProperty(sourceChange.Value, expression, beforeChange),
-                    kicker)
-                .Select(static IObservedChange<object?, object?> (x) =>
+                    kicker),
+                static IObservedChange<object?, object?> (x) =>
                     new ObservedChange<object?, object?>(x.Sender, x.Expression, x.GetValueOrDefault()));
     }
 

@@ -94,7 +94,7 @@ public static partial class ReactiveUIBindingExtensions
             viewModel,
             propertyName,
             controlName,
-            LinqExtensions.Map(withParameter, static value => (object?)value),
+            new MapSignal<TParam?, object?>(withParameter, static value => (object?)value),
             toEvent,
             bindingExpression);
     }
@@ -133,7 +133,7 @@ public static partial class ReactiveUIBindingExtensions
         // The parameter property lives on the same view model, so it is only observable once there is one.
         var parameters = viewModel is null
             ? Signal.Never<object?>()
-            : LinqExtensions.Map(
+            : new MapSignal<TParam?, object?>(
                 RuntimeObservationFallback.WhenAnyValue(viewModel, withParameter),
                 static value => (object?)value);
 

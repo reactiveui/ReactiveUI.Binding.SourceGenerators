@@ -927,8 +927,11 @@ internal static class BindingEmitterHelpers
     /// <returns>The local holding the routed values.</returns>
     private static string AppendObserveOnStage(StringBuilder sb, in BindingStreamStage stage, string sourceVar)
     {
-        _ = sb.Append("        var ").Append(stage.ScheduledName).Append(" = ").Append(GeneratedTypeNames.LinqExtensions)
-            .Append(".ObserveOn<").Append(stage.ToTypeFullName).Append(">(").Append(sourceVar).AppendLine(", scheduler);");
+        _ = sb.Append("        var ").Append(stage.ScheduledName)
+            .Append(" = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (")
+            .Append(GeneratedTypeNames.ObservableOf(stage.ToTypeFullName)).Append(')').Append(sourceVar)
+            .Append(" : new ").Append(GeneratedTypeNames.WitnessOnSignal).Append('<').Append(stage.ToTypeFullName)
+            .Append(">(").Append(sourceVar).AppendLine(", scheduler);");
 
         return stage.ScheduledName;
     }
