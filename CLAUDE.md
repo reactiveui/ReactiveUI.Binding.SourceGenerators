@@ -398,14 +398,15 @@ more tests that share the suite's compiler.
 ### Where This Engine Parts Company With ReactiveUI's
 
 The generator is a replacement for `PropertyBinderImplementation`, so its behaviour is measured against that
-engine. Two of its inputs are deliberately not offered, and one behaviour is deliberately cheaper.
+engine. Generated bindings and reflection-based bindings have distinct entry points.
 
-**`TriggerUpdate` and `signalViewUpdate` are not offered.** ReactiveUI's `Bind` takes both: the first chooses
-which side wins the first emission, the second replaces the view's own change stream with a caller-supplied
-one. Neither has a generated overload, so asking for one does not compile - the divergence announces itself
-at the call site rather than at run time. They are omitted because the generator resolves a binding from the
-two lambdas alone; an overload taking a runtime stream would have to fall back to the reflection engine for
-exactly the call sites this library exists to remove from it.
+**`TriggerUpdate` and `signalViewUpdate` use `BindUnsafe`.** The view-first Unsafe overloads accept a stream
+with registered or explicit converters. `ViewToViewModel` replaces view notifications with the stream;
+`ViewModelToView` takes the first model notification and uses the stream for subsequent model-to-view updates,
+while observing view notifications. A null stream observes both properties. The initial delivery reads from the
+model even when later notifications replace a queued direction before its dispatch. Both sides are read at
+delivery, compared after conversion, and written through the view-thread scheduler. These calls carry
+`RequiresUnreferencedCode`; generated calls resolve from their property lambdas.
 
 **Binding faults follow ReactiveUI's contract exactly.** A write that faults is logged against the bound
 expression, and rethrown as a `TargetInvocationException` only when it carries an inner exception. This is
@@ -526,9 +527,19 @@ Two traps when naming these:
   stay in `ReactiveUI.Primitives.Advanced` for the `.Reactive` leaf too. That leaf imports the unshifted
   namespace alongside its shifted one; the two declare disjoint types, which is what lets the lean leaf merge
   them already.
-- **Generated code calls extension classes statically**, as
-  `global::ReactiveUI.Primitives.LinqExtensions.ObserveOn(source, scheduler)`, so no import has to be emitted
-  and `RuntimeFlavourRewriter` can retarget the whole path onto the `.Reactive` flavour.
+- **Generated code qualifies operator types**, such as `global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<T>`,
+  so `RuntimeFlavourRewriter` can retarget the types declared by the `.Reactive` flavour. Immediate scheduling
+  returns the source directly. The shared `MapSignal` type keeps its namespace.
+
+Use `CurrentValueDelivery<T>` for after-change and custom-provider reads and `SerializedDelivery<T>` with
+reentrancy enabled for before-change capture. Keep each gate in a mutable field. Read after-change values inside
+the gate; capture before-change values on the raising thread. Attach before initial delivery and release the
+subscription if initialization throws. A contended producer can hand off after the gate's 20 ms wait budget.
+Custom-provider terminals must follow a change raised inside the current observer call.
+
+Two-source combinations construct `CombineLatestSignal<TLeft, TRight, TResult>`. For 3–16 sources, keep the
+`CombineLatest` extension's specialized subscription path. Keep the specialized `Return`, `Never`, and `Empty`
+factories, the internal `Skip` operator's extension, and the subscription extensions' fast paths.
 
 What stays in `Observables/` is decided by whether the type is a general operator or something this domain
 fuses:

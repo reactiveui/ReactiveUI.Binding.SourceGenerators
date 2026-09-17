@@ -109,9 +109,12 @@ public class RuntimeBindingFallbackTests
     }
 
     /// <summary>Verifies that an explicit sequencer is used to deliver the write.</summary>
+    /// <param name="immediate">Whether to use the immediate scheduler or queue on the current thread.</param>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task BindOneWay_WithSequencer_WritesTarget()
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task BindOneWay_WithSequencer_WritesTarget(bool immediate)
     {
         RuntimeObservationFallbackTests.EnsureInitialized();
 
@@ -123,7 +126,7 @@ public class RuntimeBindingFallbackTests
             target,
             x => x.Name,
             x => x.Name,
-            ImmediateSequencer.Instance,
+            immediate ? Sequencer.Immediate : Sequencer.CurrentThread,
             BindingExpression);
 
         source.Name = NotifyingValue;

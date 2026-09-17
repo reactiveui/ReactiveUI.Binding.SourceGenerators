@@ -32,7 +32,7 @@ public static class CombineLatestObservable
         IObservable<T1> source1,
         IObservable<T2> source2,
         Func<T1, T2, TResult> resultSelector) =>
-        LinqExtensions.CombineLatest(source1, source2, resultSelector);
+        new CombineLatestSignal<T1, T2, TResult>(source1, source2, resultSelector);
 
     /// <summary>Combines the latest values from three observables using a result selector.</summary>
     /// <typeparam name="T1">Source element type 1.</typeparam>

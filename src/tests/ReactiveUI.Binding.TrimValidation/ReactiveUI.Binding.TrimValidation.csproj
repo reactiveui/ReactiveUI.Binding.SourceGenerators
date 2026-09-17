@@ -24,7 +24,8 @@
 
   <!-- The scenarios live once, in the AOT harness, and run under both linkers. -->
   <ItemGroup>
-    <Compile Include="..\ReactiveUI.Binding.AotValidation\*.cs" LinkBase="Scenarios"/>
+    <Compile Include="..\ReactiveUI.Binding.AotValidation\*.cs" LinkBase="Scenarios" Condition="'$(UnsafeTriggerProbe)' != 'true'"/>
+    <Compile Remove="UnsafeProbe\**\*.cs" Condition="'$(UnsafeTriggerProbe)' != 'true'"/>
   </ItemGroup>
 
   <ItemGroup>

@@ -38,10 +38,11 @@ public static partial class ReactiveUIBindingExtensions
         ArgumentExceptionHelper.ThrowIfNull(sender);
         ArgumentExceptionHelper.ThrowIfNull(property1);
 
-        return sender.SubscribeToExpressionChain<TSender, T1>(
+        return new MapSignal<IObservedChange<TSender, T1>, TRet>(
+            sender.SubscribeToExpressionChain<TSender, T1>(
                 property1.Body,
-                skipInitial: false)
-            .Select(selector);
+                skipInitial: false),
+            selector);
     }
 
     /// <summary>Observes 2 properties on the specified sender and applies a selector to the observed changes.</summary>

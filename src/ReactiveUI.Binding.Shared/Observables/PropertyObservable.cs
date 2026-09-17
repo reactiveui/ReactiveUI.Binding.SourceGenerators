@@ -57,7 +57,7 @@ public sealed class PropertyObservable<T> : IObservable<T>
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);
 
-        return new Subscription(this, observer);
+        return new Subscription(this, observer).Start();
     }
 
     /// <summary>Manages the event subscription for a single observer, with optional distinct-until-changed filtering.</summary>
@@ -66,48 +66,46 @@ public sealed class PropertyObservable<T> : IObservable<T>
         /// <summary>The parent observable that owns the source and property metadata.</summary>
         private readonly PropertyObservable<T> _parent;
 
-        /// <summary>The equality comparer used for distinct-until-changed filtering.</summary>
-        private readonly EqualityComparer<T> _comparer;
+        /// <summary>The downstream observer.</summary>
+        private readonly IObserver<T> _observer;
 
-        /// <summary>
-        /// Serializes emits across threads. A change raised on another thread waits for the running emit and is
-        /// then delivered on the thread that raised it.
-        /// </summary>
-        private readonly Lock _gate = new();
+        /// <summary>Serializes reads and delivery without holding a lock across the observer.</summary>
+        private CurrentValueDelivery<T> _delivery;
 
-        /// <summary>Whether an emit is running. Read and written only under <see cref="_gate"/>.</summary>
-        private bool _emitting;
+        /// <summary>Whether this subscription has been disposed.</summary>
+        private int _disposed;
 
-        /// <summary>Whether the emitting thread raised another change from inside its own emit.</summary>
-        private bool _changedDuringEmit;
-
-        /// <summary>The downstream observer. Set to <see langword="null"/> on disposal.</summary>
-        private IObserver<T>? _observer;
-
-        /// <summary>
-        /// The most recently emitted value, used for distinct-until-changed comparison.
-        /// May be <see langword="null"/> for reference-typed properties.
-        /// </summary>
-        private T? _lastValue;
-
-        /// <summary>Whether at least one value has been emitted.</summary>
-        private bool _hasValue;
-
-        /// <summary>Initializes a new instance of the <see cref="Subscription"/> class, subscribing and emitting the initial value.</summary>
+        /// <summary>Initializes a new instance of the <see cref="Subscription"/> class.</summary>
         /// <param name="parent">The parent observable.</param>
         /// <param name="observer">The downstream observer.</param>
-        /// <remarks>A throw from the initial emit detaches the handler before propagating, as the caller never receives a disposable.</remarks>
         public Subscription(PropertyObservable<T> parent, IObserver<T> observer)
         {
             _parent = parent;
             _observer = observer;
-            _comparer = EqualityComparer<T>.Default;
+            _delivery = new(parent._distinctUntilChanged);
+        }
 
-            parent._source.PropertyChanged += OnPropertyChanged;
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            {
+                return;
+            }
 
+            _delivery.Stop();
+            _parent._source.PropertyChanged -= OnPropertyChanged;
+        }
+
+        /// <summary>Attaches notifications before reading the initial value inside the delivery gate.</summary>
+        /// <returns>The subscription owning the event handler.</returns>
+        internal IDisposable Start()
+        {
             try
             {
-                EmitCurrent();
+                _parent._source.PropertyChanged += OnPropertyChanged;
+                _delivery.Start(new Drain(this));
+                return this;
             }
             catch
             {
@@ -115,23 +113,6 @@ public sealed class PropertyObservable<T> : IObservable<T>
                 throw;
             }
         }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            if (!TrySetDisposed())
-            {
-                return;
-            }
-
-            _parent._source.PropertyChanged -= OnPropertyChanged;
-        }
-
-        /// <summary>Atomically nulls the observer, returning whether it was previously non-null.</summary>
-        /// <returns><see langword="true"/> if this is the first disposal; otherwise <see langword="false"/>.</returns>
-        [ExcludeFromCodeCoverage]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool TrySetDisposed() => Interlocked.Exchange(ref _observer, null) is not null;
 
         /// <summary>
         /// Handles the <see cref="INotifyPropertyChanged.PropertyChanged"/> event
@@ -147,55 +128,23 @@ public sealed class PropertyObservable<T> : IObservable<T>
                 return;
             }
 
-            EmitCurrent();
+            _delivery.Changed(new Drain(this));
         }
 
-        /// <summary>Reads the current property value and forwards it downstream when the distinct gate allows.</summary>
-        /// <remarks>
-        /// A call from another thread waits for the running emit, then emits on its own thread. A call the
-        /// emitting thread makes from inside its own emit, from the getter or the downstream observer, returns
-        /// at once; the running emit reads the property again after the observer returns.
-        /// </remarks>
-        private void EmitCurrent()
+        /// <summary>Reads the current property value inside the delivery gate.</summary>
+        /// <param name="Owner">The subscription owning the getter.</param>
+        private readonly record struct Reader(Subscription Owner) : ICurrentValueReader<T>
         {
-            lock (_gate)
-            {
-                if (_emitting)
-                {
-                    _changedDuringEmit = true;
-                    return;
-                }
+            /// <inheritdoc/>
+            public T Read() => Owner._parent._getter(Owner._parent._source)!;
+        }
 
-                _emitting = true;
-                try
-                {
-                    do
-                    {
-                        _changedDuringEmit = false;
-
-                        var observer = Volatile.Read(ref _observer);
-                        if (observer is null)
-                        {
-                            return;
-                        }
-
-                        var value = _parent._getter(_parent._source);
-
-                        if (!_parent._distinctUntilChanged || !_hasValue || !_comparer.Equals(value!, _lastValue!))
-                        {
-                            _lastValue = value;
-                            _hasValue = true;
-                            observer.OnNext(value!);
-                        }
-                    }
-                    while (_changedDuringEmit);
-                }
-                finally
-                {
-                    _emitting = false;
-                    _changedDuringEmit = false;
-                }
-            }
+        /// <summary>Drains pending changes into the observer.</summary>
+        /// <param name="Owner">The subscription owning delivery state.</param>
+        private readonly record struct Drain(Subscription Owner) : IDrainTarget
+        {
+            /// <inheritdoc/>
+            void IDrainTarget.Drain() => _ = Owner._delivery.DrainTo(Owner._observer, new Reader(Owner));
         }
     }
 }

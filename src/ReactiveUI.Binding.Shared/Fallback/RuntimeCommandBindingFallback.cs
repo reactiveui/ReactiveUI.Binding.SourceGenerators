@@ -68,9 +68,9 @@ public static class RuntimeCommandBindingFallback
         // Each rebind touches the control, so it is delivered on the view's thread.
         var observation = BindingErrors.Subscribe(
             BindingSchedulers.ObserveOnViewThread(
-                LinqExtensions.CombineLatest(commands, controls, static (command, control) => (command, control)),
+                new CombineLatestSignal<TProp?, TControl, (TProp? Command, TControl Control)>(commands, controls, static (command, control) => (command, control)),
                 view),
-            pair => binding.Disposable = Bind(pair.command, pair.control, commandParameter, toEvent),
+            pair => binding.Disposable = Bind(pair.Command, pair.Control, commandParameter, toEvent),
             bindingExpression);
 
         return new MultipleDisposable(observation, binding);

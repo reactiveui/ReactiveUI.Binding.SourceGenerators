@@ -304,4 +304,71 @@ public static partial class ReactiveUIBindingExtensions
             null,
             bindingExpression);
     }
+
+    /// <summary>Binds two properties, reading both values whenever the selected side signals an update.</summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <typeparam name="TView">The view type.</typeparam>
+    /// <typeparam name="TVMProp">The view model property type.</typeparam>
+    /// <typeparam name="TVProp">The view property type.</typeparam>
+    /// <typeparam name="TDontCare">The ignored signal payload.</typeparam>
+    /// <param name="view">The view to bind.</param>
+    /// <param name="viewModel">The view model to bind.</param>
+    /// <param name="viewModelProperty">The view model property path.</param>
+    /// <param name="viewProperty">The view property path.</param>
+    /// <param name="signalViewUpdate">The update stream, or null to observe both properties.</param>
+    /// <param name="triggerUpdate">The direction driven by the update stream.</param>
+    /// <returns>The binding, which disconnects both directions when disposed.</returns>
+    /// <remarks>The initial signal writes from view model to view after both sides are wired.</remarks>
+    [SuppressMessage("Design", "SST2309", Justification = "The compatibility overload requires ViewToViewModel as its optional enum default.")]
+    [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IReactiveBinding<TView, BindingChange> BindUnsafe<TViewModel, TView, TVMProp, TVProp, TDontCare>(
+        this TView view,
+        TViewModel viewModel,
+        Expression<Func<TViewModel, TVMProp>> viewModelProperty,
+        Expression<Func<TView, TVProp>> viewProperty,
+        IObservable<TDontCare>? signalViewUpdate,
+        TriggerUpdate triggerUpdate = TriggerUpdate.ViewToViewModel)
+        where TViewModel : class
+        where TView : class, IViewFor =>
+        RuntimeBindingFallback.Bind(view, viewModel, viewModelProperty, viewProperty, signalViewUpdate, triggerUpdate);
+
+    /// <summary>Binds two properties with explicit conversions and a stream driving the selected direction.</summary>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
+    /// <typeparam name="TView">The view type.</typeparam>
+    /// <typeparam name="TVMProp">The view model property type.</typeparam>
+    /// <typeparam name="TVProp">The view property type.</typeparam>
+    /// <typeparam name="TDontCare">The ignored signal payload.</typeparam>
+    /// <param name="view">The view to bind.</param>
+    /// <param name="viewModel">The view model to bind.</param>
+    /// <param name="viewModelProperty">The view model property path.</param>
+    /// <param name="viewProperty">The view property path.</param>
+    /// <param name="viewModelToViewConverter">Converts a value written to the view.</param>
+    /// <param name="viewToViewModelConverter">Converts a value written to the view model.</param>
+    /// <param name="signalViewUpdate">The update stream, or null to observe both properties.</param>
+    /// <param name="triggerUpdate">The direction driven by the update stream.</param>
+    /// <returns>The binding, which disconnects both directions when disposed.</returns>
+    /// <remarks>Each signal reads both sides and drops writes whose converted value equals the destination.</remarks>
+    [SuppressMessage("Design", "SST2309", Justification = "The compatibility overload requires ViewToViewModel as its optional enum default.")]
+    [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IReactiveBinding<TView, BindingChange> BindUnsafe<TViewModel, TView, TVMProp, TVProp, TDontCare>(
+        this TView view,
+        TViewModel viewModel,
+        Expression<Func<TViewModel, TVMProp>> viewModelProperty,
+        Expression<Func<TView, TVProp>> viewProperty,
+        Func<TVMProp, TVProp> viewModelToViewConverter,
+        Func<TVProp, TVMProp> viewToViewModelConverter,
+        IObservable<TDontCare>? signalViewUpdate,
+        TriggerUpdate triggerUpdate = TriggerUpdate.ViewToViewModel)
+        where TViewModel : class
+        where TView : class, IViewFor =>
+        RuntimeBindingFallback.Bind(
+            view,
+            viewModel,
+            viewModelProperty,
+            viewProperty,
+            TwoWayConverters.Create(viewModelToViewConverter, viewToViewModelConverter),
+            signalViewUpdate,
+            triggerUpdate);
 }

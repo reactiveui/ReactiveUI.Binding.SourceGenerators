@@ -30,6 +30,35 @@ public class PropertyObservableTests
     /// <summary>The number of rapid property-changed iterations in the concurrency test.</summary>
     private const int ConcurrencyIterations = 100;
 
+    /// <summary>A subscriber can wait for a competing property write without blocking that writer.</summary>
+    /// <returns>A task representing the asynchronous test.</returns>
+    [Test]
+    public async Task OnNext_WaitsForCompetingWriter_DeliversLatestValueWithoutOverlap()
+    {
+        const int joinTimeoutSeconds = 5;
+        var source = new TestViewModel { Name = InitialName };
+        var writerFinished = false;
+        Thread? writer = null;
+        var recorder = new EmissionRecorder<string?>();
+        var observable = new PropertyObservable<string?>(source, nameof(source.Name), static x => ((TestViewModel)x).Name, true);
+        recorder.OnFirstValue = () =>
+        {
+            writer = new(() => source.Name = "Bob") { IsBackground = true };
+            writer.Start();
+            writerFinished = writer.Join(TimeSpan.FromSeconds(joinTimeoutSeconds));
+        };
+        using var subscription = observable.Subscribe(recorder);
+
+        var joined = writer!.Join(TimeSpan.FromSeconds(joinTimeoutSeconds));
+        var values = recorder.Snapshot();
+        await Assert.That(joined).IsTrue();
+        await Assert.That(writerFinished).IsTrue();
+        await Assert.That(recorder.MaxConcurrentEmissions).IsEqualTo(1);
+        await Assert.That(values).Count().IsEqualTo(ExpectedTwoEmissions);
+        await Assert.That(values[0]).IsEqualTo(InitialName);
+        await Assert.That(values[1]).IsEqualTo("Bob");
+    }
+
     /// <summary>Verifies that Subscribe throws ArgumentNullException when observer is null.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
@@ -242,15 +271,10 @@ public class PropertyObservableTests
         await Assert.That(results).Count().IsEqualTo(1);
     }
 
-    /// <summary>
-    /// Verifies that the <c>if (observer is null) { return; }</c> guard in OnPropertyChanged
-    /// is exercised by nulling the observer via <see cref="PropertyObservable{T}.Subscription.TrySetDisposed"/>
-    /// without calling Dispose (which would unregister the handler). This deterministically covers the
-    /// race-condition guard path.
-    /// </summary>
+    /// <summary>A notification captured before disposal cannot deliver after disposal.</summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Test]
-    public async Task OnPropertyChanged_ObserverNulledWithoutUnregistering_DoesNotThrow()
+    public async Task OnPropertyChanged_HandlerCapturedBeforeDisposal_DoesNotDeliver()
     {
         var vm = new ManualTestViewModel { Name = InitialName };
         var results = new List<string>();
@@ -258,19 +282,9 @@ public class PropertyObservableTests
 
         var subscription = observable.Subscribe(new AnonymousObserver<string>(results.Add, static _ => { }, static () => { }));
 
-        // Null the observer WITHOUT calling Dispose so the PropertyChanged event handler remains
-        // registered — when the event fires, OnPropertyChanged runs with a null observer,
-        // deterministically hitting the null-guard branch. TrySetDisposed performs exactly the
-        // atomic null-out that Dispose's first step does, minus the handler unregistration.
-        _ = ((PropertyObservable<string>.Subscription)subscription).TrySetDisposed();
-
-        var action = () => vm.RaisePropertyChanged("Name");
+        var action = () => vm.RaisePropertyChanged("Name", subscription.Dispose);
         await Assert.That(action).ThrowsNothing();
-
-        // Only the initial value should have been emitted; no second value after null-observer.
         await Assert.That(results).Count().IsEqualTo(1);
-
-        // Cleanup: Dispose will see _observer already null and skip unregistration.
         subscription.Dispose();
     }
 
@@ -341,9 +355,14 @@ public class PropertyObservableTests
 
         /// <summary>Raises the <see cref="PropertyChanged"/> event for the specified property.</summary>
         /// <param name="propertyName">The name of the property that changed.</param>
+        /// <param name="beforeRaise">An action to run after capturing the event handlers.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RaisePropertyChanged(string? propertyName) =>
-            PropertyChanged?.Invoke(this, new(propertyName));
+        public void RaisePropertyChanged(string? propertyName, Action? beforeRaise = null)
+        {
+            var handlers = PropertyChanged;
+            beforeRaise?.Invoke();
+            handlers?.Invoke(this, new(propertyName));
+        }
     }
 
     /// <summary>A view model whose getter throws on demand and which counts its attached handlers.</summary>

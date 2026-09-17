@@ -83,7 +83,7 @@ public sealed class PluginPropertyObservable<T> : IObservable<T>
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);
 
-        return new Subscription(this, observer);
+        return new Subscription(this, observer).Start();
     }
 
     /// <summary>Relays one observer's subscription to the plugin, with the distinct gate applied inline.</summary>
@@ -92,53 +92,78 @@ public sealed class PluginPropertyObservable<T> : IObservable<T>
         /// <summary>The parent observable that owns the source and property metadata.</summary>
         private readonly PluginPropertyObservable<T> _parent;
 
-        /// <summary>The equality comparer used for distinct-until-changed filtering.</summary>
-        private readonly EqualityComparer<T> _comparer;
-
-        /// <summary>
-        /// Serializes the initial emit with notifications arriving on other threads, so the handler always
-        /// sees a consistent <see cref="_hasValue"/> and <see cref="_lastValue"/> pair whatever the timing.
-        /// It is a lock rather than a hand-off to the thread already emitting, because a before-change
-        /// notification must read the value on the raising thread before that thread writes.
-        /// </summary>
-        private readonly Lock _gate = new();
+        /// <summary>The downstream observer.</summary>
+        private IObserver<T> _observer;
 
         /// <summary>The plugin's own subscription, dropped when this one is.</summary>
-        private readonly IDisposable _inner;
+        private IDisposable _inner = EmptyDisposable.Instance;
 
-        /// <summary>The downstream observer. Set to <see langword="null"/> on disposal.</summary>
-        private IObserver<T>? _observer;
+        /// <summary>Serializes current-value reads and terminal notifications.</summary>
+        private CurrentValueDelivery<T> _delivery;
 
-        /// <summary>The most recently emitted value, used for distinct-until-changed comparison.</summary>
-        private T? _lastValue;
+        /// <summary>Whether this subscription has been disposed.</summary>
+        private int _disposed;
 
-        /// <summary>Whether at least one value has been emitted.</summary>
-        private bool _hasValue;
+        /// <summary>Whether a provider notification is waiting to be read.</summary>
+        private int _pendingChange;
 
-        /// <summary>Whether <see cref="_inner"/> is in place; notifications before then are covered by the initial emit.</summary>
-        private bool _subscribed;
-
-        /// <summary>Initializes a new instance of the <see cref="Subscription"/> class, subscribing and emitting the initial value.</summary>
+        /// <summary>Initializes a new instance of the <see cref="Subscription"/> class.</summary>
         /// <param name="parent">The parent observable.</param>
         /// <param name="observer">The downstream observer.</param>
-        /// <remarks>A throw from the initial emit drops the registration's subscription before propagating, as the caller never receives a disposable.</remarks>
         public Subscription(PluginPropertyObservable<T> parent, IObserver<T> observer)
         {
             _parent = parent;
             _observer = observer;
-            _comparer = EqualityComparer<T>.Default;
+            _delivery = new(parent._distinctUntilChanged);
+        }
 
-            _inner = parent._plugin.GetNotificationForProperty(
-                parent._source,
-                parent._expression,
-                parent._propertyName,
-                parent._beforeChange,
-                false).Subscribe(this);
-            Volatile.Write(ref _subscribed, true);
+        /// <inheritdoc/>
+        public void OnNext(IObservedChange<object, object?> value)
+        {
+            if (_delivery.IsTerminated)
+            {
+                return;
+            }
 
+            Volatile.Write(ref _pendingChange, 1);
+            _delivery.Changed(new Drain(this));
+        }
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void OnError(Exception error) => _delivery.Fault(error, new Drain(this));
+
+        /// <inheritdoc/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void OnCompleted() => _delivery.Complete(new Drain(this));
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            {
+                return;
+            }
+
+            _delivery.Stop();
+            _inner.Dispose();
+        }
+
+        /// <summary>Attaches the provider before delivering the initial value.</summary>
+        /// <returns>The subscription owning the provider registration.</returns>
+        internal IDisposable Start()
+        {
+            _observer = new DeliveryObserver(this, _observer);
             try
             {
-                EmitCurrent();
+                _inner = _parent._plugin.GetNotificationForProperty(
+                    _parent._source,
+                    _parent._expression,
+                    _parent._propertyName,
+                    _parent._beforeChange,
+                    false).Subscribe(this);
+                _delivery.Start(new Drain(this));
+                return this;
             }
             catch
             {
@@ -147,61 +172,79 @@ public sealed class PluginPropertyObservable<T> : IObservable<T>
             }
         }
 
-        /// <inheritdoc/>
-        public void OnNext(IObservedChange<object, object?> value)
+        /// <summary>Reads the current property value inside the delivery gate.</summary>
+        /// <param name="Owner">The subscription owning the getter.</param>
+        private readonly record struct Reader(Subscription Owner) : ICurrentValueReader<T>
         {
-            if (!Volatile.Read(ref _subscribed))
+            /// <inheritdoc/>
+            public T Read()
             {
-                return;
+                _ = Interlocked.Exchange(ref Owner._pendingChange, 0);
+                return Owner._parent._getter(Owner._parent._source)!;
             }
-
-            EmitCurrent();
         }
 
-        /// <inheritdoc/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void OnError(Exception error) => Volatile.Read(ref _observer)?.OnError(error);
-
-        /// <inheritdoc/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void OnCompleted() => Volatile.Read(ref _observer)?.OnCompleted();
-
-        /// <inheritdoc/>
-        public void Dispose()
+        /// <summary>Drains pending changes and the terminal notification into the observer.</summary>
+        /// <param name="Owner">The subscription owning delivery state.</param>
+        private readonly record struct Drain(Subscription Owner) : IDrainTarget
         {
-            if (Interlocked.Exchange(ref _observer, null) is null)
-            {
-                return;
-            }
-
-            _inner.Dispose();
+            /// <inheritdoc/>
+            void IDrainTarget.Drain() => _ = Owner._delivery.DrainTo(Owner._observer, new Reader(Owner));
         }
 
-        /// <summary>
-        /// Reads the current property value under <see cref="_gate"/> and forwards it downstream when the
-        /// distinct gate allows, so the initial emit and a concurrent notification cannot interleave on the
-        /// observer or publish a duplicate when both see the same value.
-        /// </summary>
-        private void EmitCurrent()
+        /// <summary>Reads a change raised inside the current delivery before passing on its terminal notification.</summary>
+        /// <param name="owner">The subscription holding the pending read.</param>
+        /// <param name="observer">The downstream observer.</param>
+        private sealed class DeliveryObserver(Subscription owner, IObserver<T> observer) : IObserver<T>
         {
-            lock (_gate)
+            /// <summary>The last value emitted by the delivery gate.</summary>
+            private T? _lastValue;
+
+            /// <inheritdoc/>
+            public void OnNext(T value)
             {
-                var observer = Volatile.Read(ref _observer);
-                if (observer is null)
-                {
-                    return;
-                }
-
-                var value = _parent._getter(_parent._source);
-
-                if (_parent._distinctUntilChanged && _hasValue && _comparer.Equals(value!, _lastValue!))
-                {
-                    return;
-                }
-
                 _lastValue = value;
-                _hasValue = true;
-                observer.OnNext(value!);
+                observer.OnNext(value);
+            }
+
+            /// <inheritdoc/>
+            public void OnError(Exception error)
+            {
+                DeliverPendingValue();
+                if (Volatile.Read(ref owner._disposed) == 0)
+                {
+                    observer.OnError(error);
+                }
+            }
+
+            /// <inheritdoc/>
+            public void OnCompleted()
+            {
+                DeliverPendingValue();
+                if (Volatile.Read(ref owner._disposed) == 0)
+                {
+                    observer.OnCompleted();
+                }
+            }
+
+            /// <summary>Delivers a pending current value while the terminal notification owns the delivery gate.</summary>
+            private void DeliverPendingValue()
+            {
+                if (Interlocked.Exchange(ref owner._pendingChange, 0) == 0)
+                {
+                    return;
+                }
+
+                var value = owner._parent._getter(owner._parent._source)!;
+                if (Volatile.Read(ref owner._disposed) != 0)
+                {
+                    return;
+                }
+
+                if (!owner._parent._distinctUntilChanged || !EqualityComparer<T>.Default.Equals(value, _lastValue!))
+                {
+                    observer.OnNext(value);
+                }
             }
         }
     }
