@@ -14,7 +14,7 @@ namespace ReactiveUI.Binding.SourceGenerators;
 /// </summary>
 internal static class RoslynHelpers
 {
-    /// <summary>Pipeline A predicate: detects class declarations with a base list (potential INPC, IRO, DP, etc.).</summary>
+    /// <summary>Detects class declarations that can participate in view registration.</summary>
     /// <param name="node">The syntax node to check.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>true if the node is a class with a base list; otherwise, false.</returns>

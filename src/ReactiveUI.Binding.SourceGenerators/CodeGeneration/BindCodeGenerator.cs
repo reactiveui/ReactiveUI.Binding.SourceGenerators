@@ -107,7 +107,6 @@ internal static class BindCodeGenerator
             ViewObservableName);
 
         var (viewModelVar, viewVar) = BindingEmitterHelpers.EmitDualStreamStages(sb, DispatchApi, inv);
-        (viewModelVar, viewVar) = EmitRegistryConversionStages(sb, inv, viewModelVar, viewVar);
 
         EmitTwoWaySubscription(sb, inv, viewModelVar, viewVar, viewPropertyAccess, viewModelSetAccess);
     }
@@ -179,75 +178,44 @@ internal static class BindCodeGenerator
         string viewPropertyAccess,
         string viewModelSetAccess)
     {
+        var changeType = $"global::System.ValueTuple<bool, {inv.TargetPropertyTypeFullName}, {inv.SourcePropertyTypeFullName}>";
         _ = sb.AppendLine()
             .Append("            var __vmTagged = new ").Append(MapSignal).Append('<').Append(inv.TargetPropertyTypeFullName).Append(", ")
-            .Append(BindingChange).Append(">(").Append(viewModelVar).Append(", v => new ").Append(BindingChange).AppendLine("(v, true));")
+            .Append(changeType).Append(">(").Append(viewModelVar).Append(", v => new ").Append(changeType)
+            .Append("(true, v, default(").Append(inv.SourcePropertyTypeFullName).AppendLine(")));")
             .Append("            var __viewTagged = new ").Append(MapSignal).Append('<').Append(inv.SourcePropertyTypeFullName).Append(", ")
-            .Append(BindingChange).Append(">(").Append(viewVar).Append(", v => new ").Append(BindingChange).AppendLine("(v, false));")
-            .Append("            var __sides = new ").Append(MergeSignal).Append('<').Append(BindingChange).AppendLine(">(__vmTagged, __viewTagged);");
+            .Append(changeType).Append(">(").Append(viewVar).Append(", v => new ").Append(changeType)
+            .Append("(false, default(").Append(inv.TargetPropertyTypeFullName).AppendLine("), v));")
+            .Append("            var __sides = new ").Append(MergeSignal).Append('<').Append(changeType).AppendLine(">(__vmTagged, __viewTagged);");
 
         var routedVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, "__sides", "__routed", "view", inv.TargetViewThreadInvoker);
 
         _ = sb.AppendLine("            var changed = new global::ReactiveUI.Binding.Observables.AppliedChangeObservable();")
             .AppendLine().Append("            var disposable = ").Append(BindingErrors).Append(".Subscribe(").Append(routedVar).AppendLine(", __change =>")
             .AppendLine(GeneratedSyntax.StatementBlockOpen)
-            .AppendLine("                if (__change.FromViewModel)")
+            .AppendLine("                if (__change.Item1)")
             .AppendLine("                {")
-            .Append("                    var value = (").Append(inv.TargetPropertyTypeFullName).AppendLine(")__change.Value;")
+            .AppendLine("                    var value = __change.Item2;")
             .Append("                    ").Append(viewPropertyAccess).AppendLine()
+            .AppendLine("                    if (changed.HasObservers)")
+            .AppendLine("                    {")
+            .Append("                        changed.OnNext(new ").Append(BindingChange).AppendLine("(value, true));")
+            .AppendLine("                    }")
             .AppendLine("                }")
             .AppendLine("                else")
             .AppendLine("                {")
-            .Append("                    var value = (").Append(inv.SourcePropertyTypeFullName).AppendLine(")__change.Value;")
+            .AppendLine("                    var value = __change.Item3;")
             .Append("                    ").Append(viewModelSetAccess).AppendLine()
+            .AppendLine("                    if (changed.HasObservers)")
+            .AppendLine("                    {")
+            .Append("                        changed.OnNext(new ").Append(BindingChange).AppendLine("(value, false));")
+            .AppendLine("                    }")
             .AppendLine("                }")
-            .AppendLine()
-            .AppendLine("                changed.OnNext(__change);")
             .Append("            }, \"").Append(CodeGeneratorHelpers.EscapeString(inv.SourceExpressionText)).Append(" / ")
             .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");")
             .AppendLine().Append("            return new global::ReactiveUI.Binding.ReactiveBinding<").Append(inv.TargetTypeFullName).Append(", ")
             .Append(BindingChange).AppendLine(">(").AppendLine("                view,").AppendLine("                changed,")
             .AppendLine("                global::ReactiveUI.Binding.BindingDirection.TwoWay,").AppendLine("                disposable);")
             .AppendLine("        }").AppendLine();
-    }
-
-    /// <summary>Emits the stages that convert each direction to the type the other side declares.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="inv">The binding invocation info.</param>
-    /// <param name="viewModelVar">The variable holding the view model side's values.</param>
-    /// <param name="viewVar">The variable holding the view side's values.</param>
-    /// <returns>The variables to subscribe each direction to.</returns>
-    /// <remarks>
-    /// Two-way needs both: each direction assigns across the same type gap, in opposite directions.
-    /// </remarks>
-    private static BindingObservables EmitRegistryConversionStages(
-        StringBuilder sb,
-        BindingInvocationInfo inv,
-        string viewModelVar,
-        string viewVar)
-    {
-        if (!BindingEmitterHelpers.RequiresRegistryConversion(inv))
-        {
-            return new(viewModelVar, viewVar);
-        }
-
-        const string convertedViewModelVar = "convertedVmObs";
-        const string convertedViewVar = "convertedViewObs";
-
-        BindingEmitterHelpers.EmitRegistryConversion(
-            sb,
-            viewModelVar,
-            convertedViewModelVar,
-            inv.SourcePropertyTypeFullName,
-            inv.TargetPropertyTypeFullName);
-
-        BindingEmitterHelpers.EmitRegistryConversion(
-            sb,
-            viewVar,
-            convertedViewVar,
-            inv.TargetPropertyTypeFullName,
-            inv.SourcePropertyTypeFullName);
-
-        return new(convertedViewModelVar, convertedViewVar);
     }
 }

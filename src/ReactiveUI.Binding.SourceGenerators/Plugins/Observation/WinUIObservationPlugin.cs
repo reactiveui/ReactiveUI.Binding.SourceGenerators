@@ -4,222 +4,50 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
-using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
+using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
-/// <summary>Observes WinUI dependency properties through <c>RegisterPropertyChangedCallback</c>.</summary>
-internal sealed class WinUIObservationPlugin : AfterChangeObservationPlugin
+/// <summary>Observes WinUI dependency properties through native callback tokens.</summary>
+internal sealed class WinUIObservationPlugin : IPlatformObservationPlugin
 {
-    /// <summary>Completes the name of the dependency property field a plain property is registered under.</summary>
-    private const string DependencyPropertyFieldSuffix = "Property,";
-
-    /// <summary>The affinity this plugin bids with.</summary>
-    private static readonly int WinUIAffinity = BindingAffinity.WinUiDependencyObject;
+    /// <inheritdoc/>
+    public string ObservationKind => "WinUIDP";
 
     /// <inheritdoc/>
-    public override int Affinity => WinUIAffinity;
+    public int Affinity => BindingAffinity.WinUiDependencyObject;
 
     /// <inheritdoc/>
-    public override string ObservationKind => "WinUIDP";
+    public bool SupportsBeforeChanged => false;
 
     /// <inheritdoc/>
-    public override bool RequiresHelperClasses => true;
+    public bool RequiresHelperClasses => true;
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override bool IsAMatch(ClassBindingInfo classInfo) =>
-        classInfo.InheritsWinUIDependencyObject;
+    public int GetAffinityForProperty(ClassBindingInfo classInfo, string propertyName, bool isBeforeChange) =>
+        !isBeforeChange && CanObserveProperty(classInfo, propertyName) ? Affinity : 0;
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
-        ObservedProperties.IsDependencyProperty(classInfo, propertyName);
-
-    /// <inheritdoc/>
-    public override void EmitHelperClasses(StringBuilder sb)
-    {
-        EmitObservableHeader(sb);
-        EmitSubscriptionClass(sb);
-    }
+    public PlatformObservationInfo? InspectProperty(INamedTypeSymbol owner, IPropertySymbol property) =>
+        DependencyPropertyObservationEmitter.Inspect(owner, property, ObservationKind, "Microsoft.UI.Xaml");
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override void EmitInlineObservationVariable(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        string varName) =>
-        sb.Append(GeneratedSyntax.InlineLocalDeclaration).Append(varName).Append(" = new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .Append("            (global::Microsoft.UI.Xaml.DependencyObject)").Append(rootVar).AppendLine(",").Append("            ")
-            .Append(castTypeName).Append('.').Append(segment.PropertyName).AppendLine("Property,")
-            .Append("            (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(castTypeName).Append(")__o).")
-            .Append(segment.PropertyName).AppendLine(",").AppendLine("            true);");
+    public bool IsAMatch(ClassBindingInfo classInfo) => PlatformSymbols.HasCandidate(classInfo, ObservationKind);
 
     /// <inheritdoc/>
-    protected override void AppendShallowObservation(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        bool includeStartWith) =>
-        _ = sb.Append("new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).Append(">(")
-            .Append("(global::Microsoft.UI.Xaml.DependencyObject)").Append(rootVar).Append(", ").Append(castTypeName).Append('.')
-            .Append(segment.PropertyName).Append("Property, ").Append("(global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(castTypeName)
-            .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).Append(", ").Append(includeStartWith ? "true" : "false").Append(')');
+    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
+        PlatformSymbols.Candidate(classInfo, propertyName, ObservationKind) is not null;
 
     /// <inheritdoc/>
-    protected override void AppendShallowObservationVariable(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        string varName) =>
-        _ = sb.Append("            var ").Append(varName).Append(" = new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .Append("                (global::Microsoft.UI.Xaml.DependencyObject)").Append(rootVar).AppendLine(",").Append("                ")
-            .Append(castTypeName).Append('.').Append(segment.PropertyName).AppendLine(DependencyPropertyFieldSuffix)
-            .Append("                (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)
-            .Append(segment.PropertyName).AppendLine(",").Append("                true);");
-
-    /// <inheritdoc/>
-    protected override void AppendChainSegmentObservation(
-        StringBuilder sb,
-        string lambdaParam,
-        PropertyPathSegment segment) =>
-        _ = sb.Append("                    new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .Append("                    (global::Microsoft.UI.Xaml.DependencyObject)").Append(lambdaParam).AppendLine(",")
-            .Append("                    ").Append(segment.DeclaringTypeFullName).Append('.').Append(segment.PropertyName)
-            .AppendLine(DependencyPropertyFieldSuffix)
-            .Append("                    (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(segment.DeclaringTypeFullName)
-            .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).AppendLine(",").Append("                    false)");
-
-    /// <inheritdoc/>
-    protected override void AppendDeepChainRootSegment(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        string obsVarName) =>
-        _ = sb.Append("            var ").Append(obsVarName).Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName)
-            .Append("                    new __WinUIDPObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .Append("                (global::Microsoft.UI.Xaml.DependencyObject)").Append(rootVar).AppendLine(",").Append("                ")
-            .Append(castTypeName).Append('.').Append(segment.PropertyName).AppendLine(DependencyPropertyFieldSuffix)
-            .Append("                (global::Microsoft.UI.Xaml.DependencyObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)
-            .Append(segment.PropertyName).AppendLine(",").AppendLine("                false);");
-
-    /// <summary>Emits the <c>__WinUIDPObservable&lt;T&gt;</c> class header (fields and constructor).</summary>
-    /// <param name="sb">The string builder.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void EmitObservableHeader(StringBuilder sb) =>
-        sb.AppendLine("""
+    public void EmitHelperClasses(StringBuilder sb) => NativeObservableEmitter.EmitHelper(sb, "__WinUIDPObservable");
 
-                          /// <summary>
-                          /// Fused observable for WinUI DependencyProperty observation.
-                          /// Uses <c>RegisterPropertyChangedCallback</c> / <c>UnregisterPropertyChangedCallback</c>
-                          /// for token-based subscription management.
-                          /// </summary>
-                          private sealed class __WinUIDPObservable<T> : global::System.IObservable<T>
-                          {
-                              private readonly global::Microsoft.UI.Xaml.DependencyObject _source;
-                              private readonly global::Microsoft.UI.Xaml.DependencyProperty _dp;
-                              private readonly global::System.Func<global::Microsoft.UI.Xaml.DependencyObject, T> _getter;
-                              private readonly bool _distinctUntilChanged;
-
-                              internal __WinUIDPObservable(
-                                  global::Microsoft.UI.Xaml.DependencyObject source,
-                                  global::Microsoft.UI.Xaml.DependencyProperty dp,
-                                  global::System.Func<global::Microsoft.UI.Xaml.DependencyObject, T> getter,
-                                  bool distinctUntilChanged)
-                              {
-                                  _source = source;
-                                  _dp = dp;
-                                  _getter = getter;
-                                  _distinctUntilChanged = distinctUntilChanged;
-                              }
-                      """);
-
-    /// <summary>Emits the observable's <c>Subscribe</c> method and subscription class, closing the observable.</summary>
-    /// <param name="sb">The string builder.</param>
-    private static void EmitSubscriptionClass(StringBuilder sb)
-    {
-        EmitSubscriptionClassHead(sb);
-        EmitSubscriptionClassCallbacks(sb);
-    }
-
-    /// <summary>Emits the Subscribe method plus the subscription's fields and constructor.</summary>
-    /// <param name="sb">The string builder to append to.</param>
+    /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void EmitSubscriptionClassHead(StringBuilder sb) =>
-        sb.AppendLine("""
-
-                              public global::System.IDisposable Subscribe(global::System.IObserver<T> observer)
-                              {
-                                  return new Subscription(this, observer);
-                              }
-
-                              private sealed class Subscription : global::System.IDisposable
-                              {
-                                  private readonly __WinUIDPObservable<T> _parent;
-                                  private readonly long _token;
-                                  private readonly global::System.Collections.Generic.IEqualityComparer<T> _comparer;
-                                  private global::System.IObserver<T> _observer;
-                                  private T _lastValue;
-                                  private bool _hasValue;
-
-                                  internal Subscription(__WinUIDPObservable<T> parent, global::System.IObserver<T> observer)
-                                  {
-                                      _parent = parent;
-                                      _observer = observer;
-                                      _comparer = global::System.Collections.Generic.EqualityComparer<T>.Default;
-                                      _token = parent._source.RegisterPropertyChangedCallback(parent._dp, OnPropertyChanged);
-
-                                      // Emit initial value
-                                      var initial = parent._getter(parent._source);
-                                      _lastValue = initial;
-                                      _hasValue = true;
-                                      observer.OnNext(initial);
-                                  }
-                      """);
-
-    /// <summary>Emits the subscription's change callback and disposal, closing the observable class.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void EmitSubscriptionClassCallbacks(StringBuilder sb) =>
-        sb.AppendLine("""
-
-                                  private void OnPropertyChanged(
-                                      global::Microsoft.UI.Xaml.DependencyObject sender,
-                                      global::Microsoft.UI.Xaml.DependencyProperty dp)
-                                  {
-                                      var obs = System.Threading.Volatile.Read(ref _observer);
-                                      if (obs == null)
-                                      {
-                                          return;
-                                      }
-
-                                      var value = _parent._getter(sender);
-
-                                      if (_parent._distinctUntilChanged && _hasValue && _comparer.Equals(value, _lastValue))
-                                      {
-                                          return;
-                                      }
-
-                                      _lastValue = value;
-                                      _hasValue = true;
-                                      obs.OnNext(value);
-                                  }
-
-                                  public void Dispose()
-                                  {
-                                      var obs = System.Threading.Interlocked.Exchange(ref _observer, null);
-                                      if (obs != null)
-                                      {
-                                          _parent._source.UnregisterPropertyChangedCallback(_parent._dp, _token);
-                                      }
-                                  }
-                              }
-                          }
-                      """);
+    public void EmitObservation(StringBuilder sb, in ObservationExpression observation) =>
+        NativeObservationEmitter.Emit(sb, observation, ObservationKind, DependencyPropertyObservationEmitter.AppendSubscription);
 }

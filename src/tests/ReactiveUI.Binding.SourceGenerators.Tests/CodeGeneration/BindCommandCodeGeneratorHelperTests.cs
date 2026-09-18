@@ -274,13 +274,14 @@ public class BindCommandCodeGeneratorHelperTests
         await Assert.That(result).Contains("view.SaveButton.Enabled = cmd.CanExecute(param)");
         await Assert.That(result).Contains("cmd.CanExecuteChanged += __canExecHandler");
         await Assert.That(result).Contains(ViewSaveButtonClickHandlerFragment);
-        await Assert.That(result).Contains("Volatile.Read(ref __latestParam)");
+        await Assert.That(result).Contains("lock (__parameterGate)");
+        await Assert.That(result).Contains("__ReadParameter()");
     }
 
-    /// <summary>Verifies EventEnabledBindingPlugin emits event+Enabled with expression parameter.</summary>
+    /// <summary>Expression parameters use their observed stream when synchronizing enabled state.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task EventEnabledPlugin_EmitBinding_ExpressionParam_EmitsDirectPropertyAccess()
+    public async Task EventEnabledPlugin_EmitBinding_ExpressionParam_ReadsObservedParameter()
     {
         var paramPath = new EquatableArray<PropertyPathSegment>(
             [ModelFactory.CreatePropertyPathSegment(ParamName)]);
@@ -296,7 +297,7 @@ public class BindCommandCodeGeneratorHelperTests
         plugin.EmitBinding(sb, inv, ViewSaveButtonName, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("view.SaveButton.Enabled = cmd.CanExecute(viewModel.Param)");
+        await Assert.That(result).Contains("view.SaveButton.Enabled = cmd.CanExecute(__ReadParameter())");
         await Assert.That(result).Contains(ViewSaveButtonClickHandlerFragment);
         await Assert.That(result).DoesNotContain(VolatileName);
     }

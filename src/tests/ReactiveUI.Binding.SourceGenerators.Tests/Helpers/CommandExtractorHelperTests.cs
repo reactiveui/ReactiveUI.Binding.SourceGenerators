@@ -86,7 +86,7 @@ public class CommandExtractorHelperTests
         var model = compilation.GetSemanticModel(tree);
         var classSymbol = GetFirstClassSymbol(tree, model);
 
-        var result = CommandExtractor.HasCommandProperties(classSymbol, out var hasParam);
+        var result = ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.CommandPropertyBindingPlugin.HasCommandProperties(classSymbol, out var hasParam);
 
         await Assert.That(result).IsFalse();
         await Assert.That(hasParam).IsFalse();
@@ -113,7 +113,7 @@ public class CommandExtractorHelperTests
         var model = compilation.GetSemanticModel(tree);
         var classSymbol = GetFirstClassSymbol(tree, model);
 
-        var result = CommandExtractor.HasCommandProperties(classSymbol, out var hasParam);
+        var result = ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.CommandPropertyBindingPlugin.HasCommandProperties(classSymbol, out var hasParam);
 
         await Assert.That(result).IsTrue();
         await Assert.That(hasParam).IsFalse();
@@ -141,7 +141,7 @@ public class CommandExtractorHelperTests
         var model = compilation.GetSemanticModel(tree);
         var classSymbol = GetFirstClassSymbol(tree, model);
 
-        var result = CommandExtractor.HasCommandProperties(classSymbol, out var hasParam);
+        var result = ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.CommandPropertyBindingPlugin.HasCommandProperties(classSymbol, out var hasParam);
 
         await Assert.That(result).IsTrue();
         await Assert.That(hasParam).IsTrue();
@@ -168,7 +168,7 @@ public class CommandExtractorHelperTests
         var model = compilation.GetSemanticModel(tree);
         var classSymbol = GetFirstClassSymbol(tree, model);
 
-        var result = CommandExtractor.HasCommandProperties(classSymbol, out var hasParam);
+        var result = ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.CommandPropertyBindingPlugin.HasCommandProperties(classSymbol, out var hasParam);
 
         await Assert.That(result).IsFalse();
         await Assert.That(hasParam).IsFalse();
@@ -194,7 +194,7 @@ public class CommandExtractorHelperTests
         var model = compilation.GetSemanticModel(tree);
         var classSymbol = GetFirstClassSymbol(tree, model);
 
-        var result = CommandExtractor.HasEnabledProperty(classSymbol);
+        var result = ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.EventEnabledBindingPlugin.HasEnabledProperty(classSymbol);
 
         await Assert.That(result).IsFalse();
     }
@@ -219,7 +219,7 @@ public class CommandExtractorHelperTests
         var model = compilation.GetSemanticModel(tree);
         var classSymbol = GetFirstClassSymbol(tree, model);
 
-        var result = CommandExtractor.HasEnabledProperty(classSymbol);
+        var result = ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.EventEnabledBindingPlugin.HasEnabledProperty(classSymbol);
 
         await Assert.That(result).IsTrue();
     }
@@ -244,7 +244,7 @@ public class CommandExtractorHelperTests
         var model = compilation.GetSemanticModel(tree);
         var classSymbol = GetFirstClassSymbol(tree, model);
 
-        var result = CommandExtractor.HasEnabledProperty(classSymbol);
+        var result = ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.EventEnabledBindingPlugin.HasEnabledProperty(classSymbol);
 
         await Assert.That(result).IsFalse();
     }
@@ -462,28 +462,28 @@ public class CommandExtractorHelperTests
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsSettableICommandProperty_SettableCommand_ReturnsTrue() =>
-        await Assert.That(CommandExtractor.IsSettableICommandProperty(
+        await Assert.That(ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.CommandPropertyBindingPlugin.IsSettableICommandProperty(
             await PropertyAsync("public ICommand Command { get; set; }", "Command"))).IsTrue();
 
     /// <summary>Verifies that a read-only Command property is rejected.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsSettableICommandProperty_ReadOnlyCommand_ReturnsFalse() =>
-        await Assert.That(CommandExtractor.IsSettableICommandProperty(
+        await Assert.That(ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.CommandPropertyBindingPlugin.IsSettableICommandProperty(
             await PropertyAsync("public ICommand Command { get; }", "Command"))).IsFalse();
 
     /// <summary>Verifies that a settable CommandParameter property is recognized.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsSettableCommandParameterProperty_Settable_ReturnsTrue() =>
-        await Assert.That(CommandExtractor.IsSettableCommandParameterProperty(
+        await Assert.That(ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.CommandPropertyBindingPlugin.IsSettableCommandParameterProperty(
             await PropertyAsync("public object CommandParameter { get; set; }", "CommandParameter"))).IsTrue();
 
     /// <summary>Verifies that a differently named property is not treated as the command parameter.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task IsSettableCommandParameterProperty_OtherName_ReturnsFalse() =>
-        await Assert.That(CommandExtractor.IsSettableCommandParameterProperty(
+        await Assert.That(ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.CommandPropertyBindingPlugin.IsSettableCommandParameterProperty(
             await PropertyAsync("public object Tag { get; set; }", "Tag"))).IsFalse();
 
     /// <summary>Verifies that a method with no withParameter reports neither overload shape.</summary>

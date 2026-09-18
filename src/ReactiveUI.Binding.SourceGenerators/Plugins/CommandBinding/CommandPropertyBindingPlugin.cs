@@ -4,6 +4,7 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
+using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
@@ -40,7 +41,7 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanHandle(BindCommandInvocationInfo inv) =>
-        inv.HasCommandProperty && inv.HasCommandParameterProperty;
+        !inv.HasExplicitEvent && inv.HasCommandProperty && inv.HasCommandParameterProperty;
 
     /// <inheritdoc/>
     public void EmitBinding(
@@ -81,6 +82,78 @@ internal sealed class CommandPropertyBindingPlugin : ICommandBindingPlugin
 
         AppendRestoringReturn(sb, controlAccess, "new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__cmdSub, serial)");
     }
+
+    /// <summary>
+    /// Checks if a control type has a settable <c>Command</c> property (ICommand)
+    /// and optionally a settable <c>CommandParameter</c> property.
+    /// Walks the type hierarchy.
+    /// </summary>
+    /// <param name="controlType">The control type symbol to inspect.</param>
+    /// <param name="hasCommandParameter">
+    /// Set to <see langword="true"/> when the type also has a settable <c>CommandParameter</c> property.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if the type or one of its base types has a settable <c>Command</c> property.
+    /// </returns>
+    internal static bool HasCommandProperties(INamedTypeSymbol controlType, out bool hasCommandParameter)
+    {
+        hasCommandParameter = false;
+        var hasCommand = false;
+
+        var current = (ITypeSymbol?)controlType;
+        while (current is INamedTypeSymbol namedCurrent)
+        {
+            var members = namedCurrent.GetMembers();
+            for (var i = 0; i < members.Length; i++)
+            {
+                if (members[i] is not IPropertySymbol property)
+                {
+                    continue;
+                }
+
+                if (IsSettableICommandProperty(property))
+                {
+                    hasCommand = true;
+                }
+
+                if (IsSettableCommandParameterProperty(property))
+                {
+                    hasCommandParameter = true;
+                }
+            }
+
+            if (hasCommand && hasCommandParameter)
+            {
+                return true;
+            }
+
+            current = namedCurrent.BaseType;
+        }
+
+        return hasCommand;
+    }
+
+    /// <summary>Determines whether a property is a settable public instance <c>Command</c> property typed as ICommand.</summary>
+    /// <param name="property">The property to inspect.</param>
+    /// <returns><see langword="true"/> if the property is a settable ICommand-typed Command property.</returns>
+    internal static bool IsSettableICommandProperty(IPropertySymbol property)
+    {
+        if (property.Name != "Command" || property.IsReadOnly || property.IsStatic
+            || property.DeclaredAccessibility != Accessibility.Public)
+        {
+            return false;
+        }
+
+        var typeName = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        return typeName.EndsWith("ICommand", StringComparison.Ordinal);
+    }
+
+    /// <summary>Determines whether a property is a settable public instance <c>CommandParameter</c> property.</summary>
+    /// <param name="property">The property to inspect.</param>
+    /// <returns><see langword="true"/> if the property is a settable CommandParameter property.</returns>
+    internal static bool IsSettableCommandParameterProperty(IPropertySymbol property) =>
+        property.Name == "CommandParameter" && !property.IsReadOnly && !property.IsStatic
+        && property.DeclaredAccessibility == Accessibility.Public;
 
     /// <summary>Appends the reads that remember what the control carried before the binding touched it.</summary>
     /// <param name="sb">The string builder to append to.</param>

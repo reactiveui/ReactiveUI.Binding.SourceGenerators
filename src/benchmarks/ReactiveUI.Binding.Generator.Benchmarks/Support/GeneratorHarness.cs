@@ -58,7 +58,11 @@ internal static class GeneratorHarness
             syntaxTrees[i] = CSharpSyntaxTree.ParseText(reader.ReadToEnd(), parseOptions, paths[i]);
         }
 
-        var references = new List<MetadataReference>(Basic.Reference.Assemblies.Net80.References.All)
+#if NET11_0_OR_GREATER
+        var references = new List<MetadataReference>(Basic.Reference.Assemblies.Net110.References.All)
+#else
+        var references = new List<MetadataReference>(Basic.Reference.Assemblies.Net100.References.All)
+#endif
         {
             MetadataReference.CreateFromFile(typeof(ReactiveUIBindingExtensions).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(ReactiveUI.Primitives.Concurrency.ISequencer).Assembly.Location),

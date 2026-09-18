@@ -53,12 +53,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return null;
         }
-        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
-            viewModel,
-            "Count",
-            (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel)__o).Count,
-            true);
-        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel), "Count", 5, false);
+            var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(viewModel, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel)__o).Count, true);
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Count", 5, false);
         var sourceObs = sourceObsRegistration == null
             ? (global::System.IObservable<int>)sourceObsMechanism
             : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(

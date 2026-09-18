@@ -15,18 +15,15 @@ internal static class BindTwoWayInvocationGenerator
     /// <summary>Registers the BindTwoWay invocation detection pipeline.</summary>
     /// <param name="context">The generator initialization context.</param>
     /// <param name="invocations">The detected invocations of this API.</param>
-    /// <param name="allClasses">The shared type detection pipeline.</param>
     /// <param name="languageFeatures">The consumer compilation's C# language-feature snapshot.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void Register(
         in IncrementalGeneratorInitializationContext context,
         IncrementalValuesProvider<BindingInvocationInfo> invocations,
-        IncrementalValuesProvider<ClassBindingInfo> allClasses,
         IncrementalValueProvider<LanguageFeatures> languageFeatures) =>
         InvocationPipeline.Register(
             context,
             invocations,
-            allClasses,
             languageFeatures,
             "BindTwoWayDispatch.g.cs",
             static (invocations, classes, features) => BindingEmitterHelpers.Generate(

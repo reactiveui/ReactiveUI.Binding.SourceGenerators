@@ -18,7 +18,7 @@ See: https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test?tabs=dotnet
 ### Prerequisites
 
 ```powershell
-# Check .NET installation (.NET 8.0, 9.0, 10.0 and 11.0 required)
+# Check .NET installation (.NET 10.0 and 11.0 for tests and benchmarks)
 dotnet --info
 
 # Restore NuGet packages
@@ -187,7 +187,7 @@ src/
 │   │   ├── PropertyPathSegment.cs               # Per-segment: name, types, and how its declaring type notifies
 │   │   ├── ObservablePropertyInfo.cs            # Per-property: DP field and change-event participation
 │   │   └── ViewRegistrationInfo.cs              # Per-IViewFor<T>: view dispatch mapping
-│   ├── Plugins/                                 # Mechanism selection (Pipeline A)
+│   ├── Plugins/                                 # Per-property mechanism selection
 │   │   ├── ObservationPluginRegistry.cs         # Highest-affinity plugin that reaches a given property
 │   │   ├── ObservedProperties.cs                # Whether one property participates in a type's mechanism
 │   │   └── Observation/                         # One plugin per mechanism, scored from BindingAffinity
@@ -198,13 +198,12 @@ src/
 │   │       ├── INPCObservationPlugin.cs         # INotifyPropertyChanged (Explicit, 5)
 │   │       ├── AndroidObservationPlugin.cs      # Android View (Explicit, 5)
 │   │       ├── WpfObservationPlugin.cs          # WPF DependencyObject (WpfDependencyObject, 4)
-│   │       ├── NotifyPropertyObservationPlugin.cs # Base for the INPC-watching plugins above
+│   │       ├── ObservationEmissionExtensions.cs  # Shared expression and chain composition
 │   │       └── NotifyPropertyEmitter.cs         # The observation those plugins all emit
 │   │   └── ViewThread/                          # The invoker a generated binding carries for its target
 │   │       ├── ViewThreadPluginRegistry.cs      # Matches a target's type to its platform's invoker
 │   │       └── Wpf/WinForms/MauiViewThreadPlugin.cs # One plugin per platform
 │   ├── Generators/                              # Whole-compilation outputs
-│   │   ├── RegistrationGenerator.cs             # Consolidates all → [ModuleInitializer]
 │   │   ├── ObservationHelperGenerator.cs        # Declares the KVO/WinUI helper classes, once per compilation
 │   │   ├── ViewThreadInvokerGenerator.cs        # Declares the WPF/WinForms/MAUI invoker classes, once per compilation
 │   │   └── ViewLocatorDispatchGenerator.cs      # IViewFor<T> → AOT view dispatch (Pipeline C)
@@ -243,11 +242,19 @@ src/
     └── ReactiveUI.Binding.Tests/                  # Runtime library tests
 ```
 
-### Three Pipelines
+### Generation Pipelines
 
-**Pipeline A (Type Detection)**: Scans classes with base lists → builds `ClassBindingInfo` POCOs with boolean flags for each notification mechanism (IReactiveObject, INPC, WPF DP, WinUI DP, KVO, WinForms, Android) and a per-property record of which of them each declared property actually participates in. Consolidates into a single `[ModuleInitializer]` registration.
+**Property metadata** is captured while each invocation's property path is extracted. Each link records its
+concrete owner, eligible native mechanisms, their scores, and members verified from Roslyn symbols. The same
+extraction handles source and referenced types. Selection emits the binding directly.
 
-Affinity values are the shared `BindingAffinity` scores the runtime library declares (`Fallback = 1` … `Kvo = 15`), the same numbers ReactiveUI's own plugins return, so a user-registered plugin and a generated one rank on one scale.
+Observation, command and conversion mechanisms implement their interfaces directly. They use no plugin base
+classes. Shared logic lives in static helpers with internal methods. Each mechanism owns its eligibility and
+emission; registries compare affinity and retain declaration order on ties.
+
+Affinity values match the corresponding ReactiveUI mechanisms, including property-specific UIKit scores of 30,
+Apple value notifications at 20, KVO at 15, and ordinary CLR fallback at 1. Registered providers and generated
+mechanisms rank on the same scale.
 
 ### Mechanisms Travel With the Property Path
 
@@ -261,8 +268,7 @@ The mechanism is captured during extraction, which already holds the property sy
 the detected-type set afterwards. That is a performance constraint, not a preference: binding one of these
 invocations is the single largest allocation in a generation pass (extension-method overload resolution and
 generic type inference dominate the `GcVerbose` trace), so a second semantic pass over the same call sites is
-not affordable. It also means a type from a *referenced* assembly is observed correctly even though the
-declaration scan never sees it.
+not affordable. A type from a *referenced* assembly follows the same extraction path as a source type.
 
 **Pipeline B (Invocation Detection)** scans calls to 13 APIs: `WhenChanged`, `WhenChanging`, `WhenAnyValue`,
 `WhenAny`, `WhenAnyObservable`, `BindOneWay`, `BindTwoWay`, `OneWayBind`, `Bind`, `BindTo`, `BindCommand`,
@@ -435,11 +441,10 @@ tokens - which is what keeps a consumer publishing ahead-of-time free of trim an
 generated path reaches the runtime expression engine; routing a whole binding to it instead would put
 `[RequiresUnreferencedCode]` back on every call site.
 
-Leaving the override out is not a divergence anyone could see: the registration would apply to `WhenChanged`
-and silently not to a binding of the same property. The check has to be on the path of every binding, so the
-registered set is resolved once and kept rather than re-read from the locator per call - re-reading cost
-~141 B and ~1.2 us per binding created, which a view full of bindings pays for repeatedly. `Refresh()`
-drops the cache for a host that registers a plugin after its first binding.
+The registered set and strongest custom vote are cached by runtime type, property and notification timing.
+Each binding compares that vote with its generated score; the generated mechanism wins ties. `Refresh()`
+replaces the cache generation, so an in-flight lookup cannot repopulate it with stale registrations. Generated
+expressions and object adapters for a custom provider are constructed only when that provider wins.
 
 **Every binding writes on the view's owning thread.** ReactiveUI moves a write only on WPF. It does so for a
 two-way `Bind` and for swapping a control's `Command`. Here every binding API moves it, on WPF, WinForms and MAUI.
@@ -732,17 +737,14 @@ All pipeline models are `sealed record` types with value equality. NEVER include
 ### Where the Observation Helper Classes Are Declared
 
 Some plugins (`KVOObservationPlugin`, `WinUIObservationPlugin`) emit observation code that instantiates helper
-classes by bare name — `__KVOObservable<T>`, `__KVOObserver`, `__WinUIDPObservable<T>`. Every dispatch file is
+classes by bare name — `__KVOObservable<T>`, `__KVOObserver`, `__WinUIDPObservable<TSource, TValue>`. Every dispatch file is
 another part of the same `__ReactiveUIGeneratedBindings` class, so one part declaring them is enough for all of
 them, and two parts declaring them is a duplicate-member error.
 
-`ObservationHelperGenerator` therefore owns the declarations outright, in `ObservationHelpers.g.cs`. Emitters
-only ever reference the helpers; none of them declare any. Which helpers to declare is decided from the
-**detected types**, not from the call sites — a reference can only be emitted for a type
-`CodeGeneratorHelpers.FindClassInfo` matched, so the declarations are a superset of the references whichever
-binding API reaches for them. Deciding it from the call sites instead leaves any API whose call sites were not
-enumerated — `BindOneWay`, `BindTwoWay`, `Bind`, `OneWayBind`, `WhenAny`, `WhenAnyObservable` — emitting
-references to types nobody declared.
+`ObservationHelperGenerator` owns these declarations in `ObservationHelpers.g.cs`.
+`InvocationHelperRequirements` collects the selected mechanisms from every extracted invocation and chain
+link. Observation and view-thread helpers are emitted only when a binding uses them. Every invocation pipeline
+must contribute its requirements through this collector, using the same property selection as its emitter.
 
 ### Two-Layer Language Version Constraint
 
@@ -896,7 +898,7 @@ build keeps working right up until Wine starts. Each copy chains to the reposito
 
 ## Important Notes
 
-- **Required .NET SDKs:** .NET 8.0, 9.0, 10.0 and 11.0
+- **Test and benchmark runtimes:** .NET 10.0 and 11.0
 - **Generator + Analyzer targets:** netstandard2.0 (Roslyn requirement)
 - **Runtime library targets:** net8.0;net9.0;net10.0;net11.0;net462;net47;net471;net472;net48;net481
 - **No shallow clones:** Repository requires full clone for Nerdbank.GitVersioning

@@ -35,14 +35,15 @@
     <BindingWindowsOnlyTargets>$(BindingLegacyTargets);$(BindingWindowsTargets)</BindingWindowsOnlyTargets>
 
     <!-- Test targets -->
-    <BindingTestTargets>net8.0;net9.0;net10.0;net11.0</BindingTestTargets>
+    <BindingTestTargets>net10.0;net11.0</BindingTestTargets>
+    <BindingTestPlatformTargets>net10.0-windows10.0.19041.0;net11.0-windows10.0.19041.0</BindingTestPlatformTargets>
 
     <!-- MAUI's net9 heads are end of life, so its tests start where the package does. -->
     <BindingMauiTestTargets>net10.0;net11.0</BindingMauiTestTargets>
 
     <!-- Windows-specific test targets: use Windows TFMs on Windows, core TFMs elsewhere -->
     <BindingTestWindowsTargets>$(BindingTestTargets)</BindingTestWindowsTargets>
-    <BindingTestWindowsTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(BindingWindowsTargets)</BindingTestWindowsTargets>
+    <BindingTestWindowsTargets Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(BindingTestPlatformTargets)</BindingTestWindowsTargets>
   </PropertyGroup>
 
   <PropertyGroup>

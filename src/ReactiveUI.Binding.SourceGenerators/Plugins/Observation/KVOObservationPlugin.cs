@@ -4,7 +4,7 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
-using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
+using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -29,7 +29,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// for the subscription lifetime.
 /// </para>
 /// </remarks>
-internal sealed class KVOObservationPlugin : IObservationPlugin
+internal sealed class KVOObservationPlugin : IPlatformObservationPlugin
 {
     /// <summary>
     /// The affinity score for the Apple KVO observation plugin
@@ -51,6 +51,11 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int GetAffinityForProperty(ClassBindingInfo classInfo, string propertyName, bool isBeforeChange) =>
+        IsAMatch(classInfo) && CanObserveProperty(classInfo, propertyName) ? Affinity : 0;
+
+    /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.InheritsNSObject;
 
@@ -63,292 +68,70 @@ internal sealed class KVOObservationPlugin : IObservationPlugin
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
-        !ObservedProperties.IsDeclaredByConsumer(classInfo, propertyName);
+        ObservedProperties.Find(classInfo, propertyName) is { SymbolsInspected: true }
+            ? PlatformSymbols.Candidate(classInfo, propertyName, ObservationKind) is not null
+            : !ObservedProperties.IsDeclaredByConsumer(classInfo, propertyName);
 
     /// <inheritdoc/>
-    public void EmitHelperClasses(StringBuilder sb)
+    public PlatformObservationInfo? InspectProperty(INamedTypeSymbol owner, IPropertySymbol property)
     {
-        EmitObserverClass(sb);
-        EmitObservableClass(sb);
-    }
-
-    /// <inheritdoc/>
-    public void EmitShallowObservation(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        bool isBeforeChange,
-        bool includeStartWith)
-    {
-        var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        _ = sb.Append("new __KVOObservable<").Append(segment.PropertyTypeFullName).Append(">(").Append("(global::Foundation.NSObject)")
-            .Append(rootVar).Append(", ").Append('"').Append(keyPath).Append("\", ").Append("(global::Foundation.NSObject __o) => ((")
-            .Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).Append(", ").Append(BoolLiteral(includeStartWith)).Append(", ")
-            .Append(BoolLiteral(isBeforeChange)).Append(')');
-    }
-
-    /// <inheritdoc/>
-    public void EmitShallowObservationVariable(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        bool isBeforeChange,
-        string varName)
-    {
-        var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        _ = sb.Append("            var ").Append(varName).Append(" = new __KVOObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .Append("                (global::Foundation.NSObject)").Append(rootVar).AppendLine(",").Append("                \"").Append(keyPath)
-            .AppendLine("\",").Append("                (global::Foundation.NSObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)
-            .Append(segment.PropertyName).AppendLine(",").AppendLine("                true,").Append("                ")
-            .Append(BoolLiteral(isBeforeChange)).Append(");");
-    }
-
-    /// <inheritdoc/>
-    public void EmitDeepChainRootSegment(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        bool isBeforeChange,
-        string obsVarName)
-    {
-        var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        _ = sb.Append("            var ").Append(obsVarName).Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName)
-            .Append(">)new __KVOObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .Append("                (global::Foundation.NSObject)").Append(rootVar).AppendLine(",").Append("                \"").Append(keyPath)
-            .AppendLine("\",").Append("                (global::Foundation.NSObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)
-            .Append(segment.PropertyName).AppendLine(",").AppendLine("                false,").Append("                ")
-            .Append(BoolLiteral(isBeforeChange)).AppendLine(");");
-    }
-
-    /// <inheritdoc/>
-    public void EmitDeepChainInnerSegment(
-        StringBuilder sb,
-        string prevVar,
-        string curVar,
-        string lambdaParam,
-        PropertyPathSegment segment,
-        bool isBeforeChange,
-        NullParentObservationBehavior nullParentBehavior)
-    {
-        var segType = segment.PropertyTypeFullName;
-        var declType = segment.DeclaringTypeFullName;
-        var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        var nullParentObservable = nullParentBehavior == NullParentObservationBehavior.EmitDefault
-            ? $"new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<{segType}>(default({segType}))"
-            : $"global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<{segType}>.Instance";
-
-        _ = sb.AppendLine().Append("        var ").Append(curVar).Append(" = ")
-            .Append(GeneratedTypeNames.OpenChainSwitchMap(segment, segType, prevVar)).AppendLine().Append("            ").Append(lambdaParam)
-            .Append(" => ").Append(lambdaParam).AppendLine(" != null");
-
-        ChainRegistrationEmitter.AppendChoiceOpen(sb, lambdaParam, segment, Affinity, isBeforeChange);
-
-        _ = sb.Append("                    new __KVOObservable<").Append(segType).AppendLine(">(").Append("                    (global::Foundation.NSObject)")
-            .Append(lambdaParam).AppendLine(",").Append("                    \"").Append(keyPath).AppendLine("\",")
-            .Append("                    (global::Foundation.NSObject __o) => ((").Append(declType).Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName)
-            .AppendLine(",").AppendLine("                    false,").Append("                    ").Append(BoolLiteral(isBeforeChange)).AppendLine("))")
-            .Append("                : (global::System.IObservable<").Append(segType).Append(">)").Append(nullParentObservable).AppendLine(");");
-    }
-
-    /// <inheritdoc/>
-    public void EmitInlineObservationVariable(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        string varName)
-    {
-        var keyPath = ToKvoKeyPath(segment.PropertyName, segment.PropertyTypeFullName);
-        _ = sb.Append("        var ").Append(varName).Append(" = new __KVOObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .Append("            (global::Foundation.NSObject)").Append(rootVar).AppendLine(",").Append("            \"").Append(keyPath)
-            .AppendLine("\",").Append("            (global::Foundation.NSObject __o) => ((").Append(castTypeName).Append(GeneratedSyntax.ObserverCastClose)
-            .Append(segment.PropertyName).AppendLine(",").AppendLine("            true,").AppendLine("            false);");
-    }
-
-    /// <summary>Renders a boolean as the lowercase C# literal text (<c>true</c>/<c>false</c>) for emission into generated source.</summary>
-    /// <param name="value">The boolean value.</param>
-    /// <returns><c>"true"</c> or <c>"false"</c>.</returns>
-    private static string BoolLiteral(bool value) => value ? "true" : "false";
-
-    /// <summary>
-    /// Converts a .NET property name to a KVO key path using the standard naming convention.
-    /// Boolean properties get an "Is" prefix unless they already start with "Is"
-    /// (e.g., <c>Enabled</c> → <c>"isEnabled"</c>, but <c>IsEnabled</c> → <c>"isEnabled"</c>).
-    /// All others: lowercase first character (e.g., <c>Text</c> → <c>"text"</c>).
-    /// </summary>
-    /// <param name="propertyName">The .NET property name.</param>
-    /// <param name="propertyTypeFullName">The fully qualified property type (e.g., "bool", "string").</param>
-    /// <returns>The KVO key path string.</returns>
-    private static string ToKvoKeyPath(string propertyName, string propertyTypeFullName)
-    {
-        if (propertyTypeFullName == "bool" && !propertyName.StartsWith("Is", StringComparison.Ordinal))
+        if (!PlatformSymbols.DerivesFrom(owner, "Foundation.NSObject"))
         {
-            propertyName = $"Is{propertyName}";
+            return null;
         }
 
-        return propertyName.Length == 0 ? propertyName : char.ToLowerInvariant(propertyName[0]) + propertyName[1..];
+        var selector = property.GetMethod is { } getter ? ExportedSelector(getter) : null;
+        selector ??= ExportedSelector(property);
+        if (selector is null && IsNativeDeclaration(owner, property))
+        {
+            selector = KvoObservationEmitter.ToKvoKeyPath(property.Name, property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+        }
+
+        return selector is null ? null : new(ObservationKind, Affinity, default, null, null, selector);
     }
 
-    /// <summary>Emits the <c>__KVOObserver</c> NSObject subclass that forwards ObserveValue callbacks.</summary>
-    /// <param name="sb">The string builder.</param>
+    /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void EmitObserverClass(StringBuilder sb) =>
-        sb.AppendLine("""
+    public void EmitHelperClasses(StringBuilder sb) => KvoObservationEmitter.EmitHelperClasses(sb);
 
-                          /// <summary>
-                          /// NSObject subclass that receives KVO ObserveValue callbacks and forwards
-                          /// them to a delegate. Mirrors ReactiveUI's BlockObserveValueDelegate pattern.
-                          /// </summary>
-                          private sealed class __KVOObserver : global::Foundation.NSObject
-                          {
-                              private readonly global::System.Action _callback;
+    /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void EmitObservation(StringBuilder sb, in ObservationExpression observation) =>
+        KvoObservationEmitter.Emit(sb, observation.Source, observation.Segment, observation.SourceType, observation.BeforeChange, observation.Distinct);
 
-                              internal __KVOObserver(global::System.Action callback)
-                              {
-                                  _callback = callback;
-                              }
-
-                              public override void ObserveValue(
-                                  global::Foundation.NSString keyPath,
-                                  global::Foundation.NSObject ofObject,
-                                  global::Foundation.NSDictionary change,
-                                  global::System.IntPtr context)
-                              {
-                                  _callback();
-                              }
-                          }
-                      """);
-
-    /// <summary>Emits the <c>__KVOObservable&lt;T&gt;</c> fused observable that wraps KVO add/remove observer calls.</summary>
-    /// <param name="sb">The string builder.</param>
-    private static void EmitObservableClass(StringBuilder sb)
+    /// <summary>Recognizes properties declared by the assembly supplying NSObject.</summary>
+    /// <param name="owner">The concrete observed type.</param>
+    /// <param name="property">The selected property declaration.</param>
+    /// <returns>True when the declaration belongs to the native framework.</returns>
+    internal static bool IsNativeDeclaration(INamedTypeSymbol owner, IPropertySymbol property)
     {
-        _ = sb.AppendLine("""
+        for (var current = owner; current is not null; current = current.BaseType)
+        {
+            if (current.ToDisplayString() == "Foundation.NSObject")
+            {
+                return SymbolEqualityComparer.Default.Equals(property.ContainingAssembly, current.ContainingAssembly);
+            }
+        }
 
-                          /// <summary>
-                          /// Fused observable for Apple KVO property observation.
-                          /// Uses <c>NSObject.AddObserver</c> / <c>NSObject.RemoveObserver</c>
-                          /// with a compile-time resolved KVO key path.
-                          /// </summary>
-                          private sealed class __KVOObservable<T> : global::System.IObservable<T>
-                          {
-                              private readonly global::Foundation.NSObject _source;
-                              private readonly global::Foundation.NSString _keyPath;
-                              private readonly global::System.Func<global::Foundation.NSObject, T> _getter;
-                              private readonly bool _distinctUntilChanged;
-                              private readonly global::Foundation.NSKeyValueObservingOptions _options;
-
-                              internal __KVOObservable(
-                                  global::Foundation.NSObject source,
-                                  string keyPath,
-                                  global::System.Func<global::Foundation.NSObject, T> getter,
-                                  bool distinctUntilChanged,
-                                  bool beforeChange)
-                              {
-                                  _source = source;
-                                  _keyPath = (global::Foundation.NSString)keyPath;
-                                  _getter = getter;
-                                  _distinctUntilChanged = distinctUntilChanged;
-                                  _options = beforeChange
-                                      ? global::Foundation.NSKeyValueObservingOptions.Old
-                                      : global::Foundation.NSKeyValueObservingOptions.New;
-                              }
-
-                              public global::System.IDisposable Subscribe(global::System.IObserver<T> observer)
-                              {
-                                  return new Subscription(this, observer);
-                              }
-                      """);
-
-        EmitSubscriptionClass(sb);
+        return false;
     }
 
-    /// <summary>Emits the nested <c>Subscription</c> type of <c>__KVOObservable&lt;T&gt;</c> and the closing brace of the observable.</summary>
-    /// <param name="sb">The string builder.</param>
-    private static void EmitSubscriptionClass(StringBuilder sb)
+    /// <summary>Reads a Foundation export selector without loading the platform assembly.</summary>
+    /// <param name="symbol">The property or getter carrying export metadata.</param>
+    /// <returns>The getter selector, or null.</returns>
+    private static string? ExportedSelector(ISymbol symbol)
     {
-        EmitSubscriptionClassHead(sb);
-        EmitSubscriptionClassCallbacks(sb);
+        foreach (var attribute in symbol.GetAttributes())
+        {
+            if (attribute.AttributeClass?.ToDisplayString() == "Foundation.ExportAttribute"
+                && !attribute.ConstructorArguments.IsEmpty
+                && attribute.ConstructorArguments[0].Value is string selector
+                && selector.Length > 0 && selector.IndexOf(':') < 0)
+            {
+                return selector;
+            }
+        }
+
+        return null;
     }
-
-    /// <summary>Emits the subscription's fields and constructor, which registers the KVO observer.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void EmitSubscriptionClassHead(StringBuilder sb) =>
-        sb.AppendLine("""
-
-                              private sealed class Subscription : global::System.IDisposable
-                              {
-                                  private readonly __KVOObservable<T> _parent;
-                                  private readonly __KVOObserver _kvoObserver;
-                                  private readonly global::System.Runtime.InteropServices.GCHandle _handle;
-                                  private readonly global::System.Collections.Generic.IEqualityComparer<T> _comparer;
-                                  private global::System.IObserver<T> _observer;
-                                  private T _lastValue;
-                                  private bool _hasValue;
-
-                                  internal Subscription(__KVOObservable<T> parent, global::System.IObserver<T> observer)
-                                  {
-                                      _parent = parent;
-                                      _observer = observer;
-                                      _comparer = global::System.Collections.Generic.EqualityComparer<T>.Default;
-
-                                      _kvoObserver = new __KVOObserver(OnValueChanged);
-                                      _handle = global::System.Runtime.InteropServices.GCHandle.Alloc(_kvoObserver);
-
-                                      parent._source.AddObserver(
-                                          _kvoObserver,
-                                          parent._keyPath,
-                                          parent._options,
-                                          global::System.IntPtr.Zero);
-
-                                      // Emit initial value
-                                      var initial = parent._getter(parent._source);
-                                      _lastValue = initial;
-                                      _hasValue = true;
-                                      observer.OnNext(initial);
-                                  }
-                      """);
-
-    /// <summary>Emits the subscription's value-changed callback and disposal.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void EmitSubscriptionClassCallbacks(StringBuilder sb) =>
-        sb.AppendLine("""
-
-                                  private void OnValueChanged()
-                                  {
-                                      var obs = System.Threading.Volatile.Read(ref _observer);
-                                      if (obs == null)
-                                      {
-                                          return;
-                                      }
-
-                                      var value = _parent._getter(_parent._source);
-
-                                      if (_parent._distinctUntilChanged && _hasValue && _comparer.Equals(value, _lastValue))
-                                      {
-                                          return;
-                                      }
-
-                                      _lastValue = value;
-                                      _hasValue = true;
-                                      obs.OnNext(value);
-                                  }
-
-                                  public void Dispose()
-                                  {
-                                      var obs = System.Threading.Interlocked.Exchange(ref _observer, null);
-                                      if (obs != null)
-                                      {
-                                          _parent._source.RemoveObserver(_kvoObserver, _parent._keyPath);
-                                          _handle.Free();
-                                      }
-                                  }
-                              }
-                          }
-                      """);
 }

@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins.SetMethod;
 
 using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
@@ -252,37 +253,60 @@ internal static class BindToCodeGenerator
     /// <param name="suffix">The stable method-name suffix.</param>
     internal static void GenerateBindToMethod(StringBuilder sb, BindToInvocationInfo inv, string suffix)
     {
-        var directAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
-            TargetParameterName,
-            inv.TargetPropertyPath,
-            "value",
-            DirectSubscriptionBodyIndent);
-        var convertedAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
-            TargetParameterName,
-            inv.TargetPropertyPath,
-            "__converted",
-            ConvertedSubscriptionBodyIndent);
         var targetPathComment = CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath);
         var extraParams = FormatExtraMethodParams(inv);
 
         // Direct assignment is only safe when the value type matches the property type and the caller did
         // not supply an explicit converter. A conversion hint alone is meaningless for identity assignment.
         var directAssign = inv.SourceValueTypeFullName == inv.TargetPropertyTypeFullName && !inv.HasConverterOverride;
+        var sourceVariable = "source";
 
         _ = sb.Append("        private static ").Append(GeneratedTypeNames.IDisposable).Append(" __BindTo_").Append(suffix).Append('(')
             .Append(ObservableOf(inv.SourceValueTypeFullName)).Append(" source, ").Append(inv.TargetTypeFullName).Append(" target").Append(extraParams)
             .AppendLine(")").AppendLine(GeneratedSyntax.MemberBodyOpen).Append("            // BindTo: observable -> ").Append(targetPathComment).AppendLine();
 
+        if (inv.SetMethod is { } setMethod)
+        {
+            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append("            var __setSource = "), "source", TargetParameterName, inv.TargetViewThreadInvoker).AppendLine(";");
+            CollectionSetMethodEmitter.EmitSubscription(sb, new(TargetParameterName, inv.TargetPropertyPath, inv.SourceValueTypeFullName, setMethod, inv.TargetExpressionText, false), "__setSource");
+            _ = sb.AppendLine("            return __setSubscription;").AppendLine(GeneratedSyntax.MemberBodyClose);
+            return;
+        }
+
+        if (inv.Conversion is not null)
+        {
+            ConversionEmitter.EmitStage(
+                sb,
+                sourceVariable,
+                "__convertedSource",
+                inv.SourceValueTypeFullName,
+                inv.TargetPropertyTypeFullName,
+                inv.Conversion,
+                new(inv.HasConversionHint ? "conversionHint" : "null", inv.HasConverterOverride ? "converterOverride" : "null"));
+            sourceVariable = "__convertedSource";
+            directAssign = true;
+        }
+
         if (directAssign)
         {
-            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe("), "source", TargetParameterName, inv.TargetViewThreadInvoker)
+            var directAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
+                TargetParameterName,
+                inv.TargetPropertyPath,
+                "value",
+                DirectSubscriptionBodyIndent);
+            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe("), sourceVariable, TargetParameterName, inv.TargetViewThreadInvoker)
                 .AppendLine(", value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
                 .Append("                ").Append(directAssignment).AppendLine().Append("            }, \"")
                 .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");").AppendLine(GeneratedSyntax.MemberBodyClose).AppendLine();
         }
         else
         {
-            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe("), "source", TargetParameterName, inv.TargetViewThreadInvoker)
+            var convertedAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
+                TargetParameterName,
+                inv.TargetPropertyPath,
+                "__converted",
+                ConvertedSubscriptionBodyIndent);
+            _ = BindingEmitterHelpers.AppendViewThreadCall(sb.Append(ReturnPrefix).Append(BindingErrors).Append(".Subscribe("), sourceVariable, TargetParameterName, inv.TargetViewThreadInvoker)
                 .AppendLine(", value =>").AppendLine(GeneratedSyntax.StatementBlockOpen)
                 .Append("                if (").Append(RuntimeBindingConverter).Append(".TryConvert<").Append(inv.SourceValueTypeFullName).Append(", ")
                 .Append(inv.TargetPropertyTypeFullName).Append(">(value, ").Append(FormatConversionArguments(inv)).AppendLine(", out var __converted))")

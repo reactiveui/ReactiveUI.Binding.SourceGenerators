@@ -59,12 +59,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
         }
-        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-            source,
-            "Name",
-            (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyViewModel)__o).Name,
-            true);
-        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyViewModel), "Name", 5, false);
+            var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(source, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyViewModel)__o).Name, true);
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(source.GetType(), "Name", 5, false);
         var sourceObs = sourceObsRegistration == null
             ? (global::System.IObservable<string>)sourceObsMechanism
             : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
@@ -75,7 +71,47 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::SharedScenarios.BindOneWay.SinglePropertyWithScheduler.MyViewModel)__o).Name,
                 false,
                 true);
-        var bindObs = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)sourceObs : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(sourceObs, scheduler);
+            global::ReactiveUI.Binding.IBindingTypeConverter __convertedForwardConverter = null;
+            if (__convertedForwardConverter == null)
+            {
+                __convertedForwardConverter = global::ReactiveUI.Binding.BindingConverters.Current.TypedConverters.TryGetConverter(typeof(string), typeof(string));
+                if (__convertedForwardConverter != null && __convertedForwardConverter.GetAffinityForObjects() <= 2)
+                {
+                    __convertedForwardConverter = null;
+                }
+            }
+            var __convertedForward = __convertedForwardConverter == null ? (global::System.IObservable<string>)sourceObs : global::ReactiveUI.Primitives.LinqExtensions.Choose<string, string>(
+                sourceObs,
+                __value =>
+                {
+                    object __hint = null;
+                    if (__convertedForwardConverter != null)
+                    {
+                        if (__convertedForwardConverter is global::ReactiveUI.Binding.IBindingTypeConverter<string, string> __typed)
+                        {
+                            string __converted;
+                            if (__typed.TryConvert(__value, __hint, out __converted))
+                            {
+                                return (true, __converted);
+                            }
+                        }
+                        else
+                        {
+                            object __boxed;
+                            if (__convertedForwardConverter.TryConvertTyped(__value, __hint, out __boxed))
+                            {
+                                return (true, (string)__boxed);
+                            }
+                        }
+                        if (null == null)
+                        {
+                            return (true, (string)__value);
+                        }
+                        return (false, default(string));
+                    }
+                    return __value != null ? (true, __value) : (true, (string)__value);
+                });
+        var bindObs = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__convertedForward : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__convertedForward, scheduler);
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(bindObs, value =>
             {

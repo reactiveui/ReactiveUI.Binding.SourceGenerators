@@ -47,15 +47,21 @@ internal static class ChainRegistrationEmitter
     {
         var declaringType = segment.DeclaringTypeFullName;
         var valueType = segment.PropertyTypeFullName;
+        var registration = $"__registration_{sourceExpression}";
 
-        _ = sb.Append(opening).Append("global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<")
-            .Append(valueType).AppendLine(">(")
+        _ = sb.Append(opening).Append("(global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(")
+            .Append(sourceExpression).Append(".GetType(), \"").Append(segment.PropertyName).Append("\", ")
+            .Append(generatedAffinity).Append(", ").Append(isBeforeChange ? "true" : "false")
+            .Append(") is global::ReactiveUI.Binding.ICreatesObservableForProperty ").Append(registration).AppendLine()
+            .Append(argumentIndent).Append("? (global::System.IObservable<").Append(valueType)
+            .Append(">)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<").Append(valueType).AppendLine(">(")
+            .Append(argumentIndent).Append(registration).AppendLine(",")
             .Append(argumentIndent).Append(sourceExpression).AppendLine(",")
             .Append(argumentIndent).Append("((global::System.Linq.Expressions.Expression<global::System.Func<").Append(declaringType).Append(", ")
             .Append(valueType).Append(">>)(__e => __e.").Append(segment.PropertyName).AppendLine(")).Body,")
             .Append(argumentIndent).Append('"').Append(segment.PropertyName).AppendLine("\",")
-            .Append(argumentIndent).Append(isBeforeChange ? "true" : "false").AppendLine(",")
-            .Append(argumentIndent).Append(generatedAffinity).AppendLine(",")
-            .Append(argumentIndent).Append("(object __o) => ((").Append(declaringType).Append(")__o).").Append(segment.PropertyName).AppendLine(",");
+            .Append(argumentIndent).Append("(object __o) => ((").Append(declaringType).Append(")__o).").Append(segment.PropertyName).AppendLine(",")
+            .Append(argumentIndent).Append(isBeforeChange ? "true" : "false").AppendLine(", false)")
+            .Append(argumentIndent).Append(": (global::System.IObservable<").Append(valueType).AppendLine(">)");
     }
 }

@@ -673,10 +673,7 @@ public class UnanalyzableInvocationTests
         await result.DoesNotHaveGeneratedSource(WhenAnyObservableDispatchgcsName);
     }
 
-    /// <summary>
-    /// Verifies that the generator handles source code with no INPC types at all.
-    /// Exercises the allTypes.IsDefaultOrEmpty guard in RegistrationGenerator (line 76).
-    /// </summary>
+    /// <summary>Verifies that the generator handles source code with no INPC types at all.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NoObservableTypes_GeneratesNoRegistration()

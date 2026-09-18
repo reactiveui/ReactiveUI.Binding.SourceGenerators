@@ -46,9 +46,14 @@ public static class RuntimeBindingConverter
         out TTo result)
     {
         var toType = typeof(TTo);
-        object? boxed = value;
         var fromType = typeof(TFrom);
+        var resolved = converterOverride ?? BindingConverters.Current.ResolveConverter(fromType, toType);
+        if (resolved is IBindingTypeConverter<TFrom, TTo> typedConverter)
+        {
+            return typedConverter.TryConvert(value, conversionHint, out result!);
+        }
 
+        object? boxed = value;
         object? converted;
 
         if (converterOverride is not null)
@@ -64,7 +69,6 @@ public static class RuntimeBindingConverter
             return false;
         }
 
-        var resolved = BindingConverters.Current.ResolveConverter(fromType, toType);
         if (BindingTypeConverterDispatch.TryConvertAny(resolved, fromType, boxed, toType, conversionHint, out converted)
             && converted is TTo typed)
         {

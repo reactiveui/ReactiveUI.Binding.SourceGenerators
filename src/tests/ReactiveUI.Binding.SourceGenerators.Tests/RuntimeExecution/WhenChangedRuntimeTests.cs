@@ -16,10 +16,10 @@ public class WhenChangedRuntimeTests
     /// <summary>The <c>WhenChangedDispatch.g.cs</c> name these tests generate against.</summary>
     private const string WhenChangedDispatchgcsName = "WhenChangedDispatch.g.cs";
 
-    /// <summary>Verifies that single-property WhenChanged generates a dispatch file with correct structure.</summary>
+    /// <summary>Verifies that single-property observation emits direct dispatch without a registration layer.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task SingleProperty_GeneratesDispatchAndRegistration()
+    public async Task SingleProperty_GeneratesDirectDispatch()
     {
         const string source = """
                               using System;
@@ -63,7 +63,7 @@ public class WhenChangedRuntimeTests
         await result.CompilationSucceeds();
         await result.HasNoGeneratorDiagnostics();
         await result.HasGeneratedSource(WhenChangedDispatchgcsName);
-        await result.HasGeneratedSource("GeneratedBinderRegistration.g.cs");
+        await result.DoesNotHaveGeneratedSource("GeneratedBinderRegistration.g.cs");
         await result.GeneratedSourceContains(WhenChangedDispatchgcsName, "PropertyChanged");
         await result.GeneratedSourceContains(WhenChangedDispatchgcsName, "Name");
     }

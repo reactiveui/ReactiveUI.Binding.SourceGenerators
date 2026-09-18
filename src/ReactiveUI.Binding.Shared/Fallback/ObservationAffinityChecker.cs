@@ -2,6 +2,7 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -18,21 +19,19 @@ namespace ReactiveUI.Binding.Fallback;
 /// override source-generated observation at runtime.
 /// </summary>
 /// <remarks>
-/// Every generated observation and binding asks this before it does anything else, so the answer is on the
-/// path of every binding an application creates. The registered set is resolved once and kept rather than
-/// re-read from the locator each time: asking the locator allocates an enumeration per call, which a view
-/// with many bindings pays for repeatedly and never gets anything back for. <see cref="Refresh"/> drops the
-/// resolved set for a host that registers a plugin after the first binding.
+/// Registrations and their best score for each type, property and notification timing are cached until
+/// <see cref="Refresh"/>. The generated mechanism wins ties. Custom providers own their reflection and AOT requirements.
 /// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class ObservationAffinityChecker
 {
-    /// <summary>The resolved plugins, or null while none have been resolved yet.</summary>
-    private static ICreatesObservableForProperty[]? _plugins;
+    /// <summary>The registrations and scores belonging to the current refresh generation.</summary>
+    private static SelectionCache _cache = new();
 
-    /// <summary>Re-reads the registered plugins, for a host that registers them after the first binding.</summary>
+    /// <summary>Invalidates registrations and scores for subsequent selections.</summary>
+    /// <remarks>A selection overlapping refresh may finish using its captured registrations.</remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Refresh() => Interlocked.Exchange(ref _plugins, null);
+    public static void Refresh() => Interlocked.Exchange(ref _cache, new());
 
     /// <summary>Returns <see langword="true"/> if a registered <see cref="ICreatesObservableForProperty"/> outranks <paramref name="generatedAffinity"/>.</summary>
     /// <param name="type">The type being observed.</param>
@@ -46,22 +45,8 @@ public static class ObservationAffinityChecker
     /// WinForms and KVO plugins all answer 0 for a property their mechanism does not reach, whatever the type -
     /// so asking without one makes every mechanism-specific registration score 0 and lose by construction.
     /// </remarks>
-    public static bool HasHigherAffinityPlugin(Type type, string propertyName, int generatedAffinity, bool beforeChanged)
-    {
-        ArgumentExceptionHelper.ThrowIfNull(type);
-        ArgumentExceptionHelper.ThrowIfNull(propertyName);
-
-        var plugins = Resolve();
-        for (var i = 0; i < plugins.Length; i++)
-        {
-            if (plugins[i].GetAffinityForObject(type, propertyName, beforeChanged) > generatedAffinity)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
+    public static bool HasHigherAffinityPlugin(Type type, string propertyName, int generatedAffinity, bool beforeChanged) =>
+        FindHigherAffinityPlugin(type, propertyName, generatedAffinity, beforeChanged) is not null;
 
     /// <summary>Finds the registered <see cref="ICreatesObservableForProperty"/> that outranks <paramref name="generatedAffinity"/>.</summary>
     /// <param name="type">The type being observed.</param>
@@ -71,9 +56,8 @@ public static class ObservationAffinityChecker
     /// <returns>The highest-scoring registration that beats the generated one, or <see langword="null"/> when none does.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="type"/> or <paramref name="propertyName"/> is null.</exception>
     /// <remarks>
-    /// Generated code asks for the registration itself rather than for a yes-or-no, so the winner is scored
-    /// once and then observed through. Answering only "is there one" costs a second scan to find it again,
-    /// on a path every binding runs.
+    /// The cached custom score is compared with each call's generated affinity, so two generated mechanisms
+    /// observing the same property share scoring without sharing the outcome of that comparison.
     /// </remarks>
     public static ICreatesObservableForProperty? FindHigherAffinityPlugin(
         Type type,
@@ -84,43 +68,82 @@ public static class ObservationAffinityChecker
         ArgumentExceptionHelper.ThrowIfNull(type);
         ArgumentExceptionHelper.ThrowIfNull(propertyName);
 
-        var plugins = Resolve();
-        var bestScore = generatedAffinity;
-        ICreatesObservableForProperty? best = null;
-
-        for (var i = 0; i < plugins.Length; i++)
-        {
-            var score = plugins[i].GetAffinityForObject(type, propertyName, beforeChanged);
-            if (score <= bestScore)
-            {
-                continue;
-            }
-
-            bestScore = score;
-            best = plugins[i];
-        }
-
-        return best;
+        var selection = Volatile.Read(ref _cache).Find(type, propertyName, beforeChanged);
+        return selection.Affinity > generatedAffinity ? selection.Plugin : null;
     }
 
-    /// <summary>Resolves the registered plugins once and keeps them.</summary>
-    /// <returns>The registered plugins, empty when none is registered.</returns>
-    /// <remarks>
-    /// Publishing with a compare-exchange rather than a lock means the read that every binding makes is a
-    /// plain field read. Two threads racing the first resolve both ask the locator and one array is discarded,
-    /// which costs less than making every later caller take a lock to avoid it.
-    /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ICreatesObservableForProperty[] Resolve()
+    /// <summary>Identifies the inputs to a custom provider's affinity vote.</summary>
+    /// <param name="Type">The type being observed.</param>
+    /// <param name="PropertyName">The property being observed.</param>
+    /// <param name="BeforeChanged">Whether notification occurs before the change.</param>
+    [DebuggerDisplay("{Type.Name,nq}.{PropertyName,nq}, BeforeChanged = {BeforeChanged}")]
+    private readonly record struct ObservationKey(Type Type, string PropertyName, bool BeforeChanged);
+
+    /// <summary>Keeps the strongest custom vote independently of any generated mechanism's affinity.</summary>
+    /// <param name="Plugin">The winning registration, or null when no registration wins.</param>
+    /// <param name="Affinity">The registration's property-specific score.</param>
+    [DebuggerDisplay("Affinity = {Affinity}")]
+    private readonly record struct PluginSelection(ICreatesObservableForProperty? Plugin, int Affinity);
+
+    /// <summary>Owns registrations and scored votes so refresh cannot receive a stale publication.</summary>
+    private sealed class SelectionCache
     {
-        var resolved = Volatile.Read(ref _plugins);
-        if (resolved is not null)
+        /// <summary>The strongest vote for each observed property and notification timing.</summary>
+        private readonly ConcurrentDictionary<ObservationKey, PluginSelection> _selections = new();
+
+        /// <summary>The cache factory, retained to avoid creating a delegate on cache hits.</summary>
+        private readonly Func<ObservationKey, PluginSelection> _select;
+
+        /// <summary>The resolved registrations, or null before resolution.</summary>
+        private ICreatesObservableForProperty[]? _plugins;
+
+        /// <summary>Initializes a new instance of the <see cref="SelectionCache"/> class.</summary>
+        public SelectionCache() => _select = Select;
+
+        /// <summary>Returns the strongest cached vote without allocating property entries for an empty registry.</summary>
+        /// <param name="type">The type being observed.</param>
+        /// <param name="propertyName">The property being observed.</param>
+        /// <param name="beforeChanged">Whether notification occurs before the change.</param>
+        /// <returns>The strongest custom vote, or an empty selection when no registrations exist.</returns>
+        public PluginSelection Find(Type type, string propertyName, bool beforeChanged) =>
+            Resolve().Length == 0 ? default : _selections.GetOrAdd(new(type, propertyName, beforeChanged), _select);
+
+        /// <summary>Scores registrations for one observation, preserving registration order on ties.</summary>
+        /// <param name="key">The inputs to each registration's affinity vote.</param>
+        /// <returns>The highest scoring registration and its score.</returns>
+        private PluginSelection Select(ObservationKey key)
         {
-            return resolved;
+            var plugins = Resolve();
+            var bestScore = int.MinValue;
+            ICreatesObservableForProperty? best = null;
+
+            for (var i = 0; i < plugins.Length; i++)
+            {
+                var score = plugins[i].GetAffinityForObject(key.Type, key.PropertyName, key.BeforeChanged);
+                if (score <= bestScore)
+                {
+                    continue;
+                }
+
+                bestScore = score;
+                best = plugins[i];
+            }
+
+            return new(best, bestScore);
         }
 
-        ICreatesObservableForProperty[] built = [.. AppLocator.Current.GetServices<ICreatesObservableForProperty>()];
+        /// <summary>Publishes registrations only into the cache generation that requested them.</summary>
+        /// <returns>The resolved registrations.</returns>
+        private ICreatesObservableForProperty[] Resolve()
+        {
+            var resolved = Volatile.Read(ref _plugins);
+            if (resolved is not null)
+            {
+                return resolved;
+            }
 
-        return Interlocked.CompareExchange(ref _plugins, built, null) ?? built;
+            ICreatesObservableForProperty[] built = [.. AppLocator.Current.GetServices<ICreatesObservableForProperty>()];
+            return Interlocked.CompareExchange(ref _plugins, built, null) ?? built;
+        }
     }
 }

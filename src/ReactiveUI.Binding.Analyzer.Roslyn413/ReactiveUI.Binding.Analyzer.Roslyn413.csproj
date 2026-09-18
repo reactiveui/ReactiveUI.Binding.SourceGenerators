@@ -33,6 +33,10 @@
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Constants.cs" Link="Constants.cs"/>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Models\InterceptorLocation.cs" Link="Models\InterceptorLocation.cs"/>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Helpers\InterceptableLocationReader.cs" Link="Helpers\InterceptableLocationReader.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Helpers\NativeCommandMembers.cs" Link="Helpers\NativeCommandMembers.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Helpers\NativeTypeIdentity.cs" Link="Helpers\NativeTypeIdentity.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Plugins\CommandBinding\AppKitCommandSymbols.cs" Link="Helpers\AppKitCommandSymbols.cs"/>
+    <Compile Include="..\ReactiveUI.Binding.SourceGenerators\Plugins\CommandBinding\UIKitCommandSymbols.cs" Link="Helpers\UIKitCommandSymbols.cs"/>
     <Compile Include="..\ReactiveUI.Binding.Shared\Polyfills\**.cs" Link="Polyfills"/>
     <Compile Include="..\ReactiveUI.Binding.Shared\Helpers\ArgumentExceptionHelper.cs" Link="Helpers\ArgumentExceptionHelper.cs"/>
   </ItemGroup>

@@ -33,12 +33,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<global::ReactiveUI.Binding.PropertyValues<string, int>> __WhenChanged_7FFFFC6CDD42386A(global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel obj)
         {
-            var __propObs0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "Name",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel)__o).Name,
-                true);
-            var __propObs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel), "Name", 5, false);
+            var __propObs0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel)__o).Name, true);
+
+            var __propObs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Name", 5, false);
             var __propObs0 = __propObs0Registration == null
                 ? (global::System.IObservable<string>)__propObs0Mechanism
                 : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
@@ -50,12 +47,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     false,
                     true);
 
-            var __propObs1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
-                obj,
-                "Age",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel)__o).Age,
-                true);
-            var __propObs1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel), "Age", 5, false);
+            var __propObs1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(obj, "Age", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanged.MultiPropertyTwoProperties.MyViewModel)__o).Age, true);
+
+            var __propObs1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Age", 5, false);
             var __propObs1 = __propObs1Registration == null
                 ? (global::System.IObservable<int>)__propObs1Mechanism
                 : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(

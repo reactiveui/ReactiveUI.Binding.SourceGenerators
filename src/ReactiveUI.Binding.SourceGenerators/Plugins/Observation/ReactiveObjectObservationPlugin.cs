@@ -2,6 +2,8 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
+using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
@@ -11,14 +13,44 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 /// plain INPC plugin. <c>IReactiveObject</c> implements both notification interfaces, so the emitted
 /// observation is the same.
 /// </summary>
-internal sealed class ReactiveObjectObservationPlugin : NotifyPropertyObservationPlugin
+internal sealed class ReactiveObjectObservationPlugin : IObservationPlugin
 {
     /// <inheritdoc/>
-    public override int Affinity => BindingAffinity.ExactType;
+    public int Affinity => BindingAffinity.ExactType;
 
     /// <inheritdoc/>
-    public override string ObservationKind => "ReactiveObject";
+    public string ObservationKind => "ReactiveObject";
 
     /// <inheritdoc/>
-    public override bool IsAMatch(ClassBindingInfo classInfo) => classInfo.ImplementsIReactiveObject;
+    public bool SupportsBeforeChanged => true;
+
+    /// <inheritdoc/>
+    public bool RequiresHelperClasses => false;
+
+    /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int GetAffinityForProperty(ClassBindingInfo classInfo, string propertyName, bool isBeforeChange) =>
+        IsAMatch(classInfo) ? Affinity : 0;
+
+    /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsAMatch(ClassBindingInfo classInfo) => classInfo.ImplementsIReactiveObject;
+
+    /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) => true;
+
+    /// <inheritdoc/>
+    public void EmitHelperClasses(StringBuilder sb) {}
+
+    /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void EmitObservation(StringBuilder sb, in ObservationExpression observation) =>
+        NotifyPropertyEmitter.EmitShallowObservation(
+            sb,
+            observation.Source,
+            observation.Segment,
+            observation.SourceType,
+            observation.BeforeChange,
+            observation.Distinct);
 }

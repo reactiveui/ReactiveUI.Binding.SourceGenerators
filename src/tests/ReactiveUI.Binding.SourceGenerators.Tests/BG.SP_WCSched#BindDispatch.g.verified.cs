@@ -54,12 +54,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return null;
         }
-        var vmObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(
-            viewModel,
-            "Count",
-            (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel)__o).Count,
-            true);
-        var vmObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel), "Count", 5, false);
+            var vmObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<int>(viewModel, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel)__o).Count, true);
+        var vmObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Count", 5, false);
         var vmObs = vmObsRegistration == null
             ? (global::System.IObservable<int>)vmObsMechanism
             : (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
@@ -70,12 +66,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyViewModel)__o).Count,
                 false,
                 true);
-        var viewObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-            view,
-            "CountText",
-            (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView)__o).CountText,
-            true);
-        var viewObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView), "CountText", 5, false);
+            var viewObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(view, "CountText", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView)__o).CountText, true);
+        var viewObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "CountText", 5, false);
         var viewObs = viewObsRegistration == null
             ? (global::System.IObservable<string>)viewObsMechanism
             : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
@@ -91,35 +83,41 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         var vmBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__vmSelected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__vmSelected, scheduler);
         var viewBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<int>)__viewSelected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<int>(__viewSelected, scheduler);
 
-            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::ReactiveUI.Binding.BindingChange>(vmBind, v => new global::ReactiveUI.Binding.BindingChange(v, true));
-            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<int, global::ReactiveUI.Binding.BindingChange>(viewBind, v => new global::ReactiveUI.Binding.BindingChange(v, false));
-            var __sides = new global::ReactiveUI.Primitives.Advanced.MergeSignal<global::ReactiveUI.Binding.BindingChange>(__vmTagged, __viewTagged);
+            var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::System.ValueTuple<bool, string, int>>(vmBind, v => new global::System.ValueTuple<bool, string, int>(true, v, default(int)));
+            var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<int, global::System.ValueTuple<bool, string, int>>(viewBind, v => new global::System.ValueTuple<bool, string, int>(false, default(string), v));
+            var __sides = new global::ReactiveUI.Primitives.Advanced.MergeSignal<global::System.ValueTuple<bool, string, int>>(__vmTagged, __viewTagged);
             var changed = new global::ReactiveUI.Binding.Observables.AppliedChangeObservable();
 
             var disposable = global::ReactiveUI.Binding.BindingErrors.Subscribe(__sides, __change =>
             {
-                if (__change.FromViewModel)
+                if (__change.Item1)
                 {
-                    var value = (string)__change.Value;
+                    var value = __change.Item2;
                     if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.CountText, value))
                 {
                     return;
                 }
 
                 view.CountText = value;
+                    if (changed.HasObservers)
+                    {
+                        changed.OnNext(new global::ReactiveUI.Binding.BindingChange(value, true));
+                    }
                 }
                 else
                 {
-                    var value = (int)__change.Value;
+                    var value = __change.Item3;
                     if (global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(viewModel.Count, value))
                 {
                     return;
                 }
 
                 viewModel.Count = value;
+                    if (changed.HasObservers)
+                    {
+                        changed.OnNext(new global::ReactiveUI.Binding.BindingChange(value, false));
+                    }
                 }
-
-                changed.OnNext(__change);
             }, "x => x.Count / x => x.CountText");
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.Bind.SinglePropertyWithConvertersAndScheduler.MyView, global::ReactiveUI.Binding.BindingChange>(

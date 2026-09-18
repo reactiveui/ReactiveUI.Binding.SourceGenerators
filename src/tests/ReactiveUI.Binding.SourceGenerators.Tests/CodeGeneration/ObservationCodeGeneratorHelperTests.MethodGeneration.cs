@@ -211,13 +211,10 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result!).Contains("__WhenChanged_");
     }
 
-    /// <summary>
-    /// Verifies Generate with invocations but no matching class info skips affinity check
-    /// and does not emit ObservationAffinityChecker (covers null branches for groupClassInfo/groupPlugin).
-    /// </summary>
+    /// <summary>A registered provider can observe a property even when no generated mechanism matches its type.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task Generate_NoMatchingClassInfo_SkipsAffinityCheck()
+    public async Task Generate_NoMatchingClassInfo_AllowsCustomProvider()
     {
         var inv = ModelFactory.CreateInvocationInfo();
 
@@ -228,7 +225,7 @@ public partial class ObservationCodeGeneratorHelperTests
             WhenChangedName);
 
         await Assert.That(result).IsNotNull();
-        await Assert.That(result!).DoesNotContain(ObservationAffinityCheckerName);
+        await Assert.That(result!).Contains(ObservationAffinityCheckerName);
     }
 
     /// <summary>Verifies GenerateConcreteOverload with multiple invocations in a group generates else if branching.</summary>
@@ -375,7 +372,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         ObservationCodeGenerator.GenerateShallowObservableVariable(sb, path, ModelFactory.CreateClassBindingInfo(implementsINPChanging: true), true, ObservedPropertyVariable);
 
-        await Assert.That(sb.ToString()).Contains("\", 0, true);");
+        await Assert.That(sb.ToString()).Contains("\", 5, true);");
     }
 
     /// <summary>A binding reads through the same choice, so its generated write is untouched by a registration.</summary>

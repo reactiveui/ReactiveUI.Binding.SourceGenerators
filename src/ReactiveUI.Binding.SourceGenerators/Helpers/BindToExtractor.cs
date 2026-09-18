@@ -5,6 +5,8 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins.Conversion;
+using ReactiveUI.Binding.SourceGenerators.Plugins.SetMethod;
 using ReactiveUI.Binding.SourceGenerators.Plugins.ViewThread;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -74,14 +76,12 @@ internal static class BindToExtractor
 
         DetectConversionParameters(methodSymbol, out var hasConversionHint, out var hasConverterOverride);
 
-        var filePath = invocation.SyntaxTree.FilePath;
-        var lineNumber = invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-        var targetExpressionText =
-            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString());
+        var targetValueType = ConversionPluginRegistry.SelectorType(targetPropertyArg, semanticModel, ct);
+        var targetExpressionText = CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString());
 
         return new(
-            filePath,
-            lineNumber,
+            invocation.SyntaxTree.FilePath,
+            invocation.SyntaxTree.GetLineSpan(invocation.Span, ct).StartLinePosition.Line + 1,
             sourceValueTypeFullName,
             targetTypeName,
             new(targetPropertyPath),
@@ -91,7 +91,11 @@ internal static class BindToExtractor
             hasConverterOverride,
             targetExpressionText,
             InterceptableLocationReader.Read(semanticModel, invocation, ct),
-            ViewThreadPluginRegistry.InvokerFor(targetType, semanticModel.Compilation));
+            ViewThreadPluginRegistry.InvokerFor(targetType, semanticModel.Compilation))
+        {
+            Conversion = ConversionPluginRegistry.Select(sourceValueType, targetValueType, semanticModel.Compilation),
+            SetMethod = SetMethodPluginRegistry.Select(sourceValueType, targetValueType),
+        };
     }
 
     /// <summary>

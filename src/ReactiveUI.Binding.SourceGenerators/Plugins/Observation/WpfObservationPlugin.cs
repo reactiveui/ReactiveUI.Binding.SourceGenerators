@@ -4,139 +4,61 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
+using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
 /// <summary>Observes WPF dependency properties through <c>DependencyPropertyDescriptor.AddValueChanged</c>.</summary>
-internal sealed class WpfObservationPlugin : AfterChangeObservationPlugin
+internal sealed class WpfObservationPlugin : IPlatformObservationPlugin
 {
-    /// <summary>Opens the descriptor lookup the handler is added to or removed from.</summary>
-    private const string DescriptorLookupOpen = "                __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(";
-
-    /// <summary>Closes the descriptor lookup and subscribes the generated handler.</summary>
-    private const string AddValueChangedCall = ")).AddValueChanged(";
-
-    /// <summary>Closes the descriptor lookup and unsubscribes the generated handler.</summary>
-    private const string RemoveValueChangedCall = ")).RemoveValueChanged(";
-
-    /// <summary>Passes the generated handler and closes the add or remove lambda.</summary>
-    private const string HandlerArgumentClose = ", __h),";
-
-    /// <summary>Completes the dependency property field name and opens its owner type.</summary>
-    private const string DependencyPropertyOwnerOpen = "Property, typeof(";
-
     /// <summary>The affinity this plugin bids with.</summary>
     private static readonly int WpfAffinity = BindingAffinity.WpfDependencyObject;
 
     /// <inheritdoc/>
-    public override int Affinity => WpfAffinity;
+    public int Affinity => WpfAffinity;
 
     /// <inheritdoc/>
-    public override string ObservationKind => "WpfDP";
+    public string ObservationKind => "WpfDP";
 
     /// <inheritdoc/>
-    public override bool RequiresHelperClasses => false;
+    public bool RequiresHelperClasses => false;
 
     /// <inheritdoc/>
-    protected override bool AnswersBeforeChangeWithLiveStream => true;
+    public bool SupportsBeforeChanged => false;
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override bool IsAMatch(ClassBindingInfo classInfo) =>
+    public int GetAffinityForProperty(ClassBindingInfo classInfo, string propertyName, bool isBeforeChange) =>
+        IsAMatch(classInfo) && CanObserveProperty(classInfo, propertyName) ? Affinity : 0;
+
+    /// <inheritdoc/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsAMatch(ClassBindingInfo classInfo) =>
         classInfo.InheritsWpfDependencyObject;
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
-        ObservedProperties.IsDependencyProperty(classInfo, propertyName);
+    public bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName) =>
+        ObservedProperties.Find(classInfo, propertyName) is { SymbolsInspected: true }
+            ? PlatformSymbols.Candidate(classInfo, propertyName, ObservationKind) is not null
+            : ObservedProperties.IsDependencyProperty(classInfo, propertyName);
 
     /// <inheritdoc/>
-    public override void EmitHelperClasses(StringBuilder sb)
+    public PlatformObservationInfo? InspectProperty(INamedTypeSymbol owner, IPropertySymbol property) =>
+        PlatformSymbols.DerivesFrom(owner, "System.Windows.DependencyObject")
+        && PlatformSymbols.HasDependencyProperty(owner, property.Name, "System.Windows.DependencyProperty")
+            ? new(ObservationKind, Affinity, default, null, "global::System.Windows.DependencyObject", null)
+            : null;
+
+    /// <inheritdoc/>
+    public void EmitHelperClasses(StringBuilder sb)
     {
         // No helper classes needed — uses EventObservable<T> from runtime library.
     }
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override void EmitInlineObservationVariable(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        string varName) =>
-        sb.Append("        var ").Append(varName).Append(" = new global::ReactiveUI.Binding.Observables.EventObservable<")
-            .Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .AppendLine("            __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(").Append("                ")
-            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append("Property, typeof(").Append(castTypeName)
-            .Append(")).AddValueChanged(").Append(rootVar).AppendLine(", __h),")
-            .AppendLine("            __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(").Append("                ")
-            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append("Property, typeof(").Append(castTypeName)
-            .Append(")).RemoveValueChanged(").Append(rootVar).AppendLine(", __h),").Append("            () => ((").Append(castTypeName).Append(')')
-            .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",").AppendLine("            true);");
-
-    /// <inheritdoc/>
-    protected override void AppendShallowObservation(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        bool includeStartWith) =>
-        _ = sb.Append("new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).Append(">(")
-            .Append("__h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(").Append(castTypeName).Append('.')
-            .Append(segment.PropertyName).Append("Property,").Append(" typeof(").Append(castTypeName).Append(AddValueChangedCall).Append(rootVar)
-            .Append(", __h), ").Append("__h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(").Append(castTypeName).Append('.')
-            .Append(segment.PropertyName).Append("Property,").Append(" typeof(").Append(castTypeName).Append(RemoveValueChangedCall).Append(rootVar)
-            .Append(", __h), ").Append("() => ((").Append(castTypeName).Append(')').Append(rootVar).Append(").").Append(segment.PropertyName).Append(", ")
-            .Append(includeStartWith ? "true" : "false").Append(')');
-
-    /// <inheritdoc/>
-    protected override void AppendShallowObservationVariable(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        string varName) =>
-        _ = sb.Append("            var ").Append(varName).Append(" = new global::ReactiveUI.Binding.Observables.EventObservable<")
-            .Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .AppendLine(DescriptorLookupOpen).Append("                    ")
-            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append(DependencyPropertyOwnerOpen).Append(castTypeName).Append(AddValueChangedCall)
-            .Append(rootVar).AppendLine(HandlerArgumentClose)
-            .AppendLine(DescriptorLookupOpen).Append("                    ")
-            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append(DependencyPropertyOwnerOpen).Append(castTypeName)
-            .Append(RemoveValueChangedCall).Append(rootVar).AppendLine(HandlerArgumentClose).Append("                () => ((").Append(castTypeName).Append(')')
-            .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",").Append("                true);");
-
-    /// <inheritdoc/>
-    protected override void AppendChainSegmentObservation(
-        StringBuilder sb,
-        string lambdaParam,
-        PropertyPathSegment segment) =>
-        _ = sb.Append("                    new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .AppendLine("                    __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(")
-            .Append("                        ").Append(segment.DeclaringTypeFullName).Append('.').Append(segment.PropertyName)
-            .Append(DependencyPropertyOwnerOpen).Append(segment.DeclaringTypeFullName).Append(AddValueChangedCall).Append(lambdaParam)
-            .AppendLine(HandlerArgumentClose)
-            .AppendLine("                    __h => global::System.ComponentModel.DependencyPropertyDescriptor.FromProperty(")
-            .Append("                        ").Append(segment.DeclaringTypeFullName).Append('.').Append(segment.PropertyName)
-            .Append(DependencyPropertyOwnerOpen).Append(segment.DeclaringTypeFullName).Append(RemoveValueChangedCall).Append(lambdaParam)
-            .AppendLine(HandlerArgumentClose).Append("                    () => ((").Append(segment.DeclaringTypeFullName).Append(')')
-            .Append(lambdaParam).Append(").").Append(segment.PropertyName).AppendLine(",").Append("                    false)");
-
-    /// <inheritdoc/>
-    protected override void AppendDeepChainRootSegment(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        string obsVarName) =>
-        _ = sb.Append("            var ").Append(obsVarName).Append(" = (global::System.IObservable<").Append(segment.PropertyTypeFullName)
-            .Append("                    new global::ReactiveUI.Binding.Observables.EventObservable<").Append(segment.PropertyTypeFullName).AppendLine(">(")
-            .AppendLine(DescriptorLookupOpen).Append("                    ")
-            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append(DependencyPropertyOwnerOpen).Append(castTypeName).Append(AddValueChangedCall)
-            .Append(rootVar).AppendLine(HandlerArgumentClose)
-            .AppendLine(DescriptorLookupOpen).Append("                    ")
-            .Append(castTypeName).Append('.').Append(segment.PropertyName).Append(DependencyPropertyOwnerOpen).Append(castTypeName)
-            .Append(RemoveValueChangedCall).Append(rootVar).AppendLine(HandlerArgumentClose).Append("                () => ((").Append(castTypeName).Append(')')
-            .Append(rootVar).Append(").").Append(segment.PropertyName).AppendLine(",").AppendLine("                false);");
+    public void EmitObservation(StringBuilder sb, in ObservationExpression observation) =>
+        WpfObservationEmitter.Emit(sb, observation.Source, observation.Segment, observation.SourceType, observation.Distinct);
 }

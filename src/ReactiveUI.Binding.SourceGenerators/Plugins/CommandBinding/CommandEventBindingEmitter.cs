@@ -4,7 +4,6 @@
 
 using System;
 using System.Text;
-using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
@@ -35,7 +34,6 @@ internal static class CommandEventBindingEmitter
     /// <param name="controlAccess">The control access chain expression.</param>
     /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="emitObservableParameter">Emits the binding when an observable parameter is supplied.</param>
-    /// <param name="emitExpressionParameter">Emits the binding when an expression parameter is supplied.</param>
     /// <param name="emitNoParameter">Emits the binding when no parameter is supplied.</param>
     internal static void EmitByParameterKind(
         StringBuilder sb,
@@ -43,20 +41,13 @@ internal static class CommandEventBindingEmitter
         string controlAccess,
         bool supportsNullable,
         Action<StringBuilder, BindCommandInvocationInfo, string, string, bool> emitObservableParameter,
-        Action<StringBuilder, BindCommandInvocationInfo, string, string, string, bool> emitExpressionParameter,
         Action<StringBuilder, BindCommandInvocationInfo, string, string, bool> emitNoParameter)
     {
         var eventArgsType = inv.ResolvedEventArgsTypeFullName ?? "global::System.EventArgs";
 
-        if (inv.HasObservableParameter)
+        if (CommandParameterEmitter.HasParameter(inv))
         {
             emitObservableParameter(sb, inv, controlAccess, eventArgsType, supportsNullable);
-        }
-        else if (inv is { HasExpressionParameter: true, ParameterPropertyPath: not null })
-        {
-            var paramAccess =
-                CodeGeneratorHelpers.BuildPropertyAccessChain("viewModel", inv.ParameterPropertyPath.Value);
-            emitExpressionParameter(sb, inv, controlAccess, eventArgsType, paramAccess, supportsNullable);
         }
         else
         {

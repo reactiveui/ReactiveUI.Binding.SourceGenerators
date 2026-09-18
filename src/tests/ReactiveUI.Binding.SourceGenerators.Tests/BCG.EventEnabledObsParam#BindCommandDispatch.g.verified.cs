@@ -51,12 +51,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
             }
 
-        var __commandChangesMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Windows.Input.ICommand>(
-            viewModel,
-            "Save",
-            (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.EventEnabledObsParam.MyViewModel)__o).Save,
-            true);
-        var __commandChangesRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.BindCommand.EventEnabledObsParam.MyViewModel), "Save", 5, false);
+            var __commandChangesMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Windows.Input.ICommand>(viewModel, "Save", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.EventEnabledObsParam.MyViewModel)__o).Save, true);
+        var __commandChangesRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Save", 5, false);
         var __commandChanges = __commandChangesRegistration == null
             ? (global::System.IObservable<global::System.Windows.Input.ICommand>)__commandChangesMechanism
             : (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.Windows.Input.ICommand>(
@@ -68,12 +64,39 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 false,
                 true);
             var commandObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__commandChanges, view);
+            var __controlChangesMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton>(view, "SaveButton", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.EventEnabledObsParam.MyView)__o).SaveButton, true);
+        var __controlChangesRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "SaveButton", 5, false);
+        var __controlChanges = __controlChangesRegistration == null
+            ? (global::System.IObservable<global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton>)__controlChangesMechanism
+            : (global::System.IObservable<global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton>(
+                __controlChangesRegistration,
+                view,
+                ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindCommand.EventEnabledObsParam.MyView, global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton>>)(__e => __e.SaveButton)).Body,
+                "SaveButton",
+                (object __o) => ((global::SharedScenarios.BindCommand.EventEnabledObsParam.MyView)__o).SaveButton,
+                false,
+                true);
+            var __controls = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__controlChanges, view);
+            var __controlBinding = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
+            var __controlSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(__controls, __control =>
+            {
+                __controlBinding.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
+                if (__control != null)
+                {
+                    __controlBinding.Disposable = __BindCommandCore_00001723A43D0363(__control, commandObs, withParameter);
+                }
+            });
+            return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__controlSub, __controlBinding);
+        }
+
+        private static global::System.IDisposable __BindCommandCore_00001723A43D0363(global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton __control, global::System.IObservable<global::System.Windows.Input.ICommand> commandObs, global::System.IObservable<string> withParameter)
+        {
 
             if (global::ReactiveUI.Binding.Fallback.CommandBindingAffinityChecker
-                .HasHigherAffinityPlugin<global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton>(4, true))
+                .HasHigherAffinityPlugin<global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton>(4, false))
             {
                 var __customBinder = global::ReactiveUI.Binding.CommandBinding.CommandBinderService
-                    .GetBinder<global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton>(true);
+                    .GetBinder<global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton>(false);
                 if (__customBinder != null)
                 {
                     var __serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
@@ -82,47 +105,72 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                         __serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                         global::System.IObservable<object> __paramObs = new global::ReactiveUI.Primitives.Signals.MapSignal<string, object>(withParameter, __p => __p);
                         __serial.Disposable = __customBinder.BindCommandToObject<global::SharedScenarios.BindCommand.EventEnabledObsParam.WinFormsLikeButton>(
-                            __cmd, view.SaveButton, __paramObs)
+                            __cmd, __control, __paramObs)
                             ?? global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                     });
                     return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__binderCmdSub, __serial);
                 }
             }
 
-
-            string? __latestParam = default;
-            var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(
-                withParameter, p => global::System.Threading.Volatile.Write(ref __latestParam, p));
-
+            string __latestParam = default(string);
+        var __parameterGate = new object();
+        var __hasParameter = false;
+        var __argumentCached = false;
+        object __argument = null;
+        object __ReadParameter()
+        {
+            lock (__parameterGate)
+            {
+                if (!__hasParameter)
+                {
+                    return null;
+                }
+                if (!__argumentCached)
+                {
+                    __argument = __latestParam;
+                    __argumentCached = true;
+                }
+                return __argument;
+            }
+        }
+        var __paramSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(withParameter, __parameter =>
+        {
+            lock (__parameterGate)
+            {
+                __latestParam = __parameter;
+                __hasParameter = true;
+                __argumentCached = false;
+            }
+        });
             var serial = new global::ReactiveUI.Primitives.Disposables.SwapDisposable();
             var __cmdSub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(commandObs, cmd =>
             {
                 serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;
                 if (cmd == null)
                 {
-                    view.SaveButton.Enabled = false;
+                    __control.Enabled = false;
                     return;
                 }
 
-                var param = global::System.Threading.Volatile.Read(ref __latestParam);
-                view.SaveButton.Enabled = cmd.CanExecute(param);
+                var param = __ReadParameter();
+                __control.Enabled = cmd.CanExecute(param);
                 global::System.EventHandler __canExecHandler = (s, e) =>
-                    view.SaveButton.Enabled = cmd.CanExecute(global::System.Threading.Volatile.Read(ref __latestParam));
+                    __control.Enabled = cmd.CanExecute(__ReadParameter());
                 cmd.CanExecuteChanged += __canExecHandler;
 
                 void __Handler(object? sender, global::System.EventArgs e)
                 {
-                    var p = global::System.Threading.Volatile.Read(ref __latestParam);
+                    var p = __ReadParameter();
                     if (cmd.CanExecute(p))
                     {
                         cmd.Execute(p);
                     }
                 }
 
-                view.SaveButton.Click += __Handler;
+                __control.Click += __Handler;
                 serial.Disposable = new global::ReactiveUI.Primitives.Disposables.ActionDisposable(() =>
                 {
-                    view.SaveButton.Click -= __Handler;
+                    __control.Click -= __Handler;
                     cmd.CanExecuteChanged -= __canExecHandler;
                 });
             });

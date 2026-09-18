@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins;
+using ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 
@@ -200,19 +201,16 @@ internal static class BindCommandCodeGenerator
             .AppendLine("                return global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;").AppendLine(GeneratedSyntax.StatementBlockClose)
             .AppendLine();
 
-        var controlAccess = CodeGeneratorHelpers.BuildPropertyAccessChain("view", inv.ControlPropertyPath);
-
         EmitViewModelObservations(sb, inv, viewModelClassInfo, viewClassInfo);
+        CommandControlEmitter.EmitRebinding(sb, inv, viewClassInfo, suffix);
 
         var plugin = CommandBindingPluginRegistry.GetBestPlugin(inv);
         var generatedAffinity = plugin is not null ? plugin.Affinity : -1;
-        var hasEvent = inv.ResolvedEventName is not null;
-
-        EmitCommandAffinityCheck(sb, inv, controlAccess, generatedAffinity, hasEvent);
+        EmitCommandAffinityCheck(sb, inv, "__control", generatedAffinity, inv.HasExplicitEvent);
 
         if (plugin is not null)
         {
-            plugin.EmitBinding(sb, inv, controlAccess, supportsNullable);
+            plugin.EmitBinding(sb, inv, "__control", supportsNullable);
         }
         else
         {
@@ -253,8 +251,10 @@ internal static class BindCommandCodeGenerator
             .AppendLine("                    {")
             .AppendLine("                        __serial.Disposable = global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;")
             .Append("                        global::System.IObservable<object> __paramObs = ").Append(paramObsExpr).AppendLine(";")
-            .Append("                        __serial.Disposable = __customBinder.BindCommandToObject<").Append(inv.ControlTypeFullName).AppendLine(">(")
-            .Append("                            __cmd, ").Append(controlAccess).AppendLine(", __paramObs)")
+            .Append("                        __serial.Disposable = __customBinder.BindCommandToObject<").Append(inv.ControlTypeFullName)
+            .Append(hasEvent ? $", {inv.ResolvedEventArgsTypeFullName ?? "global::System.EventArgs"}" : string.Empty).AppendLine(">(")
+            .Append("                            __cmd, ").Append(controlAccess).Append(", __paramObs")
+            .Append(hasEvent ? $", \"{inv.ResolvedEventName}\"" : string.Empty).AppendLine(")")
             .AppendLine("                            ?? global::ReactiveUI.Primitives.Disposables.EmptyDisposable.Instance;")
             .AppendLine("                    });")
             .AppendLine("                    return new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__binderCmdSub, __serial);")

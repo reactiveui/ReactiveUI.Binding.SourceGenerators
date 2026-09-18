@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for full license information.
 
 using BenchmarkDotNet.Running;
+using ReactiveUI.Binding.Benchmarks.Configs;
 
 namespace ReactiveUI.Binding.Generator.Benchmarks;
 
@@ -12,6 +13,9 @@ internal static class Program
     /// <summary>Runs the benchmark selected by the command line.</summary>
     /// <param name="args">The command-line arguments passed to the switcher.</param>
     [STAThread]
-    internal static void Main(string[] args) =>
-        _ = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+    internal static void Main(string[] args)
+    {
+        var count = BenchmarkRunValidation.CountVerified(BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args));
+        BenchmarkRunValidation.RequireMeasurements(count, args);
+    }
 }

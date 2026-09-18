@@ -34,12 +34,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenAnyValue_00000ABCF94E0289(global::SharedScenarios.WhenAnyValue.MultiPropertyWithSelector.MyViewModel obj, global::System.Func<string, string, string> selector)
         {
-            var __propObs0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "FirstName",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyWithSelector.MyViewModel)__o).FirstName,
-                true);
-            var __propObs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyWithSelector.MyViewModel), "FirstName", 5, false);
+            var __propObs0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "FirstName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyWithSelector.MyViewModel)__o).FirstName, true);
+
+            var __propObs0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "FirstName", 5, false);
             var __propObs0 = __propObs0Registration == null
                 ? (global::System.IObservable<string>)__propObs0Mechanism
                 : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
@@ -51,12 +48,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     false,
                     true);
 
-            var __propObs1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-                obj,
-                "LastName",
-                (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyWithSelector.MyViewModel)__o).LastName,
-                true);
-            var __propObs1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenAnyValue.MultiPropertyWithSelector.MyViewModel), "LastName", 5, false);
+            var __propObs1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(obj, "LastName", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.MultiPropertyWithSelector.MyViewModel)__o).LastName, true);
+
+            var __propObs1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "LastName", 5, false);
             var __propObs1 = __propObs1Registration == null
                 ? (global::System.IObservable<string>)__propObs1Mechanism
                 : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(

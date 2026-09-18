@@ -59,4 +59,11 @@ internal sealed record BindCommandInvocationInfo(
     bool HasCommandParameterProperty,
     bool HasEnabledProperty,
     InterceptorLocation Interceptor = default,
-    string? ViewThreadInvoker = null);
+    string? ViewThreadInvoker = null)
+{
+    /// <summary>Gets a value indicating whether the caller explicitly selected an event.</summary>
+    public bool HasExplicitEvent { get; init; }
+
+    /// <summary>Gets the native command route verified during extraction.</summary>
+    public NativeCommandInfo? NativeCommand { get; init; }
+}

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <!-- WinForms only exists on the windows TFMs, so these target them everywhere. They compile off Windows
          (EnableWindowsTargeting) but can only execute on the Windows CI leg - see Directory.Build.targets. -->
-    <TargetFrameworks>$(BindingWindowsTargets)</TargetFrameworks>
+    <TargetFrameworks>$(BindingTestPlatformTargets)</TargetFrameworks>
     <UseWindowsForms>true</UseWindowsForms>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

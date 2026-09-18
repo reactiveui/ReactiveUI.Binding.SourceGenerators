@@ -83,10 +83,7 @@ public class PlatformDetectionSnapshotTests
         return TestHelper.TestPass(source, typeof(PlatformDetectionSnapshotTests));
     }
 
-    /// <summary>
-    /// Verifies detection of Apple NSObject (KVO), and that the KVO observation helpers it brings with it
-    /// compile on the minimum supported language version even with no binding call to use them.
-    /// </summary>
+    /// <summary>Verifies that an unused Apple type compiles on the minimum supported language version.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task NSObject_Detected()

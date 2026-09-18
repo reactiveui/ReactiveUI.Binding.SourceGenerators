@@ -97,9 +97,6 @@ internal static class Constants
     /// <summary>The generated namespace segment used when the compilation has no assembly name.</summary>
     internal const string AnonymousAssemblyNamespaceSegment = "Anonymous";
 
-    /// <summary>Class name for the generated module-initializer registration class.</summary>
-    internal const string GeneratedBinderRegistrationClassName = "__GeneratedBinderRegistration";
-
     /// <summary>Method name for after-change property observation (<c>WhenChanged</c>).</summary>
     internal const string WhenChangedMethodName = "WhenChanged";
 

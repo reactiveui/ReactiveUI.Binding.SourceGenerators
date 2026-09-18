@@ -56,10 +56,7 @@ internal static class ExtractorValidation
     internal static bool HasMinimumArguments(int argumentCount, int minimumRequired) =>
         argumentCount >= minimumRequired;
 
-    /// <summary>
-    /// Checks whether an immutable array of items is non-empty and should be processed.
-    /// Used by RegistrationGenerator to guard against empty type detection results.
-    /// </summary>
+    /// <summary>Checks whether an immutable array of items is non-empty and should be processed.</summary>
     /// <typeparam name="T">The type of items in the array.</typeparam>
     /// <param name="items">The immutable array to check.</param>
     /// <returns><see langword="true"/> if the array has items; otherwise <see langword="false"/>.</returns>

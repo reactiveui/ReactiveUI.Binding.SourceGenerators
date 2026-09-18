@@ -19,18 +19,15 @@ internal static class WhenAnyInvocationGenerator
     /// <summary>Registers the WhenAny invocation detection pipeline.</summary>
     /// <param name="context">The generator initialization context.</param>
     /// <param name="invocations">The detected invocations of this API.</param>
-    /// <param name="allClasses">The shared type detection pipeline.</param>
     /// <param name="languageFeatures">The consumer compilation's C# language-feature snapshot.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void Register(
         in IncrementalGeneratorInitializationContext context,
         IncrementalValuesProvider<InvocationInfo> invocations,
-        IncrementalValuesProvider<ClassBindingInfo> allClasses,
         IncrementalValueProvider<LanguageFeatures> languageFeatures) =>
         InvocationPipeline.Register(
             context,
             invocations,
-            allClasses,
             languageFeatures,
             "WhenAnyDispatch.g.cs",
             static (invocations, classes, features) => WhenAnyCodeGenerator.Generate(invocations, classes, features));

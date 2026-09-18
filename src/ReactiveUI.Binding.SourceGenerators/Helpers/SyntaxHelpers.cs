@@ -62,13 +62,15 @@ internal static class SyntaxHelpers
                 return null;
             }
 
+            var owner = semanticModel.GetTypeInfo(memberAccess.Expression, ct).Type as INamedTypeSymbol ?? propertySymbol.ContainingType;
             segments.Add(new(
                 propertySymbol.Name,
                 propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                propertySymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                owner.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 propertySymbol.Type.IsReferenceType,
-                TypeDetectionExtractor.ExtractFromSymbol(
-                    propertySymbol.ContainingType,
+                TypeDetectionExtractor.ExtractPropertyOwner(
+                    owner,
+                    propertySymbol,
                     semanticModel.Compilation,
                     ct)));
 

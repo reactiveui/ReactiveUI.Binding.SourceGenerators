@@ -34,11 +34,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenChanging_7FFFFF97E6DC4D84(global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel obj, global::System.Func<string, string, string> selector)
         {
-            var __propObs0_s0Mechanism = (global::System.IObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>(
-                (global::System.ComponentModel.INotifyPropertyChanging)obj,
-                "Address",
-                (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel)__o).Address);
-            var __propObs0_s0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel), "Address", 5, true);
+            var __propObs0_s0Mechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>(obj, "Address", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel)__o).Address, false);
+            var __propObs0_s0Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Address", 5, false);
             var __propObs0_s0 = __propObs0_s0Registration == null
                 ? (global::System.IObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>)__propObs0_s0Mechanism
                 : (global::System.IObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>(
@@ -47,23 +44,27 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel, global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel>>)(__e => __e.Address)).Body,
                     "Address",
                     (object __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel)__o).Address,
-                    true,
+                    false,
                     true);
-        var __propObs0_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel, string>(__propObs0_s0,
-            __propObs0_p1 => __propObs0_p1 != null
-                ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
-                    (global::System.ComponentModel.INotifyPropertyChanging)__propObs0_p1,
+            var __propObs0_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel, string>(__propObs0_s0,
+                __propObs0_p1 => __propObs0_p1 != null
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__propObs0_p1.GetType(), "City", 5, true) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___propObs0_p1
+                    ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
+                    __registration___propObs0_p1,
+                    __propObs0_p1,
+                    ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel, string>>)(__e => __e.City)).Body,
                     "City",
-                    (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel)__o).City)
+                    (object __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel)__o).City,
+                    true, false)
+                    : (global::System.IObservable<string>)
+new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>((global::System.ComponentModel.INotifyPropertyChanging)__propObs0_p1, "City", (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel)__o).City))
                 : (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
             var __propObs0 = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<string>(__propObs0_s1, global::System.Collections.Generic.EqualityComparer<string>.Default);
 
 
-            var __propObs1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>(
-                (global::System.ComponentModel.INotifyPropertyChanging)obj,
-                "Name",
-                (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel)__o).Name);
-            var __propObs1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel), "Name", 5, true);
+            var __propObs1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>((global::System.ComponentModel.INotifyPropertyChanging)obj, "Name", (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel)__o).Name);
+
+            var __propObs1Registration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Name", 5, true);
             var __propObs1 = __propObs1Registration == null
                 ? (global::System.IObservable<string>)__propObs1Mechanism
                 : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(

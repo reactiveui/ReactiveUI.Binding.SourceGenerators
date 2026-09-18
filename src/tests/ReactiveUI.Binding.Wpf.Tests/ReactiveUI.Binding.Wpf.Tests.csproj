@@ -3,7 +3,7 @@
     <!-- WPF only exists on the windows TFMs, so these target them everywhere. They compile off Windows
          (EnableWindowsTargeting) but can only execute on the Windows CI leg, which is why IsTestProject
          is switched off elsewhere - see Directory.Build.props. -->
-    <TargetFrameworks>$(BindingWindowsTargets)</TargetFrameworks>
+    <TargetFrameworks>$(BindingTestPlatformTargets)</TargetFrameworks>
     <UseWpf>true</UseWpf>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

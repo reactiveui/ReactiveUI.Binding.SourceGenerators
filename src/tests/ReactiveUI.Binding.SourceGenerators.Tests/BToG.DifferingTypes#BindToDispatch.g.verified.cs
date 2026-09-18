@@ -34,17 +34,50 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindTo_7FFFF0EE063CE32A(global::System.IObservable<int> source, global::SharedScenarios.BindTo.DifferingTypes.MyView target)
         {
             // BindTo: observable -> Caption
-            return global::ReactiveUI.Binding.BindingErrors.Subscribe(global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(source, target), value =>
+            global::ReactiveUI.Binding.IBindingTypeConverter __convertedSourceConverter = null;
+            if (__convertedSourceConverter == null)
             {
-                if (global::ReactiveUI.Binding.Fallback.RuntimeBindingConverter.TryConvert<int, string>(value, null, null, out var __converted))
+                __convertedSourceConverter = global::ReactiveUI.Binding.BindingConverters.Current.TypedConverters.TryGetConverter(typeof(int), typeof(string));
+                if (__convertedSourceConverter != null && __convertedSourceConverter.GetAffinityForObjects() <= 2)
                 {
-                    if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.Caption, __converted))
-                    {
-                        return;
-                    }
-
-                    target.Caption = __converted;
+                    __convertedSourceConverter = null;
                 }
+            }
+            var __convertedSource = global::ReactiveUI.Primitives.LinqExtensions.Choose<int, string>(
+                source,
+                __value =>
+                {
+                    object __hint = null;
+                    if (__convertedSourceConverter != null)
+                    {
+                        if (__convertedSourceConverter is global::ReactiveUI.Binding.IBindingTypeConverter<int, string> __typed)
+                        {
+                            string __converted;
+                            if (__typed.TryConvert(__value, __hint, out __converted))
+                            {
+                                return (true, __converted);
+                            }
+                        }
+                        else
+                        {
+                            object __boxed;
+                            if (__convertedSourceConverter.TryConvertTyped(__value, __hint, out __boxed))
+                            {
+                                return (true, (string)__boxed);
+                            }
+                        }
+                        return (false, default(string));
+                    }
+                    return true ? (true, __hint is int __precision ? __value.ToString("D" + __precision.ToString()) : __hint is string __format ? __value.ToString(__format) : __value.ToString()) : (false, default(string));
+                });
+            return global::ReactiveUI.Binding.BindingErrors.Subscribe(global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__convertedSource, target), value =>
+            {
+                if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.Caption, value))
+                {
+                    return;
+                }
+
+                target.Caption = value;
             }, "x => x.Caption");
         }
 

@@ -16,21 +16,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Generators;
 /// generated observation code instantiates by name, such as the Apple KVO and WinUI dependency-property
 /// observables.
 /// </summary>
-/// <remarks>
-/// <para>
-/// The helpers are declared once for the whole compilation, in a file of their own, because every dispatch
-/// file is another part of the same <c>__ReactiveUIGeneratedBindings</c> class: one part declares them and
-/// all the others reach them. Letting each file declare the helpers it happens to use would collide as soon
-/// as two files used the same one, and letting one dispatch file own them - which is what used to happen -
-/// left every other file referencing types that were never declared.
-/// </para>
-/// <para>
-/// Which helpers to declare is decided from the detected types rather than from the call sites, so the
-/// declarations are a superset of the references: observation code can only name a helper for a type this
-/// pipeline detected, whichever API the call site used. A future binding API therefore cannot reintroduce
-/// the undeclared-helper failure by forgetting to register itself here.
-/// </para>
-/// </remarks>
+/// <remarks>Helpers are shared across dispatch files and selected from the mechanisms used by each property path.</remarks>
 internal static class ObservationHelperGenerator
 {
     /// <summary>The generated file the helper classes are declared in.</summary>
@@ -39,11 +25,8 @@ internal static class ObservationHelperGenerator
     /// <summary>Buffer capacity to reserve per helper-requiring observation kind.</summary>
     private const int PerKindBufferCapacity = 4_096;
 
-    /// <summary>
-    /// Reduces the per-type observation kinds to the distinct, ordered set of kinds that need helper
-    /// declarations, so adding another type of an already-seen kind leaves the generated file untouched.
-    /// </summary>
-    /// <param name="observationKinds">The observation kind of every detected type, with repeats.</param>
+    /// <summary>Reduces observation kinds to the distinct, ordered set that needs helper declarations.</summary>
+    /// <param name="observationKinds">The selected observation kinds, with repeats.</param>
     /// <returns>The kinds requiring helper declarations, ordered for deterministic output.</returns>
     internal static EquatableArray<string> SelectHelperKinds(ImmutableArray<string> observationKinds)
     {

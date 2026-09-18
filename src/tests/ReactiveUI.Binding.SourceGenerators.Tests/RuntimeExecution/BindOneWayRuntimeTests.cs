@@ -19,10 +19,10 @@ public class BindOneWayRuntimeTests
     /// <summary>The <c>BindTwoWayDispatch.g.cs</c> name these tests generate against.</summary>
     private const string BindTwoWayDispatchgcsName = "BindTwoWayDispatch.g.cs";
 
-    /// <summary>Verifies that BindOneWay generates dispatch and registration files.</summary>
+    /// <summary>Verifies that BindOneWay emits direct dispatch without a registration layer.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task StringBinding_GeneratesDispatchAndRegistration()
+    public async Task StringBinding_GeneratesDirectDispatch()
     {
         const string source = """
                               using System;
@@ -59,7 +59,7 @@ public class BindOneWayRuntimeTests
 
         await result.HasNoGeneratorDiagnostics();
         await result.HasGeneratedSource(BindOneWayDispatchgcsName);
-        await result.HasGeneratedSource("GeneratedBinderRegistration.g.cs");
+        await result.DoesNotHaveGeneratedSource("GeneratedBinderRegistration.g.cs");
         await result.GeneratedSourceContains(BindOneWayDispatchgcsName, "NameText");
         await result.GeneratedSourceContains(BindOneWayDispatchgcsName, "Name");
     }
