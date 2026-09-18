@@ -45,9 +45,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     true);
             var __propObs0_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAny.DeepPropertyChain.ChildModel, string>(__propObs0_s0,
                 __propObs0_p1 => __propObs0_p1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__propObs0_p1.GetType(), "Name", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration3747
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__propObs0_p1.GetType(), "Name", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___propObs0_p1
                     ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                    __registration3747,
+                    __registration___propObs0_p1,
                     __propObs0_p1,
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAny.DeepPropertyChain.ChildModel, string>>)(__e => __e.Name)).Body,
                     "Name",

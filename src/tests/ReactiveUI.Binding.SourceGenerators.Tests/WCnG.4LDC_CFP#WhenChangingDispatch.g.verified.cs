@@ -42,9 +42,9 @@ namespace ReactiveUI.Binding
                     true);
             var __obs1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level2, global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>(__obs0,
                 __parent1 => __parent1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__parent1.GetType(), "Model", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration3181
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__parent1.GetType(), "Model", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___parent1
                     ? (global::System.IObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>(
-                    __registration3181,
+                    __registration___parent1,
                     __parent1,
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level2, global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3>>)(__e => __e.Model)).Body,
                     "Model",
@@ -56,9 +56,9 @@ new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScen
 
             var __obs2 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3, global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>(__obs1,
                 __parent2 => __parent2 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__parent2.GetType(), "Model", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration5130
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__parent2.GetType(), "Model", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___parent2
                     ? (global::System.IObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>(
-                    __registration5130,
+                    __registration___parent2,
                     __parent2,
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Level3, global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model>>)(__e => __e.Model)).Body,
                     "Model",
@@ -70,9 +70,9 @@ new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScen
 
             var __obs3 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model, string>(__obs2,
                 __parent3 => __parent3 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__parent3.GetType(), "Value", 5, true) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration7015
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__parent3.GetType(), "Value", 5, true) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___parent3
                     ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                    __registration7015,
+                    __registration___parent3,
                     __parent3,
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.FourLevelDeepChain.Model, string>>)(__e => __e.Value)).Body,
                     "Value",

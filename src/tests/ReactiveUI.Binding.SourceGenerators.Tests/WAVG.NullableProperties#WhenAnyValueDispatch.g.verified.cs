@@ -30,9 +30,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenAnyValue_00001B08EE215D76(global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel obj)
         {
-            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "NullableName", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration1755
+            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "NullableName", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                __registration1755,
+                __registration_obj,
                 obj,
                 ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel, string>>)(__e => __e.NullableName)).Body,
                 "NullableName",
@@ -63,9 +63,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<int?> __WhenAnyValue_00001B08D596E358(global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel obj)
         {
-            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "NullableAge", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration4422
+            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "NullableAge", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<int?>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int?>(
-                __registration4422,
+                __registration_obj,
                 obj,
                 ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.NullableProperties.MyViewModel, int?>>)(__e => __e.NullableAge)).Body,
                 "NullableAge",

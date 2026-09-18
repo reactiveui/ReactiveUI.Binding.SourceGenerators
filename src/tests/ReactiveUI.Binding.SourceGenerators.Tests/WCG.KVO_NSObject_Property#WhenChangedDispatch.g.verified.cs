@@ -30,9 +30,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenChanged_000018C06482B4BD(global::TestApp.MyAppleView obj)
         {
-            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Text", 15, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration1541
+            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Text", 15, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                __registration1541,
+                __registration_obj,
                 obj,
                 ((global::System.Linq.Expressions.Expression<global::System.Func<global::TestApp.MyAppleView, string>>)(__e => __e.Text)).Body,
                 "Text",

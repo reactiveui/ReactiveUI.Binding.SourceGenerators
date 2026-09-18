@@ -57,9 +57,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     true);
             var __commandObs_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.InvokeCommand.DeepCommandPath.ChildViewModel, global::System.Windows.Input.ICommand>(__commandObs_s0,
                 __p1 => __p1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__p1.GetType(), "Save", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration4003
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__p1.GetType(), "Save", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___p1
                     ? (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.Windows.Input.ICommand>(
-                    __registration4003,
+                    __registration___p1,
                     __p1,
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.InvokeCommand.DeepCommandPath.ChildViewModel, global::System.Windows.Input.ICommand>>)(__e => __e.Save)).Body,
                     "Save",

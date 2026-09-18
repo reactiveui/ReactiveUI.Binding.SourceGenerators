@@ -30,9 +30,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<string> __WhenChanged_7FFFDB8E16EAA670(global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel obj)
         {
-            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Name", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration1806
+            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Name", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                __registration1806,
+                __registration_obj,
                 obj,
                 ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel, string>>)(__e => __e.Name)).Body,
                 "Name",
@@ -63,9 +63,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<int> __WhenChanged_7FFFDB8E19F31E38(global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel obj)
         {
-            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Age", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration4511
+            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Age", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<int>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<int>(
-                __registration4511,
+                __registration_obj,
                 obj,
                 ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel, int>>)(__e => __e.Age)).Body,
                 "Age",
@@ -96,9 +96,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
         private static global::System.IObservable<double> __WhenChanged_7FFFDB8D81A702DF(global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel obj)
         {
-            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Score", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration7209
+            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Score", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<double>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<double>(
-                __registration7209,
+                __registration_obj,
                 obj,
                 ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanged.MultipleInvocationsSameViewModel.MyViewModel, double>>)(__e => __e.Score)).Body,
                 "Score",

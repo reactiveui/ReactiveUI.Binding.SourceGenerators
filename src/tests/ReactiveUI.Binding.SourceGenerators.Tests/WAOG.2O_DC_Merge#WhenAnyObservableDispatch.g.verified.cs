@@ -47,9 +47,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     true);
             var __obsProperty0_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel, global::System.IObservable<string>>(__obsProperty0_s0,
                 __obsProperty0_p1 => __obsProperty0_p1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__obsProperty0_p1.GetType(), "Command1", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration4098
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__obsProperty0_p1.GetType(), "Command1", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___obsProperty0_p1
                     ? (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<string>>(
-                    __registration4098,
+                    __registration___obsProperty0_p1,
                     __obsProperty0_p1,
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel, global::System.IObservable<string>>>)(__e => __e.Command1)).Body,
                     "Command1",
@@ -78,9 +78,9 @@ new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IOb
                     true);
             var __obsProperty1_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel, global::System.IObservable<string>>(__obsProperty1_s0,
                 __obsProperty1_p1 => __obsProperty1_p1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__obsProperty1_p1.GetType(), "Command2", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration7981
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__obsProperty1_p1.GetType(), "Command2", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___obsProperty1_p1
                     ? (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<string>>(
-                    __registration7981,
+                    __registration___obsProperty1_p1,
                     __obsProperty1_p1,
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel, global::System.IObservable<string>>>)(__e => __e.Command2)).Body,
                     "Command2",

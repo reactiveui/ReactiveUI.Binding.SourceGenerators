@@ -47,7 +47,7 @@ internal static class ChainRegistrationEmitter
     {
         var declaringType = segment.DeclaringTypeFullName;
         var valueType = segment.PropertyTypeFullName;
-        var registration = $"__registration{sb.Length}";
+        var registration = $"__registration_{sourceExpression}";
 
         _ = sb.Append(opening).Append("(global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(")
             .Append(sourceExpression).Append(".GetType(), \"").Append(segment.PropertyName).Append("\", ")

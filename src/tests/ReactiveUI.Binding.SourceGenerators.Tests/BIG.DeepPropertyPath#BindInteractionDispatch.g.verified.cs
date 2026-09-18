@@ -58,9 +58,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     true);
             var __interactionObs_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>(__interactionObs_s0,
                 __p1 => __p1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__p1.GetType(), "Confirm", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration4394
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__p1.GetType(), "Confirm", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___p1
                     ? (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(
-                    __registration4394,
+                    __registration___p1,
                     __p1,
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel, global::ReactiveUI.Binding.Interaction<string, bool>>>)(__e => __e.Confirm)).Body,
                     "Confirm",

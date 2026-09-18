@@ -28,9 +28,9 @@ namespace ReactiveUI.Binding
 
         private static global::System.IObservable<string> __WhenAnyValue_0000263492582AFF(global::SharedScenarios.WhenAnyValue.SinglePropertyINPC.MyViewModel obj)
         {
-            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Name", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration1535
+            return (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(obj.GetType(), "Name", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration_obj
                 ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                __registration1535,
+                __registration_obj,
                 obj,
                 ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyValue.SinglePropertyINPC.MyViewModel, string>>)(__e => __e.Name)).Body,
                 "Name",

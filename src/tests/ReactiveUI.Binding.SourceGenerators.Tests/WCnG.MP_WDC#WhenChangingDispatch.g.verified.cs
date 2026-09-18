@@ -48,9 +48,9 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     true);
             var __propObs0_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel, string>(__propObs0_s0,
                 __propObs0_p1 => __propObs0_p1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__propObs0_p1.GetType(), "City", 5, true) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration4301
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__propObs0_p1.GetType(), "City", 5, true) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration___propObs0_p1
                     ? (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
-                    __registration4301,
+                    __registration___propObs0_p1,
                     __propObs0_p1,
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel, string>>)(__e => __e.City)).Body,
                     "City",
