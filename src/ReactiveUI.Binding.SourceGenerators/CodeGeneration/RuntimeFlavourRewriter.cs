@@ -96,7 +96,7 @@ internal static class RuntimeFlavourRewriter
             // Signals.MapSignal, which the shared core declares and which therefore keeps its name.
             var pathEnd = matchWholePath ? ExtendThroughDots(source, segmentEnd) : segmentEnd;
 
-            if (Declares(shiftedNamespaceMembers, source, segmentStart, pathEnd - segmentStart)
+            if (Declares(shiftedNamespaceMembers, source, segmentStart, pathEnd - segmentStart, matchWholePath)
                 || (matchWholePath && DeclaresAnyPrefix(shiftedNamespaceMembers, source, segmentStart, pathEnd)))
             {
                 _ = builder.Append(source, copiedTo, segmentStart - copiedTo).Append(ReactiveSegment);
@@ -114,13 +114,16 @@ internal static class RuntimeFlavourRewriter
     /// <param name="source">The generated source.</param>
     /// <param name="start">The index the name starts at.</param>
     /// <param name="length">The length of the name.</param>
+    /// <param name="matchArity">Whether metadata generic arity must match the reference.</param>
     /// <returns><see langword="true"/> when the name is one the shifted namespace declares.</returns>
-    private static bool Declares(EquatableArray<string> shiftedNamespaceMembers, string source, int start, int length)
+    private static bool Declares(EquatableArray<string> shiftedNamespaceMembers, string source, int start, int length, bool matchArity)
     {
         for (var i = 0; i < shiftedNamespaceMembers.Length; i++)
         {
             var member = shiftedNamespaceMembers[i];
-            if (member.Length == length && string.CompareOrdinal(member, 0, source, start, length) == 0)
+            var marker = matchArity ? member.IndexOf('`') : -1;
+            if ((marker < 0 ? member.Length : marker) == length && string.CompareOrdinal(member, 0, source, start, length) == 0
+                && (!matchArity || TypeReferenceArity.Read(source, start + length) == TypeReferenceArity.FromMetadata(member, marker)))
             {
                 return true;
             }
@@ -177,7 +180,7 @@ internal static class RuntimeFlavourRewriter
                 continue;
             }
 
-            if (Declares(shiftedNamespaceMembers, source, start, cut - start))
+            if (Declares(shiftedNamespaceMembers, source, start, cut - start, true))
             {
                 return true;
             }

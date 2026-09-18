@@ -32,8 +32,8 @@ or another property. This library lets you say that in one line. It writes the c
 - [Your first binding](#your-first-binding)
 - [How a property reports a change](#how-a-property-reports-a-change)
 - [The generator checks each property in a path](#the-generator-checks-each-property-in-a-path)
-- [What the generator writes](#what-the-generator-writes)
-- [How a call site reaches its generated code](#how-a-call-site-reaches-its-generated-code)
+- [Trimming and NativeAOT](#trimming-and-nativeaot)
+- [Compiler requirements](#compiler-requirements)
 - [When nothing claims the call](#when-nothing-claims-the-call)
 - [Installing](#installing)
 - [Supported frameworks](#supported-frameworks)
@@ -47,7 +47,6 @@ or another property. This library lets you say that in one line. It writes the c
 - [Performance](#performance)
 - [Diagnostics](#diagnostics)
 - [Where this differs from ReactiveUI](#where-this-differs-from-reactiveui)
-- [Layout](#layout)
 - [Core team](#core-team)
 - [Contribute](#contribute)
 
@@ -170,16 +169,17 @@ not raise `PropertyChanged`. An iOS view does not raise it at all.
 Each way of reporting a change is a mechanism. The generator first finds the mechanisms a type offers. Each
 mechanism uses a different event, and attaches to it a different way.
 
-| Mechanism | What it is | How it is observed | Before the change |
-|-----------|------------|--------------------|-------------------|
-| `INotifyPropertyChanged` | The .NET interface. It has one event for the whole object. The event names the property that changed. | Attach to `PropertyChanged`, keep the events for your property, and read the getter. | no |
-| `INotifyPropertyChanging` | The matching interface, raised before the value is replaced. | Attach to `PropertyChanging` the same way. `WhenChanging` needs this. | yes |
-| `IReactiveObject` | ReactiveUI's interface. It raises both events above. | As above, with both events. | yes |
-| WPF dependency property | `TextBox.Text` is a `DependencyProperty`, not a plain C# property. It raises no `PropertyChanged`. | Get a descriptor from `DependencyPropertyDescriptor.FromProperty(...)`, then call `AddValueChanged`. | see below |
-| WinUI and MAUI bindable property | The same idea on WinUI and MAUI. | Call `RegisterPropertyChangedCallback`. Release it with the token it returns. | no |
-| WinForms component | WinForms has one event per property, named by convention. | Find the `{PropertyName}Changed` event and attach to it. | no |
-| Apple KVO | Key-value observing. An `NSObject` reports changes this way on Apple platforms. | Call `NSObject.AddObserver` with `NSKeyValueObservingOptions`. | yes |
-| Android view | An Android widget raises its own event, such as `TextView.TextChanged`. | Attach to that widget's event for the property. | no |
+| Mechanism | Supported properties | Before the change |
+|-----------|----------------------|-------------------|
+| `INotifyPropertyChanged` | Properties that raise `PropertyChanged`, including MAUI bindable properties. | no |
+| `INotifyPropertyChanging` | Properties that raise `PropertyChanging`. | yes |
+| `IReactiveObject` | ReactiveUI properties that raise change notifications. | yes |
+| WPF dependency property | Dependency properties such as `TextBox.Text`. | see below |
+| WinUI and Uno dependency property | Properties backed by a framework dependency property. | no |
+| WinForms component | Properties with a public `{PropertyName}Changed` event. | no |
+| Apple KVO | Native `NSObject` properties and exported properties. | yes |
+| UIKit and AppKit notifications | Supported control text, value, date and selection properties. | no |
+| Android view | Supported widget properties such as `TextView.Text`. | no |
 
 > [!NOTE]
 > A type can offer more than one mechanism. A `ReactiveObject` in a WPF window implements
@@ -208,42 +208,37 @@ When `Address` is replaced, the subscription detaches from the old `Address` and
 would otherwise write this part by hand, and it is easy to get wrong.
 
 > [!WARNING]
-> If a property in the path raises no change event, its value is read once. The path is followed no further.
-> Nothing tells you when the app runs. So the analyzer reports RXUIBIND010 when you build.
+> If a property in the path raises no change event, replacing it cannot be detected. Properties below it can
+> still be observed on the initial object. The analyzer reports RXUIBIND010 when you build.
 
-## What the generator writes
+## Trimming and NativeAOT
 
-Here is the code it writes for `vm.WhenChanged(x => x.Name)` on a class that raises `PropertyChanged`:
+For example, observing a WinForms text box uses its own change event:
 
 ```csharp
-private static global::System.IObservable<string> __WhenChanged_7FFFD2E8D6FC818E(MyViewModel obj)
-{
-    return global::ReactiveUI.Binding.Observables.PluginObservationSource.Choose<string>(
-        obj,
-        ((Expression<Func<MyViewModel, string>>)(__e => __e.Name)).Body,
-        "Name",
-        false,
-        5,
-        (object __o) => ((MyViewModel)__o).Name,
-        new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-            obj, "Name", (INotifyPropertyChanged __o) => ((MyViewModel)__o).Name, true));
-}
+var changes = textBox.WhenChanged(x => x.Text);
 ```
 
-The last argument is the subscription the generator chose. Everything it needs is fixed when you build: the
-declaring type, the property name, and a getter. The getter is a direct call, not a lookup by name.
+The central framework calls are direct property access and event subscription:
 
-`Choose` also checks for an `ICreatesObservableForProperty` you registered yourself. It uses yours when yours
-scores higher. See [Which mechanism wins](#which-mechanism-wins).
+```csharp
+EventHandler handler = (_, _) => observer.OnNext(textBox.Text);
+textBox.TextChanged += handler;
+// When the subscription is disposed:
+textBox.TextChanged -= handler;
+```
 
-> [!IMPORTANT]
-> The generated code names every type and member it touches. So a trimmer keeps them, and a binding keeps
-> working with `PublishTrimmed` and `PublishAot`.
+The complete observation also delivers the initial value and handles disposal. Ordinary JIT projects benefit
+from avoiding runtime expression analysis and property lookup, keeping values typed, and catching unsupported
+bindings during the build. Trimming and NativeAOT support are additional benefits.
 
-## How a call site reaches its generated code
+Bindings with property paths known at build time support `PublishTrimmed` and `PublishAot`. Use the normal
+binding APIs with inline property lambdas. The `Unsafe` APIs use reflection and carry trimming warnings.
+Custom providers remain responsible for their own trimming and NativeAOT requirements.
 
-A call site is a line where you call a method such as `WhenChanged`. How a call site reaches its generated code
-depends on the C# compiler that builds your project.
+## Compiler requirements
+
+Use supported build tools and C# 7.3 or later.
 
 ### Which compiler you have
 
@@ -253,22 +248,14 @@ You do not choose the compiler directly. It comes with your build tools.
   Studio version.
 - Building with `dotnet build` uses the compiler that ships with that .NET SDK version.
 
-| Your build tools | How a call reaches the generated code |
+| Your build tools | Support |
 |------------------|---------------------------------------|
-| Visual Studio 2022 17.13 or later, Visual Studio 2026, or .NET SDK 9.0.200 or later | Interception |
-| Visual Studio 2022 17.8 to 17.12, or .NET SDK 8.0.100 to 9.0.1xx | A generated overload |
+| Visual Studio 2022 17.13 or later, Visual Studio 2026, or .NET SDK 9.0.200 or later | Supported |
+| Visual Studio 2022 17.8 to 17.12, or .NET SDK 8.0.100 to 9.0.1xx | Supported, with call-site restrictions reported by RXUIBIND009 |
 | Anything older | Not supported. The build fails with RXUIBIND100. |
 
 Microsoft's [Roslyn version table](https://learn.microsoft.com/en-us/visualstudio/extensibility/roslyn-version-support)
 lists the compiler in each Visual Studio version.
-
-**Interception.** The compiler replaces your call with a call to the generated method. This works from any file
-and any C# language version.
-
-**A generated overload.** The generator adds an overload that has to win C#'s normal method lookup. RXUIBIND009
-tells you where it cannot.
-
-Both ways run the same generated method. A binding behaves the same either way.
 
 ### .NET Framework projects
 
@@ -284,7 +271,7 @@ enough build tools. An SDK-style project file names the SDK on its first line an
 ```
 
 Build that project with Visual Studio 2022 17.13 or later, or with `dotnet build` on .NET SDK 9.0.200 or later.
-It then uses interception, even at the C# 7.3 language version .NET Framework projects default to.
+The C# 7.3 language version used by .NET Framework projects is supported.
 
 An old-style project file has no `Sdk` attribute and lists its source files one by one. It still works. It uses the
 compiler from the Visual Studio that builds it.
@@ -296,17 +283,6 @@ Two build properties change this.
 - Set `ReactiveUIBindingUseInterceptors` to `false` to use the overloads on a compiler that can intercept.
 - Set `ReactiveUIBindingEmitGeneratedCodeMarkers` to `false` to drop the `// <auto-generated/>` header from
   generated files. Analyzer and compiler warnings inside those files then show up.
-
-The package holds one copy of the generator and the analyzer per compiler generation:
-
-```
-analyzers/dotnet/roslyn4.8/cs/    <- Roslyn 4.8 to 4.12
-analyzers/dotnet/roslyn4.13/cs/   <- Roslyn 4.13 and newer
-```
-
-The .NET SDK picks the highest folder your compiler supports. An old-style project that does not use the .NET
-SDK gets both folders. The package's build targets remove the folder your compiler does not use. Loading the
-generator twice would write every generated file twice and fail your build.
 
 ## When nothing claims the call
 
@@ -581,22 +557,62 @@ Each mechanism has a score. The highest-scoring mechanism that can reach the pro
 
 | Mechanism | Type it keys on | Score |
 |-----------|-----------------|------:|
+| UIKit control notifications | Supported text, selection, date and switch properties | 30 |
+| UIKit value changes | `UIKit.UIControl.Value` with `ValueChanged` | 20 |
+| AppKit control notifications | Supported `AppKit.NSControl` value properties | 20 |
 | Apple KVO | `Foundation.NSObject` | 15 |
 | IReactiveObject | `ReactiveUI.IReactiveObject` | 10 |
 | WinForms component | `System.ComponentModel.Component` | 8 |
 | WinUI bindable property | `Microsoft.UI.Xaml.DependencyObject` | 6 |
+| Uno dependency property | `Windows.UI.Xaml.DependencyObject` | 6 |
 | INotifyPropertyChanged | `System.ComponentModel.INotifyPropertyChanged` | 5 |
 | Android view | `Android.Views.View` | 5 |
 | WPF dependency property | `System.Windows.DependencyObject` | 4 |
+| Plain property | A readable property without notifications | 1 |
 
 A mechanism has to reach the property. A plain C# property on a dependency object is not a dependency property. A
 component property with no `{PropertyName}Changed` event has nothing to attach to. Both fall through to the next
 mechanism down.
 
+A plain property emits its current value when you subscribe. It cannot report later changes.
+
 `INotifyPropertyChanged` and `Android.Views.View` share a score. `INotifyPropertyChanged` wins that tie.
 
 An `ICreatesObservableForProperty` you register yourself uses the same scores. It takes the property when it
 scores higher. The generated code wins a tie.
+
+Call `ReactiveUI.Binding.Fallback.ObservationAffinityChecker.Refresh()` after changing observation-provider
+registrations so subsequent subscriptions use the updated registrations.
+
+### Platform adapters
+
+Platform support uses the framework references in your application. No extra binding platform package or
+platform registration is needed for these APIs.
+
+`BindCommand` supports Android `Click`, UIKit target/action touch handling, refresh-control `ValueChanged`,
+bar-button `Clicked`, and AppKit `Target`/`Action`. It follows command and control replacements, tracks streamed
+or property-based parameters, and detaches handlers when disposed. Registered command binders take over when
+their score exceeds the selected adapter's score.
+
+| Command mechanism | Score |
+|-------------------|------:|
+| UIKit refresh control or bar button | 10 |
+| UIKit touch target or Android click | 9 |
+| `Command` and `CommandParameter` properties | 5 |
+| AppKit target/action or an event with `Enabled` | 4 |
+| An event without `Enabled` | 3 |
+
+Supplying `toEvent` selects that event instead of the control's default command mechanism.
+
+`BindTo` and `OneWayBind` can populate WinForms panel and table-layout control collections from collections of
+derived controls. They update the existing collection, including a read-only `Controls` property. They suspend
+layout during the write and resume it even when a collection operation throws. The generated setter scores 10;
+a registered `ISetMethodBindingConverter` must score higher to replace it.
+
+Generated conversions cover numeric, boolean, GUID, date and time strings; numeric nullable values; URIs;
+framework visibility enums; and Apple `NSDate` values. Visibility conversions honor the framework's inversion
+and hidden-value hints. Registered typed converters must beat the generated score. An explicit converter
+override takes precedence over conversion voting.
 
 ## Which thread a binding writes on
 
@@ -773,37 +789,13 @@ build instead. From the helper, call the `Unsafe` twin to bind by reflection.
 
 ReactiveUI logs a warning the first time it observes a property on a type that raises no change event.
 RXUIBIND010 reports the same thing when you build. A generator can only report it then. The observation behaves
-the same either way. The value is read once, and the path is followed no further.
+the same either way. The value is read when you subscribe; replacing that property cannot be detected.
 
 ### A write that throws behaves the same
 
 A write that throws is logged against the bound expression. It is rethrown as a `TargetInvocationException` only
 when it has an inner exception. The setter threw on the thread that raised the change, so no caller can catch it.
 Swallowing the exception would hide the failure.
-
-## Layout
-
-```
-src/
-  ReactiveUI.Binding/                     Runtime package, lightweight observables
-  ReactiveUI.Binding.Reactive/            Runtime package, System.Reactive schedulers
-  ReactiveUI.Binding.Shared/              The runtime source, compiled by both packages above
-  ReactiveUI.Binding.SourceGenerators/    The generator, and the shipped props and targets
-  ReactiveUI.Binding.Analyzer/            The RXUIBIND analyzers
-  ReactiveUI.Binding.*.Roslyn413/         The same generator and analyzer against Roslyn 4.13
-  ReactiveUI.Binding.Wpf*/                WPF integration, a standard and a .Reactive package
-  ReactiveUI.Binding.WinForms*/           WinForms integration, a standard and a .Reactive package
-  ReactiveUI.Binding.Maui*/               MAUI integration, a standard and a .Reactive package
-  benchmarks/                             BenchmarkDotNet projects
-  tests/                                  Test projects and the shared scenario sources
-```
-
-A `*.Shared` folder holds source, not a project. Each package that uses it compiles its own copy. That is how one
-set of code builds both a standard package and its `.Reactive` twin. `ReactiveShim.props` looks for the
-`.Reactive` suffix on the project name. It defines `REACTIVE_SHIM` and maps the scheduler type to `IScheduler`.
-
-The generator and the analyzer target netstandard2.0, because Roslyn requires it. Generated code compiles as C#
-7.3, so the oldest supported project can build it.
 
 ## Contribute
 

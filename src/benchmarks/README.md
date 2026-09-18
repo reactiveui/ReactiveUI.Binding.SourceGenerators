@@ -72,6 +72,7 @@ cost of creating the subscription is measured separately, by the `First...` case
 | `BindBenchmark` | `Bind` | `Standard`, `Bidirectional`, `WithObservedChanges` |
 | `OneWayBindBenchmark` | `OneWayBind` | `Standard`, `FirstBinding` |
 | `BindToBenchmark` | `BindTo` | `Standard`, `FirstBinding` |
+| `TypedAdapterBenchmark` | `BindTo` conversions | `NullableValues`, `FormattedValues` |
 | `InvokeCommandBenchmark` | `InvokeCommand` | `Standard`, `FirstInvocation` |
 | `UnsafeFallbackBenchmark` | the `Unsafe` overloads | `WhenChangedUnsafe`, `WhenChangedUnsafe deep chain`, `WhenAnyValueUnsafe`, `BindOneWayUnsafe`, `BindUnsafe` |
 | `RxUiDynamicChainBaseline` | ReactiveUI's dynamic chain | `SingleChain`, `TwoChains`, `DeepChain`, `FirstObservation` |
@@ -83,21 +84,9 @@ have a counterpart here. Read each against `ReactiveUIObservationBenchmark` and 
 table. A chain named at run time is walked by reflection; the same chain written as a lambda is resolved at
 compile time.
 
-Each class declares a job per runtime: .NET 8, 10 and 11, and NativeAOT 10 and 11 where the code can run
+Each class declares a job per runtime: .NET 10 and 11, and NativeAOT 10 and 11 where the code can run
 ahead of time. A class that walks a chain by reflection declares no NativeAOT job, because it cannot run
 there.
-
-The .NET Framework 4.6.2 job is opt-in. Set `BenchNetFx` to add it, on Windows only, since no other host can
-launch it:
-
-```sh
-dotnet run -c Release -f net10.0 --property:BenchNetFx=true -- --filter '*'
-```
-
-That leg and the EventPipe profiler are mutually exclusive. The profiler refuses any job below .NET Core 3.0
-and its validator stops the whole run rather than the single job, so `BenchNetFx` drops it. A default run
-keeps the profiler and the allocation traces; a `BenchNetFx` run trades them for the older runtime, and
-`MemoryDiagnoser` still reports the allocation column.
 
 ## What the generation benchmark covers
 
@@ -114,17 +103,31 @@ its incremental caches, which measures the cache rather than the pass a consumer
 The corpus is built once per parameter set, because loading a framework's worth of metadata references
 costs far more than the pass under measurement.
 
-The benchmark runs under `MemoryDiagnoser` and the `GcVerbose` EventPipe profiler. The allocation column is
-the A/B number, and the trace names the frame that allocated.
+The `GcVerbose` EventPipe profiler records allocations. Analysis uses the measured workload windows and their
+operation counts to report sampled bytes per generation and the allocation sites. NativeAOT timing runs remain
+separate where EventPipe capture is unavailable.
+
+## Focused adapter measurements
+
+`AdapterGenerationBenchmarks` covers native observation, Android/UIKit/AppKit commands, WinForms collection
+bindings and typed conversions. Each corpus checks the exact number of binding methods and the intended
+native operations before collecting timings.
+
+`TypedAdapterBenchmark` measures nullable and formatting delivery after creating the bindings.
+`NativeAdapterBenchmark` measures observation, command delivery and collection writes against native-shaped
+contracts. These fixtures exclude platform rendering costs. Both benchmarks count actual deliveries and reject
+runs that drop updates or leave layout suspended. Timings include this counting overhead.
+
+Run only these cases with `--filter '*AdapterGenerationBenchmarks*'` in the generator benchmark project, or
+`--filter '*TypedAdapterBenchmark*' '*NativeAdapterBenchmark*'` in the runtime benchmark project. Use `--artifacts` to put reports and
+traces under `~/.cache`.
 
 ## What is not measured
 
-`BindCommand` and `BindInteraction` have no benchmark. Both need something registered before they do any
-work: `BindCommand` needs an `ICreatesCommandBinding` that reaches the control, and `BindInteraction` needs a
-handler. A benchmark would be measuring that fixture rather than the library, so the number would not mean
-what it appeared to.
+`BindCommand` generation is measured by the adapter corpus. Execution inside native UI frameworks and
+application-specific `BindInteraction` handlers is not timed by this suite.
 
-Everything else in the observation and binding surface is covered, including the `Unsafe` overloads.
+The runtime suite covers property observation and binding delivery, including the `Unsafe` overloads.
 
 `UnsafeFallbackBenchmark` declares no NativeAOT job. Those overloads carry `RequiresUnreferencedCode` because
 they walk the path at run time, so an ahead-of-time publish cannot be relied on to keep the members they

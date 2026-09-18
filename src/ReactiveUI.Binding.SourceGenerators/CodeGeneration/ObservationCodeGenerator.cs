@@ -258,7 +258,7 @@ internal static class ObservationCodeGenerator
         bool isBeforeChange)
     {
         var segment = path[0];
-        var plugin = ResolveRootPlugin(classInfo, segment);
+        var plugin = ResolveRootPlugin(classInfo, segment, isBeforeChange);
 
         ChainRegistrationEmitter.AppendChoiceOpen(
             sb,
@@ -336,7 +336,7 @@ internal static class ObservationCodeGenerator
         string varName)
     {
         var segment = path[0];
-        var plugin = ResolveRootPlugin(classInfo, segment);
+        var plugin = ResolveRootPlugin(classInfo, segment, isBeforeChange);
         var mechanismVariable = varName + MechanismVariableSuffix;
 
         if (plugin is not null)
@@ -397,7 +397,7 @@ internal static class ObservationCodeGenerator
         var obs0Var = $"{varName}_s0";
         var rootPlugin = ResolveRootPlugin(classInfo, seg0);
 
-        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, isBeforeChange, obs0Var);
+        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, false, obs0Var);
 
         EmitDeepChainInnerSegments(sb, path, isBeforeChange, varName);
 
@@ -540,10 +540,8 @@ internal static class ObservationCodeGenerator
     string propertyName,
     bool isBeforeChange)
     {
-        var plugin = classInfo is not null
-            ? ObservationPluginRegistry.GetBestPlugin(classInfo, propertyName)
-            : null;
         var segment = inv.PropertyPaths[0][0];
+        var plugin = ResolveRootPlugin(classInfo, segment, isBeforeChange);
 
         ChainRegistrationEmitter.AppendChoiceOpen(
             sb,
@@ -594,7 +592,7 @@ internal static class ObservationCodeGenerator
         var rootPlugin = ResolveRootPlugin(classInfo, seg0);
 
         // First segment: observe root object for first property
-        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, isBeforeChange, "__obs0");
+        EmitChainRootWithChoice(sb, "obj", seg0, classInfo, rootPlugin, false, "__obs0");
 
         EmitObservationChainInnerSegments(sb, path, isBeforeChange);
 
@@ -622,7 +620,7 @@ internal static class ObservationCodeGenerator
         ClassBindingInfo? classInfo,
         string variableName)
     {
-        var plugin = classInfo is not null ? ObservationPluginRegistry.GetBestPlugin(classInfo) : null;
+        var plugin = ResolveRootPlugin(classInfo, propertyPath[0]);
 
         if (propertyPath.Length == 1)
         {
@@ -655,6 +653,17 @@ internal static class ObservationCodeGenerator
         {
             EmitInlineDeepChain(sb, rootVar, propertyPath, classInfo, plugin, variableName);
         }
+    }
+
+    /// <summary>Selects a property's mechanism using its declaring type when the property is inherited.</summary>
+    /// <param name="classInfo">The type named by the call site, or null when unavailable.</param>
+    /// <param name="segment">The observed property and its declaring type.</param>
+    /// <param name="isBeforeChange">Whether the requested notification precedes the change.</param>
+    /// <returns>The winning observation plugin, or null when no mechanism reaches the property.</returns>
+    internal static IObservationPlugin? ResolveRootPlugin(ClassBindingInfo? classInfo, PropertyPathSegment segment, bool isBeforeChange = false)
+    {
+        var owner = segment.DeclaringTypeInfo ?? classInfo;
+        return owner is null ? null : ObservationPluginRegistry.GetBestPlugin(owner, segment.PropertyName, isBeforeChange);
     }
 
     /// <summary>Renders a flag as the generated output spells it.</summary>
@@ -701,7 +710,7 @@ internal static class ObservationCodeGenerator
         const string observableOpen = "? (global::System.IObservable<";
 
         _ = sb.Append(layout.DeclarationPrefix).Append(pluginVariable).Append(" = ").Append(ObservationAffinityChecker)
-            .Append(".FindHigherAffinityPlugin(typeof(").Append(declaringType).Append("), \"").Append(segment.PropertyName)
+            .Append(".FindHigherAffinityPlugin(").Append(rootVar).Append(".GetType(), \"").Append(segment.PropertyName)
             .Append("\", ").Append(generatedAffinity).Append(", ").Append(BooleanLiteral(isBeforeChange)).AppendLine(");")
             .Append(layout.DeclarationPrefix).Append(layout.VariableName).Append(" = ").Append(pluginVariable).AppendLine(" == null")
             .Append(layout.ContinuationIndent).Append(observableOpen).Append(valueType).Append(">)").AppendLine(layout.MechanismVariable)
@@ -781,6 +790,7 @@ internal static class ObservationCodeGenerator
 
     /// <summary>Picks the observation plugin for the type that declares a chain segment's property.</summary>
     /// <param name="segment">The chain segment, which carries how its declaring type notifies.</param>
+    /// <param name="isBeforeChange">Whether the property is observed before it changes.</param>
     /// <returns>The plugin for that type, or null to fall back to reading the property.</returns>
     /// <remarks>
     /// Each link of a chain is declared by its own type and notifies - or does not - on its own terms, so the
@@ -789,34 +799,10 @@ internal static class ObservationCodeGenerator
     /// merely different.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static IObservationPlugin? ResolveSegmentPlugin(PropertyPathSegment segment) =>
+    private static IObservationPlugin? ResolveSegmentPlugin(PropertyPathSegment segment, bool isBeforeChange = false) =>
         segment.DeclaringTypeInfo is null
             ? null
-            : ObservationPluginRegistry.GetBestPlugin(segment.DeclaringTypeInfo, segment.PropertyName);
-
-    /// <summary>Resolves the mechanism for a property observed directly on the type a call site names.</summary>
-    /// <param name="classInfo">The type the call site observes, or null when it was never detected.</param>
-    /// <param name="segment">The property being observed.</param>
-    /// <returns>The mechanism to observe it through, or null when nothing reaches it.</returns>
-    /// <remarks>
-    /// The type a call site names advertises the mechanism, but only the type that declares the property knows
-    /// whether that property takes part in it - and the two differ for an inherited property, which the named
-    /// type's own member list does not mention. Answering from the named type alone treats every inherited
-    /// property as participating, which for a dependency object means emitting a companion field that an
-    /// inherited plain property does not have, and the consumer's build is what discovers it.
-    /// </remarks>
-    private static IObservationPlugin? ResolveRootPlugin(ClassBindingInfo? classInfo, PropertyPathSegment segment)
-    {
-        if (classInfo is null)
-        {
-            return null;
-        }
-
-        return ObservedProperties.IsDeclaredByConsumer(classInfo, segment.PropertyName)
-               || segment.DeclaringTypeInfo is null
-            ? ObservationPluginRegistry.GetBestPlugin(classInfo, segment.PropertyName)
-            : ObservationPluginRegistry.GetBestPlugin(segment.DeclaringTypeInfo, segment.PropertyName);
-    }
+            : ObservationPluginRegistry.GetBestPlugin(segment.DeclaringTypeInfo, segment.PropertyName, isBeforeChange);
 
     /// <summary>
     /// Chains the segments after the root for the standalone observation method, which names its
@@ -842,7 +828,8 @@ internal static class ObservationCodeGenerator
             var lambdaParam = $"__parent{s}";
             var segType = seg.PropertyTypeFullName;
             var segInfo = seg.DeclaringTypeInfo;
-            var segPlugin = ResolveSegmentPlugin(seg);
+            var beforeLeaf = isBeforeChange && s == path.Length - 1;
+            var segPlugin = ResolveSegmentPlugin(seg, beforeLeaf);
 
             // Only the leaf suppresses. Inner segments keep pushing the null downstream so the
             // stage below re-parents onto null and drops its subscription on the detached subtree.
@@ -855,14 +842,7 @@ internal static class ObservationCodeGenerator
 
             if (segPlugin is not null)
             {
-                segPlugin.EmitDeepChainInnerSegment(
-                    sb,
-                    prevVar,
-                    curVar,
-                    lambdaParam,
-                    seg,
-                    isBeforeChange,
-                    nullParentBehavior);
+                segPlugin.EmitDeepChainInnerSegment(sb, new(prevVar, curVar, lambdaParam), seg, beforeLeaf, nullParentBehavior);
             }
             else if (IsINPChanging(segInfo) && isBeforeChange)
             {
@@ -914,7 +894,8 @@ internal static class ObservationCodeGenerator
             var lambdaParam = $"{varName}_p{s}";
             var segType = seg.PropertyTypeFullName;
             var segInfo = seg.DeclaringTypeInfo;
-            var segPlugin = ResolveSegmentPlugin(seg);
+            var beforeLeaf = isBeforeChange && s == path.Length - 1;
+            var segPlugin = ResolveSegmentPlugin(seg, beforeLeaf);
 
             var nullParentBehavior = s == path.Length - 1
                 ? NullParentObservationBehavior.SuppressEmission
@@ -925,14 +906,7 @@ internal static class ObservationCodeGenerator
 
             if (segPlugin is not null)
             {
-                segPlugin.EmitDeepChainInnerSegment(
-                    sb,
-                    prevObsVar,
-                    curObsVar,
-                    lambdaParam,
-                    seg,
-                    isBeforeChange,
-                    nullParentBehavior);
+                segPlugin.EmitDeepChainInnerSegment(sb, new(prevObsVar, curObsVar, lambdaParam), seg, beforeLeaf, nullParentBehavior);
             }
             else if (IsINPChanging(segInfo) && isBeforeChange)
             {
@@ -991,14 +965,7 @@ internal static class ObservationCodeGenerator
 
             if (segPlugin is not null)
             {
-                segPlugin.EmitDeepChainInnerSegment(
-                    sb,
-                    prevVar,
-                    curVar,
-                    lambdaParam,
-                    seg,
-                    isBeforeChange: false,
-                    nullParentBehavior: NullParentObservationBehavior.EmitDefault);
+                segPlugin.EmitDeepChainInnerSegment(sb, new(prevVar, curVar, lambdaParam), seg, isBeforeChange: false, nullParentBehavior: NullParentObservationBehavior.EmitDefault);
                 continue;
             }
 

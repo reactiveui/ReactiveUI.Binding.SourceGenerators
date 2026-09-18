@@ -3,31 +3,30 @@
 // See the LICENSE file in the project root for full license information.
 
 using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.Models;
 using ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins;
 
-/// <summary>
-/// Static registry of observation plugins, sorted by affinity descending.
-/// Returns the highest-affinity plugin that matches a given type's <see cref="ClassBindingInfo"/>.
-/// Affinity values match ReactiveUI's runtime <c>GetAffinityForObject</c> values exactly.
-/// </summary>
+/// <summary>Selects the strongest eligible observation mechanism, preserving declaration order for ties.</summary>
 internal static class ObservationPluginRegistry
 {
-    /// <summary>
-    /// All plugins sorted by affinity descending (highest priority first).
-    /// When multiple plugins match the same type, the first match wins.
-    /// </summary>
+    /// <summary>The supported mechanisms in deterministic tie order.</summary>
     private static readonly IObservationPlugin[] Plugins =
     [
         new KVOObservationPlugin(), // Affinity 15 - Apple NSObject KVO
+        new UIKitObservationPlugin(),
+        new UIKitValueObservationPlugin(),
+        new AppKitObservationPlugin(),
         new ReactiveObjectObservationPlugin(), // Affinity 10 - IReactiveObject
         new WinFormsObservationPlugin(), // Affinity  8 - WinForms Component
         new WinUIObservationPlugin(), // Affinity  6 - WinUI DependencyObject
+        new UnoObservationPlugin(),
         new INPCObservationPlugin(), // Affinity  5 - INotifyPropertyChanged
         new AndroidObservationPlugin(), // Affinity  5 - Android View
-        new WpfObservationPlugin() // Affinity  4 - WPF DependencyObject
+        new WpfObservationPlugin(), // Affinity  4 - WPF DependencyObject
+        new PocoObservationPlugin()
     ];
 
     /// <summary>Gets the total number of registered plugins.</summary>
@@ -38,37 +37,65 @@ internal static class ObservationPluginRegistry
     /// <returns>The best matching plugin, or <see langword="null"/> if no plugin matches.</returns>
     internal static IObservationPlugin? GetBestPlugin(ClassBindingInfo classInfo)
     {
+        IObservationPlugin? best = null;
         for (var i = 0; i < Plugins.Length; i++)
         {
-            if (Plugins[i].IsAMatch(classInfo))
+            var candidate = Plugins[i];
+            if (candidate.IsAMatch(classInfo) && (best is null || candidate.Affinity > best.Affinity))
             {
-                return Plugins[i];
+                best = candidate;
             }
         }
 
-        return null;
+        return best;
     }
 
     /// <summary>Gets the highest-affinity plugin whose mechanism reaches one particular property.</summary>
     /// <param name="classInfo">The type-level binding info.</param>
     /// <param name="propertyName">The property being observed.</param>
+    /// <param name="isBeforeChange">Whether the mechanism must report before the property changes.</param>
     /// <returns>The best matching plugin, or <see langword="null"/> if none reaches that property.</returns>
     /// <remarks>
     /// A mechanism that outranks another on the type can still be the wrong one for a given property - a
     /// component that also raises PropertyChanged declares properties with no change event - so a plugin that
     /// cannot reach the property is passed over for the next, exactly as a zero affinity would be at runtime.
     /// </remarks>
-    internal static IObservationPlugin? GetBestPlugin(ClassBindingInfo classInfo, string propertyName)
+    internal static IObservationPlugin? GetBestPlugin(ClassBindingInfo classInfo, string propertyName, bool isBeforeChange = false)
     {
+        IObservationPlugin? best = null;
+        var bestScore = 0;
         for (var i = 0; i < Plugins.Length; i++)
         {
-            if (Plugins[i].IsAMatch(classInfo) && Plugins[i].CanObserveProperty(classInfo, propertyName))
+            var candidate = Plugins[i];
+            var score = candidate.GetAffinityForProperty(classInfo, propertyName, isBeforeChange);
+            if (score <= bestScore)
             {
-                return Plugins[i];
+                continue;
+            }
+
+            best = candidate;
+            bestScore = score;
+        }
+
+        return best;
+    }
+
+    /// <summary>Collects eligible platform candidates while property symbols are available.</summary>
+    /// <param name="owner">The concrete type exposing the property.</param>
+    /// <param name="property">The property to inspect.</param>
+    /// <returns>Value-equatable candidates for subsequent affinity voting.</returns>
+    internal static EquatableArray<PlatformObservationInfo> InspectProperty(INamedTypeSymbol owner, IPropertySymbol property)
+    {
+        var candidates = new List<PlatformObservationInfo>();
+        for (var i = 0; i < Plugins.Length; i++)
+        {
+            if (Plugins[i] is IPlatformObservationPlugin platform && platform.InspectProperty(owner, property) is { } candidate)
+            {
+                candidates.Add(candidate);
             }
         }
 
-        return null;
+        return new([.. candidates]);
     }
 
     /// <summary>Gets a plugin by its observation kind identifier.</summary>

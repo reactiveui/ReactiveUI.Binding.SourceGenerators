@@ -47,4 +47,14 @@ internal sealed record BindingInvocationInfo(
     bool HasConverterOverride,
     InterceptorLocation Interceptor = default,
     string? SourceViewThreadInvoker = null,
-    string? TargetViewThreadInvoker = null);
+    string? TargetViewThreadInvoker = null)
+{
+    /// <summary>Gets the typed mechanism converting source values to the target.</summary>
+    public ConversionInfo? ForwardConversion { get; init; }
+
+    /// <summary>Gets the typed mechanism converting target values to the source.</summary>
+    public ConversionInfo? ReverseConversion { get; init; }
+
+    /// <summary>Gets the native mutation used by a one-way collection binding.</summary>
+    public SetMethodInfo? SetMethod { get; init; }
+}

@@ -4,8 +4,10 @@
 
 using System.Runtime.CompilerServices;
 using System.Text;
+using Microsoft.CodeAnalysis;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using static ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.EventCommandBindingEmitter;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 
@@ -20,7 +22,7 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 /// Platforms covered: WinForms Control/ToolStripItem (Click+Enabled),
 /// Android View (Click+Enabled), Apple UIControl (TouchUpInside+Enabled).
 /// </remarks>
-internal sealed class EventEnabledBindingPlugin : EventCommandBindingPlugin
+internal sealed class EventEnabledBindingPlugin : ICommandBindingPlugin
 {
     /// <summary>Opens the assignment that puts the control's enabled state in step with the command.</summary>
     private const string CanExecuteEnabledOpen = ".Enabled = cmd.CanExecute(";
@@ -29,23 +31,42 @@ internal sealed class EventEnabledBindingPlugin : EventCommandBindingPlugin
     private static readonly int EventEnabledAffinity = BindingAffinity.EventEnabledControl;
 
     /// <inheritdoc/>
-    public override int Affinity => EventEnabledAffinity;
+    public int Affinity => EventEnabledAffinity;
 
     /// <inheritdoc/>
-    public override bool CanHandle(BindCommandInvocationInfo inv) =>
+    public bool RequiresCustomBinderFallback => true;
+
+    /// <inheritdoc/>
+    public bool CanHandle(BindCommandInvocationInfo inv) =>
         inv.ResolvedEventName is not null && inv.HasEnabledProperty;
 
     /// <inheritdoc/>
-    protected override void EmitWithObservableParameter(
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void EmitBinding(StringBuilder sb, BindCommandInvocationInfo inv, string controlAccess, bool supportsNullable) =>
+        CommandEventBindingEmitter.EmitByParameterKind(
+            sb,
+            inv,
+            controlAccess,
+            supportsNullable,
+            EmitWithObservableParameter,
+            EmitWithNoParameter);
+
+    /// <summary>Emits command execution using the latest streamed parameter.</summary>
+    /// <param name="sb">The output builder.</param>
+    /// <param name="inv">The extracted binding call.</param>
+    /// <param name="controlAccess">The control's typed access expression.</param>
+    /// <param name="eventArgsType">The framework event argument type.</param>
+    /// <param name="supportsNullable">Whether nullable annotations are available.</param>
+    internal static void EmitWithObservableParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
         string eventArgsType,
         bool supportsNullable)
     {
-        var latestParameter = CommandBindingSyntax.ReadLatestParameter(inv);
+        var latestParameter = CommandParameterEmitter.Read(inv);
 
-        AppendLatestParameterCapture(sb, inv, supportsNullable);
+        AppendLatestParameterCapture(sb, inv);
         AppendCommandMissingExit(sb, controlAccess);
 
         _ = sb.Append("                var param = ").Append(latestParameter).AppendLine(";");
@@ -60,8 +81,14 @@ internal sealed class EventEnabledBindingPlugin : EventCommandBindingPlugin
         AppendParameterisedDisposableReturn(sb);
     }
 
-    /// <inheritdoc/>
-    protected override void EmitWithExpressionParameter(
+    /// <summary>Emits command execution using the selected parameter property.</summary>
+    /// <param name="sb">The output builder.</param>
+    /// <param name="inv">The extracted binding call.</param>
+    /// <param name="controlAccess">The control's typed access expression.</param>
+    /// <param name="eventArgsType">The framework event argument type.</param>
+    /// <param name="paramAccess">The typed command parameter access.</param>
+    /// <param name="supportsNullable">Whether nullable annotations are available.</param>
+    internal static void EmitWithExpressionParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
@@ -83,8 +110,13 @@ internal sealed class EventEnabledBindingPlugin : EventCommandBindingPlugin
         _ = sb.AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn).AppendLine(GeneratedSyntax.MemberBodyClose);
     }
 
-    /// <inheritdoc/>
-    protected override void EmitWithNoParameter(
+    /// <summary>Emits command execution without a parameter.</summary>
+    /// <param name="sb">The output builder.</param>
+    /// <param name="inv">The extracted binding call.</param>
+    /// <param name="controlAccess">The control's typed access expression.</param>
+    /// <param name="eventArgsType">The framework event argument type.</param>
+    /// <param name="supportsNullable">Whether nullable annotations are available.</param>
+    internal static void EmitWithNoParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
@@ -100,6 +132,37 @@ internal sealed class EventEnabledBindingPlugin : EventCommandBindingPlugin
         AppendHandlerAttachment(sb, inv, controlAccess);
 
         _ = sb.AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn).AppendLine(GeneratedSyntax.MemberBodyClose);
+    }
+
+    /// <summary>Checks if a control type has a settable <c>Enabled</c> property (bool). Walks the type hierarchy.</summary>
+    /// <param name="controlType">The control type symbol to inspect.</param>
+    /// <returns>
+    /// <see langword="true"/> if the type or one of its base types has a public settable
+    /// <c>bool Enabled</c> property.
+    /// </returns>
+    internal static bool HasEnabledProperty(INamedTypeSymbol controlType)
+    {
+        var current = (ITypeSymbol?)controlType;
+        while (current is INamedTypeSymbol namedCurrent)
+        {
+            var members = namedCurrent.GetMembers();
+            for (var i = 0; i < members.Length; i++)
+            {
+                if (members[i] is IPropertySymbol property
+                    && property.Name == "Enabled"
+                    && !property.IsReadOnly
+                    && !property.IsStatic
+                    && property.DeclaredAccessibility == Accessibility.Public
+                    && property.Type.SpecialType == SpecialType.System_Boolean)
+                {
+                    return true;
+                }
+            }
+
+            current = namedCurrent.BaseType;
+        }
+
+        return false;
     }
 
     /// <summary>Appends the exit taken while the view model has handed over no command, disabling the control.</summary>

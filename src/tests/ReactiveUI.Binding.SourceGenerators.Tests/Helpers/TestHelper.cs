@@ -351,11 +351,19 @@ public static class TestHelper
     /// <param name="result">The generator test result to emit.</param>
     /// <returns>The loaded assembly and the load context (dispose context to unload).</returns>
     /// <exception cref="InvalidOperationException">Thrown when emission fails.</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static LoadedAssembly EmitAndLoad(GeneratorTestResult result) => EmitAndLoad(result, false);
+
+    /// <summary>Loads generated bindings with optionally isolated converter registrations.</summary>
+    /// <param name="result">The generated consumer compilation.</param>
+    /// <param name="isolateBindingRuntime">Whether the binding runtime has private static state.</param>
+    /// <returns>The consumer assembly and its collectible context.</returns>
+    /// <exception cref="InvalidOperationException">The consumer could not be emitted.</exception>
     [SuppressMessage(
         "Security",
         "SES1402:Assembly loaded from an unverifiable source",
         Justification = "loads the compilation this test just emitted, in-process, into a collectible context")]
-    public static LoadedAssembly EmitAndLoad(GeneratorTestResult result)
+    public static LoadedAssembly EmitAndLoad(GeneratorTestResult result, bool isolateBindingRuntime)
     {
         ArgumentNullException.ThrowIfNull(result);
 
@@ -375,7 +383,7 @@ public static class TestHelper
         }
 
         assemblyStream.Position = 0;
-        var context = new CollectibleAssemblyLoadContext();
+        var context = new CollectibleAssemblyLoadContext { IsolateBindingRuntime = isolateBindingRuntime };
         var assembly = context.LoadFromStream(assemblyStream);
         return new(assembly, context);
     }

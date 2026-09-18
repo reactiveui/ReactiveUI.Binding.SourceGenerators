@@ -19,7 +19,15 @@ public sealed class CollectibleAssemblyLoadContext : AssemblyLoadContext
     {
     }
 
+    /// <summary>Gets whether converter registrations belong to this test's private runtime instance.</summary>
+    internal bool IsolateBindingRuntime { get; init; }
+
     /// <inheritdoc/>
-    protected override Assembly? Load(AssemblyName assemblyName) =>
-        Default.LoadFromAssemblyName(assemblyName);
+    protected override Assembly? Load(AssemblyName assemblyName)
+    {
+        var runtime = typeof(ReactiveUIBindingExtensions).Assembly;
+        return IsolateBindingRuntime && assemblyName.Name == runtime.GetName().Name
+            ? LoadFromAssemblyPath(runtime.Location)
+            : Default.LoadFromAssemblyName(assemblyName);
+    }
 }

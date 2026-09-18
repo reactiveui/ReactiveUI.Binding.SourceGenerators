@@ -23,6 +23,8 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// own frameworks declare, not what an application adds to a subclass - so an inherited property has to stay
 /// distinguishable from a declared one even though both are now recorded.
 /// </param>
+/// <param name="PlatformObservations">Eligible platform plugins and their verified notification members.</param>
+/// <param name="SymbolsInspected">Whether eligibility was checked against compiler symbols.</param>
 internal sealed record ObservablePropertyInfo(
     string PropertyName,
     string PropertyTypeFullName,
@@ -30,4 +32,6 @@ internal sealed record ObservablePropertyInfo(
     bool IsIndexer,
     bool IsDependencyProperty,
     bool HasChangeEvent,
-    bool IsDeclaredByType = true);
+    bool IsDeclaredByType = true,
+    EquatableArray<PlatformObservationInfo> PlatformObservations = default,
+    bool SymbolsInspected = false);

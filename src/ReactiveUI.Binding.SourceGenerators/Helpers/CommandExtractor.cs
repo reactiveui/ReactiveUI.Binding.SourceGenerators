@@ -5,6 +5,8 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins;
+using ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 using ReactiveUI.Binding.SourceGenerators.Plugins.ViewThread;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -69,12 +71,11 @@ internal static class CommandExtractor
         // Determine parameter overload (Expression vs IObservable withParameter)
         var parameterOverload = DetectParameterOverload(methodSymbol, args, semanticModel, ct);
 
-        var (resolvedEventName, resolvedEventArgsTypeFullName, capabilities) =
-            ResolveControlBinding(methodSymbol, args, controlPropertyArg, semanticModel, ct);
+        var controlBinding = ResolveControlBinding(methodSymbol, args, controlPropertyArg, semanticModel, ct);
 
         return new(
             invocation.SyntaxTree.FilePath,
-            invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+            invocation.SyntaxTree.GetLineSpan(invocation.Span, ct).StartLinePosition.Line + 1,
             sides.ViewTypeFullName,
             sides.ViewModelTypeFullName,
             new(commandPropertyPath),
@@ -86,17 +87,18 @@ internal static class CommandExtractor
             parameterOverload.ParameterTypeFullName,
             parameterOverload.ParameterIsReferenceType,
             parameterOverload.ParameterPropertyPath,
-            resolvedEventName,
-            resolvedEventArgsTypeFullName,
+            controlBinding.EventName,
+            controlBinding.EventArgsTypeFullName,
             Constants.BindCommandMethodName,
             CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(commandPropertyArg.ToString()),
             CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(controlPropertyArg.ToString()),
             parameterOverload.ParameterExpressionText,
-            capabilities.HasCommand,
-            capabilities.HasCommandParameter,
-            capabilities.HasEnabled,
+            controlBinding.Capabilities.HasCommand,
+            controlBinding.Capabilities.HasCommandParameter,
+            controlBinding.Capabilities.HasEnabled,
             InterceptableLocationReader.Read(semanticModel, invocation, ct),
-            sides.ViewThreadInvoker);
+            sides.ViewThreadInvoker)
+        { HasExplicitEvent = controlBinding.HasExplicitEvent, NativeCommand = controlBinding.NativeCommand };
     }
 
     /// <summary>Searches invocation arguments for a valid <c>withParameter</c> lambda expression.</summary>
@@ -125,87 +127,6 @@ internal static class CommandExtractor
         }
 
         return null;
-    }
-
-    /// <summary>
-    /// Checks if a control type has a settable <c>Command</c> property (ICommand)
-    /// and optionally a settable <c>CommandParameter</c> property.
-    /// Walks the type hierarchy.
-    /// </summary>
-    /// <param name="controlType">The control type symbol to inspect.</param>
-    /// <param name="hasCommandParameter">
-    /// Set to <see langword="true"/> when the type also has a settable <c>CommandParameter</c> property.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> if the type or one of its base types has a settable <c>Command</c> property.
-    /// </returns>
-    internal static bool HasCommandProperties(INamedTypeSymbol controlType, out bool hasCommandParameter)
-    {
-        hasCommandParameter = false;
-        var hasCommand = false;
-
-        var current = (ITypeSymbol?)controlType;
-        while (current is INamedTypeSymbol namedCurrent)
-        {
-            var members = namedCurrent.GetMembers();
-            for (var i = 0; i < members.Length; i++)
-            {
-                if (members[i] is not IPropertySymbol property)
-                {
-                    continue;
-                }
-
-                if (IsSettableICommandProperty(property))
-                {
-                    hasCommand = true;
-                }
-
-                if (IsSettableCommandParameterProperty(property))
-                {
-                    hasCommandParameter = true;
-                }
-            }
-
-            if (hasCommand && hasCommandParameter)
-            {
-                return true;
-            }
-
-            current = namedCurrent.BaseType;
-        }
-
-        return hasCommand;
-    }
-
-    /// <summary>Checks if a control type has a settable <c>Enabled</c> property (bool). Walks the type hierarchy.</summary>
-    /// <param name="controlType">The control type symbol to inspect.</param>
-    /// <returns>
-    /// <see langword="true"/> if the type or one of its base types has a public settable
-    /// <c>bool Enabled</c> property.
-    /// </returns>
-    internal static bool HasEnabledProperty(INamedTypeSymbol controlType)
-    {
-        var current = (ITypeSymbol?)controlType;
-        while (current is INamedTypeSymbol namedCurrent)
-        {
-            var members = namedCurrent.GetMembers();
-            for (var i = 0; i < members.Length; i++)
-            {
-                if (members[i] is IPropertySymbol property
-                    && property.Name == "Enabled"
-                    && !property.IsReadOnly
-                    && !property.IsStatic
-                    && property.DeclaredAccessibility == Accessibility.Public
-                    && property.Type.SpecialType == SpecialType.System_Boolean)
-                {
-                    return true;
-                }
-            }
-
-            current = namedCurrent.BaseType;
-        }
-
-        return false;
     }
 
     /// <summary>
@@ -310,35 +231,18 @@ internal static class CommandExtractor
         CancellationToken ct)
     {
         var resolvedEventName = ResolveExplicitEventName(methodSymbol, args, semanticModel, ct);
+        var explicitEvent = !string.IsNullOrEmpty(resolvedEventName);
 
         var controlLeafType = SymbolHelpers.ResolveNamedType(semanticModel, controlPropertyArg, ct);
 
         var resolvedEventArgsTypeFullName = ResolveEventArgsTypeFullName(controlLeafType, ref resolvedEventName);
 
-        return new(resolvedEventName, resolvedEventArgsTypeFullName, DetectControlCapabilities(controlLeafType));
-    }
-
-    /// <summary>Determines whether a property is a settable public instance <c>Command</c> property typed as ICommand.</summary>
-    /// <param name="property">The property to inspect.</param>
-    /// <returns><see langword="true"/> if the property is a settable ICommand-typed Command property.</returns>
-    internal static bool IsSettableICommandProperty(IPropertySymbol property)
-    {
-        if (property.Name != "Command" || property.IsReadOnly || property.IsStatic
-            || property.DeclaredAccessibility != Accessibility.Public)
+        return new(resolvedEventName, resolvedEventArgsTypeFullName, DetectControlCapabilities(controlLeafType))
         {
-            return false;
-        }
-
-        var typeName = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        return typeName.EndsWith("ICommand", StringComparison.Ordinal);
+            HasExplicitEvent = explicitEvent,
+            NativeCommand = explicitEvent ? null : CommandBindingPluginRegistry.InspectControl(controlLeafType),
+        };
     }
-
-    /// <summary>Determines whether a property is a settable public instance <c>CommandParameter</c> property.</summary>
-    /// <param name="property">The property to inspect.</param>
-    /// <returns><see langword="true"/> if the property is a settable CommandParameter property.</returns>
-    internal static bool IsSettableCommandParameterProperty(IPropertySymbol property) =>
-        property.Name == "CommandParameter" && !property.IsReadOnly && !property.IsStatic
-        && property.DeclaredAccessibility == Accessibility.Public;
 
     /// <summary>
     /// Inspects the method's <c>withParameter</c> parameter (if any) to determine whether the
@@ -434,8 +338,8 @@ internal static class CommandExtractor
             return default;
         }
 
-        var hasCommandProperty = HasCommandProperties(controlLeafType, out var hasCommandParameterProperty);
-        var hasEnabledProperty = HasEnabledProperty(controlLeafType);
+        var hasCommandProperty = CommandPropertyBindingPlugin.HasCommandProperties(controlLeafType, out var hasCommandParameterProperty);
+        var hasEnabledProperty = EventEnabledBindingPlugin.HasEnabledProperty(controlLeafType);
         return new(hasCommandProperty, hasCommandParameterProperty, hasEnabledProperty);
     }
 
@@ -455,7 +359,14 @@ internal static class CommandExtractor
     internal readonly record struct ControlBinding(
         string? EventName,
         string? EventArgsTypeFullName,
-        ControlCapabilities Capabilities);
+        ControlCapabilities Capabilities)
+    {
+        /// <summary>Gets a value indicating whether the caller selected an event.</summary>
+        public bool HasExplicitEvent { get; init; }
+
+        /// <summary>Gets the verified native command members.</summary>
+        public NativeCommandInfo? NativeCommand { get; init; }
+    }
 
     /// <summary>Holds the detected <c>withParameter</c> overload information for a BindCommand invocation.</summary>
     internal sealed class ParameterOverloadInfo

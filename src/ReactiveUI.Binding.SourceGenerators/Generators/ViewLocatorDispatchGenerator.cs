@@ -47,7 +47,6 @@ internal static class ViewLocatorDispatchGenerator
         in IncrementalGeneratorInitializationContext context,
         IncrementalValueProvider<LanguageFeatures> languageFeatures)
     {
-        // Reuse Pipeline A's class-with-base-list predicate
         var viewRegistrations = context.SyntaxProvider
             .CreateSyntaxProvider(
                 RoslynHelpers.IsClassWithBaseList,

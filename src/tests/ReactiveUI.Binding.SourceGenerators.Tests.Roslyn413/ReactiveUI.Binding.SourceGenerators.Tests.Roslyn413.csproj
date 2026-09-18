@@ -3,7 +3,7 @@
   <PropertyGroup>
     <!-- The same tests, run against the generator built for Roslyn 4.13. That build is the one that can
          describe a call site, so it is the only one where the interceptor tier is reachable at all. -->
-    <TargetFrameworks>net8.0;net9.0;net10.0;net11.0</TargetFrameworks>
+    <TargetFrameworks>$(BindingTestTargets)</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -27,7 +27,7 @@
   <!-- No test source of its own: it recompiles the baseline project's files against the other generator. -->
   <ItemGroup>
     <Compile Include="..\ReactiveUI.Binding.SourceGenerators.Tests\**\*.cs"
-             Exclude="..\ReactiveUI.Binding.SourceGenerators.Tests\obj\**\*.cs;..\ReactiveUI.Binding.SourceGenerators.Tests\bin\**\*.cs;..\ReactiveUI.Binding.SourceGenerators.Tests\**\*.verified.cs"
+             Exclude="..\ReactiveUI.Binding.SourceGenerators.Tests\obj\**\*.cs;..\ReactiveUI.Binding.SourceGenerators.Tests\bin\**\*.cs;..\ReactiveUI.Binding.SourceGenerators.Tests\**\*.verified.cs;..\ReactiveUI.Binding.SourceGenerators.Tests\**\*.received.cs"
              Link="%(RecursiveDir)%(Filename)%(Extension)"/>
     <Compile Include="..\Shared\TransitiveAssemblyResolver.cs" Link="Shared\TransitiveAssemblyResolver.cs"/>
     <Compile Include="..\Shared\RoslynSymbolProbe.cs" Link="Shared\RoslynSymbolProbe.cs"/>

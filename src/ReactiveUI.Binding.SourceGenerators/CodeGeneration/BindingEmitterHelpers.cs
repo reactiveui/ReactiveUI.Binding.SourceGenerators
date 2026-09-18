@@ -30,6 +30,9 @@ internal static class BindingEmitterHelpers
     /// <summary>Opens a delegate parameter, ready for the two type arguments and the parameter name.</summary>
     private const string FuncParameterPrefix = ", global::System.Func<";
 
+    /// <summary>The stream carrying values converted for the target.</summary>
+    private const string ConvertedForwardName = "__convertedForward";
+
     /// <summary>Emits a whole binding dispatch file, claiming its call sites through one API's dispatch.</summary>
     /// <param name="invocations">The detected call sites for this API.</param>
     /// <param name="allClasses">All detected class binding info.</param>
@@ -378,7 +381,7 @@ internal static class BindingEmitterHelpers
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool RequiresRegistryConversion(BindingInvocationInfo inv) =>
         !inv.HasConversion
-        && !string.Equals(inv.SourcePropertyTypeFullName, inv.TargetPropertyTypeFullName, StringComparison.Ordinal);
+        && (inv.ForwardConversion is not null || !string.Equals(inv.SourcePropertyTypeFullName, inv.TargetPropertyTypeFullName, StringComparison.Ordinal));
 
     /// <summary>Emits a stage that converts observed values to the type the other side declares.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -397,13 +400,7 @@ internal static class BindingEmitterHelpers
         string resultVar,
         string fromTypeFullName,
         string toTypeFullName) =>
-        sb.Append("                var ").Append(resultVar).Append(" = new ").Append(GeneratedTypeNames.MapSignal).Append('<')
-            .Append(fromTypeFullName).Append(", ").Append(toTypeFullName).AppendLine(">(").Append("                    ").Append(sourceVar)
-            .AppendLine(",").AppendLine("                    __value =>").AppendLine("                    {").Append("                        ")
-            .Append(toTypeFullName).AppendLine(" __converted;").Append("                        ").Append(GeneratedTypeNames.RuntimeBindingConverter)
-            .Append(".TryConvert<").Append(fromTypeFullName).Append(", ").Append(toTypeFullName)
-            .AppendLine(">(__value, null, null, out __converted);").AppendLine("                        return __converted;")
-            .AppendLine("                    });");
+        ConversionEmitter.EmitStage(sb, sourceVar, resultVar, fromTypeFullName, toTypeFullName, null);
 
     /// <summary>Emits the stage that delivers a write on the owning thread of the object it lands on.</summary>
     /// <param name="sb">The string builder to append to.</param>
@@ -734,6 +731,11 @@ internal static class BindingEmitterHelpers
         {
             currentVar = AppendMapStage(sb, forward, currentVar, inv.HasScheduler);
         }
+        else if (inv.SetMethod is null && RequiresRegistryConversion(inv))
+        {
+            ConversionEmitter.EmitStage(sb, currentVar, ConvertedForwardName, inv.SourcePropertyTypeFullName, inv.TargetPropertyTypeFullName, inv.ForwardConversion);
+            currentVar = ConvertedForwardName;
+        }
 
         if (inv.HasScheduler)
         {
@@ -763,6 +765,13 @@ internal static class BindingEmitterHelpers
         {
             sourceVar = AppendMapStage(sb, forward, sourceVar, inv.HasScheduler);
             targetVar = AppendMapStage(sb, reverse, targetVar, inv.HasScheduler);
+        }
+        else if (RequiresRegistryConversion(inv))
+        {
+            ConversionEmitter.EmitStage(sb, sourceVar, ConvertedForwardName, inv.SourcePropertyTypeFullName, inv.TargetPropertyTypeFullName, inv.ForwardConversion);
+            ConversionEmitter.EmitStage(sb, targetVar, "__convertedReverse", inv.TargetPropertyTypeFullName, inv.SourcePropertyTypeFullName, inv.ReverseConversion);
+            sourceVar = ConvertedForwardName;
+            targetVar = "__convertedReverse";
         }
 
         if (inv.HasScheduler)

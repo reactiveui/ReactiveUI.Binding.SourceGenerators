@@ -52,6 +52,13 @@ internal interface IObservationPlugin
     /// </remarks>
     bool CanObserveProperty(ClassBindingInfo classInfo, string propertyName);
 
+    /// <summary>Scores this property for the requested notification timing; zero declines the observation.</summary>
+    /// <param name="classInfo">The concrete owner's capabilities.</param>
+    /// <param name="propertyName">The observed property.</param>
+    /// <param name="isBeforeChange">Whether the caller requests before-change notifications.</param>
+    /// <returns>The eligible mechanism's score, or zero.</returns>
+    int GetAffinityForProperty(ClassBindingInfo classInfo, string propertyName, bool isBeforeChange);
+
     /// <summary>
     /// Emits any helper class definitions needed by this plugin's generated code.
     /// Called at most once per generated output file, inside the
@@ -60,81 +67,8 @@ internal interface IObservationPlugin
     /// <param name="sb">The string builder to append to.</param>
     void EmitHelperClasses(StringBuilder sb);
 
-    /// <summary>
-    /// Emits a shallow (single-segment) observation as an inline expression appended to sb.
-    /// Used for inline contexts such as a selector <c>.Select()</c> call.
-    /// </summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="rootVar">The root variable name (e.g., "obj").</param>
-    /// <param name="segment">The property path segment.</param>
-    /// <param name="castTypeName">The fully qualified type name for casting.</param>
-    /// <param name="isBeforeChange">True for WhenChanging (before-change).</param>
-    /// <param name="includeStartWith">Whether to include StartWith for initial value emission.</param>
-    void EmitShallowObservation(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        bool isBeforeChange,
-        bool includeStartWith);
-
-    /// <summary>Emits a shallow (single-segment) observation as a local variable declaration.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="rootVar">The root variable name (e.g., "obj").</param>
-    /// <param name="segment">The property path segment.</param>
-    /// <param name="castTypeName">The fully qualified type name for casting.</param>
-    /// <param name="isBeforeChange">True for WhenChanging (before-change).</param>
-    /// <param name="varName">The variable name to assign the observable to.</param>
-    void EmitShallowObservationVariable(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        bool isBeforeChange,
-        string varName);
-
-    /// <summary>Emits the root segment of a deep chain observation as a local variable declaration.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="rootVar">The root variable name (e.g., "obj").</param>
-    /// <param name="segment">The first property path segment.</param>
-    /// <param name="castTypeName">The fully qualified type name for casting the root object.</param>
-    /// <param name="isBeforeChange">True for WhenChanging (before-change).</param>
-    /// <param name="obsVarName">The variable name for the resulting observable.</param>
-    void EmitDeepChainRootSegment(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        bool isBeforeChange,
-        string obsVarName);
-
-    /// <summary>Emits an inner segment of a deep chain observation using Select/Switch re-subscription.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="prevVar">The previous segment's observable variable name.</param>
-    /// <param name="curVar">The current segment's observable variable name.</param>
-    /// <param name="lambdaParam">The lambda parameter name for the parent value.</param>
-    /// <param name="segment">The current property path segment.</param>
-    /// <param name="isBeforeChange">True for WhenChanging (before-change).</param>
-    /// <param name="nullParentBehavior">The behavior to use while the parent segment is null.</param>
-    void EmitDeepChainInnerSegment(
-        StringBuilder sb,
-        string prevVar,
-        string curVar,
-        string lambdaParam,
-        PropertyPathSegment segment,
-        bool isBeforeChange,
-        NullParentObservationBehavior nullParentBehavior);
-
-    /// <summary>Emits an inline observation variable for binding generators. Used by BindOneWay/BindTwoWay for direct observation code.</summary>
-    /// <param name="sb">The string builder to append to.</param>
-    /// <param name="rootVar">The root variable name (e.g., "source", "target").</param>
-    /// <param name="segment">The property path segment.</param>
-    /// <param name="castTypeName">The fully qualified type name for casting.</param>
-    /// <param name="varName">The variable name for the resulting observable.</param>
-    void EmitInlineObservationVariable(
-        StringBuilder sb,
-        string rootVar,
-        PropertyPathSegment segment,
-        string castTypeName,
-        string varName);
+    /// <summary>Emits a direct typed expression for this mechanism.</summary>
+    /// <param name="sb">The output builder.</param>
+    /// <param name="observation">The concrete property and notification timing.</param>
+    void EmitObservation(StringBuilder sb, in ObservationExpression observation);
 }

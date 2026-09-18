@@ -25,6 +25,9 @@ public sealed class AppliedChangeObservable : IObservable<BindingChange>
     /// <summary>The observers a change is delivered to, replaced whenever the set changes.</summary>
     private IObserver<BindingChange>[] _observers = [];
 
+    /// <summary>Gets whether constructing a public change notification has any recipient.</summary>
+    public bool HasObservers => Volatile.Read(ref _observers).Length != 0;
+
     /// <summary>Reports a change the binding has written.</summary>
     /// <param name="value">The change that was written.</param>
     public void OnNext(BindingChange value)

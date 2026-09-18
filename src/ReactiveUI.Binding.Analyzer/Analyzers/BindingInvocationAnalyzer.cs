@@ -9,6 +9,8 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 using ReactiveUI.Binding.Helpers;
 using ReactiveUI.Binding.SourceGenerators;
+using ReactiveUI.Binding.SourceGenerators.Helpers;
+using ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 
 namespace ReactiveUI.Binding.Analyzer.Analyzers;
 
@@ -588,16 +590,18 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
     /// <returns><c>true</c> if a default bindable event is found; otherwise, <c>false</c>.</returns>
     private static bool HasDefaultBindableEvent(INamedTypeSymbol controlType)
     {
+        if (AppKitCommandSymbols.CanBind(controlType) || UIKitCommandSymbols.CanBindTouch(controlType)
+            || UIKitCommandSymbols.ControlEvent(controlType) is not null)
+        {
+            return true;
+        }
+
         string[] defaultEvents = ["Click", "TouchUpInside", "MouseUp", "Pressed"];
         for (var j = 0; j < defaultEvents.Length; j++)
         {
-            var members = controlType.GetMembers(defaultEvents[j]);
-            for (var k = 0; k < members.Length; k++)
+            if (NativeCommandMembers.HasEvent(controlType, defaultEvents[j]))
             {
-                if (members[k] is IEventSymbol)
-                {
-                    return true;
-                }
+                return true;
             }
         }
 

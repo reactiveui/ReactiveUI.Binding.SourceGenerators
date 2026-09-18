@@ -11,17 +11,13 @@ using ReactiveUI.Binding.SourceGenerators.Generators;
 using ReactiveUI.Binding.SourceGenerators.Helpers;
 using ReactiveUI.Binding.SourceGenerators.Invocations;
 using ReactiveUI.Binding.SourceGenerators.Models;
-using ReactiveUI.Binding.SourceGenerators.Plugins;
-using ReactiveUI.Binding.SourceGenerators.Plugins.ViewThread;
 
 namespace ReactiveUI.Binding.SourceGenerators;
 
 /// <summary>
 /// The main incremental source generator entry point for ReactiveUI property observation and binding.
-/// Orchestrates three pipelines:
-/// Pipeline A (Type Detection): Detects notification mechanisms and generates high-affinity fallback binders.
-/// Pipeline B (Invocation Detection): Detects WhenChanged/WhenChanging/Bind calls and generates per-invocation code.
-/// Pipeline C (View Dispatch): Scans IViewFor&lt;T&gt; implementations and generates AOT-safe view locator dispatch.
+/// Invocation extraction captures notification mechanisms from each bound property's owner.
+/// View detection supplies the independent IViewFor&lt;T&gt; dispatch mappings.
 /// </summary>
 [Generator]
 public class BindingGenerator : IIncrementalGenerator
@@ -35,37 +31,6 @@ public class BindingGenerator : IIncrementalGenerator
         var languageFeatures = SelectLanguageFeatures(in context);
 
         RegisterSharedAttributeOutput(in context, languageFeatures);
-
-        // Pipeline A: Shared type detection
-        var allClasses = DetectTypes(in context);
-
-        // Single plugin-based step replaces 7 separate filter calls.
-        // Each type is matched against the plugin registry; the highest-affinity
-        // matching plugin determines the observation kind and capabilities.
-        var allObservableTypes = allClasses
-            .Select(static (classInfo, _) =>
-            {
-                var plugin = ObservationPluginRegistry.GetBestPlugin(classInfo);
-                return plugin is null ? null : new ObservableTypeInfo(
-                    classInfo.FullyQualifiedName,
-                    classInfo.MetadataName,
-                    plugin.ObservationKind,
-                    plugin.Affinity,
-                    plugin.SupportsBeforeChanged,
-                    classInfo.Properties);
-            })
-            .Where(static x => x is not null)
-            .Select(static (x, _) => x!);
-
-        // Consolidate all observable types → single RegisterSourceOutput
-        var consolidated = allObservableTypes.Collect();
-
-        context.RegisterSourceOutput(
-            consolidated.Combine(languageFeatures),
-            static (ctx, data) => RegistrationGenerator.Generate(ctx, data.Left, data.Right));
-
-        RegisterObservationHelperOutput(in context, allObservableTypes, languageFeatures);
-        RegisterViewThreadInvokerOutput(in context, languageFeatures);
 
         // Pipeline C: View locator dispatch (IViewFor<T> scanning)
         ViewLocatorDispatchGenerator.Register(context, languageFeatures);
@@ -91,21 +56,35 @@ public class BindingGenerator : IIncrementalGenerator
         var bindInteraction = Detect(in context, RoslynHelpers.IsBindInteractionInvocation, InteractionExtractor.ExtractBindInteractionInvocation);
         var bindTo = Detect(in context, RoslynHelpers.IsBindToInvocation, BindToExtractor.ExtractBindToInvocation);
         var invokeCommand = Detect(in context, RoslynHelpers.IsInvokeCommandInvocation, InvokeCommandExtractor.ExtractInvokeCommandInvocation);
+        var helpers = InvocationHelperRequirements.Select(whenChanged);
+        helpers = InvocationHelperRequirements.Combine(helpers, whenChanging);
+        helpers = InvocationHelperRequirements.Combine(helpers, whenAnyValue);
+        helpers = InvocationHelperRequirements.Combine(helpers, whenAny);
+        helpers = InvocationHelperRequirements.Combine(helpers, whenAnyObservable);
+        helpers = InvocationHelperRequirements.Combine(helpers, bindOneWay);
+        helpers = InvocationHelperRequirements.Combine(helpers, bindTwoWay);
+        helpers = InvocationHelperRequirements.Combine(helpers, oneWayBind);
+        helpers = InvocationHelperRequirements.Combine(helpers, bind);
+        helpers = InvocationHelperRequirements.Combine(helpers, bindCommand);
+        helpers = InvocationHelperRequirements.Combine(helpers, bindInteraction);
+        helpers = InvocationHelperRequirements.Combine(helpers, bindTo);
+        helpers = InvocationHelperRequirements.Combine(helpers, invokeCommand);
+        RegisterHelperOutput(in context, helpers, languageFeatures);
 
         // Each invocation generator receives the language-feature snapshot to control dispatch/output
-        WhenChangedInvocationGenerator.Register(context, whenChanged, allClasses, languageFeatures);
-        WhenChangingInvocationGenerator.Register(context, whenChanging, allClasses, languageFeatures);
-        BindOneWayInvocationGenerator.Register(context, bindOneWay, allClasses, languageFeatures);
-        BindTwoWayInvocationGenerator.Register(context, bindTwoWay, allClasses, languageFeatures);
-        OneWayBindInvocationGenerator.Register(context, oneWayBind, allClasses, languageFeatures);
-        BindInvocationGenerator.Register(context, bind, allClasses, languageFeatures);
-        WhenAnyValueInvocationGenerator.Register(context, whenAnyValue, allClasses, languageFeatures);
-        WhenAnyInvocationGenerator.Register(context, whenAny, allClasses, languageFeatures);
-        WhenAnyObservableInvocationGenerator.Register(context, whenAnyObservable, allClasses, languageFeatures);
-        BindInteractionInvocationGenerator.Register(context, bindInteraction, allClasses, languageFeatures);
-        BindCommandInvocationGenerator.Register(context, bindCommand, allClasses, languageFeatures);
+        WhenChangedInvocationGenerator.Register(context, whenChanged, languageFeatures);
+        WhenChangingInvocationGenerator.Register(context, whenChanging, languageFeatures);
+        BindOneWayInvocationGenerator.Register(context, bindOneWay, languageFeatures);
+        BindTwoWayInvocationGenerator.Register(context, bindTwoWay, languageFeatures);
+        OneWayBindInvocationGenerator.Register(context, oneWayBind, languageFeatures);
+        BindInvocationGenerator.Register(context, bind, languageFeatures);
+        WhenAnyValueInvocationGenerator.Register(context, whenAnyValue, languageFeatures);
+        WhenAnyInvocationGenerator.Register(context, whenAny, languageFeatures);
+        WhenAnyObservableInvocationGenerator.Register(context, whenAnyObservable, languageFeatures);
+        BindInteractionInvocationGenerator.Register(context, bindInteraction, languageFeatures);
+        BindCommandInvocationGenerator.Register(context, bindCommand, languageFeatures);
         BindToInvocationGenerator.Register(context, bindTo, languageFeatures);
-        InvokeCommandInvocationGenerator.Register(context, invokeCommand, allClasses, languageFeatures);
+        InvokeCommandInvocationGenerator.Register(context, invokeCommand, languageFeatures);
     }
 
     /// <summary>Reads the C# language version the consumer is compiling with.</summary>
@@ -136,64 +115,24 @@ public class BindingGenerator : IIncrementalGenerator
             && compilation.IsSymbolAccessibleWithin(attribute, compilation.Assembly);
     }
 
-    /// <summary>Detects every type the emitters may need a notification mechanism for.</summary>
+    /// <summary>Declares only the helpers selected by extracted binding and observation calls.</summary>
     /// <param name="context">The generator initialization context.</param>
-    /// <returns>One entry per detected type, from declarations and from call sites alike.</returns>
-    /// <remarks>
-    /// Only declarations are scanned here. A type the consumer merely references reaches the emitters through
-    /// the property path instead, which carries how each segment's declaring type notifies - and that costs
-    /// nothing extra, because extraction already holds the symbol. Resolving those types from the call sites
-    /// separately would mean binding every binding invocation a second time, and that binding is the single
-    /// largest allocation in a generation pass.
-    /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static IncrementalValuesProvider<ClassBindingInfo> DetectTypes(
-        in IncrementalGeneratorInitializationContext context) =>
-        context.SyntaxProvider
-            .CreateSyntaxProvider(
-                RoslynHelpers.IsClassWithBaseList,
-                TypeDetectionExtractor.ExtractClassBindingInfo)
-            .Where(static x => x is not null)
-            .Select(static (x, _) => x!);
-
-    /// <summary>
-    /// Declares the observation helper classes that generated observation code instantiates by name, once
-    /// for the whole compilation.
-    /// </summary>
-    /// <param name="context">The generator initialization context.</param>
-    /// <param name="observableTypes">Every detected type that has an observation plugin.</param>
+    /// <param name="helpers">The distinct helper requirements across the invocation pipelines.</param>
     /// <param name="languageFeatures">The consumer's language-feature snapshot, which names the namespace.</param>
-    /// <remarks>
-    /// Keyed to the detected types rather than to the call sites, which keeps the declarations a superset of
-    /// the references: observation code can only name a helper for a detected type, whichever binding API
-    /// reaches for it. Collapsing the per-type kinds to a distinct set first means adding another type of an
-    /// already-seen kind leaves this output cached.
-    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void RegisterObservationHelperOutput(
+    private static void RegisterHelperOutput(
         in IncrementalGeneratorInitializationContext context,
-        IncrementalValuesProvider<ObservableTypeInfo> observableTypes,
-        IncrementalValueProvider<LanguageFeatures> languageFeatures) =>
+        IncrementalValueProvider<InvocationHelperRequirements.Selection> helpers,
+        IncrementalValueProvider<LanguageFeatures> languageFeatures)
+    {
         context.RegisterSourceOutput(
-            observableTypes
-                .Select(static (typeInfo, _) => typeInfo.ObservationKind)
-                .Collect()
-                .Select(static (kinds, _) => ObservationHelperGenerator.SelectHelperKinds(kinds))
-                .Combine(languageFeatures),
+            helpers.Select(static (selection, _) => selection.ObservationKinds).Combine(languageFeatures),
             static (ctx, data) => ObservationHelperGenerator.Generate(ctx, data.Left, data.Right));
 
-    /// <summary>Declares the invoker classes generated bindings carry, for each UI platform the compilation references.</summary>
-    /// <param name="context">The generator initialization context.</param>
-    /// <param name="languageFeatures">The consumer's language-feature snapshot, which names the namespace.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void RegisterViewThreadInvokerOutput(
-        in IncrementalGeneratorInitializationContext context,
-        IncrementalValueProvider<LanguageFeatures> languageFeatures) =>
         context.RegisterSourceOutput(
-            context.CompilationProvider
-                .Select(static (compilation, _) => ViewThreadPluginRegistry.InvokersIn(compilation))
-                .Combine(languageFeatures),
+            helpers.Select(static (selection, _) => selection.ViewThreadInvokers).Combine(languageFeatures),
             static (ctx, data) => ViewThreadInvokerGenerator.Generate(ctx, data.Left, data.Right));
+    }
 
     /// <summary>Runs one syntax scan and keeps the call sites it could extract.</summary>
     /// <typeparam name="T">The extracted call-site model.</typeparam>
@@ -463,7 +402,7 @@ public class BindingGenerator : IIncrementalGenerator
                 }
                 else if (member is INamedTypeSymbol { DeclaredAccessibility: Accessibility.Public } type)
                 {
-                    _ = names.Add(prefix + type.Name);
+                    _ = names.Add(prefix + type.MetadataName);
                 }
             }
         }

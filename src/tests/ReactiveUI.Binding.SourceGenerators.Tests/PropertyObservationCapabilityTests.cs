@@ -88,13 +88,14 @@ public class PropertyObservationCapabilityTests
                                                              namespace System.Windows
                                                              {
                                                                  public class DependencyObject { }
+                                                                 public class DependencyProperty { }
                                                              }
 
                                                              namespace Consumer
                                                              {
                                                                  public class BaseControl : System.Windows.DependencyObject
                                                                  {
-                                                                     public static readonly object CaptionProperty = new object();
+                                                                     public static readonly System.Windows.DependencyProperty CaptionProperty = new System.Windows.DependencyProperty();
 
                                                                      public string Caption { get; set; }
                                                                  }

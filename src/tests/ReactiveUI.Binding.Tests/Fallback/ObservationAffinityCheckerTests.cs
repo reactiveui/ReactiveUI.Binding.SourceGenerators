@@ -195,10 +195,7 @@ public class ObservationAffinityCheckerTests
         }
     }
 
-    /// <summary>
-    /// Verifies that when multiple plugins are registered and only one has higher affinity,
-    /// the method returns true (short-circuits on first match).
-    /// </summary>
+    /// <summary>Verifies that a stronger provider wins among several registered providers.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
     public async Task HasHigherAffinityPlugin_MultiplePlugins_OnlyOneHigher_ReturnsTrue()
@@ -343,6 +340,169 @@ public class ObservationAffinityCheckerTests
         await Assert.That(action).ThrowsExactly<ArgumentNullException>();
     }
 
+    /// <summary>Repeated selections reuse the custom score while comparing each generated affinity independently.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FindHigherAffinityPlugin_RepeatedSelection_ScoresOnceAcrossGeneratedAffinities()
+    {
+        AppLocator.UnregisterAll<ICreatesObservableForProperty>();
+        try
+        {
+            var plugin = new StubObservableForProperty(HigherPluginAffinity);
+            AppLocator.Register<ICreatesObservableForProperty>(() => plugin);
+            ObservationAffinityChecker.Refresh();
+
+            var winner = ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
+            var tie = ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), ObservedPropertyName, HigherPluginAffinity, false);
+            var repeated = ObservationAffinityChecker.HasHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
+
+            await Assert.That(winner).IsSameReferenceAs(plugin);
+            await Assert.That(tie).IsNull();
+            await Assert.That(repeated).IsTrue();
+            await Assert.That(plugin.AffinityCallCount).IsEqualTo(1);
+        }
+        finally
+        {
+            RestoreDefaultPlugins();
+        }
+    }
+
+    /// <summary>Types, properties and notification timing each receive independent cached scores.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FindHigherAffinityPlugin_DifferentObservationKeys_ScoresEachOnce()
+    {
+        const int repetitions = 2;
+        const int distinctObservationCount = 4;
+        AppLocator.UnregisterAll<ICreatesObservableForProperty>();
+        try
+        {
+            var plugin = new StubObservableForProperty(HigherPluginAffinity);
+            AppLocator.Register<ICreatesObservableForProperty>(() => plugin);
+            ObservationAffinityChecker.Refresh();
+
+            for (var repeat = 0; repeat < repetitions; repeat++)
+            {
+                _ = ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
+                _ = ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(object), ObservedPropertyName, GeneratedAffinity, false);
+                _ = ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), UnscoredPropertyName, GeneratedAffinity, false);
+                _ = ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, true);
+            }
+
+            await Assert.That(plugin.AffinityCallCount).IsEqualTo(distinctObservationCount);
+        }
+        finally
+        {
+            RestoreDefaultPlugins();
+        }
+    }
+
+    /// <summary>Refresh invalidates scored selections even when the registered provider instances are unchanged.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FindHigherAffinityPlugin_Refresh_ScoresRegistrationsAgain()
+    {
+        const int expectedAffinityCalls = 2;
+        AppLocator.UnregisterAll<ICreatesObservableForProperty>();
+        try
+        {
+            var plugin = new StubObservableForProperty(LowerPluginAffinity);
+            AppLocator.Register<ICreatesObservableForProperty>(() => plugin);
+            ObservationAffinityChecker.Refresh();
+
+            _ = ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
+            _ = ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
+            ObservationAffinityChecker.Refresh();
+            _ = ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
+
+            await Assert.That(plugin.AffinityCallCount).IsEqualTo(expectedAffinityCalls);
+        }
+        finally
+        {
+            RestoreDefaultPlugins();
+        }
+    }
+
+    /// <summary>The highest custom score wins regardless of registration order.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FindHigherAffinityPlugin_MultipleWinners_ReturnsHighestAffinity()
+    {
+        AppLocator.UnregisterAll<ICreatesObservableForProperty>();
+        try
+        {
+            var highest = new StubObservableForProperty(HigherPluginAffinity);
+            AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(GeneratedAffinity));
+            AppLocator.Register<ICreatesObservableForProperty>(() => highest);
+            AppLocator.Register<ICreatesObservableForProperty>(static () => new StubObservableForProperty(AlternatePluginAffinity));
+            ObservationAffinityChecker.Refresh();
+
+            var winner = ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), ObservedPropertyName, LowerPluginAffinity, false);
+
+            await Assert.That(winner).IsSameReferenceAs(highest);
+        }
+        finally
+        {
+            RestoreDefaultPlugins();
+        }
+    }
+
+    /// <summary>A resolution overlapping refresh cannot publish its registrations into the refreshed cache.</summary>
+    /// <param name="cancellationToken">Cancels the synchronization if the test is interrupted.</param>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task FindHigherAffinityPlugin_RefreshDuringResolution_DiscardsStaleRegistrations(CancellationToken cancellationToken)
+    {
+        AppLocator.UnregisterAll<ICreatesObservableForProperty>();
+        using var releaseResolution = new ManualResetEventSlim();
+        var resolutionStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        Task<ICreatesObservableForProperty?>? pending = null;
+        try
+        {
+            var stale = new StubObservableForProperty(HigherPluginAffinity);
+            var current = new StubObservableForProperty(HigherPluginAffinity);
+            var resolutionCount = 0;
+            AppLocator.Register<ICreatesObservableForProperty>(() =>
+            {
+                if (Interlocked.Increment(ref resolutionCount) == 1)
+                {
+                    resolutionStarted.SetResult(true);
+                    releaseResolution.Wait(cancellationToken);
+                    return stale;
+                }
+
+                return current;
+            });
+            ObservationAffinityChecker.Refresh();
+            pending = Task.Run(
+                static () => ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false),
+                cancellationToken);
+            _ = await resolutionStarted.Task.WaitAsync(cancellationToken);
+
+            ObservationAffinityChecker.Refresh();
+            releaseResolution.Set();
+            _ = await pending;
+            var winner = ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(string), ObservedPropertyName, GeneratedAffinity, false);
+
+            await Assert.That(winner).IsSameReferenceAs(current);
+        }
+        finally
+        {
+            releaseResolution.Set();
+            try
+            {
+                if (pending is not null)
+                {
+                    _ = await pending;
+                }
+            }
+            finally
+            {
+                RestoreDefaultPlugins();
+            }
+        }
+    }
+
     /// <summary>Restores default plugins by re-initializing the binding infrastructure.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void RestoreDefaultPlugins()
@@ -396,9 +556,15 @@ public class ObservationAffinityCheckerTests
             _afterChangedAffinity = afterChangedAffinity;
         }
 
+        /// <summary>Gets the number of times this registration has been scored.</summary>
+        public int AffinityCallCount { get; private set; }
+
         /// <inheritdoc/>
-        public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged) =>
-            beforeChanged ? _beforeChangedAffinity : _afterChangedAffinity;
+        public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
+        {
+            AffinityCallCount++;
+            return beforeChanged ? _beforeChangedAffinity : _afterChangedAffinity;
+        }
 
         /// <inheritdoc/>
         public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(

@@ -5,6 +5,8 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins.Conversion;
+using ReactiveUI.Binding.SourceGenerators.Plugins.SetMethod;
 using ReactiveUI.Binding.SourceGenerators.Plugins.ViewThread;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
@@ -65,15 +67,14 @@ internal static class BindingExtractor
             return null;
         }
 
-        DetectBindingParameters(
-            methodSymbol,
-            out var hasConversion,
-            out var hasScheduler,
-            out var hasConverterOverride);
+        DetectBindingParameters(methodSymbol, out var hasConversion, out var hasScheduler, out var hasConverterOverride);
+
+        var sourceValueType = ConversionPluginRegistry.SelectorType(sourcePropertyArg, semanticModel, ct);
+        var targetValueType = ConversionPluginRegistry.SelectorType(targetPropertyArg, semanticModel, ct);
 
         return new(
             invocation.SyntaxTree.FilePath,
-            invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+            invocation.SyntaxTree.GetLineSpan(invocation.Span, ct).StartLinePosition.Line + 1,
             sides.SourceTypeFullName,
             new(sourcePropertyPath),
             sides.TargetTypeFullName,
@@ -89,7 +90,12 @@ internal static class BindingExtractor
             hasConverterOverride,
             InterceptableLocationReader.Read(semanticModel, invocation, ct),
             sides.SourceViewThreadInvoker,
-            sides.TargetViewThreadInvoker);
+            sides.TargetViewThreadInvoker)
+        {
+            ForwardConversion = ConversionPluginRegistry.Select(sourceValueType, targetValueType, semanticModel.Compilation),
+            ReverseConversion = isTwoWay ? ConversionPluginRegistry.Select(targetValueType, sourceValueType, semanticModel.Compilation) : null,
+            SetMethod = !isTwoWay && !hasConversion ? SetMethodPluginRegistry.Select(sourceValueType, targetValueType) : null,
+        };
     }
 
     /// <summary>

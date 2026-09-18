@@ -1711,6 +1711,7 @@ namespace ReactiveUI.Binding.Observables
     public sealed class AppliedChangeObservable : System.IObservable<ReactiveUI.Binding.BindingChange>
     {
         public AppliedChangeObservable() { }
+        public bool HasObservers { get; }
         public void OnNext(ReactiveUI.Binding.BindingChange value) { }
         public System.IDisposable Subscribe(System.IObserver<ReactiveUI.Binding.BindingChange> observer) { }
     }

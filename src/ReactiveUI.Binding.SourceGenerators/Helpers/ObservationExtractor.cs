@@ -112,7 +112,7 @@ internal static class ObservationExtractor
         var returnTypeFullName = ComputeReturnTypeFullName(methodSymbol, propertyPaths, hasSelector);
 
         var filePath = invocation.SyntaxTree.FilePath;
-        var lineNumber = invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+        var lineNumber = invocation.SyntaxTree.GetLineSpan(invocation.Span, ct).StartLinePosition.Line + 1;
 
         return new(
             filePath,

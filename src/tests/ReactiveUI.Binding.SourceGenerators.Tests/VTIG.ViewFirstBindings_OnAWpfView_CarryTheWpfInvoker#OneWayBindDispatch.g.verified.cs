@@ -51,12 +51,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         {
             return null;
         }
-        var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(
-            viewModel,
-            "Name",
-            (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyViewModel)__o).Name,
-            true);
-        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(typeof(global::TestApp.MyViewModel), "Name", 5, false);
+            var sourceObsMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(viewModel, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::TestApp.MyViewModel)__o).Name, true);
+        var sourceObsRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(viewModel.GetType(), "Name", 5, false);
         var sourceObs = sourceObsRegistration == null
             ? (global::System.IObservable<string>)sourceObsMechanism
             : (global::System.IObservable<string>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<string>(
@@ -67,7 +63,47 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 (object __o) => ((global::TestApp.MyViewModel)__o).Name,
                 false,
                 true);
-            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(sourceObs, view, __WpfViewThreadInvoker.Instance);
+            global::ReactiveUI.Binding.IBindingTypeConverter __convertedForwardConverter = null;
+            if (__convertedForwardConverter == null)
+            {
+                __convertedForwardConverter = global::ReactiveUI.Binding.BindingConverters.Current.TypedConverters.TryGetConverter(typeof(string), typeof(string));
+                if (__convertedForwardConverter != null && __convertedForwardConverter.GetAffinityForObjects() <= 2)
+                {
+                    __convertedForwardConverter = null;
+                }
+            }
+            var __convertedForward = __convertedForwardConverter == null ? (global::System.IObservable<string>)sourceObs : global::ReactiveUI.Primitives.LinqExtensions.Choose<string, string>(
+                sourceObs,
+                __value =>
+                {
+                    object __hint = null;
+                    if (__convertedForwardConverter != null)
+                    {
+                        if (__convertedForwardConverter is global::ReactiveUI.Binding.IBindingTypeConverter<string, string> __typed)
+                        {
+                            string __converted;
+                            if (__typed.TryConvert(__value, __hint, out __converted))
+                            {
+                                return (true, __converted);
+                            }
+                        }
+                        else
+                        {
+                            object __boxed;
+                            if (__convertedForwardConverter.TryConvertTyped(__value, __hint, out __boxed))
+                            {
+                                return (true, (string)__boxed);
+                            }
+                        }
+                        if (null == null)
+                        {
+                            return (true, (string)__value);
+                        }
+                        return (false, default(string));
+                    }
+                    return __value != null ? (true, __value) : (true, (string)__value);
+                });
+            var viewThreadObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__convertedForward, view, __WpfViewThreadInvoker.Instance);
 
             var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {

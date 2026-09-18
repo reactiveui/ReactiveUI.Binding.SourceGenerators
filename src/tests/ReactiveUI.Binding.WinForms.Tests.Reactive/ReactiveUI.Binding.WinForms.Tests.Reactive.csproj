@@ -2,7 +2,7 @@
   <PropertyGroup>
     <!-- The same tests, recompiled against ReactiveUI.Binding.Reactive.WinForms. REACTIVE_SHIM comes from
          ReactiveShim.props via the '.Reactive' name suffix, which is why the suffix goes last. -->
-    <TargetFrameworks>$(BindingWindowsTargets)</TargetFrameworks>
+    <TargetFrameworks>$(BindingTestPlatformTargets)</TargetFrameworks>
     <UseWindowsForms>true</UseWindowsForms>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

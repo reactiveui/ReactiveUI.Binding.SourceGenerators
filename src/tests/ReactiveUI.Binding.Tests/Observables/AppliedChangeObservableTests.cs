@@ -25,6 +25,19 @@ public class AppliedChangeObservableTests
     /// <summary>What an observer that joined after the first change receives.</summary>
     private static readonly string[] SecondOnly = [SecondValue];
 
+    /// <summary>The public boundary is needed only while a subscriber is present.</summary>
+    /// <returns>The asynchronous test operation.</returns>
+    [Test]
+    public async Task HasObservers_TracksSubscriptionLifetime()
+    {
+        var changes = new AppliedChangeObservable();
+        await Assert.That(changes.HasObservers).IsFalse();
+        var subscription = changes.Subscribe(new RecordingObserver());
+        await Assert.That(changes.HasObservers).IsTrue();
+        subscription.Dispose();
+        await Assert.That(changes.HasObservers).IsFalse();
+    }
+
     /// <summary>Reporting a change with nobody watching is what a binding usually does.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]

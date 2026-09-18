@@ -11,14 +11,14 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// </summary>
 /// <param name="PropertyName">The name of the property for this path segment.</param>
 /// <param name="PropertyTypeFullName">The fully qualified type of the property.</param>
-/// <param name="DeclaringTypeFullName">The fully qualified type that declares this property.</param>
+/// <param name="DeclaringTypeFullName">The concrete type exposing the property, including inherited declarations.</param>
 /// <param name="IsReferenceType">
 /// Whether the property's type is a reference type. Used to decide whether the generated
 /// <c>Expression&lt;Func&lt;…, T&gt;&gt;</c> selector parameter may be annotated nullable (<c>T?</c>) so it
 /// accepts selectors of nullable reference-typed properties; value-type leaves stay non-nullable.
 /// </param>
 /// <param name="DeclaringTypeInfo">
-/// How the declaring type notifies, or <see langword="null"/> when the segment was built without a symbol to
+/// How the concrete owner notifies, or <see langword="null"/> when the segment was built without a symbol to
 /// read it from. Each link of a chain notifies on its own terms, so the mechanism travels with the segment
 /// rather than being inferred from the type the chain started at.
 /// <para>

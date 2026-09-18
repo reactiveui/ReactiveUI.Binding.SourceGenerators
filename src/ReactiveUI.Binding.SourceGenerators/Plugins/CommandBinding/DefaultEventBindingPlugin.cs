@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.CodeGeneration;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using static ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding.EventCommandBindingEmitter;
 
 namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 
@@ -19,39 +20,64 @@ namespace ReactiveUI.Binding.SourceGenerators.Plugins.CommandBinding;
 /// Platforms covered: Any control with a Click/TouchUpInside/Pressed event
 /// that does not have Command or Enabled properties.
 /// </remarks>
-internal sealed class DefaultEventBindingPlugin : EventCommandBindingPlugin
+internal sealed class DefaultEventBindingPlugin : ICommandBindingPlugin
 {
     /// <summary>The affinity score for the default-event binder (lowest priority among command binding plugins).</summary>
     private static readonly int DefaultEventAffinity = BindingAffinity.DefaultEvent;
 
     /// <inheritdoc/>
-    public override int Affinity => DefaultEventAffinity;
+    public int Affinity => DefaultEventAffinity;
 
     /// <inheritdoc/>
-    public override bool CanHandle(BindCommandInvocationInfo inv) =>
+    public bool RequiresCustomBinderFallback => true;
+
+    /// <inheritdoc/>
+    public bool CanHandle(BindCommandInvocationInfo inv) =>
         inv.ResolvedEventName is not null;
 
     /// <inheritdoc/>
-    protected override void EmitWithObservableParameter(
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void EmitBinding(StringBuilder sb, BindCommandInvocationInfo inv, string controlAccess, bool supportsNullable) =>
+        CommandEventBindingEmitter.EmitByParameterKind(
+            sb,
+            inv,
+            controlAccess,
+            supportsNullable,
+            EmitWithObservableParameter,
+            EmitWithNoParameter);
+
+    /// <summary>Emits command execution using the latest streamed parameter.</summary>
+    /// <param name="sb">The output builder.</param>
+    /// <param name="inv">The extracted binding call.</param>
+    /// <param name="controlAccess">The control's typed access expression.</param>
+    /// <param name="eventArgsType">The framework event argument type.</param>
+    /// <param name="supportsNullable">Whether nullable annotations are available.</param>
+    internal static void EmitWithObservableParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
         string eventArgsType,
         bool supportsNullable)
     {
-        AppendLatestParameterCapture(sb, inv, supportsNullable);
+        AppendLatestParameterCapture(sb, inv);
         AppendCommandMissingExit(sb);
         AppendHandlerDeclaration(sb, eventArgsType, supportsNullable);
 
-        _ = sb.Append("                    var param = ").Append(CommandBindingSyntax.ReadLatestParameter(inv)).AppendLine(";");
+        _ = sb.Append("                    var param = ").Append(CommandParameterEmitter.Read(inv)).AppendLine(";");
 
         AppendHandlerExecution(sb, "param");
         AppendHandlerAttachment(sb, inv, controlAccess);
         AppendParameterisedDisposableReturn(sb);
     }
 
-    /// <inheritdoc/>
-    protected override void EmitWithExpressionParameter(
+    /// <summary>Emits command execution using the selected parameter property.</summary>
+    /// <param name="sb">The output builder.</param>
+    /// <param name="inv">The extracted binding call.</param>
+    /// <param name="controlAccess">The control's typed access expression.</param>
+    /// <param name="eventArgsType">The framework event argument type.</param>
+    /// <param name="paramAccess">The typed command parameter access.</param>
+    /// <param name="supportsNullable">Whether nullable annotations are available.</param>
+    internal static void EmitWithExpressionParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,
@@ -72,8 +98,13 @@ internal sealed class DefaultEventBindingPlugin : EventCommandBindingPlugin
         _ = sb.AppendLine(CommandBindingSyntax.CommandOnlyDisposableReturn).AppendLine(GeneratedSyntax.MemberBodyClose);
     }
 
-    /// <inheritdoc/>
-    protected override void EmitWithNoParameter(
+    /// <summary>Emits command execution without a parameter.</summary>
+    /// <param name="sb">The output builder.</param>
+    /// <param name="inv">The extracted binding call.</param>
+    /// <param name="controlAccess">The control's typed access expression.</param>
+    /// <param name="eventArgsType">The framework event argument type.</param>
+    /// <param name="supportsNullable">Whether nullable annotations are available.</param>
+    internal static void EmitWithNoParameter(
         StringBuilder sb,
         BindCommandInvocationInfo inv,
         string controlAccess,

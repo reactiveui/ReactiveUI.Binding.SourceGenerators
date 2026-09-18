@@ -57,7 +57,7 @@ internal static class ObservedProperties
     /// <param name="classInfo">The declaring type's binding info.</param>
     /// <param name="propertyName">The property name to find.</param>
     /// <returns>The property info, or null when the type does not declare it.</returns>
-    private static ObservablePropertyInfo? Find(ClassBindingInfo classInfo, string propertyName)
+    internal static ObservablePropertyInfo? Find(ClassBindingInfo classInfo, string propertyName)
     {
         var properties = classInfo.Properties;
         for (var i = 0; i < properties.Length; i++)

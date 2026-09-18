@@ -5,6 +5,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins.SetMethod;
 using static ReactiveUI.Binding.SourceGenerators.CodeGeneration.GeneratedTypeNames;
 
 namespace ReactiveUI.Binding.SourceGenerators.CodeGeneration;
@@ -63,11 +64,6 @@ internal static class OneWayBindCodeGenerator
         ClassBindingInfo? targetClassInfo,
         string suffix)
     {
-        var viewAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
-            "view",
-            inv.TargetPropertyPath,
-            "value",
-            SubscriptionBodyIndent);
         BindingEmitterHelpers.AppendWorkerMethodHeader(sb, DispatchApi, inv, suffix);
 
         // Emit inline observation code instead of delegating to WhenChanged dispatch
@@ -83,13 +79,23 @@ internal static class OneWayBindCodeGenerator
 
         var currentVar = BindingEmitterHelpers.EmitSingleStreamStages(sb, DispatchApi, inv);
 
-        if (BindingEmitterHelpers.RequiresRegistryConversion(inv))
-        {
-            currentVar = EmitRegistryConversionStage(sb, inv, currentVar);
-        }
-
         currentVar = BindingEmitterHelpers.EmitViewThreadStage(sb, inv, currentVar, "viewThreadObs", "view", inv.TargetViewThreadInvoker);
 
+        if (inv.SetMethod is { } setMethod)
+        {
+            CollectionSetMethodEmitter.EmitSubscription(sb, new("view", inv.TargetPropertyPath, inv.SourcePropertyTypeFullName, setMethod, inv.TargetExpressionText, true), currentVar);
+            _ = sb.Append("            return new global::ReactiveUI.Binding.ReactiveBinding<").Append(inv.TargetTypeFullName).Append(", ")
+                .Append(inv.TargetPropertyTypeFullName).AppendLine(">(view, __setChanges, global::ReactiveUI.Binding.BindingDirection.OneWay,")
+                .AppendLine("                new global::ReactiveUI.Primitives.Disposables.MultipleDisposable(__setSubscription, __setChanges));")
+                .AppendLine(GeneratedSyntax.MemberBodyClose);
+            return;
+        }
+
+        var viewAssignment = CodeGeneratorHelpers.BuildGuardedAssignment(
+            "view",
+            inv.TargetPropertyPath,
+            "value",
+            SubscriptionBodyIndent);
         _ = sb.AppendLine().Append("            var sub = ").Append(BindingErrors).Append(".Subscribe(").Append(currentVar).AppendLine(", value =>")
             .AppendLine(GeneratedSyntax.StatementBlockOpen).Append("                ").Append(viewAssignment).AppendLine().Append("            }, \"")
             .Append(CodeGeneratorHelpers.EscapeString(inv.TargetExpressionText)).AppendLine("\");").AppendLine()

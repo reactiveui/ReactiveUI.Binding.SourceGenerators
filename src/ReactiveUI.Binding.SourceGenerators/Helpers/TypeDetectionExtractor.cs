@@ -2,42 +2,79 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI.Binding.SourceGenerators.Models;
+using ReactiveUI.Binding.SourceGenerators.Plugins;
+using ReactiveUI.Binding.SourceGenerators.Plugins.Observation;
 
 namespace ReactiveUI.Binding.SourceGenerators.Helpers;
 
-/// <summary>Pipeline A transform: extracts ClassBindingInfo from class declarations.</summary>
+/// <summary>Extracts notification capabilities from property-owner symbols.</summary>
 internal static class TypeDetectionExtractor
 {
-    /// <summary>
-    /// Pipeline A transform: extracts ClassBindingInfo from a class declaration with a base list.
-    /// Sets boolean flags by walking AllInterfaces + base type chain.
-    /// </summary>
-    /// <param name="context">The generator syntax context containing the semantic model.</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns>A ClassBindingInfo POCO, or null if the node is not relevant.</returns>
-    /// <exception cref="OperationCanceledException">If the cancellation token is triggered.</exception>
-    internal static ClassBindingInfo? ExtractClassBindingInfo(GeneratorSyntaxContext context, CancellationToken ct)
-    {
-        var classDecl = (ClassDeclarationSyntax)context.Node;
-
-        var semanticModel = context.SemanticModel;
-        var typeSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(classDecl, ct)!;
-
-        return ExtractFromSymbol(typeSymbol, semanticModel.Compilation, ct);
-    }
-
     /// <summary>Reads a type's notification mechanisms and observable properties from its symbol.</summary>
     /// <param name="typeSymbol">The type to inspect, declared in this compilation or referenced from another.</param>
     /// <param name="compilation">The compilation the type is resolved against.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A ClassBindingInfo POCO for the type.</returns>
     /// <exception cref="OperationCanceledException">If the cancellation token is triggered.</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static ClassBindingInfo ExtractFromSymbol(
         INamedTypeSymbol typeSymbol,
         Compilation compilation,
+        CancellationToken ct) =>
+        CreateTypeInfo(typeSymbol, compilation, ExtractProperties(typeSymbol, ct), ct);
+
+    /// <summary>Captures the concrete owner's notification interfaces and one inherited or declared property.</summary>
+    /// <param name="owner">The type through which the property is read.</param>
+    /// <param name="property">The bound property symbol.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The owner's capabilities with property-specific native candidates.</returns>
+    internal static ClassBindingInfo ExtractPropertyOwner(
+        INamedTypeSymbol owner,
+        IPropertySymbol property,
+        Compilation compilation,
+        CancellationToken ct)
+    {
+        var propertyInfo = ExtractProperty(owner, property);
+        var properties = property.Name != "ViewModel"
+            && PlatformSymbols.FindMember(owner, "ViewModel") is IPropertySymbol { IsStatic: false, GetMethod.DeclaredAccessibility: Accessibility.Public } viewModel
+            ? new EquatableArray<ObservablePropertyInfo>([propertyInfo, ExtractProperty(owner, viewModel)])
+            : new EquatableArray<ObservablePropertyInfo>([propertyInfo]);
+        return CreateTypeInfo(owner, compilation, properties, ct);
+    }
+
+    /// <summary>Reads one property's native candidates while its owner symbols are available.</summary>
+    /// <param name="owner">The concrete property owner.</param>
+    /// <param name="property">The selected declaration.</param>
+    /// <returns>Property-specific observation metadata.</returns>
+    internal static ObservablePropertyInfo ExtractProperty(INamedTypeSymbol owner, IPropertySymbol property)
+    {
+        var companion = PlatformSymbols.FindMember(owner, $"{property.Name}Property");
+        return new(
+            property.Name,
+            property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            property.GetMethod?.DeclaredAccessibility == Accessibility.Public,
+            property.IsIndexer,
+            companion is IFieldSymbol { IsStatic: true } or IPropertySymbol { IsStatic: true },
+            PlatformSymbols.FindEvent(owner, $"{property.Name}Changed") is not null,
+            SymbolEqualityComparer.Default.Equals(owner, property.ContainingType),
+            ObservationPluginRegistry.InspectProperty(owner, property),
+            true);
+    }
+
+    /// <summary>Combines owner capabilities with the property metadata needed by the caller.</summary>
+    /// <param name="typeSymbol">The concrete owner type.</param>
+    /// <param name="compilation">The consumer compilation.</param>
+    /// <param name="properties">The inspected property metadata.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>Value-equatable owner information.</returns>
+    internal static ClassBindingInfo CreateTypeInfo(
+        INamedTypeSymbol typeSymbol,
+        Compilation compilation,
+        EquatableArray<ObservablePropertyInfo> properties,
         CancellationToken ct)
     {
         var wellKnown = SymbolHelpers.GetWellKnownSymbols(compilation);
@@ -53,9 +90,6 @@ internal static class TypeDetectionExtractor
 
         // Walk base type chain for platform detection
         var platform = DetectPlatformBaseTypes(typeSymbol, wellKnown, ct);
-
-        // Extract properties
-        var properties = ExtractProperties(typeSymbol, ct);
 
         return new(
             typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
@@ -108,7 +142,9 @@ internal static class TypeDetectionExtractor
                 property.IsIndexer,
                 isDependencyProperty,
                 hasChangeEvent,
-                SymbolEqualityComparer.Default.Equals(property.ContainingType, typeSymbol)));
+                SymbolEqualityComparer.Default.Equals(property.ContainingType, typeSymbol),
+                ObservationPluginRegistry.InspectProperty(typeSymbol, property),
+                true));
         }
 
         return new([.. properties]);
@@ -247,7 +283,7 @@ internal static class TypeDetectionExtractor
         var winforms = false;
         var android = false;
 
-        var baseType = typeSymbol.BaseType;
+        var baseType = typeSymbol;
         while (baseType is not null)
         {
             ct.ThrowIfCancellationRequested();

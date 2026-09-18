@@ -16,6 +16,12 @@ public class ObservationPluginTests
     /// <summary>The <c>EventObservable</c> name these tests generate against.</summary>
     private const string EventObservableName = "EventObservable";
 
+    /// <summary>The typed WinForms observation helper.</summary>
+    private const string WinFormsObservableName = "__WinFormsObservable";
+
+    /// <summary>The typed Android observation helper.</summary>
+    private const string AndroidObservableName = "__AndroidObservable";
+
     /// <summary>The <c>false)</c> fragment these tests expect in the generated source.</summary>
     private const string FalseFragment = "false)";
 
@@ -201,7 +207,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.SuppressEmission);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(EventObservableName);
@@ -217,7 +223,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, true, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(EventObservableName);
@@ -233,7 +239,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.EmitDefault);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.EmitDefault);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ImmediateReturnSignalName);
@@ -302,12 +308,12 @@ public class ObservationPluginTests
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyTextBoxTypeName, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).Contains(WinFormsObservableName);
         await Assert.That(result).Contains(TextChangedName);
     }
 
@@ -318,7 +324,7 @@ public class ObservationPluginTests
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyTextBoxTypeName, true, Obs0Local);
 
@@ -332,7 +338,7 @@ public class ObservationPluginTests
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyTextBoxTypeName, true, true);
 
@@ -346,12 +352,12 @@ public class ObservationPluginTests
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyTextBoxTypeName, false, Obs0Local);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).Contains(WinFormsObservableName);
         await Assert.That(result).Contains(TextChangedName);
     }
 
@@ -362,7 +368,7 @@ public class ObservationPluginTests
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyTextBoxTypeName, true, Obs0Local);
 
@@ -376,27 +382,27 @@ public class ObservationPluginTests
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.SuppressEmission);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).Contains(WinFormsObservableName);
         await Assert.That(result).Contains(SwitchName);
     }
 
     /// <summary>Verifies WinForms plugin deep chain inner segment before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinFormsPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WinFormsPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsUnchangingValue()
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, true, NullParentObservationBehavior.SuppressEmission);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>A WinForms inner segment that is not the leaf pushes the leaf's default value down the chain.</summary>
@@ -406,9 +412,9 @@ public class ObservationPluginTests
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.EmitDefault);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.EmitDefault);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ImmediateReturnSignalName);
@@ -422,26 +428,26 @@ public class ObservationPluginTests
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyTextBoxTypeName, SourceObsName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).Contains(WinFormsObservableName);
         await Assert.That(result).Contains(TextChangedName);
     }
 
-    /// <summary>Verifies WinForms plugin EmitHelperClasses is a no-op.</summary>
+    /// <summary>Verifies WinForms declares its typed subscription helper.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinFormsPlugin_EmitHelperClasses_IsNoOp()
+    public async Task WinFormsPlugin_EmitHelperClasses_DeclaresTypedSubscription()
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
 
         plugin.EmitHelperClasses(sb);
 
-        await Assert.That(sb.Length).IsEqualTo(0);
+        await Assert.That(sb.ToString()).Contains(WinFormsObservableName);
     }
 
     // ========== WinUIObservationPlugin ==========
@@ -452,7 +458,7 @@ public class ObservationPluginTests
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, true, true);
 
@@ -466,7 +472,7 @@ public class ObservationPluginTests
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, false, Obs0Local);
 
@@ -482,7 +488,7 @@ public class ObservationPluginTests
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
@@ -496,7 +502,7 @@ public class ObservationPluginTests
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, false, Obs0Local);
 
@@ -510,7 +516,7 @@ public class ObservationPluginTests
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyControlTypeName, true, Obs0Local);
 
@@ -524,9 +530,9 @@ public class ObservationPluginTests
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.SuppressEmission);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(WinUIDPObservableLocal);
@@ -536,15 +542,15 @@ public class ObservationPluginTests
     /// <summary>Verifies WinUI plugin deep chain inner segment before-change emits ImmediateReturnSignal.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task WinUIPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsImmediateReturnSignal()
+    public async Task WinUIPlugin_EmitDeepChainInnerSegment_BeforeChange_EmitsUnchangingValue()
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, true, NullParentObservationBehavior.SuppressEmission);
 
-        await Assert.That(sb.ToString()).Contains(ImmediateReturnSignalName);
+        await Assert.That(sb.ToString()).Contains(UnchangingPropertyObservableName);
     }
 
     /// <summary>A WinUI inner segment that is not the leaf pushes the leaf's default value down the chain.</summary>
@@ -554,9 +560,9 @@ public class ObservationPluginTests
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName, InnerTypeName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName, InnerTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.EmitDefault);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.EmitDefault);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ImmediateReturnSignalName);
@@ -570,7 +576,7 @@ public class ObservationPluginTests
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyControlTypeName, SourceObsName);
 
@@ -591,7 +597,7 @@ public class ObservationPluginTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(WinUIDPObservableLocal);
-        await Assert.That(result).Contains("RegisterPropertyChangedCallback");
+        await Assert.That(result).Contains("global::System.IObservable<TValue>");
     }
 
     // ========== KVOObservationPlugin ==========
@@ -668,7 +674,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.SuppressEmission);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(KVOObservableLocal);
@@ -684,7 +690,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, true, NullParentObservationBehavior.SuppressEmission);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, true, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(KVOObservableLocal);
@@ -700,7 +706,7 @@ public class ObservationPluginTests
         var sb = new StringBuilder();
         var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.EmitDefault);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.EmitDefault);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ImmediateReturnSignalName);
@@ -805,7 +811,7 @@ public class ObservationPluginTests
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
 
@@ -821,7 +827,7 @@ public class ObservationPluginTests
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment(UnreportedPropertyName, StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
         plugin.EmitShallowObservationVariable(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
 
@@ -837,7 +843,7 @@ public class ObservationPluginTests
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
 
@@ -853,7 +859,7 @@ public class ObservationPluginTests
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment(UnreportedPropertyName, StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
         plugin.EmitDeepChainRootSegment(sb, "obj", segment, MyAndroidViewTypeName, false, Obs0Local);
 
@@ -865,16 +871,16 @@ public class ObservationPluginTests
     /// <summary>Verifies Android plugin deep chain inner segment emits ImmediateReturnSignal with Switch.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task AndroidPlugin_EmitDeepChainInnerSegment_EmitsImmediateReturnSignal()
+    public async Task AndroidPlugin_EmitDeepChainInnerSegment_EmitsUnchangingValue()
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.SuppressEmission);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.SuppressEmission);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(ImmediateReturnSignalName);
+        await Assert.That(result).Contains(UnchangingPropertyObservableName);
         await Assert.That(result).Contains(SwitchName);
     }
 
@@ -885,9 +891,9 @@ public class ObservationPluginTests
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("City", StringName, AddressTypeName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "City", StringName, AddressTypeName);
 
-        plugin.EmitDeepChainInnerSegment(sb, Obs0Local, Obs1Local, "__p1", segment, false, NullParentObservationBehavior.EmitDefault);
+        plugin.EmitDeepChainInnerSegment(sb, new(Obs0Local, Obs1Local, "__p1"), segment, false, NullParentObservationBehavior.EmitDefault);
 
         var result = sb.ToString();
         await Assert.That(result).Contains(ImmediateReturnSignalName);
@@ -901,7 +907,7 @@ public class ObservationPluginTests
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyAndroidViewTypeName, SourceObsName);
 
@@ -917,7 +923,7 @@ public class ObservationPluginTests
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment(UnreportedPropertyName, StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
         plugin.EmitInlineObservationVariable(sb, SourceName, segment, MyAndroidViewTypeName, SourceObsName);
 
@@ -926,17 +932,17 @@ public class ObservationPluginTests
         await Assert.That(result).Contains(SourceObsDeclaration);
     }
 
-    /// <summary>Verifies Android plugin EmitHelperClasses is a no-op.</summary>
+    /// <summary>Verifies Android declares its typed subscription helper.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task AndroidPlugin_EmitHelperClasses_IsNoOp()
+    public async Task AndroidPlugin_EmitHelperClasses_DeclaresTypedSubscription()
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
 
         plugin.EmitHelperClasses(sb);
 
-        await Assert.That(sb.Length).IsEqualTo(0);
+        await Assert.That(sb.ToString()).Contains(AndroidObservableName);
     }
 
     /// <summary>Verifies Android plugin properties.</summary>
@@ -950,7 +956,7 @@ public class ObservationPluginTests
         await Assert.That(plugin.Affinity).IsEqualTo(ExpectedPluginAffinity);
         await Assert.That(plugin.ObservationKind).IsEqualTo("Android");
         await Assert.That(plugin.SupportsBeforeChanged).IsFalse();
-        await Assert.That(plugin.RequiresHelperClasses).IsFalse();
+        await Assert.That(plugin.RequiresHelperClasses).IsTrue();
     }
 
     // ========== Shallow observation with includeStartWith=false ==========
@@ -1003,7 +1009,7 @@ public class ObservationPluginTests
     {
         var plugin = new WinFormsObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyTextBoxTypeName, false, false);
 
@@ -1017,7 +1023,7 @@ public class ObservationPluginTests
     {
         var plugin = new WinUIObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment("Text", StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, "Text", StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyControlTypeName, false, false);
 
@@ -1045,12 +1051,12 @@ public class ObservationPluginTests
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, true);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).Contains(AndroidObservableName);
         await Assert.That(result).Contains(TextChangedEventName);
     }
 
@@ -1061,7 +1067,7 @@ public class ObservationPluginTests
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment(UnreportedPropertyName, StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, UnreportedPropertyName, StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, true);
 
@@ -1078,12 +1084,12 @@ public class ObservationPluginTests
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, false, false);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains(EventObservableName);
+        await Assert.That(result).Contains(AndroidObservableName);
         await Assert.That(result).EndsWith(", false)");
     }
 
@@ -1094,7 +1100,7 @@ public class ObservationPluginTests
     {
         var plugin = new AndroidObservationPlugin();
         var sb = new StringBuilder();
-        var segment = ModelFactory.CreatePropertyPathSegment(TextPropertyName, StringName);
+        var segment = NativeObservationTestModels.CreateSegment(plugin, TextPropertyName, StringName);
 
         plugin.EmitShallowObservation(sb, "obj", segment, MyAndroidViewTypeName, true, true);
 
@@ -1154,9 +1160,9 @@ public class ObservationPluginTests
     /// <summary>Verifies Count returns the correct number of plugins.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task Registry_Count_Returns7()
+    public async Task Registry_Count_MatchesSupportedMechanisms()
     {
-        const int ExpectedPluginCount = 7;
+        const int ExpectedPluginCount = 12;
         await Assert.That(ObservationPluginRegistry.Count).IsEqualTo(ExpectedPluginCount);
     }
 }

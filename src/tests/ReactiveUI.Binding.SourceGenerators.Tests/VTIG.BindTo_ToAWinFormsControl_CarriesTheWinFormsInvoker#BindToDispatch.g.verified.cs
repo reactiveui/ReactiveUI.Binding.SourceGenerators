@@ -34,7 +34,47 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         private static global::System.IDisposable __BindTo_7FFFD2E8338B15D7(global::System.IObservable<string> source, global::TestApp.MyControl target)
         {
             // BindTo: observable -> Text
-            return global::ReactiveUI.Binding.BindingErrors.Subscribe(global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(source, target, __WinFormsViewThreadInvoker.Instance), value =>
+            global::ReactiveUI.Binding.IBindingTypeConverter __convertedSourceConverter = null;
+            if (__convertedSourceConverter == null)
+            {
+                __convertedSourceConverter = global::ReactiveUI.Binding.BindingConverters.Current.TypedConverters.TryGetConverter(typeof(string), typeof(string));
+                if (__convertedSourceConverter != null && __convertedSourceConverter.GetAffinityForObjects() <= 2)
+                {
+                    __convertedSourceConverter = null;
+                }
+            }
+            var __convertedSource = __convertedSourceConverter == null ? (global::System.IObservable<string>)source : global::ReactiveUI.Primitives.LinqExtensions.Choose<string, string>(
+                source,
+                __value =>
+                {
+                    object __hint = null;
+                    if (__convertedSourceConverter != null)
+                    {
+                        if (__convertedSourceConverter is global::ReactiveUI.Binding.IBindingTypeConverter<string, string> __typed)
+                        {
+                            string __converted;
+                            if (__typed.TryConvert(__value, __hint, out __converted))
+                            {
+                                return (true, __converted);
+                            }
+                        }
+                        else
+                        {
+                            object __boxed;
+                            if (__convertedSourceConverter.TryConvertTyped(__value, __hint, out __boxed))
+                            {
+                                return (true, (string)__boxed);
+                            }
+                        }
+                        if (null == null)
+                        {
+                            return (true, (string)__value);
+                        }
+                        return (false, default(string));
+                    }
+                    return __value != null ? (true, __value) : (true, (string)__value);
+                });
+            return global::ReactiveUI.Binding.BindingErrors.Subscribe(global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__convertedSource, target, __WinFormsViewThreadInvoker.Instance), value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.Text, value))
                 {

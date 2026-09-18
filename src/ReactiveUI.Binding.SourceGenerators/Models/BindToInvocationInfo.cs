@@ -29,4 +29,11 @@ internal sealed record BindToInvocationInfo(
     bool HasConverterOverride,
     string TargetExpressionText,
     InterceptorLocation Interceptor = default,
-    string? TargetViewThreadInvoker = null);
+    string? TargetViewThreadInvoker = null)
+{
+    /// <summary>Gets the typed mechanism converting stream values to the target.</summary>
+    public ConversionInfo? Conversion { get; init; }
+
+    /// <summary>Gets the native mutation of an existing target collection.</summary>
+    public SetMethodInfo? SetMethod { get; init; }
+}

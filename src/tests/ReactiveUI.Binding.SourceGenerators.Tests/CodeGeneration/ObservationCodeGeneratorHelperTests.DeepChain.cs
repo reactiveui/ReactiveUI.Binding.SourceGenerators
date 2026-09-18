@@ -47,17 +47,18 @@ public partial class ObservationCodeGeneratorHelperTests
     public async Task GenerateDeepChainObservation_BeforeChange_SuppressesRepeatedValues()
     {
         var sb = new StringBuilder();
+        var leafInfo = ModelFactory.CreateClassBindingInfo(fullyQualifiedName: AddressTypeName, implementsINPChanging: true);
         var paths = new EquatableArray<EquatableArray<PropertyPathSegment>>([
             new([
                 ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
-                ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName)
+                ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName) with { DeclaringTypeInfo = leafInfo }
             ])
         ]);
         var inv = ModelFactory.CreateInvocationInfo(
             propertyPaths: paths,
             isBeforeChange: true,
             expressionTexts: new EquatableArray<string>([CitySelector]));
-        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true, implementsINPChanging: true);
 
         ObservationCodeGenerator.GenerateDeepChainObservation(sb, inv, classInfo, true);
 
@@ -118,11 +119,12 @@ public partial class ObservationCodeGeneratorHelperTests
     public async Task GenerateDeepChainVariable_BeforeChange_GeneratesPropertyChangingCode()
     {
         var sb = new StringBuilder();
+        var leafInfo = ModelFactory.CreateClassBindingInfo(fullyQualifiedName: AddressTypeName, implementsINPChanging: true);
         var path = new EquatableArray<PropertyPathSegment>([
             ModelFactory.CreatePropertyPathSegment(AddressName, AddressTypeName),
-            ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName)
+            ModelFactory.CreatePropertyPathSegment("City", StringTypeName, AddressTypeName) with { DeclaringTypeInfo = leafInfo }
         ]);
-        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPChanging: true);
+        var classInfo = ModelFactory.CreateClassBindingInfo(implementsINPC: true, implementsINPChanging: true);
 
         ObservationCodeGenerator.GenerateDeepChainVariable(sb, path, classInfo, true, PropObs0Local);
 

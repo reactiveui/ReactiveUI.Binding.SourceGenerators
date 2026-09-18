@@ -66,19 +66,19 @@ internal static class NotifyPropertyEmitter
         bool isBeforeChange,
         bool includeStartWith)
     {
+        var read = GeneratedTypeNames.ReadProperty(segment, castTypeName, "__o");
         if (isBeforeChange)
         {
             _ = sb.Append("new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<").Append(segment.PropertyTypeFullName).Append(">((")
                 .Append("global::System.ComponentModel.INotifyPropertyChanging)").Append(rootVar).Append(", \"").Append(segment.PropertyName)
-                .Append("\", (").Append("global::System.ComponentModel.INotifyPropertyChanging __o) => ((").Append(castTypeName)
-                .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName).Append(')');
+                .Append("\", (").Append("global::System.ComponentModel.INotifyPropertyChanging __o) => ")
+                .Append(read).Append(')');
             return;
         }
 
         _ = sb.Append("new global::ReactiveUI.Binding.Observables.PropertyObservable<").Append(segment.PropertyTypeFullName).Append(">(")
             .Append(rootVar).Append(", \"").Append(segment.PropertyName).Append("\", (")
-            .Append("global::System.ComponentModel.INotifyPropertyChanged __o) => ((").Append(castTypeName)
-            .Append(GeneratedSyntax.ObserverCastClose).Append(segment.PropertyName)
+            .Append("global::System.ComponentModel.INotifyPropertyChanged __o) => ").Append(read)
             .Append(", ").Append(includeStartWith ? "true" : "false").Append(')');
     }
 

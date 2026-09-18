@@ -22,6 +22,10 @@ internal static class ApplePlatformSource
     private const string FoundationStub = """
                                           namespace Foundation
                                           {
+                                              public sealed class ExportAttribute : Attribute
+                                              {
+                                                  public ExportAttribute(string selector) {}
+                                              }
                                               public class NSString
                                               {
                                                   private readonly string _value;
@@ -50,6 +54,7 @@ internal static class ApplePlatformSource
         {
             public class MyAppleView : Foundation.NSObject
             {
+                [Foundation.Export("text")]
                 public string Text { get; set; }
             }
         }
@@ -73,6 +78,7 @@ internal static class ApplePlatformSource
         {
             public class MyAppleView : Foundation.NSObject
             {
+                [Foundation.Export("text")]
                 public string Text { get; set; }
             }
 
