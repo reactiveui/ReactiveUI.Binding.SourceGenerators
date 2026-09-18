@@ -67,7 +67,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             var __switched1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty1,
                 __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
 
-            return global::ReactiveUI.Primitives.LinqExtensions.Merge(
+            return new global::ReactiveUI.Primitives.Advanced.MergeSignal<string>(
                 __switched0,
                 __switched1);
         }

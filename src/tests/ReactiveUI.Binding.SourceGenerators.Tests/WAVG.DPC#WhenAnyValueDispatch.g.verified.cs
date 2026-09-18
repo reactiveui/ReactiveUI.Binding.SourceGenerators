@@ -55,7 +55,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     : (global::System.IObservable<string>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(__parent1, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyValue.DeepPropertyChain.ChildModel)__o).Name, false))
                 : (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
-            return global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obs1);
+            return new global::ReactiveUI.Primitives.Advanced.UniqueSignal<string>(__obs1, global::System.Collections.Generic.EqualityComparer<string>.Default);
         }
 
     }

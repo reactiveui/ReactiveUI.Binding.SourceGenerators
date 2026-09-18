@@ -35,6 +35,9 @@ internal static class GeneratedSyntax
     /// <summary>Declares a local in a generated member's body.</summary>
     internal const string BodyLocalDeclaration = "            var ";
 
+    /// <summary>Returns a constructed value from a generated method.</summary>
+    internal const string ReturnNew = "            return new ";
+
     /// <summary>Declares a local at the indentation an inline emitter writes into.</summary>
     internal const string InlineLocalDeclaration = "        var ";
 

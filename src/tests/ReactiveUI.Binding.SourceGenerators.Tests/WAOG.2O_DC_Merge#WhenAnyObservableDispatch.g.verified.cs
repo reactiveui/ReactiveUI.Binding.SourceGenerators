@@ -58,7 +58,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     : (global::System.IObservable<global::System.IObservable<string>>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(__obsProperty0_p1, "Command1", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel)__o).Command1, false))
                 : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<global::System.IObservable<string>>.Instance);
-            var __obsProperty0 = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obsProperty0_s1);
+            var __obsProperty0 = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::System.IObservable<string>>(__obsProperty0_s1, global::System.Collections.Generic.EqualityComparer<global::System.IObservable<string>>.Default);
 
 
             var __switched0 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty0,
@@ -78,9 +78,9 @@ new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IOb
                     true);
             var __obsProperty1_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel, global::System.IObservable<string>>(__obsProperty1_s0,
                 __obsProperty1_p1 => __obsProperty1_p1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__obsProperty1_p1.GetType(), "Command2", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration7858
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__obsProperty1_p1.GetType(), "Command2", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration7981
                     ? (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<string>>(
-                    __registration7858,
+                    __registration7981,
                     __obsProperty1_p1,
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel, global::System.IObservable<string>>>)(__e => __e.Command2)).Body,
                     "Command2",
@@ -89,13 +89,13 @@ new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IOb
                     : (global::System.IObservable<global::System.IObservable<string>>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(__obsProperty1_p1, "Command2", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableMerge.ChildModel)__o).Command2, false))
                 : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<global::System.IObservable<string>>.Instance);
-            var __obsProperty1 = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obsProperty1_s1);
+            var __obsProperty1 = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::System.IObservable<string>>(__obsProperty1_s1, global::System.Collections.Generic.EqualityComparer<global::System.IObservable<string>>.Default);
 
 
             var __switched1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty1,
                 __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
 
-            return global::ReactiveUI.Primitives.LinqExtensions.Merge(
+            return new global::ReactiveUI.Primitives.Advanced.MergeSignal<string>(
                 __switched0,
                 __switched1);
         }

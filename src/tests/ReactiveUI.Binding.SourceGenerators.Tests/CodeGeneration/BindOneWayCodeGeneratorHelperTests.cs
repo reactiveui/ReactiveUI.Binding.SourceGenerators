@@ -267,10 +267,10 @@ public class BindOneWayCodeGeneratorHelperTests
         await Assert.That(result).Contains(ConversionFuncName);
     }
 
-    /// <summary>Verifies GenerateBindOneWayMethod with scheduler includes .ObserveOn chain.</summary>
+    /// <summary>A scheduled binding constructs a typed witness operator and bypasses the immediate scheduler.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
-    public async Task GenerateBindOneWayMethod_WithScheduler_IncludesObserveOn()
+    public async Task GenerateBindOneWayMethod_WithScheduler_IncludesWitnessOnSignal()
     {
         var sb = new StringBuilder();
         var inv = ModelFactory.CreateBindingInvocationInfo(hasScheduler: true);
@@ -279,7 +279,7 @@ public class BindOneWayCodeGeneratorHelperTests
         BindOneWayCodeGenerator.GenerateBindOneWayMethod(sb, inv, classInfo, TEST00000000TESTName);
 
         var result = sb.ToString();
-        await Assert.That(result).Contains("ObserveOn");
-        await Assert.That(result).Contains("scheduler");
+        await Assert.That(result).Contains("new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<global::System.String>(sourceObs, scheduler)");
+        await Assert.That(result).Contains("scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<global::System.String>)sourceObs");
     }
 }

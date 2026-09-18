@@ -68,7 +68,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     : (global::System.IObservable<global::System.Windows.Input.ICommand>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Windows.Input.ICommand>(__p1, "Save", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.InvokeCommand.DeepCommandPath.ChildViewModel)__o).Save, false))
                 : (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::System.Windows.Input.ICommand>(default(global::System.Windows.Input.ICommand)));
-        var commandObs = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__commandObs_s1);
+        var commandObs = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::System.Windows.Input.ICommand>(__commandObs_s1, global::System.Collections.Generic.EqualityComparer<global::System.Windows.Input.ICommand>.Default);
             return global::ReactiveUI.Binding.CommandBinding.CommandInvoker.Invoke(source, commandObs);
         }
 

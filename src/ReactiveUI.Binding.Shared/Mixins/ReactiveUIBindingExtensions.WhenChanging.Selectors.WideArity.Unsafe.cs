@@ -41,9 +41,11 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T2>> property2,
         Func<T1, T2, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
-            property2).Select(t => conversionFunc(t.Property1, t.Property2));
+            property2),
+            t => conversionFunc(t.Property1, t.Property2));
 
     /// <summary>
     /// Observes changes on 3 properties on the specified object and applies a conversion function to produce a result before any property changes.
@@ -70,10 +72,12 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T3>> property3,
         Func<T1, T2, T3, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
-            property3).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3));
+            property3),
+            t => conversionFunc(t.Property1, t.Property2, t.Property3));
 
     /// <summary>
     /// Observes changes on 4 properties on the specified object and applies a conversion function to produce a result before any property changes.
@@ -103,11 +107,13 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T4>> property4,
         Func<T1, T2, T3, T4, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
-            property4).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4));
+            property4),
+            t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4));
 
     /// <summary>
     /// Observes changes on 5 properties on the specified object and applies a conversion function to produce a result before any property changes.
@@ -141,12 +147,14 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T5>> property5,
         Func<T1, T2, T3, T4, T5, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
             property4,
-            property5).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5));
+            property5),
+            t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5));
 
     /// <summary>
     /// Observes changes on 6 properties on the specified object and applies a conversion function to produce a result before any property changes.
@@ -183,13 +191,15 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T6>> property6,
         Func<T1, T2, T3, T4, T5, T6, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
             property4,
             property5,
-            property6).Select(t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5, t.Property6));
+            property6),
+            t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5, t.Property6));
 
     /// <summary>
     /// Observes changes on 7 properties on the specified object and applies a conversion function to produce a result before any property changes.
@@ -229,14 +239,16 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T7>> property7,
         Func<T1, T2, T3, T4, T5, T6, T7, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
             property4,
             property5,
             property6,
-            property7).Select(t => conversionFunc(
+            property7),
+            t => conversionFunc(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -286,7 +298,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T8>> property8,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
@@ -294,7 +307,8 @@ public static partial class ReactiveUIBindingExtensions
             property5,
             property6,
             property7,
-            property8).Select(t => conversionFunc(
+            property8),
+            t => conversionFunc(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -348,7 +362,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T9>> property9,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
@@ -357,7 +372,8 @@ public static partial class ReactiveUIBindingExtensions
             property6,
             property7,
             property8,
-            property9).Select(t => conversionFunc(
+            property9),
+            t => conversionFunc(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -415,7 +431,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T10>> property10,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
@@ -425,7 +442,8 @@ public static partial class ReactiveUIBindingExtensions
             property7,
             property8,
             property9,
-            property10).Select(t => conversionFunc(
+            property10),
+            t => conversionFunc(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -487,7 +505,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T11>> property11,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
@@ -498,7 +517,8 @@ public static partial class ReactiveUIBindingExtensions
             property8,
             property9,
             property10,
-            property11).Select(t => conversionFunc(
+            property11),
+            t => conversionFunc(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -564,7 +584,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T12>> property12,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
@@ -576,7 +597,8 @@ public static partial class ReactiveUIBindingExtensions
             property9,
             property10,
             property11,
-            property12).Select(t => conversionFunc(
+            property12),
+            t => conversionFunc(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -661,7 +683,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T13>> property13,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
@@ -674,7 +697,8 @@ public static partial class ReactiveUIBindingExtensions
             property10,
             property11,
             property12,
-            property13).Select(t => conversionFunc(
+            property13),
+            t => conversionFunc(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -764,7 +788,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T14>> property14,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
@@ -778,7 +803,8 @@ public static partial class ReactiveUIBindingExtensions
             property11,
             property12,
             property13,
-            property14).Select(t => conversionFunc(
+            property14),
+            t => conversionFunc(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -873,7 +899,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T15>> property15,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
@@ -888,7 +915,8 @@ public static partial class ReactiveUIBindingExtensions
             property12,
             property13,
             property14,
-            property15).Select(t => conversionFunc(
+            property15),
+            t => conversionFunc(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -988,7 +1016,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TObj, T16>> property16,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TReturn> conversionFunc)
         where TObj : class
-        => objectToMonitor.WhenChangingUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>, TReturn>(
+            objectToMonitor.WhenChangingUnsafe(
             property1,
             property2,
             property3,
@@ -1004,7 +1033,8 @@ public static partial class ReactiveUIBindingExtensions
             property13,
             property14,
             property15,
-            property16).Select(t => conversionFunc(
+            property16),
+            t => conversionFunc(
                 t.Property1,
                 t.Property2,
                 t.Property3,

@@ -87,8 +87,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 true);
         var __srcSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, sourceToTargetConv);
         var __tgtSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(targetObs, targetToSourceConv);
-        var sourceBind = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<string>(__srcSelected, scheduler);
-        var targetBind = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<int>(__tgtSelected, scheduler);
+        var sourceBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__srcSelected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__srcSelected, scheduler);
+        var targetBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<int>)__tgtSelected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<int>(__tgtSelected, scheduler);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(sourceBind, value =>
             {

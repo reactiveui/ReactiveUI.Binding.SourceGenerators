@@ -44,6 +44,7 @@
     <Using Include="ReactiveUI.Primitives.Advanced"/>
     <Using Include="ReactiveUI.Primitives.Concurrency"/>
     <Using Include="ReactiveUI.Primitives.Disposables"/>
+    <Using Include="ReactiveUI.Primitives.Extensions"/>
     <Using Include="ReactiveUI.Primitives.Signals"/>
     <Using Include="ReactiveUI.Binding.Builder"/>
     <Using Include="ReactiveUI.Binding.Expressions"/>

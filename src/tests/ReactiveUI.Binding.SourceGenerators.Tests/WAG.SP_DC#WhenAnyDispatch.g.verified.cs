@@ -56,10 +56,10 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     : (global::System.IObservable<string>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<string>(__propObs0_p1, "Name", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAny.DeepPropertyChain.ChildModel)__o).Name, false))
                 : (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
-            var __propObs0 = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__propObs0_s1);
+            var __propObs0 = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<string>(__propObs0_s1, global::System.Collections.Generic.EqualityComparer<string>.Default);
 
 
-            return global::ReactiveUI.Primitives.LinqExtensions.Select(__propObs0,
+            return new global::ReactiveUI.Primitives.Signals.MapSignal<string, string>(__propObs0,
                 value => selector(new global::ReactiveUI.Binding.ObservedChange<global::SharedScenarios.WhenAny.DeepPropertyChain.ParentViewModel, string>(obj, null, value)));
         }
 

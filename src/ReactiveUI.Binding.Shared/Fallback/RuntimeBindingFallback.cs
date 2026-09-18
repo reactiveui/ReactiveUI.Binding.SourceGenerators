@@ -12,14 +12,11 @@ namespace ReactiveUI.Binding.Fallback;
 
 /// <summary>Drives a binding through the runtime observation engine instead of the generated one.</summary>
 /// <remarks>
-/// The generator picks an observation mechanism at compile time from the types it can see. A consumer may
-/// register an <see cref="ICreatesObservableForProperty"/> that outranks that choice, and the binding has to
-/// honour it or the registration would apply to <c>WhenChanged</c> and silently not to a binding. Generated
-/// bindings therefore test the affinity first and route here when the registration wins, which reads the bound
-/// properties through the highest-affinity plugin exactly as the runtime engine does.
+/// Unsafe entry points resolve property paths through the runtime observation engine and cached expression
+/// chains. Their trimming annotations make member discovery explicit at the call site.
 /// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static class RuntimeBindingFallback
+public static partial class RuntimeBindingFallback
 {
     /// <summary>Binds a source property one way onto a target property of the same type.</summary>
     /// <typeparam name="TSource">The type declaring the observed property.</typeparam>
@@ -430,8 +427,20 @@ public static class RuntimeBindingFallback
     /// <param name="target">The object the write lands on, which is what owns the thread it lands from.</param>
     /// <returns>The sequence, observed on the chosen sequencer.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static IObservable<T> Schedule<T>(IObservable<T> values, ISequencer? scheduler, object? target) =>
-        scheduler is null ? BindingSchedulers.ObserveOnViewThread(values, target) : values.ObserveOn(scheduler);
+    private static IObservable<T> Schedule<T>(IObservable<T> values, ISequencer? scheduler, object? target)
+    {
+        if (scheduler is null)
+        {
+            return BindingSchedulers.ObserveOnViewThread(values, target);
+        }
+
+#if REACTIVE_SHIM
+        var immediate = Scheduler.Immediate;
+#else
+        var immediate = Sequencer.Immediate;
+#endif
+        return scheduler == immediate ? values : new WitnessOnSignal<T>(values, scheduler);
+    }
 
     /// <summary>Wires a forward and a reverse write, dropping the target's initial value so it does not echo back.</summary>
     /// <typeparam name="TSource">The type declaring the source property.</typeparam>

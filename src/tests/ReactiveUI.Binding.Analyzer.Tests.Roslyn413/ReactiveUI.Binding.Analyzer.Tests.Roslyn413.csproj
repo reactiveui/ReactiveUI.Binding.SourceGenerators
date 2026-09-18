@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ReactiveUI.Binding.Analyzer.Roslyn413\ReactiveUI.Binding.Analyzer.Roslyn413.csproj"/>
+    <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
   </ItemGroup>
 
   <!-- No test source of its own: it recompiles the baseline project's files against the other analyzer. -->

@@ -141,7 +141,7 @@ internal static class WhenAnyObservableCodeGenerator
             .AppendLine();
 
         // Switch pattern: take the observable property value, replace null with Empty, and switch
-        _ = sb.Append("            return new ").Append(SwitchMapSignal).Append('<').Append(ObservableOf(innerType)).Append(", ").Append(innerType)
+        _ = sb.Append(GeneratedSyntax.ReturnNew).Append(SwitchMapSignal).Append('<').Append(ObservableOf(innerType)).Append(", ").Append(innerType)
             .AppendLine(">(__obsProperty,").Append(ObservableFallbackOpen).Append(innerType)
             .Append(EmptySignalOpen).Append(innerType).Append(SingletonInstanceClose);
     }
@@ -157,7 +157,13 @@ internal static class WhenAnyObservableCodeGenerator
     {
         EmitSwitchedObservables(sb, inv, classInfo);
 
-        _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.Merge(");
+        _ = sb.Append(GeneratedSyntax.ReturnNew).Append(MergeSignal).Append('<').Append(inv.ReturnTypeFullName).Append(">(");
+        if (inv.PropertyPaths.Length > 2)
+        {
+            _ = sb.Append("new global::System.IObservable<").Append(inv.ReturnTypeFullName).Append(">[] {");
+        }
+
+        _ = sb.AppendLine();
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             _ = sb.Append("                __switched").Append(i);
@@ -165,6 +171,11 @@ internal static class WhenAnyObservableCodeGenerator
             {
                 _ = sb.AppendLine(",");
             }
+        }
+
+        if (inv.PropertyPaths.Length > 2)
+        {
+            _ = sb.Append(" }");
         }
 
         _ = sb.Append(");");
@@ -184,7 +195,17 @@ internal static class WhenAnyObservableCodeGenerator
     {
         EmitSwitchedObservables(sb, inv, classInfo);
 
-        _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
+        if (inv.PropertyPaths.Length == 2)
+        {
+            _ = sb.Append(GeneratedSyntax.ReturnNew).Append(CombineLatestSignal).Append('<')
+                .Append(inv.InnerObservableTypeFullNames[0]).Append(", ").Append(inv.InnerObservableTypeFullNames[1]).Append(", ")
+                .Append(inv.ReturnTypeFullName).AppendLine(">(");
+        }
+        else
+        {
+            _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
+        }
+
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             _ = sb.Append("                __switched").Append(i).AppendLine(",");

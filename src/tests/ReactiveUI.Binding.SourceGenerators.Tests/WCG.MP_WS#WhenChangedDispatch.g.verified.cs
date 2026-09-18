@@ -62,7 +62,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     false,
                     true);
 
-            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
+            return new global::ReactiveUI.Primitives.Advanced.CombineLatestSignal<string, string, string>(
                 __propObs0,
                 __propObs1,
                 selector);

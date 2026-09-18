@@ -745,18 +745,33 @@ time, so it cannot run under NativeAOT.
 `WhenAnyValue`, `OneWayBind` and `Bind` use ReactiveUI's names. They make code written for ReactiveUI easier to
 move across.
 
-### `TriggerUpdate` and `signalViewUpdate` are not offered
+### Observation delivery is serialized
 
-ReactiveUI's `Bind` accepts both. `TriggerUpdate` chooses which side wins the first write. `signalViewUpdate`
-replaces the view's change stream with one you supply.
+Property observations deliver on the raising thread when the delivery gate is available. A competing producer
+waits up to 20 ms, then hands its notification to the delivering thread. Subscriber calls do not hold a lock,
+so a subscriber can wait for another thread to update the same property. Observation APIs leave scheduling
+to the caller.
 
-This library has no overload for either, so a call that uses one does not compile. A generated binding is built
-from its two lambdas alone. A stream you pass in cannot be read when you build. An overload that took one would
-have to use reflection. That overload would carry `[RequiresUnreferencedCode]` and break a `PublishAot` build for
-every caller.
+After-change and custom-provider observations read inside the gate and collapse contended changes to the
+latest value. A change raised by the subscriber is delivered after that subscriber returns. Before-change
+observations capture values before the write and preserve their order; a nested notification on the delivering
+thread reaches the subscriber before the nested setter writes. Disposal stops pending delivery.
 
-The first write follows ReactiveUI's default. The view model's value is written first. The view's own first value
-is then compared with it. The view's value is dropped when the two are equal.
+### `TriggerUpdate` and `signalViewUpdate` use `BindUnsafe`
+
+The view-first `BindUnsafe` overloads accept an update stream and `TriggerUpdate`, with either registered
+converters or explicit conversion delegates. These overloads resolve property paths by reflection and carry
+`RequiresUnreferencedCode`; calling them produces a trimming diagnostic. Generated bindings use the two
+property lambdas and do not offer these parameters.
+
+`ViewToViewModel` is the default. A supplied stream replaces the view's change notifications, so editing the
+view writes back only when the stream signals. With `ViewModelToView`, the stream drives model-to-view updates
+after the initial model notification, and the view's own notifications always participate. A null stream observes
+both properties in either mode; pass a typed null such as `(IObservable<int>?)null` for type inference.
+
+Both sides are wired before a single initial signal writes from view model to view. Each signal reads the
+current values when delivered, converts in its selected direction, and skips a write when the converted value
+equals the destination. Disposing the binding disconnects both directions and the supplied stream.
 
 ### Every binding writes on the thread that owns the view
 

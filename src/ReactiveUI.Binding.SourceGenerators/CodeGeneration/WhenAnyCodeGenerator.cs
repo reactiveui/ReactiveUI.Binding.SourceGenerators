@@ -161,7 +161,8 @@ internal static class WhenAnyCodeGenerator
             .AppendLine();
 
         // Wrap in ObservedChange and apply selector
-        _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.Select(__propObs0,")
+        _ = sb.Append("            return new ").Append(GeneratedTypeNames.MapSignal).Append('<')
+            .Append(leafType).Append(", ").Append(inv.ReturnTypeFullName).AppendLine(">(__propObs0,")
             .Append("                value => selector(new global::ReactiveUI.Binding.ObservedChange<").Append(inv.SourceTypeFullName).Append(", ")
             .Append(leafType).Append(">(obj, null, value)));");
     }
@@ -197,7 +198,7 @@ internal static class WhenAnyCodeGenerator
                 .AppendLine();
         }
 
-        _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
+        ObservationCodeGenerator.AppendCombineLatestConstruction(sb, inv.PropertyPaths, inv.ReturnTypeFullName);
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             _ = sb.Append("                __propObs").Append(i);

@@ -80,8 +80,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 true);
         var __vmSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(vmObs, viewModelToViewConverter);
         var __viewSelected = new global::ReactiveUI.Primitives.Signals.MapSignal<string, int>(viewObs, viewToViewModelConverter);
-        var vmBind = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<string>(__vmSelected, scheduler);
-        var viewBind = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<int>(__viewSelected, scheduler);
+        var vmBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__vmSelected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__vmSelected, scheduler);
+        var viewBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<int>)__viewSelected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<int>(__viewSelected, scheduler);
 
             var __vmTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<string, global::System.ValueTuple<bool, string, int>>(vmBind, v => new global::System.ValueTuple<bool, string, int>(true, v, default(int)));
             var __viewTagged = new global::ReactiveUI.Primitives.Signals.MapSignal<int, global::System.ValueTuple<bool, string, int>>(viewBind, v => new global::System.ValueTuple<bool, string, int>(false, default(string), v));

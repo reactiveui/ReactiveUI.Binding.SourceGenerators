@@ -163,8 +163,8 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     }
                     return __value != null ? (true, __value) : (true, (string)__value);
                 });
-        var sourceBind = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<string>(__convertedForward, scheduler);
-        var targetBind = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<string>(__convertedReverse, scheduler);
+        var sourceBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__convertedForward : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__convertedForward, scheduler);
+        var targetBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__convertedReverse : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__convertedReverse, scheduler);
 
             var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(sourceBind, value =>
             {

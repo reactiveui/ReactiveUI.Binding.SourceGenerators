@@ -62,7 +62,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     false,
                     true);
 
-            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
+            return new global::ReactiveUI.Primitives.Advanced.CombineLatestSignal<string, string, string>(
                 __propObs0,
                 __propObs1,
                 (v1, v2) => selector(new global::ReactiveUI.Binding.ObservedChange<global::SharedScenarios.WhenAny.MultiPropertyTwoProperties.MyViewModel, string>(obj, null, v1), new global::ReactiveUI.Binding.ObservedChange<global::SharedScenarios.WhenAny.MultiPropertyTwoProperties.MyViewModel, string>(obj, null, v2)));

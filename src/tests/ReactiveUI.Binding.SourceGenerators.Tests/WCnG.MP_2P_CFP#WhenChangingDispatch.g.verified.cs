@@ -58,7 +58,7 @@ namespace ReactiveUI.Binding
                     true,
                     true);
 
-            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
+            return new global::ReactiveUI.Primitives.Advanced.CombineLatestSignal<string, int, global::ReactiveUI.Binding.PropertyValues<string, int>>(
                 __propObs0,
                 __propObs1,
                 (p1, p2) => new global::ReactiveUI.Binding.PropertyValues<string, int>(p1, p2));

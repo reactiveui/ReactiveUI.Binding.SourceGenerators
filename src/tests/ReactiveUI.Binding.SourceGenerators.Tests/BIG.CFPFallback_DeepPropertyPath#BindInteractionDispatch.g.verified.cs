@@ -68,7 +68,7 @@ namespace ReactiveUI.Binding
                     : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<global::ReactiveUI.Binding.Interaction<string, bool>>(__p1, "Confirm", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindInteraction.DeepPropertyPath.ChildViewModel)__o).Confirm, false))
                 : (global::System.IObservable<global::ReactiveUI.Binding.Interaction<string, bool>>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::ReactiveUI.Binding.Interaction<string, bool>>(default(global::ReactiveUI.Binding.Interaction<string, bool>)));
-        var interactionObs = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__interactionObs_s1);
+        var interactionObs = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::ReactiveUI.Binding.Interaction<string, bool>>(__interactionObs_s1, global::System.Collections.Generic.EqualityComparer<global::ReactiveUI.Binding.Interaction<string, bool>>.Default);
 
             var sub = global::ReactiveUI.Primitives.SubscribeExtensions.Subscribe(interactionObs, interaction =>
             {

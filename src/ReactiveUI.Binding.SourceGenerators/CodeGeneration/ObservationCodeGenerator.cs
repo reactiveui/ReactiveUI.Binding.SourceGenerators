@@ -56,8 +56,8 @@ internal static class ObservationCodeGenerator
     /// <summary>Names the local holding the registration that outranked that mechanism.</summary>
     private const string RegistrationVariableSuffix = "Registration";
 
-    /// <summary>The operator every observation ends with, so consecutive equal values are suppressed.</summary>
-    private const string DistinctUntilChangedCall = "global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged";
+    /// <summary>Opens a fully qualified default equality comparer.</summary>
+    private const string EqualityComparerOpen = "global::System.Collections.Generic.EqualityComparer<";
 
     /// <summary>
     /// Returns the fully qualified type name for casting the observer parameter back to the
@@ -149,7 +149,8 @@ internal static class ObservationCodeGenerator
 
                 if (inv.HasSelector)
                 {
-                    _ = sb.Append("            return global::ReactiveUI.Primitives.LinqExtensions.Select(");
+                    _ = sb.Append("            return new ").Append(MapSignal).Append('<')
+                        .Append(path[0].PropertyTypeFullName).Append(", ").Append(inv.ReturnTypeFullName).Append(">(");
                     GenerateShallowPathObservation(sb, path, classInfo, isBeforeChange);
                     _ = sb.AppendLine(", selector);");
                 }
@@ -191,6 +192,30 @@ internal static class ObservationCodeGenerator
         return sb.ToStringAndReturn();
     }
 
+    /// <summary>Starts a typed pair constructor or the wide-arity factory.</summary>
+    /// <param name="sb">The output builder.</param>
+    /// <param name="paths">The observed property paths.</param>
+    /// <param name="returnType">The projected result type.</param>
+    internal static void AppendCombineLatestConstruction(
+        StringBuilder sb,
+        EquatableArray<EquatableArray<PropertyPathSegment>> paths,
+        string returnType)
+    {
+        if (paths.Length == 2)
+        {
+            var left = paths[0];
+            var right = paths[1];
+            _ = sb.Append(GeneratedSyntax.ReturnNew).Append(CombineLatestSignal).Append('<')
+                .Append(left[left.Length - 1].PropertyTypeFullName).Append(", ")
+                .Append(right[right.Length - 1].PropertyTypeFullName).Append(", ")
+                .Append(returnType).AppendLine(">(");
+        }
+        else
+        {
+            _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
+        }
+    }
+
     /// <summary>
     /// Generates a multi-property observation method body using CombineLatest.
     /// Each property path observable is pre-declared as a local variable with properly
@@ -221,7 +246,7 @@ internal static class ObservationCodeGenerator
                 .AppendLine();
         }
 
-        _ = sb.AppendLine("            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(");
+        AppendCombineLatestConstruction(sb, inv.PropertyPaths, inv.ReturnTypeFullName);
         for (var i = 0; i < inv.PropertyPaths.Length; i++)
         {
             _ = sb.Append("                __propObs").Append(i);
@@ -405,9 +430,9 @@ internal static class ObservationCodeGenerator
 
         // Distinct on both timings. The runtime engine asks for it whichever way it observes, so a
         // before-change stream that repeated a value would emit where the runtime engine stayed quiet.
-        _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(varName)
-            .Append(" = ").Append(DistinctUntilChangedCall).Append('(')
-            .Append(lastObsVar).AppendLine(");");
+        _ = sb.Append(GeneratedSyntax.BodyLocalDeclaration).Append(varName).Append(" = ");
+        AppendUniqueObservation(sb, path[path.Length - 1].PropertyTypeFullName, lastObsVar);
+        _ = sb.AppendLine(";");
     }
 
     /// <summary>
@@ -597,8 +622,21 @@ internal static class ObservationCodeGenerator
         EmitObservationChainInnerSegments(sb, path, isBeforeChange);
 
         var lastObs = $"__obs{path.Length - 1}";
-        _ = sb.Append("            return ").Append(DistinctUntilChangedCall).Append('(')
-            .Append(lastObs).Append(");");
+        var leafType = path[path.Length - 1].PropertyTypeFullName;
+        _ = sb.Append("            return ");
+        if (inv.HasSelector)
+        {
+            _ = sb.Append("new ").Append(MapSignal).Append('<').Append(leafType).Append(", ")
+                .Append(inv.ReturnTypeFullName).Append(">(");
+        }
+
+        AppendUniqueObservation(sb, leafType, lastObs);
+        if (inv.HasSelector)
+        {
+            _ = sb.Append(", selector)");
+        }
+
+        _ = sb.Append(';');
     }
 
     /// <summary>
@@ -982,9 +1020,19 @@ internal static class ObservationCodeGenerator
         }
 
         var lastSeg = $"__{variableName}_s{propertyPath.Length - 1}";
-        _ = sb.Append(GeneratedSyntax.InlineLocalDeclaration).Append(variableName).Append(" = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(")
-            .Append(lastSeg).AppendLine(");");
+        _ = sb.Append(GeneratedSyntax.InlineLocalDeclaration).Append(variableName).Append(" = ");
+        AppendUniqueObservation(sb, propertyPath[propertyPath.Length - 1].PropertyTypeFullName, lastSeg);
+        _ = sb.AppendLine(";");
     }
+
+    /// <summary>Constructs typed distinct-value filtering with the default comparer.</summary>
+    /// <param name="sb">The output builder.</param>
+    /// <param name="valueType">The observed value type.</param>
+    /// <param name="source">The source variable.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AppendUniqueObservation(StringBuilder sb, string valueType, string source) =>
+        sb.Append("new ").Append(UniqueSignal).Append('<').Append(valueType).Append(">(")
+            .Append(source).Append(", ").Append(EqualityComparerOpen).Append(valueType).Append(">.Default)");
 
     /// <summary>
     /// Computes the worker-method suffix for an observation invocation, keyed only by the source type and

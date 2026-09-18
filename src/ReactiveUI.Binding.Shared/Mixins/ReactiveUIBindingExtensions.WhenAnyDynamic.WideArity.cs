@@ -62,7 +62,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
     {
         var chains = Chains(sender, selector, isDistinct, property1);
-        return chains[0].Select(selector);
+        return new MapSignal<IObservedChange<TSender, object?>, TRet>(chains[0], selector);
     }
 
     /// <summary>Observes 2 dynamically-typed property chains and combines them with a selector.</summary>

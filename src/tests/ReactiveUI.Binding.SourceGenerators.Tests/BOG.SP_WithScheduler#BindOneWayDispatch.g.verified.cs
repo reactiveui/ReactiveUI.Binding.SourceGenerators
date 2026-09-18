@@ -111,7 +111,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     }
                     return __value != null ? (true, __value) : (true, (string)__value);
                 });
-        var bindObs = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<string>(__convertedForward, scheduler);
+        var bindObs = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__convertedForward : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__convertedForward, scheduler);
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(bindObs, value =>
             {

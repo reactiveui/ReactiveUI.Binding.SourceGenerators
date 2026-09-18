@@ -41,6 +41,7 @@
     <Using Include="ReactiveUI.Primitives.Signals"/>
     <Using Include="ReactiveUI.Primitives.Reactive.Signals"/>
     <Using Include="ReactiveUI.Primitives.Disposables"/>
+    <Using Include="ReactiveUI.Primitives.Extensions"/>
     <Using Include="ReactiveUI.Binding.Reactive.Builder"/>
     <Using Include="ReactiveUI.Binding.Reactive.Expressions"/>
     <Using Include="ReactiveUI.Binding.Reactive.Fallback"/>

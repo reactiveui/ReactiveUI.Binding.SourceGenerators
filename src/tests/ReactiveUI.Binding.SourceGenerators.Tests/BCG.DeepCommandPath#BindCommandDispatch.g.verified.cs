@@ -75,7 +75,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     : (global::System.IObservable<global::System.Windows.Input.ICommand>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.Windows.Input.ICommand>(__p1, "SaveCommand", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.ChildViewModel)__o).SaveCommand, false))
                 : (global::System.IObservable<global::System.Windows.Input.ICommand>)new global::ReactiveUI.Primitives.Advanced.ImmediateReturnSignal<global::System.Windows.Input.ICommand>(default(global::System.Windows.Input.ICommand)));
-        var __commandChanges = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(____commandChanges_s1);
+        var __commandChanges = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::System.Windows.Input.ICommand>(____commandChanges_s1, global::System.Collections.Generic.EqualityComparer<global::System.Windows.Input.ICommand>.Default);
             var commandObs = global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(__commandChanges, view);
             var __controlChangesMechanism = new global::ReactiveUI.Binding.Observables.PropertyObservable<global::SharedScenarios.BindCommand.DeepCommandPath.MyButton>(view, "SaveButton", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.BindCommand.DeepCommandPath.MyView)__o).SaveButton, true);
         var __controlChangesRegistration = global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(view.GetType(), "SaveButton", 5, false);

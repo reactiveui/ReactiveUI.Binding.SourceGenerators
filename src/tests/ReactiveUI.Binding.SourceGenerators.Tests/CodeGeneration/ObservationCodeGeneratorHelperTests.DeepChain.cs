@@ -35,7 +35,7 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("__obs0");
         await Assert.That(result).Contains("__obs1");
         await Assert.That(result).Contains(SwitchSinkFragment);
-        await Assert.That(result).Contains(DistinctUntilChangedFragment);
+        await Assert.That(result).Contains(UniqueSignalFragment);
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains("PropertyChanging");
-        await Assert.That(result).Contains(DistinctUntilChangedName);
+        await Assert.That(result).Contains(UniqueSignalName);
     }
 
     /// <summary>Verifies GenerateDeepChainVariable generates variable declarations for deep chain.</summary>
@@ -86,7 +86,7 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("var __propObs0_s1");
         await Assert.That(result).Contains("var __propObs0");
         await Assert.That(result).Contains(SwitchSinkFragment);
-        await Assert.That(result).Contains(DistinctUntilChangedFragment);
+        await Assert.That(result).Contains(UniqueSignalFragment);
     }
 
     /// <summary>
@@ -130,7 +130,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains("PropertyChanging");
-        await Assert.That(result).Contains(DistinctUntilChangedName);
+        await Assert.That(result).Contains(UniqueSignalName);
     }
 
     /// <summary>Verifies EmitInlineObservation with single property INPC generates PropertyObservable.</summary>
@@ -201,7 +201,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(SwitchSinkFragment);
-        await Assert.That(result).Contains(DistinctUntilChangedFragment);
+        await Assert.That(result).Contains(UniqueSignalFragment);
         await Assert.That(result).Contains(SourceObsDeclaration);
     }
 
@@ -239,7 +239,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(PropertyObservableName);
-        await Assert.That(result).Contains(DistinctUntilChangedName);
+        await Assert.That(result).Contains(UniqueSignalName);
     }
 
     /// <summary>Verifies GenerateDeepChainObservation with null classInfo generates after-change code with ImmediateReturnSignal fallback.</summary>
@@ -286,7 +286,7 @@ public partial class ObservationCodeGeneratorHelperTests
 
         var result = sb.ToString();
         await Assert.That(result).Contains(PropertyObservableName);
-        await Assert.That(result).Contains(DistinctUntilChangedName);
+        await Assert.That(result).Contains(UniqueSignalName);
     }
 
     /// <summary>Verifies EmitInlineObservation with null classInfo generates PropertyObservable (uses null-safe path).</summary>
@@ -369,6 +369,6 @@ public partial class ObservationCodeGeneratorHelperTests
         await Assert.That(result).Contains("__sourceObs_s0");
         await Assert.That(result).Contains("__sourceObs_s1");
         await Assert.That(result).Contains("Switch");
-        await Assert.That(result).Contains(DistinctUntilChangedName);
+        await Assert.That(result).Contains(UniqueSignalName);
     }
 }

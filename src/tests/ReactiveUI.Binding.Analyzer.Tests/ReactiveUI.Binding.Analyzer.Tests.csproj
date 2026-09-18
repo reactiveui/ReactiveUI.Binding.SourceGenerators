@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ReactiveUI.Binding.Analyzer\ReactiveUI.Binding.Analyzer.csproj"/>
+    <ProjectReference Include="..\..\ReactiveUI.Binding\ReactiveUI.Binding.csproj"/>
   </ItemGroup>
 
   <ItemGroup>

@@ -55,7 +55,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     : (global::System.IObservable<global::System.IObservable<string>>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(__obsProperty_p1, "MyCommand", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableSwitch.ChildModel)__o).MyCommand, false))
                 : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<global::System.IObservable<string>>.Instance);
-            var __obsProperty = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obsProperty_s1);
+            var __obsProperty = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::System.IObservable<string>>(__obsProperty_s1, global::System.Collections.Generic.EqualityComparer<global::System.IObservable<string>>.Default);
 
 
             return new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty,

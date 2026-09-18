@@ -59,7 +59,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     : (global::System.IObservable<global::System.IObservable<int>>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<int>>(__obsProperty0_p1, "Count", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableCombineLatest.ChildModel)__o).Count, false))
                 : (global::System.IObservable<global::System.IObservable<int>>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<global::System.IObservable<int>>.Instance);
-            var __obsProperty0 = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obsProperty0_s1);
+            var __obsProperty0 = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::System.IObservable<int>>(__obsProperty0_s1, global::System.Collections.Generic.EqualityComparer<global::System.IObservable<int>>.Default);
 
 
             var __switched0 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<int>, int>(__obsProperty0,
@@ -79,9 +79,9 @@ new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IOb
                     true);
             var __obsProperty1_s1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::SharedScenarios.WhenAnyObservable.DeepObservableCombineLatest.ChildModel, global::System.IObservable<string>>(__obsProperty1_s0,
                 __obsProperty1_p1 => __obsProperty1_p1 != null
-                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__obsProperty1_p1.GetType(), "Message", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration8139
+                ? (global::ReactiveUI.Binding.Fallback.ObservationAffinityChecker.FindHigherAffinityPlugin(__obsProperty1_p1.GetType(), "Message", 5, false) is global::ReactiveUI.Binding.ICreatesObservableForProperty __registration8256
                     ? (global::System.IObservable<global::System.IObservable<string>>)new global::ReactiveUI.Binding.Observables.PluginPropertyObservable<global::System.IObservable<string>>(
-                    __registration8139,
+                    __registration8256,
                     __obsProperty1_p1,
                     ((global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.WhenAnyObservable.DeepObservableCombineLatest.ChildModel, global::System.IObservable<string>>>)(__e => __e.Message)).Body,
                     "Message",
@@ -90,13 +90,13 @@ new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IOb
                     : (global::System.IObservable<global::System.IObservable<string>>)
 new global::ReactiveUI.Binding.Observables.PropertyObservable<global::System.IObservable<string>>(__obsProperty1_p1, "Message", (global::System.ComponentModel.INotifyPropertyChanged __o) => ((global::SharedScenarios.WhenAnyObservable.DeepObservableCombineLatest.ChildModel)__o).Message, false))
                 : (global::System.IObservable<global::System.IObservable<string>>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<global::System.IObservable<string>>.Instance);
-            var __obsProperty1 = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__obsProperty1_s1);
+            var __obsProperty1 = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<global::System.IObservable<string>>(__obsProperty1_s1, global::System.Collections.Generic.EqualityComparer<global::System.IObservable<string>>.Default);
 
 
             var __switched1 = new global::ReactiveUI.Primitives.Advanced.SwitchMapSignal<global::System.IObservable<string>, string>(__obsProperty1,
                 __obs => __obs ?? (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
 
-            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
+            return new global::ReactiveUI.Primitives.Advanced.CombineLatestSignal<int, string, string>(
                 __switched0,
                 __switched1,
                 selector);

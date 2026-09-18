@@ -59,7 +59,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     : (global::System.IObservable<string>)
 new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>((global::System.ComponentModel.INotifyPropertyChanging)__propObs0_p1, "City", (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.AddressModel)__o).City))
                 : (global::System.IObservable<string>)global::ReactiveUI.Primitives.Advanced.ImmutableEmptySignal<string>.Instance);
-            var __propObs0 = global::ReactiveUI.Primitives.LinqExtensions.DistinctUntilChanged(__propObs0_s1);
+            var __propObs0 = new global::ReactiveUI.Primitives.Advanced.UniqueSignal<string>(__propObs0_s1, global::System.Collections.Generic.EqualityComparer<string>.Default);
 
 
             var __propObs1Mechanism = new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>((global::System.ComponentModel.INotifyPropertyChanging)obj, "Name", (global::System.ComponentModel.INotifyPropertyChanging __o) => ((global::SharedScenarios.WhenChanging.MultiPropertyWithDeepChains.MyViewModel)__o).Name);
@@ -76,7 +76,7 @@ new global::ReactiveUI.Binding.Observables.PropertyChangingObservable<string>((g
                     true,
                     true);
 
-            return global::ReactiveUI.Primitives.LinqExtensions.CombineLatest(
+            return new global::ReactiveUI.Primitives.Advanced.CombineLatestSignal<string, string, string>(
                 __propObs0,
                 __propObs1,
                 selector);

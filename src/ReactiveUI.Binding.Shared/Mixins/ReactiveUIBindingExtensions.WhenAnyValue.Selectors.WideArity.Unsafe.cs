@@ -37,8 +37,7 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T1>> property1,
         Func<T1, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(property1)
-            .Select(selector);
+        => new MapSignal<T1, TRet>(sender.WhenAnyValueUnsafe(property1), selector);
 
     /// <summary>
     /// Observes 2 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
@@ -62,8 +61,7 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T2>> property2,
         Func<T1, T2, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(property1, property2)
-            .Select(t => selector(t.Property1, t.Property2));
+        => new MapSignal<PropertyValues<T1, T2>, TRet>(sender.WhenAnyValueUnsafe(property1, property2), t => selector(t.Property1, t.Property2));
 
     /// <summary>
     /// Observes 3 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
@@ -90,10 +88,12 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T3>> property3,
         Func<T1, T2, T3, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
-            property3).Select(t => selector(t.Property1, t.Property2, t.Property3));
+            property3),
+            t => selector(t.Property1, t.Property2, t.Property3));
 
     /// <summary>
     /// Observes 4 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
@@ -123,11 +123,13 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T4>> property4,
         Func<T1, T2, T3, T4, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
-            property4).Select(t => selector(t.Property1, t.Property2, t.Property3, t.Property4));
+            property4),
+            t => selector(t.Property1, t.Property2, t.Property3, t.Property4));
 
     /// <summary>
     /// Observes 5 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
@@ -161,12 +163,14 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T5>> property5,
         Func<T1, T2, T3, T4, T5, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
             property4,
-            property5).Select(t => selector(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5));
+            property5),
+            t => selector(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5));
 
     /// <summary>
     /// Observes 6 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
@@ -203,13 +207,15 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T6>> property6,
         Func<T1, T2, T3, T4, T5, T6, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
             property4,
             property5,
-            property6).Select(t => selector(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5, t.Property6));
+            property6),
+            t => selector(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5, t.Property6));
 
     /// <summary>
     /// Observes 7 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
@@ -249,14 +255,16 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T7>> property7,
         Func<T1, T2, T3, T4, T5, T6, T7, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
             property4,
             property5,
             property6,
-            property7).Select(t => selector(
+            property7),
+            t => selector(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -306,7 +314,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T8>> property8,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
@@ -314,7 +323,8 @@ public static partial class ReactiveUIBindingExtensions
             property5,
             property6,
             property7,
-            property8).Select(t => selector(
+            property8),
+            t => selector(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -368,7 +378,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T9>> property9,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
@@ -377,7 +388,8 @@ public static partial class ReactiveUIBindingExtensions
             property6,
             property7,
             property8,
-            property9).Select(t => selector(
+            property9),
+            t => selector(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -435,7 +447,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T10>> property10,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
@@ -445,7 +458,8 @@ public static partial class ReactiveUIBindingExtensions
             property7,
             property8,
             property9,
-            property10).Select(t => selector(
+            property10),
+            t => selector(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -507,7 +521,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T11>> property11,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
@@ -518,7 +533,8 @@ public static partial class ReactiveUIBindingExtensions
             property8,
             property9,
             property10,
-            property11).Select(t => selector(
+            property11),
+            t => selector(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -584,7 +600,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T12>> property12,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
@@ -596,7 +613,8 @@ public static partial class ReactiveUIBindingExtensions
             property9,
             property10,
             property11,
-            property12).Select(t => selector(
+            property12),
+            t => selector(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -666,7 +684,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T13>> property13,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
@@ -679,7 +698,8 @@ public static partial class ReactiveUIBindingExtensions
             property10,
             property11,
             property12,
-            property13).Select(t => selector(
+            property13),
+            t => selector(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -769,7 +789,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T14>> property14,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
@@ -783,7 +804,8 @@ public static partial class ReactiveUIBindingExtensions
             property11,
             property12,
             property13,
-            property14).Select(t => selector(
+            property14),
+            t => selector(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -878,7 +900,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T15>> property15,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
@@ -893,7 +916,8 @@ public static partial class ReactiveUIBindingExtensions
             property12,
             property13,
             property14,
-            property15).Select(t => selector(
+            property15),
+            t => selector(
                 t.Property1,
                 t.Property2,
                 t.Property3,
@@ -993,7 +1017,8 @@ public static partial class ReactiveUIBindingExtensions
         Expression<Func<TSender, T16>> property16,
         Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TRet> selector)
         where TSender : class
-        => sender.WhenAnyValueUnsafe(
+        => new MapSignal<PropertyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>, TRet>(
+            sender.WhenAnyValueUnsafe(
             property1,
             property2,
             property3,
@@ -1009,7 +1034,8 @@ public static partial class ReactiveUIBindingExtensions
             property13,
             property14,
             property15,
-            property16).Select(t => selector(
+            property16),
+            t => selector(
                 t.Property1,
                 t.Property2,
                 t.Property3,

@@ -73,7 +73,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 false,
                 true);
         var __selected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, conversionFunc);
-        var bindObs = global::ReactiveUI.Primitives.LinqExtensions.ObserveOn<string>(__selected, scheduler);
+        var bindObs = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__selected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__selected, scheduler);
 
             return global::ReactiveUI.Binding.BindingErrors.Subscribe(bindObs, value =>
             {

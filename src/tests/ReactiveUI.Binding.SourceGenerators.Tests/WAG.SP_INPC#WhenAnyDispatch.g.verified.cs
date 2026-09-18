@@ -45,7 +45,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     false,
                     true);
 
-            return global::ReactiveUI.Primitives.LinqExtensions.Select(__propObs0,
+            return new global::ReactiveUI.Primitives.Signals.MapSignal<string, string>(__propObs0,
                 value => selector(new global::ReactiveUI.Binding.ObservedChange<global::SharedScenarios.WhenAny.SinglePropertyINPC.MyViewModel, string>(obj, null, value)));
         }
 
