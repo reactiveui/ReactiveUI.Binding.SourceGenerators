@@ -22,6 +22,12 @@ namespace ReactiveUI.Binding;
 /// Interactions have both an input and an output. The interaction's input provides handlers the information
 /// they require to ask a question. The handler then provides the interaction with an output as the answer.
 /// </para>
+/// <para>
+/// This contract covers handler registration only, which is all a binding needs. Asking the question is the
+/// caller's own concern, so the method that does it belongs to the implementation:
+/// <see cref="Interaction{TInput, TOutput}.Handle(TInput)"/> returns a task, while a host framework that
+/// prefers observables can return one from its own type without conflicting with this interface.
+/// </para>
 /// </remarks>
 public interface IInteraction<TInput, TOutput>
 {
@@ -40,9 +46,4 @@ public interface IInteraction<TInput, TOutput>
     /// <param name="handler">The handler.</param>
     /// <returns>A disposable which, when disposed, will unregister the handler.</returns>
     IDisposable RegisterHandler<TDontCare>(Func<IInteractionContext<TInput, TOutput>, IObservable<TDontCare>> handler);
-
-    /// <summary>Handles an interaction and asynchronously returns the result.</summary>
-    /// <param name="input">The input for the interaction.</param>
-    /// <returns>A task that completes with the output when the interaction is handled.</returns>
-    Task<TOutput> Handle(TInput input);
 }

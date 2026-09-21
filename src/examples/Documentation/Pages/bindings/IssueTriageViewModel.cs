@@ -8,8 +8,8 @@ using ReactiveUI.Binding.Documentation.Infrastructure;
 namespace ReactiveUI.Binding.Documentation.Bindings;
 
 /// <summary>
-/// The triage panel of the issue board. It exposes the board's close confirmation through the
-/// <see cref="IInteraction{TInput, TOutput}"/> interface, so the panel's view never sees the concrete interaction.
+/// The triage panel of the issue board. It hands the board's close confirmation straight to the panel's
+/// view, which registers a handler against it.
 /// </summary>
 /// <param name="board">The issue board the panel triages.</param>
 [System.Diagnostics.DebuggerDisplay("Board = {Board}")]
@@ -19,5 +19,5 @@ public sealed class IssueTriageViewModel(IssueBoardViewModel board) : Observable
     public IssueBoardViewModel Board { get; } = board;
 
     /// <summary>Gets the question the view answers before the board closes an issue.</summary>
-    public IInteraction<Issue, bool> ConfirmClose { get; } = board.ConfirmClose;
+    public Interaction<Issue, bool> ConfirmClose { get; } = board.ConfirmClose;
 }

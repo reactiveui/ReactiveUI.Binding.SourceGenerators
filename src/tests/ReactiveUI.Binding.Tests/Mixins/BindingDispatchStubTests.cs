@@ -310,7 +310,8 @@ public class BindingDispatchStubTests
     public async Task BindInteraction_WithAnAsynchronousHandler_RegistersThroughTheRuntimeEngine()
     {
         RuntimeObservationFallbackTests.EnsureInitialized();
-        _viewModel.Confirm = new Interaction<string, bool>();
+        var interaction = new Interaction<string, bool>();
+        _viewModel.Confirm = interaction;
 
         using var binding = ReactiveUIBindingExtensions.BindInteractionUnsafe(
             _view,
@@ -322,7 +323,7 @@ public class BindingDispatchStubTests
                 return Task.CompletedTask;
             });
 
-        var handled = await _viewModel.Confirm.Handle(BoundValue);
+        var handled = await interaction.Handle(BoundValue);
 
         await Assert.That(handled).IsTrue();
     }
@@ -333,7 +334,8 @@ public class BindingDispatchStubTests
     public async Task BindInteraction_WithAStreamHandler_RegistersThroughTheRuntimeEngine()
     {
         RuntimeObservationFallbackTests.EnsureInitialized();
-        _viewModel.Confirm = new Interaction<string, bool>();
+        var interaction = new Interaction<string, bool>();
+        _viewModel.Confirm = interaction;
 
         using var binding = ReactiveUIBindingExtensions.BindInteractionUnsafe(
             _view,
@@ -345,7 +347,7 @@ public class BindingDispatchStubTests
                 return ReactiveUI.Primitives.Signals.Signal.Empty<string>();
             });
 
-        var handled = await _viewModel.Confirm.Handle(BoundValue);
+        var handled = await interaction.Handle(BoundValue);
 
         await Assert.That(handled).IsTrue();
     }
