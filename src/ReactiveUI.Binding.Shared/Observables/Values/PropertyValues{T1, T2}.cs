@@ -13,11 +13,6 @@ namespace ReactiveUI.Binding;
 /// <typeparam name="T2">The type of the second observed property.</typeparam>
 /// <param name="Property1">The value of the first observed property.</param>
 /// <param name="Property2">The value of the second observed property.</param>
-/// <remarks>
-/// Multi-property observation emits every property's current value together, so the emission is one value
-/// rather than a group of them. Being positional, it still deconstructs, so a subscriber can name the
-/// properties it cares about without naming the type.
-/// </remarks>
 [DebuggerDisplay("PropertyValues: {Property1}, {Property2}")]
 public readonly record struct PropertyValues<T1, T2>(
     T1 Property1,

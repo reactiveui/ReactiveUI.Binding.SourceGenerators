@@ -8,7 +8,11 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to nullable <see cref="decimal"/> using <see cref="decimal.TryParse(string?, out decimal)"/>.</summary>
+/// <summary>
+/// Converts a <see cref="string"/> to a nullable <see cref="decimal"/> with
+/// <see cref="decimal.TryParse(string?, out decimal)"/> under the current culture; a null or empty string succeeds with a
+/// null result and an unparseable string fails.
+/// </summary>
 public sealed class StringToNullableDecimalTypeConverter : BindingTypeConverter<string, decimal?>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

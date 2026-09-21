@@ -29,6 +29,23 @@ internal static class GeneratedCodeAssertionMixins
                     $"Compilation should succeed but had {result.CompilationErrors.Length} error(s):{Environment.NewLine}{errorMessages}");
         }
 
+        /// <summary>Asserts that the output compilation has no warnings.</summary>
+        /// <returns>A task representing the asynchronous assertion.</returns>
+        internal async Task HasNoCompilationWarnings()
+        {
+            if (result.CompilationWarnings.IsEmpty)
+            {
+                return;
+            }
+
+            var warningMessages = string.Join(
+                Environment.NewLine,
+                result.CompilationWarnings.Select(static d => $"  {d.Id}: {d.GetMessage()} at {d.Location}"));
+
+            await Assert.That(result.CompilationWarnings.Length).IsEqualTo(0)
+                .Because($"Compilation should produce no warnings but had:{Environment.NewLine}{warningMessages}");
+        }
+
         /// <summary>Asserts that a generated source file with the specified hint name exists.</summary>
         /// <param name="hintName">The hint name of the generated file.</param>
         /// <returns>A task representing the asynchronous assertion.</returns>

@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="DateTimeOffset"/> to <see cref="string"/>.</summary>
+/// <summary>Converts a <see cref="DateTimeOffset"/> to a <see cref="string"/> in the general date and time format of the current culture, including the offset.</summary>
 public sealed class DateTimeOffsetToStringTypeConverter : BindingTypeConverter<DateTimeOffset, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

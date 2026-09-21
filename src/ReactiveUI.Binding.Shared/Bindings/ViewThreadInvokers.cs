@@ -23,7 +23,7 @@ public static class ViewThreadInvokers
 
     /// <summary>Finds the first registered invoker that claims <paramref name="target"/>.</summary>
     /// <param name="target">The object a binding is about to write to.</param>
-    /// <returns>The invoker, or null when nothing claims the object.</returns>
+    /// <returns>The invoker, or null when <paramref name="target"/> is null or nothing claims it.</returns>
     public static IViewThreadInvoker? ForTarget(object? target)
     {
         if (target is null)

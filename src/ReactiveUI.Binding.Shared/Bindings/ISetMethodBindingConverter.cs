@@ -8,26 +8,22 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>This converter will allow users to change the way the set functionality is performed in ReactiveUI property binding.</summary>
+/// <summary>Replaces how a binding writes a value to its target, for example to fill a collection instead of assigning a property.</summary>
 public interface ISetMethodBindingConverter : IEnableLogger
 {
-    /// <summary>
-    /// Returns a positive integer when this class supports
-    /// PerformSet for this particular Type. If the method isn't supported at
-    /// all, return a non-positive integer. When multiple implementations
-    /// return a positive value, the host will use the one which returns
-    /// the highest value. When in doubt, return '2' or '0'.
-    /// </summary>
-    /// <param name="fromType">The from type to convert from.</param>
-    /// <param name="toType">The target type to convert to.</param>
-    /// <returns>A positive integer if PerformSet is supported,
-    /// zero or a negative value otherwise.</returns>
+    /// <summary>Returns this converter's priority for writing a value of one type to a target of another.</summary>
+    /// <param name="fromType">The type of the value being written; may be null.</param>
+    /// <param name="toType">The type of the target being written to; may be null.</param>
+    /// <returns>
+    /// A positive value when <see cref="PerformSet"/> applies; zero or less excludes the converter.
+    /// The registry picks the highest value and, on a tie, the earliest registered converter.
+    /// </returns>
     int GetAffinityForObjects(Type? fromType, Type? toType);
 
-    /// <summary>Convert a given object to the specified type.</summary>
-    /// <param name="toTarget">The target object we are setting to.</param>
-    /// <param name="newValue">The value to set on the new object.</param>
-    /// <param name="arguments">The arguments required. Used for indexer based values.</param>
-    /// <returns>The value that was set.</returns>
+    /// <summary>Writes a value to the target.</summary>
+    /// <param name="toTarget">The object being written to.</param>
+    /// <param name="newValue">The value to write.</param>
+    /// <param name="arguments">The index arguments for an indexer target; a generated collection write passes null.</param>
+    /// <returns>The result of the write; a generated collection write casts it to the target type and reports it as the new value.</returns>
     object? PerformSet(object? toTarget, object? newValue, object?[]? arguments);
 }

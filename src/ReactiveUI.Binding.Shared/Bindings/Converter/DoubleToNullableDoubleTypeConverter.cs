@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="double"/> to a nullable <see cref="double"/>.</summary>
+/// <summary>Converts a <see cref="double"/> to a nullable <see cref="double"/>; the conversion always succeeds.</summary>
 [DebuggerDisplay("double -> double? (affinity {Affinity})")]
 public sealed class DoubleToNullableDoubleTypeConverter : IBindingTypeConverter<double, double?>
 {

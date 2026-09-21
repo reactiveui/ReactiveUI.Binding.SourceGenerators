@@ -12,7 +12,7 @@ namespace ReactiveUI.Binding.Reactive.Fallback;
 namespace ReactiveUI.Binding.Fallback;
 #endif
 
-/// <summary>Binds a command to a control through the runtime expression engine.</summary>
+/// <summary>Binds a command to a control, resolving the command and control properties at runtime.</summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class RuntimeCommandBindingFallback
 {
@@ -30,6 +30,10 @@ public static class RuntimeCommandBindingFallback
     /// <param name="bindingExpression">The bound expression, named when the observation faults.</param>
     /// <returns>A disposable that, when disposed, unbinds the command and stops observing.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="commandProperty"/> or <paramref name="controlProperty"/> is null.</exception>
+    /// <remarks>
+    /// The command is rebound whenever either property changes, on the view's owning thread. Nothing is bound while
+    /// the view model, the command or the control is null, or when no registered binder supports the control.
+    /// </remarks>
     [RequiresUnreferencedCode("Runtime command binding resolves the property chain by reflection.")]
     public static IDisposable BindCommand<
         TView,

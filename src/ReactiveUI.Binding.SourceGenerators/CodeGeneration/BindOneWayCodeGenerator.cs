@@ -33,7 +33,7 @@ internal static class BindOneWayCodeGenerator
         SourceConvertedName = "__selected",
         SourceScheduledName = "bindObs",
         ForwardConverterArgument = ConversionParameterName,
-        NormalizesStaticPrefix = true,
+        OverrideForwardName = "converter",
         AppendExtraParameters = AppendExtraParameters,
         FormatWorkerParameters = FormatExtraMethodParams,
         FormatExtraArguments = FormatExtraArgs,
@@ -90,9 +90,10 @@ internal static class BindOneWayCodeGenerator
     /// <summary>Appends extra parameters (converter, scheduler) to the concrete overload signature.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group) =>
-        BindingEmitterHelpers.AppendExtraParameters(sb, group, ConversionParameterName);
+    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group, bool supportsNullable) =>
+        BindingEmitterHelpers.AppendExtraParameters(sb, group, ConversionParameterName, supportsNullable);
 
     /// <summary>Formats extra arguments (converter, scheduler) for forwarding to the binding method.</summary>
     /// <param name="group">The binding type group.</param>

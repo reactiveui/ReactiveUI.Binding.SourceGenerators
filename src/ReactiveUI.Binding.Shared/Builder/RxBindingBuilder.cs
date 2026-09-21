@@ -11,13 +11,6 @@ namespace ReactiveUI.Binding.Builder;
 #endif
 
 /// <summary>Static factory for creating <see cref="ReactiveUIBindingBuilder"/> instances.</summary>
-/// <example>
-/// <code>
-/// RxBindingBuilder.CreateReactiveUIBindingBuilder()
-///     .WithCoreServices()
-///     .BuildApp();
-/// </code>
-/// </example>
 public static class RxBindingBuilder
 {
     /// <summary>Whether ReactiveUI.Binding has been initialized: 0 until <see cref="MarkAsInitialized"/> runs, 1 after.</summary>
@@ -28,8 +21,8 @@ public static class RxBindingBuilder
     public static ReactiveUIBindingBuilder CreateReactiveUIBindingBuilder() =>
         new(AppLocator.CurrentMutable, AppLocator.Current);
 
-    /// <summary>Ensures ReactiveUI.Binding has been initialized via the builder pattern.</summary>
-    /// <exception cref="InvalidOperationException">Thrown if <c>BuildApp()</c> has not been called.</exception>
+    /// <summary>Returns when a builder's <c>BuildApp()</c> has completed, and throws otherwise.</summary>
+    /// <exception cref="InvalidOperationException"><c>BuildApp()</c> has not been called on a <see cref="ReactiveUIBindingBuilder"/>.</exception>
     public static void EnsureInitialized()
     {
         if (Volatile.Read(ref _hasBeenInitialized) != 0)

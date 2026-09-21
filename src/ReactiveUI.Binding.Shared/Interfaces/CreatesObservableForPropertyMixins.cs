@@ -8,11 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>
-/// Convenience overloads for <see cref="ICreatesObservableForProperty"/> that supply the common
-/// defaults. They are provided as overloads (rather than optional parameters on the interface) so the
-/// interface stays free of optional parameters and works on target frameworks without default interface methods.
-/// </summary>
+/// <summary>Overloads of <see cref="ICreatesObservableForProperty"/> members that default the before-change and warning flags to <see langword="false"/>.</summary>
 public static class CreatesObservableForPropertyMixins
 {
     /// <summary>Provides GetAffinityForObject extension members for <paramref name="factory"/>.</summary>
@@ -23,6 +19,7 @@ public static class CreatesObservableForPropertyMixins
         /// <param name="type">The type being observed.</param>
         /// <param name="propertyName">The property name being observed.</param>
         /// <returns>The affinity score. Positive means supported.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="factory"/> is <see langword="null"/>.</exception>
         public int GetAffinityForObject(Type type, string propertyName)
         {
             ArgumentExceptionHelper.ThrowIfNull(factory);
@@ -34,6 +31,7 @@ public static class CreatesObservableForPropertyMixins
         /// <param name="expression">The expression identifying the property.</param>
         /// <param name="propertyName">The property name.</param>
         /// <returns>An observable of observed changes.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="factory"/> is <see langword="null"/>.</exception>
         public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(
             object sender,
             Expression expression,
@@ -49,6 +47,7 @@ public static class CreatesObservableForPropertyMixins
         /// <param name="propertyName">The property name.</param>
         /// <param name="beforeChanged">Whether to observe before-change events.</param>
         /// <returns>An observable of observed changes.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="factory"/> is <see langword="null"/>.</exception>
         public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(
             object sender,
             Expression expression,

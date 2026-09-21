@@ -19,7 +19,7 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public static partial class ReactiveUIBindingExtensions
 {
-    /// <summary>Creates a one-way binding from a source property to a target property.</summary>
+    /// <summary>Binds a source property to a target property one way, writing the current value and each later change on the target's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
     /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
@@ -50,7 +50,7 @@ public static partial class ReactiveUIBindingExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a one-way binding from a source property to a target property with a conversion function.</summary>
+    /// <summary>Binds a source property to a target property one way through a conversion function, writing on the target's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -85,7 +85,7 @@ public static partial class ReactiveUIBindingExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a two-way binding between a source property and a target property.</summary>
+    /// <summary>Binds a source and a target property to each other, seeding the target from the source and mirroring each change on the other side's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
     /// <typeparam name="TProperty">The type of the property being bound.</typeparam>
@@ -116,7 +116,7 @@ public static partial class ReactiveUIBindingExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a two-way binding between a source property and a target property with conversion functions.</summary>
+    /// <summary>Binds a source and a target property to each other through conversion functions, seeding the target and mirroring each change on the other side's owning thread.</summary>
     /// <typeparam name="TSource">The type of the source object.</typeparam>
     /// <typeparam name="TSourceProp">The type of the source property.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -153,7 +153,7 @@ public static partial class ReactiveUIBindingExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a one-way binding from a view model property to a view property.</summary>
+    /// <summary>Binds a view model property to a view property one way, writing the current value and each later change on the view's owning thread.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -190,7 +190,7 @@ public static partial class ReactiveUIBindingExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a one-way binding from a view model property to a view property with a specified selector.</summary>
+    /// <summary>Binds a view model property to a view property one way through a selector, writing on the view's owning thread.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TProp">The type of the view model property.</typeparam>
@@ -225,7 +225,7 @@ public static partial class ReactiveUIBindingExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a two-way binding between a view model property and a view property.</summary>
+    /// <summary>Creates a two-way binding between a view model property and a view property, resolving the property chains by reflection.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -234,8 +234,12 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="viewModel">The view model to observe.</param>
     /// <param name="viewModelProperty">An expression that selects the view model property to observe.</param>
     /// <param name="viewProperty">An expression that selects the view property to update.</param>
-    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
+    /// <returns>The binding; its change stream reports each value with the side it came from, and disposing it disconnects both directions.</returns>
+    /// <remarks>
+    /// The view model value is written to the view first, and the view's own current value is not written back.
+    /// Writes to the view land on its owning thread when a registered view-thread invoker claims it.
+    /// Values are converted with the registered converters, and a value they cannot convert is written as the default of the destination type.
+    /// </remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IReactiveBinding<TView, BindingChange> BindUnsafe<TViewModel, TView, TVMProp, TVProp>(
@@ -268,7 +272,7 @@ public static partial class ReactiveUIBindingExtensions
             bindingExpression);
     }
 
-    /// <summary>Creates a two-way binding between a view model property and a view property with conversion functions.</summary>
+    /// <summary>Creates a two-way binding between a view model property and a view property with conversion functions, resolving the property chains by reflection.</summary>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TVMProp">The type of the view model property.</typeparam>
@@ -279,8 +283,11 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="viewProperty">An expression that selects the view property to update.</param>
     /// <param name="viewModelToViewConverter">A function that converts the view model property value to the view property type.</param>
     /// <param name="viewToViewModelConverter">A function that converts the view property value back to the view model property type.</param>
-    /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
+    /// <returns>The binding; its change stream reports each value with the side it came from, and disposing it disconnects both directions.</returns>
+    /// <remarks>
+    /// The view model value is written to the view first, and the view's own current value is not written back.
+    /// Writes to the view land on its owning thread when a registered view-thread invoker claims it.
+    /// </remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IReactiveBinding<TView, BindingChange> BindUnsafe<TViewModel, TView, TVMProp, TVProp>(
@@ -305,7 +312,7 @@ public static partial class ReactiveUIBindingExtensions
             bindingExpression);
     }
 
-    /// <summary>Binds two properties, reading both values whenever the selected side signals an update.</summary>
+    /// <summary>Binds a view model property and a view property in both directions, with an update stream driving one direction.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <typeparam name="TView">The view type.</typeparam>
     /// <typeparam name="TVMProp">The view model property type.</typeparam>
@@ -315,10 +322,14 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="viewModel">The view model to bind.</param>
     /// <param name="viewModelProperty">The view model property path.</param>
     /// <param name="viewProperty">The view property path.</param>
-    /// <param name="signalViewUpdate">The update stream, or null to observe both properties.</param>
-    /// <param name="triggerUpdate">The direction driven by the update stream.</param>
-    /// <returns>The binding, which disconnects both directions when disposed.</returns>
-    /// <remarks>The initial signal writes from view model to view after both sides are wired.</remarks>
+    /// <param name="signalViewUpdate">The update stream, or null to observe both properties' own notifications.</param>
+    /// <param name="triggerUpdate">The direction the update stream drives; see <see cref="TriggerUpdate"/>.</param>
+    /// <returns>The binding; its change stream reports each write with the side it came from, and disposing it disconnects both directions.</returns>
+    /// <remarks>
+    /// The view model value is written to the view first, once both sides are wired.
+    /// Each signal then reads both sides at delivery on the view's owning thread, converts with the registered converters,
+    /// and drops the write when the converted value equals the destination or cannot be converted.
+    /// </remarks>
     [SuppressMessage("Design", "SST2309", Justification = "The compatibility overload requires ViewToViewModel as its optional enum default.")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -333,7 +344,7 @@ public static partial class ReactiveUIBindingExtensions
         where TView : class, IViewFor =>
         RuntimeBindingFallback.Bind(view, viewModel, viewModelProperty, viewProperty, signalViewUpdate, triggerUpdate);
 
-    /// <summary>Binds two properties with explicit conversions and a stream driving the selected direction.</summary>
+    /// <summary>Binds a view model property and a view property in both directions with explicit conversions, with an update stream driving one direction.</summary>
     /// <typeparam name="TViewModel">The view model type.</typeparam>
     /// <typeparam name="TView">The view type.</typeparam>
     /// <typeparam name="TVMProp">The view model property type.</typeparam>
@@ -345,10 +356,13 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="viewProperty">The view property path.</param>
     /// <param name="viewModelToViewConverter">Converts a value written to the view.</param>
     /// <param name="viewToViewModelConverter">Converts a value written to the view model.</param>
-    /// <param name="signalViewUpdate">The update stream, or null to observe both properties.</param>
-    /// <param name="triggerUpdate">The direction driven by the update stream.</param>
-    /// <returns>The binding, which disconnects both directions when disposed.</returns>
-    /// <remarks>Each signal reads both sides and drops writes whose converted value equals the destination.</remarks>
+    /// <param name="signalViewUpdate">The update stream, or null to observe both properties' own notifications.</param>
+    /// <param name="triggerUpdate">The direction the update stream drives; see <see cref="TriggerUpdate"/>.</param>
+    /// <returns>The binding; its change stream reports each write with the side it came from, and disposing it disconnects both directions.</returns>
+    /// <remarks>
+    /// The view model value is written to the view first, once both sides are wired.
+    /// Each signal then reads both sides at delivery on the view's owning thread and drops the write when the converted value equals the destination.
+    /// </remarks>
     [SuppressMessage("Design", "SST2309", Justification = "The compatibility overload requires ViewToViewModel as its optional enum default.")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

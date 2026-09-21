@@ -8,31 +8,10 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Thread-safe registry for fallback binding converters using a lock-free snapshot pattern.</summary>
+/// <summary>Holds fallback binding converters, which are asked about a type pair at lookup time rather than grouped by it.</summary>
 /// <remarks>
-/// <para>
-/// This registry uses a copy-on-write snapshot pattern optimized for read-heavy workloads:
-/// </para>
-/// <list type="bullet">
-/// <item><description>
-/// <strong>Reads:</strong> Lock-free via a volatile read of the snapshot reference.
-/// Multiple readers can access the registry concurrently without contention.
-/// </description></item>
-/// <item><description>
-/// <strong>Writes:</strong> Serialized under a lock. Writes clone the converter list,
-/// mutate the clone, and publish a new snapshot atomically.
-/// </description></item>
-/// <item><description>
-/// <strong>Selection:</strong> Fallback converters are stored in a simple list (no type-pair grouping).
-/// When looking up a converter, each converter's runtime affinity is checked via
-/// <see cref="IBindingFallbackConverter.GetAffinityForObjects(Type, Type)"/>.
-/// The converter with the highest affinity (&gt; 0) is selected.
-/// </description></item>
-/// </list>
-/// <para>
-/// Fallback converters are used when no exact type-pair match is found in the typed converter registry.
-/// They provide runtime type checking and conversion using techniques like reflection or type descriptors.
-/// </para>
+/// Reads are lock-free against an immutable snapshot; each registration is serialized under a lock and publishes a
+/// new snapshot.
 /// </remarks>
 [DebuggerDisplay("{_snapshot.Converters.Count} fallback converters registered")]
 public sealed class BindingFallbackConverterRegistry
@@ -44,15 +23,8 @@ public sealed class BindingFallbackConverterRegistry
     private Snapshot? _snapshot;
 
     /// <summary>Registers a fallback binding converter.</summary>
-    /// <param name="converter">The converter to register. Must not be null.</param>
+    /// <param name="converter">The converter to register.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="converter"/> is null.</exception>
-    /// <remarks>
-    /// <para>
-    /// Fallback converters are consulted when no exact type-pair converter is found.
-    /// Multiple fallback converters can be registered; when retrieved, the converter with
-    /// the highest affinity for the requested type pair will be selected.
-    /// </para>
-    /// </remarks>
     public void Register(IBindingFallbackConverter converter)
     {
         ArgumentExceptionHelper.ThrowIfNull(converter);
@@ -71,11 +43,12 @@ public sealed class BindingFallbackConverterRegistry
         }
     }
 
-    /// <summary>Attempts to retrieve the best fallback converter for the specified type pair.</summary>
+    /// <summary>Asks each fallback converter for its affinity to the type pair and returns the highest positive one.</summary>
     /// <param name="fromType">The source type to convert from.</param>
     /// <param name="toType">The target type to convert to.</param>
     /// <returns>
-    /// The converter with the highest affinity for the type pair, or <see langword="null"/> if no converter supports the conversion.
+    /// The converter with the highest positive affinity, the earliest registered one on a tie; <see langword="null"/>
+    /// when none reports a positive affinity.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     /// Thrown if <paramref name="fromType"/> or <paramref name="toType"/> is null.
@@ -116,11 +89,8 @@ public sealed class BindingFallbackConverterRegistry
         return best;
     }
 
-    /// <summary>Returns all registered fallback converters.</summary>
-    /// <returns>
-    /// A sequence of all fallback converters currently registered in the registry.
-    /// Returns an empty sequence if no converters are registered.
-    /// </returns>
+    /// <summary>Returns a copy of every registered fallback converter, in registration order.</summary>
+    /// <returns>The converters registered at the time of the call; empty when none are registered.</returns>
     public IEnumerable<IBindingFallbackConverter> GetAllConverters()
     {
         var snap = Volatile.Read(ref _snapshot);

@@ -37,7 +37,8 @@ internal static class BindCodeGenerator
         TargetScheduledName = "viewBind",
         ForwardConverterArgument = ForwardConverterName,
         ReverseConverterArgument = ReverseConverterName,
-        NormalizesStaticPrefix = false,
+        OverrideForwardName = ForwardConverterName,
+        OverrideReverseName = ReverseConverterName,
         FormatReturnType = FormatReturnType,
         FormatWorkerReturnType = FormatMethodReturnType,
         AppendExtraParameters = AppendExtraParameters,
@@ -114,9 +115,10 @@ internal static class BindCodeGenerator
     /// <summary>Appends extra parameters (converters, scheduler) to the concrete overload signature.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group) =>
-        BindingEmitterHelpers.AppendTwoWayExtraParameters(sb, group, ForwardConverterName, ReverseConverterName);
+    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group, bool supportsNullable) =>
+        BindingEmitterHelpers.AppendTwoWayExtraParameters(sb, group, ForwardConverterName, ReverseConverterName, supportsNullable);
 
     /// <summary>Formats extra arguments (converters, scheduler) for forwarding to the binding method.</summary>
     /// <param name="group">The binding type group.</param>

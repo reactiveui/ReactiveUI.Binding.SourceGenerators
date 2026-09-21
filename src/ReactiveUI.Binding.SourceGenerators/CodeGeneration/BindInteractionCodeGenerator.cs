@@ -63,7 +63,8 @@ internal static class BindInteractionCodeGenerator
                 .Append(inv.ViewModelTypeFullName).Append('|')
                 .Append(inv.InputTypeFullName).Append('|')
                 .Append(inv.OutputTypeFullName).Append('|')
-                .Append(inv.IsTaskHandler);
+                .Append(inv.IsTaskHandler).Append('|')
+                .Append(inv.DontCareTypeFullName);
 
             var key = keySb.ToString();
 
@@ -99,37 +100,38 @@ internal static class BindInteractionCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindInteraction type group.</param>
     /// <param name="supportsCallerArgExpr">Whether CallerArgumentExpression is available.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateConcreteOverload(
         StringBuilder sb,
         BindInteractionTypeGroup group,
         bool supportsCallerArgExpr,
+        bool supportsNullable,
         bool stubHasExpressionParameters)
     {
         if (supportsCallerArgExpr)
         {
-            GenerateCallerArgExprOverload(sb, group);
+            GenerateCallerArgExprOverload(sb, group, supportsNullable);
         }
         else
         {
-            GenerateCallerFilePathOverload(sb, group, stubHasExpressionParameters);
+            GenerateCallerFilePathOverload(sb, group, supportsNullable, stubHasExpressionParameters);
         }
     }
 
     /// <summary>Generates the CallerArgumentExpression-based overload for BindInteraction dispatch.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindInteraction type group.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void GenerateCallerArgExprOverload(
         StringBuilder sb,
-        BindInteractionTypeGroup group)
+        BindInteractionTypeGroup group,
+        bool supportsNullable)
     {
         AppendOverloadSummary(sb, group, "        /// Uses CallerArgumentExpression for dispatch.");
-        AppendParameterList(sb, group, true, true);
+        AppendParameterList(sb, group, true, supportsNullable, true);
 
-        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen)
-            .Append("            propertyNameExpression = propertyNameExpression.StartsWith(\"static \", global::System.StringComparison.Ordinal)")
-            .AppendLine(" ? propertyNameExpression.Substring(7) : propertyNameExpression;")
-            .AppendLine();
+        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -147,14 +149,16 @@ internal static class BindInteractionCodeGenerator
     /// <summary>Generates the CallerFilePath-based overload for BindInteraction dispatch.</summary>
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindInteraction type group.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameters this overload has to match.</param>
     internal static void GenerateCallerFilePathOverload(
         StringBuilder sb,
         BindInteractionTypeGroup group,
+        bool supportsNullable,
         bool stubHasExpressionParameters)
     {
         AppendOverloadSummary(sb, group, "        /// Uses CallerFilePath + CallerLineNumber for dispatch.");
-        AppendParameterList(sb, group, false, stubHasExpressionParameters);
+        AppendParameterList(sb, group, false, supportsNullable, stubHasExpressionParameters);
 
         _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
@@ -230,16 +234,19 @@ internal static class BindInteractionCodeGenerator
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The BindInteraction type group whose types the parameters are written from.</param>
     /// <param name="dispatchesOnExpressionText">Whether the captured expression text is what identifies a call site.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     /// <param name="stubHasExpressionParameters">Whether the runtime stub declares the expression parameter.</param>
     /// <remarks>
     /// One list serves the overload and the interceptor, because both have to be the stub's signature: the
     /// overload only wins resolution against a candidate it is otherwise indistinguishable from, and an
-    /// interceptor is refused outright unless its signature is the intercepted method's.
+    /// interceptor is refused outright unless its signature is the intercepted method's. The view model is
+    /// declared nullable, as the stub declares it: a view is bound before it has been given one.
     /// </remarks>
     private static void AppendParameterList(
         StringBuilder sb,
         BindInteractionTypeGroup group,
         bool dispatchesOnExpressionText,
+        bool supportsNullable,
         bool stubHasExpressionParameters)
     {
         var handlerType = group.IsTaskHandler
@@ -247,7 +254,8 @@ internal static class BindInteractionCodeGenerator
             : $"global::System.Func<global::ReactiveUI.Binding.IInteractionContext<{group.InputTypeFullName}, {group.OutputTypeFullName}>, global::System.IObservable<{group.DontCareTypeFullName}>>";
 
         _ = sb.Append("            this ").Append(group.ViewTypeFullName)
-            .AppendLine(ViewParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent).Append(group.ViewModelTypeFullName)
+            .AppendLine(ViewParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent)
+            .Append(CodeGeneratorHelpers.NullableSelectorType(group.ViewModelTypeFullName, true, supportsNullable))
             .AppendLine(ViewModelParameterSuffix).Append(CodeGeneratorHelpers.ParameterIndent).Append(Expression).Append('<').Append(Func).Append('<')
             .Append(group.ViewModelTypeFullName).Append(", ").Append(IInteraction).Append('<').Append(group.InputTypeFullName).Append(", ")
             .Append(group.OutputTypeFullName).AppendLine(">>> propertyName,").Append(CodeGeneratorHelpers.ParameterIndent).Append(handlerType)
@@ -268,6 +276,7 @@ internal static class BindInteractionCodeGenerator
     private static void GenerateInterceptors(StringBuilder sb, BindInteractionTypeGroup group, in LanguageFeatures features)
     {
         var dispatchesOnExpressionText = features.SupportsCallerArgExpr;
+        var supportsNullable = features.SupportsNullable;
         var stubHasExpressionParameters = features.StubHasExpressionParameters;
 
         foreach (var entry in InterceptorEmitter.GroupCallSites(group.Invocations, static x => x.Interceptor, MethodSuffix))
@@ -279,7 +288,7 @@ internal static class BindInteractionCodeGenerator
 
             _ = sb.Append("        internal static global::System.IDisposable __Intercept_BindInteraction_").Append(entry.Key).AppendLine("(");
 
-            AppendParameterList(sb, group, dispatchesOnExpressionText, stubHasExpressionParameters);
+            AppendParameterList(sb, group, dispatchesOnExpressionText, supportsNullable, stubHasExpressionParameters);
 
             _ = sb.Append("            => ").Append(WorkerMethodPrefix).Append(entry.Key).Append('(').Append(WorkerArguments)
                 .AppendLine(");").AppendLine();
@@ -312,7 +321,12 @@ internal static class BindInteractionCodeGenerator
         }
         else
         {
-            GenerateConcreteOverload(sb, collapsed, features.SupportsCallerArgExpr, features.StubHasExpressionParameters);
+            GenerateConcreteOverload(
+                sb,
+                collapsed,
+                features.SupportsCallerArgExpr,
+                features.SupportsNullable,
+                features.StubHasExpressionParameters);
         }
 
         _ = sb.AppendLine();

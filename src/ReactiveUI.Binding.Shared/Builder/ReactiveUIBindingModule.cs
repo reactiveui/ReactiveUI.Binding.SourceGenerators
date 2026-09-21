@@ -10,21 +10,18 @@ namespace ReactiveUI.Binding.Reactive.Builder;
 namespace ReactiveUI.Binding.Builder;
 #endif
 
-/// <summary>Core module that registers the default ReactiveUI.Binding services with the dependency resolver.</summary>
+/// <summary>Registers the <see cref="ICreatesObservableForProperty"/> implementations for INotifyPropertyChanged and plain object properties.</summary>
 /// <remarks>
-/// This module registers:
-/// <list type="bullet">
-/// <item><description>Core <see cref="ICreatesObservableForProperty"/> implementations (INPC, POCO).</description></item>
-/// </list>
 /// Command binding for known patterns (Command property, event+Enabled, basic event) is handled
-/// at compile time by source generator plugins. Only custom <see cref="ICreatesCommandBinding"/>
-/// implementations registered by the user are resolved at runtime.
-/// Platform-specific modules (WPF, WinForms, MAUI) should be registered separately via
+/// at compile time by source generator plugins; only custom <see cref="ICreatesCommandBinding"/>
+/// implementations are resolved at runtime. Register the WPF, WinForms and MAUI modules separately with
 /// <c>WithPlatformModule</c> or <c>UsingModule</c>.
 /// </remarks>
 public sealed class ReactiveUIBindingModule : IModule
 {
-    /// <inheritdoc/>
+    /// <summary>Registers the INPC and POCO property observation services with the resolver.</summary>
+    /// <param name="resolver">The dependency resolver to configure.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="resolver"/> is null.</exception>
     public void Configure(IMutableDependencyResolver resolver)
     {
         ArgumentExceptionHelper.ThrowIfNull(resolver);

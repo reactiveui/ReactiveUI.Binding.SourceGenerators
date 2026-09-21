@@ -62,7 +62,6 @@ internal static class WhenAnyCodeGenerator
 
         _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
-        CodeGeneratorHelpers.AppendIndexedStaticPrefixNormalization(sb, supportsCallerArgExpr, "property", propCount);
         EmitDispatchTable(sb, group, supportsCallerArgExpr, propCount);
 
         GenerateRuntimeFallback(sb, first, propCount);

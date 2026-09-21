@@ -2,6 +2,7 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using Microsoft.CodeAnalysis.CSharp;
 using ReactiveUI.Binding.SourceGenerators.Tests.Helpers;
 
 namespace ReactiveUI.Binding.SourceGenerators.Tests;
@@ -9,6 +10,9 @@ namespace ReactiveUI.Binding.SourceGenerators.Tests;
 /// <summary>Snapshot tests for the view locator dispatch generator.</summary>
 public class ViewLocatorDispatchGeneratorTests
 {
+    /// <summary>The hint name of the generated view dispatch file.</summary>
+    private const string DispatchHintName = "ViewDispatch.g.cs";
+
     /// <summary>Verifies that a single IViewFor&lt;T&gt; implementation generates correct dispatch code.</summary>
     /// <returns>A task representing the asynchronous test operation.</returns>
     [Test]
@@ -38,6 +42,37 @@ public class ViewLocatorDispatchGeneratorTests
                               """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
+    }
+
+    /// <summary>Verifies that a C# 10 consumer registers the dispatch as a module initializer.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public Task ModuleInitializerRegistration()
+    {
+        const string source = """
+                              using System.ComponentModel;
+
+                              namespace TestApp
+                              {
+                                  public class LoginViewModel : INotifyPropertyChanged
+                                  {
+                                      public string UserName { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
+
+                                  public class LoginView : ReactiveUI.Binding.IViewFor<LoginViewModel>
+                                  {
+                                      public LoginViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (LoginViewModel)value;
+                                      }
+                                  }
+                              }
+                              """;
+
+        return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests), LanguageVersion.CSharp10);
     }
 
     /// <summary>Verifies that multiple IViewFor&lt;T&gt; implementations generate multiple dispatch branches.</summary>
@@ -435,6 +470,108 @@ public class ViewLocatorDispatchGeneratorTests
                               """;
 
         return TestHelper.TestPass(source, typeof(ViewLocatorDispatchGeneratorTests));
+    }
+
+    /// <summary>Verifies an open generic view base is not dispatched while its concrete subclass is.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task OpenGenericViewBaseIsSkippedAndConcreteSubclassIsDispatched()
+    {
+        const string source = """
+                              using System.ComponentModel;
+
+                              namespace TestApp
+                              {
+                                  public class TodoViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Title { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
+
+                                  public class ViewBase<TViewModel> : ReactiveUI.Binding.IViewFor<TViewModel>
+                                      where TViewModel : class
+                                  {
+                                      public TViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (TViewModel)value;
+                                      }
+                                  }
+
+                                  public abstract class AbstractViewBase<TViewModel> : ReactiveUI.Binding.IViewFor<TViewModel>
+                                      where TViewModel : class
+                                  {
+                                      public TViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (TViewModel)value;
+                                      }
+                                  }
+
+                                  public class TodoView : ViewBase<TodoViewModel>
+                                  {
+                                  }
+
+                                  public class TodoDetailView : AbstractViewBase<TodoViewModel>
+                                  {
+                                  }
+                              }
+                              """;
+
+        var result = await TestHelper.TestPassWithResult(source, typeof(ViewLocatorDispatchGeneratorTests));
+
+        await result.CompilationSucceeds();
+        await result.GeneratedSourceContains(DispatchHintName, "global::TestApp.TodoView");
+        await result.GeneratedSourceDoesNotContain(DispatchHintName, "TViewModel");
+    }
+
+    /// <summary>Verifies a generic view closed over its view model is not dispatched.</summary>
+    /// <returns>A task representing the asynchronous test operation.</returns>
+    [Test]
+    public async Task GenericViewWithFixedViewModelIsSkipped()
+    {
+        const string source = """
+                              using System.ComponentModel;
+
+                              namespace TestApp
+                              {
+                                  public class NoteViewModel : INotifyPropertyChanged
+                                  {
+                                      public string Title { get; set; }
+                                      public event PropertyChangedEventHandler PropertyChanged;
+                                  }
+
+                                  public class NoteView<TSkin> : ReactiveUI.Binding.IViewFor<NoteViewModel>
+                                  {
+                                      public NoteViewModel ViewModel { get; set; }
+                                      object ReactiveUI.Binding.IViewFor.ViewModel
+                                      {
+                                          get => ViewModel;
+                                          set => ViewModel = (NoteViewModel)value;
+                                      }
+                                  }
+
+                                  public class Host<T>
+                                  {
+                                      public class NestedNoteView : ReactiveUI.Binding.IViewFor<NoteViewModel>
+                                      {
+                                          public NoteViewModel ViewModel { get; set; }
+                                          object ReactiveUI.Binding.IViewFor.ViewModel
+                                          {
+                                              get => ViewModel;
+                                              set => ViewModel = (NoteViewModel)value;
+                                          }
+                                      }
+                                  }
+                              }
+                              """;
+
+        var result = TestHelper.RunGenerator(source);
+
+        await result.CompilationSucceeds();
+        await result.DoesNotHaveGeneratedSource(DispatchHintName);
     }
 
     /// <summary>Verifies [SingleInstanceView] on a view without a parameterless constructor generates no singleton cache.</summary>

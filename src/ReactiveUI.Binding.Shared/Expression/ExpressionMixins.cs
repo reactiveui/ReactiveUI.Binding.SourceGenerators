@@ -11,15 +11,19 @@ namespace ReactiveUI.Binding.Reactive.Expressions;
 namespace ReactiveUI.Binding.Expressions;
 #endif
 
-/// <summary>Extension methods associated with the Expression class.</summary>
+/// <summary>Extension methods that decompose property-access expression trees.</summary>
 public static class ExpressionMixins
 {
     /// <summary>Provides GetExpressionChain extension members for <paramref name="expression"/>.</summary>
     /// <param name="expression">The expression.</param>
     extension(Expression expression)
     {
-        /// <summary>Gets all the chain of child expressions within an Expression. Handles property member accesses, objects and indexes.</summary>
-        /// <returns>An enumerable of expressions.</returns>
+        /// <summary>Gets the member accesses and indexer accesses that make up an expression, ordered from the root parameter outward.</summary>
+        /// <returns>
+        /// The links in order, each rebased onto a fresh parameter of its parent's type; empty when the expression is a
+        /// parameter or <see langword="null"/>.
+        /// </returns>
+        /// <exception cref="NotSupportedException">The expression contains a node that is neither a member access, an index nor the root parameter.</exception>
         public IEnumerable<Expression> GetExpressionChain()
         {
             var expressions = new List<Expression>();
@@ -47,12 +51,8 @@ public static class ExpressionMixins
             return expressions;
         }
 
-        /// <summary>
-        /// Gets the MemberInfo where an Expression is pointing towards.
-        /// Can handle MemberAccess and Index types and will handle
-        /// going through the Conversion Expressions.
-        /// </summary>
-        /// <returns>The member info from the expression.</returns>
+        /// <summary>Gets the member an index or member-access expression names, looking through conversions.</summary>
+        /// <returns>The property, field or indexer the expression names.</returns>
         /// <exception cref="ArgumentNullException">The expression is <see langword="null"/>.</exception>
         /// <exception cref="NotSupportedException">The expression is not an index, member access, or conversion node, so it names no member.</exception>
         public MemberInfo? GetMemberInfo()
@@ -90,8 +90,8 @@ public static class ExpressionMixins
             }
         }
 
-        /// <summary>Gets the parent Expression of the current Expression object.</summary>
-        /// <returns>The parent expression.</returns>
+        /// <summary>Gets the expression an index or member-access expression is read from.</summary>
+        /// <returns>The object expression, or null for a static member.</returns>
         /// <exception cref="ArgumentNullException">The expression is <see langword="null"/>.</exception>
         /// <exception cref="NotSupportedException">The expression is not an index or member access node, so nothing precedes it in a chain.</exception>
         public Expression? GetParent()
@@ -107,8 +107,10 @@ public static class ExpressionMixins
             };
         }
 
-        /// <summary>For an Expression which is an Index type, will get all the arguments passed to the indexer.</summary>
-        /// <returns>An array of arguments.</returns>
+        /// <summary>Gets the constant arguments passed to an indexer expression.</summary>
+        /// <returns>The argument values, or null when the expression is not an index expression.</returns>
+        /// <exception cref="ArgumentNullException">The expression is <see langword="null"/>.</exception>
+        /// <exception cref="InvalidCastException">An indexer argument is not a constant expression.</exception>
         public object?[]? GetArgumentsArray()
         {
             ArgumentExceptionHelper.ThrowIfNull(expression);

@@ -10,15 +10,10 @@ namespace ReactiveUI.Binding.Reactive.Wpf;
 namespace ReactiveUI.Binding.Wpf;
 #endif
 
-/// <summary>Converts <see cref="Visibility"/> to <see cref="bool"/>.</summary>
+/// <summary>Converts a <see cref="Visibility"/> to a <see cref="bool"/>, true for Visible and false for Hidden or Collapsed; the conversion always succeeds.</summary>
 /// <remarks>
-/// <para>
-/// The conversion supports a <see cref="BooleanToVisibilityHints"/> as the conversion hint parameter:
-/// </para>
-/// <list type="bullet">
-/// <item><description><see cref="BooleanToVisibilityHints.None"/> - Visible maps to True, other values map to False.</description></item>
-/// <item><description><see cref="BooleanToVisibilityHints.Inverse"/> - Inverts the result.</description></item>
-/// </list>
+/// A <see cref="BooleanToVisibilityHints.Inverse"/> conversion hint inverts the result. Any other hint is treated as
+/// <see cref="BooleanToVisibilityHints.None"/>.
 /// </remarks>
 public sealed class VisibilityToBooleanTypeConverter : BindingTypeConverter<Visibility, bool>
 {

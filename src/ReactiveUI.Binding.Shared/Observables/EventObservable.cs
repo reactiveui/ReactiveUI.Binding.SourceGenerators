@@ -10,14 +10,15 @@ namespace ReactiveUI.Binding.Reactive.Observables;
 namespace ReactiveUI.Binding.Observables;
 #endif
 
-/// <summary>
-/// Platform-agnostic event-based observable for property observation.
-/// Collapses <c>Observable.Create + StartWith + DistinctUntilChanged</c> into a single allocation.
-/// Used for WPF <c>DependencyProperty</c> observation via
-/// <c>DependencyPropertyDescriptor.AddValueChanged</c> and WinForms
-/// <c>{PropertyName}Changed</c> event observation.
-/// </summary>
+/// <summary>Emits a value on subscribe, then again each time an <see cref="EventHandler"/> event is raised.</summary>
 /// <typeparam name="T">The type of the property value.</typeparam>
+/// <remarks>
+/// The value comes from the getter, which is read on subscribe and on every raise, so the event's arguments are
+/// ignored. The value read on subscribe is always emitted. When distinct filtering is on, a later value equal to
+/// the last emitted one is dropped. A getter that throws on subscribe makes <c>Subscribe</c> throw after the handler is
+/// detached, and one that throws while the event is raised propagates to whoever raised it. The sequence never
+/// completes.
+/// </remarks>
 [DebuggerDisplay("Getter = {_getter}, DistinctUntilChanged = {_distinctUntilChanged}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class EventObservable<T> : IObservable<T>
@@ -39,6 +40,7 @@ public sealed class EventObservable<T> : IObservable<T>
     /// <param name="removeHandler">A delegate that unsubscribes an <see cref="EventHandler"/> from the property change event.</param>
     /// <param name="getter">A delegate that reads the current property value.</param>
     /// <param name="distinctUntilChanged">Whether to suppress duplicate consecutive values.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="addHandler"/>, <paramref name="removeHandler"/> or <paramref name="getter"/> is <see langword="null"/>.</exception>
     public EventObservable(
         Action<EventHandler> addHandler,
         Action<EventHandler> removeHandler,
@@ -55,6 +57,7 @@ public sealed class EventObservable<T> : IObservable<T>
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException"><paramref name="observer"/> is <see langword="null"/>.</exception>
     public IDisposable Subscribe(IObserver<T> observer)
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);

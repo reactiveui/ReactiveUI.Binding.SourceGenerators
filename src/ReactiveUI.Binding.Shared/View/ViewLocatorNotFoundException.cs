@@ -14,7 +14,7 @@ namespace ReactiveUI.Binding;
 #endif
 public class ViewLocatorNotFoundException : Exception
 {
-    /// <summary>Initializes a new instance of the <see cref="ViewLocatorNotFoundException"/> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="ViewLocatorNotFoundException"/> class with a message naming the builder calls that register the default locator.</summary>
     public ViewLocatorNotFoundException()
         : base(
             "No IViewLocator is registered. Call RxBindingBuilder.CreateReactiveUIBindingBuilder().WithCoreServices().BuildApp() to register default services.")

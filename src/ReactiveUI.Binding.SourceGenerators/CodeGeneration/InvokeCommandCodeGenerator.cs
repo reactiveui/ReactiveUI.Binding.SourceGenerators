@@ -161,12 +161,6 @@ internal static class InvokeCommandCodeGenerator
 
         _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
-        if (dispatchesOnExpressionText)
-        {
-            CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, CommandExpressionParameter);
-            _ = sb.AppendLine();
-        }
-
         for (var i = 0; i < group.Invocations.Length; i++)
         {
             var inv = group.Invocations[i];
@@ -241,7 +235,7 @@ internal static class InvokeCommandCodeGenerator
         var commandType = supportsNullable ? $"{ICommand}?" : ICommand;
 
         _ = sb.Append("            this ").Append(ObservableOf(group.SourceValueTypeFullName)).AppendLine(SourceParameter)
-            .Append(CodeGeneratorHelpers.ParameterIndent).Append(group.TargetTypeFullName).AppendLine(" target,")
+            .Append(CodeGeneratorHelpers.ParameterIndent).Append(CodeGeneratorHelpers.NullableSelectorType(group.TargetTypeFullName, true, supportsNullable)).AppendLine(" target,")
             .Append(CodeGeneratorHelpers.ParameterIndent)
             .Append(PropertyExpression(group.TargetTypeFullName, commandType)).AppendLine(" commandProperty,");
 

@@ -11,10 +11,18 @@ namespace ReactiveUI.Binding.Reactive.Wpf;
 namespace ReactiveUI.Binding.Wpf;
 #endif
 
-/// <summary>Creates an observable for a property if available that is based on a WPF DependencyProperty.</summary>
+/// <summary>Observes a WPF <c>DependencyObject</c> property through its <c>{PropertyName}Property</c> dependency property.</summary>
+/// <remarks>
+/// The observable raises after the value changes, and each notification carries no value; the observer reads the property.
+/// A before-change request receives the same after-change observable.
+/// </remarks>
 public class DependencyObjectObservableForProperty : ICreatesObservableForProperty
 {
-    /// <inheritdoc/>
+    /// <summary>Returns the WPF dependency-object affinity when the type declares a public static <c>{propertyName}Property</c> field.</summary>
+    /// <param name="type">The type that owns the property.</param>
+    /// <param name="propertyName">The property name, without the <c>Property</c> suffix.</param>
+    /// <param name="beforeChanged">Ignored.</param>
+    /// <returns><see cref="BindingAffinity.WpfDependencyObject"/> for a <c>DependencyObject</c> type with such a field; otherwise zero.</returns>
     public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
     {
         if (!typeof(DependencyObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
@@ -25,7 +33,16 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         return GetDependencyProperty(type, propertyName) is not null ? BindingAffinity.WpfDependencyObject : 0;
     }
 
-    /// <inheritdoc/>
+    /// <summary>Returns an observable that raises whenever the dependency property changes on <paramref name="sender"/>.</summary>
+    /// <param name="sender">The <c>DependencyObject</c> to observe.</param>
+    /// <param name="expression">The expression carried on each notification.</param>
+    /// <param name="propertyName">The property name, without the <c>Property</c> suffix.</param>
+    /// <param name="beforeChanged">Ignored; notifications are always after the change.</param>
+    /// <param name="suppressWarnings"><see langword="true"/> to skip the debug message written when no descriptor is found.</param>
+    /// <returns>An observable that subscribes to the descriptor's value-changed event and unsubscribes on disposal.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> is null.</exception>
+    /// <exception cref="ArgumentException">The type declares no dependency property for <paramref name="propertyName"/>.</exception>
+    /// <exception cref="InvalidOperationException">WPF supplies no descriptor for the dependency property.</exception>
     public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(
         object sender,
         System.Linq.Expressions.Expression expression,

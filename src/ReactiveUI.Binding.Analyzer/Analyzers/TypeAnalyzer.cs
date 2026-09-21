@@ -46,23 +46,11 @@ public class TypeAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        // The check reads the first type argument, which most APIs name the observed object with.
-        // BindTo names the value type of a stream the caller already built, and nothing about that type is
-        // ever observed, so asking whether it notifies has no answer worth reporting.
-        if (methodSymbol.Name == Constants.BindToMethodName)
-        {
-            return;
-        }
-
-        // InvokeCommand names that stream's value type first as well; the object it observes is the one holding
-        // the command, which it names second.
-        var observedTypeArgument = methodSymbol.Name == Constants.InvokeCommandMethodName ? 1 : 0;
-
-        // Check if the source type lacks any observable mechanism
+        // Which type argument names the observed object differs by API, and some APIs observe none of them.
         if (!AnalyzerHelpers.LacksObservableMechanism(
             methodSymbol,
             context.Compilation,
-            observedTypeArgument,
+            AnalyzerHelpers.ObservedTypeArgumentIndex(methodSymbol),
             out var sourceType))
         {
             return;

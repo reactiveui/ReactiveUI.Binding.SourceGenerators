@@ -10,10 +10,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts a nullable <see cref="float"/> to <see cref="float"/>.</summary>
-/// <remarks>
-/// When the nullable value is null, the conversion fails and returns false.
-/// </remarks>
+/// <summary>Converts a nullable <see cref="float"/> to a <see cref="float"/>; a null value fails the conversion.</summary>
 [DebuggerDisplay("float? -> float (affinity {Affinity})")]
 public sealed class NullableSingleToSingleTypeConverter : IBindingTypeConverter<float?, float>
 {

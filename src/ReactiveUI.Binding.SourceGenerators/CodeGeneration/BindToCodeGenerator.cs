@@ -186,9 +186,7 @@ internal static class BindToCodeGenerator
 
         AppendParameterList(sb, group, true, supportsNullable, true);
 
-        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen)
-            .AppendLine("            propertyExpression = propertyExpression.StartsWith(\"static \", global::System.StringComparison.Ordinal) ? propertyExpression.Substring(7) : propertyExpression;")
-            .AppendLine();
+        _ = sb.AppendLine(GeneratedSyntax.MemberBodyOpen);
 
         var extraArguments = FormatExtraArgs(group);
 
@@ -419,7 +417,7 @@ internal static class BindToCodeGenerator
             supportsNullable);
 
         _ = sb.Append("            this ").Append(ObservableOf(group.SourceValueTypeFullName))
-            .AppendLine(" source,").Append("            ").Append(group.TargetTypeFullName).AppendLine(" target,")
+            .AppendLine(" source,").Append("            ").Append(CodeGeneratorHelpers.NullableSelectorType(group.TargetTypeFullName, true, supportsNullable)).AppendLine(" target,")
             .Append("            ").Append(PropertyExpression(group.TargetTypeFullName, targetPropType)).AppendLine(" property,");
 
         AppendExtraParameters(sb, group);

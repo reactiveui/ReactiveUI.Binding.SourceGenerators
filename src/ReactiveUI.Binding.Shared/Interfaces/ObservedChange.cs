@@ -17,7 +17,7 @@ public class ObservedChange<TSender, TValue> : IObservedChange<TSender, TValue>
     /// <summary>Initializes a new instance of the <see cref="ObservedChange{TSender, TValue}"/> class.</summary>
     /// <param name="sender">The object that raised the change.</param>
     /// <param name="expression">The expression of the member that changed.</param>
-    /// <param name="value">The current value of the property.</param>
+    /// <param name="value">The value of the property; the default when the reader is to fetch it from <paramref name="sender"/>.</param>
     public ObservedChange(TSender sender, Expression? expression, TValue value)
     {
         Sender = sender;

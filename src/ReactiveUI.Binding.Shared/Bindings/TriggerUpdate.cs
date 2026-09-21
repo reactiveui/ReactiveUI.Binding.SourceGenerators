@@ -14,6 +14,6 @@ public enum TriggerUpdate
     /// <summary>The stream replaces view notifications and requests writes to the view model.</summary>
     ViewToViewModel = 0,
 
-    /// <summary>The stream requests writes to the view; only the initial view model notification is observed.</summary>
+    /// <summary>The stream requests writes to the view in place of view model notifications after the first; view notifications are still observed.</summary>
     ViewModelToView = 1,
 }

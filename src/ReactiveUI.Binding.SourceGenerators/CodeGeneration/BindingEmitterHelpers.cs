@@ -33,6 +33,15 @@ internal static class BindingEmitterHelpers
     /// <summary>The stream carrying values converted for the target.</summary>
     private const string ConvertedForwardName = "__convertedForward";
 
+    /// <summary>The stream carrying values converted for the source.</summary>
+    private const string ConvertedReverseName = "__convertedReverse";
+
+    /// <summary>Follows a scheduler's type where a worker declares it.</summary>
+    private const string SchedulerDeclarationSuffix = " scheduler";
+
+    /// <summary>What a converter overload calls the hint it hands its converters.</summary>
+    private const string ConversionHintName = "conversionHint";
+
     /// <summary>Emits a whole binding dispatch file, claiming its call sites through one API's dispatch.</summary>
     /// <param name="invocations">The detected call sites for this API.</param>
     /// <param name="allClasses">All detected class binding info.</param>
@@ -89,7 +98,7 @@ internal static class BindingEmitterHelpers
 
         for (var g = 0; g < groups.Count; g++)
         {
-            var group = snapshot.CollapsesIndistinguishableCallSites
+            var group = snapshot.CollapsesIndistinguishableCallSites && !groups[g].HasConverterOverride
                 ? groups[g] with
                 {
                     Invocations = CodeGeneratorHelpers.CollapseIndistinguishableCallSites(
@@ -172,7 +181,8 @@ internal static class BindingEmitterHelpers
                 .Append(inv.SourcePropertyTypeFullName).Append('|')
                 .Append(inv.TargetPropertyTypeFullName).Append('|')
                 .Append(inv.HasConversion).Append('|')
-                .Append(inv.HasScheduler);
+                .Append(inv.HasScheduler).Append('|')
+                .Append(inv.HasConverterOverride);
 
             var key = keySb.ToString();
 
@@ -198,7 +208,7 @@ internal static class BindingEmitterHelpers
                 first.TargetPropertyTypeFullName,
                 first.HasConversion,
                 first.HasScheduler,
-                [.. kvp.Value]));
+                [.. kvp.Value]) { HasConverterOverride = first.HasConverterOverride });
         }
 
         return result;
@@ -209,11 +219,13 @@ internal static class BindingEmitterHelpers
     /// <param name="group">The binding type group.</param>
     /// <param name="forwardName">What this API calls the source-to-target converter.</param>
     /// <param name="reverseName">What this API calls the target-to-source converter.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
     internal static void AppendTwoWayExtraParameters(
         StringBuilder sb,
         BindingTypeGroup group,
         string forwardName,
-        string reverseName)
+        string reverseName,
+        bool supportsNullable)
     {
         if (group.HasConversion)
         {
@@ -228,7 +240,7 @@ internal static class BindingEmitterHelpers
             return;
         }
 
-        _ = sb.Append("            ").Append(GeneratedTypeNames.ISequencer).AppendLine(" scheduler,");
+        AppendSchedulerParameter(sb, supportsNullable);
     }
 
     /// <summary>Formats the extra arguments a two-way overload forwards to its generated method.</summary>
@@ -287,7 +299,7 @@ internal static class BindingEmitterHelpers
 
         if (inv.HasScheduler)
         {
-            _ = sb.Append(", ").Append(GeneratedTypeNames.ISequencer).Append(" scheduler");
+            _ = sb.Append(", ").Append(GeneratedTypeNames.ISequencer).Append(SchedulerDeclarationSuffix);
         }
 
         return sb.ToStringAndReturn();
@@ -297,7 +309,12 @@ internal static class BindingEmitterHelpers
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="group">The binding type group.</param>
     /// <param name="conversionParameterName">What this API calls its conversion argument.</param>
-    internal static void AppendExtraParameters(StringBuilder sb, BindingTypeGroup group, string conversionParameterName)
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    internal static void AppendExtraParameters(
+        StringBuilder sb,
+        BindingTypeGroup group,
+        string conversionParameterName,
+        bool supportsNullable)
     {
         if (group.HasConversion)
         {
@@ -310,8 +327,15 @@ internal static class BindingEmitterHelpers
             return;
         }
 
-        _ = sb.Append("            ").Append(GeneratedTypeNames.ISequencer).AppendLine(" scheduler,");
+        AppendSchedulerParameter(sb, supportsNullable);
     }
+
+    /// <summary>Writes the required scheduler parameter, which the stub declares nullable.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void AppendSchedulerParameter(StringBuilder sb, bool supportsNullable) =>
+        sb.Append(CodeGeneratorHelpers.ParameterIndent).Append(GeneratedTypeNames.ISequencer).AppendLine(supportsNullable ? "? scheduler," : " scheduler,");
 
     /// <summary>Formats the extra arguments for forwarding to the generated binding method.</summary>
     /// <param name="group">The binding type group.</param>
@@ -364,7 +388,7 @@ internal static class BindingEmitterHelpers
 
         if (inv.HasScheduler)
         {
-            _ = sb.Append(", ").Append(GeneratedTypeNames.ISequencer).Append(" scheduler");
+            _ = sb.Append(", ").Append(GeneratedTypeNames.ISequencer).Append(SchedulerDeclarationSuffix);
         }
 
         return sb.ToStringAndReturn();
@@ -418,10 +442,14 @@ internal static class BindingEmitterHelpers
         string targetVar,
         string? invoker)
     {
-        // A scheduler named at the call site already decides where the write lands.
+        // A scheduler named at the call site decides where the write lands. The parameter is nullable, and a call
+        // site that passes null or leaves it out leaves the write to the thread that owns the target.
         if (inv.HasScheduler)
         {
-            return sourceVar;
+            _ = AppendViewThreadCall(sb.Append("            var ").Append(resultVar).Append(" = scheduler == null ? "), sourceVar, targetVar, invoker)
+                .Append(" : ").Append(sourceVar).AppendLine(";");
+
+            return resultVar;
         }
 
         _ = AppendViewThreadCall(sb.Append("            var ").Append(resultVar).Append(" = "), sourceVar, targetVar, invoker).AppendLine(";");
@@ -605,15 +633,84 @@ internal static class BindingEmitterHelpers
             .Append(GeneratedSyntax.SelectorParameterOpen).Append(group.TargetTypeFullName).Append(", ").Append(targetLeaf)
             .Append(">> ").Append(api.TargetSelectorName).AppendLine(",");
 
-        api.AppendExtraParameters(sb, group);
-
-        if (dispatchesOnExpressionText || stubHasExpressionParameters)
+        if (group.HasConverterOverride)
         {
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, api.SourceSelectorName, api.SourceExpressionParameter, dispatchesOnExpressionText);
-            CodeGeneratorHelpers.AppendExpressionParameter(sb, api.TargetSelectorName, api.TargetExpressionParameter, dispatchesOnExpressionText);
+            AppendConverterOverrideParameters(sb, api, supportsNullable);
+        }
+        else
+        {
+            api.AppendExtraParameters(sb, group, supportsNullable);
+
+            if (dispatchesOnExpressionText || stubHasExpressionParameters)
+            {
+                CodeGeneratorHelpers.AppendExpressionParameter(sb, api.SourceSelectorName, api.SourceExpressionParameter, dispatchesOnExpressionText);
+                CodeGeneratorHelpers.AppendExpressionParameter(sb, api.TargetSelectorName, api.TargetExpressionParameter, dispatchesOnExpressionText);
+            }
         }
 
         _ = sb.AppendLine(CodeGeneratorHelpers.CallerInfoParameterList);
+    }
+
+    /// <summary>Writes the converter, hint and scheduler parameters a converter overload declares.</summary>
+    /// <param name="sb">The string builder to append to.</param>
+    /// <param name="api">What names this API gives its converters.</param>
+    /// <param name="supportsNullable">Whether the target supports nullable reference types (C# 8+).</param>
+    /// <remarks>
+    /// The stub declares the hint and the scheduler as optional and no expression parameters at all, so the
+    /// overload does the same: a call that leaves them out only resolves to this overload if it can leave them
+    /// out too, and it can only be told apart from the stub by file and line.
+    /// </remarks>
+    internal static void AppendConverterOverrideParameters(StringBuilder sb, BindingDispatchApi api, bool supportsNullable)
+    {
+        var annotation = supportsNullable ? "?" : string.Empty;
+
+        _ = sb.Append(CodeGeneratorHelpers.ParameterIndent).Append(GeneratedTypeNames.IBindingTypeConverter).Append(' ')
+            .Append(api.OverrideForwardName).AppendLine(",");
+
+        if (api.OverrideReverseName is not null)
+        {
+            _ = sb.Append(CodeGeneratorHelpers.ParameterIndent).Append(GeneratedTypeNames.IBindingTypeConverter).Append(' ')
+                .Append(api.OverrideReverseName).AppendLine(",");
+        }
+
+        _ = sb.Append(CodeGeneratorHelpers.ParameterIndent).Append("object").Append(annotation).Append(' ').Append(ConversionHintName)
+            .AppendLine(" = null,").Append(CodeGeneratorHelpers.ParameterIndent).Append(GeneratedTypeNames.ISequencer).Append(annotation)
+            .AppendLine(" scheduler = null,");
+    }
+
+    /// <summary>Formats the arguments a dispatch forwards to a generated worker beyond the two bound objects.</summary>
+    /// <param name="api">What distinguishes this API's overload from the other three.</param>
+    /// <param name="group">The binding type group.</param>
+    /// <returns>The argument list fragment, or empty when there is nothing extra to forward.</returns>
+    internal static string FormatDispatchArguments(BindingDispatchApi api, BindingTypeGroup group) =>
+        group.HasConverterOverride
+            ? FormatConverterOverrideArguments(api)
+            : api.FormatExtraArguments(group);
+
+    /// <summary>Formats the converter, hint and scheduler arguments a converter overload forwards.</summary>
+    /// <param name="api">What names this API gives its converters.</param>
+    /// <returns>The argument list fragment.</returns>
+    internal static string FormatConverterOverrideArguments(BindingDispatchApi api) =>
+        api.OverrideReverseName is null
+            ? $", {api.OverrideForwardName}, {ConversionHintName}, scheduler"
+            : $", {api.OverrideForwardName}, {api.OverrideReverseName}, {ConversionHintName}, scheduler";
+
+    /// <summary>Formats the converter, hint and scheduler parameters a generated worker declares.</summary>
+    /// <param name="api">What names this API gives its converters.</param>
+    /// <returns>The parameter list fragment.</returns>
+    internal static string FormatConverterOverrideParameters(BindingDispatchApi api)
+    {
+        var sb = new PooledStringBuilder(CodeGeneratorHelpers.FragmentBufferCapacity);
+
+        _ = sb.Append(", ").Append(GeneratedTypeNames.IBindingTypeConverter).Append(' ').Append(api.OverrideForwardName);
+
+        if (api.OverrideReverseName is not null)
+        {
+            _ = sb.Append(", ").Append(GeneratedTypeNames.IBindingTypeConverter).Append(' ').Append(api.OverrideReverseName);
+        }
+
+        return sb.Append(", object ").Append(ConversionHintName).Append(", ").Append(GeneratedTypeNames.ISequencer).Append(SchedulerDeclarationSuffix)
+            .ToStringAndReturn();
     }
 
     /// <summary>Emits whichever of the two ways this group's call sites are reached.</summary>
@@ -641,7 +738,7 @@ internal static class BindingEmitterHelpers
             sb,
             group,
             api,
-            features.SupportsCallerArgExpr,
+            features.SupportsCallerArgExpr && !group.HasConverterOverride,
             features.SupportsNullable,
             features.StubHasExpressionParameters);
     }
@@ -662,8 +759,8 @@ internal static class BindingEmitterHelpers
         BindingDispatchApi api,
         in LanguageFeatures features)
     {
-        var extraArguments = api.FormatExtraArguments(group);
-        var dispatchesOnExpressionText = features.SupportsCallerArgExpr;
+        var extraArguments = FormatDispatchArguments(api, group);
+        var dispatchesOnExpressionText = features.SupportsCallerArgExpr && !group.HasConverterOverride;
         var supportsNullable = features.SupportsNullable;
         var stubHasExpressionParameters = features.StubHasExpressionParameters;
 
@@ -702,11 +799,13 @@ internal static class BindingEmitterHelpers
     {
         _ = sb.Append("        private static ").Append(api.FormatWorkerReturnType(inv)).Append(' ').Append(api.WorkerMethodPrefix).Append(suffix)
             .Append('(').Append(inv.SourceTypeFullName).Append(' ').Append(api.WorkerSourceParameterName).Append(", ")
-            .Append(inv.TargetTypeFullName).Append(' ').Append(api.WorkerTargetParameterName).Append(api.FormatWorkerParameters(inv))
+            .Append(inv.TargetTypeFullName).Append(' ').Append(api.WorkerTargetParameterName)
+            .Append(inv.HasConverterOverride ? FormatConverterOverrideParameters(api) : api.FormatWorkerParameters(inv))
             .AppendLine(")").AppendLine(GeneratedSyntax.MemberBodyOpen)
             .Append("            // ").Append(api.Name).Append(": ").Append(CodeGeneratorHelpers.BuildPropertyPathString(inv.SourcePropertyPath))
             .Append(api.IsTwoWay ? " <-> " : " -> ").Append(CodeGeneratorHelpers.BuildPropertyPathString(inv.TargetPropertyPath))
             .Append(inv.HasConversion ? " (with conversion)" : string.Empty)
+            .Append(inv.HasConverterOverride ? " (with converter)" : string.Empty)
             .Append(inv.HasScheduler ? " (with scheduler)" : string.Empty).AppendLine();
 
         EmitBindingHookGuard(
@@ -727,7 +826,19 @@ internal static class BindingEmitterHelpers
         var forward = ForwardStage(api, inv);
         var currentVar = forward.ObservableName;
 
-        if (inv.HasConversion)
+        if (inv.HasConverterOverride)
+        {
+            ConversionEmitter.EmitStage(
+                sb,
+                currentVar,
+                ConvertedForwardName,
+                inv.SourcePropertyTypeFullName,
+                inv.TargetPropertyTypeFullName,
+                inv.ForwardConversion,
+                new(ConversionHintName, api.OverrideForwardName));
+            currentVar = ConvertedForwardName;
+        }
+        else if (inv.HasConversion)
         {
             currentVar = AppendMapStage(sb, forward, currentVar, inv.HasScheduler);
         }
@@ -739,7 +850,7 @@ internal static class BindingEmitterHelpers
 
         if (inv.HasScheduler)
         {
-            currentVar = AppendObserveOnStage(sb, forward, currentVar);
+            currentVar = AppendObserveOnStage(sb, forward, currentVar, false);
         }
 
         return currentVar;
@@ -761,7 +872,28 @@ internal static class BindingEmitterHelpers
         var sourceVar = forward.ObservableName;
         var targetVar = reverse.ObservableName;
 
-        if (inv.HasConversion)
+        if (inv.HasConverterOverride)
+        {
+            ConversionEmitter.EmitStage(
+                sb,
+                sourceVar,
+                ConvertedForwardName,
+                inv.SourcePropertyTypeFullName,
+                inv.TargetPropertyTypeFullName,
+                inv.ForwardConversion,
+                new(ConversionHintName, api.OverrideForwardName));
+            ConversionEmitter.EmitStage(
+                sb,
+                targetVar,
+                ConvertedReverseName,
+                inv.TargetPropertyTypeFullName,
+                inv.SourcePropertyTypeFullName,
+                inv.ReverseConversion,
+                new(ConversionHintName, api.OverrideReverseName ?? api.OverrideForwardName));
+            sourceVar = ConvertedForwardName;
+            targetVar = ConvertedReverseName;
+        }
+        else if (inv.HasConversion)
         {
             sourceVar = AppendMapStage(sb, forward, sourceVar, inv.HasScheduler);
             targetVar = AppendMapStage(sb, reverse, targetVar, inv.HasScheduler);
@@ -769,15 +901,15 @@ internal static class BindingEmitterHelpers
         else if (RequiresRegistryConversion(inv))
         {
             ConversionEmitter.EmitStage(sb, sourceVar, ConvertedForwardName, inv.SourcePropertyTypeFullName, inv.TargetPropertyTypeFullName, inv.ForwardConversion);
-            ConversionEmitter.EmitStage(sb, targetVar, "__convertedReverse", inv.TargetPropertyTypeFullName, inv.SourcePropertyTypeFullName, inv.ReverseConversion);
+            ConversionEmitter.EmitStage(sb, targetVar, ConvertedReverseName, inv.TargetPropertyTypeFullName, inv.SourcePropertyTypeFullName, inv.ReverseConversion);
             sourceVar = ConvertedForwardName;
-            targetVar = "__convertedReverse";
+            targetVar = ConvertedReverseName;
         }
 
         if (inv.HasScheduler)
         {
-            sourceVar = AppendObserveOnStage(sb, forward, sourceVar);
-            targetVar = AppendObserveOnStage(sb, reverse, targetVar);
+            sourceVar = AppendObserveOnStage(sb, forward, sourceVar, true);
+            targetVar = AppendObserveOnStage(sb, reverse, targetVar, true);
         }
 
         return new(sourceVar, targetVar);
@@ -830,13 +962,6 @@ internal static class BindingEmitterHelpers
     /// <param name="api">What distinguishes this API's overload from the other three.</param>
     private static void AppendExpressionDispatchBody(StringBuilder sb, BindingTypeGroup group, BindingDispatchApi api)
     {
-        if (api.NormalizesStaticPrefix)
-        {
-            CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, api.SourceExpressionParameter);
-            CodeGeneratorHelpers.AppendStaticPrefixNormalization(sb, api.TargetExpressionParameter);
-            _ = sb.AppendLine();
-        }
-
         var extraArguments = api.FormatExtraArguments(group);
 
         for (var i = 0; i < group.Invocations.Length; i++)
@@ -866,7 +991,7 @@ internal static class BindingEmitterHelpers
         BindingTypeGroup group,
         BindingDispatchApi api)
     {
-        var extraArguments = api.FormatExtraArguments(group);
+        var extraArguments = FormatDispatchArguments(api, group);
 
         for (var i = 0; i < group.Invocations.Length; i++)
         {
@@ -933,14 +1058,25 @@ internal static class BindingEmitterHelpers
     /// <param name="sb">The string builder to append to.</param>
     /// <param name="stage">The direction being emitted.</param>
     /// <param name="sourceVar">The local holding the values to route.</param>
+    /// <param name="latestWins">Whether a value still waiting on the scheduler is replaced by a newer one.</param>
     /// <returns>The local holding the routed values.</returns>
-    private static string AppendObserveOnStage(StringBuilder sb, in BindingStreamStage stage, string sourceVar)
+    /// <remarks>
+    /// A null scheduler adds no stage here; the view-thread stage that follows routes those values. A two-way
+    /// binding asks for the latest to win: each write raises the other side's change, and a queue that replays
+    /// every value writes an older one back over a newer one, so the two sides hand each other stale values
+    /// without end.
+    /// </remarks>
+    private static string AppendObserveOnStage(StringBuilder sb, in BindingStreamStage stage, string sourceVar, bool latestWins)
     {
         _ = sb.Append("        var ").Append(stage.ScheduledName)
-            .Append(" = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (")
-            .Append(GeneratedTypeNames.ObservableOf(stage.ToTypeFullName)).Append(')').Append(sourceVar)
-            .Append(" : new ").Append(GeneratedTypeNames.WitnessOnSignal).Append('<').Append(stage.ToTypeFullName)
-            .Append(">(").Append(sourceVar).AppendLine(", scheduler);");
+            .Append(" = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (")
+            .Append(GeneratedTypeNames.ObservableOf(stage.ToTypeFullName)).Append(')').Append(sourceVar).Append(" : ");
+
+        _ = latestWins
+            ? sb.Append(GeneratedTypeNames.BindingSchedulers).Append(".ObserveOnSequencer<").Append(stage.ToTypeFullName).Append(">(")
+            : sb.Append("new ").Append(GeneratedTypeNames.WitnessOnSignal).Append('<').Append(stage.ToTypeFullName).Append(">(");
+
+        _ = sb.Append(sourceVar).AppendLine(", scheduler);");
 
         return stage.ScheduledName;
     }
@@ -1057,8 +1193,11 @@ internal static class BindingEmitterHelpers
         /// <summary>Gets what a generated worker calls the converter from the target side's type to the source's.</summary>
         internal string ReverseConverterArgument { get; init; } = string.Empty;
 
-        /// <summary>Gets a value indicating whether the overload strips a <c>static</c> prefix off captured expressions.</summary>
-        internal bool NormalizesStaticPrefix { get; init; }
+        /// <summary>Gets what the converter overload calls its converter, or the converter that carries values to the target.</summary>
+        internal string OverrideForwardName { get; init; } = string.Empty;
+
+        /// <summary>Gets what the converter overload calls the converter that carries values back, or null for a one-way API.</summary>
+        internal string? OverrideReverseName { get; init; }
 
         /// <summary>Gets the function rendering what the overload returns.</summary>
         internal Func<BindingTypeGroup, string> FormatReturnType { get; init; } =
@@ -1073,8 +1212,8 @@ internal static class BindingEmitterHelpers
             static _ => string.Empty;
 
         /// <summary>Gets the action appending the conversion and scheduler parameters this API takes.</summary>
-        internal Action<StringBuilder, BindingTypeGroup> AppendExtraParameters { get; init; } =
-            static (_, _) => { };
+        internal Action<StringBuilder, BindingTypeGroup, bool> AppendExtraParameters { get; init; } =
+            static (_, _, _) => { };
 
         /// <summary>Gets the function rendering the conversion and scheduler arguments the worker takes.</summary>
         internal Func<BindingTypeGroup, string> FormatExtraArguments { get; init; } =

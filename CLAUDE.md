@@ -286,7 +286,20 @@ before the default view. Each view's resolver tries the service locator first. I
 for a `[SingleInstanceView]` view, or calls the parameterless constructor. A view with no parameterless
 constructor resolves to null. `[ExcludeFromViewRegistration]` leaves a view out.
 
-`DefaultViewLocator.ResolveView` tries the generated lookup first. It then tries mappings added with `Map`, and
+A view is skipped when it, or a type it is nested in, is an open generic. A closed subclass of a generic view
+base registers through its own `IViewFor<T>` interface.
+
+The generated class registers the lookup with `DefaultViewLocator.SetGeneratedViewDispatch`. From C# 9 it does
+so in a module initializer, which runs before any code in the assembly. The generator declares
+`ModuleInitializerAttribute` when the framework has none. Older projects register in a static constructor, which
+runs when a binding first uses the generated class.
+
+Each assembly that contains views registers its own lookup, and `DefaultViewLocator` keeps all of them in
+registration order. `ResolveView` asks them from the most recently registered to the first and takes the first
+view returned. A view model that two assemblies both have a view for resolves to the assembly that registered
+last. Registering the same lookup twice has no effect.
+
+`DefaultViewLocator.ResolveView` tries the generated lookups first. It then tries mappings added with `Map`, and
 then the service locator.
 
 ### API Pattern
@@ -491,6 +504,13 @@ Keeping every value breaks two-way bindings. Writing a view raises the view's ow
 is still waiting, that echo writes the older value back to the view model. The write raises another change, and
 the two sides bounce forever. `ViewWriteSchedulingRuntimeTests` covers this for `Bind` and `BindTwoWay`.
 
+A two-way binding that names a sequencer follows the same rule. An `Unsafe` binding routes the source direction
+through `ViewThreadObservable` on that sequencer, so only the latest value waits on it. A generated binding routes
+both directions through `BindingSchedulers.ObserveOnSequencer`, which is the same stage. A value that a newer one
+supersedes before the sequencer runs is never written, so two edits before the queue drains write once, with the
+second. A null scheduler and the immediate sequencer skip the stage: the first writes on the thread that owns the
+target and the second writes inline.
+
 `MainThread` only carries writes from another thread to a claimed object. It never sees an on-thread write. It
 never sees a write to an unclaimed object.
 
@@ -573,6 +593,17 @@ texts, but **only under expression-text dispatch**. Collapsing is sound there be
 both types, so a shared pair of expressions means a shared pair of property paths and an identical body. Doing
 the same under file-and-line dispatch would strand every collapsed call site on the stub's runtime throw.
 
+Collapsing is sound only while the lambdas are everything that shapes the body. Any other argument that changes
+the body belongs in both the branch condition and the collapse key. `BindCommand` is the example: an explicit
+`toEvent` replaces the mechanism the control would bind through, and a `withParameter` selector picks the
+property that feeds the control. So its branch compares `toEvent` and the parameter text as well as the two
+selectors. A call site that names no event carries no `toEvent` condition, so the call sites that name one are
+tried first. An argument that changes the overload's signature belongs in the group key instead: a converter, a
+hint, a scheduler, or the type an observable handler produces each get their own overload.
+
+The dispatch compares the text exactly as the compiler captured it, so a `static` lambda and the same lambda
+without the modifier are two call sites with two branches. Nothing strips the modifier at run time.
+
 ### Generating for the Lean or the .Reactive Runtime
 
 The two runtime packages share **no type names** — everything the lean one puts in `ReactiveUI.Binding.*`, the
@@ -615,6 +646,22 @@ So `LanguageFeatures` carries them separately:
 
 Below C# 10 on a framework that has the attribute, the parameters are emitted unattributed and inert: they exist
 only so the lists line up, and dispatch runs off the file and line.
+
+The overloads that take an `IBindingTypeConverter` - `BindOneWay`, `BindTwoWay`, `OneWayBind` and `Bind` with a
+converter, an optional hint and an optional scheduler - declare no expression parameters at all. Their call sites
+are dispatched by file and line at every language version and are never collapsed. Their generated overload keeps
+the stub's parameter names, so a call that names an argument still resolves to it. The scheduler is optional, so
+a call that leaves it out reaches the binding as null.
+
+Every property-binding overload that takes a scheduler treats null the same way: the binding writes on the thread
+that owns the target, as if no scheduler had been named. The generated binding tests for null once, when it is
+created.
+
+A generated overload also declares nullable reference types the way the stub does. The property selectors, the
+scheduler, and the view model or target the stub takes as `TViewModel?` or `TTarget?`, are annotated `?` wherever
+the target supports nullable reference types, so a call that passes an explicit null scheduler compiles without a
+warning. Value types are left alone, because annotating one adds a conversion node to
+the expression and breaks path extraction.
 
 ### WhenChanged vs WhenChanging
 

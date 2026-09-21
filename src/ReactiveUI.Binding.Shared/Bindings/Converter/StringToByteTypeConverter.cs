@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to <see cref="byte"/> using <see cref="byte.TryParse(string?, out byte)"/>.</summary>
+/// <summary>Converts a <see cref="string"/> to a <see cref="byte"/> with <see cref="byte.TryParse(string?, out byte)"/> under the current culture; a null or unparseable string fails.</summary>
 public sealed class StringToByteTypeConverter : BindingTypeConverter<string, byte>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

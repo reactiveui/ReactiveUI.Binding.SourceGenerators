@@ -15,13 +15,10 @@ namespace ReactiveUI.Binding.Wpf.Builder;
 public static class WpfBindingBuilderExtensions
 {
     /// <summary>Provides WithWpf extension members for <paramref name="builder"/>.</summary>
-    /// <param name="builder">The builder instance.</param>
+    /// <param name="builder">The builder instance; it must be an <see cref="IReactiveUIBindingBuilder"/>.</param>
     extension(IAppBuilder builder)
     {
-        /// <summary>
-        /// Configures ReactiveUI.Binding for WPF platform, registering DependencyObject observation
-        /// and WPF-specific Visibility converters.
-        /// </summary>
+        /// <summary>Registers the WPF module, which adds dependency-property observation and the dispatcher view thread invoker.</summary>
         /// <returns>The builder instance for chaining.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IReactiveUIBindingBuilder WithWpf() =>
@@ -32,11 +29,9 @@ public static class WpfBindingBuilderExtensions
     /// <param name="builder">The builder instance.</param>
     extension(IReactiveUIBindingBuilder builder)
     {
-        /// <summary>
-        /// Configures ReactiveUI.Binding for WPF platform, registering DependencyObject observation
-        /// and WPF-specific Visibility converters.
-        /// </summary>
+        /// <summary>Registers the WPF module, which adds dependency-property observation and the dispatcher view thread invoker.</summary>
         /// <returns>The builder instance for chaining.</returns>
+        /// <exception cref="ArgumentNullException">The builder is null.</exception>
         public IReactiveUIBindingBuilder WithWpf()
         {
             ArgumentExceptionHelper.ThrowIfNull(builder);

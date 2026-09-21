@@ -15,15 +15,13 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::System.IDisposable BindInteraction(
             this global::SharedScenarios.BindInteraction.DeepPropertyPath.MyView view,
-            global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel viewModel,
+            global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel? viewModel,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindInteraction.DeepPropertyPath.MyViewModel, global::ReactiveUI.Binding.IInteraction<string, bool>>> propertyName,
             global::System.Func<global::ReactiveUI.Binding.IInteractionContext<string, bool>, global::System.Threading.Tasks.Task> handler,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("propertyName")] string propertyNameExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            propertyNameExpression = propertyNameExpression.StartsWith("static ", global::System.StringComparison.Ordinal) ? propertyNameExpression.Substring(7) : propertyNameExpression;
-
             if (propertyNameExpression == "x => x.Child!.Confirm")
             {
                 return __BindInteraction_7FFFEF09AD5AF30B(view, viewModel, handler);

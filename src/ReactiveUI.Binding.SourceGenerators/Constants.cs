@@ -167,4 +167,8 @@ internal static class Constants
     /// <summary>Metadata name for the <c>CallerArgumentExpressionAttribute</c> used in dispatch stubs for C# 10+ projects.</summary>
     internal const string CallerArgumentExpressionAttributeMetadataName =
         "System.Runtime.CompilerServices.CallerArgumentExpressionAttribute";
+
+    /// <summary>Metadata name for the <c>ModuleInitializerAttribute</c> the generated view dispatch registers itself with.</summary>
+    internal const string ModuleInitializerAttributeMetadataName =
+        "System.Runtime.CompilerServices.ModuleInitializerAttribute";
 }

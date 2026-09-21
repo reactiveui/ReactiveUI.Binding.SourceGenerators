@@ -17,7 +17,7 @@ public static partial class ReactiveUIBindingExtensions
     private const string NoWhenAnyDispatchMessage =
         "No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.";
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 1 property on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 1 property and emits the selector applied to its observed change, on subscription and after each change.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -27,7 +27,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property1Expression">The caller argument expression for <paramref name="property1"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAny<TSender, TRet, T1>(
         this TSender sender,
@@ -39,7 +39,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 1 property on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 1 property and emits the selector applied to its observed change, on subscription and after each change.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -48,7 +48,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAny<TSender, TRet, T1>(
         this TSender sender,
@@ -63,7 +63,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 2 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 2 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -76,7 +76,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property2Expression">The caller argument expression for <paramref name="property2"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2>(
@@ -92,7 +92,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 2 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 2 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -103,7 +103,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2>(
         this TSender sender,
@@ -119,7 +119,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 3 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 3 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -135,7 +135,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property3Expression">The caller argument expression for <paramref name="property3"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -155,7 +155,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 3 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 3 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -168,7 +168,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3>(
         this TSender sender,
@@ -185,7 +185,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 4 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 4 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -204,7 +204,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property4Expression">The caller argument expression for <paramref name="property4"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -232,7 +232,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 4 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 4 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -247,7 +247,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4>(
@@ -266,7 +266,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 5 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 5 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -288,7 +288,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property5Expression">The caller argument expression for <paramref name="property5"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -320,7 +320,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 5 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 5 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -337,7 +337,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5>(
@@ -357,7 +357,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 6 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 6 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -382,7 +382,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property6Expression">The caller argument expression for <paramref name="property6"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -418,7 +418,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 6 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 6 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -437,7 +437,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAny<TSender, TRet, T1, T2, T3, T4, T5, T6>(
@@ -465,7 +465,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 7 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 7 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -493,7 +493,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property7Expression">The caller argument expression for <paramref name="property7"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -533,7 +533,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 7 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 7 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -554,7 +554,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
@@ -585,7 +585,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 8 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 8 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -616,7 +616,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property8Expression">The caller argument expression for <paramref name="property8"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -660,7 +660,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 8 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 8 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -683,7 +683,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
@@ -716,7 +716,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 9 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 9 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -750,7 +750,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property9Expression">The caller argument expression for <paramref name="property9"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -798,7 +798,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 9 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 9 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -823,7 +823,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
@@ -858,7 +858,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 10 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 10 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -895,7 +895,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property10Expression">The caller argument expression for <paramref name="property10"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -947,7 +947,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 10 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 10 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -974,7 +974,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
@@ -1011,7 +1011,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 11 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 11 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -1051,7 +1051,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property11Expression">The caller argument expression for <paramref name="property11"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1107,7 +1107,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 11 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 11 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -1136,7 +1136,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
@@ -1175,7 +1175,7 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Observes 12 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 12 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -1218,7 +1218,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property12Expression">The caller argument expression for <paramref name="property12"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1278,7 +1278,7 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TSender : class
 #else
-    /// <summary>Observes 12 properties on the specified sender and applies a selector to the observed changes.</summary>
+    /// <summary>Observes 12 properties and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="TRet">The return type of the selector.</typeparam>
     /// <typeparam name="T1">The type of property 1 value.</typeparam>
@@ -1309,7 +1309,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that combines the observed changes into a result.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence of selector results.</returns>
+    /// <returns>An observable of selector results, emitted on subscription and whenever an observed property changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAny dispatch matched this call site. Use WhenAnyUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]

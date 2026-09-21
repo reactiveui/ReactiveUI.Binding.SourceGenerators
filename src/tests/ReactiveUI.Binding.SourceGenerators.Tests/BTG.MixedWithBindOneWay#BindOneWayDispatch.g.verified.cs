@@ -23,13 +23,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? sourcePropertyExpression.Substring(7)
-                : sourcePropertyExpression;
-            targetPropertyExpression = targetPropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? targetPropertyExpression.Substring(7)
-                : targetPropertyExpression;
-
             if (sourcePropertyExpression == "x => x.ReadOnlyCount"
                 && targetPropertyExpression == "x => x.CountDisplay")
             {

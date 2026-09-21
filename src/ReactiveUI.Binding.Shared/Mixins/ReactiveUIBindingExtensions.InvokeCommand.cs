@@ -22,7 +22,7 @@ public static partial class ReactiveUIBindingExtensions
     private const string NoInvokeCommandDispatchMessage =
         "No generated InvokeCommand dispatch matched this call site. Use InvokeCommandUnsafe to resolve the expression at run time.";
 
-    /// <summary>Executes a command with each value the sequence produces.</summary>
+    /// <summary>Executes a command with each value the sequence produces as its parameter, skipping a value the command cannot execute.</summary>
     /// <typeparam name="T">The type of the value offered as the command parameter.</typeparam>
     /// <param name="source">The sequence driving the executions.</param>
     /// <param name="command">The command to execute.</param>
@@ -30,18 +30,19 @@ public static partial class ReactiveUIBindingExtensions
     /// <exception cref="ArgumentNullException"><paramref name="source"/> or <paramref name="command"/> is null.</exception>
     /// <remarks>
     /// The command is the caller's own object rather than a property to observe, so there is nothing here for the
-    /// generator to resolve and no dispatch is emitted for this overload.
+    /// generator to resolve and no dispatch is emitted for this overload. An error from <paramref name="source"/>
+    /// is rethrown on the thread that raised it.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IDisposable InvokeCommand<T>(this IObservable<T> source, ICommand command) =>
         CommandBinding.CommandInvoker.Invoke(source, command);
 
 #if NET8_0_OR_GREATER
-    /// <summary>Executes the command a property holds with each value the sequence produces.</summary>
+    /// <summary>Executes the command a property holds with each value as its parameter, skipping a value while there is no command or the command cannot execute it.</summary>
     /// <typeparam name="T">The type of the value offered as the command parameter.</typeparam>
     /// <typeparam name="TTarget">The type declaring the command property.</typeparam>
     /// <param name="source">The sequence driving the executions.</param>
-    /// <param name="target">The object declaring the command property.</param>
+    /// <param name="target">The object declaring the command property; null executes nothing.</param>
     /// <param name="commandProperty">An expression that selects the command property to execute.</param>
     /// <param name="commandPropertyExpression">The caller argument expression for <paramref name="commandProperty"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
@@ -57,11 +58,11 @@ public static partial class ReactiveUIBindingExtensions
         [CallerLineNumber] int callerLineNumber = 0)
         where TTarget : class
 #else
-    /// <summary>Executes the command a property holds with each value the sequence produces.</summary>
+    /// <summary>Executes the command a property holds with each value as its parameter, skipping a value while there is no command or the command cannot execute it.</summary>
     /// <typeparam name="T">The type of the value offered as the command parameter.</typeparam>
     /// <typeparam name="TTarget">The type declaring the command property.</typeparam>
     /// <param name="source">The sequence driving the executions.</param>
-    /// <param name="target">The object declaring the command property.</param>
+    /// <param name="target">The object declaring the command property; null executes nothing.</param>
     /// <param name="commandProperty">An expression that selects the command property to execute.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>

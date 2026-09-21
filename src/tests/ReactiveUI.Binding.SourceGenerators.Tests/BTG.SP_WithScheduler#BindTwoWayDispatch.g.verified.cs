@@ -18,19 +18,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyView target,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyViewModel, string?>> sourceProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.BindTwoWay.SinglePropertyWithScheduler.MyView, string?>> targetProperty,
-            global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler,
+            global::ReactiveUI.Primitives.Concurrency.ISequencer? scheduler,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("sourceProperty")] string sourcePropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("targetProperty")] string targetPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            sourcePropertyExpression = sourcePropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? sourcePropertyExpression.Substring(7)
-                : sourcePropertyExpression;
-            targetPropertyExpression = targetPropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? targetPropertyExpression.Substring(7)
-                : targetPropertyExpression;
-
             if (sourcePropertyExpression == "x => x.Name"
                 && targetPropertyExpression == "x => x.NameText")
             {
@@ -163,10 +156,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                     }
                     return __value != null ? (true, __value) : (true, (string)__value);
                 });
-        var sourceBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__convertedForward : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__convertedForward, scheduler);
-        var targetBind = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__convertedReverse : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__convertedReverse, scheduler);
+        var sourceBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__convertedForward : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<string>(__convertedForward, scheduler);
+        var targetBind = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__convertedReverse : global::ReactiveUI.Binding.BindingSchedulers.ObserveOnSequencer<string>(__convertedReverse, scheduler);
+            var targetThreadObs = scheduler == null ? global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(sourceBind, target) : sourceBind;
+            var sourceThreadObs = scheduler == null ? global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(targetBind, source) : targetBind;
 
-            var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(sourceBind, value =>
+            var d1 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetThreadObs, value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(target.NameText, value))
                 {
@@ -176,7 +171,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 target.NameText = value;
             }, "x => x.NameText");
 
-            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(targetBind, value =>
+            var d2 = global::ReactiveUI.Binding.BindingErrors.Subscribe(sourceThreadObs, value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(source.Name, value))
                 {

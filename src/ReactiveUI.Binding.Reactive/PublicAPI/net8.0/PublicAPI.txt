@@ -71,6 +71,8 @@ namespace ReactiveUI.Binding.Reactive
     {
         public static System.Reactive.Concurrency.IScheduler? MainThread { get; set; }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public static System.IObservable<T> ObserveOnSequencer<T>(System.IObservable<T> source, System.Reactive.Concurrency.IScheduler scheduler) { }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public static System.IObservable<T> ObserveOnViewThread<T>(System.IObservable<T> source, object? target) { }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public static System.IObservable<T> ObserveOnViewThread<T>(System.IObservable<T> source, object? target, ReactiveUI.Binding.Reactive.IViewThreadInvoker fallback) { }

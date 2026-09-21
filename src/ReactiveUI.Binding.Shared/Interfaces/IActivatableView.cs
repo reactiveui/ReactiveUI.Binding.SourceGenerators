@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Marker interface for views that support activation and deactivation lifecycle events.</summary>
+/// <summary>Marker interface that every <see cref="IViewFor"/> implements; it declares no members.</summary>
 [SuppressMessage("Design", "SST1437:Empty interface", Justification = "Intentional marker interface.")]
 [SuppressMessage("Design", "CA1040:Avoid empty interfaces", Justification = "Intentional marker interface.")]
 public interface IActivatableView;

@@ -17,7 +17,7 @@ public static partial class ReactiveUIBindingExtensions
 {
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 1 property on the specified sender and applies a selector function to produce a result after it changes. This is a ReactiveUI compatibility shim.
+    /// Observes 1 property and emits the result of a selector applied to its current value when subscribed and after each change. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -28,7 +28,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property1Expression">The caller argument expression for <paramref name="property1"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when the observed property changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and after each change of the observed property.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyValue<TSender, T1, TRet>(
         this TSender sender,
@@ -41,7 +41,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 1 property on the specified sender and applies a selector function to produce a result after it changes. This is a ReactiveUI compatibility shim.
+    /// Observes 1 property and emits the result of a selector applied to its current value when subscribed and after each change. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -51,7 +51,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property value to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when the observed property changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and after each change of the observed property.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyValue<TSender, T1, TRet>(
         this TSender sender,
@@ -65,7 +65,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 2 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 2 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -79,7 +79,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property2Expression">The caller argument expression for <paramref name="property2"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, TRet>(
@@ -96,7 +96,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 2 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 2 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -108,7 +108,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, TRet>(
         this TSender sender,
@@ -123,7 +123,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 3 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 3 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -140,7 +140,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property3Expression">The caller argument expression for <paramref name="property3"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, TRet>(
@@ -160,7 +160,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 3 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 3 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -174,7 +174,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, TRet>(
         this TSender sender,
@@ -190,7 +190,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 4 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 4 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -210,7 +210,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property4Expression">The caller argument expression for <paramref name="property4"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, TRet>(
@@ -233,7 +233,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 4 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 4 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -249,7 +249,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, TRet>(
@@ -267,7 +267,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 5 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 5 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -290,7 +290,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property5Expression">The caller argument expression for <paramref name="property5"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -317,7 +317,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 5 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 5 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -335,7 +335,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, TRet>(
@@ -354,7 +354,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 6 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 6 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -380,7 +380,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property6Expression">The caller argument expression for <paramref name="property6"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -410,7 +410,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 6 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 6 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -430,7 +430,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, TRet>(
@@ -450,7 +450,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 7 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 7 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -479,7 +479,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property7Expression">The caller argument expression for <paramref name="property7"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -512,7 +512,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 7 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 7 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -534,7 +534,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, TRet>(
@@ -555,7 +555,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 8 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 8 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -587,7 +587,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property8Expression">The caller argument expression for <paramref name="property8"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -623,7 +623,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 8 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 8 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -647,7 +647,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, TRet>(
@@ -669,7 +669,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 9 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 9 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -704,7 +704,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property9Expression">The caller argument expression for <paramref name="property9"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -743,7 +743,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 9 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 9 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -769,7 +769,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, TRet>(
@@ -792,7 +792,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 10 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 10 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -830,7 +830,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property10Expression">The caller argument expression for <paramref name="property10"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -872,7 +872,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 10 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 10 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -900,7 +900,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TRet>(
@@ -924,7 +924,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 11 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 11 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -965,7 +965,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property11Expression">The caller argument expression for <paramref name="property11"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1010,7 +1010,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 11 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 11 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1040,7 +1040,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TRet>(
@@ -1065,7 +1065,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 12 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 12 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1109,7 +1109,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property12Expression">The caller argument expression for <paramref name="property12"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1157,7 +1157,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 12 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 12 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1189,7 +1189,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TRet>(
@@ -1215,7 +1215,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 13 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 13 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1262,7 +1262,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property13Expression">The caller argument expression for <paramref name="property13"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1313,7 +1313,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 13 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 13 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1347,7 +1347,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TRet>(
@@ -1374,7 +1374,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 14 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 14 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1424,7 +1424,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property14Expression">The caller argument expression for <paramref name="property14"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1494,7 +1494,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 14 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 14 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1530,7 +1530,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TRet>(
@@ -1558,7 +1558,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 15 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 15 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1611,7 +1611,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property15Expression">The caller argument expression for <paramref name="property15"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1685,7 +1685,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 15 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 15 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1723,7 +1723,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TRet>(
@@ -1752,7 +1752,7 @@ public static partial class ReactiveUIBindingExtensions
 
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// Observes 16 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 16 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1808,7 +1808,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property16Expression">The caller argument expression for <paramref name="property16"/>. Auto-populated by the compiler.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
@@ -1886,7 +1886,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
 #else
     /// <summary>
-    /// Observes 16 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 16 properties and emits the result of a selector applied to their current values when subscribed and whenever any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -1926,7 +1926,7 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
     /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
-    /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
+    /// <returns>An observable that emits the selector result on subscription and whenever any of the observed properties changes.</returns>
     /// <exception cref="InvalidOperationException">No generated WhenAnyValue dispatch matched this call site. Use WhenAnyValueUnsafe to resolve the expression at run time.</exception>
     [SuppressMessage("Design", "SST1472", Justification = "parameter count is inherent to the N-property dispatch stub and its CallerInfo contract")]
     public static IObservable<TRet> WhenAnyValue<TSender, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TRet>(

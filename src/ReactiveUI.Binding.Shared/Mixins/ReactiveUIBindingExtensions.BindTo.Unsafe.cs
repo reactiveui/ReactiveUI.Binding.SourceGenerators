@@ -19,7 +19,7 @@ namespace ReactiveUI.Binding;
 /// </remarks>
 public static partial class ReactiveUIBindingExtensions
 {
-    /// <summary>Applies an observable stream to a target property. Conceptually similar to <c>source.Subscribe(x =&gt; target.property = x)</c>.</summary>
+    /// <summary>Writes each value the source produces to a target property, resolving the property chain by reflection.</summary>
     /// <typeparam name="TValue">The type of the value produced by the source observable.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
     /// <typeparam name="TTargetValue">The type of the property on the target object.</typeparam>
@@ -27,7 +27,11 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="target">The target object whose property will be set.</param>
     /// <param name="property">An expression that selects the target property to set.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is null.</exception>
+    /// <remarks>
+    /// Values are written on the target's owning thread when a registered view-thread invoker claims it.
+    /// A null target writes nothing, and a value the converter cannot convert is written as the default of the property type.
+    /// </remarks>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IDisposable BindToUnsafe<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
@@ -48,8 +52,8 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Applies an observable stream to a target property, using the supplied conversion hint when a
-    /// converter is required to coerce the source value to the target property type.
+    /// Writes each value the source produces to a target property, passing the conversion hint to the
+    /// converter and resolving the property chain by reflection.
     /// </summary>
     /// <typeparam name="TValue">The type of the value produced by the source observable.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -59,7 +63,11 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property">An expression that selects the target property to set.</param>
     /// <param name="conversionHint">An object that provides a hint to the converter. The semantics are defined by the converter.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is null.</exception>
+    /// <remarks>
+    /// Values are written on the target's owning thread when a registered view-thread invoker claims it.
+    /// A null target writes nothing, and a value the converter cannot convert is written as the default of the property type.
+    /// </remarks>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IDisposable BindToUnsafe<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
@@ -81,8 +89,8 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Applies an observable stream to a target property, using the supplied converter to coerce the
-    /// source value to the target property type.
+    /// Writes each value the source produces to a target property, converting it with the supplied converter
+    /// and resolving the property chain by reflection.
     /// </summary>
     /// <typeparam name="TValue">The type of the value produced by the source observable.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -92,7 +100,11 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property">An expression that selects the target property to set.</param>
     /// <param name="converterOverride">An explicit converter to use when converting the source value to the target property type.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is null.</exception>
+    /// <remarks>
+    /// Values are written on the target's owning thread when a registered view-thread invoker claims it.
+    /// A null target writes nothing, and a value the converter cannot convert is written as the default of the property type.
+    /// </remarks>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IDisposable BindToUnsafe<TValue, TTarget, TTargetValue>(
         this IObservable<TValue> source,
@@ -114,8 +126,8 @@ public static partial class ReactiveUIBindingExtensions
     }
 
     /// <summary>
-    /// Applies an observable stream to a target property, using the supplied converter and conversion
-    /// hint to coerce the source value to the target property type.
+    /// Writes each value the source produces to a target property, converting it with the supplied converter
+    /// and conversion hint and resolving the property chain by reflection.
     /// </summary>
     /// <typeparam name="TValue">The type of the value produced by the source observable.</typeparam>
     /// <typeparam name="TTarget">The type of the target object.</typeparam>
@@ -126,7 +138,11 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="conversionHint">An object that provides a hint to the converter. The semantics are defined by the converter.</param>
     /// <param name="converterOverride">An explicit converter to use when converting the source value to the target property type.</param>
     /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/> is null.</exception>
+    /// <remarks>
+    /// Values are written on the target's owning thread when a registered view-thread invoker claims it.
+    /// A null target writes nothing, and a value the converter cannot convert is written as the default of the property type.
+    /// </remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IDisposable BindToUnsafe<TValue, TTarget, TTargetValue>(

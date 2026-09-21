@@ -20,7 +20,7 @@ namespace ReactiveUI.Binding;
 public static partial class ReactiveUIBindingExtensions
 {
     /// <summary>
-    /// Observes changes on 2 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 2 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -31,7 +31,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property2">An expression that selects the second property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -48,7 +47,7 @@ public static partial class ReactiveUIBindingExtensions
             t => conversionFunc(t.Property1, t.Property2));
 
     /// <summary>
-    /// Observes changes on 3 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 3 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -61,7 +60,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property3">An expression that selects the third property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -80,7 +78,7 @@ public static partial class ReactiveUIBindingExtensions
             t => conversionFunc(t.Property1, t.Property2, t.Property3));
 
     /// <summary>
-    /// Observes changes on 4 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 4 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -95,7 +93,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property4">An expression that selects the fourth property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -116,7 +113,7 @@ public static partial class ReactiveUIBindingExtensions
             t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4));
 
     /// <summary>
-    /// Observes changes on 5 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 5 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -133,7 +130,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property5">An expression that selects the fifth property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -157,7 +153,7 @@ public static partial class ReactiveUIBindingExtensions
             t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5));
 
     /// <summary>
-    /// Observes changes on 6 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 6 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -176,7 +172,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property6">An expression that selects the sixth property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -202,7 +197,7 @@ public static partial class ReactiveUIBindingExtensions
             t => conversionFunc(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5, t.Property6));
 
     /// <summary>
-    /// Observes changes on 7 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 7 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -223,7 +218,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property7">An expression that selects the seventh property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -258,7 +252,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property7));
 
     /// <summary>
-    /// Observes changes on 8 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 8 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -281,7 +275,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property8">An expression that selects the eighth property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -319,7 +312,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property8));
 
     /// <summary>
-    /// Observes changes on 9 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 9 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -344,7 +337,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property9">An expression that selects the ninth property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -385,7 +377,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property9));
 
     /// <summary>
-    /// Observes changes on 10 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 10 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -412,7 +404,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property10">An expression that selects the tenth property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -456,7 +447,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property10));
 
     /// <summary>
-    /// Observes changes on 11 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 11 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -485,7 +476,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property11">An expression that selects the eleventh property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -532,7 +522,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property11));
 
     /// <summary>
-    /// Observes changes on 12 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 12 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -563,7 +553,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property12">An expression that selects the twelfth property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -613,7 +602,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property12));
 
     /// <summary>
-    /// Observes changes on 13 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 13 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -646,7 +635,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property13">An expression that selects the thirteenth property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -714,7 +702,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property13));
 
     /// <summary>
-    /// Observes changes on 14 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 14 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -749,7 +737,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property14">An expression that selects the fourteenth property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -821,7 +808,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property14));
 
     /// <summary>
-    /// Observes changes on 15 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 15 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -858,7 +845,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property15">An expression that selects the fifteenth property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -934,7 +920,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property15));
 
     /// <summary>
-    /// Observes changes on 16 properties on the specified object and applies a conversion function to produce a result after any property changes.
+    /// Observes 16 properties by reflection and emits the conversion function's result for their values, first on subscription and again after any of them changes.
     /// </summary>
     /// <typeparam name="TObj">The type of the object to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -973,7 +959,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property16">An expression that selects the sixteenth property to observe.</param>
     /// <param name="conversionFunc">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the converted result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

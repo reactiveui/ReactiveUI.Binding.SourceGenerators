@@ -19,13 +19,13 @@ public static partial class ReactiveUIBindingExtensions
         "No generated BindCommand dispatch matched this call site. Use BindCommandUnsafe to resolve the expression at run time.";
 
 #if NET8_0_OR_GREATER
-    /// <summary>Binds a command from a view model to a control on a view.</summary>
+    /// <summary>Binds the command a view model property holds to the control a view property holds, rebinding when either changes.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
     /// <typeparam name="TControl">The type of the control.</typeparam>
     /// <param name="view">The view to bind to.</param>
-    /// <param name="viewModel">The view model containing the command.</param>
+    /// <param name="viewModel">The view model containing the command; null binds nothing.</param>
     /// <param name="propertyName">An expression that selects the command property on the view model.</param>
     /// <param name="controlName">An expression that selects the control on the view.</param>
     /// <param name="toEvent">The event name to bind to. If null, a default event is selected.</param>
@@ -52,13 +52,13 @@ public static partial class ReactiveUIBindingExtensions
         where TProp : ICommand
         where TControl : class
 #else
-    /// <summary>Binds a command from a view model to a control on a view.</summary>
+    /// <summary>Binds the command a view model property holds to the control a view property holds, rebinding when either changes.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
     /// <typeparam name="TControl">The type of the control.</typeparam>
     /// <param name="view">The view to bind to.</param>
-    /// <param name="viewModel">The view model containing the command.</param>
+    /// <param name="viewModel">The view model containing the command; null binds nothing.</param>
     /// <param name="propertyName">An expression that selects the command property on the view model.</param>
     /// <param name="controlName">An expression that selects the control on the view.</param>
     /// <param name="toEvent">The event name to bind to. If null, a default event is selected.</param>
@@ -86,14 +86,14 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Binds a command from a view model to a control on a view with an observable parameter.</summary>
+    /// <summary>Binds the command a view model property holds to the control a view property holds, using an observable as the source of the command parameter.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
     /// <typeparam name="TControl">The type of the control.</typeparam>
     /// <typeparam name="TParam">The type of the command parameter.</typeparam>
     /// <param name="view">The view to bind to.</param>
-    /// <param name="viewModel">The view model containing the command.</param>
+    /// <param name="viewModel">The view model containing the command; null binds nothing.</param>
     /// <param name="propertyName">An expression that selects the command property on the view model.</param>
     /// <param name="controlName">An expression that selects the control on the view.</param>
     /// <param name="withParameter">An observable that provides the command parameter.</param>
@@ -122,14 +122,14 @@ public static partial class ReactiveUIBindingExtensions
         where TProp : ICommand
         where TControl : class
 #else
-    /// <summary>Binds a command from a view model to a control on a view with an observable parameter.</summary>
+    /// <summary>Binds the command a view model property holds to the control a view property holds, using an observable as the source of the command parameter.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
     /// <typeparam name="TControl">The type of the control.</typeparam>
     /// <typeparam name="TParam">The type of the command parameter.</typeparam>
     /// <param name="view">The view to bind to.</param>
-    /// <param name="viewModel">The view model containing the command.</param>
+    /// <param name="viewModel">The view model containing the command; null binds nothing.</param>
     /// <param name="propertyName">An expression that selects the command property on the view model.</param>
     /// <param name="controlName">An expression that selects the control on the view.</param>
     /// <param name="withParameter">An observable that provides the command parameter.</param>
@@ -160,14 +160,14 @@ public static partial class ReactiveUIBindingExtensions
     }
 
 #if NET8_0_OR_GREATER
-    /// <summary>Binds a command from a view model to a control on a view with a parameter expression.</summary>
+    /// <summary>Binds the command a view model property holds to the control a view property holds, using a view model property as the command parameter.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
     /// <typeparam name="TControl">The type of the control.</typeparam>
     /// <typeparam name="TParam">The type of the command parameter.</typeparam>
     /// <param name="view">The view to bind to.</param>
-    /// <param name="viewModel">The view model containing the command.</param>
+    /// <param name="viewModel">The view model containing the command; null binds nothing.</param>
     /// <param name="propertyName">An expression that selects the command property on the view model.</param>
     /// <param name="controlName">An expression that selects the control on the view.</param>
     /// <param name="withParameter">An expression that selects the command parameter property on the view model.</param>
@@ -198,14 +198,14 @@ public static partial class ReactiveUIBindingExtensions
         where TProp : ICommand
         where TControl : class
 #else
-    /// <summary>Binds a command from a view model to a control on a view with a parameter expression.</summary>
+    /// <summary>Binds the command a view model property holds to the control a view property holds, using a view model property as the command parameter.</summary>
     /// <typeparam name="TView">The type of the view.</typeparam>
     /// <typeparam name="TViewModel">The type of the view model.</typeparam>
     /// <typeparam name="TProp">The type of the command property.</typeparam>
     /// <typeparam name="TControl">The type of the control.</typeparam>
     /// <typeparam name="TParam">The type of the command parameter.</typeparam>
     /// <param name="view">The view to bind to.</param>
-    /// <param name="viewModel">The view model containing the command.</param>
+    /// <param name="viewModel">The view model containing the command; null binds nothing.</param>
     /// <param name="propertyName">An expression that selects the command property on the view model.</param>
     /// <param name="controlName">An expression that selects the control on the view.</param>
     /// <param name="withParameter">An expression that selects the command parameter property on the view model.</param>

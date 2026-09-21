@@ -10,16 +10,10 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts any value to <see cref="bool"/> by comparing it with a hint value using <see cref="object.Equals(object, object)"/>.</summary>
+/// <summary>Converts any value to a <see cref="bool"/> that says whether it equals the conversion hint, using <see cref="object.Equals(object, object)"/>.</summary>
 /// <remarks>
-/// <para>
-/// This converter is useful for binding scenarios where you need to determine if a value
-/// equals a specific comparison value. The comparison value should be provided via the
-/// <c>conversionHint</c> parameter.
-/// </para>
-/// <para>
-/// Example: Convert an enum value to bool by comparing with a specific enum member.
-/// </para>
+/// The conversion always succeeds, and two nulls are equal. The converter is registered for the
+/// (<see cref="object"/>, <see cref="bool"/>) pair, so a registry lookup finds it only for that pair.
 /// </remarks>
 [DebuggerDisplay("{FromType.Name,nq} -> {ToType.Name,nq} by equality with the conversion hint")]
 public sealed class EqualityTypeConverter : IBindingTypeConverter

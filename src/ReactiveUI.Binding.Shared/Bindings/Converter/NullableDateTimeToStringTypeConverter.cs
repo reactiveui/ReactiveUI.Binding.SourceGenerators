@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts nullable <see cref="DateTime"/> to <see cref="string"/>.</summary>
+/// <summary>Converts a nullable <see cref="DateTime"/> to a <see cref="string"/> in the general date and time format of the current culture. A null value succeeds with a null string.</summary>
 public sealed class NullableDateTimeToStringTypeConverter : BindingTypeConverter<DateTime?, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

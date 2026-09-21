@@ -12,15 +12,18 @@ namespace ReactiveUI.Binding.ObservableForProperty;
 #endif
 
 /// <summary>
-/// Walks an expression member chain (<c>x.A.B.C</c>) as a single switching engine: one watcher per link, each
-/// observing its link on the value produced by the previous link and re-subscribing the deeper links when an
-/// intermediate value changes. Emits the leaf value as an observed change, applying skip-initial, the
-/// non-null-parent filter, the cast to <typeparamref name="TValue"/>, and the optional distinct-by-value gate
-/// inline — collapsing the nested <c>Select</c>+<c>Switch</c> fold plus
-/// <c>Skip</c>/<c>Where</c>/<c>Select</c>/<c>DistinctUntilChanged</c> into one allocation-light sink.
+/// Observes the leaf of an expression member chain (<c>x.A.B.C</c>) and emits its value as an observed change
+/// each time any link changes.
 /// </summary>
 /// <typeparam name="TSender">The root sender type surfaced on the emitted change.</typeparam>
 /// <typeparam name="TValue">The leaf value type.</typeparam>
+/// <remarks>
+/// Each link is observed on the value the previous link produced, and the deeper links are re-attached when an
+/// intermediate value changes. The current leaf value is emitted on subscribe unless the first value is skipped.
+/// Nothing is emitted while an intermediate value is null. A leaf value that is not a <typeparamref name="TValue"/>
+/// faults the observer with an <see cref="InvalidCastException"/>. The sequence never completes; observed values
+/// carry the root object as their sender.
+/// </remarks>
 [DebuggerDisplay("{_expression}, Links = {_links.Length}, BeforeChange = {_beforeChange}, SkipInitial = {_skipInitial}, Distinct = {_isDistinct}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
@@ -52,9 +55,10 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
     /// <param name="expression">The full expression surfaced on the emitted change.</param>
     /// <param name="links">The member-access links of the chain, in order.</param>
     /// <param name="beforeChange">Whether values are observed before they change.</param>
-    /// <param name="skipInitial">Whether the initial value is suppressed.</param>
+    /// <param name="skipInitial">Whether the first value the chain produces is dropped.</param>
     /// <param name="isDistinct">Whether consecutive equal leaf values are suppressed.</param>
-    /// <param name="suppressWarnings">Whether the warning an unobservable property raises is suppressed.</param>
+    /// <param name="suppressWarnings">Whether the warning a property with no notification mechanism raises is suppressed.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="links"/> is <see langword="null"/>.</exception>
     public ExpressionChainSink(
         TSender? source,
         Expression? expression,
@@ -75,6 +79,7 @@ public sealed class ExpressionChainSink<TSender, TValue> : IObservable<IObserved
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException"><paramref name="observer"/> is <see langword="null"/>.</exception>
     public IDisposable Subscribe(IObserver<IObservedChange<TSender, TValue>> observer)
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);

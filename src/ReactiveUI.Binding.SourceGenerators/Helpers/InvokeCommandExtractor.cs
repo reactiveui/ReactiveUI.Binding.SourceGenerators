@@ -73,7 +73,7 @@ internal static class InvokeCommandExtractor
                 sourceValueType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 targetTypeName,
                 new(commandPropertyPath),
-                CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(commandArg.ToString()),
+                commandArg.ToString(),
                 InterceptableLocationReader.Read(semanticModel, invocation, ct));
     }
 }

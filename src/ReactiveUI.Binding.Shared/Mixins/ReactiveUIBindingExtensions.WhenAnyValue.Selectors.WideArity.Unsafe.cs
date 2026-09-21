@@ -20,7 +20,7 @@ namespace ReactiveUI.Binding;
 public static partial class ReactiveUIBindingExtensions
 {
     /// <summary>
-    /// Observes 1 property on the specified sender and applies a selector function to produce a result after it changes. This is a ReactiveUI compatibility shim.
+    /// Observes a property by reflection and emits the selector's result for its value, on subscription and after each change. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -29,7 +29,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property1">An expression that selects the first property to observe.</param>
     /// <param name="selector">A function that converts the observed property value to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when the observed property changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IObservable<TRet> WhenAnyValueUnsafe<TSender, T1, TRet>(
@@ -40,7 +39,7 @@ public static partial class ReactiveUIBindingExtensions
         => new MapSignal<T1, TRet>(sender.WhenAnyValueUnsafe(property1), selector);
 
     /// <summary>
-    /// Observes 2 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 2 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -51,7 +50,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property2">An expression that selects the second property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -64,7 +62,7 @@ public static partial class ReactiveUIBindingExtensions
         => new MapSignal<PropertyValues<T1, T2>, TRet>(sender.WhenAnyValueUnsafe(property1, property2), t => selector(t.Property1, t.Property2));
 
     /// <summary>
-    /// Observes 3 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 3 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -77,7 +75,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property3">An expression that selects the third property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -96,7 +93,7 @@ public static partial class ReactiveUIBindingExtensions
             t => selector(t.Property1, t.Property2, t.Property3));
 
     /// <summary>
-    /// Observes 4 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 4 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -111,7 +108,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property4">An expression that selects the fourth property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
@@ -132,7 +128,7 @@ public static partial class ReactiveUIBindingExtensions
             t => selector(t.Property1, t.Property2, t.Property3, t.Property4));
 
     /// <summary>
-    /// Observes 5 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 5 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -149,7 +145,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property5">An expression that selects the fifth property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -173,7 +168,7 @@ public static partial class ReactiveUIBindingExtensions
             t => selector(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5));
 
     /// <summary>
-    /// Observes 6 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 6 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -192,7 +187,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property6">An expression that selects the sixth property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -218,7 +212,7 @@ public static partial class ReactiveUIBindingExtensions
             t => selector(t.Property1, t.Property2, t.Property3, t.Property4, t.Property5, t.Property6));
 
     /// <summary>
-    /// Observes 7 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 7 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -239,7 +233,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property7">An expression that selects the seventh property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -274,7 +267,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property7));
 
     /// <summary>
-    /// Observes 8 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 8 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -297,7 +290,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property8">An expression that selects the eighth property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -335,7 +327,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property8));
 
     /// <summary>
-    /// Observes 9 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 9 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -360,7 +352,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property9">An expression that selects the ninth property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -401,7 +392,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property9));
 
     /// <summary>
-    /// Observes 10 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 10 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -428,7 +419,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property10">An expression that selects the tenth property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -472,7 +462,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property10));
 
     /// <summary>
-    /// Observes 11 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 11 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -501,7 +491,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property11">An expression that selects the eleventh property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -548,7 +537,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property11));
 
     /// <summary>
-    /// Observes 12 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 12 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -579,7 +568,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property12">An expression that selects the twelfth property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -629,7 +617,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property12));
 
     /// <summary>
-    /// Observes 13 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 13 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -662,7 +650,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property13">An expression that selects the thirteenth property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -715,7 +702,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property13));
 
     /// <summary>
-    /// Observes 14 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 14 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -750,7 +737,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property14">An expression that selects the fourteenth property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -822,7 +808,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property14));
 
     /// <summary>
-    /// Observes 15 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 15 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -859,7 +845,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property15">An expression that selects the fifteenth property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -935,7 +920,7 @@ public static partial class ReactiveUIBindingExtensions
                 t.Property15));
 
     /// <summary>
-    /// Observes 16 properties on the specified sender and applies a selector function to produce a result after any property changes. This is a ReactiveUI compatibility shim.
+    /// Observes 16 properties by reflection and emits the selector's result for their values, first on subscription and again after any of them changes. This is a ReactiveUI compatibility shim.
     /// </summary>
     /// <typeparam name="TSender">The type of the sender to monitor for property changes.</typeparam>
     /// <typeparam name="T1">The type of the first observed property value.</typeparam>
@@ -974,7 +959,6 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property16">An expression that selects the sixteenth property to observe.</param>
     /// <param name="selector">A function that converts the observed property values to the return type.</param>
     /// <returns>An observable sequence that emits the selector result when any of the observed properties changes.</returns>
-    /// <remarks>Resolves the property chain by reflection, for an expression the generator could not read.</remarks>
     [SuppressMessage("Design", "SST1472", Justification = "one selector per observed property; the parameter count is the shape of this overload")]
     [SuppressMessage("Design", "SST1523", Justification = "one observation step per observed property; the length is the shape of this overload")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

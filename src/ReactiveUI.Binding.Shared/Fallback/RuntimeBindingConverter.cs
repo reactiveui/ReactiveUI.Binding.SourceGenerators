@@ -14,12 +14,9 @@ namespace ReactiveUI.Binding.Fallback;
 /// is supplied.
 /// </summary>
 /// <remarks>
-/// <para>
-/// Resolution order matches ReactiveUI: an explicit converter override wins; otherwise
-/// the global <see cref="BindingConverters.Current"/> service resolves the best converter for the runtime
-/// type pair. When no converter can produce a value, the conversion fails and the generated binding skips
-/// the assignment for that emission.
-/// </para>
+/// An explicit converter override wins; otherwise <see cref="BindingConverters.Current"/> resolves the best
+/// converter for the declared source and target types. When no converter can produce a value, the conversion
+/// fails and the generated binding skips the assignment for that emission.
 /// </remarks>
 public static class RuntimeBindingConverter
 {
@@ -31,12 +28,7 @@ public static class RuntimeBindingConverter
     /// <param name="converterOverride">An optional explicit converter that takes precedence over the registry.</param>
     /// <param name="result">The converted value when conversion succeeds.</param>
     /// <returns><see langword="true"/> if conversion succeeded; otherwise <see langword="false"/>.</returns>
-    /// <remarks>
-    /// The converter is resolved from the declared types rather than from the value's runtime type. A runtime
-    /// <see cref="Type"/> cannot satisfy the annotations the converter registry declares, so resolving from one
-    /// would put a trimming requirement on every generated binding that converts. The declared types are what
-    /// the generator bound, so they are what the registry is asked about.
-    /// </remarks>
+    /// <remarks>The converter is resolved from <typeparamref name="TFrom"/> and <typeparamref name="TTo"/>, not from the runtime type of <paramref name="value"/>.</remarks>
     public static bool TryConvert<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TFrom,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TTo>(

@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Property binding extension methods that observe on a caller-supplied scheduler.</summary>
+/// <summary>Binding extension methods that deliver writes on a caller-supplied scheduler.</summary>
 public static partial class ReactiveSchedulerExtensions
 {
     /// <summary>The message thrown when no generated binding matched the call site.</summary>
@@ -28,13 +28,13 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="target">The target object whose property will be updated.</param>
         /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
         /// <param name="targetProperty">An expression that selects the target property to update.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler the write to the target is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="sourcePropertyExpression">The caller argument expression for <paramref name="sourceProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="targetPropertyExpression">The caller argument expression for <paramref name="targetProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -58,11 +58,11 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="target">The target object whose property will be updated.</param>
         /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
         /// <param name="targetProperty">An expression that selects the target property to update.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler the write to the target is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -89,13 +89,13 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
         /// <param name="targetProperty">An expression that selects the target property to update.</param>
         /// <param name="conversionFunc">A function that converts the source property value to the target property type.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler the write to the target is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="sourcePropertyExpression">The caller argument expression for <paramref name="sourceProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="targetPropertyExpression">The caller argument expression for <paramref name="targetProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -122,11 +122,11 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
         /// <param name="targetProperty">An expression that selects the target property to update.</param>
         /// <param name="conversionFunc">A function that converts the source property value to the target property type.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler the write to the target is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -154,11 +154,11 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="targetProperty">An expression that selects the target property to update.</param>
         /// <param name="converter">The binding type converter to use for converting between source and target types.</param>
         /// <param name="conversionHint">An optional hint passed to the converter (e.g., format string).</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler the write to the target is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated BindOneWay dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Design",
             "SST2309:Optional parameters should be overloads",
@@ -188,13 +188,13 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="target">The target object whose property will be updated.</param>
         /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
         /// <param name="targetProperty">An expression that selects the target property to update.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler each write is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="sourcePropertyExpression">The caller argument expression for <paramref name="sourceProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="targetPropertyExpression">The caller argument expression for <paramref name="targetProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -218,11 +218,11 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="target">The target object whose property will be updated.</param>
         /// <param name="sourceProperty">An expression that selects the source property to observe.</param>
         /// <param name="targetProperty">An expression that selects the target property to update.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler each write is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -250,13 +250,13 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="targetProperty">An expression that selects the target property to update.</param>
         /// <param name="sourceToTargetConv">A function that converts the source property value to the target property type.</param>
         /// <param name="targetToSourceConv">A function that converts the target property value back to the source property type.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler each write is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="sourcePropertyExpression">The caller argument expression for <paramref name="sourceProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="targetPropertyExpression">The caller argument expression for <paramref name="targetProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -285,11 +285,11 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="targetProperty">An expression that selects the target property to update.</param>
         /// <param name="sourceToTargetConv">A function that converts the source property value to the target property type.</param>
         /// <param name="targetToSourceConv">A function that converts the target property value back to the source property type.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler each write is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -319,11 +319,11 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="sourceToTargetConverter">The converter for source-to-target conversion.</param>
         /// <param name="targetToSourceConverter">The converter for target-to-source conversion.</param>
         /// <param name="conversionHint">An optional hint passed to the converters (e.g., format string).</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler each write is delivered on, in place of the target's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A disposable that, when disposed, disconnects the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated BindTwoWay dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Design",
             "SST2309:Optional parameters should be overloads",
@@ -364,13 +364,13 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="viewModelProperty">An expression that selects the view model property to observe.</param>
         /// <param name="viewProperty">An expression that selects the view property to update.</param>
         /// <param name="selector">A function that converts the view model property value to the view property type.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler the write to the view is delivered on, in place of the view's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="viewModelPropertyExpression">The caller argument expression for <paramref name="viewModelProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="viewPropertyExpression">The caller argument expression for <paramref name="viewProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -397,11 +397,11 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="viewModelProperty">An expression that selects the view model property to observe.</param>
         /// <param name="viewProperty">An expression that selects the view property to update.</param>
         /// <param name="selector">A function that converts the view model property value to the view property type.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler the write to the view is delivered on, in place of the view's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -429,11 +429,11 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="viewProperty">An expression that selects the view property to update.</param>
         /// <param name="converter">The binding type converter to use for converting between source and target types.</param>
         /// <param name="conversionHint">An optional hint passed to the converter (e.g., format string).</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler the write to the view is delivered on, in place of the view's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Design",
             "SST2309:Optional parameters should be overloads",
@@ -466,13 +466,13 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="viewProperty">An expression that selects the view property to update.</param>
         /// <param name="viewModelToViewConverter">A function that converts the view model property value to the view property type.</param>
         /// <param name="viewToViewModelConverter">A function that converts the view property value back to the view model property type.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler each write is delivered on, in place of the view's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="viewModelPropertyExpression">The caller argument expression for <paramref name="viewModelProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="viewPropertyExpression">The caller argument expression for <paramref name="viewProperty"/>. Auto-populated by the compiler.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -501,11 +501,11 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="viewProperty">An expression that selects the view property to update.</param>
         /// <param name="viewModelToViewConverter">A function that converts the view model property value to the view property type.</param>
         /// <param name="viewToViewModelConverter">A function that converts the view property value back to the view model property type.</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler each write is delivered on, in place of the view's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Extensions",
             "SST1711:Extension block members should use the block's receiver",
@@ -535,11 +535,11 @@ public static partial class ReactiveSchedulerExtensions
         /// <param name="viewModelToViewConverter">The converter for view model-to-view conversion.</param>
         /// <param name="viewToViewModelConverter">The converter for view-to-view model conversion.</param>
         /// <param name="conversionHint">An optional hint passed to the converters (e.g., format string).</param>
-        /// <param name="scheduler">The scheduler to use for the binding.</param>
+        /// <param name="scheduler">The scheduler each write is delivered on, in place of the view's owning thread; an immediate scheduler writes inline.</param>
         /// <param name="callerFilePath">The source file path of the caller. Auto-populated by the compiler.</param>
         /// <param name="callerLineNumber">The source line number of the caller. Auto-populated by the compiler.</param>
         /// <returns>A reactive binding that can be disposed to disconnect the binding.</returns>
-        /// <exception cref="InvalidOperationException">No generated IReactiveBinding dispatch matched this call site.</exception>
+        /// <exception cref="InvalidOperationException">No generated dispatch matched this call site; use the matching Unsafe overload to resolve the expression at run time.</exception>
         [SuppressMessage(
             "Design",
             "SST2309:Optional parameters should be overloads",

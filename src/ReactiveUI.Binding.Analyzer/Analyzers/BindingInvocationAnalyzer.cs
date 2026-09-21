@@ -166,7 +166,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            var current = body;
+            var current = AnalyzerHelpers.SkipNullForgivingAndParentheses(body);
             while (current is MemberAccessExpressionSyntax memberAccess)
             {
                 var memberSymbol = context.Operation.SemanticModel!.GetSymbolInfo(memberAccess, context.CancellationToken).Symbol;
@@ -180,7 +180,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
                     break;
                 }
 
-                current = memberAccess.Expression;
+                current = AnalyzerHelpers.SkipNullForgivingAndParentheses(memberAccess.Expression);
             }
         }
     }
@@ -454,7 +454,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
         in OperationAnalysisContext context,
         ExpressionSyntax expression)
     {
-        var current = expression;
+        var current = AnalyzerHelpers.SkipNullForgivingAndParentheses(expression);
         while (current is not null)
         {
             if (current is InvocationExpressionSyntax invocation)
@@ -493,7 +493,7 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
                     return;
                 }
 
-                current = memberAccess.Expression;
+                current = AnalyzerHelpers.SkipNullForgivingAndParentheses(memberAccess.Expression);
                 continue;
             }
 
@@ -520,33 +520,45 @@ public class BindingInvocationAnalyzer : DiagnosticAnalyzer
 
         // The path is written outermost-first, so walking down it reaches the root last. Every access whose
         // own receiver is itself an access is a link past the first.
-        for (var current = body as MemberAccessExpressionSyntax;
-            current is not null;
-            current = current.Expression as MemberAccessExpressionSyntax)
+        var current = AnalyzerHelpers.SkipNullForgivingAndParentheses(body) as MemberAccessExpressionSyntax;
+        while (current is not null)
         {
-            if (current.Expression is not MemberAccessExpressionSyntax parent)
+            var parent = AnalyzerHelpers.SkipNullForgivingAndParentheses(current.Expression) as MemberAccessExpressionSyntax;
+            if (parent is not null)
             {
-                continue;
+                ReportIfSilent(context, model, parent);
             }
 
-            if (model.GetSymbolInfo(parent, context.CancellationToken).Symbol
-                is not IPropertySymbol { Type: INamedTypeSymbol linkType })
-            {
-                continue;
-            }
-
-            if (AnalyzerHelpers.HasObservableMechanism(linkType, context.Compilation))
-            {
-                continue;
-            }
-
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    DiagnosticWarnings.SilentPathLink,
-                    parent.GetLocation(),
-                    linkType.Name,
-                    parent.ToString()));
+            current = parent;
         }
+    }
+
+    /// <summary>Reports a link when the type it yields raises no notification.</summary>
+    /// <param name="context">The operation analysis context.</param>
+    /// <param name="model">The semantic model the link is read through.</param>
+    /// <param name="link">The member access naming the link.</param>
+    private static void ReportIfSilent(
+        in OperationAnalysisContext context,
+        SemanticModel model,
+        MemberAccessExpressionSyntax link)
+    {
+        if (model.GetSymbolInfo(link, context.CancellationToken).Symbol
+            is not IPropertySymbol { Type: INamedTypeSymbol linkType })
+        {
+            return;
+        }
+
+        if (AnalyzerHelpers.HasObservableMechanism(linkType, context.Compilation))
+        {
+            return;
+        }
+
+        context.ReportDiagnostic(
+            Diagnostic.Create(
+                DiagnosticWarnings.SilentPathLink,
+                link.GetLocation(),
+                linkType.Name,
+                link.ToString()));
     }
 
     /// <summary>Determines whether an argument is an inline lambda passed as an expression tree.</summary>

@@ -15,16 +15,12 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
         /// </summary>
         public static global::System.IDisposable InvokeCommand(
             this global::System.IObservable<string> source,
-            global::SharedScenarios.InvokeCommand.CommandProperty.MyViewModel target,
+            global::SharedScenarios.InvokeCommand.CommandProperty.MyViewModel? target,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.InvokeCommand.CommandProperty.MyViewModel, global::System.Windows.Input.ICommand?>> commandProperty,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("commandProperty")] string commandPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            commandPropertyExpression = commandPropertyExpression.StartsWith("static ", global::System.StringComparison.Ordinal)
-                ? commandPropertyExpression.Substring(7)
-                : commandPropertyExpression;
-
             if (commandPropertyExpression == "x => x.Save")
             {
                 return __InvokeCommand_7FFFFF3B8638039A(source, target);

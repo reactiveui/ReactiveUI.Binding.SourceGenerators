@@ -8,7 +8,10 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to <see cref="bool"/> using <see cref="bool.TryParse(string?, out bool)"/>.</summary>
+/// <summary>
+/// Converts a <see cref="string"/> to a <see cref="bool"/> with <see cref="bool.TryParse(string?, out bool)"/>
+/// (case-insensitive <c>true</c> or <c>false</c>); a null or unparseable string fails.
+/// </summary>
 public sealed class StringToBooleanTypeConverter : BindingTypeConverter<string, bool>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

@@ -9,7 +9,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts nullable <see cref="DateOnly"/> to <see cref="string"/>.</summary>
+/// <summary>Converts a nullable <see cref="DateOnly"/> to a <see cref="string"/> in the short date format of the current culture. A null value succeeds with a null string.</summary>
 public sealed class NullableDateOnlyToStringTypeConverter : BindingTypeConverter<DateOnly?, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

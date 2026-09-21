@@ -11,17 +11,23 @@ namespace ReactiveUI.Binding.Reactive.Wpf;
 namespace ReactiveUI.Binding.Wpf;
 #endif
 
-/// <summary>Writes to a WPF object on the thread its dispatcher owns.</summary>
+/// <summary>Routes writes to a WPF <c>DispatcherObject</c> onto the thread its dispatcher owns.</summary>
 public sealed class DispatcherViewThreadInvoker : IViewThreadInvoker
 {
     /// <inheritdoc/>
     public bool Claims(object target) => target is DispatcherObject;
 
-    /// <inheritdoc/>
+    /// <summary>Returns whether the calling thread owns the target's dispatcher.</summary>
+    /// <param name="target">A <c>DispatcherObject</c>; any other type throws <see cref="InvalidCastException"/>.</param>
+    /// <returns><see langword="true"/> when the calling thread may touch the target.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CheckAccess(object target) => ((DispatcherObject)target).CheckAccess();
 
-    /// <inheritdoc/>
+    /// <summary>Queues <paramref name="callback"/> on the target's dispatcher at normal priority, or runs it inline when the target has no dispatcher.</summary>
+    /// <param name="target">A <c>DispatcherObject</c>; any other type throws <see cref="InvalidCastException"/>.</param>
+    /// <param name="callback">The callback to run.</param>
+    /// <param name="state">The value passed to <paramref name="callback"/>.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="callback"/> is null.</exception>
     public void Post(object target, Action<object?> callback, object? state)
     {
         ArgumentExceptionHelper.ThrowIfNull(callback);

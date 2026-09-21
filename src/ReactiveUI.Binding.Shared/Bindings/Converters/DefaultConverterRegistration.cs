@@ -8,18 +8,15 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Registers all built-in type converters with a <see cref="ConverterService"/>.</summary>
-/// <remarks>
-/// This class is public to allow external packages (e.g., ReactiveUI) to register
-/// the default set of binding converters provided by ReactiveUI.Binding.
-/// </remarks>
+/// <summary>Registers the built-in typed converters with a <see cref="ConverterService"/>.</summary>
 public static class DefaultConverterRegistration
 {
-    /// <summary>Registers all default built-in converters with the specified <paramref name="service"/>.</summary>
-    /// <param name="service">The converter service to register defaults into.</param>
+    /// <summary>Registers the string identity, equality, boolean, Guid, Uri, numeric and date and time converters, each with its nullable forms.</summary>
+    /// <param name="service">The converter service to register the converters with.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="service"/> is null.</exception>
     /// <remarks>
-    /// Call this method during application initialization to populate the converter service
-    /// with all standard type converters (string, numeric, datetime, nullable, etc.).
+    /// Registering twice adds every converter twice. <c>DateOnly</c> and <c>TimeOnly</c> converters are registered
+    /// on .NET 8 and later only. No fallback or set-method converters are registered.
     /// </remarks>
     public static void RegisterDefaults(ConverterService service)
     {

@@ -10,12 +10,12 @@ namespace ReactiveUI.Binding.Reactive.Observables;
 namespace ReactiveUI.Binding.Observables;
 #endif
 
-/// <summary>
-/// Fused property observation observable for <see cref="INotifyPropertyChanged"/> objects.
-/// Collapses <c>Observable.Create + StartWith + DistinctUntilChanged</c> into a single allocation.
-/// Emits the current value on subscription, then emits new values when the property changes.
-/// </summary>
+/// <summary>Emits a property's value on subscribe, then its new value after each change the source announces.</summary>
 /// <typeparam name="T">The type of the property value.</typeparam>
+/// <remarks>
+/// A <see cref="INotifyPropertyChanged.PropertyChanged"/> notification with a null or empty property name applies
+/// to every property. When distinct filtering is on, a value equal to the last emitted one is dropped.
+/// </remarks>
 [DebuggerDisplay("Property = {_propertyName}, Source = {_source}, DistinctUntilChanged = {_distinctUntilChanged}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class PropertyObservable<T> : IObservable<T>
@@ -37,6 +37,7 @@ public sealed class PropertyObservable<T> : IObservable<T>
     /// <param name="propertyName">The property name to observe.</param>
     /// <param name="getter">A delegate that reads the property value from the source.</param>
     /// <param name="distinctUntilChanged">Whether to suppress duplicate consecutive values.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="source"/>, <paramref name="propertyName"/> or <paramref name="getter"/> is <see langword="null"/>.</exception>
     public PropertyObservable(
         INotifyPropertyChanged source,
         string propertyName,
@@ -53,6 +54,7 @@ public sealed class PropertyObservable<T> : IObservable<T>
     }
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException"><paramref name="observer"/> is <see langword="null"/>.</exception>
     public IDisposable Subscribe(IObserver<T> observer)
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);

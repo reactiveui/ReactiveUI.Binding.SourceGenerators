@@ -31,7 +31,7 @@ public class BindCommandBenchmark
     private IDisposable _binding = null!;
 
     /// <summary>Creates the model and view outside the binding measurement.</summary>
-    [GlobalSetup(Target = nameof(Subscribe))]
+    [GlobalSetup(Targets = [nameof(Subscribe), nameof(SubscribeWithExplicitEvent)])]
     public void Setup()
     {
         _commands = [new(), new()];
@@ -57,6 +57,13 @@ public class BindCommandBenchmark
     public void Subscribe()
     {
         using var binding = _view.BindCommand(_model, x => x.Command, x => x.Button);
+    }
+
+    /// <summary>Creates a generated binding that names the event the control is bound through.</summary>
+    [Benchmark]
+    public void SubscribeWithExplicitEvent()
+    {
+        using var binding = _view.BindCommand(_model, x => x.Command, x => x.Button, toEvent: "Click");
     }
 
     /// <summary>Writes alternating commands through a live binding on the calling thread.</summary>

@@ -8,36 +8,20 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Service-scoped entry points for importing Splat-registered converters.</summary>
-/// <example>
-/// <para>
-/// <strong>Example: Direct import into existing service</strong>
-/// </para>
-/// <code>
-/// var converterService = BindingConverters.Current;
-/// converterService.ImportFrom(Splat.Locator.Current);
-/// </code>
-/// </example>
+/// <summary>Extension members that import Splat-registered converters into a <see cref="ConverterService"/>.</summary>
 public static class ConverterMigrationHelperMixins
 {
     /// <summary>Provides ImportFrom extension members for <paramref name="converterService"/>.</summary>
-    /// <param name="converterService">The converter service to import into. Must not be null.</param>
+    /// <param name="converterService">The converter service to import into.</param>
     extension(ConverterService converterService)
     {
-        /// <summary>Imports converters from a Splat resolver directly into a <see cref="ConverterService"/>.</summary>
-        /// <param name="resolver">The Splat resolver to import converters from. Must not be null.</param>
+        /// <summary>Registers the converters held by a Splat resolver with this service.</summary>
+        /// <param name="resolver">The Splat resolver to import converters from.</param>
         /// <exception cref="ArgumentNullException">
         /// Thrown if <paramref name="converterService"/> or <paramref name="resolver"/> is null.
         /// </exception>
         /// <remarks>
-        /// <para>
-        /// This extension method extracts all converters from the Splat resolver and registers them
-        /// with the specified <see cref="ConverterService"/>.
-        /// </para>
-        /// <para>
-        /// <strong>Important:</strong> This method imports converters at the time it's called.
-        /// Any converters registered with Splat after this call will not be included.
-        /// </para>
+        /// The import is a one-time copy; converters registered with the resolver afterwards are not picked up.
         /// </remarks>
         public void ImportFrom(
             IReadonlyDependencyResolver resolver)

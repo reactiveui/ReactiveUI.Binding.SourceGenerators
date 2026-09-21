@@ -13,17 +13,7 @@ namespace ReactiveUI.Binding.Observables;
 /// <summary>Observes a property that has no change notification: its value, once, and then silence.</summary>
 /// <typeparam name="T">The type of the property value.</typeparam>
 /// <remarks>
-/// <para>
-/// Deliberately never completes. A property with no mechanism behind it has one value and no further news,
-/// which is not the same as a sequence that has ended - and downstream operators read the difference. A
-/// completing source ends a binding's subscription, and inside a chain it lets the stage below tear down a
-/// subtree that is still live. The runtime engine's own fallback stays open for exactly this reason.
-/// </para>
-/// <para>
-/// Hand-rolled rather than composed. The general spelling is a return followed by a never, concatenated,
-/// which is three objects where this is one - on a path taken once per binding of every unobservable
-/// property in a view.
-/// </para>
+/// The sequence never completes, so a binding or chain that observes it stays subscribed.
 /// </remarks>
 [DebuggerDisplay("UnchangingProperty: {_value}")]
 [EditorBrowsable(EditorBrowsableState.Never)]
@@ -37,6 +27,7 @@ public sealed class UnchangingPropertyObservable<T> : IObservable<T>
     public UnchangingPropertyObservable(T value) => _value = value;
 
     /// <inheritdoc/>
+    /// <exception cref="ArgumentNullException"><paramref name="observer"/> is <see langword="null"/>.</exception>
     public IDisposable Subscribe(IObserver<T> observer)
     {
         ArgumentExceptionHelper.ThrowIfNull(observer);

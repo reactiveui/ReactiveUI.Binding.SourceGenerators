@@ -68,6 +68,15 @@ namespace ReactiveUI.Binding.SourceGenerators.Models;
 /// this record otherwise describes applies - lookup never sees an interceptor, so there is no namespace to
 /// reach, no import to emit, and no expression text to match at run time.
 /// </param>
+/// <param name="SupportsModuleInitializer">
+/// Whether the consumer can mark a method as a module initializer (C# 9+). The generated view dispatch registers
+/// itself that way, so it is in place before any code in the assembly runs. An older consumer has no such hook
+/// and the dispatch registers when its generated class is first used.
+/// </param>
+/// <param name="DeclaresModuleInitializerAttribute">
+/// Whether the compilation has to declare <c>ModuleInitializerAttribute</c> itself, because no accessible one
+/// is in reach. Frameworks from .NET 5 ship it; older ones do not.
+/// </param>
 internal readonly record struct LanguageFeatures(
     bool SupportsCallerArgExpr,
     bool SupportsNullable,
@@ -78,7 +87,9 @@ internal readonly record struct LanguageFeatures(
     bool UsesReactiveRuntime = false,
     EquatableArray<string> RuntimeNamespaceMembers = default,
     EquatableArray<string> PrimitivesNamespaceMembers = default,
-    bool SupportsInterceptors = false)
+    bool SupportsInterceptors = false,
+    bool SupportsModuleInitializer = false,
+    bool DeclaresModuleInitializerAttribute = false)
 {
     /// <summary>Gets a value indicating whether call sites a dispatch cannot tell apart collapse to one.</summary>
     /// <remarks>

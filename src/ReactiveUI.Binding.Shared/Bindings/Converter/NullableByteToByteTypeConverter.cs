@@ -10,10 +10,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts a nullable <see cref="byte"/> to <see cref="byte"/>.</summary>
-/// <remarks>
-/// When the nullable value is null, the conversion fails and returns false.
-/// </remarks>
+/// <summary>Converts a nullable <see cref="byte"/> to a <see cref="byte"/>; a null value fails the conversion.</summary>
 [DebuggerDisplay("byte? -> byte (affinity {Affinity})")]
 public sealed class NullableByteToByteTypeConverter : IBindingTypeConverter<byte?, byte>
 {

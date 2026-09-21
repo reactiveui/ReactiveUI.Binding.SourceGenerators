@@ -11,10 +11,7 @@ namespace ReactiveUI.Binding.Reactive.Observables;
 namespace ReactiveUI.Binding.Observables;
 #endif
 
-/// <summary>
-/// Factory methods for creating lightweight CombineLatest observables.
-/// Replacement for <c>System.Reactive.Linq.Observable.CombineLatest</c>.
-/// </summary>
+/// <summary>Creates an observable that combines the latest value of each of two to sixteen sources.</summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 [ExcludeFromCodeCoverage]
 public static class CombineLatestObservable
@@ -26,7 +23,7 @@ public static class CombineLatestObservable
     /// <param name="source1">Source observable 1.</param>
     /// <param name="source2">Source observable 2.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, TResult>(
         IObservable<T1> source1,
@@ -43,7 +40,7 @@ public static class CombineLatestObservable
     /// <param name="source2">Source observable 2.</param>
     /// <param name="source3">Source observable 3.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, TResult>(
         IObservable<T1> source1,
@@ -63,7 +60,7 @@ public static class CombineLatestObservable
     /// <param name="source3">Source observable 3.</param>
     /// <param name="source4">Source observable 4.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, TResult>(
         IObservable<T1> source1,
@@ -86,7 +83,7 @@ public static class CombineLatestObservable
     /// <param name="source4">Source observable 4.</param>
     /// <param name="source5">Source observable 5.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, TResult>(
         IObservable<T1> source1,
@@ -118,7 +115,7 @@ public static class CombineLatestObservable
     /// <param name="source5">Source observable 5.</param>
     /// <param name="source6">Source observable 6.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, TResult>(
         IObservable<T1> source1,
@@ -154,7 +151,7 @@ public static class CombineLatestObservable
     /// <param name="source6">Source observable 6.</param>
     /// <param name="source7">Source observable 7.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, TResult>(
@@ -195,7 +192,7 @@ public static class CombineLatestObservable
     /// <param name="source7">Source observable 7.</param>
     /// <param name="source8">Source observable 8.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(
@@ -240,7 +237,7 @@ public static class CombineLatestObservable
     /// <param name="source8">Source observable 8.</param>
     /// <param name="source9">Source observable 9.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(
@@ -289,7 +286,7 @@ public static class CombineLatestObservable
     /// <param name="source9">Source observable 9.</param>
     /// <param name="source10">Source observable 10.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(
@@ -342,7 +339,7 @@ public static class CombineLatestObservable
     /// <param name="source10">Source observable 10.</param>
     /// <param name="source11">Source observable 11.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(
@@ -399,7 +396,7 @@ public static class CombineLatestObservable
     /// <param name="source11">Source observable 11.</param>
     /// <param name="source12">Source observable 12.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(
@@ -460,7 +457,7 @@ public static class CombineLatestObservable
     /// <param name="source12">Source observable 12.</param>
     /// <param name="source13">Source observable 13.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(
@@ -525,7 +522,7 @@ public static class CombineLatestObservable
     /// <param name="source13">Source observable 13.</param>
     /// <param name="source14">Source observable 14.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(
@@ -594,7 +591,7 @@ public static class CombineLatestObservable
     /// <param name="source14">Source observable 14.</param>
     /// <param name="source15">Source observable 15.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<
@@ -683,7 +680,7 @@ public static class CombineLatestObservable
     /// <param name="source15">Source observable 15.</param>
     /// <param name="source16">Source observable 16.</param>
     /// <param name="resultSelector">The function to combine the latest values.</param>
-    /// <returns>An observable of combined results.</returns>
+    /// <returns>An observable that emits once every source has produced a value, then again on each later value from any source.</returns>
     [SuppressMessage("Design", "SST1472:Signatures should not declare too many parameters", Justification = "Parameter count is intrinsic to the fixed CombineLatest arity.")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TResult> Create<

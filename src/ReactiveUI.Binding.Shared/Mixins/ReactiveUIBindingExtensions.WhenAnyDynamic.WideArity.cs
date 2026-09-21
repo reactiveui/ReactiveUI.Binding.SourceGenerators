@@ -12,14 +12,12 @@ namespace ReactiveUI.Binding;
 
 /// <summary>Observes property chains that are only known as expressions at run time.</summary>
 /// <remarks>
-/// Every other observation in this library is resolved at compile time, which is what keeps it free of
-/// reflection. These overloads take an <see cref="Expression"/> the caller built rather than a lambda the
-/// compiler could read, so there is nothing for a generator to resolve and the chain has to be walked by
-/// reflection. They are the one part of the observation surface that is not trim- or AOT-safe, and they
-/// say so.
+/// These overloads take an <see cref="Expression"/> the caller built rather than a lambda the compiler can
+/// read, so no generator resolves them: the chain is always walked by reflection, and the overloads are
+/// annotated as not trim- or AOT-safe.
 /// <para>
-/// The walking itself is the engine the runtime observation fallback already uses, so resolving a link,
-/// re-subscribing a deeper one when an intermediate moves, and filtering duplicates are not written twice.
+/// The chain walking is the engine the runtime observation fallback uses: it resolves each link,
+/// re-subscribes a deeper link when an intermediate value changes, and filters duplicates.
 /// Each arity differs only in how many chains it combines.
 /// </para>
 /// </remarks>
@@ -29,13 +27,14 @@ public static partial class ReactiveUIBindingExtensions
     private const string DynamicChainRequiresUnreferencedCode =
         "Evaluates expression-based member chains via reflection; members may be trimmed.";
 
-    /// <summary>Observes 1 dynamically-typed property chain and projects it with a selector.</summary>
+    /// <summary>Observes 1 property chain named by a run-time expression and emits the selector applied to its observed change, on subscription and after each change.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
     /// <param name="property1">An expression naming property 1.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -45,14 +44,15 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, selector, true);
 
-    /// <summary>Observes 1 dynamically-typed property chain and projects it with a selector.</summary>
+    /// <summary>Observes 1 property chain named by a run-time expression and emits the selector applied to its observed change, on subscription and after each change.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
     /// <param name="property1">An expression naming property 1.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
         this TSender sender,
@@ -65,14 +65,15 @@ public static partial class ReactiveUIBindingExtensions
         return new MapSignal<IObservedChange<TSender, object?>, TRet>(chains[0], selector);
     }
 
-    /// <summary>Observes 2 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 2 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
     /// <param name="property1">An expression naming property 1.</param>
     /// <param name="property2">An expression naming property 2.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -83,7 +84,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, property2, selector, true);
 
-    /// <summary>Observes 2 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 2 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -91,7 +92,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property2">An expression naming property 2.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
         this TSender sender,
@@ -105,7 +107,7 @@ public static partial class ReactiveUIBindingExtensions
         return CombineLatestObservable.Create(chains[0], chains[1], selector);
     }
 
-    /// <summary>Observes 3 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 3 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -113,7 +115,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property2">An expression naming property 2.</param>
     /// <param name="property3">An expression naming property 3.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -125,7 +128,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, property2, property3, selector, true);
 
-    /// <summary>Observes 3 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 3 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -134,7 +137,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property3">An expression naming property 3.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
         this TSender sender,
@@ -149,7 +153,7 @@ public static partial class ReactiveUIBindingExtensions
         return CombineLatestObservable.Create(chains[0], chains[1], chains[2], selector);
     }
 
-    /// <summary>Observes 4 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 4 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -158,7 +162,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property3">An expression naming property 3.</param>
     /// <param name="property4">An expression naming property 4.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -176,7 +181,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, property2, property3, property4, selector, true);
 
-    /// <summary>Observes 4 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 4 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -186,7 +191,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property4">An expression naming property 4.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
         this TSender sender,
@@ -207,7 +213,7 @@ public static partial class ReactiveUIBindingExtensions
         return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], selector);
     }
 
-    /// <summary>Observes 5 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 5 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -217,7 +223,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property4">An expression naming property 4.</param>
     /// <param name="property5">An expression naming property 5.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -237,7 +244,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, property2, property3, property4, property5, selector, true);
 
-    /// <summary>Observes 5 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 5 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -248,7 +255,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property5">An expression naming property 5.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
         this TSender sender,
@@ -271,7 +279,7 @@ public static partial class ReactiveUIBindingExtensions
         return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], selector);
     }
 
-    /// <summary>Observes 6 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 6 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -282,7 +290,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property5">An expression naming property 5.</param>
     /// <param name="property6">An expression naming property 6.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -304,7 +313,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, property2, property3, property4, property5, property6, selector, true);
 
-    /// <summary>Observes 6 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 6 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -316,7 +325,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property6">An expression naming property 6.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -342,7 +352,7 @@ public static partial class ReactiveUIBindingExtensions
         return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], selector);
     }
 
-    /// <summary>Observes 7 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 7 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -354,7 +364,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property6">An expression naming property 6.</param>
     /// <param name="property7">An expression naming property 7.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
@@ -379,7 +390,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, property2, property3, property4, property5, property6, property7, selector, true);
 
-    /// <summary>Observes 7 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 7 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -392,7 +403,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property7">An expression naming property 7.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -420,7 +432,7 @@ public static partial class ReactiveUIBindingExtensions
         return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], chains[6], selector);
     }
 
-    /// <summary>Observes 8 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 8 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -433,7 +445,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property7">An expression naming property 7.</param>
     /// <param name="property8">An expression naming property 8.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
@@ -460,7 +473,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, property2, property3, property4, property5, property6, property7, property8, selector, true);
 
-    /// <summary>Observes 8 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 8 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -474,7 +487,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property8">An expression naming property 8.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -504,7 +518,7 @@ public static partial class ReactiveUIBindingExtensions
         return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], chains[6], chains[7], selector);
     }
 
-    /// <summary>Observes 9 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 9 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -518,7 +532,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property8">An expression naming property 8.</param>
     /// <param name="property9">An expression naming property 9.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
@@ -547,7 +562,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, property2, property3, property4, property5, property6, property7, property8, property9, selector, true);
 
-    /// <summary>Observes 9 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 9 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -562,7 +577,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property9">An expression naming property 9.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -594,7 +610,7 @@ public static partial class ReactiveUIBindingExtensions
         return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], chains[6], chains[7], chains[8], selector);
     }
 
-    /// <summary>Observes 10 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 10 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -609,7 +625,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property9">An expression naming property 9.</param>
     /// <param name="property10">An expression naming property 10.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
@@ -640,7 +657,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, selector, true);
 
-    /// <summary>Observes 10 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 10 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -656,7 +673,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property10">An expression naming property 10.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -690,7 +708,7 @@ public static partial class ReactiveUIBindingExtensions
         return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], chains[6], chains[7], chains[8], chains[9], selector);
     }
 
-    /// <summary>Observes 11 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 11 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -706,7 +724,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property10">An expression naming property 10.</param>
     /// <param name="property11">An expression naming property 11.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
@@ -739,7 +758,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, property11, selector, true);
 
-    /// <summary>Observes 11 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 11 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -756,7 +775,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property11">An expression naming property 11.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(
@@ -792,7 +812,7 @@ public static partial class ReactiveUIBindingExtensions
         return CombineLatestObservable.Create(chains[0], chains[1], chains[2], chains[3], chains[4], chains[5], chains[6], chains[7], chains[8], chains[9], chains[10], selector);
     }
 
-    /// <summary>Observes 12 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 12 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -809,7 +829,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property11">An expression naming property 11.</param>
     /// <param name="property12">An expression naming property 12.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
@@ -844,7 +865,7 @@ public static partial class ReactiveUIBindingExtensions
         where TSender : class
         => sender.WhenAnyDynamic(property1, property2, property3, property4, property5, property6, property7, property8, property9, property10, property11, property12, selector, true);
 
-    /// <summary>Observes 12 dynamically-typed property chains and combines them with a selector.</summary>
+    /// <summary>Observes 12 property chains named by run-time expressions and emits the selector applied to their observed changes, on subscription and whenever any of them changes.</summary>
     /// <typeparam name="TSender">The type of the object the chains are rooted on.</typeparam>
     /// <typeparam name="TRet">The type of the projected result.</typeparam>
     /// <param name="sender">The object the chains are rooted on.</param>
@@ -862,7 +883,8 @@ public static partial class ReactiveUIBindingExtensions
     /// <param name="property12">An expression naming property 12.</param>
     /// <param name="selector">Projects the observed changes into a result.</param>
     /// <param name="isDistinct">Whether a chain reports only when its value changes.</param>
-    /// <returns>An observable of the projected result.</returns>
+    /// <returns>An observable of selector results.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> or <paramref name="selector"/> is null.</exception>
     [RequiresUnreferencedCode(DynamicChainRequiresUnreferencedCode)]
     [SuppressMessage("Design", "SST1472", Justification = "one expression per observed chain; the parameter count is the shape of this overload")]
     public static IObservable<TRet> WhenAnyDynamic<TSender, TRet>(

@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="DateTime"/> to <see cref="string"/>.</summary>
+/// <summary>Converts a <see cref="DateTime"/> to a <see cref="string"/> in the general date and time format of the current culture.</summary>
 public sealed class DateTimeToStringTypeConverter : BindingTypeConverter<DateTime, string>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

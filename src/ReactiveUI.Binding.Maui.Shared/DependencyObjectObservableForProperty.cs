@@ -16,7 +16,11 @@ namespace ReactiveUI.Binding.Reactive.Maui;
 namespace ReactiveUI.Binding.Maui;
 #endif
 
-/// <summary>Creates an observable for a property if available that is based on a WinUI DependencyProperty.</summary>
+/// <summary>Observes a WinUI <c>DependencyObject</c> property through its <c>{PropertyName}Property</c> static field or property.</summary>
+/// <remarks>
+/// A before-change request, or a property with no dependency property, is observed as a plain object property instead.
+/// Each notification carries no value; the observer reads the property.
+/// </remarks>
 [RequiresUnreferencedCode("Uses reflection to find DependencyProperty static fields/properties.")]
 public class DependencyObjectObservableForProperty : ICreatesObservableForProperty
 {
@@ -28,7 +32,11 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
     private static readonly CompositeFormat DependencyPropertyMissingFormat = CompositeFormat.Parse(
         "[ReactiveUI.Binding.Maui] Tried to bind DO {0}.{1}, but DP doesn't exist. Binding as POCO object");
 
-    /// <inheritdoc/>
+    /// <summary>Returns the WinUI dependency-object affinity when the type declares a <c>{propertyName}Property</c> static member.</summary>
+    /// <param name="type">The type that owns the property.</param>
+    /// <param name="propertyName">The property name, without the <c>Property</c> suffix.</param>
+    /// <param name="beforeChanged">Ignored.</param>
+    /// <returns><see cref="BindingAffinity.WinUiDependencyObject"/> for a <c>DependencyObject</c> type with such a member; otherwise zero.</returns>
     [RequiresUnreferencedCode("Uses reflection to find DependencyProperty.")]
     public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
     {
@@ -40,7 +48,15 @@ public class DependencyObjectObservableForProperty : ICreatesObservableForProper
         return GetDependencyPropertyFetcher(type, propertyName) is null ? 0 : BindingAffinity.WinUiDependencyObject;
     }
 
-    /// <inheritdoc/>
+    /// <summary>Returns an observable that raises whenever the dependency property changes on <paramref name="sender"/>.</summary>
+    /// <param name="sender">The <c>DependencyObject</c> to observe.</param>
+    /// <param name="expression">The expression carried on each notification.</param>
+    /// <param name="propertyName">The property name, without the <c>Property</c> suffix.</param>
+    /// <param name="beforeChanged"><see langword="true"/> observes the property as a plain object property, since a dependency property has no before-change notification.</param>
+    /// <param name="suppressWarnings">Passed through to the plain-object observer when it is used.</param>
+    /// <returns>An observable that registers a property-changed callback and unregisters it on disposal.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> is null.</exception>
+    /// <exception cref="ArgumentException"><paramref name="sender"/> is not a <c>DependencyObject</c>.</exception>
     [RequiresUnreferencedCode("Uses reflection to find DependencyProperty.")]
     public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(
         object sender,

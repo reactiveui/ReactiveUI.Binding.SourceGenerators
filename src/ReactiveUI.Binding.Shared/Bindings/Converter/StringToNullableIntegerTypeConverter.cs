@@ -8,7 +8,10 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to nullable <see cref="int"/> using <see cref="int.TryParse(string?, out int)"/>.</summary>
+/// <summary>
+/// Converts a <see cref="string"/> to a nullable <see cref="int"/> with <see cref="int.TryParse(string?, out int)"/> under
+/// the current culture; a null or empty string succeeds with a null result and an unparseable string fails.
+/// </summary>
 public sealed class StringToNullableIntegerTypeConverter : BindingTypeConverter<string, int?>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

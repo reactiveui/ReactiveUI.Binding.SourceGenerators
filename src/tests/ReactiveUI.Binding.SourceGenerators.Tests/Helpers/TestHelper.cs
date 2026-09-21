@@ -409,6 +409,7 @@ public static class TestHelper
         "InvokeCommandGeneratorTests" => "ICG",
         "ViewLocatorDispatchGeneratorTests" => "VDG",
         "ViewThreadInvokerGeneratorTests" => "VTIG",
+        "NullableSchedulerDispatchTests" => "NSD",
         _ => typeName
     };
 
@@ -439,7 +440,17 @@ public static class TestHelper
         .Replace("TwoProperties", "2P", StringComparison.Ordinal)
         .Replace("CombineLatest", "CL", StringComparison.Ordinal)
         .Replace("GeneratesElseIf", "GEI", StringComparison.Ordinal)
-        .Replace("SameTypeSignature", "STS", StringComparison.Ordinal);
+        .Replace("SameTypeSignature", "STS", StringComparison.Ordinal)
+        .Replace("SchedulerOverloads", "SchedOv", StringComparison.Ordinal)
+        .Replace("UnderNullableReferenceTypes", "NRT", StringComparison.Ordinal)
+        .Replace("DeclareTheSchedulerNullable", "DeclNull", StringComparison.Ordinal)
+        .Replace("ForTheTargetOnly", "TargetOnly", StringComparison.Ordinal)
+        .Replace("CarriesThe", "Carries", StringComparison.Ordinal)
+        .Replace("CarryThe", "Carry", StringComparison.Ordinal)
+        .Replace("ViewFirstBindings", "ViewFirst", StringComparison.Ordinal)
+        .Replace("OpenGeneric", "OG", StringComparison.Ordinal)
+        .Replace("IsSkippedAnd", "Skip", StringComparison.Ordinal)
+        .Replace("ConcreteSubclassIsDispatched", "SubDisp", StringComparison.Ordinal);
 
     /// <summary>Returns the runtime and transitive references a flavour compiles against.</summary>
     /// <param name="useReactiveRuntime">Whether to reference the System.Reactive flavour rather than the lean one.</param>

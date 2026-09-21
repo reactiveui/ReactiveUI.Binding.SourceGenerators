@@ -25,7 +25,7 @@ namespace ReactiveUI.Binding.Builder;
 public interface IReactiveUIBindingBuilder : IAppBuilder
 {
     /// <summary>
-    /// Registers the core ReactiveUI.Binding services (INPC/POCO observation, default converters).
+    /// Registers the core ReactiveUI.Binding services (INPC/POCO observation, default converters, default view locator).
     /// Hides <see cref="IAppBuilder.WithCoreServices"/> to return <see cref="IReactiveUIBindingBuilder"/>
     /// for fluent chaining.
     /// </summary>
@@ -39,7 +39,7 @@ public interface IReactiveUIBindingBuilder : IAppBuilder
     IReactiveUIBindingBuilder WithPlatformModule<T>(T module)
         where T : IModule;
 
-    /// <summary>Registers a custom action to be executed during the build phase.</summary>
+    /// <summary>Runs a registration action against the mutable dependency resolver.</summary>
     /// <param name="configureAction">An action that receives the mutable dependency resolver.</param>
     /// <returns>The builder instance for chaining.</returns>
     IReactiveUIBindingBuilder WithRegistration(Action<IMutableDependencyResolver> configureAction);
@@ -64,12 +64,12 @@ public interface IReactiveUIBindingBuilder : IAppBuilder
     /// <returns>The builder instance for chaining.</returns>
     IReactiveUIBindingBuilder WithCommandBinder(ICreatesCommandBinding binder);
 
-    /// <summary>Configures the default view locator with explicit view-to-view-model mappings.</summary>
+    /// <summary>Registers a default view locator holding the explicit view-to-view-model mappings.</summary>
     /// <param name="configure">An action that receives a <see cref="ViewMappingBuilder"/> for registering mappings.</param>
     /// <returns>The builder instance for chaining.</returns>
     IReactiveUIBindingBuilder ConfigureViewLocator(Action<ViewMappingBuilder> configure);
 
-    /// <summary>Builds the application and returns the configured instance.</summary>
+    /// <summary>Builds the application, publishes the converter service and marks ReactiveUI.Binding initialized.</summary>
     /// <returns>The configured application instance.</returns>
     IReactiveUIBindingInstance BuildApp();
 }

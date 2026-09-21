@@ -10,7 +10,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="decimal"/> to a nullable <see cref="decimal"/>.</summary>
+/// <summary>Converts a <see cref="decimal"/> to a nullable <see cref="decimal"/>; the conversion always succeeds.</summary>
 [DebuggerDisplay("decimal -> decimal? (affinity {Affinity})")]
 public sealed class DecimalToNullableDecimalTypeConverter : IBindingTypeConverter<decimal, decimal?>
 {

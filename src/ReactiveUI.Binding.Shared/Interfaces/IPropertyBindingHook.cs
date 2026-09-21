@@ -14,13 +14,13 @@ namespace ReactiveUI.Binding;
 /// </summary>
 public interface IPropertyBindingHook
 {
-    /// <summary>Called when any binding is set up.</summary>
-    /// <param name="source">The source ViewModel.</param>
+    /// <summary>Called as a binding is set up, before it is wired, and can refuse the binding.</summary>
+    /// <param name="source">The source ViewModel; may be null.</param>
     /// <param name="target">The target View (not the actual control).</param>
-    /// <param name="getCurrentViewModelProperties">Get current view model properties.</param>
-    /// <param name="getCurrentViewProperties">Get current view properties.</param>
+    /// <param name="getCurrentViewModelProperties">Reads the current values along the view model property path when called.</param>
+    /// <param name="getCurrentViewProperties">Reads the current values along the view property path when called.</param>
     /// <param name="direction">The Binding direction.</param>
-    /// <returns>If false, the binding is cancelled.</returns>
+    /// <returns><see langword="true"/> to let the binding proceed; <see langword="false"/> to cancel it.</returns>
     bool ExecuteHook(
         object? source,
         object target,

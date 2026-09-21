@@ -19,7 +19,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyViewModel, int>> viewModelProperty,
             global::System.Linq.Expressions.Expression<global::System.Func<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView, string?>> viewProperty,
             global::System.Func<int, string> selector,
-            global::ReactiveUI.Primitives.Concurrency.ISequencer scheduler,
+            global::ReactiveUI.Primitives.Concurrency.ISequencer? scheduler,
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewModelProperty")] string viewModelPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerArgumentExpression("viewProperty")] string viewPropertyExpression = "",
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
@@ -66,9 +66,10 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
                 false,
                 true);
         var __selected = new global::ReactiveUI.Primitives.Signals.MapSignal<int, string>(sourceObs, selector);
-        var bindObs = scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__selected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__selected, scheduler);
+        var bindObs = scheduler == null || scheduler == global::ReactiveUI.Primitives.Concurrency.Sequencer.Immediate ? (global::System.IObservable<string>)__selected : new global::ReactiveUI.Primitives.Advanced.WitnessOnSignal<string>(__selected, scheduler);
+            var viewThreadObs = scheduler == null ? global::ReactiveUI.Binding.BindingSchedulers.ObserveOnViewThread(bindObs, view) : bindObs;
 
-            var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(bindObs, value =>
+            var sub = global::ReactiveUI.Binding.BindingErrors.Subscribe(viewThreadObs, value =>
             {
                 if (global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(view.CountText, value))
                     {
@@ -80,7 +81,7 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
 
             return new global::ReactiveUI.Binding.ReactiveBinding<global::SharedScenarios.OneWayBind.SinglePropertyWithSelectorAndScheduler.MyView, string>(
                 view,
-                bindObs,
+                viewThreadObs,
                 global::ReactiveUI.Binding.BindingDirection.OneWay,
                 sub);
         }

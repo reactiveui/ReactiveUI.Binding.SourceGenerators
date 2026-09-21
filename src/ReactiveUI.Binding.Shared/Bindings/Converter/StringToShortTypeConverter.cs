@@ -8,7 +8,7 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to <see cref="short"/> using <see cref="short.TryParse(string?, out short)"/>.</summary>
+/// <summary>Converts a <see cref="string"/> to a <see cref="short"/> with <see cref="short.TryParse(string?, out short)"/> under the current culture; a null or unparseable string fails.</summary>
 public sealed class StringToShortTypeConverter : BindingTypeConverter<string, short>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

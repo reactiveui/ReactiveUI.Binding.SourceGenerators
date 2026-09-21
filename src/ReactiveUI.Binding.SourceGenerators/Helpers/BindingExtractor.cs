@@ -85,8 +85,8 @@ internal static class BindingExtractor
             hasScheduler,
             isTwoWay,
             methodName,
-            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(sourcePropertyArg.ToString()),
-            CodeGeneration.CodeGeneratorHelpers.NormalizeLambdaText(targetPropertyArg.ToString()),
+            sourcePropertyArg.ToString(),
+            targetPropertyArg.ToString(),
             hasConverterOverride,
             InterceptableLocationReader.Read(semanticModel, invocation, ct),
             sides.SourceViewThreadInvoker,
@@ -94,9 +94,24 @@ internal static class BindingExtractor
         {
             ForwardConversion = ConversionPluginRegistry.Select(sourceValueType, targetValueType, semanticModel.Compilation),
             ReverseConversion = isTwoWay ? ConversionPluginRegistry.Select(targetValueType, sourceValueType, semanticModel.Compilation) : null,
-            SetMethod = !isTwoWay && !hasConversion ? SetMethodPluginRegistry.Select(sourceValueType, targetValueType) : null,
+            SetMethod = SelectSetMethod(isTwoWay, hasConversion, hasConverterOverride, sourceValueType, targetValueType),
         };
     }
+
+    /// <summary>Selects the native mutation a one-way binding writes through, when nothing converts the value on the way.</summary>
+    /// <param name="isTwoWay">Whether the binding drives both sides.</param>
+    /// <param name="hasConversion">Whether the call site passes a delegate that converts the value.</param>
+    /// <param name="hasConverterOverride">Whether the call site passes a converter object.</param>
+    /// <param name="sourceValueType">The type the source produces.</param>
+    /// <param name="targetValueType">The type the target holds.</param>
+    /// <returns>The mutation, or <see langword="null"/> when the value is assigned.</returns>
+    private static SetMethodInfo? SelectSetMethod(
+        bool isTwoWay,
+        bool hasConversion,
+        bool hasConverterOverride,
+        ITypeSymbol? sourceValueType,
+        ITypeSymbol? targetValueType) =>
+        isTwoWay || hasConversion || hasConverterOverride ? null : SetMethodPluginRegistry.Select(sourceValueType, targetValueType);
 
     /// <summary>
     /// Resolves which side of the binding is the source and which is the target. The view-first
@@ -157,14 +172,15 @@ internal static class BindingExtractor
 
         foreach (var parameter in methodSymbol.Parameters)
         {
-            if (parameter.Name is "conversionFunc" or "sourceToTargetConv" or "selector" or "vmToViewConverter" or "viewModelToViewConverter")
-            {
-                hasConversion = true;
-            }
-
+            // A converter object shares a name with the delegate the same parameter takes elsewhere, so the type
+            // decides which one this is.
             if (SymbolHelpers.DetectHasConverterOverride(parameter))
             {
                 hasConverterOverride = true;
+            }
+            else if (parameter.Name is "conversionFunc" or "sourceToTargetConv" or "selector" or "vmToViewConverter" or "viewModelToViewConverter")
+            {
+                hasConversion = true;
             }
 
             if (parameter.Name == "scheduler")

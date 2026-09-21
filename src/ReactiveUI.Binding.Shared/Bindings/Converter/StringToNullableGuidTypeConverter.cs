@@ -8,7 +8,10 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to nullable <see cref="Guid"/> using <see cref="Guid.TryParse(string?, out Guid)"/>.</summary>
+/// <summary>
+/// Converts a <see cref="string"/> to a nullable <see cref="Guid"/> with <see cref="Guid.TryParse(string?, out Guid)"/>; a
+/// null or empty string succeeds with a null result and an unparseable string fails.
+/// </summary>
 public sealed class StringToNullableGuidTypeConverter : BindingTypeConverter<string, Guid?>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

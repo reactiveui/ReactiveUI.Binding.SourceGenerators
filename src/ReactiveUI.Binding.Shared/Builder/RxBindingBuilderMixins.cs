@@ -15,8 +15,9 @@ public static class RxBindingBuilderMixins
     /// <param name="resolver">The dependency resolver to use.</param>
     extension(IMutableDependencyResolver resolver)
     {
-        /// <summary>Creates a new <see cref="ReactiveUIBindingBuilder"/> using the specified dependency resolver.</summary>
-        /// <returns>A new builder instance.</returns>
+        /// <summary>Creates a new <see cref="ReactiveUIBindingBuilder"/> that registers into the specified resolver.</summary>
+        /// <returns>A new builder instance that reads services from the resolver when it is also an <see cref="IReadonlyDependencyResolver"/>, and from the current locator otherwise.</returns>
+        /// <exception cref="ArgumentNullException">The resolver is null.</exception>
         public ReactiveUIBindingBuilder CreateReactiveUIBindingBuilder()
         {
             ArgumentExceptionHelper.ThrowIfNull(resolver);

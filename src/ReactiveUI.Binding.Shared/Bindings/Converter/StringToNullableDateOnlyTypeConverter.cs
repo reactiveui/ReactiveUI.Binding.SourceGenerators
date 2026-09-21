@@ -9,7 +9,11 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>Converts <see cref="string"/> to nullable <see cref="DateOnly"/> using <see cref="DateOnly.TryParse(string?, out DateOnly)"/>.</summary>
+/// <summary>
+/// Converts a <see cref="string"/> to a nullable <see cref="DateOnly"/> with
+/// <see cref="DateOnly.TryParse(string?, out DateOnly)"/> under the current culture; a null or empty string succeeds with a
+/// null result and an unparseable string fails.
+/// </summary>
 public sealed class StringToNullableDateOnlyTypeConverter : BindingTypeConverter<string, DateOnly?>
 {
     /// <summary>The affinity returned by <see cref="GetAffinityForObjects"/> indicating a strong match.</summary>

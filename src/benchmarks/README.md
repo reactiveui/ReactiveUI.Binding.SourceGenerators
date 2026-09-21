@@ -50,6 +50,7 @@ overload makes no measurable difference.
 | `ReactiveUI.Binding.Benchmarks.ReactiveUI` | The same scenarios on ReactiveUI's expression-tree engine, as the baseline. |
 | `ReactiveUI.Binding.Generator.Benchmarks` | A whole generation pass over a corpus of consumer code. |
 | `ReactiveUI.Binding.Generator.Benchmarks.Roslyn413` | The same generation pass against Roslyn 4.13. |
+| `ReactiveUI.Binding.Analyzer.Benchmarks` | What the analyzers cost a compilation, on startup, clean and violating source. |
 
 The baseline lives in its own project because it needs ReactiveUI's own binding surface. Keeping the two
 apart stops one engine's imports reaching the other's call sites.
@@ -69,6 +70,7 @@ cost of creating the subscription is measured separately, by the `First...` case
 | `WhenAnyDynamicBenchmark` | `WhenAnyDynamic` | `SingleChain`, `TwoChains`, `DeepChain`, `FirstObservation`, `SingleChainGenerated` |
 | `BindOneWayBenchmark` | `BindOneWay` | `Standard`, `WithScheduler`, `FirstBinding`, `SetupTeardown` |
 | `BindTwoWayBenchmark` | `BindTwoWay` | `Standard`, `WithScheduler`, `Bidirectional` |
+| `BindTwoWayQueuedBenchmark` | `BindTwoWay` through a sequencer that queues | `InitialDelivery`, `ModelToView`, `ViewToModel` |
 | `BindBenchmark` | `Bind` | `Standard`, `Bidirectional`, `WithObservedChanges` |
 | `OneWayBindBenchmark` | `OneWayBind` | `Standard`, `FirstBinding` |
 | `BindToBenchmark` | `BindTo` | `Standard`, `FirstBinding` |
@@ -80,6 +82,7 @@ cost of creating the subscription is measured separately, by the `First...` case
 | `ObservationContentionBenchmark` | The three observation delivery contracts | Competing producer latency and slow-subscriber delivery-thread occupancy |
 | `CombineLatestArityBenchmark` | 2–16-source `CombineLatest` | Public concrete constructor versus extension, including subscription and disposal |
 | `UnsafeFallbackBenchmark` | the `Unsafe` overloads | `WhenChangedUnsafe`, `WhenChangedUnsafe deep chain`, `WhenAnyValueUnsafe`, `BindOneWayUnsafe`, `BindUnsafe` |
+| `ViewLocatorBenchmark` | `DefaultViewLocator.ResolveView` | `SingleLookupHit`, `HitInFirstOfThreeLookups`, `HitInLastOfThreeLookups`, `MissInEveryLookup`, `AssemblyGeneratedLookup` |
 | `RxUiDynamicChainBaseline` | ReactiveUI's dynamic chain | `SingleChain`, `TwoChains`, `DeepChain`, `FirstObservation` |
 
 `WhenAnyValueBenchmark` and `OneWayBindBenchmark` exist so the two operators the ReactiveUI baseline measures
@@ -111,6 +114,32 @@ costs far more than the pass under measurement.
 The `GcVerbose` EventPipe profiler records allocations. Analysis uses the measured workload windows and their
 operation counts to report sampled bytes per generation and the allocation sites. NativeAOT timing runs remain
 separate where EventPipe capture is unavailable.
+
+## What the analyzer benchmark covers
+
+`AnalyzerBenchmarks` runs each analyzer over a corpus through `CompilationWithAnalyzers`. It has two cases,
+`AnalyzeInvocations` for `BindingInvocationAnalyzer` and `AnalyzeTypes` for `TypeAnalyzer`. One parameter
+varies.
+
+| `Corpus` | Meaning |
+|----------|---------|
+| `Startup` | One empty class. This is the fixed cost every compilation pays before an analyzer has anything to decide. |
+| `Clean` | Calls to `WhenChanged`, `BindOneWay`, `BindTwoWay`, `BindTo` and `InvokeCommand` with nothing to report. |
+| `CleanNullForgiving` | The `Clean` calls with a `!` after each link of each path. |
+| `Violating` | Calls that report a private member, an unsupported segment, a silent link and a type that never notifies. |
+| `ViolatingNullForgiving` | The `Violating` calls with a `!` after each link. |
+| `UnsafeTargets` | Calls to `BindToUnsafe`, `InvokeCommandUnsafe` and `OneWayBindUnsafe`, whose first type argument is not the object they observe. |
+
+`Clean` minus `Startup` is the cost of deciding there is nothing to report. Report it apart from the
+`Violating` figure, which adds the cost of the diagnostics themselves. Setup fails when a corpus does not bind,
+when `Startup`, `Clean` or `CleanNullForgiving` reports anything, or when `Violating` reports nothing. Setup
+logs the diagnostic count of every corpus.
+
+To compare two checkouts, build this project in each and run the same filter in the same session:
+
+```bash
+dotnet run -c Release --project benchmarks/ReactiveUI.Binding.Analyzer.Benchmarks -f net10.0 -- --filter '*AnalyzerBenchmarks*'
+```
 
 ## Focused adapter measurements
 

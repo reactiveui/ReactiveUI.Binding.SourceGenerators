@@ -21,9 +21,6 @@ namespace ReactiveUI.Binding.Generated.TestAssembly
             [global::System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            obs1Expression = obs1Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? obs1Expression.Substring(7) : obs1Expression;
-            obs2Expression = obs2Expression.StartsWith("static ", global::System.StringComparison.Ordinal) ? obs2Expression.Substring(7) : obs2Expression;
-
             if (obs1Expression == "x => x.Command1" && obs2Expression == "x => x.Command2")
             {
                 return __WhenAnyObservable_000004E8406EC0BF(objectToMonitor);

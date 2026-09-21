@@ -19,11 +19,8 @@ public static class ObservedChangedMixins
     /// <param name="stream">The change notification stream to get the values of.</param>
     extension<TSender, TValue>(IObservable<IObservedChange<TSender, TValue>> stream)
     {
-        /// <summary>
-        /// Given a stream of notification changes, this method will convert
-        /// the property changes to the current value of the property.
-        /// </summary>
-        /// <returns>An Observable representing the stream of current values.</returns>
+        /// <summary>Projects each observed change to the current value of the property it describes.</summary>
+        /// <returns>An observable of the current values; a change whose expression cannot be followed faults it with an <see cref="InvalidOperationException"/>.</returns>
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IObservable<TValue> Value() =>
@@ -36,15 +33,16 @@ public static class ObservedChangedMixins
     /// <param name="item">The observed change.</param>
     extension<TSender, TValue>(IObservedChange<TSender, TValue> item)
     {
-        /// <summary>Returns the name of a property which has been changed.</summary>
-        /// <returns>The name of the property which has changed.</returns>
+        /// <summary>Returns the dotted path of the property the change describes, such as <c>A.B[0].C</c>.</summary>
+        /// <returns>The property path built from the change's expression.</returns>
+        /// <exception cref="ArgumentNullException">The observed change or its expression is <see langword="null"/>.</exception>
         public string GetPropertyName()
         {
             ArgumentExceptionHelper.ThrowIfNull(item);
             return Reflection.ExpressionToPropertyNames(item.Expression);
         }
 
-        /// <summary>Returns the current value of a property given a notification that it has changed.</summary>
+        /// <summary>Returns the value carried by the change, or reads it from the sender through the change's expression when the carried value is the default.</summary>
         /// <returns>The current value of the property.</returns>
         /// <exception cref="ArgumentNullException">The observed change is <see langword="null"/>.</exception>
         /// <exception cref="InvalidOperationException">A property partway along the observed change's expression is <see langword="null"/>, so the chain cannot be followed to the value.</exception>
@@ -61,11 +59,9 @@ public static class ObservedChangedMixins
             return returnValue;
         }
 
-        /// <summary>
-        /// Returns the current value of a property given a notification that it has changed,
-        /// or the default value if the chain cannot be resolved.
-        /// </summary>
+        /// <summary>Returns the value <see cref="GetValue"/> would return, or the default when a property partway along the expression is <see langword="null"/>.</summary>
         /// <returns>The current value of the property, or default.</returns>
+        /// <exception cref="ArgumentNullException">The observed change is <see langword="null"/>.</exception>
         [RequiresUnreferencedCode("Evaluates expression-based member chains via reflection; members may be trimmed.")]
         public TValue? GetValueOrDefault()
         {

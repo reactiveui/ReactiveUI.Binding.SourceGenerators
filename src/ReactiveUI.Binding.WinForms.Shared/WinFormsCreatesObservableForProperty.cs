@@ -12,7 +12,10 @@ namespace ReactiveUI.Binding.Reactive.WinForms;
 namespace ReactiveUI.Binding.WinForms;
 #endif
 
-/// <summary>Creates observables for WinForms component properties by subscribing to {PropertyName}Changed events via reflection.</summary>
+/// <summary>Observes a WinForms <c>Component</c> property by subscribing to its public <c>{PropertyName}Changed</c> event through reflection.</summary>
+/// <remarks>
+/// Each notification carries no value; the observer reads the property. Before-change observation is not supported.
+/// </remarks>
 [RequiresUnreferencedCode(
     "Uses reflection to find and subscribe to {PropertyName}Changed events on WinForms components.")]
 public class WinFormsCreatesObservableForProperty : ICreatesObservableForProperty
@@ -25,7 +28,11 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
     /// </summary>
     private static readonly ConcurrentDictionary<EventCacheKey, EventInfo?> EventInfoCache = new();
 
-    /// <inheritdoc/>
+    /// <summary>Returns the WinForms event affinity when the component type has a public instance <c>{propertyName}Changed</c> event.</summary>
+    /// <param name="type">The type that owns the property.</param>
+    /// <param name="propertyName">The property name, without the <c>Changed</c> suffix.</param>
+    /// <param name="beforeChanged"><see langword="true"/> always yields zero, since WinForms raises no before-change event.</param>
+    /// <returns><see cref="BindingAffinity.WinFormsEvent"/> for a <c>Component</c> type with such an event; otherwise zero.</returns>
     [RequiresUnreferencedCode("Uses reflection to find {PropertyName}Changed events.")]
     public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
     {
@@ -42,7 +49,15 @@ public class WinFormsCreatesObservableForProperty : ICreatesObservableForPropert
         return GetEventInfo(type, propertyName) is not null ? BindingAffinity.WinFormsEvent : 0;
     }
 
-    /// <inheritdoc/>
+    /// <summary>Returns an observable that raises whenever <paramref name="sender"/> raises its <c>{propertyName}Changed</c> event.</summary>
+    /// <param name="sender">The component to observe.</param>
+    /// <param name="expression">The expression carried on each notification.</param>
+    /// <param name="propertyName">The property name, without the <c>Changed</c> suffix.</param>
+    /// <param name="beforeChanged">Ignored; notifications are always after the change.</param>
+    /// <param name="suppressWarnings">Ignored.</param>
+    /// <returns>An observable that adds the event handler on subscription and removes it on disposal.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="sender"/> is null.</exception>
+    /// <exception cref="ArgumentException">The sender's type has no such event.</exception>
     [RequiresUnreferencedCode("Uses reflection to subscribe to {PropertyName}Changed events.")]
     public IObservable<IObservedChange<object, object?>> GetNotificationForProperty(
         object sender,

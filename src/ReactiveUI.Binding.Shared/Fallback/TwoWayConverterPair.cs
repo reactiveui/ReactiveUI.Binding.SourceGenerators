@@ -15,10 +15,6 @@ namespace ReactiveUI.Binding.Fallback;
 /// <typeparam name="TTargetProp">The type of the target property.</typeparam>
 /// <param name="Forward">Converts a source value to the target's type.</param>
 /// <param name="Reverse">Converts a target value back to the source's type.</param>
-/// <remarks>
-/// The two conversions only ever travel together, so they are carried as one value rather than as two
-/// parameters threaded through every overload that forwards them.
-/// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 [DebuggerDisplay("TwoWayConverterPair: {typeof(TSourceProp).Name,nq} <-> {typeof(TTargetProp).Name,nq}")]
 public sealed record TwoWayConverterPair<TSourceProp, TTargetProp>(

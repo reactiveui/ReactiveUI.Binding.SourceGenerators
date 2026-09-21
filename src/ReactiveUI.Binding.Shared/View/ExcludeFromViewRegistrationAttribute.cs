@@ -8,10 +8,6 @@ namespace ReactiveUI.Binding.Reactive;
 namespace ReactiveUI.Binding;
 #endif
 
-/// <summary>
-/// Apply this attribute to a view class to exclude it from automatic registration
-/// when scanning for <see cref="IViewFor{T}"/> implementations during source generation
-/// or runtime assembly scanning.
-/// </summary>
+/// <summary>Leaves a view class out of the view dispatch the source generator builds from <see cref="IViewFor{T}"/> implementations.</summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 public sealed class ExcludeFromViewRegistrationAttribute : Attribute;
