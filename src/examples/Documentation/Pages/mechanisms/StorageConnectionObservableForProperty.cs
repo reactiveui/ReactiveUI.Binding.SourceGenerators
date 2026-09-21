@@ -4,7 +4,9 @@
 
 using System.Linq.Expressions;
 using ReactiveUI.Binding.Documentation.CloudStorage;
+using ReactiveUI.Primitives;
 using ReactiveUI.Primitives.Advanced;
+using ReactiveUI.Primitives.Signals;
 
 namespace ReactiveUI.Binding.Documentation.Mechanisms;
 
@@ -34,54 +36,8 @@ public sealed class StorageConnectionObservableForProperty : ICreatesObservableF
         }
 
         Console.WriteLine("The connection state is observed by the StateChanged provider");
-        return new StateChangedObservable(connection, expression);
-    }
 
-    /// <summary>Reports each <see cref="StorageConnection.StateChanged"/> event as an observed change.</summary>
-    /// <param name="connection">The connection being observed.</param>
-    /// <param name="expression">The property expression the change reports.</param>
-    private sealed class StateChangedObservable(StorageConnection connection, Expression expression) : IObservable<IObservedChange<object, object?>>
-    {
-        /// <inheritdoc/>
-                public IDisposable Subscribe(IObserver<IObservedChange<object, object?>> observer) =>
-            new StateChangedSubscription(connection, expression, observer);
-    }
-
-    /// <summary>Holds the <see cref="StorageConnection.StateChanged"/> handler of one observer.</summary>
-    [System.Diagnostics.DebuggerDisplay("Connection = {_connection}")]
-    private sealed class StateChangedSubscription : IDisposable
-    {
-        /// <summary>The connection being observed.</summary>
-        private readonly StorageConnection _connection;
-
-        /// <summary>The property expression each change reports.</summary>
-        private readonly Expression _expression;
-
-        /// <summary>The observer that receives the changes.</summary>
-        private readonly IObserver<IObservedChange<object, object?>> _observer;
-
-        /// <summary>Initializes a new instance of the <see cref="StateChangedSubscription"/> class and attaches the handler.</summary>
-        /// <param name="connection">The connection being observed.</param>
-        /// <param name="expression">The property expression each change reports.</param>
-        /// <param name="observer">The observer that receives the changes.</param>
-        public StateChangedSubscription(
-            StorageConnection connection,
-            Expression expression,
-            IObserver<IObservedChange<object, object?>> observer)
-        {
-            _connection = connection;
-            _expression = expression;
-            _observer = observer;
-            connection.StateChanged += OnStateChanged;
-        }
-
-        /// <inheritdoc/>
-        public void Dispose() => _connection.StateChanged -= OnStateChanged;
-
-        /// <summary>Passes the new state to the observer.</summary>
-        /// <param name="sender">The connection.</param>
-        /// <param name="e">The event data.</param>
-        private void OnStateChanged(object? sender, EventArgs e) =>
-            _observer.OnNext(new ObservedChange<object, object?>(_connection, _expression, _connection.State));
+        return Signal.FromEventPattern(handler => connection.StateChanged += handler, handler => connection.StateChanged -= handler)
+            .Select(_ => new ObservedChange<object, object?>(connection, expression, connection.State));
     }
 }

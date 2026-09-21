@@ -250,6 +250,36 @@ public static class BindInteractionExamples
         // True
     }
 
+    /// <summary>Casts the context a handler receives to <see cref="InteractionContext{TInput, TOutput}"/>, the class that holds the input and the answer.</summary>
+    /// <returns>A task that completes when the answer has been read.</returns>
+    public static async Task AnswerThroughInteractionContext()
+    {
+        Interaction<Issue, bool> confirmClose = new();
+        Issue issue = new() { Number = CheckoutIssueNumber };
+
+        using var registration = confirmClose.RegisterHandler(static context =>
+        {
+            var answer = (InteractionContext<Issue, bool>)context;
+
+            Console.WriteLine(answer.Input.Number);
+            Console.WriteLine(answer.IsHandled);
+
+            answer.SetOutput(true);
+
+            Console.WriteLine(answer.IsHandled);
+            Console.WriteLine(answer.GetOutput());
+        });
+
+        Console.WriteLine(await confirmClose.Handle(issue));
+
+        // Output:
+        // 101
+        // False
+        // True
+        // True
+        // True
+    }
+
     /// <summary>Closes an issue while no view has bound a handler; the close faults with <see cref="UnhandledInteractionException{TInput, TOutput}"/>.</summary>
     /// <returns>A task that completes when the failure has been read.</returns>
     public static async Task CloseIssueWithoutHandler()

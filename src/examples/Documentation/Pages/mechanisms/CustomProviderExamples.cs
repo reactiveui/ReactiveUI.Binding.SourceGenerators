@@ -10,6 +10,7 @@ using ReactiveUI.Binding.Fallback;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Observables;
 using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Advanced;
 using Splat;
 
 namespace ReactiveUI.Binding.Documentation.Mechanisms;
@@ -136,6 +137,30 @@ public static class CustomProviderExamples
         // Notifications before a change: 0
     }
 
+    /// <summary>Picks the registered provider with the highest bid, as the run-time engine does, and calls it through <see cref="ICreatesObservableForProperty"/>.</summary>
+    /// <param name="connection">The connection to observe.</param>
+    public static void CallProviderThroughItsInterface(StorageConnection connection)
+    {
+        var registered = AppLocator.Current
+            .GetServices<ICreatesObservableForProperty>()
+            .MaxBy(static candidate => candidate.GetAffinityForObject(typeof(StorageConnection), StatePropertyName, false))!;
+        Expression<Func<StorageConnection, ConnectionState>> property = x => x.State;
+
+        Console.WriteLine($"Affinity for State: {registered.GetAffinityForObject(typeof(StorageConnection), StatePropertyName, false)}");
+
+        using (registered.GetNotificationForProperty(connection, property.Body, StatePropertyName, false, true).Subscribe(static change => Console.WriteLine(change.Value)))
+        {
+            connection.State = ConnectionState.Connecting;
+            connection.State = ConnectionState.Connected;
+        }
+
+        // Output:
+        // Affinity for State: 8
+        // The connection state is observed by the StateChanged provider
+        // Connecting
+        // Connected
+    }
+
     /// <summary>Asks which registered provider outranks a mechanism the generator picked, at several generated scores.</summary>
     public static void FindProviderThatOutranksGeneratedMechanism()
     {
@@ -186,6 +211,35 @@ public static class CustomProviderExamples
             true);
 
         using (observable.Subscribe(static state => Console.WriteLine(state)))
+        {
+            connection.State = ConnectionState.Disconnected;
+            connection.State = ConnectionState.Connected;
+        }
+
+        // Output:
+        // The connection state is observed by the StateChanged provider
+        // Connected
+        // Disconnected
+        // Connected
+    }
+
+    /// <summary>Observes the state through <see cref="PluginPropertyObservable{T}"/> and hands the values to an observer object.</summary>
+    /// <param name="connection">The connection to observe.</param>
+    /// <param name="provider">The registered provider.</param>
+    public static void ObserveThroughPluginPropertyObservableWithAnObserver(StorageConnection connection, StorageConnectionObservableForProperty provider)
+    {
+        Expression<Func<StorageConnection, ConnectionState>> property = x => x.State;
+        PluginPropertyObservable<ConnectionState> observable = new(
+            provider,
+            connection,
+            property.Body,
+            StatePropertyName,
+            static source => ((StorageConnection)source).State,
+            false,
+            true);
+        var observer = Witness.Create<ConnectionState>(static state => Console.WriteLine(state));
+
+        using (observable.Subscribe(observer))
         {
             connection.State = ConnectionState.Disconnected;
             connection.State = ConnectionState.Connected;
@@ -269,6 +323,28 @@ public static class CustomProviderExamples
         // Connected, sent by the browser: True
     }
 
+    /// <summary>Walks <c>x.Connection.State</c> with the chain engine and hands the changes to an observer object.</summary>
+    /// <param name="browser">The browser whose connection is observed.</param>
+    public static void ObserveThroughExpressionChainWithAnObserver(StorageBrowserViewModel browser)
+    {
+        Expression<Func<StorageBrowserViewModel, ConnectionState>> property = x => x.Connection.State;
+        Expression[] links = [.. Reflection.Rewrite(property.Body).GetExpressionChain()];
+        ExpressionChainSink<StorageBrowserViewModel, ConnectionState> sink = new(browser, property.Body, links, false, false, true, true);
+        var observer = Witness.Create<IObservedChange<StorageBrowserViewModel, ConnectionState>>(static change => Console.WriteLine(change.Value));
+
+        using (sink.Subscribe(observer))
+        {
+            browser.Connection.State = ConnectionState.Disconnected;
+            browser.Connection.State = ConnectionState.Connected;
+        }
+
+        // Output:
+        // The connection state is observed by the StateChanged provider
+        // Connected
+        // Disconnected
+        // Connected
+    }
+
     /// <summary>Wraps the provider's notifications in <see cref="ObservableForPropertySink{TSender, TValue}"/>, which reads the value on each one.</summary>
     /// <param name="connection">The connection to observe.</param>
     /// <param name="provider">The registered provider.</param>
@@ -285,6 +361,35 @@ public static class CustomProviderExamples
             true);
 
         using (sink.Subscribe(static change => Console.WriteLine(change.Value)))
+        {
+            connection.State = ConnectionState.Disconnected;
+            connection.State = ConnectionState.Connected;
+        }
+
+        // Output:
+        // The connection state is observed by the StateChanged provider
+        // Connected
+        // Disconnected
+        // Connected
+    }
+
+    /// <summary>Wraps the provider's notifications in <see cref="ObservableForPropertySink{TSender, TValue}"/> and hands the values to an observer object.</summary>
+    /// <param name="connection">The connection to observe.</param>
+    /// <param name="provider">The registered provider.</param>
+    public static void ObserveThroughObservableForPropertySinkWithAnObserver(StorageConnection connection, StorageConnectionObservableForProperty provider)
+    {
+        Expression<Func<StorageConnection, ConnectionState>> property = x => x.State;
+        var notifications = provider.GetNotificationForProperty(connection, property.Body, StatePropertyName);
+        ObservableForPropertySink<StorageConnection, ConnectionState> sink = new(
+            connection,
+            property.Body,
+            notifications,
+            () => connection.State,
+            false,
+            true);
+        var observer = Witness.Create<IObservedChange<StorageConnection, ConnectionState>>(static change => Console.WriteLine(change.Value));
+
+        using (sink.Subscribe(observer))
         {
             connection.State = ConnectionState.Disconnected;
             connection.State = ConnectionState.Connected;

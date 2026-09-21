@@ -369,6 +369,28 @@ public static class MauiExamples
         // posted
     }
 
+    /// <summary>Calls the three members through <see cref="IViewThreadInvoker"/>, the type every platform module registers; a platform of your own implements the same three.</summary>
+    /// <param name="invoker">The invoker to ask, such as the <see cref="DispatcherViewThreadInvoker"/> the MAUI module registers.</param>
+    public static void CallInvokerThroughInterface(IViewThreadInvoker invoker)
+    {
+        StorageBrowserView view = new();
+        var progressBar = view.UploadProgressBar;
+        List<string> log = [];
+
+        var claimed = invoker.Claims(progressBar);
+        var mayWrite = invoker.CheckAccess(progressBar);
+        invoker.Post(progressBar, static state => ((List<string>)state!).Add(PostedText), log);
+
+        Console.WriteLine(claimed);
+        Console.WriteLine(mayWrite);
+        Console.WriteLine(string.Join(", ", log));
+
+        // Output:
+        // True
+        // True
+        // posted
+    }
+
     /// <summary>Uses the invoker where no dispatcher exists: MAUI throws when asked for one, so the invoker lets any thread write and posts inline.</summary>
     public static void PostWithoutDispatcherRunsInline()
     {

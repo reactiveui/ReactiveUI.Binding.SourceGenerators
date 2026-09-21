@@ -189,6 +189,28 @@ public static class ServiceRegistrationExamples
         // True
     }
 
+    /// <summary>Registers a fallback converter and a set-method converter through the <see cref="IAppBuilder"/> extensions.</summary>
+    public static void RegisterFallbackAndSetMethodConvertersThroughAppBuilder()
+    {
+        using ModernDependencyResolver resolver = new();
+        var builder = resolver.CreateReactiveUIBindingBuilder();
+        IAppBuilder appBuilder = builder;
+
+        var fallback = appBuilder.WithFallbackConverter(new EnumNameFallbackConverter());
+        var setMethod = appBuilder.WithSetMethodConverter(new TagListSetMethodConverter());
+
+        Console.WriteLine(ReferenceEquals(builder, fallback));
+        Console.WriteLine(ReferenceEquals(builder, setMethod));
+        Console.WriteLine(builder.ConverterService.FallbackConverters.TryGetConverter(typeof(TodoPriority), typeof(string)) is EnumNameFallbackConverter);
+        Console.WriteLine(builder.ConverterService.SetMethodConverters.TryGetConverter(typeof(List<string>), typeof(string)) is TagListSetMethodConverter);
+
+        // Output:
+        // True
+        // True
+        // True
+        // True
+    }
+
     /// <summary>Registers a service and view mappings through the <see cref="IAppBuilder"/> extensions.</summary>
     public static void ConfigureThroughAppBuilder()
     {

@@ -47,7 +47,11 @@ ServiceRegistrationExamples.RegisterCoreObservationModule();
 
 ServiceRegistrationExamples.RegisterConvertersThroughAppBuilder();
 
+ServiceRegistrationExamples.RegisterFallbackAndSetMethodConvertersThroughAppBuilder();
+
 ServiceRegistrationExamples.ConfigureThroughAppBuilder();
+
+BuilderExamples.BuildWithBuilderMembers();
 
 BuilderExamples.BuildThroughAppBuilder();
 

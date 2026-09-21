@@ -7,6 +7,9 @@ namespace ReactiveUI.Binding.Documentation.Converters;
 /// <summary>Demonstrates boolean, GUID, and URI type converters.</summary>
 public static class BooleanGuidUriExamples
 {
+    /// <summary>The text of a session correlation ID.</summary>
+    private const string SessionCorrelationIdText = "550e8400-e29b-41d4-a716-446655440000";
+
     /// <summary>A unique identifier (correlation ID) for tracking user sessions.</summary>
     private static readonly Guid SessionCorrelationId = new("550e8400-e29b-41d4-a716-446655440000");
 
@@ -122,5 +125,73 @@ public static class BooleanGuidUriExamples
         // Output:
         // True
         // https://github.com/reactiveui/ReactiveUI
+    }
+
+    /// <summary>Converts a feature toggle to and from text with all four boolean converters and shows their affinity.</summary>
+    public static void ConvertFeatureToggleBothWays()
+    {
+        var toBoolean = new StringToBooleanTypeConverter();
+        _ = toBoolean.TryConvert("True", conversionHint: null, out var isEnabled);
+        Console.WriteLine($"{isEnabled} affinity {toBoolean.GetAffinityForObjects()}");
+
+        var fromBoolean = new BooleanToStringTypeConverter();
+        _ = fromBoolean.TryConvert(true, conversionHint: null, out var enabledText);
+        Console.WriteLine($"{enabledText} affinity {fromBoolean.GetAffinityForObjects()}");
+
+        var toOptionalBoolean = new StringToNullableBooleanTypeConverter();
+        _ = toOptionalBoolean.TryConvert("False", conversionHint: null, out var isOptionalEnabled);
+        Console.WriteLine($"{isOptionalEnabled} affinity {toOptionalBoolean.GetAffinityForObjects()}");
+
+        var fromOptionalBoolean = new NullableBooleanToStringTypeConverter();
+        _ = fromOptionalBoolean.TryConvert((bool?)false, conversionHint: null, out var optionalEnabledText);
+        Console.WriteLine($"{optionalEnabledText} affinity {fromOptionalBoolean.GetAffinityForObjects()}");
+
+        // Output:
+        // True affinity 2
+        // True affinity 2
+        // False affinity 2
+        // False affinity 2
+    }
+
+    /// <summary>Converts a session correlation ID to and from text with all four GUID converters and shows their affinity.</summary>
+    public static void ConvertSessionCorrelationIdBothWays()
+    {
+        var toGuid = new StringToGuidTypeConverter();
+        _ = toGuid.TryConvert(SessionCorrelationIdText, conversionHint: null, out var correlationId);
+        Console.WriteLine($"{correlationId} affinity {toGuid.GetAffinityForObjects()}");
+
+        var fromGuid = new GuidToStringTypeConverter();
+        _ = fromGuid.TryConvert(SessionCorrelationId, conversionHint: null, out var correlationIdText);
+        Console.WriteLine($"{correlationIdText} affinity {fromGuid.GetAffinityForObjects()}");
+
+        var toOptionalGuid = new StringToNullableGuidTypeConverter();
+        _ = toOptionalGuid.TryConvert(SessionCorrelationIdText, conversionHint: null, out var optionalCorrelationId);
+        Console.WriteLine($"{optionalCorrelationId} affinity {toOptionalGuid.GetAffinityForObjects()}");
+
+        var fromOptionalGuid = new NullableGuidToStringTypeConverter();
+        _ = fromOptionalGuid.TryConvert((Guid?)SessionCorrelationId, conversionHint: null, out var optionalCorrelationIdText);
+        Console.WriteLine($"{optionalCorrelationIdText} affinity {fromOptionalGuid.GetAffinityForObjects()}");
+
+        // Output:
+        // 550e8400-e29b-41d4-a716-446655440000 affinity 2
+        // 550e8400-e29b-41d4-a716-446655440000 affinity 2
+        // 550e8400-e29b-41d4-a716-446655440000 affinity 2
+        // 550e8400-e29b-41d4-a716-446655440000 affinity 2
+    }
+
+    /// <summary>Converts a repository URL to and from text with both URI converters and shows their affinity.</summary>
+    public static void ConvertRepositoryUrlBothWays()
+    {
+        var toUri = new StringToUriTypeConverter();
+        _ = toUri.TryConvert("https://github.com/reactiveui/ReactiveUI", conversionHint: null, out var repoUrl);
+        Console.WriteLine($"{repoUrl} affinity {toUri.GetAffinityForObjects()}");
+
+        var fromUri = new UriToStringTypeConverter();
+        _ = fromUri.TryConvert(ReactiveUiRepositoryUrl, conversionHint: null, out var urlText);
+        Console.WriteLine($"{urlText} affinity {fromUri.GetAffinityForObjects()}");
+
+        // Output:
+        // https://github.com/reactiveui/ReactiveUI affinity 2
+        // https://github.com/reactiveui/ReactiveUI affinity 2
     }
 }

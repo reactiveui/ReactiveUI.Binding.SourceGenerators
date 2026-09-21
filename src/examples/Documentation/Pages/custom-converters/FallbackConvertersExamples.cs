@@ -91,4 +91,22 @@ public static class FallbackConvertersExamples
         // DemoSetMethodConverter
         // Renew car registration
     }
+
+    /// <summary>Asks a set-method converter how strongly it applies; it applies only to a target that is a list of tags.</summary>
+    public static void ScoreSetMethodConverter()
+    {
+        ConverterService service = new();
+        service.SetMethodConverters.Register(new LegacyTagListSetMethodConverter());
+
+        var converter = service.ResolveSetMethodConverter(typeof(IReadOnlyList<string>), typeof(List<string>))!;
+
+        Console.WriteLine(converter.GetAffinityForObjects(typeof(IReadOnlyList<string>), typeof(List<string>)));
+        Console.WriteLine(converter.GetAffinityForObjects(typeof(string), typeof(string)));
+        Console.WriteLine(converter.GetAffinityForObjects(fromType: null, toType: null));
+
+        // Output:
+        // 5
+        // 0
+        // 0
+    }
 }

@@ -8,6 +8,7 @@ using ReactiveUI.Binding.Documentation.Todo;
 using ReactiveUI.Binding.ObservableForProperty;
 using ReactiveUI.Binding.Observables;
 using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Advanced;
 
 namespace ReactiveUI.Binding.Documentation.Mechanisms;
 
@@ -186,6 +187,86 @@ public static class ObservableTypesExamples
         // Renew car registration online, from the view model: False
         // Renew car registration by post, from the view model: True
         // The entry shows: Renew car registration by post
+    }
+
+    /// <summary>Observes whether a to-do item is urgent through an observer object instead of a callback.</summary>
+    public static void ObserveTodoUrgencyThroughAnObserver()
+    {
+        TodoItem item = new() { Title = RegistrationTitle };
+        PropertyObservable<bool> isUrgent = new(item, nameof(TodoItem.Priority), static source => ((TodoItem)source).Priority == TodoPriority.High, true);
+        var observer = Witness.Create<bool>(Console.WriteLine);
+
+        using (isUrgent.Subscribe(observer))
+        {
+            item.Priority = TodoPriority.Low;
+            item.Priority = TodoPriority.High;
+        }
+
+        // Output:
+        // False
+        // True
+    }
+
+    /// <summary>Reads the title of an item before an edit is applied, through an observer object.</summary>
+    public static void ObserveTitleBeforeAnEditThroughAnObserver()
+    {
+        DraftTodo draft = new() { Title = RegistrationTitle };
+        PropertyChangingObservable<string> beforeChange = new(draft, nameof(DraftTodo.Title), static source => ((DraftTodo)source).Title);
+        var observer = Witness.Create<string>(Console.WriteLine);
+
+        using (beforeChange.Subscribe(observer))
+        {
+            draft.Title = RenamedTitle;
+        }
+
+        // Output:
+        // Renew car registration
+        // Renew car registration
+    }
+
+    /// <summary>Names the property of each after-change notification, through an observer object.</summary>
+    public static void ObserveDraftTitleThroughAnObserver()
+    {
+        DraftTodo draft = new() { Title = RegistrationTitle };
+        Expression<Func<DraftTodo, string>> title = x => x.Title;
+        NotifyPropertyChangedObservable afterChange = new(draft, title.Body, nameof(DraftTodo.Title), false);
+        var observer = Witness.Create<IObservedChange<object, object?>>(static change => Console.WriteLine(change.GetPropertyName()));
+
+        using (afterChange.Subscribe(observer))
+        {
+            draft.Title = RenamedTitle;
+        }
+
+        // Output:
+        // Title
+    }
+
+    /// <summary>Observes a property whose owner raises no notification, through an observer object.</summary>
+    public static void ObserveStorageObjectKeyThroughAnObserver()
+    {
+        StorageObject file = new() { Key = "photos/2026/launch.png" };
+        UnchangingPropertyObservable<string> key = new(file.Key);
+        var observer = Witness.Create<string>(Console.WriteLine);
+
+        using var subscription = key.Subscribe(observer);
+
+        // Output:
+        // photos/2026/launch.png
+    }
+
+    /// <summary>Reports the changes a binding wrote to an observer object.</summary>
+    public static void ReportAppliedChangesToAnObserver()
+    {
+        AppliedChangeObservable applied = new();
+        var observer = Witness.Create<BindingChange>(static change => Console.WriteLine($"{change.Value}, from the view model: {change.FromViewModel}"));
+
+        using (applied.Subscribe(observer))
+        {
+            applied.OnNext(new(RenamedTitle, true));
+        }
+
+        // Output:
+        // Renew car registration online, from the view model: True
     }
 
     /// <summary>Keeps the generated observation while no registered provider outranks it.</summary>

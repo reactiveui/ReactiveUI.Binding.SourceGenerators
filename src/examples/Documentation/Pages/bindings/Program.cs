@@ -127,6 +127,14 @@ await BindCommandExamples.BindUploadButtonWithParameterExpressionOnNamedEvent();
 
 await BindCommandExamples.BindUploadButtonWithParameterExpression();
 
+CreatesCommandBindingExamples.AskBinderForAffinity();
+
+CreatesCommandBindingExamples.BindExportButtonToDefaultEvent();
+
+CreatesCommandBindingExamples.BindExportButtonToNamedEvent();
+
+CreatesCommandBindingExamples.BindSearchToTextChangedEvent();
+
 await InvokeCommandExamples.InvokeSignInWhenTokenChanges();
 
 await InvokeCommandExamples.InvokeUploadWithPickedFile();
@@ -161,6 +169,8 @@ await BindInteractionExamples.RegisterHandlersInReverseOrder();
 
 await BindInteractionExamples.InspectInteractionContext();
 
+await BindInteractionExamples.AnswerThroughInteractionContext();
+
 await BindInteractionExamples.CloseIssueWithoutHandler();
 
 await BindInteractionExamples.AuditApprovalWithDerivedInteraction();
@@ -186,6 +196,8 @@ await ListSelectionBindingExamples.BindCommandFollowsSelection();
 await ReactiveBindingExamples.ReadOneWayBinding();
 
 await ReactiveBindingExamples.ReadTwoWayBinding();
+
+await ReactiveBindingExamples.ReadBindingExpressions();
 
 await ReactiveBindingExamples.CreateReactiveBinding();
 
@@ -222,3 +234,5 @@ await BindingHookExamples.VetoViewFirstBinding();
 await BindingHookExamples.AskHooksDirectly();
 
 await BindingHookExamples.RefreshAfterLateRegistration();
+
+PropertyBindingHookExamples.AskHookDirectly();

@@ -28,6 +28,8 @@ ViewLocatorExamples.ResolveGitHubViewFromObject();
 
 ViewLocatorExamples.ResolveTransferViewFromObject();
 
+ViewLocatorExamples.ResolveObjectThroughInterface();
+
 ViewLocatorExamples.ResolveMissingView();
 
 ViewLocatorExamples.ResolveNullViewModel();
@@ -55,6 +57,8 @@ GeneratedViewDispatchExamples.ResolveViewWithoutParameterlessConstructor();
 GeneratedViewDispatchExamples.ResolveViewRegisteredForInterface();
 
 GeneratedViewDispatchExamples.ResolveInterfaceViewBeforeClassView();
+
+GeneratedViewDispatchExamples.RegisterHandWrittenDispatch();
 
 ViewMappingExamples.MapView();
 

@@ -327,4 +327,86 @@ public static class NumberExamples
         // 255
         // 0
     }
+
+    /// <summary>Parses text into each number type; every text-to-number converter reports the same affinity.</summary>
+    public static void ParseEveryNumberType()
+    {
+        var toByte = new StringToByteTypeConverter();
+        _ = toByte.TryConvert("255", conversionHint: null, out var colorChannel);
+        Console.WriteLine($"{colorChannel} affinity {toByte.GetAffinityForObjects()}");
+
+        var toShort = new StringToShortTypeConverter();
+        _ = toShort.TryConvert("8080", conversionHint: null, out var portNumber);
+        Console.WriteLine($"{portNumber} affinity {toShort.GetAffinityForObjects()}");
+
+        var toInteger = new StringToIntegerTypeConverter();
+        _ = toInteger.TryConvert("42", conversionHint: null, out var issueNumber);
+        Console.WriteLine($"{issueNumber} affinity {toInteger.GetAffinityForObjects()}");
+
+        var toLong = new StringToLongTypeConverter();
+        _ = toLong.TryConvert("524288", conversionHint: null, out var fileSize);
+        Console.WriteLine($"{fileSize} affinity {toLong.GetAffinityForObjects()}");
+
+        var toSingle = new StringToSingleTypeConverter();
+        _ = toSingle.TryConvert("3.14", conversionHint: null, out var pi);
+        Console.WriteLine($"{pi} affinity {toSingle.GetAffinityForObjects()}");
+
+        var toDouble = new StringToDoubleTypeConverter();
+        _ = toDouble.TryConvert("2.71828", conversionHint: null, out var eulersNumber);
+        Console.WriteLine($"{eulersNumber} affinity {toDouble.GetAffinityForObjects()}");
+
+        var toDecimal = new StringToDecimalTypeConverter();
+        _ = toDecimal.TryConvert("250.50", conversionHint: null, out var transferAmount);
+        Console.WriteLine($"{transferAmount} affinity {toDecimal.GetAffinityForObjects()}");
+
+        // Output:
+        // 255 affinity 2
+        // 8080 affinity 2
+        // 42 affinity 2
+        // 524288 affinity 2
+        // 3.14 affinity 2
+        // 2.71828 affinity 2
+        // 250.50 affinity 2
+    }
+
+    /// <summary>Formats each number type as text; every number-to-text converter reports the same affinity.</summary>
+    public static void FormatEveryNumberType()
+    {
+        var fromByte = new ByteToStringTypeConverter();
+        _ = fromByte.TryConvert(ColorChannelValue, conversionHint: null, out var colorChannel);
+        Console.WriteLine($"{colorChannel} affinity {fromByte.GetAffinityForObjects()}");
+
+        var fromShort = new ShortToStringTypeConverter();
+        _ = fromShort.TryConvert(PortNumber, conversionHint: null, out var portNumber);
+        Console.WriteLine($"{portNumber} affinity {fromShort.GetAffinityForObjects()}");
+
+        var fromInteger = new IntegerToStringTypeConverter();
+        _ = fromInteger.TryConvert(IssueNumber, conversionHint: null, out var issueNumber);
+        Console.WriteLine($"{issueNumber} affinity {fromInteger.GetAffinityForObjects()}");
+
+        var fromLong = new LongToStringTypeConverter();
+        _ = fromLong.TryConvert(FileSize, conversionHint: null, out var fileSize);
+        Console.WriteLine($"{fileSize} affinity {fromLong.GetAffinityForObjects()}");
+
+        var fromSingle = new SingleToStringTypeConverter();
+        _ = fromSingle.TryConvert(Pi, conversionHint: null, out var pi);
+        Console.WriteLine($"{pi} affinity {fromSingle.GetAffinityForObjects()}");
+
+        var fromDouble = new DoubleToStringTypeConverter();
+        _ = fromDouble.TryConvert(EulersNumber, conversionHint: null, out var eulersNumber);
+        Console.WriteLine($"{eulersNumber} affinity {fromDouble.GetAffinityForObjects()}");
+
+        var fromDecimal = new DecimalToStringTypeConverter();
+        _ = fromDecimal.TryConvert(TransferAmount, conversionHint: null, out var transferAmount);
+        Console.WriteLine($"{transferAmount} affinity {fromDecimal.GetAffinityForObjects()}");
+
+        // Output:
+        // 255 affinity 2
+        // 8080 affinity 2
+        // 42 affinity 2
+        // 524288 affinity 2
+        // 3.14 affinity 2
+        // 2.71828 affinity 2
+        // 250.50 affinity 2
+    }
 }

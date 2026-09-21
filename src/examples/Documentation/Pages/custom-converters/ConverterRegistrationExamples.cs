@@ -2,6 +2,8 @@
 // ReactiveUI and Contributors licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for full license information.
 
+using ReactiveUI.Binding.Documentation.Todo;
+
 namespace ReactiveUI.Binding.Documentation.Converters;
 
 /// <summary>Examples of registering a converter, choosing between converters by affinity, and overriding a built-in converter.</summary>
@@ -67,5 +69,26 @@ public static class ConverterRegistrationExamples
         // CustomBoolToStringConverter
         // True
         // AFFIRMATIVE
+    }
+
+    /// <summary>Creates the three registries on their own, without a converter service, and registers a converter in each.</summary>
+    public static void CreateRegistriesWithoutService()
+    {
+        BindingTypeConverterRegistry typed = new();
+        BindingFallbackConverterRegistry fallback = new();
+        SetMethodBindingConverterRegistry setMethod = new();
+
+        typed.Register(new PriorityColourConverter());
+        fallback.Register(new CustomFallbackConverter());
+        setMethod.Register(new DemoSetMethodConverter());
+
+        Console.WriteLine(typed.TryGetConverter(typeof(TodoPriority), typeof(string))!.GetType().Name);
+        Console.WriteLine(fallback.TryGetConverter(typeof(TodoPriority), typeof(string))!.GetType().Name);
+        Console.WriteLine(setMethod.TryGetConverter(typeof(string), typeof(string))!.GetType().Name);
+
+        // Output:
+        // PriorityColourConverter
+        // CustomFallbackConverter
+        // DemoSetMethodConverter
     }
 }

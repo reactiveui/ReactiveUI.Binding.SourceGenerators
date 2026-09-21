@@ -76,31 +76,31 @@ public static class SearchAsYouTypeExamples
         // gift
     }
 
-    /// <summary>Waits for a pause in typing before a term goes on.</summary>
-    /// <returns>A task that completes when the example has finished.</returns>
-    public static async Task ThrottleTypingUntilPause()
+    /// <summary>Waits for a pause in typing before a term goes on, on a virtual clock.</summary>
+    public static void ThrottleTypingUntilPause()
     {
+        VirtualClock clock = new();
         var server = InMemoryGitHubServer.CreateSeeded();
         IssueSearchViewModel viewModel = new(server, Webshop);
 
         using var subscription = viewModel.WhenAnyValue(x => x.SearchTerm)
-            .Throttle(_quietPeriod, Sequencer.Default)
+            .Throttle(_quietPeriod, clock)
             .Subscribe(Console.WriteLine);
 
         viewModel.SearchTerm = "c";
-        await Task.Delay(_keyGap);
+        clock.AdvanceBy(_keyGap);
         viewModel.SearchTerm = "cr";
-        await Task.Delay(_keyGap);
+        clock.AdvanceBy(_keyGap);
         viewModel.SearchTerm = CraTerm;
 
         // Every key press restarts the wait, so nothing has settled yet.
-        await Task.Delay(_keyGap);
+        clock.AdvanceBy(_keyGap);
         Console.WriteLine("Still typing");
 
-        await Task.Delay(_settle);
+        clock.AdvanceBy(_quietPeriod);
 
         viewModel.SearchTerm = CrashTerm;
-        await Task.Delay(_settle);
+        clock.AdvanceBy(_quietPeriod);
 
         // Output:
         // Still typing
@@ -221,27 +221,27 @@ public static class SearchAsYouTypeExamples
         // Add gift-card support
     }
 
-    /// <summary>Copies the amount box into the transfer draft once the customer stops typing, without a two-way binding.</summary>
-    /// <returns>A task that completes when the example has finished.</returns>
-    public static async Task DebounceAmountIntoTransferDraft()
+    /// <summary>Copies the amount box into the transfer draft once the customer stops typing, without a two-way binding, on a virtual clock.</summary>
+    public static void DebounceAmountIntoTransferDraft()
     {
+        VirtualClock clock = new();
         TransferViewModel screen = new(new InMemoryBankingBackend());
         TransferView view = new() { ViewModel = screen };
 
         using var subscription = view.AmountTextBox.WhenChanged(x => x.Text)
             .Where(static text => !string.IsNullOrEmpty(text))
-            .Throttle(_quietPeriod, Sequencer.Default)
+            .Throttle(_quietPeriod, clock)
             .Subscribe(text => screen.Draft.Amount = decimal.Parse(text, CultureInfo.InvariantCulture));
 
         view.AmountTextBox.Text = "1";
-        await Task.Delay(_keyGap);
+        clock.AdvanceBy(_keyGap);
         view.AmountTextBox.Text = "12";
-        await Task.Delay(_keyGap);
+        clock.AdvanceBy(_keyGap);
         view.AmountTextBox.Text = "125";
 
         Console.WriteLine(screen.Draft.Amount);
 
-        await Task.Delay(_settle);
+        clock.AdvanceBy(_quietPeriod);
 
         Console.WriteLine(screen.Draft.Amount);
 

@@ -5,6 +5,7 @@
 using ReactiveUI.Binding.Documentation.CloudStorage;
 using ReactiveUI.Binding.Observables;
 using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Advanced;
 
 namespace ReactiveUI.Binding.Documentation.Mechanisms;
 
@@ -61,5 +62,27 @@ public static class EventNotificationExamples
         // False
         // True
         // False
+    }
+
+    /// <summary>Observes whether a storage connection is open through its plain event, and hands the values to an observer object.</summary>
+    public static void ObserveConnectionOpenThroughAnObserver()
+    {
+        StorageConnection connection = new() { Endpoint = StorageEndpoint };
+        EventObservable<bool> isOpen = new(
+            handler => connection.StateChanged += handler,
+            handler => connection.StateChanged -= handler,
+            () => connection.State == ConnectionState.Connected,
+            true);
+        var observer = Witness.Create<bool>(Console.WriteLine);
+
+        using (isOpen.Subscribe(observer))
+        {
+            connection.State = ConnectionState.Connecting;
+            connection.State = ConnectionState.Connected;
+        }
+
+        // Output:
+        // False
+        // True
     }
 }

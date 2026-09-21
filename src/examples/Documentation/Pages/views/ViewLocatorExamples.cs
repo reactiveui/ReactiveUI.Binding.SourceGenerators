@@ -128,6 +128,31 @@ public static class ViewLocatorExamples
         // TransferView
     }
 
+    /// <summary>Finds the screen for a view model that a navigation stack holds as an object, under a contract.</summary>
+    /// <param name="locator">The locator that knows the screens.</param>
+    /// <param name="viewModel">The view model to show.</param>
+    /// <param name="contract">The layout to ask for, or <see langword="null"/> for the default layout.</param>
+    /// <returns>The screen with its view model set, or <see langword="null"/> when none is registered.</returns>
+    public static IViewFor? ResolveForContract(IViewLocator locator, object viewModel, string? contract) =>
+        locator.ResolveView(viewModel, contract);
+
+    /// <summary>Resolves a screen through <see cref="IViewLocator"/> for a view model held as an object, with and without a contract.</summary>
+    public static void ResolveObjectThroughInterface()
+    {
+        object viewModel = new AccountsViewModel(new InMemoryBankingBackend());
+        DefaultViewLocator locator = new();
+
+        var standard = ResolveForContract(locator, viewModel, null);
+        var compact = ResolveForContract(locator, viewModel, AccountViewContracts.Compact);
+
+        Console.WriteLine(standard?.GetType().Name);
+        Console.WriteLine(compact?.GetType().Name);
+
+        // Output:
+        // AccountsView
+        // CompactAccountsView
+    }
+
     /// <summary>Resolves a view model that has no screen: the locator answers null, and a host may turn that into an exception.</summary>
     public static void ResolveMissingView()
     {

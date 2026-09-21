@@ -63,3 +63,19 @@ MigrationExamples.BindToWithMigratedConverterOverride();
 MigrationExamples.BindToResolvesMigratedConverter();
 
 CustomConvertersExamples.RegisterWithBuilder();
+
+CustomConvertersExamples.ConvertAmountThroughBaseClass();
+
+CustomConvertersExamples.ConvertAmountThroughInterfaces();
+
+ConverterRegistrationExamples.CreateRegistriesWithoutService();
+
+FallbackConvertersExamples.ScoreSetMethodConverter();
+
+MigrationExamples.GroupConvertersAndDeconstruct();
+
+MigrationExamples.CompareExtractedConverters();
+
+TwoWayConverterPairExamples.DeconstructPriorityConverterPair();
+
+TwoWayConverterPairExamples.ComparePriorityConverterPairs();

@@ -80,6 +80,20 @@ public static class WinFormsExamples
         // True
     }
 
+    /// <summary>Calls <c>WithWinForms</c> on a builder held as <see cref="IReactiveUIBindingBuilder"/>; it returns the same builder.</summary>
+    public static void ChainWithWinFormsThroughBindingBuilder()
+    {
+        using ModernDependencyResolver resolver = new();
+        var builder = (IReactiveUIBindingBuilder)resolver.CreateReactiveUIBindingBuilder();
+
+        var chained = builder.WithWinForms();
+
+        Console.WriteLine(ReferenceEquals(builder, chained));
+
+        // Output:
+        // True
+    }
+
     /// <summary>Applies the WinForms module to a resolver you own; it registers the observer and the invoker.</summary>
     public static void ConfigureWinFormsModuleOnResolver()
     {

@@ -114,4 +114,49 @@ public static class MigrationExamples
         // #FB8C00
         // #D32F2F
     }
+
+    /// <summary>Groups converters into an <c>ExtractedConverters</c> yourself and takes the three groups apart again.</summary>
+    public static void GroupConvertersAndDeconstruct()
+    {
+        List<IBindingTypeConverter> typed = [new LegacyPriorityToColorConverter()];
+        List<IBindingFallbackConverter> fallback = [new LegacyObjectToStringFallbackConverter()];
+        List<ISetMethodBindingConverter> setMethod = [new LegacyTagListSetMethodConverter()];
+        ExtractedConverters extracted = new(typed, fallback, setMethod);
+
+        var (typedConverters, fallbackConverters, setMethodConverters) = extracted;
+
+        Console.WriteLine(typedConverters[0].GetType().Name);
+        Console.WriteLine(fallbackConverters[0].GetType().Name);
+        Console.WriteLine(setMethodConverters[0].GetType().Name);
+
+        // Output:
+        // LegacyPriorityToColorConverter
+        // LegacyObjectToStringFallbackConverter
+        // LegacyTagListSetMethodConverter
+    }
+
+    /// <summary>Compares extracted converters; two results are equal when they hold the same three groups.</summary>
+    public static void CompareExtractedConverters()
+    {
+        using var legacyResolver = LegacyAppDependencyResolver.Create();
+        var extracted = ConverterMigrationHelper.ExtractConverters(legacyResolver);
+        var same = extracted with { };
+        var withoutFallback = extracted with { FallbackConverters = [] };
+        object boxedSame = same;
+
+        Console.WriteLine(extracted == same);
+        Console.WriteLine(extracted != withoutFallback);
+        Console.WriteLine(extracted.Equals(same));
+        Console.WriteLine(extracted.Equals(boxedSame));
+        Console.WriteLine(extracted.GetHashCode() == same.GetHashCode());
+        Console.WriteLine(extracted.ToString().StartsWith(nameof(ExtractedConverters), StringComparison.Ordinal));
+
+        // Output:
+        // True
+        // True
+        // True
+        // True
+        // True
+        // True
+    }
 }

@@ -44,6 +44,8 @@ NotifyPropertyChangedExamples.ObservePlainClassWithInpcProvider(photos[0].Clone(
 
 NotifyPropertyChangedExamples.ObservePlainClassWithPocoProvider(photos[0].Clone());
 
+NotifyPropertyChangedExamples.AskFallbackProviderBeforeAndAfterChange();
+
 NotifyPropertyChangedExamples.ObservePlainClassThroughWhenChanged(browser, photos[0].Clone(), photos[1].Clone());
 
 NotifyPropertyChangingExamples.ObserveTitleBeforeItChanges();
@@ -57,6 +59,8 @@ BindableObjectExamples.AskProvidersAboutEntry();
 EventNotificationExamples.ObserveConnectionOpenWithoutRepeats();
 
 EventNotificationExamples.ObserveConnectionOpenOnEveryEvent();
+
+EventNotificationExamples.ObserveConnectionOpenThroughAnObserver();
 
 ObservableTypesExamples.ObserveTodoUrgencyWithoutRepeats();
 
@@ -73,6 +77,16 @@ ObservableTypesExamples.ObserveStorageObjectKey();
 ObservableTypesExamples.ReportAppliedChanges();
 
 ObservableTypesExamples.ReadTwoWayBindingChanges();
+
+ObservableTypesExamples.ObserveTodoUrgencyThroughAnObserver();
+
+ObservableTypesExamples.ObserveTitleBeforeAnEditThroughAnObserver();
+
+ObservableTypesExamples.ObserveDraftTitleThroughAnObserver();
+
+ObservableTypesExamples.ObserveStorageObjectKeyThroughAnObserver();
+
+ObservableTypesExamples.ReportAppliedChangesToAnObserver();
 
 ObservableTypesExamples.KeepGeneratedObservationWhenNoProviderOutranksIt(item);
 
@@ -160,14 +174,22 @@ CustomProviderExamples.ObserveConnectionWithWhenChanged(browser, storage);
 
 CustomProviderExamples.CallProviderThroughMixins(storage.Connection, provider);
 
+CustomProviderExamples.CallProviderThroughItsInterface(storage.Connection);
+
 CustomProviderExamples.FindProviderThatOutranksGeneratedMechanism();
 
 CustomProviderExamples.ObserveThroughPluginPropertyObservable(storage.Connection, provider);
+
+CustomProviderExamples.ObserveThroughPluginPropertyObservableWithAnObserver(storage.Connection, provider);
 
 CustomProviderExamples.ChooseBetweenGeneratedObservationAndProvider(storage.Connection);
 
 CustomProviderExamples.ObserveThroughExpressionChain(browser);
 
+CustomProviderExamples.ObserveThroughExpressionChainWithAnObserver(browser);
+
 CustomProviderExamples.ObserveThroughObservableForPropertySink(storage.Connection, provider);
+
+CustomProviderExamples.ObserveThroughObservableForPropertySinkWithAnObserver(storage.Connection, provider);
 
 ObservableTypesExamples.KeepGeneratedObservationOnEqualAffinity(provider);

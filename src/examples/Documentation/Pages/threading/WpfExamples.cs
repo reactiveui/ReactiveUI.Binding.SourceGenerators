@@ -98,6 +98,20 @@ public static class WpfExamples
         // True
     }
 
+    /// <summary>Calls <c>WithWpf</c> on a builder held as <see cref="IReactiveUIBindingBuilder"/>; it returns the same builder.</summary>
+    public static void ChainWithWpfThroughBindingBuilder()
+    {
+        using ModernDependencyResolver resolver = new();
+        var builder = (IReactiveUIBindingBuilder)resolver.CreateReactiveUIBindingBuilder();
+
+        var chained = builder.WithWpf();
+
+        Console.WriteLine(ReferenceEquals(builder, chained));
+
+        // Output:
+        // True
+    }
+
     /// <summary>Applies the WPF module to a resolver you own; it registers the observer and the invoker.</summary>
     public static void ConfigureWpfModuleOnResolver()
     {

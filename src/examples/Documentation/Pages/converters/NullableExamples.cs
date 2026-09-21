@@ -853,4 +853,86 @@ public static class NullableExamples
         // True
         // 550e8400-e29b-41d4-a716-446655440000
     }
+
+    /// <summary>Parses text into each optional number type; every converter reports the same affinity.</summary>
+    public static void ParseEveryOptionalNumberType()
+    {
+        var toByte = new StringToNullableByteTypeConverter();
+        _ = toByte.TryConvert("255", conversionHint: null, out var colorChannel);
+        Console.WriteLine($"{colorChannel} affinity {toByte.GetAffinityForObjects()}");
+
+        var toShort = new StringToNullableShortTypeConverter();
+        _ = toShort.TryConvert("8080", conversionHint: null, out var portNumber);
+        Console.WriteLine($"{portNumber} affinity {toShort.GetAffinityForObjects()}");
+
+        var toInteger = new StringToNullableIntegerTypeConverter();
+        _ = toInteger.TryConvert("42", conversionHint: null, out var issueNumber);
+        Console.WriteLine($"{issueNumber} affinity {toInteger.GetAffinityForObjects()}");
+
+        var toLong = new StringToNullableLongTypeConverter();
+        _ = toLong.TryConvert("524288", conversionHint: null, out var fileSize);
+        Console.WriteLine($"{fileSize} affinity {toLong.GetAffinityForObjects()}");
+
+        var toSingle = new StringToNullableSingleTypeConverter();
+        _ = toSingle.TryConvert("3.14", conversionHint: null, out var pi);
+        Console.WriteLine($"{pi} affinity {toSingle.GetAffinityForObjects()}");
+
+        var toDouble = new StringToNullableDoubleTypeConverter();
+        _ = toDouble.TryConvert("2.71828", conversionHint: null, out var eulersNumber);
+        Console.WriteLine($"{eulersNumber} affinity {toDouble.GetAffinityForObjects()}");
+
+        var toDecimal = new StringToNullableDecimalTypeConverter();
+        _ = toDecimal.TryConvert("250.50", conversionHint: null, out var transferAmount);
+        Console.WriteLine($"{transferAmount} affinity {toDecimal.GetAffinityForObjects()}");
+
+        // Output:
+        // 255 affinity 2
+        // 8080 affinity 2
+        // 42 affinity 2
+        // 524288 affinity 2
+        // 3.14 affinity 2
+        // 2.71828 affinity 2
+        // 250.50 affinity 2
+    }
+
+    /// <summary>Formats each optional number type as text; every converter reports the same affinity.</summary>
+    public static void FormatEveryOptionalNumberType()
+    {
+        var fromByte = new NullableByteToStringTypeConverter();
+        _ = fromByte.TryConvert((byte?)ColorChannelValue, conversionHint: null, out var colorChannel);
+        Console.WriteLine($"{colorChannel} affinity {fromByte.GetAffinityForObjects()}");
+
+        var fromShort = new NullableShortToStringTypeConverter();
+        _ = fromShort.TryConvert((short?)PortNumber, conversionHint: null, out var portNumber);
+        Console.WriteLine($"{portNumber} affinity {fromShort.GetAffinityForObjects()}");
+
+        var fromInteger = new NullableIntegerToStringTypeConverter();
+        _ = fromInteger.TryConvert((int?)IssueNumber, conversionHint: null, out var issueNumber);
+        Console.WriteLine($"{issueNumber} affinity {fromInteger.GetAffinityForObjects()}");
+
+        var fromLong = new NullableLongToStringTypeConverter();
+        _ = fromLong.TryConvert((long?)FileSize, conversionHint: null, out var fileSize);
+        Console.WriteLine($"{fileSize} affinity {fromLong.GetAffinityForObjects()}");
+
+        var fromSingle = new NullableSingleToStringTypeConverter();
+        _ = fromSingle.TryConvert((float?)Pi, conversionHint: null, out var pi);
+        Console.WriteLine($"{pi} affinity {fromSingle.GetAffinityForObjects()}");
+
+        var fromDouble = new NullableDoubleToStringTypeConverter();
+        _ = fromDouble.TryConvert((double?)EulersNumber, conversionHint: null, out var eulersNumber);
+        Console.WriteLine($"{eulersNumber} affinity {fromDouble.GetAffinityForObjects()}");
+
+        var fromDecimal = new NullableDecimalToStringTypeConverter();
+        _ = fromDecimal.TryConvert((decimal?)TransferAmount, conversionHint: null, out var transferAmount);
+        Console.WriteLine($"{transferAmount} affinity {fromDecimal.GetAffinityForObjects()}");
+
+        // Output:
+        // 255 affinity 2
+        // 8080 affinity 2
+        // 42 affinity 2
+        // 524288 affinity 2
+        // 3.14 affinity 2
+        // 2.71828 affinity 2
+        // 250.50 affinity 2
+    }
 }

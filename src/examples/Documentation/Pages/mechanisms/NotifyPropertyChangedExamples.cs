@@ -153,6 +153,19 @@ public static class NotifyPropertyChangedExamples
         // Property: Size
     }
 
+    /// <summary>Asks the fallback provider for its bid before and after a change; it bids the same for both.</summary>
+    public static void AskFallbackProviderBeforeAndAfterChange()
+    {
+        POCOObservableForProperty provider = new();
+
+        Console.WriteLine($"Affinity after a change: {provider.GetAffinityForObject(typeof(StorageObject), SizePropertyName, false)}");
+        Console.WriteLine($"Affinity before a change: {provider.GetAffinityForObject(typeof(StorageObject), SizePropertyName, true)}");
+
+        // Output:
+        // Affinity after a change: 1
+        // Affinity before a change: 1
+    }
+
     /// <summary>Observes a notifying view model's selection through <c>WhenChanged</c> and reads the plain class's property on each delivery.</summary>
     /// <param name="browser">The browser whose selection is observed.</param>
     /// <param name="first">The object selected first.</param>

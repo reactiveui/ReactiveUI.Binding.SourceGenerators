@@ -17,6 +17,12 @@ public static class CustomConvertersExamples
     /// <summary>The tags the customer typed, with an extra tag on the end.</summary>
     private const string TypedTags = "car, admin, urgent";
 
+    /// <summary>The currency symbol of the customer's account.</summary>
+    private const string DollarSymbol = "$";
+
+    /// <summary>The amount of a transfer.</summary>
+    private const decimal TransferAmount = 250.50M;
+
     /// <summary>Registers a custom TodoPriority-to-color converter and converts a priority through the service.</summary>
     public static void RegisterAndUseCustomConverter()
     {
@@ -166,5 +172,41 @@ public static class CustomConvertersExamples
         // PriorityColourConverter
         // CustomFallbackConverter
         // DemoSetMethodConverter
+    }
+
+    /// <summary>Writes a converter by deriving from <c>BindingTypeConverter</c> and calls it through that base class.</summary>
+    public static void ConvertAmountThroughBaseClass()
+    {
+        BindingTypeConverter<decimal, string> converter = new CurrencyTextConverter(DollarSymbol);
+
+        Console.WriteLine($"{converter.FromType.Name} -> {converter.ToType.Name}");
+        Console.WriteLine(converter.GetAffinityForObjects());
+        Console.WriteLine(converter.TryConvert(TransferAmount, conversionHint: null, out var amountText));
+        Console.WriteLine(amountText);
+
+        // Output:
+        // Decimal -> String
+        // 10
+        // True
+        // $250.50
+    }
+
+    /// <summary>Resolves a converter from a service and calls it through the untyped and the typed converter interfaces.</summary>
+    public static void ConvertAmountThroughInterfaces()
+    {
+        ConverterService service = new();
+        service.TypedConverters.Register(new CurrencyTextConverter(DollarSymbol));
+
+        var untyped = service.TypedConverters.TryGetConverter(typeof(decimal), typeof(string))!;
+        var typed = (IBindingTypeConverter<decimal, string>)untyped;
+
+        Console.WriteLine($"{untyped.FromType.Name} -> {untyped.ToType.Name}");
+        Console.WriteLine(typed.TryConvert(TransferAmount, conversionHint: null, out var amountText));
+        Console.WriteLine(amountText);
+
+        // Output:
+        // Decimal -> String
+        // True
+        // $250.50
     }
 }

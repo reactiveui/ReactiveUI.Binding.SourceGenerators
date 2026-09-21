@@ -31,7 +31,7 @@ public static class BindingSchedulersExamples
     {
         TextBlock titleLabel = new();
         TodoItem item = new() { Title = OriginalTitle };
-        VirtualClock sequencer = new();
+        var sequencer = AvaloniaScheduler.Instance;
         BindingSchedulers.MainThread = sequencer;
 
         try
@@ -45,7 +45,7 @@ public static class BindingSchedulersExamples
                 Console.WriteLine(ReferenceEquals(BindingSchedulers.MainThread, sequencer));
                 Console.WriteLine(titleLabel.Text);
 
-                sequencer.Start();
+                Dispatcher.UIThread.RunJobs();
 
                 Console.WriteLine(titleLabel.Text);
             }
@@ -66,8 +66,7 @@ public static class BindingSchedulersExamples
     {
         TextBlock titleLabel = new();
         TodoItem item = new() { Title = OriginalTitle };
-        VirtualClock sequencer = new();
-        BindingSchedulers.MainThread = sequencer;
+        BindingSchedulers.MainThread = AvaloniaScheduler.Instance;
 
         try
         {
@@ -92,8 +91,7 @@ public static class BindingSchedulersExamples
     {
         MauiLabel titleLabel = new();
         TodoItem item = new() { Title = OriginalTitle };
-        VirtualClock sequencer = new();
-        BindingSchedulers.MainThread = sequencer;
+        BindingSchedulers.MainThread = AvaloniaScheduler.Instance;
 
         try
         {
@@ -212,7 +210,7 @@ public static class BindingSchedulersExamples
     public static void ObserveOnSequencer()
     {
         TodoItem item = new() { Title = OriginalTitle };
-        VirtualClock sequencer = new();
+        var sequencer = AvaloniaScheduler.Instance;
         List<string> delivered = [];
 
         var routed = BindingSchedulers.ObserveOnSequencer(item.WhenChanged(x => x.Title), sequencer);
@@ -224,7 +222,7 @@ public static class BindingSchedulersExamples
 
             Console.WriteLine(delivered.Count);
 
-            sequencer.Start();
+            Dispatcher.UIThread.RunJobs();
 
             Console.WriteLine(string.Join(", ", delivered));
         }

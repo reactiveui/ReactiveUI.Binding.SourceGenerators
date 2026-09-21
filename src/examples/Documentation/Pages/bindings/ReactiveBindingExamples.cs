@@ -128,6 +128,23 @@ public static class ReactiveBindingExamples
         // car, from the view model: False
     }
 
+    /// <summary>Reads the two expressions of a binding. A generated binding reads its paths at compile time, so it carries no expression trees.</summary>
+    /// <returns>A task that completes when the example finishes.</returns>
+    public static async Task ReadBindingExpressions()
+    {
+        var list = await OpenTodoListAsync();
+        TodoView view = new() { ViewModel = list };
+
+        using var binding = view.Bind(list, x => x.FilterText, v => v.FilterTextBox.Text);
+
+        Console.WriteLine(binding.ViewModelExpression is null);
+        Console.WriteLine(binding.ViewExpression is null);
+
+        // Output:
+        // True
+        // True
+    }
+
     /// <summary>Wraps a subscription in a <see cref="ReactiveBinding{TView, TValue}"/>, which disposes it once however often the binding is disposed.</summary>
     /// <returns>A task that completes when the example finishes.</returns>
     public static async Task CreateReactiveBinding()

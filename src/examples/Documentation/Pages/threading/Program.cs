@@ -71,6 +71,8 @@ static async Task RunWpfExamplesAsync()
 
         WpfExamples.ChainWithWpfThroughAppBuilder();
 
+        WpfExamples.ChainWithWpfThroughBindingBuilder();
+
         WpfExamples.ConfigureWpfModuleOnResolver();
 
         WpfExamples.BuildWpfApplication();
@@ -115,6 +117,8 @@ static async Task RunWinFormsExamplesAsync()
         await WinFormsExamples.WriteProgressFromWorkerThreadWithoutModuleAsync();
 
         WinFormsExamples.ChainWithWinFormsThroughAppBuilder();
+
+        WinFormsExamples.ChainWithWinFormsThroughBindingBuilder();
 
         WinFormsExamples.ConfigureWinFormsModuleOnResolver();
 
@@ -207,6 +211,8 @@ MauiExamples.ConvertVisibilityToBoolean();
 MauiExamples.ObserveFilterEntryWithWhenChanged();
 
 MauiExamples.CallInvokerMembers();
+
+MauiExamples.CallInvokerThroughInterface(new ReactiveUI.Binding.Maui.DispatcherViewThreadInvoker());
 
 MauiExamples.PostWithoutDispatcherRunsInline();
 

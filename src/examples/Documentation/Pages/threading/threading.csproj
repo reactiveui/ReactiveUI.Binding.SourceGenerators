@@ -24,6 +24,7 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
     <ProjectReference Include="../../../../ReactiveUI.Binding.Maui/ReactiveUI.Binding.Maui.csproj" />
     <PackageReference Include="Avalonia" />
+    <PackageReference Include="ReactiveUI.Primitives.Avalonia" />
     <Compile Remove="Wpf/**;WinForms/**;WpfExamples.cs;WinFormsExamples.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.19041.0'">

@@ -5,6 +5,7 @@
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Disposables;
 
 namespace ReactiveUI.Binding.Documentation.Setup;
 
@@ -32,7 +33,9 @@ public sealed class ButtonCommandBinder : ICreatesCommandBinding
 
         BindCount++;
         button.Command = command;
-        return new ButtonAttachment(button, commandParameter.Subscribe(parameter => button.CommandParameter = parameter));
+        return new MultipleDisposable(
+            commandParameter.Subscribe(parameter => button.CommandParameter = parameter),
+            new ActionDisposable(() => button.Command = null));
     }
 
     /// <inheritdoc/>
@@ -49,17 +52,4 @@ public sealed class ButtonCommandBinder : ICreatesCommandBinding
         Action<EventHandler<TEventArgs>> removeHandler)
         where T : class
         where TEventArgs : EventArgs => null;
-
-    /// <summary>The link between a button and its command; disposing it detaches the command.</summary>
-    /// <param name="button">The button the command is attached to.</param>
-    /// <param name="parameterSubscription">The subscription that forwards the command parameter.</param>
-    private sealed class ButtonAttachment(Button button, IDisposable parameterSubscription) : IDisposable
-    {
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            parameterSubscription.Dispose();
-            button.Command = null;
-        }
-    }
 }

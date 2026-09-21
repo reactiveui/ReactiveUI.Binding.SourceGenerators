@@ -281,6 +281,74 @@ WhenAnyObservableExamples.CombineElevenStreams();
 
 WhenAnyObservableExamples.CombineTwelveStreams();
 
+WhenAnyDynamicExamples.RegisterObservationServices();
+
+WhenAnyDynamicExamples.ObserveOneChain();
+
+WhenAnyDynamicExamples.ObserveOneChainEveryTime();
+
+WhenAnyDynamicExamples.ObserveTwoChains();
+
+WhenAnyDynamicExamples.ObserveTwoChainsEveryTime();
+
+WhenAnyDynamicExamples.ObserveThreeChains();
+
+WhenAnyDynamicExamples.ObserveThreeChainsEveryTime();
+
+WhenAnyDynamicExamples.ObserveFourChains();
+
+WhenAnyDynamicExamples.ObserveFourChainsEveryTime();
+
+WhenAnyDynamicExamples.ObserveFiveChains();
+
+WhenAnyDynamicExamples.ObserveFiveChainsEveryTime();
+
+WhenAnyDynamicExamples.ObserveSixChains();
+
+WhenAnyDynamicExamples.ObserveSixChainsEveryTime();
+
+WhenAnyDynamicExamples.ObserveSevenChains();
+
+WhenAnyDynamicExamples.ObserveSevenChainsEveryTime();
+
+WhenAnyDynamicExamples.ObserveEightChains();
+
+WhenAnyDynamicExamples.ObserveEightChainsEveryTime();
+
+WhenAnyDynamicExamples.ObserveNineChains();
+
+WhenAnyDynamicExamples.ObserveNineChainsEveryTime();
+
+WhenAnyDynamicExamples.ObserveTenChains();
+
+WhenAnyDynamicExamples.ObserveTenChainsEveryTime();
+
+WhenAnyDynamicExamples.ObserveElevenChains();
+
+WhenAnyDynamicExamples.ObserveElevenChainsEveryTime();
+
+WhenAnyDynamicExamples.ObserveTwelveChains();
+
+WhenAnyDynamicExamples.ObserveTwelveChainsEveryTime();
+
+ObservableForPropertyExamples.ObserveAmountByExpression();
+
+ObservableForPropertyExamples.ObserveAmountBeforeItChanges();
+
+ObservableForPropertyExamples.ObserveReferenceByName();
+
+ObservableForPropertyExamples.ObserveReferenceByNameWithTheCurrentValue();
+
+ObservableForPropertyExamples.ObserveReferenceByNameBeforeItChanges();
+
+ObservableForPropertyExamples.ObserveExpressionChain();
+
+ObservableForPropertyExamples.ObserveExpressionChainWithTheCurrentValue();
+
+ObservableForPropertyExamples.ObserveExpressionChainBeforeItChanges();
+
+ObservableForPropertyExamples.ObserveExpressionChainWithoutWarnings();
+
 await PropertyPathExamples.ObserveSelectedIssueAssigneeLogin();
 
 await PropertyPathExamples.ReplaceAssigneeInTheMiddleOfThePath();
@@ -351,9 +419,49 @@ await PropertyValuesExamples.ReadFifteenIssueBoardValues();
 
 await PropertyValuesExamples.ReadSixteenIssueBoardValues();
 
+await PropertyValuesComparisonExamples.PrintTwoTransferValues();
+
+await PropertyValuesComparisonExamples.CompareThreeTransferValues();
+
+await PropertyValuesComparisonExamples.CompareFourTransferValues();
+
+await PropertyValuesComparisonExamples.CompareFiveTransferValues();
+
+await PropertyValuesComparisonExamples.CompareSixTransferValues();
+
+await PropertyValuesComparisonExamples.CompareSevenTransferValues();
+
+await PropertyValuesComparisonExamples.CompareEightTransferValues();
+
+await PropertyValuesComparisonExamples.CompareNineTransferValues();
+
+await PropertyValuesComparisonExamples.CompareTenTransferValues();
+
+await PropertyValuesComparisonExamples.CompareElevenTransferValues();
+
+await PropertyValuesComparisonExamples.CompareTwelveTransferValues();
+
+await PropertyValuesComparisonExamples.CompareThirteenTransferValues();
+
+await PropertyValuesComparisonExamples.CompareFourteenTransferValues();
+
+await PropertyValuesComparisonExamples.CompareFifteenTransferValues();
+
+await PropertyValuesComparisonExamples.CompareSixteenTransferValues();
+
+ExpressionChainParametersExamples.DeconstructChainParameters();
+
+ExpressionChainParametersExamples.CompareChainParameters();
+
+ExpressionChainParametersExamples.PrintChainParameters();
+
+BindingChangeExamples.CompareBindingChanges();
+
+BindingChangeExamples.PrintBindingChange();
+
 SearchAsYouTypeExamples.ObserveDistinctTrimmedSearchTerms();
 
-await SearchAsYouTypeExamples.ThrottleTypingUntilPause();
+SearchAsYouTypeExamples.ThrottleTypingUntilPause();
 
 await SearchAsYouTypeExamples.SearchWhenTypingPauses();
 
@@ -361,4 +469,48 @@ await SearchAsYouTypeExamples.BindSearchStateToView();
 
 await SearchAsYouTypeExamples.IgnoreStaleSearchResponse();
 
-await SearchAsYouTypeExamples.DebounceAmountIntoTransferDraft();
+SearchAsYouTypeExamples.DebounceAmountIntoTransferDraft();
+
+SliceExamples.SliceEditsByCount();
+
+SliceExamples.SlicePairsOfEdits();
+
+SliceExamples.SliceEditsByTime();
+
+SliceExamples.SliceEditsByTimeOrCount();
+
+SliceExamples.SliceEditsWithOverlappingTime();
+
+SliceExamples.SliceEditsBetweenAutosaves();
+
+SliceExamples.SliceEditsUntilTheTaskIsTicked();
+
+SliceExamples.SliceEditsWhileTheTaskIsUrgent();
+
+WindowExamples.CountEditsPerWindow();
+
+WindowExamples.CountEditsBetweenTicks();
+
+BufferExamples.BufferEditsByCount();
+
+BufferExamples.BufferTheLastEdits();
+
+BufferExamples.BufferEditsByTime();
+
+SampledChangesExamples.SampleAmountOnAnInterval();
+
+SampledChangesExamples.ThrottleNotesUntilTheUserPauses();
+
+RunningTotalExamples.CountEditsOfTheNotes();
+
+RunningTotalExamples.TrackTheHighestAmount();
+
+GroupedChangesExamples.GroupEditsByField();
+
+GroupedChangesExamples.GroupTagsIgnoringCase();
+
+GroupedChangesExamples.GroupEditsUntilTheFieldIsQuiet();
+
+LatestValueExamples.DeliverEveryAmountOnASequencer();
+
+LatestValueExamples.DeliverOnlyTheNewestAmountOnASequencer();

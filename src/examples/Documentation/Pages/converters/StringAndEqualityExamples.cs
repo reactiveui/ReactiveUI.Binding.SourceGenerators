@@ -85,4 +85,28 @@ public static class StringAndEqualityExamples
         // True
         // False
     }
+
+    /// <summary>Shows the affinity of the string converter, which a string-to-string binding uses.</summary>
+    public static void ShowStringConverterAffinity()
+    {
+        var converter = new StringConverter();
+
+        Console.WriteLine(converter.GetAffinityForObjects());
+
+        // Output:
+        // 2
+    }
+
+    /// <summary>Shows the type pair and the affinity of the equality converter; a built-in converter for the same pair outranks it.</summary>
+    public static void ShowEqualityConverterTypePair()
+    {
+        var converter = new EqualityTypeConverter();
+
+        Console.WriteLine($"{converter.FromType} -> {converter.ToType}");
+        Console.WriteLine(converter.GetAffinityForObjects());
+
+        // Output:
+        // System.Object -> System.Boolean
+        // 1
+    }
 }

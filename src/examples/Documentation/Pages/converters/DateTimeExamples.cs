@@ -7,6 +7,21 @@ namespace ReactiveUI.Binding.Documentation.Converters;
 /// <summary>Demonstrates date and time type converters.</summary>
 public static class DateTimeExamples
 {
+    /// <summary>The text of a todo due date and time.</summary>
+    private const string DueDateTimeText = "2025-12-25T10:30:00";
+
+    /// <summary>The text of a file modification time with its timezone offset.</summary>
+    private const string ModifiedTimeText = "2025-09-21T10:30:00+00:00";
+
+    /// <summary>The text of a todo due date.</summary>
+    private const string DueDateText = "2025-12-25";
+
+    /// <summary>The text of an appointment start time.</summary>
+    private const string StartTimeText = "14:30:00";
+
+    /// <summary>The text of a project duration.</summary>
+    private const string DurationText = "01:30:00";
+
     /// <summary>A todo item's due date and time for task scheduling.</summary>
     private static readonly DateTime TodoDueDateTime = new(2025, 12, 25, 10, 30, 0, DateTimeKind.Unspecified);
 
@@ -190,5 +205,135 @@ public static class DateTimeExamples
         // Output:
         // True
         // 01:30:00
+    }
+
+    /// <summary>Converts a todo due date and time to and from text with all four DateTime converters and shows their affinity.</summary>
+    public static void ConvertTodoDueDateTimeBothWays()
+    {
+        var toDateTime = new StringToDateTimeTypeConverter();
+        _ = toDateTime.TryConvert(DueDateTimeText, conversionHint: null, out var dueDateTime);
+        Console.WriteLine($"{dueDateTime} affinity {toDateTime.GetAffinityForObjects()}");
+
+        var fromDateTime = new DateTimeToStringTypeConverter();
+        _ = fromDateTime.TryConvert(TodoDueDateTime, conversionHint: null, out var dueDateTimeText);
+        Console.WriteLine($"{dueDateTimeText} affinity {fromDateTime.GetAffinityForObjects()}");
+
+        var toOptionalDateTime = new StringToNullableDateTimeTypeConverter();
+        _ = toOptionalDateTime.TryConvert(DueDateTimeText, conversionHint: null, out var optionalDueDateTime);
+        Console.WriteLine($"{optionalDueDateTime} affinity {toOptionalDateTime.GetAffinityForObjects()}");
+
+        var fromOptionalDateTime = new NullableDateTimeToStringTypeConverter();
+        _ = fromOptionalDateTime.TryConvert((DateTime?)TodoDueDateTime, conversionHint: null, out var optionalDueDateTimeText);
+        Console.WriteLine($"{optionalDueDateTimeText} affinity {fromOptionalDateTime.GetAffinityForObjects()}");
+
+        // Output:
+        // 12/25/2025 10:30:00 affinity 2
+        // 12/25/2025 10:30:00 affinity 2
+        // 12/25/2025 10:30:00 affinity 2
+        // 12/25/2025 10:30:00 affinity 2
+    }
+
+    /// <summary>Converts a file modification time to and from text with all four DateTimeOffset converters and shows their affinity.</summary>
+    public static void ConvertCloudStorageModificationTimeBothWays()
+    {
+        var toOffset = new StringToDateTimeOffsetTypeConverter();
+        _ = toOffset.TryConvert(ModifiedTimeText, conversionHint: null, out var modifiedTime);
+        Console.WriteLine($"{modifiedTime} affinity {toOffset.GetAffinityForObjects()}");
+
+        var fromOffset = new DateTimeOffsetToStringTypeConverter();
+        _ = fromOffset.TryConvert(FileLastModifiedTime, conversionHint: null, out var modifiedTimeText);
+        Console.WriteLine($"{modifiedTimeText} affinity {fromOffset.GetAffinityForObjects()}");
+
+        var toOptionalOffset = new StringToNullableDateTimeOffsetTypeConverter();
+        _ = toOptionalOffset.TryConvert(ModifiedTimeText, conversionHint: null, out var optionalModifiedTime);
+        Console.WriteLine($"{optionalModifiedTime} affinity {toOptionalOffset.GetAffinityForObjects()}");
+
+        var fromOptionalOffset = new NullableDateTimeOffsetToStringTypeConverter();
+        _ = fromOptionalOffset.TryConvert((DateTimeOffset?)FileLastModifiedTime, conversionHint: null, out var optionalModifiedTimeText);
+        Console.WriteLine($"{optionalModifiedTimeText} affinity {fromOptionalOffset.GetAffinityForObjects()}");
+
+        // Output:
+        // 09/21/2025 10:30:00 +00:00 affinity 2
+        // 09/21/2025 10:30:00 +00:00 affinity 2
+        // 09/21/2025 10:30:00 +00:00 affinity 2
+        // 09/21/2025 10:30:00 +00:00 affinity 2
+    }
+
+    /// <summary>Converts a todo due date to and from text with all four DateOnly converters and shows their affinity.</summary>
+    public static void ConvertTodoDueDateBothWays()
+    {
+        var toDate = new StringToDateOnlyTypeConverter();
+        _ = toDate.TryConvert(DueDateText, conversionHint: null, out var dueDate);
+        Console.WriteLine($"{dueDate} affinity {toDate.GetAffinityForObjects()}");
+
+        var fromDate = new DateOnlyToStringTypeConverter();
+        _ = fromDate.TryConvert(TodoDueDate, conversionHint: null, out var dueDateText);
+        Console.WriteLine($"{dueDateText} affinity {fromDate.GetAffinityForObjects()}");
+
+        var toOptionalDate = new StringToNullableDateOnlyTypeConverter();
+        _ = toOptionalDate.TryConvert(DueDateText, conversionHint: null, out var optionalDueDate);
+        Console.WriteLine($"{optionalDueDate} affinity {toOptionalDate.GetAffinityForObjects()}");
+
+        var fromOptionalDate = new NullableDateOnlyToStringTypeConverter();
+        _ = fromOptionalDate.TryConvert((DateOnly?)TodoDueDate, conversionHint: null, out var optionalDueDateText);
+        Console.WriteLine($"{optionalDueDateText} affinity {fromOptionalDate.GetAffinityForObjects()}");
+
+        // Output:
+        // 12/25/2025 affinity 2
+        // 12/25/2025 affinity 2
+        // 12/25/2025 affinity 2
+        // 12/25/2025 affinity 2
+    }
+
+    /// <summary>Converts an appointment start time to and from text with all four TimeOnly converters and shows their affinity.</summary>
+    public static void ConvertAppointmentStartTimeBothWays()
+    {
+        var toTime = new StringToTimeOnlyTypeConverter();
+        _ = toTime.TryConvert(StartTimeText, conversionHint: null, out var startTime);
+        Console.WriteLine($"{startTime} affinity {toTime.GetAffinityForObjects()}");
+
+        var fromTime = new TimeOnlyToStringTypeConverter();
+        _ = fromTime.TryConvert(AppointmentStartTime, conversionHint: null, out var startTimeText);
+        Console.WriteLine($"{startTimeText} affinity {fromTime.GetAffinityForObjects()}");
+
+        var toOptionalTime = new StringToNullableTimeOnlyTypeConverter();
+        _ = toOptionalTime.TryConvert(StartTimeText, conversionHint: null, out var optionalStartTime);
+        Console.WriteLine($"{optionalStartTime} affinity {toOptionalTime.GetAffinityForObjects()}");
+
+        var fromOptionalTime = new NullableTimeOnlyToStringTypeConverter();
+        _ = fromOptionalTime.TryConvert((TimeOnly?)AppointmentStartTime, conversionHint: null, out var optionalStartTimeText);
+        Console.WriteLine($"{optionalStartTimeText} affinity {fromOptionalTime.GetAffinityForObjects()}");
+
+        // Output:
+        // 14:30 affinity 2
+        // 14:30 affinity 2
+        // 14:30 affinity 2
+        // 14:30 affinity 2
+    }
+
+    /// <summary>Converts a project duration to and from text with all four TimeSpan converters and shows their affinity.</summary>
+    public static void ConvertProjectDurationBothWays()
+    {
+        var toSpan = new StringToTimeSpanTypeConverter();
+        _ = toSpan.TryConvert(DurationText, conversionHint: null, out var duration);
+        Console.WriteLine($"{duration} affinity {toSpan.GetAffinityForObjects()}");
+
+        var fromSpan = new TimeSpanToStringTypeConverter();
+        _ = fromSpan.TryConvert(ProjectDuration, conversionHint: null, out var durationText);
+        Console.WriteLine($"{durationText} affinity {fromSpan.GetAffinityForObjects()}");
+
+        var toOptionalSpan = new StringToNullableTimeSpanTypeConverter();
+        _ = toOptionalSpan.TryConvert(DurationText, conversionHint: null, out var optionalDuration);
+        Console.WriteLine($"{optionalDuration} affinity {toOptionalSpan.GetAffinityForObjects()}");
+
+        var fromOptionalSpan = new NullableTimeSpanToStringTypeConverter();
+        _ = fromOptionalSpan.TryConvert((TimeSpan?)ProjectDuration, conversionHint: null, out var optionalDurationText);
+        Console.WriteLine($"{optionalDurationText} affinity {fromOptionalSpan.GetAffinityForObjects()}");
+
+        // Output:
+        // 01:30:00 affinity 2
+        // 01:30:00 affinity 2
+        // 01:30:00 affinity 2
+        // 01:30:00 affinity 2
     }
 }

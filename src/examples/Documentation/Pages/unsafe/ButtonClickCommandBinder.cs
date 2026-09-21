@@ -5,6 +5,8 @@
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Disposables;
+using ReactiveUI.Primitives.Signals;
 
 namespace ReactiveUI.Binding.Documentation.UnsafeOverloads;
 
@@ -46,53 +48,19 @@ public sealed class ButtonClickCommandBinder : ICreatesCommandBinding
     /// <param name="button">The button to follow.</param>
     /// <param name="commandParameter">The values offered as the command parameter.</param>
     /// <returns>A disposable that stops following the button, or <see langword="null"/> when there is nothing to attach.</returns>
-    private static ClickAttachment? Attach(ICommand? command, Button? button, IObservable<object?> commandParameter) =>
-        command is null || button is null ? null : new ClickAttachment(command, button, commandParameter);
-
-    /// <summary>The link between one button and one command.</summary>
-    [System.Diagnostics.DebuggerDisplay("Parameter = {_parameter}")]
-    private sealed class ClickAttachment : IDisposable
+    private static MultipleDisposable? Attach(ICommand? command, Button? button, IObservable<object?> commandParameter)
     {
-        /// <summary>The command a click runs.</summary>
-        private readonly ICommand _command;
-
-        /// <summary>The button being followed.</summary>
-        private readonly Button _button;
-
-        /// <summary>The subscription that keeps the latest parameter.</summary>
-        private readonly IDisposable _parameterSubscription;
-
-        /// <summary>The parameter the next click passes to the command.</summary>
-        private object? _parameter;
-
-        /// <summary>Initializes a new instance of the <see cref="ClickAttachment"/> class.</summary>
-        /// <param name="command">The command a click runs.</param>
-        /// <param name="button">The button to follow.</param>
-        /// <param name="commandParameter">The values offered as the command parameter.</param>
-        public ClickAttachment(ICommand command, Button button, IObservable<object?> commandParameter)
+        if (command is null || button is null)
         {
-            _command = command;
-            _button = button;
-            _parameterSubscription = commandParameter.Subscribe(parameter => _parameter = parameter);
-            _button.Clicked += OnClicked;
+            return null;
         }
 
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            _button.Clicked -= OnClicked;
-            _parameterSubscription.Dispose();
-        }
+        BehaviorSignal<object?> parameter = new(null);
+        var clicks = Signal.FromEventPattern(handler => button.Clicked += handler, handler => button.Clicked -= handler);
 
-        /// <summary>Runs the command when it can run.</summary>
-        /// <param name="sender">The button that was clicked.</param>
-        /// <param name="e">The event data.</param>
-        private void OnClicked(object? sender, EventArgs e)
-        {
-            if (_command.CanExecute(_parameter))
-            {
-                _command.Execute(_parameter);
-            }
-        }
+        return new(
+            commandParameter.Subscribe(parameter.OnNext),
+            clicks.Where(_ => command.CanExecute(parameter.Value)).Subscribe(_ => command.Execute(parameter.Value)),
+            parameter);
     }
 }

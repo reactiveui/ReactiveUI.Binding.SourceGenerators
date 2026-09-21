@@ -35,6 +35,9 @@ public static class GeneratedViewDispatchExamples
     /// <summary>The amount of the transfer the receipt is for.</summary>
     private const decimal TransferAmount = 250M;
 
+    /// <summary>The contract the hand-written lookup answers to.</summary>
+    private const string PreviewCardContract = "preview-card";
+
     /// <summary>Resolves two accounts: a view marked as a single instance is built once and shared, and each resolve gives it the latest view model.</summary>
     public static void ResolveSingleInstanceView()
     {
@@ -139,6 +142,32 @@ public static class GeneratedViewDispatchExamples
         // Output:
         // AccountListView
         // False
+    }
+
+    /// <summary>Registers a lookup of your own, in the form the generator registers for each assembly: it answers for the view models and contracts it knows and returns null for the rest.</summary>
+    public static void RegisterHandWrittenDispatch()
+    {
+        var item = new TodoItem { Title = "Renew car registration" };
+        DefaultViewLocator locator = new();
+
+        var before = locator.ResolveView(item, PreviewCardContract);
+
+        DefaultViewLocator.SetGeneratedViewDispatch(static (viewModel, contract) =>
+            viewModel is TodoItem && contract == PreviewCardContract ? new TodoItemPreviewView() : null);
+
+        var after = locator.ResolveView(item, PreviewCardContract);
+        var otherContract = locator.ResolveView(item, null);
+
+        Console.WriteLine(before is null);
+        Console.WriteLine(after?.GetType().Name);
+        Console.WriteLine(ReferenceEquals(after?.ViewModel, item));
+        Console.WriteLine(otherContract is null);
+
+        // Output:
+        // True
+        // TodoItemPreviewView
+        // True
+        // True
     }
 
     /// <summary>Creates an account for the examples.</summary>
