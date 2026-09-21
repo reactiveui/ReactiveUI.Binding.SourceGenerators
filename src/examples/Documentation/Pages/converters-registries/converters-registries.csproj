@@ -13,6 +13,6 @@
     <ProjectReference Include="../../../../ReactiveUI.Binding/ReactiveUI.Binding.csproj" />
     <ProjectReference Include="../../../../ReactiveUI.Binding.SourceGenerators/ReactiveUI.Binding.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="../../../../ReactiveUI.Binding.Analyzer/ReactiveUI.Binding.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <Compile Include="/home/glennw/source/rxui/ReactiveUI.Binding.SourceGenerators/src/examples/Documentation/Common/**/*.cs" Link="Common/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../../Common/**/*.cs" Link="Common/%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>
